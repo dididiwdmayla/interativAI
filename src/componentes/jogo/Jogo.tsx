@@ -1,28 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
 import { Mascote } from "@/componentes/mascote/Mascote";
+import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
 import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
 import { PainelDividido } from "@/componentes/painel/PainelDividido";
+import { CamadaInspecao } from "@/componentes/preview/CamadaInspecao";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
 import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
+import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { BODY_INICIAL_PADARIA, HEAD_PADARIA, URL_PADARIA } from "@/fases/sites-elementos-1/siteAlvo";
 import type { Aba } from "@/motor/abas";
+import type { EventoFase } from "@/motor/eventos";
+import { usePainelElementos } from "./usePainelElementos";
 import { useSiteAlvo } from "./useSiteAlvo";
 
 const TRILHA = ["Ilha Sites", "Elementos", "Fase 1"] as const;
 
 export function Jogo() {
   const [aba, setAba] = useState<Aba>("elementos");
-  const [inspecionando, setInspecionando] = useState(false);
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
-  const { editorRef, previewRef, versaoDocumento, aoEditarCodigo, aoCarregarDocumento } =
-    useSiteAlvo(BODY_INICIAL_PADARIA);
+  const [ultimoEvento, setUltimoEvento] = useState<EventoFase | null>(null);
+  const {
+    editorRef,
+    previewRef,
+    arvore,
+    aoEditarCodigo,
+    aoCarregarDocumento,
+    obterDocumento,
+    editarDocumento,
+  } = useSiteAlvo(BODY_INICIAL_PADARIA);
+
+  const {
+    caminhoSelecionado,
+    recolhidos,
+    realce,
+    inspecionando,
+    destaque,
+    selecionar,
+    alternarRecolhido,
+    realcar,
+    alternarInspecao,
+    apontarNaTela,
+    escolherNaTela,
+    rolarTela,
+    editarTexto,
+    editarAtributo,
+    aoRecarregarDocumento,
+  } = usePainelElementos({
+    editorRef,
+    obterDocumento,
+    editarDocumento,
+    aoEvento: setUltimoEvento,
+  });
+
+  const aoEditarNoEditor = useCallback(
+    (texto: string) => {
+      aoEditarCodigo(texto);
+      setUltimoEvento({ tipo: "editouCodigo" });
+    },
+    [aoEditarCodigo],
+  );
+
+  const aoCarregar = useCallback(
+    (documento: Document) => {
+      aoCarregarDocumento(documento);
+      aoRecarregarDocumento(documento);
+    },
+    [aoCarregarDocumento, aoRecarregarDocumento],
+  );
 
   return (
     <div className="flex h-dvh flex-col">
@@ -33,20 +84,23 @@ export function Jogo() {
             abaAtiva={aba}
             abasDesbloqueadas={["elementos"]}
             aoTrocarAba={setAba}
-            ferramentas={
-              <BotaoInspecionar
-                ativo={inspecionando}
-                aoAlternar={() => setInspecionando((valor) => !valor)}
-              />
-            }
+            ferramentas={<BotaoInspecionar ativo={inspecionando} aoAlternar={alternarInspecao} />}
           >
             <PainelDividido
               rotulo="Redimensionar árvore e editor"
-              proporcaoInicial={0.48}
+              proporcaoInicial={0.5}
               cima={
-                <div className="h-full overflow-auto p-4 text-sm text-texto-suave">
-                  Árvore de elementos (versão do documento: {versaoDocumento})
-                </div>
+                <ArvoreElementos
+                  raiz={arvore}
+                  recolhidos={recolhidos}
+                  caminhoSelecionado={caminhoSelecionado}
+                  destaque={destaque}
+                  aoSelecionar={selecionar}
+                  aoAlternar={alternarRecolhido}
+                  aoPassarMouse={realcar}
+                  aoEditarTexto={editarTexto}
+                  aoEditarAtributo={editarAtributo}
+                />
               }
               baixo={
                 <div className="flex h-full min-h-0 flex-col">
@@ -58,7 +112,7 @@ export function Jogo() {
                     <EditorCodigo
                       ref={editorRef}
                       textoInicial={BODY_INICIAL_PADARIA}
-                      aoMudar={aoEditarCodigo}
+                      aoMudar={aoEditarNoEditor}
                       quebrarLinhas={quebrarLinhas}
                       rotulo="Editor do código HTML do corpo da página"
                     />
@@ -75,14 +129,30 @@ export function Jogo() {
               head={HEAD_PADARIA}
               bodyInicial={BODY_INICIAL_PADARIA}
               titulo="Site da Padaria Pão Quentinho"
-              aoCarregar={aoCarregarDocumento}
-            />
+              aoCarregar={aoCarregar}
+            >
+              <SobreposicaoInspecao realce={realce} />
+              <CamadaInspecao
+                ativa={inspecionando}
+                aoApontar={apontarNaTela}
+                aoEscolher={escolherNaTela}
+                aoSair={() => realcar(null)}
+                aoRolar={rolarTela}
+              />
+            </PreviewSiteAlvo>
           </JanelaNavegador>
         </section>
       </main>
       <AreaMascote
         mascote={<Mascote tamanho={110} />}
-        fala={<p className="rounded-2xl bg-painel p-3 font-bold">Oi! Eu sou o computadorzinho.</p>}
+        fala={
+          <p className="rounded-2xl bg-painel p-3 font-bold">
+            Oi! Eu sou o computadorzinho.
+            <span className="block text-xs font-normal text-texto-suave">
+              Último evento: {ultimoEvento ? JSON.stringify(ultimoEvento) : "nenhum"}
+            </span>
+          </p>
+        }
         objetivos={<p className="text-sm text-texto-suave">Objetivos da fase</p>}
       />
     </div>

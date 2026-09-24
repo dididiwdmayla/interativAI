@@ -14,6 +14,7 @@ const aparencia = EditorView.theme({
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": {
     fontFamily: "var(--fonte-codigo), ui-monospace, monospace",
+    fontVariantLigatures: "none",
     lineHeight: "1.65",
   },
   ".cm-content": { caretColor: "var(--cor-primaria)", paddingBottom: "24px" },

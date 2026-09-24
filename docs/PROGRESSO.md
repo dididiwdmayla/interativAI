@@ -17,8 +17,13 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   `definirTexto`/`destacarLinhas`/`rolarParaLinha`), `PreviewSiteAlvo`
   (iframe `srcdoc` + `sandbox="allow-same-origin"`), `PainelDividido` com
   divisor arrastável, site-alvo "Padaria Pão Quentinho" renderizando.
-- [ ] **Etapa 4: Árvore de Elementos.** Render estilo DevTools, sobreposição no
-  hover, seleção, modo inspecionar, edição inline, caminho B, teclado.
+- [x] **Etapa 4: Árvore de Elementos.** `ArvoreElementos` (estilo F12, texto
+  curto na mesma linha, `== $0` no selecionado, tudo nasce expandido),
+  sobreposição com etiqueta `tag.classe L × A` no hover, seleção que rola o
+  editor até a linha, modo inspecionar (mouse, e setas + Enter pelo teclado,
+  Esc cancela), edição inline de texto e de valor de atributo (Enter confirma,
+  Esc cancela), caminho B sem recarregar o iframe, seleção preservada pelo
+  caminho de índices, teclado (setas, Home, End, Enter/F2 edita).
 - [ ] **Etapa 5: Motor de fases e conteúdo da Fase 1.** Introdução, objetivos,
   validação, escada de ajuda, estrelas, conclusão, missão de campo, persistência.
 - [ ] **Etapa 6: Tutor Gemini.** Rota, system prompt, chat no mascote,

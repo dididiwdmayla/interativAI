@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import type { ApiPreview } from "@/componentes/preview/PreviewSiteAlvo";
+import { construirArvore, type NoArvore } from "@/lib/arvore";
 import { formatarHtml } from "@/lib/formatarHtml";
 
 const ESPERA_EDITOR_MS = 300;
@@ -23,6 +24,7 @@ export function useSiteAlvo(bodyInicial: string) {
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [htmlAtual, setHtmlAtual] = useState(bodyInicial);
   const [versaoDocumento, setVersaoDocumento] = useState(0);
+  const [arvore, setArvore] = useState<NoArvore | null>(null);
 
   const cancelarEspera = useCallback(() => {
     if (temporizador.current !== null) {
@@ -46,7 +48,8 @@ export function useSiteAlvo(bodyInicial: string) {
     [cancelarEspera],
   );
 
-  const aoCarregarDocumento = useCallback(() => {
+  const aoCarregarDocumento = useCallback((documento: Document) => {
+    setArvore(construirArvore(documento.body));
     setVersaoDocumento((versao) => versao + 1);
   }, []);
 
@@ -65,6 +68,7 @@ export function useSiteAlvo(bodyInicial: string) {
       const novo = formatarHtml(documento.body.innerHTML);
       editorRef.current?.definirTexto(novo);
       setHtmlAtual(novo);
+      setArvore(construirArvore(documento.body));
       setVersaoDocumento((versao) => versao + 1);
       return true;
     },
@@ -87,6 +91,7 @@ export function useSiteAlvo(bodyInicial: string) {
     previewRef,
     htmlAtual,
     versaoDocumento,
+    arvore,
     aoEditarCodigo,
     aoCarregarDocumento,
     obterDocumento,

@@ -57,6 +57,10 @@ body {
     color 0.25s ease;
 }
 
+.font-codigo {
+  font-variant-ligatures: none;
+}
+
 :focus-visible {
   outline: 3px solid var(--cor-secundaria);
   outline-offset: 2px;

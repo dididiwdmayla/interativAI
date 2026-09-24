@@ -11,7 +11,7 @@ type Props = {
 
 export function BotaoInspecionar({ ativo, pulsando = false, aoAlternar }: Props) {
   return (
-    <Dica texto={ativo ? "Clique num elemento da tela" : "Modo inspecionar"}>
+    <Dica texto={ativo ? "Clique num elemento da tela" : "Modo inspecionar"} alinhar="inicio">
       <button
         type="button"
         aria-pressed={ativo}
