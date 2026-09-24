@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
+import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
+import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
+import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
+import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
@@ -20,11 +25,16 @@ import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
 import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
 import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { Botao } from "@/componentes/ui/Botao";
+import type { IdFerramenta } from "@/ferramentas/ids";
+import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
+import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
 import { tocarSom } from "@/lib/som";
 import { desbloquearTema, escolherTema } from "@/lib/tema";
+import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
+import { enunciadoDe } from "@/motor/estadoMotor";
 import type { Fala, Fase } from "@/motor/tipos";
 import { SeletorVista } from "./SeletorVista";
 import { TelaConclusao } from "./TelaConclusao";
@@ -38,7 +48,10 @@ type Props = {
   aoRecomecar: () => void;
 };
 
-const FALA_PENSANDO: Fala = { texto: "Hmm, deixa eu pensar...", expressao: "pensativo" };
+const FALA_PENSANDO: Fala = {
+  texto: "Hmm, deixa eu pensar...",
+  expressao: "pensativo",
+};
 
 const PALAVRA_SECRETA = "curioso";
 
@@ -76,7 +89,12 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
   const [vistaMovel, setVistaMovel] = useState<"painel" | "tela">("painel");
+  const [caixa, setCaixa] = useState<{
+    aberta: boolean;
+    foco: IdFerramenta | null;
+  }>({ aberta: false, foco: null });
   const progresso = useProgresso();
+  const toque = useToque();
 
   const {
     editorRef,
@@ -108,7 +126,12 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     editarTexto,
     editarAtributo,
     aoRecarregarDocumento,
-  } = usePainelElementos({ editorRef, obterDocumento, editarDocumento, aoEvento: barramento.emitir });
+  } = usePainelElementos({
+    editorRef,
+    obterDocumento,
+    editarDocumento,
+    aoEvento: barramento.emitir,
+  });
 
   const {
     estado,
@@ -134,7 +157,42 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     editarTextoCaminho: editarTexto,
     substituirHtml,
     destacarNaArvore,
+    toque,
   });
+
+  const apresentacoes = useApresentacoes({
+    fase,
+    etapa: estado.etapa,
+    objetivoAtual: estado.objetivoAtual,
+    pausa: estado.pausa,
+    bloqueada: caixa.aberta || (estado.etapa === "concluida" && estado.conclusaoAberta),
+  });
+  const ferramentaEmCena = apresentacoes.atual ? FERRAMENTAS[apresentacoes.atual] : null;
+
+  const abrirCard = useCallback((id: IdFerramenta | null) => setCaixa({ aberta: true, foco: id }), []);
+
+  /** Deixa o alvo da apresentação visível: em telas pequenas, troca a vista. */
+  const prepararAlvo = (ferramenta: Ferramenta) => {
+    if (!telaPequena()) return;
+    setVistaMovel(ferramenta.id === "previa" ? "tela" : "painel");
+  };
+
+  // O que o jogador faz no painel também conta como "usou a ferramenta".
+  useEffect(
+    () =>
+      barramento.assinar((evento) => {
+        if (evento.tipo === "selecionou" && (evento.origem === "arvore" || evento.origem === "teclado")) {
+          sinalizarUso("arvore");
+        } else if (evento.tipo === "selecionou" && evento.origem === "codigo") {
+          sinalizarUso("sincronia");
+        } else if (evento.tipo === "inspecionou") {
+          sinalizarUso("inspecionar");
+        } else if (evento.tipo === "editouCodigo") {
+          sinalizarUso("editor");
+        }
+      }),
+    [barramento],
+  );
 
   const tutor = useTutor({
     faseId: fase.id,
@@ -175,6 +233,22 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     escolherNaTela(x, y);
     if (telaPequena()) setVistaMovel("painel");
   };
+
+  const aoMoverCursor = useCallback(
+    (alvo: Parameters<typeof selecionarPeloCodigo>[0]) => {
+      sinalizarUso("editor");
+      selecionarPeloCodigo(alvo);
+    },
+    [selecionarPeloCodigo],
+  );
+
+  const aoPassarMouseArvore = useCallback(
+    (no: Node | null) => {
+      realcar(no);
+      if (no) sinalizarUso("arvore");
+    },
+    [realcar],
+  );
 
   const aoEditarNoEditor = useCallback(
     (texto: string) => {
@@ -253,7 +327,25 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
       );
     }
     if (emObjetivo) {
-      return <BotaoAjuda degrau={estado.degrau} desativado={false} aoAjudar={comClique(ajudar)} />;
+      return (
+        <AlvoFerramenta
+          ids={["me-ajuda"]}
+          marcador="me-ajuda"
+          aoAbrirCard={abrirCard}
+          classeMarcador="-right-2 -top-2"
+          as="span"
+          className="inline-flex"
+        >
+          <BotaoAjuda
+            degrau={estado.degrau}
+            desativado={false}
+            aoAjudar={() => {
+              sinalizarUso("me-ajuda");
+              comClique(ajudar)();
+            }}
+          />
+        </AlvoFerramenta>
+      );
     }
     return (
       <Botao variante="secundario" onClick={comClique(abrirConclusao)} className="ml-auto">
@@ -270,6 +362,14 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   );
 
   const objetivoAtivo = estado.etapa === "objetivos" ? estado.objetivoAtual : null;
+  const objetivosNaTela = fase.objetivos.map((item) => ({
+    id: item.id,
+    enunciado: enunciadoDe(item, toque),
+  }));
+  const enviarAoTutor = (pergunta: string) => {
+    sinalizarUso("tutor");
+    void tutor.enviar(pergunta);
+  };
   const falaNaTela = tutor.pendente !== null ? FALA_PENSANDO : estado.fala;
   const perguntaDaFala =
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
@@ -280,116 +380,179 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
         trilha={[fase.ilha, fase.zona, `Fase ${fase.numero}`]}
         estrelas={estado.estrelas}
         logo={<Mascote tamanho={34} />}
-        acoes={<BotaoRecomecar aoRecomecar={aoRecomecar} />}
+        acoes={
+          <>
+            <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+            <BotaoRecomecar aoRecomecar={aoRecomecar} />
+          </>
+        }
       />
       <div className="flex shrink-0 justify-center px-3 pt-3 lg:hidden">
         <SeletorVista vista={vistaMovel} aoTrocar={setVistaMovel} />
       </div>
-      <main className="flex min-h-0 flex-1 gap-4 p-3 lg:p-4">
+      <AlvoFerramenta ids={["sincronia"]} as="main" className="flex min-h-0 flex-1 gap-4 p-3 lg:p-4">
         <section
           id="vista-painel"
           aria-label="Painel"
           className={`${vistaMovel === "painel" ? "flex" : "hidden"} min-h-0 w-full min-w-0 flex-col lg:flex lg:w-[45%]`}
         >
-          <Painel
-            abaAtiva={aba}
-            abasDesbloqueadas={fase.abasDesbloqueadas}
-            aoTrocarAba={setAba}
-            ferramentas={
-              <BotaoInspecionar
-                ativo={inspecionando}
-                pulsando={pulsarInspecionar && !inspecionando}
-                aoAlternar={alternarInspecaoResponsiva}
-              />
-            }
+          <AlvoFerramenta
+            ids={["painel"]}
+            marcador="painel"
+            aoAbrirCard={abrirCard}
+            classeMarcador="right-2 top-3"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            <PainelDividido
-              rotulo="Redimensionar árvore e editor"
-              proporcaoInicial={0.5}
-              cima={
-                <ArvoreElementos
-                  raiz={arvore}
-                  recolhidos={recolhidos}
-                  caminhoSelecionado={caminhoSelecionado}
-                  destaque={destaque}
-                  aoSelecionar={selecionar}
-                  aoAlternar={alternarRecolhido}
-                  aoPassarMouse={realcar}
-                  aoEditarTexto={editarTexto}
-                  aoEditarAtributo={editarAtributo}
-                />
-              }
-              baixo={
-                <div className="flex h-full min-h-0 flex-col">
-                  <CabecalhoEditor
-                    quebrarLinhas={quebrarLinhas}
-                    aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
+            <Painel
+              abaAtiva={aba}
+              abasDesbloqueadas={fase.abasDesbloqueadas}
+              aoTrocarAba={setAba}
+              ferramentas={
+                <AlvoFerramenta
+                  ids={["inspecionar"]}
+                  marcador="inspecionar"
+                  aoAbrirCard={abrirCard}
+                  classeMarcador="-right-2 -top-1.5"
+                  as="span"
+                  className="inline-flex"
+                >
+                  <BotaoInspecionar
+                    ativo={inspecionando}
+                    pulsando={pulsarInspecionar && !inspecionando}
+                    aoAlternar={alternarInspecaoResponsiva}
                   />
-                  <div className="min-h-0 flex-1">
-                    <EditorCodigo
-                      ref={editorRef}
-                      textoInicial={bodyInicial}
-                      aoMudar={aoEditarNoEditor}
-                      quebrarLinhas={quebrarLinhas}
-                      aoMoverCursor={selecionarPeloCodigo}
-                      rotulo="Editor do código HTML do corpo da página"
-                    />
-                  </div>
-                </div>
+                </AlvoFerramenta>
               }
-            />
-          </Painel>
+            >
+              <PainelDividido
+                rotulo="Redimensionar árvore e editor"
+                proporcaoInicial={0.5}
+                cima={
+                  <AlvoFerramenta
+                    ids={["arvore"]}
+                    marcador="arvore"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="bottom-2 right-3"
+                    className="h-full"
+                  >
+                    <ArvoreElementos
+                      raiz={arvore}
+                      recolhidos={recolhidos}
+                      caminhoSelecionado={caminhoSelecionado}
+                      destaque={destaque}
+                      aoSelecionar={selecionar}
+                      aoAlternar={alternarRecolhido}
+                      aoPassarMouse={aoPassarMouseArvore}
+                      aoEditarTexto={editarTexto}
+                      aoEditarAtributo={editarAtributo}
+                      aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
+                    />
+                  </AlvoFerramenta>
+                }
+                baixo={
+                  <AlvoFerramenta
+                    ids={["editor"]}
+                    marcador="editor"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="right-2 top-2"
+                    className="flex h-full min-h-0 flex-col"
+                  >
+                    <CabecalhoEditor
+                      quebrarLinhas={quebrarLinhas}
+                      aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
+                    />
+                    <div className="min-h-0 flex-1">
+                      <EditorCodigo
+                        ref={editorRef}
+                        textoInicial={bodyInicial}
+                        aoMudar={aoEditarNoEditor}
+                        quebrarLinhas={quebrarLinhas}
+                        aoMoverCursor={aoMoverCursor}
+                        rotulo="Editor do código HTML do corpo da página"
+                      />
+                    </div>
+                  </AlvoFerramenta>
+                }
+              />
+            </Painel>
+          </AlvoFerramenta>
         </section>
         <section
           id="vista-tela"
           aria-label="Tela do site"
           className={`${vistaMovel === "tela" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col lg:flex`}
         >
-          <JanelaNavegador url={fase.urlSiteAlvo}>
-            <PreviewSiteAlvo
-              ref={previewRef}
-              head={fase.headSiteAlvo}
-              bodyInicial={bodyInicial}
-              titulo={fase.tituloSiteAlvo}
-              aoCarregar={aoCarregar}
-            >
-              <SobreposicaoInspecao realce={realce} />
-              <CamadaInspecao
-                ativa={inspecionando}
-                aoApontar={apontarNaTela}
-                aoEscolher={escolherNaTelaResponsiva}
-                aoSair={() => realcar(null)}
-                aoRolar={rolarTela}
-              />
-            </PreviewSiteAlvo>
-          </JanelaNavegador>
+          <AlvoFerramenta
+            ids={["previa"]}
+            marcador="previa"
+            aoAbrirCard={abrirCard}
+            classeMarcador="right-3 top-3"
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <JanelaNavegador url={fase.urlSiteAlvo}>
+              <PreviewSiteAlvo
+                ref={previewRef}
+                head={fase.headSiteAlvo}
+                bodyInicial={bodyInicial}
+                titulo={fase.tituloSiteAlvo}
+                aoCarregar={aoCarregar}
+              >
+                <SobreposicaoInspecao realce={realce} />
+                <CamadaInspecao
+                  ativa={inspecionando}
+                  aoApontar={apontarNaTela}
+                  aoEscolher={escolherNaTelaResponsiva}
+                  aoSair={() => realcar(null)}
+                  aoRolar={rolarTela}
+                />
+              </PreviewSiteAlvo>
+            </JanelaNavegador>
+          </AlvoFerramenta>
         </section>
-      </main>
+      </AlvoFerramenta>
       <AreaMascote
-        mascote={
-          <Mascote expressao={falaNaTela.expressao} tamanho={112} className="h-auto w-16 sm:w-20 lg:w-28" />
-        }
+        mascote={<Mascote expressao={falaNaTela.expressao} tamanho={112} className="h-auto w-16 sm:w-20 lg:w-28" />}
         conversa={
           <>
             {objetivoAtivo !== null && (
               <p className="mb-1 line-clamp-1 text-xs font-bold text-texto-suave lg:hidden">
-                Objetivo {objetivoAtivo + 1} de {fase.objetivos.length}: {fase.objetivos[objetivoAtivo].enunciado}
+                Objetivo {objetivoAtivo + 1} de {fase.objetivos.length}: {objetivosNaTela[objetivoAtivo].enunciado}
               </p>
             )}
             <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala}>
               {acoesConversa}
             </BalaoFala>
-            <CampoTutor
-              carregando={tutor.carregando}
-              desativado={naIntroducao}
-              motivoDesativado="Primeiro, termine a conversa inicial"
-              aoEnviar={tutor.enviar}
-            />
+            <AlvoFerramenta ids={["tutor"]} marcador="tutor" aoAbrirCard={abrirCard} classeMarcador="-top-2 right-10">
+              <CampoTutor
+                carregando={tutor.carregando}
+                desativado={naIntroducao}
+                motivoDesativado="Primeiro, termine a conversa inicial"
+                aoEnviar={enviarAoTutor}
+              />
+            </AlvoFerramenta>
           </>
         }
-        objetivos={
-          <ListaObjetivos objetivos={fase.objetivos} concluidos={estado.concluidos} ativo={objetivoAtivo} />
-        }
+        objetivos={<ListaObjetivos objetivos={objetivosNaTela} concluidos={estado.concluidos} ativo={objetivoAtivo} />}
+      />
+      {ferramentaEmCena && (
+        <ApresentacaoFerramenta
+          key={ferramentaEmCena.id}
+          ferramenta={ferramentaEmCena}
+          toque={toque}
+          aoPreparar={prepararAlvo}
+          aoConcluir={() => apresentacoes.concluir(ferramentaEmCena.id)}
+        />
+      )}
+      <CaixaFerramentas
+        aberta={caixa.aberta}
+        foco={caixa.foco}
+        vistas={apresentacoes.vistas}
+        toque={toque}
+        aoFechar={() => setCaixa((atual) => ({ ...atual, aberta: false }))}
+        aoRever={(id) => {
+          setCaixa({ aberta: false, foco: null });
+          apresentacoes.rever(id);
+        }}
       />
       <TelaConclusao
         aberta={estado.etapa === "concluida" && estado.conclusaoAberta}

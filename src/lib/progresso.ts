@@ -1,3 +1,4 @@
+import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { ehTemaId, TEMA_PADRAO, TEMAS_INICIAIS, type TemaId } from "@/tema/temas";
 
 export const CHAVE_PROGRESSO = "ilha-sites:progresso:v1";
@@ -20,6 +21,8 @@ export type Progresso = {
   temasDesbloqueados: TemaId[];
   som: boolean;
   missoesDeCampo: Record<string, boolean>;
+  /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
+  apresentacoesVistas: IdFerramenta[];
 };
 
 export const PROGRESSO_PADRAO: Progresso = {
@@ -31,6 +34,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   temasDesbloqueados: [...TEMAS_INICIAIS],
   som: true,
   missoesDeCampo: {},
+  apresentacoesVistas: [],
 };
 
 function ehObjeto(valor: unknown): valor is Record<string, unknown> {
@@ -94,6 +98,9 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     temasDesbloqueados,
     som: ehBooleano(bruto.som) ? bruto.som : PROGRESSO_PADRAO.som,
     missoesDeCampo: lerRegistro(bruto.missoesDeCampo, ehBooleano),
+    apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
+      ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]
+      : [],
   };
 }
 

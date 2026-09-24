@@ -75,7 +75,21 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   seleciona o elemento mais interno, conferindo as tags nos dois lados;
   se não bater, não destaca nada. Seleção vinda do editor não mexe no
   cursor (transações externas são anotadas). Teste: `testes/sincronia.mjs`.
-- [ ] **Etapa 10: Sistema de apresentação de ferramentas.**
+- [x] **Etapa 10: Sistema de apresentação de ferramentas.** Registro central
+  data-driven em `src/ferramentas/registro.ts` (9 ferramentas, ícones SVG
+  próprios, 4 mini demos), `data-ferramenta` nos elementos reais via
+  `AlvoFerramenta` (também dá o "?" no desktop e o toque longo no celular).
+  Spotlight `ApresentacaoFerramenta`: véu com recorte arredondado (máscara
+  SVG) e contorno pulsante, mascote ao lado do alvo, 3 falas (Enter, clique
+  ou toque avançam; Esc pula), passo "Experimente" em que só o alvo fica
+  livre (bloqueio com `clip-path` evenodd, com áreas extras como a tela no
+  modo inspecionar) e fecha quando o jogador usa a ferramenta de verdade
+  (`sinalizarUso` ou toque no alvo), com comemoração. "Pular" sempre visível.
+  Vistas salvas em `apresentacoesVistas` no progresso. Caixa de Ferramentas
+  (gaveta no desktop, folha arrastável no celular) com cards, silhuetas
+  dormindo e "Rever apresentação". `apresentar` em `Fase` e `Objetivo`;
+  Fase 1 configurada; enunciados com variação de toque (`enunciadoToque`).
+  Testes: `testes/fase-completa.mjs`, `testes/ferramentas.mjs`.
 - [ ] **Etapa 11: Mobile retrato e toque.**
 - [ ] **Etapa 12: Mobile paisagem.**
 - [ ] **Etapa 13: Testes, acabamento e docs.**

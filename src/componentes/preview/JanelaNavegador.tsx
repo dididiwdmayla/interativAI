@@ -11,7 +11,7 @@ type Props = {
 export function JanelaNavegador({ url, children }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-superficie shadow-[0_8px_0_var(--cor-sombra)]">
-      <div className="flex shrink-0 items-center gap-3 border-b-2 border-borda bg-painel px-3 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b-2 border-borda bg-painel px-3 py-2 pointer-fine:pr-10">
         <div className="flex gap-1.5" aria-hidden="true">
           <span className="h-3 w-3 rounded-full bg-erro" />
           <span className="h-3 w-3 rounded-full bg-alerta" />

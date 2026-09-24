@@ -1,8 +1,8 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ComponentPropsWithRef } from "react";
 
 type Variante = "primario" | "secundario" | "fantasma";
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+type Props = ComponentPropsWithRef<"button"> & {
   variante?: Variante;
   tamanho?: "p" | "m";
 };

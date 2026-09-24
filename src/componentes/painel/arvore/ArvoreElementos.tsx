@@ -17,6 +17,8 @@ type Props = {
   aoPassarMouse: (no: Node | null) => void;
   aoEditarTexto: (caminho: number[], texto: string) => void;
   aoEditarAtributo: (caminho: number[], nome: string, valor: string) => void;
+  /** Avisado quando uma edição começa (dois cliques, Enter ou F2). */
+  aoComecarEdicao?: () => void;
 };
 
 /** Árvore de Elementos no estilo do F12, construída do body do iframe. */
@@ -30,6 +32,7 @@ export function ArvoreElementos({
   aoPassarMouse,
   aoEditarTexto,
   aoEditarAtributo,
+  aoComecarEdicao,
 }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [edicao, setEdicao] = useState<EdicaoArvore | null>(null);
@@ -101,6 +104,7 @@ export function ArvoreElementos({
       case "F2":
         if (atual && (atual.tipo === "texto" || (atual.tipo === "elemento" && atual.filhos.length === 0))) {
           setEdicao({ chave: atual.chave, alvo: "texto" });
+          aoComecarEdicao?.();
         }
         break;
       default:
@@ -160,6 +164,7 @@ export function ArvoreElementos({
             aoIniciarEdicao={(nova) => {
               aoSelecionar(linha.no.caminho, "arvore");
               setEdicao(nova);
+              aoComecarEdicao?.();
             }}
             aoCancelarEdicao={terminarEdicao}
             aoConfirmarTexto={(alvo, texto) => {

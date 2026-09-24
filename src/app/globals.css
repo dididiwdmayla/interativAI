@@ -27,6 +27,7 @@
   --color-selecao: var(--cor-selecao);
   --color-hover: var(--cor-hover);
   --color-sombra: var(--cor-sombra);
+  --color-veu: var(--cor-veu);
   --color-codigo-fundo: var(--cor-codigo-fundo);
   --color-codigo-tag: var(--cor-codigo-tag);
   --color-codigo-atributo: var(--cor-codigo-atributo);
@@ -111,5 +112,31 @@ body {
   }
   100% {
     background-color: color-mix(in srgb, var(--cor-realce-inspecao) 16%, transparent);
+  }
+}
+
+/* Contorno pulsante do recorte da apresentação de ferramentas. */
+.contorno-apresentacao {
+  transition:
+    left 0.3s ease,
+    top 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease;
+  animation: pulsar-contorno 1.4s ease-in-out infinite;
+}
+
+.cartao-apresentacao {
+  transition:
+    left 0.3s ease,
+    top 0.3s ease;
+}
+
+@keyframes pulsar-contorno {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--cor-destaque) 70%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--cor-destaque) 0%, transparent);
   }
 }
