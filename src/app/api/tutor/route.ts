@@ -1,12 +1,7 @@
 import { ApiError, type Content, GoogleGenAI, ThinkingLevel } from "@google/genai";
-import { faseDoId } from "@/conteudo";
 import { interpretarRespostaTutor } from "@/lib/tutor/interpretarResposta";
-import {
-  ESQUEMA_RESPOSTA_TUTOR,
-  type ModoTutor,
-  montarMensagemAtual,
-  PROMPT_SISTEMA_TUTOR,
-} from "@/lib/tutor/promptTutor";
+import { contextoDoTutor } from "@/lib/tutor/contextoDoTutor";
+import { ESQUEMA_RESPOSTA_TUTOR, montarMensagemAtual, PROMPT_SISTEMA_TUTOR } from "@/lib/tutor/promptTutor";
 import { gerarComResiliencia, type Tentativa } from "@/lib/tutor/resiliencia";
 import type { TipoErroTutor } from "@/lib/tutor/tipos";
 import { validarEntradaTutor } from "@/lib/tutor/validarEntrada";
@@ -76,15 +71,7 @@ export async function POST(requisicao: Request) {
   if (!entrada) return erro("desconhecido", 400);
 
   // Enunciado e modo oficiais vêm dos dados da fase; os do cliente são só reserva.
-  const fase = faseDoId(entrada.faseId);
-  const objetivo =
-    fase?.tipo === "pratica" ? fase.objetivos.find((item) => item.id === entrada.objetivoId) : undefined;
-  const modo: ModoTutor = fase?.tipo === "desafio" ? "desafio" : (objetivo?.modo ?? "guiado");
-  const enunciado =
-    fase?.tipo === "desafio"
-      ? `Desafio, sem passo a passo. Partes: ${fase.partes.map((parte) => parte.descricao).join("; ")}`
-      : (objetivo?.enunciado.mouse ?? entrada.enunciado);
-  const siteAlvo = fase?.siteAlvo.titulo ?? "site fictício";
+  const { modo, enunciado, siteAlvo } = contextoDoTutor(entrada.faseId, entrada.objetivoId, entrada.enunciado);
 
   const historico: Content[] = entrada.historico.map((mensagem) => ({
     role: mensagem.papel === "aluno" ? "user" : "model",

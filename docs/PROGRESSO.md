@@ -1,7 +1,12 @@
 # Progresso
 
-Checklist das etapas da Fase 1 jogável (Ilha Sites › Zona Elementos).
-Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
+Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
+`npm run build`, `npm run lint` e (a partir da Etapa 15)
+`npm run testar:conteudo` passando e um commit.
+
+**Estado atual:** rodada 3 concluída (fábrica de conteúdo, ferramentas
+novas, motor dos modos e Unidade 2). Próximo trabalho: objetivos sozinho e
+desafio da Unidade 1, usando a fábrica (ver "Próximos passos").
 
 - [x] **Etapa 1: Fundação.** Next + TS + Tailwind + Framer Motion, tokens e
   temas Doce e Fliperama (Segredo já definido, bloqueado), seletor de tema,
@@ -210,6 +215,41 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
   Nota: o pedido previa "terminando com 5 notícias" no sozinho da fase 3,
   mas com as 3 originais, a cópia do guiado e as 2 novas são 6; o
   validador pede 6 notícias e 3 títulos novos diferentes entre si.
+- [x] **Etapa 19: Guia, template, docs e testes gerais.**
+  `docs/GUIA-DE-CONTEUDO.md` (voz do computadorzinho, modelo pedagógico,
+  formato com tabelas de validadores e ações, escada de ajuda, previsão,
+  momentos roteirizados, desafio, regras de dificuldade, limites,
+  ferramentas, sites-alvo, conceitos, validador custom, passo a passo e
+  checklist) e `docs/TEMPLATE-FASE.ts` (prática e desafio anotados; compila
+  e passa nas regras de fase, conferido em `testes/conteudo/template.test.ts`).
+  Contexto do tutor extraído para `src/lib/tutor/contextoDoTutor.ts` e
+  testado. Teste de navegador da migração v1 (`testes/migracao.mjs`).
+  `PROJETO.md`, `README.md` e `testes/README.md` atualizados.
+
+## Critérios de pronto da rodada 3 (verificados na Etapa 19)
+
+- [x] `npm run build`, `npm run lint` e `npm run testar:conteudo` (119
+  testes) passam; console limpo em todos os testes de navegador.
+- [x] Playwright: Unidades 1 e 2 jogadas do começo ao fim no desktop, em
+  retrato (390×844, toque) e em paisagem (844×390, toque)
+  (`testes/unidades.mjs`), no build de produção e no dev. Bateria inteira
+  (`testes/todos.mjs`, 12 scripts) e os três cenários do tutor verdes.
+- [x] Progresso antigo (v1) migra sem perda (`testes/migracao.mjs` e
+  `testes/conteudo/progresso.test.ts`).
+- [x] Sabotagem: trocar `#popup-cookies` por `#popup-cookie` na solução do
+  objetivo 2 da fase `sites-elementos-u2-f2` faz o `testar:conteudo` falhar
+  com "objetivo 2 "apagar-popup": a solucaoDeTeste quebrou na ação 2 de 2
+  (apagar #popup-cookie): o seletor "#popup-cookie" não achou nenhum
+  elemento". Sabotagem desfeita.
+- [x] Buscas no repositório: nenhum emoji, nenhuma cor literal fora de
+  `src/tema/tokens.css` e dos sites-alvo (`src/conteudo/**/sites/`),
+  nenhum `NEXT_PUBLIC_GEMINI`.
+- [x] Atalhos e comportamentos do Chrome conferidos na doc oficial (fonte
+  do developer.chrome.com no GitHub: H esconde, Delete apaga, Ctrl+Z
+  desfaz, Ctrl+Y ou Cmd+Shift+Z refaz, Shift+Alt+seta para baixo duplica,
+  trilha no rodapé da aba Elements) e no código do devtools-frontend
+  (classe `__web-inspector-hide-shortcut__` com `visibility: hidden
+  !important`).
 
 ## Critérios de pronto (verificados na Etapa 13)
 
@@ -249,14 +289,26 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
+- Objetivos sozinho e desafio da Unidade 1 com a fábrica
+  (`docs/GUIA-DE-CONTEUDO.md`), preenchendo `meta.desafioId` dela.
+- Próximas unidades da zona Elementos, copiando a pasta da Unidade 2.
+- Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.
 - Configurar `GEMINI_MODEL_RESERVA` na Vercel só se quiser outro reserva.
-- Ferramentas novas do DevTools e a Fase 2, já usando o registro de
-  ferramentas e o `apresentar` dos objetivos.
 
 ## Notas da sessão
 
 - Etapa 1: `ai.google.dev` está bloqueado pela rede do ambiente; o nome do
   pacote (`@google/genai`) e do modelo (`gemini-3.8-flash`) foram confirmados
   pela busca na doc oficial e pelo README do pacote no npm.
+- Etapa 16: `developer.chrome.com` está bloqueado pela rede do ambiente; a
+  doc oficial foi lida pelo repositório de fontes dela no GitHub
+  (GoogleChrome/developer.chrome.com) e o mecanismo de esconder pelo
+  ChromeDevTools/devtools-frontend.
+- Etapa 15: Vitest 5 pede `@types/node` 22 ou mais; ele subiu de 20 para 22
+  (o Node do ambiente é o 22).
+- Testes de navegador: o `addInitScript` do Playwright gera um aviso no
+  console dos iframes com sandbox (mini prévias) em contexto de celular.
+  Sem o script do teste, o jogo não gera o aviso; `errosRelevantes` ignora
+  só essa mensagem.

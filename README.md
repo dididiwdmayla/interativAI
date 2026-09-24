@@ -10,8 +10,21 @@ npm install
 npm run dev
 ```
 
-Abra http://localhost:3000. A rota `/lab/mascote` mostra todas as expressões do
-mascote em todos os temas.
+Abra http://localhost:3000. Rotas de laboratório (fora da navegação):
+
+- `/lab/fases`: abre qualquer fase direto, mostra os validadores ao vivo,
+  aplica a solução do objetivo atual, reseta e roda as checagens de conteúdo.
+- `/lab/mascote`: todas as expressões do mascote em todos os temas.
+
+## Checagens
+
+```bash
+npm run lint
+npm run build
+npm run testar:conteudo   # checagens de todo o conteúdo (Vitest + jsdom)
+```
+
+Os testes de navegador (Playwright) ficam em `testes/` (veja `testes/README.md`).
 
 ## Tutor (opcional)
 
@@ -29,3 +42,5 @@ Sem a chave, o jogo funciona normalmente e só o chat fica indisponível.
 
 - `docs/PROJETO.md`: visão, regras e arquitetura.
 - `docs/PROGRESSO.md`: checklist das etapas.
+- `docs/GUIA-DE-CONTEUDO.md`: como escrever unidades e fases novas.
+- `docs/TEMPLATE-FASE.ts`: template anotado de fase.

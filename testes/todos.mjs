@@ -14,6 +14,7 @@ const TESTES = [
   ["unidades.mjs", "retrato"],
   ["unidades.mjs", "paisagem"],
   ["retomar.mjs"],
+  ["migracao.mjs"],
 ];
 
 let falhas = 0;
