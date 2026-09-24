@@ -5,15 +5,24 @@ import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
+import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
+import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
+import { PainelDividido } from "@/componentes/painel/PainelDividido";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
+import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
+import { BODY_INICIAL_PADARIA, HEAD_PADARIA, URL_PADARIA } from "@/fases/sites-elementos-1/siteAlvo";
 import type { Aba } from "@/motor/abas";
+import { useSiteAlvo } from "./useSiteAlvo";
 
 const TRILHA = ["Ilha Sites", "Elementos", "Fase 1"] as const;
 
 export function Jogo() {
   const [aba, setAba] = useState<Aba>("elementos");
   const [inspecionando, setInspecionando] = useState(false);
+  const [quebrarLinhas, setQuebrarLinhas] = useState(true);
+  const { editorRef, previewRef, versaoDocumento, aoEditarCodigo, aoCarregarDocumento } =
+    useSiteAlvo(BODY_INICIAL_PADARIA);
 
   return (
     <div className="flex h-dvh flex-col">
@@ -31,16 +40,43 @@ export function Jogo() {
               />
             }
           >
-            <div className="flex-1 p-4 text-texto-suave">Árvore de elementos</div>
-            <div className="h-1 bg-borda" />
-            <div className="flex-1 bg-codigo-fundo p-4 font-codigo text-codigo-texto">
-              Editor de código
-            </div>
+            <PainelDividido
+              rotulo="Redimensionar árvore e editor"
+              proporcaoInicial={0.48}
+              cima={
+                <div className="h-full overflow-auto p-4 text-sm text-texto-suave">
+                  Árvore de elementos (versão do documento: {versaoDocumento})
+                </div>
+              }
+              baixo={
+                <div className="flex h-full min-h-0 flex-col">
+                  <CabecalhoEditor
+                    quebrarLinhas={quebrarLinhas}
+                    aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
+                  />
+                  <div className="min-h-0 flex-1">
+                    <EditorCodigo
+                      ref={editorRef}
+                      textoInicial={BODY_INICIAL_PADARIA}
+                      aoMudar={aoEditarCodigo}
+                      quebrarLinhas={quebrarLinhas}
+                      rotulo="Editor do código HTML do corpo da página"
+                    />
+                  </div>
+                </div>
+              }
+            />
           </Painel>
         </section>
         <section aria-label="Tela do site" className="flex min-h-0 flex-1 flex-col">
-          <JanelaNavegador url="padaria-pao-quentinho.site">
-            <div className="grid h-full place-items-center text-texto-suave">Prévia do site</div>
+          <JanelaNavegador url={URL_PADARIA}>
+            <PreviewSiteAlvo
+              ref={previewRef}
+              head={HEAD_PADARIA}
+              bodyInicial={BODY_INICIAL_PADARIA}
+              titulo="Site da Padaria Pão Quentinho"
+              aoCarregar={aoCarregarDocumento}
+            />
           </JanelaNavegador>
         </section>
       </main>

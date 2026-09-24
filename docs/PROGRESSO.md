@@ -11,8 +11,12 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   aleatório, respiração, crossfade, pulinho, confete, respeita
   `prefers-reduced-motion`), `Carinha` (feliz, dormindo, surpresa em 4 tons),
   rota `/lab/mascote` com todos os temas lado a lado.
-- [ ] **Etapa 3: Preview e editor.** Fonte única de verdade, caminho A
-  (editor → iframe), site-alvo da Fase 1 renderizando.
+- [x] **Etapa 3: Preview e editor.** Hook `useSiteAlvo` (fonte única de
+  verdade = HTML do body), caminho A com debounce de 300 ms, `EditorCodigo`
+  (CodeMirror 6 + lang-html, tema dos tokens, quebra de linha opcional, API
+  `definirTexto`/`destacarLinhas`/`rolarParaLinha`), `PreviewSiteAlvo`
+  (iframe `srcdoc` + `sandbox="allow-same-origin"`), `PainelDividido` com
+  divisor arrastável, site-alvo "Padaria Pão Quentinho" renderizando.
 - [ ] **Etapa 4: Árvore de Elementos.** Render estilo DevTools, sobreposição no
   hover, seleção, modo inspecionar, edição inline, caminho B, teclado.
 - [ ] **Etapa 5: Motor de fases e conteúdo da Fase 1.** Introdução, objetivos,

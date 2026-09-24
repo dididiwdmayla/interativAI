@@ -77,3 +77,25 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes pulsar-linha {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: var(--cor-codigo-destaque-linha);
+  }
+}
+
+@keyframes pulsar-no {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--cor-destaque);
+    background-color: transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 3px var(--cor-destaque);
+    background-color: var(--cor-codigo-destaque-linha);
+  }
+}
