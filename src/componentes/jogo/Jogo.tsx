@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
+import { Mascote } from "@/componentes/mascote/Mascote";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
 import { Painel } from "@/componentes/painel/Painel";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
@@ -16,7 +17,7 @@ export function Jogo() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <BarraSuperior trilha={TRILHA} estrelas={3} />
+      <BarraSuperior trilha={TRILHA} estrelas={3} logo={<Mascote tamanho={34} />} />
       <main className="flex min-h-0 flex-1 gap-4 p-4">
         <section aria-label="Painel" className="flex min-h-0 w-[45%] flex-col">
           <Painel
@@ -44,7 +45,7 @@ export function Jogo() {
         </section>
       </main>
       <AreaMascote
-        mascote={<div className="h-24 w-24 rounded-3xl bg-primaria" />}
+        mascote={<Mascote tamanho={110} />}
         fala={<p className="rounded-2xl bg-painel p-3 font-bold">Oi! Eu sou o computadorzinho.</p>}
         objetivos={<p className="text-sm text-texto-suave">Objetivos da fase</p>}
       />

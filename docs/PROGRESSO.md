@@ -7,8 +7,10 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   temas Doce e Fliperama (Segredo já definido, bloqueado), seletor de tema,
   fontes, layout esqueleto (barra superior, painel com abas bloqueadas, janela
   do navegador, área do mascote), armazém de progresso, docs.
-- [ ] **Etapa 2: Mascote e Carinha.** Todas as expressões, animações e a rota
-  `/lab/mascote`.
+- [x] **Etapa 2: Mascote e Carinha.** `Mascote` (7 expressões, piscar
+  aleatório, respiração, crossfade, pulinho, confete, respeita
+  `prefers-reduced-motion`), `Carinha` (feliz, dormindo, surpresa em 4 tons),
+  rota `/lab/mascote` com todos os temas lado a lado.
 - [ ] **Etapa 3: Preview e editor.** Fonte única de verdade, caminho A
   (editor → iframe), site-alvo da Fase 1 renderizando.
 - [ ] **Etapa 4: Árvore de Elementos.** Render estilo DevTools, sobreposição no

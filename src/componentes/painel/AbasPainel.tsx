@@ -1,6 +1,7 @@
 "use client";
 
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
+import { Carinha } from "@/componentes/mascote/Carinha";
 import { Dica } from "@/componentes/ui/Dica";
 import { ABAS, type Aba } from "@/motor/abas";
 
@@ -34,6 +35,7 @@ export function AbasPainel({ ativa, desbloqueadas, aoTrocar }: Props) {
           >
             {!livre && <IconeCadeado tamanho={12} />}
             {aba.rotulo}
+            {!livre && <Carinha variante="dormindo" tom="suave" tamanho={14} />}
             {selecionada && (
               <span className="absolute inset-x-2 bottom-0 h-[3px] rounded-full bg-primaria" aria-hidden="true" />
             )}
