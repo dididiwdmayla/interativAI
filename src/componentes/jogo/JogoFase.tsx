@@ -63,6 +63,13 @@ const FALA_PENSANDO: Fala = {
 
 const PALAVRA_SECRETA = "curioso";
 
+const RECADO_PAISAGEM = "Pra digitar, fica mais confortável com o celular em pé";
+
+/** Tempo para ler uma fala antes do balão fechar sozinho (celular deitado). */
+function tempoDeLeitura(texto: string): number {
+  return 3500 + texto.length * 55;
+}
+
 /** Easter egg: a palavra do F12 libera o tema Segredo, sem chamar o Gemini. */
 function responderSegredo(pergunta: string, falar: (fala: Fala) => void): Fala | null {
   if (pergunta.trim().toLowerCase() !== PALAVRA_SECRETA) return null;
@@ -96,6 +103,8 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const [balaoAberto, setBalaoAberto] = useState(true);
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
+  const [recado, setRecado] = useState<string | null>(null);
+  const esperaRecado = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
   const movel = layout !== "desktop";
@@ -241,6 +250,22 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const comClique = (acao: () => void) => () => {
     tocarSom("clique");
     acao();
+  };
+
+  useEffect(
+    () => () => {
+      if (esperaRecado.current !== null) clearTimeout(esperaRecado.current);
+    },
+    [],
+  );
+
+  /** Deitado, digitar é apertado: o mascote dá a dica, sem bloquear nada. */
+  const aoFocarEditor = () => {
+    if (layout !== "paisagem") return;
+    setBalaoAberto(false);
+    setRecado(RECADO_PAISAGEM);
+    if (esperaRecado.current !== null) clearTimeout(esperaRecado.current);
+    esperaRecado.current = setTimeout(() => setRecado(null), 4500);
   };
 
   // No celular a prévia está sempre visível; só o balão sai da frente.
@@ -568,6 +593,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
                         aoMudar={aoEditarNoEditor}
                         quebrarLinhas={quebrarLinhas}
                         aoMoverCursor={aoMoverCursor}
+                        aoFocar={aoFocarEditor}
                         rotulo="Editor do código HTML do corpo da página"
                       />
                     </div>
@@ -632,6 +658,13 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
           aberto={balaoAberto}
           aoAlternar={setBalaoAberto}
           mini={layout === "paisagem"}
+          recado={recado}
+          chaveFala={falaNaTela.texto}
+          fecharDepoisDe={
+            layout === "paisagem" && emObjetivo && !estado.confirmandoSolucao && !tutor.carregando && !sobrecargaNaTela
+              ? tempoDeLeitura(falaNaTela.texto)
+              : null
+          }
         >
           {conversa}
         </MascoteFlutuante>

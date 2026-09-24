@@ -54,6 +54,8 @@ export function DemoEditarDuploClique() {
           key={instante}
           cx="70"
           cy="37"
+          r="0"
+          initial={{ r: 0, opacity: 0 }}
           fill="none"
           stroke="var(--cor-destaque)"
           strokeWidth="2"

@@ -58,5 +58,69 @@ await pagina.waitForTimeout(300);
 const proporcao = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v1")).proporcaoPrevia);
 conferir(Math.abs(proporcao - 0.6) < 0.001, `alça respeita o máximo de 60% e salva (${proporcao})`);
 
+// Girar no meio da fase não perde nada.
+await pagina.getByRole("tab", { name: "Árvore", exact: true }).tap();
+await pagina.locator('[role=treeitem][data-chave="1"]').tap();
+await pagina.getByRole("button", { name: /Abrir a conversa/ }).tap();
+await pagina.getByPlaceholder("Pergunte ao computadorzinho...").fill("uma dúvida");
+const estadoAtual = async () => ({
+  layout: await pagina.locator("[data-layout]").getAttribute("data-layout"),
+  selecionado: await pagina.locator("[role=treeitem][aria-selected=true]").getAttribute("data-chave"),
+  codigo: await pagina.evaluate(() => document.querySelector(".cm-content")?.textContent ?? ""),
+  rascunho: await pagina.getByPlaceholder("Pergunte ao computadorzinho...").inputValue(),
+  balao: await pagina.locator("[data-balao-mascote]").count(),
+  objetivo: await pagina.locator("[data-balao-mascote]").textContent(),
+});
+const emPe = await estadoAtual();
+for (const [largura, altura, nome] of [
+  [844, 390, "paisagem"],
+  [390, 844, "retrato"],
+]) {
+  await pagina.setViewportSize({ width: largura, height: altura });
+  await pagina.waitForTimeout(500);
+  const depois = await estadoAtual();
+  conferir(depois.layout === nome, `girou para ${nome}`);
+  conferir(depois.selecionado === emPe.selecionado, `${nome}: seleção mantida (${depois.selecionado})`);
+  conferir(depois.codigo === emPe.codigo && depois.codigo.includes("quentinho"), `${nome}: código do editor mantido`);
+  conferir(depois.rascunho === "uma dúvida" && depois.balao === 1, `${nome}: balão e rascunho mantidos`);
+  conferir(depois.objetivo.includes("Objetivo 4 de 4"), `${nome}: objetivo mantido`);
+}
+
+// Spotlight nos dois modos: o recorte fica na tela e o cartão não cobre o alvo.
+for (const [largura, altura, nome] of [
+  [390, 844, "retrato"],
+  [844, 390, "paisagem"],
+]) {
+  await pagina.setViewportSize({ width: largura, height: altura });
+  await pagina.waitForTimeout(400);
+  for (const id of ["arvore", "inspecionar", "tutor"]) {
+    const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
+    if (await fechar.isVisible().catch(() => false)) await fechar.tap();
+    await pagina.getByRole("button", { name: "Mais opções" }).tap();
+    await pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }).tap();
+    const caixa = pagina.getByRole("dialog", { name: "Caixa de Ferramentas" });
+    await caixa.locator(`[data-card="${id}"]`).getByRole("button", { name: "Rever apresentação" }).tap();
+    await pagina.locator(`[data-apresentacao="${id}"]`).waitFor();
+    await pagina.waitForTimeout(700);
+    const recorte = await pagina.locator(".contorno-apresentacao").first().boundingBox();
+    const cartao = await pagina.locator("[data-apresentacao] [role=dialog]").boundingBox();
+    const dentro = (r) => r.x >= -1 && r.y >= -1 && r.x + r.width <= largura + 1 && r.y + r.height <= altura + 1;
+    const sobrepoe =
+      Math.max(0, Math.min(recorte.x + recorte.width, cartao.x + cartao.width) - Math.max(recorte.x, cartao.x)) *
+      Math.max(0, Math.min(recorte.y + recorte.height, cartao.y + cartao.height) - Math.max(recorte.y, cartao.y));
+    conferir(dentro(recorte) && dentro(cartao), `${nome}/${id}: recorte e cartão dentro da tela`);
+    conferir(sobrepoe === 0, `${nome}/${id}: cartão não cobre o alvo`);
+    await pagina.getByRole("button", { name: "Pular" }).tap();
+    await pagina.locator("[data-apresentacao]").waitFor({ state: "detached" });
+  }
+}
+
+// Deitado, focar o editor mostra a dica de virar o celular (sem bloquear).
+await pagina.getByRole("tab", { name: "Código", exact: true }).tap();
+await pagina.locator(".cm-line", { hasText: "Pão francês" }).tap();
+await pagina.getByText("Pra digitar, fica mais confortável com o celular em pé").waitFor({ timeout: 3000 });
+await pagina.keyboard.type("x");
+conferir((await pagina.locator(".cm-content").textContent()).includes("x"), "paisagem: dica aparece e a digitação segue");
+
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

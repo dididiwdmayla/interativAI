@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import type { Expressao } from "@/motor/expressao";
 import { Mascote } from "./Mascote";
 
@@ -11,6 +11,15 @@ type Props = {
   aoAlternar: (aberto: boolean) => void;
   /** Mini avatar, para o celular deitado. */
   mini?: boolean;
+  /**
+   * Fecha sozinho depois desse tempo (ms), se ninguém estiver mexendo nele.
+   * Null mantém aberto (fala que pede um botão, por exemplo).
+   */
+  fecharDepoisDe?: number | null;
+  /** Muda a cada fala nova; reinicia a contagem. */
+  chaveFala?: string;
+  /** Recadinho curto ao lado do avatar, sem abrir o balão. */
+  recado?: string | null;
   /** Fala, objetivo, "Me ajuda" e campo do tutor. */
   children: ReactNode;
 };
@@ -20,9 +29,35 @@ type Props = {
  * Um toque abre o balão por cima do painel; toque fora ou arrastar para
  * baixo fecha.
  */
-export function MascoteFlutuante({ expressao, aberto, aoAlternar, mini = false, children }: Props) {
+export function MascoteFlutuante({
+  expressao,
+  aberto,
+  aoAlternar,
+  mini = false,
+  fecharDepoisDe = null,
+  chaveFala,
+  recado = null,
+  children,
+}: Props) {
   const arrasto = useDragControls();
   const tamanho = mini ? 44 : 56;
+  const balao = useRef<HTMLElement>(null);
+  const aoAlternarAtual = useRef(aoAlternar);
+
+  useEffect(() => {
+    aoAlternarAtual.current = aoAlternar;
+  }, [aoAlternar]);
+
+  // Balão lido fecha sozinho, a não ser que o jogador esteja mexendo nele.
+  useEffect(() => {
+    if (!aberto || fecharDepoisDe === null) return;
+    const temporizador = setInterval(() => {
+      const elemento = balao.current;
+      if (elemento && (elemento.matches(":hover") || elemento.contains(document.activeElement))) return;
+      aoAlternarAtual.current(false);
+    }, fecharDepoisDe);
+    return () => clearInterval(temporizador);
+  }, [aberto, fecharDepoisDe, chaveFala]);
 
   return (
     <>
@@ -41,6 +76,7 @@ export function MascoteFlutuante({ expressao, aberto, aoAlternar, mini = false, 
         {aberto && (
           <motion.section
             key="balao"
+            ref={balao}
             aria-label="Conversa com o computadorzinho"
             data-balao-mascote
             className={`fixed z-40 flex flex-col gap-2 rounded-3xl border-2 border-borda bg-superficie p-2.5 shadow-[0_8px_0_var(--cor-sombra)] ${
@@ -71,6 +107,21 @@ export function MascoteFlutuante({ expressao, aberto, aoAlternar, mini = false, 
             </div>
             {children}
           </motion.section>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {recado && !aberto && (
+          <motion.p
+            key={recado}
+            role="status"
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 8 }}
+            className="pointer-events-none fixed z-40 max-w-[min(280px,calc(100vw-90px))] rounded-2xl border-2 border-borda bg-superficie px-3 py-2 text-sm font-bold text-texto shadow-[0_4px_0_var(--cor-sombra)]"
+            style={{ right: tamanho + 20, bottom: 12 }}
+          >
+            {recado}
+          </motion.p>
         )}
       </AnimatePresence>
       <button

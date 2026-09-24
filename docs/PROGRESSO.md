@@ -107,7 +107,16 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   arrastando o dedo (soltar escolhe), duplo toque e botão "Editar" no nó
   selecionado, linhas da árvore e botões com 44 px. Testes:
   `testes/fase-completa.mjs retrato`, `testes/movel.mjs`.
-- [ ] **Etapa 12: Mobile paisagem.**
+- [x] **Etapa 12: Mobile paisagem.** Deitado e com altura < 500 px: painel e
+  prévia lado a lado (50/50), barra superior fina, árvore por padrão no
+  painel, mini avatar (44 px) com balão sobreposto que fecha sozinho depois
+  do tempo de leitura (não fecha se a fala pede um botão, se o dedo ou o
+  foco estão nele). Focar o editor deitado mostra o recado "Pra digitar,
+  fica mais confortável com o celular em pé" sem bloquear. Girar mantém
+  seleção, código, objetivo, balão e rascunho do tutor (mesma árvore de
+  componentes nos três layouts). Menu do celular fecha ao escolher um item
+  e mantém o conteúdo montado. Teste: `testes/movel.mjs` (giro e spotlight
+  nos dois modos).
 - [ ] **Etapa 13: Testes, acabamento e docs.**
 
 ## Critérios de pronto (verificados na Etapa 7)

@@ -42,6 +42,8 @@ type Props = {
   rotulo: string;
   /** Cursor posto pelo jogador (clique, toque, setas), já com espera de 150 ms. */
   aoMoverCursor?: (alvo: AlvoCodigo | null) => void;
+  /** O editor ganhou foco (o teclado virtual vai abrir no celular). */
+  aoFocar?: () => void;
   ref?: Ref<ApiEditor>;
 };
 
@@ -50,11 +52,12 @@ const ESPERA_CURSOR_MS = 150;
 /** Marca transações que vieram de fora do editor, para não voltar em loop. */
 const origemExterna = Annotation.define<boolean>();
 
-export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoMoverCursor, ref }: Props) {
+export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoMoverCursor, aoFocar, ref }: Props) {
   const hospedeiro = useRef<HTMLDivElement>(null);
   const visao = useRef<EditorView | null>(null);
   const aoMudarAtual = useRef(aoMudar);
   const aoMoverCursorAtual = useRef(aoMoverCursor);
+  const aoFocarAtual = useRef(aoFocar);
   const esperaCursor = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textoInicialRef = useRef(textoInicial);
   const quebrarInicialRef = useRef(quebrarLinhas);
@@ -68,6 +71,10 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
   useEffect(() => {
     aoMoverCursorAtual.current = aoMoverCursor;
   }, [aoMoverCursor]);
+
+  useEffect(() => {
+    aoFocarAtual.current = aoFocar;
+  }, [aoFocar]);
 
   useEffect(() => {
     const pai = hospedeiro.current;
@@ -93,6 +100,11 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
           destaqueTrecho,
           compartimentoQuebra.of(quebrarInicialRef.current ? EditorView.lineWrapping : []),
           EditorView.contentAttributes.of({ "aria-label": rotuloRef.current }),
+          EditorView.domEventHandlers({
+            focus: () => {
+              aoFocarAtual.current?.();
+            },
+          }),
           EditorView.updateListener.of((atualizacao) => {
             const deFora = atualizacao.transactions.some((tr) => tr.annotation(origemExterna));
             if (atualizacao.docChanged && !deFora) aoMudarAtual.current(atualizacao.state.doc.toString());
