@@ -18,8 +18,8 @@ const BRACOS: Record<DirecaoApontar, { braco: string; seta: string; vai: { x: nu
     vai: { x: 3, y: -2 },
   },
   cima: {
-    braco: "M119 45 Q128 38 129 26",
-    seta: "M129 15 L135 25 L123 25 Z",
+    braco: "M21 45 Q12 38 11 26",
+    seta: "M11 15 L17 25 L5 25 Z",
     vai: { x: 0, y: -3 },
   },
 };

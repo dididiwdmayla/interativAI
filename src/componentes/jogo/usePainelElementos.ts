@@ -80,6 +80,15 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     [editorRef, expandirAte, obterDocumento],
   );
 
+  /** Destaque pulsante da escada de ajuda; abre os ancestrais para ele aparecer. */
+  const destacarNaArvore = useCallback(
+    (novo: DestaqueArvore | null) => {
+      if (novo) expandirAte(novo.caminho);
+      setDestaque(novo);
+    },
+    [expandirAte],
+  );
+
   const alternarRecolhido = useCallback((chave: string, recolher: boolean) => {
     setRecolhidos((atual) => {
       if (atual.has(chave) === recolher) return atual;
@@ -230,7 +239,7 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     realce,
     inspecionando,
     destaque,
-    setDestaque,
+    destacarNaArvore,
     selecionar,
     alternarRecolhido,
     realcar,

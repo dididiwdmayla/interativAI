@@ -24,8 +24,16 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   Esc cancela), edição inline de texto e de valor de atributo (Enter confirma,
   Esc cancela), caminho B sem recarregar o iframe, seleção preservada pelo
   caminho de índices, teclado (setas, Home, End, Enter/F2 edita).
-- [ ] **Etapa 5: Motor de fases e conteúdo da Fase 1.** Introdução, objetivos,
-  validação, escada de ajuda, estrelas, conclusão, missão de campo, persistência.
+- [x] **Etapa 5: Motor de fases e conteúdo da Fase 1.** Tipos em
+  `src/motor/tipos.ts`, fase como dados em `src/fases/sites-elementos-1/fase.ts`,
+  hook genérico `useMotorFase` (introdução com Enter/clique, objetivos em
+  sequência, validação a cada load/edição/evento, pausa com fala de conclusão
+  e botão "Próximo objetivo", escada de ajuda com destaque pulsante na árvore,
+  no editor e no botão de inspecionar, solução com confirmação e custo de 1
+  estrela, mínimo 1), tela de conclusão com estrelas, falas finais, missão de
+  campo (checkbox salvo) e gancho do easter egg, persistência em
+  `ilha-sites:progresso:v1` (retoma objetivo, HTML e estrelas), "Recomeçar
+  fase" com confirmação. Barramento de eventos liga o painel ao motor.
 - [ ] **Etapa 6: Tutor Gemini.** Rota, system prompt, chat no mascote,
   expressões vindas da resposta, tratamento de erro.
 - [ ] **Etapa 7: Acabamento.** Sons, easter egg, polimento, responsivo,

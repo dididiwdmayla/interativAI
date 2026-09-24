@@ -22,7 +22,7 @@ const TRACO = {
 const DESLOCAMENTO_OLHAR: Record<DirecaoApontar, { x: number; y: number }> = {
   esquerda: { x: -4, y: 0 },
   direita: { x: 4, y: 0 },
-  cima: { x: 2, y: -4 },
+  cima: { x: -2, y: -4 },
 };
 
 /** Olhos e boca desenhados na tela do monitor, no estilo :) */
