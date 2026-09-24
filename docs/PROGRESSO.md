@@ -117,9 +117,35 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   componentes nos três layouts). Menu do celular fecha ao escolher um item
   e mantém o conteúdo montado. Teste: `testes/movel.mjs` (giro e spotlight
   nos dois modos).
-- [ ] **Etapa 13: Testes, acabamento e docs.**
+- [x] **Etapa 13: Testes, acabamento e docs.** Bateria completa rodada em
+  `next dev` e em `next start` (build de produção): `testes/todos.mjs`
+  (sincronia, ferramentas, fase inteira nos três modos, celular) e
+  `testes/tutor.mjs` nos três cenários (sobrecarga total, reserva, sem
+  chave), todos com console limpo. Corrigido: menu do celular não fechava ao
+  escolher item; círculo da demo sem raio inicial. `PROJETO.md` com as
+  decisões novas.
 
-## Critérios de pronto (verificados na Etapa 7)
+## Critérios de pronto (verificados na Etapa 13)
+
+- [x] `npm run build` e `npm run lint` passam; console limpo em todos os testes.
+- [x] Tutor: 503 simulado faz 4 tentativas (3 no principal + reserva); com a
+  reserva respondendo o jogador vê a resposta; com tudo falhando aparece a
+  fala de sobrecarga e "Tentar de novo" reenvia. Sem chave: chat desligado.
+- [x] Sincronia: árvore acende código e tela; cursor no código acende árvore
+  e tela; HTML quebrado ao digitar não gera erro.
+- [x] Apresentações: fase do zero passa por todas na ordem; recarregar não
+  repete; "Rever apresentação" e "Pular" funcionam.
+- [x] Mobile (Playwright, `hasTouch`, 390×844 e 844×390): fase inteira
+  jogável nos dois modos; prévia visível ao editar; giro não perde nada;
+  spotlight dentro da tela sem cobrir o alvo; teclado simulado encolhe a
+  prévia sem sumir.
+- [x] Desktop igual ao anterior, fora o botão Ferramentas, os "?" e a sincronia.
+- [x] grep: nenhum emoji, nenhuma cor fora dos tokens (exceto o site-alvo),
+  nenhum `NEXT_PUBLIC_GEMINI`.
+
+## Critérios de pronto da rodada 1 (verificados na Etapa 7)
+
+
 
 - [x] `npm run build` e `npm run lint` passam; sem erros no console do
   navegador (testado com Playwright no Chromium, desktop e celular).
@@ -137,8 +163,11 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
 
 ## Próximos passos sugeridos
 
-- Configurar `GEMINI_API_KEY` na Vercel e testar o tutor com uma chave real.
-- Mapa das ilhas e as próximas fases da zona Elementos.
+- Testar num celular de verdade (Android e iPhone), principalmente o teclado
+  virtual no iOS, que ainda não tem `interactive-widget`.
+- Configurar `GEMINI_MODEL_RESERVA` na Vercel só se quiser outro reserva.
+- Ferramentas novas do DevTools e a Fase 2, já usando o registro de
+  ferramentas e o `apresentar` dos objetivos.
 
 ## Notas da sessão
 

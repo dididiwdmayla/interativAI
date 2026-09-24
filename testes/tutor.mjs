@@ -1,4 +1,5 @@
-// Servidor com TUTOR_SIMULAR=sobrecarga-total (ou sem chave, com SEM_CHAVE=1).
+// Servidor em dev com TUTOR_SIMULAR=sobrecarga-total (padrão deste teste),
+// TUTOR_SIMULAR=sobrecarga (rode com RESERVA=1) ou sem chave (rode com SEM_CHAVE=1).
 import { abrir, conferir, errosRelevantes } from "./util.mjs";
 
 const { navegador, pagina, erros } = await abrir({ progresso: null });
@@ -11,7 +12,10 @@ for (let i = 0; i < 12; i++) {
 const campo = pagina.getByPlaceholder("Pergunte ao computadorzinho...").first();
 await campo.fill("o que é h1?");
 await campo.press("Enter");
-if (process.env.SEM_CHAVE) {
+if (process.env.RESERVA) {
+  await pagina.getByText("Resposta simulada do modelo reserva.").first().waitFor({ timeout: 20000 });
+  conferir(true, "modelo reserva responde e o jogador nem percebe");
+} else if (process.env.SEM_CHAVE) {
   await pagina.getByText("Meu chat ainda não foi ligado").first().waitFor({ timeout: 15000 });
   conferir(true, "sem chave mostra chat desligado");
 } else {
