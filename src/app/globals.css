@@ -103,3 +103,13 @@ body {
     background-color: var(--cor-codigo-destaque-linha);
   }
 }
+
+/* Trecho do elemento selecionado no editor: acende forte e assenta suave. */
+@keyframes surgir-trecho {
+  0% {
+    background-color: color-mix(in srgb, var(--cor-realce-inspecao) 55%, transparent);
+  }
+  100% {
+    background-color: color-mix(in srgb, var(--cor-realce-inspecao) 16%, transparent);
+  }
+}

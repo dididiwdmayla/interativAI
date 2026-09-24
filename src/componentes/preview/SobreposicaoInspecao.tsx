@@ -21,6 +21,7 @@ export function SobreposicaoInspecao({ realce }: Props) {
         }}
       />
       <div
+        data-realce-rotulo
         className="absolute whitespace-nowrap rounded-md bg-texto px-2 py-0.5 font-codigo text-xs text-fundo shadow-md"
         style={{
           left: Math.max(4, realce.x),

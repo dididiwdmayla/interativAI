@@ -98,6 +98,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     destaque,
     destacarNaArvore,
     selecionar,
+    selecionarPeloCodigo,
     alternarRecolhido,
     realcar,
     alternarInspecao,
@@ -330,6 +331,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
                       textoInicial={bodyInicial}
                       aoMudar={aoEditarNoEditor}
                       quebrarLinhas={quebrarLinhas}
+                      aoMoverCursor={selecionarPeloCodigo}
                       rotulo="Editor do código HTML do corpo da página"
                     />
                   </div>

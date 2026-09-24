@@ -65,7 +65,16 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   (dormindo), rede/desconhecido (preocupado, "sem sinal"). Simulação local com
   `TUTOR_SIMULAR=sobrecarga | sobrecarga-total | rede` (ignorada em produção).
   Teste: `testes/tutor.mjs`.
-- [ ] **Etapa 9: Sincronia tripla** (árvore, código e tela).
+- [x] **Etapa 9: Sincronia tripla.** Caminho "só de elementos"
+  (`src/lib/caminhoElementos.ts`, ignora textos e comentários dos dois lados)
+  ligando o código (árvore sintática Lezer do CodeMirror,
+  `editor/mapaElementos.ts`) ao DOM. Selecionar pela árvore, inspeção ou
+  ajuda acende o nó, o trecho inteiro no editor (fundo animado + barrinha,
+  `editor/destaqueTrecho.ts`, rola até ele) e a caixa no preview (sem hover,
+  a caixa mostra o selecionado). Cursor no editor (150 ms de espera)
+  seleciona o elemento mais interno, conferindo as tags nos dois lados;
+  se não bater, não destaca nada. Seleção vinda do editor não mexe no
+  cursor (transações externas são anotadas). Teste: `testes/sincronia.mjs`.
 - [ ] **Etapa 10: Sistema de apresentação de ferramentas.**
 - [ ] **Etapa 11: Mobile retrato e toque.**
 - [ ] **Etapa 12: Mobile paisagem.**
