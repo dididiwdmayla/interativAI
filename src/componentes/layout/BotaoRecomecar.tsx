@@ -8,10 +8,12 @@ import { Modal } from "@/componentes/ui/Modal";
 
 type Props = {
   aoRecomecar: () => void;
+  /** No menu do celular o botão aparece em qualquer largura. */
+  noMenu?: boolean;
 };
 
 /** Botão discreto para recomeçar a fase, com confirmação. */
-export function BotaoRecomecar({ aoRecomecar }: Props) {
+export function BotaoRecomecar({ aoRecomecar, noMenu = false }: Props) {
   const [confirmando, setConfirmando] = useState(false);
 
   return (
@@ -19,7 +21,11 @@ export function BotaoRecomecar({ aoRecomecar }: Props) {
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="hidden items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-texto-suave hover:bg-hover hover:text-texto md:inline-flex"
+        className={
+          noMenu
+            ? "inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-bold text-texto-suave hover:bg-hover hover:text-texto"
+            : "hidden items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-texto-suave hover:bg-hover hover:text-texto md:inline-flex"
+        }
       >
         <IconeRecarregar tamanho={14} />
         Recomeçar fase

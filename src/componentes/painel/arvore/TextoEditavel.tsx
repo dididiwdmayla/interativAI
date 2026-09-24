@@ -26,6 +26,7 @@ export function TextoEditavel({
   aoCancelar,
 }: Props) {
   const finalizado = useRef(false);
+  const ultimoToque = useRef(0);
 
   if (editando) {
     const aoTeclar = (evento: KeyboardEvent<HTMLInputElement>) => {
@@ -69,6 +70,17 @@ export function TextoEditavel({
       onDoubleClick={(evento) => {
         evento.stopPropagation();
         aoIniciar();
+      }}
+      onPointerUp={(evento) => {
+        // Duplo toque, caso o navegador não gere dblclick no toque.
+        if (evento.pointerType !== "touch") return;
+        const agora = evento.timeStamp;
+        if (agora - ultimoToque.current < 350) {
+          ultimoToque.current = 0;
+          aoIniciar();
+        } else {
+          ultimoToque.current = agora;
+        }
       }}
       title="Dois cliques para editar"
     >

@@ -53,7 +53,8 @@ async function mostrarPainel(segmento) {
   if (await vistaPainel.isVisible().catch(() => false)) await tocar(vistaPainel);
   if (segmento) {
     const aba = pagina.getByRole("tab", { name: segmento, exact: true });
-    if (await aba.isVisible().catch(() => false)) await tocar(aba);
+    const visivel = await aba.isVisible().catch(() => false);
+    if (visivel && (await aba.getAttribute("aria-selected")) !== "true") await tocar(aba);
   }
 }
 
@@ -106,8 +107,12 @@ await continuarConversa();
 // Objetivo 3
 await apresentacao("editar-duplo-clique", async () => {
   await mostrarPainel("Árvore");
-  const texto = arvore("1").locator("[title='Dois cliques para editar']").first();
-  await texto.dblclick();
+  if (toque) {
+    await arvore("1").tap();
+    await arvore("1").getByRole("button", { name: "Editar" }).tap();
+  } else {
+    await arvore("1").locator("[title='Dois cliques para editar']").first().dblclick();
+  }
 });
 const campoEdicao = pagina.locator("[role=tree] input").first();
 await campoEdicao.fill("Minha padaria favorita");

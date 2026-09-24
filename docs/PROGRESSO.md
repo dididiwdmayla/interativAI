@@ -90,7 +90,23 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   dormindo e "Rever apresentação". `apresentar` em `Fase` e `Objetivo`;
   Fase 1 configurada; enunciados com variação de toque (`enunciadoToque`).
   Testes: `testes/fase-completa.mjs`, `testes/ferramentas.mjs`.
-- [ ] **Etapa 11: Mobile retrato e toque.**
+- [x] **Etapa 11: Mobile retrato e toque.** Três composições
+  (`jogo/movel/useLayoutJogo.ts`): desktop (>= 1024 px), retrato (abaixo
+  disso, inclusive tablets) e paisagem (deitado e com altura < 500 px). A
+  árvore de componentes é a mesma nos três (só mudam classes e ordem), então
+  editor, iframe e seleção não remontam ao girar. Retrato: prévia em cima
+  (40%, alça arrastável de 25% a 60%, salva em `proporcaoPrevia`), painel
+  embaixo com "Árvore | Código" (as duas áreas continuam montadas; trocar
+  para Código rola até o trecho selecionado), barra superior compacta com
+  menu (Ferramentas, tema, som, recomeçar), barra de objetivos (2/4, toque
+  expande), computadorzinho flutuante de 56 px com balão que abre sozinho a
+  cada fala nova e fecha com toque fora ou arrastando para baixo. Teclado:
+  `interactiveWidget: "resizes-content"` na viewport + VisualViewport (altura
+  real e teclado aberto com campo focado); com teclado, a prévia vai a 25% e
+  a barra de objetivos some. Toque: `touch-action: manipulation`, inspecionar
+  arrastando o dedo (soltar escolhe), duplo toque e botão "Editar" no nó
+  selecionado, linhas da árvore e botões com 44 px. Testes:
+  `testes/fase-completa.mjs retrato`, `testes/movel.mjs`.
 - [ ] **Etapa 12: Mobile paisagem.**
 - [ ] **Etapa 13: Testes, acabamento e docs.**
 

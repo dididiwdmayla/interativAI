@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, type Ref, useRef } from "react";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS } from "@/ferramentas/registro";
 
@@ -16,6 +16,7 @@ type Props = {
   children: ReactNode;
   as?: "div" | "section" | "main" | "span";
   rotulo?: string;
+  ref?: Ref<HTMLElement>;
 };
 
 const TOQUE_LONGO_MS = 550;
@@ -38,6 +39,7 @@ export function AlvoFerramenta({
   children,
   as: Tag = "div",
   rotulo,
+  ref,
 }: Props) {
   const toque = useRef<{ x: number; y: number; temporizador: ReturnType<typeof setTimeout> } | null>(null);
   const engolirClique = useRef(false);
@@ -51,6 +53,7 @@ export function AlvoFerramenta({
 
   return (
     <Tag
+      ref={ref as Ref<HTMLDivElement>}
       data-ferramenta={ids.join(" ")}
       aria-label={rotulo}
       className={`relative ${className}`}

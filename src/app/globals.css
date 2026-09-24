@@ -44,6 +44,11 @@ body {
   height: 100%;
 }
 
+/* Sem zoom de duplo toque: o duplo toque edita textos na árvore. */
+html {
+  touch-action: manipulation;
+}
+
 body {
   background-color: var(--cor-fundo);
   background-image: radial-gradient(

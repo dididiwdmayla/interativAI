@@ -7,6 +7,8 @@ type Props = {
   baixo: ReactNode;
   proporcaoInicial?: number;
   rotulo: string;
+  /** No celular só uma das áreas aparece; as duas continuam montadas. */
+  mostrar?: "ambas" | "cima" | "baixo";
 };
 
 const MINIMO = 0.18;
@@ -17,7 +19,7 @@ function limitar(valor: number): number {
 }
 
 /** Duas áreas empilhadas com um divisor arrastável (mouse, toque e teclado). */
-export function PainelDividido({ cima, baixo, proporcaoInicial = 0.5, rotulo }: Props) {
+export function PainelDividido({ cima, baixo, proporcaoInicial = 0.5, rotulo, mostrar = "ambas" }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [proporcao, setProporcao] = useState(proporcaoInicial);
   const [arrastando, setArrastando] = useState(false);
@@ -54,7 +56,10 @@ export function PainelDividido({ cima, baixo, proporcaoInicial = 0.5, rotulo }: 
 
   return (
     <div ref={recipiente} className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 overflow-hidden" style={{ flexBasis: `${proporcao * 100}%`, flexGrow: 0, flexShrink: 0 }}>
+      <div
+        className={`min-h-0 overflow-hidden ${mostrar === "baixo" ? "hidden" : ""}`}
+        style={mostrar === "ambas" ? { flexBasis: `${proporcao * 100}%`, flexGrow: 0, flexShrink: 0 } : { flex: "1 1 0%" }}
+      >
         {cima}
       </div>
       <div
@@ -70,16 +75,16 @@ export function PainelDividido({ cima, baixo, proporcaoInicial = 0.5, rotulo }: 
         onPointerUp={aoSoltar}
         onPointerCancel={aoSoltar}
         onKeyDown={aoTeclar}
-        className={`group relative flex h-3 shrink-0 cursor-row-resize touch-none items-center justify-center border-y-2 border-borda transition-colors ${
+        className={`group relative h-3 shrink-0 cursor-row-resize touch-none items-center justify-center border-y-2 border-borda transition-colors ${
           arrastando ? "bg-primaria" : "bg-painel hover:bg-hover"
-        }`}
+        } ${mostrar === "ambas" ? "flex" : "hidden"}`}
       >
         <span
           className={`h-1 w-10 rounded-full ${arrastando ? "bg-sobre-primaria" : "bg-texto-suave group-hover:bg-primaria"}`}
           aria-hidden="true"
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden">{baixo}</div>
+      <div className={`min-h-0 flex-1 overflow-hidden ${mostrar === "cima" ? "hidden" : ""}`}>{baixo}</div>
     </div>
   );
 }

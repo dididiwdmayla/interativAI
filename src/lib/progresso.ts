@@ -23,7 +23,11 @@ export type Progresso = {
   missoesDeCampo: Record<string, boolean>;
   /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
   apresentacoesVistas: IdFerramenta[];
+  /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
+  proporcaoPrevia: number;
 };
+
+export const PROPORCAO_PREVIA = { minima: 0.25, padrao: 0.4, maxima: 0.6 } as const;
 
 export const PROGRESSO_PADRAO: Progresso = {
   versao: 1,
@@ -35,6 +39,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   som: true,
   missoesDeCampo: {},
   apresentacoesVistas: [],
+  proporcaoPrevia: PROPORCAO_PREVIA.padrao,
 };
 
 function ehObjeto(valor: unknown): valor is Record<string, unknown> {
@@ -101,6 +106,9 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
       ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]
       : [],
+    proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
+      ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
+      : PROPORCAO_PREVIA.padrao,
   };
 }
 

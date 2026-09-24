@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { type ReactNode, useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   aberto: boolean;
@@ -32,7 +33,9 @@ export function Modal({ aberto, titulo, aoFechar, children, className = "" }: Pr
     };
   }, [aberto]);
 
-  return (
+  // Em portal: nenhum pai com transform ou overflow corta a janela.
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <AnimatePresence>
       {aberto && (
         <motion.div
@@ -82,6 +85,7 @@ export function Modal({ aberto, titulo, aoFechar, children, className = "" }: Pr
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

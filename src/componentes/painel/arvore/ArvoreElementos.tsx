@@ -12,6 +12,8 @@ type Props = {
   recolhidos: ReadonlySet<string>;
   caminhoSelecionado: readonly number[] | null;
   destaque: DestaqueArvore | null;
+  /** Tela de toque: linhas mais altas e botão "Editar" no selecionado. */
+  toque?: boolean;
   aoSelecionar: (caminho: number[], origem: "arvore" | "teclado") => void;
   aoAlternar: (chave: string, recolher: boolean) => void;
   aoPassarMouse: (no: Node | null) => void;
@@ -27,6 +29,7 @@ export function ArvoreElementos({
   recolhidos,
   caminhoSelecionado,
   destaque,
+  toque = false,
   aoSelecionar,
   aoAlternar,
   aoPassarMouse,
@@ -154,6 +157,7 @@ export function ArvoreElementos({
             recolhido={recolhidos.has(chave)}
             selecionada={chave === chaveSelecionada}
             destaque={chave === chaveDestaque && destaque ? destaque.parte : null}
+            toque={toque}
             edicao={edicao}
             aoClicar={() => {
               aoSelecionar(linha.no.caminho, "arvore");
