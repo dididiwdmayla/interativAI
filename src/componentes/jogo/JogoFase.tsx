@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
 import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
+import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
@@ -44,9 +45,10 @@ import type { FasePratica } from "@/conteudo/tipos";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import { enunciadoDe, falaFinalDe } from "@/motor/estadoMotor";
-import type { PainelDasAcoes } from "@/motor/executarAcao";
+import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import type { Fala } from "@/motor/tipos";
+import { avaliarDetalhado } from "@/motor/validadores";
 import { AlcaDivisoria } from "./movel/AlcaDivisoria";
 import { useLayoutJogo, useViewportVisivel } from "./movel/useLayoutJogo";
 import { TelaConclusao } from "./TelaConclusao";
@@ -59,6 +61,10 @@ type Props = {
   fase: FasePratica;
   local: LocalDaFase;
   aoRecomecar: () => void;
+  /** "lab": o /lab/fases (começa no primeiro objetivo, não salva, sem apresentações). */
+  modo?: "jogo" | "lab";
+  /** Só no lab: a gaveta com os validadores ao vivo. */
+  painelLab?: (api: ApiLab) => ReactNode;
 };
 
 /** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
@@ -101,8 +107,9 @@ function focoUsaEnter(alvo: EventTarget | null): boolean {
   return Boolean(alvo.closest("input, textarea, button, a, select, [contenteditable], [role=tree], .cm-editor"));
 }
 
-export function JogoFase({ fase, local, aoRecomecar }: Props) {
-  const [salvo] = useState(() => obterProgresso().fasesEmAndamento[fase.id]);
+export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }: Props) {
+  const lab = modo === "lab";
+  const [salvo] = useState(() => (lab ? undefined : obterProgresso().fasesEmAndamento[fase.id]));
   const [bodyInicial] = useState(() => salvo?.htmlAtual ?? fase.siteAlvo.body);
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
@@ -208,6 +215,7 @@ export function JogoFase({ fase, local, aoRecomecar }: Props) {
     estado,
     objetivo,
     pulsarFerramenta,
+    contextoValidacao,
     verificar,
     avancarFala,
     seguir,
@@ -228,6 +236,7 @@ export function JogoFase({ fase, local, aoRecomecar }: Props) {
     painel,
     destacarNaArvore,
     toque,
+    modo,
   });
 
   const apresentacoes = useApresentacoes({
@@ -235,7 +244,7 @@ export function JogoFase({ fase, local, aoRecomecar }: Props) {
     etapa: estado.etapa,
     objetivoAtual: estado.objetivoAtual,
     pausa: estado.pausa,
-    bloqueada: caixa.aberta || (estado.etapa === "concluida" && estado.conclusaoAberta),
+    bloqueada: lab || caixa.aberta || (estado.etapa === "concluida" && estado.conclusaoAberta),
   });
   const ferramentaEmCena = apresentacoes.atual ? FERRAMENTAS[apresentacoes.atual] : null;
 
@@ -271,6 +280,41 @@ export function JogoFase({ fase, local, aoRecomecar }: Props) {
       }),
     [barramento],
   );
+
+  // Lab: a gaveta se redesenha a cada evento do painel e a cada recarga da página.
+  const [versaoLab, setVersaoLab] = useState(0);
+  useEffect(() => {
+    if (!lab) return;
+    return barramento.assinar(() => setVersaoLab((versao) => versao + 1));
+  }, [barramento, lab]);
+
+  const apiLab: ApiLab = {
+    versao: versaoLab,
+    avaliarItens: (): ItemLab[] => {
+      const contexto = contextoValidacao();
+      return fase.objetivos.map((item, indice) => ({
+        id: item.id,
+        rotulo: `${indice + 1}. ${item.id}`,
+        etiqueta: `${item.modo}${item.tipo === "previsao" ? ", previsão" : ""}`,
+        situacao:
+          indice < estado.concluidos
+            ? "feito"
+            : indice === estado.objetivoAtual && estado.etapa === "objetivos"
+              ? "atual"
+              : "futuro",
+        resultado: contexto ? avaliarDetalhado(item.validador, contexto) : null,
+      }));
+    },
+    aplicarSolucaoAtual: () => {
+      if (!objetivo || estado.pausa !== null) return "Nenhum objetivo ativo agora (pausa ou fase concluída).";
+      try {
+        executarAcoes(objetivo.solucaoDeTeste, painel);
+        return null;
+      } catch (erro) {
+        return erro instanceof Error ? erro.message : String(erro);
+      }
+    },
+  };
 
   const tutor = useTutor({
     faseId: fase.id,
@@ -765,6 +809,7 @@ export function JogoFase({ fase, local, aoRecomecar }: Props) {
         aoFechar={fecharConclusao}
         aoRecomecar={aoRecomecar}
       />
+      {lab && painelLab?.(apiLab)}
     </div>
   );
 }

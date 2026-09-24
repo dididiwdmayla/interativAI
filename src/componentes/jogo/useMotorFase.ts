@@ -15,7 +15,7 @@ import { criarEstadoInicial, type EstadoMotor, falaDoObjetivo, falaFinalDe } fro
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
-import { avaliarValidador, consultar } from "@/motor/validadores";
+import { avaliarValidador, consultar, type ContextoValidacao } from "@/motor/validadores";
 
 type Opcoes = {
   fase: FasePratica;
@@ -31,6 +31,8 @@ type Opcoes = {
   destacarNaArvore: (destaque: DestaqueArvore | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
+  /** "lab": começa no primeiro objetivo e não salva nada (/lab/fases). */
+  modo: "jogo" | "lab";
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -50,8 +52,9 @@ export function useMotorFase({
   painel,
   destacarNaArvore,
   toque,
+  modo,
 }: Opcoes) {
-  const [estado, setEstado] = useState<EstadoMotor>(() => criarEstadoInicial(fase, salvo, toque));
+  const [estado, setEstado] = useState<EstadoMotor>(() => criarEstadoInicial(fase, salvo, toque, modo === "lab"));
   const [pulsarFerramenta, setPulsarFerramenta] = useState<IdFerramenta | null>(null);
   const [documentoInicial] = useState(() => criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body));
   const eventosObjetivo = useRef<EventoFase[]>([]);
@@ -86,29 +89,21 @@ export function useMotorFase({
     [fase, limparAjudasVisuais],
   );
 
+  /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos do objetivo. */
+  const contextoValidacao = useCallback((): ContextoValidacao | null => {
+    const documento = obterDocumento();
+    if (!documento?.body) return null;
+    return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current };
+  }, [documentoInicial, obterDocumento, obterSelecao]);
+
   /** Roda o validador do objetivo ativo contra o documento vivo. */
   const verificar = useCallback(() => {
     if (estado.etapa !== "objetivos" || estado.pausa !== null || aplicandoSolucao.current) return;
-    const documento = obterDocumento();
-    if (!documento?.body) return;
+    const contexto = contextoValidacao();
+    if (!contexto) return;
     const atual = fase.objetivos[estado.objetivoAtual];
-    const passou = avaliarValidador(atual.validador, {
-      documento,
-      inicial: documentoInicial,
-      selecao: obterSelecao(),
-      eventos: eventosObjetivo.current,
-    });
-    if (passou) concluirObjetivo(estado.objetivoAtual);
-  }, [
-    estado.etapa,
-    estado.pausa,
-    estado.objetivoAtual,
-    obterDocumento,
-    obterSelecao,
-    fase,
-    documentoInicial,
-    concluirObjetivo,
-  ]);
+    if (avaliarValidador(atual.validador, contexto)) concluirObjetivo(estado.objetivoAtual);
+  }, [estado.etapa, estado.pausa, estado.objetivoAtual, contextoValidacao, fase, concluirObjetivo]);
 
   const verificarAtual = useRef(verificar);
   useEffect(() => {
@@ -132,8 +127,9 @@ export function useMotorFase({
     return () => clearTimeout(temporizador);
   }, [estado.etapa, estado.objetivoAtual, estado.pausa]);
 
-  // Persistência: tudo o que precisa para retomar a fase.
+  // Persistência: tudo o que precisa para retomar a fase (o lab não salva).
   useEffect(() => {
+    if (modo === "lab") return;
     atualizarProgresso((progresso) => {
       const concluida = estado.etapa === "concluida";
       return {
@@ -161,7 +157,7 @@ export function useMotorFase({
           : progresso.estrelasPorFase,
       };
     });
-  }, [fase.id, estado.etapa, estado.concluidos, estado.estrelas, htmlAtual]);
+  }, [modo, fase.id, estado.etapa, estado.concluidos, estado.estrelas, htmlAtual]);
 
   /** Avança falas da introdução e da conclusão. */
   const avancarFala = () => {
@@ -304,6 +300,7 @@ export function useMotorFase({
     estado,
     objetivo,
     pulsarFerramenta,
+    contextoValidacao,
     verificar,
     avancarFala,
     seguir,

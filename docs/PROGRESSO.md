@@ -142,6 +142,16 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
   `sites-elementos-u1-f1`), comportamento igual (bateria Playwright antiga
   passou inteira). Progresso `ilha-sites:progresso:v2` com migração
   automática da v1 (ids renomeados, fase atual, campos novos com padrão).
+- [x] **Etapa 15: Testes de conteúdo e /lab/fases.** `npm run testar:conteudo`
+  (Vitest + jsdom, `vitest.config.mts`, testes em `testes/conteudo/`).
+  Regras em `src/conteudo/checagens.ts` (gerais, de dados e de simulação),
+  simulação headless `src/motor/simulacao.ts` (mesmo núcleo da interface),
+  `montarIndice()` em `src/conteudo/indice.ts`. Testes do núcleo, dos
+  validadores e da migração v1. Rota `/lab/fases` (fora da navegação):
+  abre qualquer fase no primeiro objetivo, sem salvar e sem apresentações,
+  com gaveta de validadores ao vivo, "Aplicar solução do objetivo atual",
+  "Resetar fase", checagens rodando no navegador e índice de conceitos.
+  Sabotagem de seletor conferida: a falha diz fase, objetivo, ação e motivo.
 
 ## Critérios de pronto (verificados na Etapa 13)
 

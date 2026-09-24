@@ -42,7 +42,16 @@ export function falaFinalDe(fase: FasePratica): Fala {
   return fase.falaFinal ?? fase.conclusao[fase.conclusao.length - 1];
 }
 
-export function criarEstadoInicial(fase: FasePratica, salvo: EstadoFaseSalvo | undefined, toque: boolean): EstadoMotor {
+/**
+ * Estado ao abrir a fase: do zero, de onde o jogador parou (salvo) ou,
+ * com `direto`, já no primeiro objetivo (usado pelo /lab/fases).
+ */
+export function criarEstadoInicial(
+  fase: FasePratica,
+  salvo: EstadoFaseSalvo | undefined,
+  toque: boolean,
+  direto = false,
+): EstadoMotor {
   const total = fase.objetivos.length;
   const base: EstadoMotor = {
     etapa: "introducao",
@@ -57,6 +66,7 @@ export function criarEstadoInicial(fase: FasePratica, salvo: EstadoFaseSalvo | u
     conclusaoAberta: false,
     acertos: 0,
   };
+  if (direto) return { ...base, etapa: "objetivos", fala: falaDoObjetivo(fase, 0, toque) };
   if (!salvo || !salvo.introducaoVista) return base;
 
   const concluidos = limitar(salvo.objetivoAtual, 0, total);

@@ -1,4 +1,19 @@
-# Testes de navegador
+# Testes
+
+## Conteúdo (sem navegador)
+
+```bash
+npm run testar:conteudo
+```
+
+Vitest com jsdom (`vitest.config.mts`). Os arquivos ficam em
+`testes/conteudo/`: as regras de `src/conteudo/checagens.ts` viram um teste
+por fase (ids, conceitos, ferramentas apresentadas, limites de texto,
+emojis, previsões, soluções que cumprem cada objetivo na hora certa...),
+mais o índice de conceitos, o núcleo do painel e a migração do progresso.
+As mesmas checagens rodam no navegador em `/lab/fases` (aba Checagens).
+
+## Navegador
 
 Scripts Playwright que jogam o jogo de verdade num Chromium. Eles usam o
 Playwright do projeto ou, se não houver, o instalado globalmente
