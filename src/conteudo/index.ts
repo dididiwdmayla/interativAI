@@ -3,12 +3,13 @@
  * Unidade nova: importe o `unidade.ts` dela e acrescente nas duas listas.
  */
 import { FASES_UNIDADE_1, UNIDADE_1 } from "./ilhas/sites/elementos/unidade-1/unidade";
+import { FASES_UNIDADE_2, UNIDADE_2 } from "./ilhas/sites/elementos/unidade-2/unidade";
 import type { Fase, Unidade } from "./tipos";
 
-export const UNIDADES: readonly Unidade[] = [UNIDADE_1];
+export const UNIDADES: readonly Unidade[] = [UNIDADE_1, UNIDADE_2];
 
 /** Todas as fases, na ordem das unidades. */
-export const FASES: readonly Fase[] = [...FASES_UNIDADE_1];
+export const FASES: readonly Fase[] = [...FASES_UNIDADE_1, ...FASES_UNIDADE_2];
 
 export const FASE_INICIAL: Fase = FASES[0];
 

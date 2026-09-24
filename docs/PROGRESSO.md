@@ -192,6 +192,24 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
   "Próxima fase" na conclusão, fase atual salva em `faseAtual`. Tutor
   recebe o modo (guiado, sozinho, desafio) calculado no servidor e só faz
   perguntas nos dois últimos.
+- [x] **Etapa 18: Unidade 2, "Faxina no site" (a unidade-modelo).** Pasta
+  `src/conteudo/ilhas/sites/elementos/unidade-2/` com um arquivo por fase
+  (cada um explica as decisões pedagógicas no topo) e `unidade.ts` (meta e
+  desafio). Sites-alvo novos em `sites/`: Jornal da Vila (banner
+  `#banner-topo`, pop-up `#popup-cookies` no meio da página, três
+  `article.noticia`, `#anuncio-lateral`, `#rodape`; versão limpa para a
+  fase 3) e Brinquedos Arco-Íris (pop-up `#popup-oferta` flutuando,
+  banner, anúncio, `#vitrine` com 4 produtos desenhados em CSS). Fases:
+  família de elementos (trilha, previsão sobre o main, sozinho com a
+  setinha), esconder ou apagar (previsão, esbarrão que apaga o rodapé,
+  desfazer, faxina sozinho revisando edição de texto), copia e cola
+  (trilha + duplicar + editar, sozinho com duas cópias) e o desafio de 5
+  partes. `testar:conteudo` verde (90 testes). Jornada inteira das
+  Unidades 1 e 2 em Playwright nos três layouts (`testes/unidades.mjs`) e
+  retomada no meio do esbarrão (`testes/retomar.mjs`).
+  Nota: o pedido previa "terminando com 5 notícias" no sozinho da fase 3,
+  mas com as 3 originais, a cópia do guiado e as 2 novas são 6; o
+  validador pede 6 notícias e 3 títulos novos diferentes entre si.
 
 ## Critérios de pronto (verificados na Etapa 13)
 
