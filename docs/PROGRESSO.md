@@ -173,6 +173,25 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
   (`BarraAcoesNo`, 6 botões de 44 px). No "Experimente", o cartão do
   mascote também evita as áreas liberadas. Teste:
   `testes/ferramentas-novas.mjs` (desktop e celular, apresentações).
+- [x] **Etapa 17: Motor dos modos.** `useMotorFase` reescrito para prática
+  e desafio, com modos de jogo `jogo`, `revisao` e `lab`
+  (`src/motor/estadoMotor.ts`). Meta com antes/depois (`TelaMeta`,
+  `MiniPrevia`; o depois sai de `estadoFinalDoDesafio`) no começo da
+  unidade e antes do desafio, quando a unidade tem desafio. Sozinho: selo
+  "Sozinho" com carinha determinada (lista, barra do celular, linha do
+  balão), "Me ajuda" só até a dica, comemoração "Fez sozinho!". Previsão:
+  card com opções no balão (sem "Me ajuda" antes do palpite), resultado
+  com a explicação, errar não custa estrela, apresentações esperam o
+  palpite. Momentos roteirizados (`eventosIniciais`, `eventoAoComecar`)
+  com a animação de esbarrão (`Tropeco`); retomar no meio volta ao HTML de
+  antes e roda o momento de novo. Desafio: checklist que marca as partes
+  ao vivo (e elas ficam marcadas), "Me ajuda" vira "Rever" com a lista das
+  partes pendentes, cada Rever custa 1 estrela (mínimo 1), salva o desafio
+  e abre a fase em modo revisão (sem estrelas, sem salvar, "Voltar ao
+  desafio"). Navegação: Lista de fases (gaveta ou folha) com cadeados,
+  "Próxima fase" na conclusão, fase atual salva em `faseAtual`. Tutor
+  recebe o modo (guiado, sozinho, desafio) calculado no servidor e só faz
+  perguntas nos dois últimos.
 
 ## Critérios de pronto (verificados na Etapa 13)
 

@@ -4,7 +4,8 @@ type Props = {
   partes: readonly string[];
 };
 
-export function Trilha({ partes }: Props) {
+/** Onde o jogador está: ilha, zona, unidade e fase (não confundir com a trilha de elementos). */
+export function OndeEstou({ partes }: Props) {
   return (
     <nav aria-label="Onde você está" className="min-w-0">
       <ol className="flex items-center gap-1.5 text-sm font-bold text-texto-suave">

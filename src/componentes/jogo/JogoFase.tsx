@@ -9,21 +9,25 @@ import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
+import { BotaoFases } from "@/componentes/layout/BotaoFases";
+import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
 import { SeletorTema } from "@/componentes/layout/SeletorTema";
-import { BarraObjetivosMovel } from "@/componentes/mascote/BarraObjetivosMovel";
-import { MascoteFlutuante } from "@/componentes/mascote/MascoteFlutuante";
-import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
 import { BalaoFala } from "@/componentes/mascote/BalaoFala";
-import { BotaoAjuda } from "@/componentes/mascote/BotaoAjuda";
+import { BarraObjetivosMovel } from "@/componentes/mascote/BarraObjetivosMovel";
 import { CampoTutor } from "@/componentes/mascote/CampoTutor";
-import { ListaObjetivos } from "@/componentes/mascote/ListaObjetivos";
+import { ChecklistDesafio } from "@/componentes/mascote/ChecklistDesafio";
+import { ListaObjetivos, type ObjetivoNaTela } from "@/componentes/mascote/ListaObjetivos";
+import { ListaRever } from "@/componentes/mascote/ListaRever";
 import { Mascote } from "@/componentes/mascote/Mascote";
+import { MascoteFlutuante } from "@/componentes/mascote/MascoteFlutuante";
+import { SeloSozinho } from "@/componentes/mascote/SeloSozinho";
+import { Tropeco } from "@/componentes/mascote/Tropeco";
 import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
+import { TrilhaElementos } from "@/componentes/painel/arvore/TrilhaElementos";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
 import { BotoesHistorico } from "@/componentes/painel/BotoesHistorico";
-import { TrilhaElementos } from "@/componentes/painel/arvore/TrilhaElementos";
 import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
@@ -34,37 +38,54 @@ import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
 import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
+import { faseDoId, type LocalDaFase, proximaFase } from "@/conteudo";
+import type { Fase } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
-import { PROPORCAO_PREVIA } from "@/lib/progresso";
+import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { tocarSom } from "@/lib/som";
-import { desbloquearTema, escolherTema } from "@/lib/tema";
 import { useToque } from "@/lib/useConsultaMidia";
-import type { LocalDaFase } from "@/conteudo";
-import type { FasePratica } from "@/conteudo/tipos";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
-import { enunciadoDe, falaFinalDe } from "@/motor/estadoMotor";
-import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
+import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
-import type { Fala } from "@/motor/tipos";
 import { avaliarDetalhado } from "@/motor/validadores";
+import { AcoesConversa } from "./AcoesConversa";
+import {
+  atalhoHistorico,
+  FALA_PENSANDO,
+  FERRAMENTAS_DA_ARVORE,
+  focoTemDesfazerProprio,
+  focoUsaEnter,
+  RECADO_PAISAGEM,
+  responderSegredo,
+  tempoDeLeitura,
+} from "./ajudantesJogo";
+import { ComemoracaoSozinho } from "./ComemoracaoSozinho";
+import { ListaFases } from "./ListaFases";
 import { AlcaDivisoria } from "./movel/AlcaDivisoria";
 import { useLayoutJogo, useViewportVisivel } from "./movel/useLayoutJogo";
 import { TelaConclusao } from "./TelaConclusao";
+import { TelaMeta } from "./TelaMeta";
 import { useMotorFase } from "./useMotorFase";
 import { usePainelElementos } from "./usePainelElementos";
 import { useSiteAlvo } from "./useSiteAlvo";
 import { useTutor } from "./useTutor";
 
 type Props = {
-  fase: FasePratica;
+  fase: Fase;
   local: LocalDaFase;
   aoRecomecar: () => void;
-  /** "lab": o /lab/fases (começa no primeiro objetivo, não salva, sem apresentações). */
-  modo?: "jogo" | "lab";
+  /** "jogo" (normal), "revisao" (aberta pelo Rever do desafio) ou "lab" (/lab/fases). */
+  modo?: ModoJogo;
+  /** Abre outra fase (Lista de fases, Próxima fase). */
+  aoIrParaFase?: (faseId: string) => void;
+  /** Desafio: abre a fase onde uma parte foi ensinada, em modo revisão. */
+  aoRever?: (faseId: string) => void;
+  /** Revisão: volta para o desafio. */
+  aoVoltarAoDesafio?: () => void;
   /** Só no lab: a gaveta com os validadores ao vivo. */
   painelLab?: (api: ApiLab) => ReactNode;
 };
@@ -72,77 +93,30 @@ type Props = {
 /** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
 const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
 
-const FALA_PENSANDO: Fala = {
-  texto: "Hmm, deixa eu pensar...",
-  expressao: "pensativo",
-};
-
-const PALAVRA_SECRETA = "curioso";
-
-const RECADO_PAISAGEM = "Pra digitar, fica mais confortável com o celular em pé";
-
-/** Tempo para ler uma fala antes do balão fechar sozinho (celular deitado). */
-function tempoDeLeitura(texto: string): number {
-  return 3500 + texto.length * 55;
+/** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
+function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
+  if (!salvo) return fase.siteAlvo.body;
+  const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
+  if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
+    return salvo.htmlInicioObjetivo;
+  }
+  return salvo.htmlAtual ?? fase.siteAlvo.body;
 }
 
-/** Easter egg: a palavra do F12 libera o tema Segredo, sem chamar o Gemini. */
-function responderSegredo(pergunta: string, falar: (fala: Fala) => void): Fala | null {
-  if (pergunta.trim().toLowerCase() !== PALAVRA_SECRETA) return null;
-  const jaTinha = obterProgresso().temasDesbloqueados.includes("segredo");
-  desbloquearTema("segredo");
-  escolherTema("segredo");
-  tocarSom("conclusao");
-  const fala: Fala = {
-    texto: jaTinha
-      ? "Olha só quem voltou para investigar! O tema Segredo já é seu. Troque quando quiser na paleta lá em cima."
-      : "Você me achou pelo F12! Isso é investigar do jeitinho de quem programa. Liberei o tema Segredo pra você: já liguei, e dá pra trocar na paleta lá em cima.",
-    expressao: "comemorando",
-  };
-  falar(fala);
-  return fala;
-}
-
-/** Ferramentas que moram na árvore: no celular, a apresentação mostra a Árvore. */
-const FERRAMENTAS_DA_ARVORE: readonly IdFerramenta[] = [
-  "arvore",
-  "editar-duplo-clique",
-  "trilha",
-  "esconder",
-  "apagar",
-  "duplicar",
-];
-
-/** Ctrl+Z (desfazer) e Ctrl+Shift+Z ou Ctrl+Y (refazer), como no F12. */
-function atalhoHistorico(evento: {
-  key: string;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  altKey: boolean;
-  shiftKey: boolean;
-}): "desfazer" | "refazer" | null {
-  if (!(evento.ctrlKey || evento.metaKey) || evento.altKey) return null;
-  const tecla = evento.key.toLowerCase();
-  if (tecla === "z") return evento.shiftKey ? "refazer" : "desfazer";
-  if (tecla === "y" && !evento.shiftKey) return "refazer";
-  return null;
-}
-
-/** Com o foco no editor ou num campo, vale o desfazer deles. */
-function focoTemDesfazerProprio(alvo: EventTarget | null): boolean {
-  return alvo instanceof HTMLElement && Boolean(alvo.closest(".cm-editor, input, textarea, [contenteditable]"));
-}
-
-/** Elementos que já usam Enter sozinhos; aí o atalho global não age. */
-function focoUsaEnter(alvo: EventTarget | null): boolean {
-  if (!(alvo instanceof HTMLElement)) return false;
-  return Boolean(alvo.closest("input, textarea, button, a, select, [contenteditable], [role=tree], .cm-editor"));
-}
-
-export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }: Props) {
+export function JogoFase({
+  fase,
+  local,
+  aoRecomecar,
+  modo = "jogo",
+  aoIrParaFase,
+  aoRever,
+  aoVoltarAoDesafio,
+  painelLab,
+}: Props) {
   const lab = modo === "lab";
-  const [salvo] = useState(() => (lab ? undefined : obterProgresso().fasesEmAndamento[fase.id]));
-  const [bodyInicial] = useState(() => salvo?.htmlAtual ?? fase.siteAlvo.body);
+  const revisao = modo === "revisao";
+  const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
+  const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
@@ -151,6 +125,7 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
   const [recado, setRecado] = useState<string | null>(null);
+  const [listaFasesAberta, setListaFasesAberta] = useState(false);
   const esperaRecado = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
@@ -162,6 +137,13 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   }>({ aberta: false, foco: null });
   const progresso = useProgresso();
   const toque = useToque();
+
+  // A meta (antes/depois) abre a unidade e o desafio, quando a unidade já tem desafio.
+  const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
+  const desafioParaMeta = desafioDaUnidade?.tipo === "desafio" ? desafioDaUnidade : null;
+  const mostrarMeta =
+    modo === "jogo" && desafioParaMeta !== null && (fase.tipo === "desafio" || local.unidade.fases[0] === fase.id);
+  const proxima = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
 
   const {
     editorRef,
@@ -210,8 +192,8 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     aoEvento: barramento.emitir,
   });
 
-  /** As mesmas funções que a interface usa; a solução do "Me ajuda" passa por elas. */
-  const painel = useMemo<PainelDasAcoes>(
+  /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
+  const painel = useMemo(
     () => ({
       obterDocumento,
       noSelecionado,
@@ -223,7 +205,6 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
       duplicar,
       inserirHtml,
       desfazer,
-      responderPrevisao: () => {},
     }),
     [
       obterDocumento,
@@ -245,22 +226,10 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     return atual && no ? { no, via: viaDaOrigem(atual.origem) } : null;
   }, [noSelecionado, selecao]);
 
-  const {
-    estado,
-    objetivo,
-    pulsarFerramenta,
-    contextoValidacao,
-    verificar,
-    avancarFala,
-    seguir,
-    ajudar,
-    cancelarSolucao,
-    confirmarSolucao,
-    falar,
-    abrirConclusao,
-    fecharConclusao,
-  } = useMotorFase({
+  const motor = useMotorFase({
     fase,
+    modo,
+    mostrarMeta,
     salvo,
     barramento,
     htmlAtual,
@@ -270,15 +239,22 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     painel,
     destacarNaArvore,
     toque,
-    modo,
   });
+  const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
+  const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
     fase,
     etapa: estado.etapa,
     objetivoAtual: estado.objetivoAtual,
     pausa: estado.pausa,
-    bloqueada: lab || caixa.aberta || (estado.etapa === "concluida" && estado.conclusaoAberta),
+    bloqueada:
+      lab ||
+      caixa.aberta ||
+      listaFasesAberta ||
+      estado.roteiro !== null ||
+      previsaoPendente ||
+      (estado.etapa === "concluida" && estado.conclusaoAberta),
   });
   const ferramentaEmCena = apresentacoes.atual ? FERRAMENTAS[apresentacoes.atual] : null;
 
@@ -325,7 +301,7 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     [barramento],
   );
 
-  // Lab: a gaveta se redesenha a cada evento do painel e a cada recarga da página.
+  // Lab: a gaveta se redesenha a cada evento do painel.
   const [versaoLab, setVersaoLab] = useState(0);
   useEffect(() => {
     if (!lab) return;
@@ -335,7 +311,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   const apiLab: ApiLab = {
     versao: versaoLab,
     avaliarItens: (): ItemLab[] => {
-      const contexto = contextoValidacao();
+      const contexto = motor.contextoValidacao();
+      if (fase.tipo === "desafio") {
+        return fase.partes.map((parte, indice) => ({
+          id: parte.id,
+          rotulo: `${indice + 1}. ${parte.id}`,
+          etiqueta: `parte, rever em ${parte.revisarEm}`,
+          situacao: estado.partesFeitas.includes(parte.id) ? "feito" : "atual",
+          resultado: contexto ? avaliarDetalhado(parte.validador, contexto) : null,
+        }));
+      }
       return fase.objetivos.map((item, indice) => ({
         id: item.id,
         rotulo: `${indice + 1}. ${item.id}`,
@@ -349,20 +334,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
         resultado: contexto ? avaliarDetalhado(item.validador, contexto) : null,
       }));
     },
-    aplicarSolucaoAtual: () => {
-      if (!objetivo || estado.pausa !== null) return "Nenhum objetivo ativo agora (pausa ou fase concluída).";
-      try {
-        executarAcoes(objetivo.solucaoDeTeste, painel);
-        return null;
-      } catch (erro) {
-        return erro instanceof Error ? erro.message : String(erro);
-      }
-    },
+    aplicarSolucaoAtual: motor.aplicarSolucaoDeTeste,
   };
 
   const tutor = useTutor({
     faseId: fase.id,
-    objetivo: objetivo ? { id: objetivo.id, enunciado: objetivo.enunciado.mouse } : null,
+    objetivo: desafio
+      ? { id: "desafio", enunciado: FALA_DESAFIO.texto }
+      : objetivo
+        ? { id: objetivo.id, enunciado: objetivo.enunciado.mouse }
+        : null,
     degrau: estado.degrau,
     htmlAtual,
     falar,
@@ -383,6 +364,9 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   useEffect(() => {
     if (estado.confirmandoSolucao) tocarSom("aviso");
   }, [estado.confirmandoSolucao]);
+  useEffect(() => {
+    if (estado.comemoracoesSozinho > 0) tocarSom("conclusao");
+  }, [estado.comemoracoesSozinho]);
 
   const comClique = (acao: () => void) => () => {
     tocarSom("clique");
@@ -437,21 +421,23 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     [antesDeEditarCodigo, aoEditarCodigo, barramento],
   );
 
+  const { verificar, aoDocumentoPronto } = motor;
   const aoCarregar = useCallback(
     (documento: Document) => {
       aoCarregarDocumento(documento);
       aoRecarregarDocumento(documento);
       verificar();
+      aoDocumentoPronto();
     },
-    [aoCarregarDocumento, aoRecarregarDocumento, verificar],
+    [aoCarregarDocumento, aoRecarregarDocumento, verificar, aoDocumentoPronto],
   );
 
   // Enter avança a conversa quando o foco não está num campo ou botão.
   const atalhoEnter = useRef<() => void>(() => {});
   useEffect(() => {
     atalhoEnter.current = () => {
-      if (estado.etapa === "introducao") comClique(avancarFala)();
-      else if (estado.pausa !== null) comClique(seguir)();
+      if (estado.etapa === "introducao" || estado.etapa === "meta") comClique(motor.avancarFala)();
+      else if (estado.pausa !== null) comClique(motor.seguir)();
     };
   });
   useEffect(() => {
@@ -463,9 +449,22 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     return () => window.removeEventListener("keydown", aoTeclar);
   }, []);
 
-  const ultimoObjetivo = estado.concluidos >= fase.objetivos.length;
-  const naIntroducao = estado.etapa === "introducao";
+  const fecharListaFases = useCallback(() => setListaFasesAberta(false), []);
+
+  const irParaFase = (faseId: string) => {
+    setListaFasesAberta(false);
+    if (faseId !== fase.id || revisao) aoIrParaFase?.(faseId);
+  };
+
+  const reverParte = (parteId: string) => {
+    tocarSom("clique");
+    const alvo = motor.rever(parteId);
+    if (alvo) aoRever?.(alvo);
+  };
+
+  const naIntroducao = estado.etapa === "introducao" || estado.etapa === "meta";
   const emObjetivo = estado.etapa === "objetivos" && estado.pausa === null;
+  const ultimaPausa = estado.pausa === "desafioConcluido" || estado.concluidos >= motor.total;
 
   const sobrecargaNaTela = tutor.repetir !== null && tutor.repetir.fala === estado.fala && !tutor.carregando;
   const botaoTentarDeNovo = sobrecargaNaTela ? (
@@ -474,76 +473,49 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     </Botao>
   ) : null;
 
-  const acoesConversaRoteiro = (() => {
-    if (naIntroducao) {
-      const ultima = estado.indiceFala >= fase.introducao.length - 1;
-      return (
-        <>
-          <span className="text-xs text-texto-suave">
-            {estado.indiceFala + 1} de {fase.introducao.length}
-          </span>
-          <Botao onClick={comClique(avancarFala)} className="ml-auto">
-            {ultima ? "Vamos lá!" : "Continuar"}
-          </Botao>
-        </>
-      );
-    }
-    if (estado.pausa !== null) {
-      return (
-        <Botao onClick={comClique(seguir)} className="ml-auto">
-          {ultimoObjetivo ? "Ver resultado" : "Próximo objetivo"}
-        </Botao>
-      );
-    }
-    if (emObjetivo && estado.confirmandoSolucao) {
-      return (
-        <>
-          <Botao variante="secundario" onClick={comClique(cancelarSolucao)}>
-            Não, vou tentar
-          </Botao>
-          <Botao onClick={confirmarSolucao}>Sim, mostrar a solução</Botao>
-        </>
-      );
-    }
-    if (emObjetivo) {
-      return (
-        <AlvoFerramenta
-          ids={["me-ajuda"]}
-          marcador="me-ajuda"
-          aoAbrirCard={abrirCard}
-          classeMarcador="-right-2 -top-2"
-          as="span"
-          className="inline-flex"
-        >
-          <BotaoAjuda
-            degrau={estado.degrau}
-            desativado={false}
-            aoAjudar={() => {
-              sinalizarUso("me-ajuda");
-              comClique(ajudar)();
-            }}
-          />
-        </AlvoFerramenta>
-      );
-    }
-    return (
-      <Botao variante="secundario" onClick={comClique(abrirConclusao)} className="ml-auto">
-        Ver conclusão
-      </Botao>
-    );
-  })();
-
   const acoesConversa = (
     <>
       {botaoTentarDeNovo}
-      {acoesConversaRoteiro}
+      <AcoesConversa
+        estado={estado}
+        totalIntroducao={fase.introducao.length}
+        ultimaPausa={ultimaPausa}
+        previsao={objetivo?.tipo === "previsao" ? objetivo.previsao : null}
+        degrauMaximo={motor.degrauMaximo}
+        desafio={desafio !== null}
+        listaRever={
+          desafio && (
+            <ListaRever
+              pendentes={desafio.partes.filter((parte) => !estado.partesFeitas.includes(parte.id))}
+              tituloDaFase={(id) => faseDoId(id)?.titulo ?? id}
+              aoRever={reverParte}
+              aoFechar={comClique(motor.fecharListaRever)}
+            />
+          )
+        }
+        aoAvancar={comClique(motor.avancarFala)}
+        aoSeguir={comClique(motor.seguir)}
+        aoAjudar={() => {
+          sinalizarUso("me-ajuda");
+          comClique(motor.ajudar)();
+        }}
+        aoCancelarSolucao={comClique(motor.cancelarSolucao)}
+        aoConfirmarSolucao={motor.confirmarSolucao}
+        aoResponderPrevisao={(opcao) => {
+          tocarSom("clique");
+          motor.responderPrevisao(opcao);
+        }}
+        aoAbrirConclusao={comClique(motor.abrirConclusao)}
+        aoAbrirCard={abrirCard}
+      />
     </>
   );
 
-  const objetivoAtivo = estado.etapa === "objetivos" ? estado.objetivoAtual : null;
-  const objetivosNaTela = fase.objetivos.map((item) => ({
+  const objetivoAtivo = estado.etapa === "objetivos" && !desafio ? estado.objetivoAtual : null;
+  const objetivosNaTela: ObjetivoNaTela[] = (fase.tipo === "pratica" ? fase.objetivos : []).map((item) => ({
     id: item.id,
     enunciado: enunciadoDe(item, toque),
+    sozinho: item.modo === "sozinho",
   }));
   const enviarAoTutor = (pergunta: string) => {
     sinalizarUso("tutor");
@@ -564,12 +536,26 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   const perguntaDaFala =
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
+  const checklist = desafio ? <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} /> : null;
+  const objetivoDaLinha = objetivoAtivo !== null ? objetivosNaTela[objetivoAtivo] : null;
+
   const conversa = (
     <>
-      {movel && objetivoAtivo !== null && (
+      {movel && objetivoDaLinha && (
         <p className="line-clamp-2 px-1 text-xs font-bold text-texto-suave">
-          Objetivo {objetivoAtivo + 1} de {fase.objetivos.length}: {objetivosNaTela[objetivoAtivo].enunciado}
+          {objetivoDaLinha.sozinho && <SeloSozinho compacto className="mr-1 align-middle" />}
+          Objetivo {estado.objetivoAtual + 1} de {objetivosNaTela.length}: {objetivoDaLinha.enunciado}
         </p>
+      )}
+      {layout === "retrato" && desafio && estado.etapa === "objetivos" && (
+        <p className="px-1 text-xs font-bold text-texto-suave">
+          Desafio: {estado.partesFeitas.length} de {desafio.partes.length} partes feitas
+        </p>
+      )}
+      {layout === "paisagem" && desafio && estado.etapa === "objetivos" && (
+        <div className="max-h-40 shrink-0">
+          <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} />
+        </div>
       )}
       <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala} rabo={movel ? "baixo-direita" : "esquerda"}>
         {acoesConversa}
@@ -586,6 +572,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
       </AlvoFerramenta>
     </>
   );
+
+  const rotuloFase = fase.tipo === "desafio" ? "Desafio" : `Fase ${local.numero}`;
+  const botaoFases = aoIrParaFase && !lab ? (
+    <BotaoFases aoAbrir={() => setListaFasesAberta(true)} noMenu={movel} />
+  ) : null;
+  const botaoVoltar = revisao ? (
+    <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
+      Voltar ao desafio
+    </Botao>
+  ) : null;
 
   const classesMain = {
     desktop: "flex min-h-0 flex-1 gap-4 p-3 lg:p-4",
@@ -611,35 +607,52 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     >
       {movel ? (
         <BarraSuperiorMovel
-          titulo={`${local.unidade.zona} › Fase ${local.numero}`}
-          estrelas={estado.estrelas}
+          titulo={`Unidade ${local.unidade.numero} › ${rotuloFase}`}
+          estrelas={revisao ? null : estado.estrelas}
           fina={layout === "paisagem"}
+          acaoFixa={botaoVoltar}
           menu={
             <>
+              {botaoFases}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
               <div className="flex items-center justify-between gap-2">
                 <SeletorTema />
                 <BotaoSom />
               </div>
-              <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />
+              {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
             </>
           }
         />
       ) : (
         <BarraSuperior
-          trilha={[local.unidade.ilha, local.unidade.zona, `Fase ${local.numero}`]}
-          estrelas={estado.estrelas}
+          caminho={[local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
+          estrelas={revisao ? null : estado.estrelas}
           logo={<Mascote tamanho={34} />}
           acoes={
             <>
+              {botaoVoltar}
+              {botaoFases}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              <BotaoRecomecar aoRecomecar={aoRecomecar} />
+              {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
           }
         />
       )}
       {layout === "retrato" && !viewport.tecladoAberto && (
-        <BarraObjetivosMovel objetivos={objetivosNaTela} concluidos={estado.concluidos} ativo={objetivoAtivo} />
+        <BarraObjetivosMovel
+          objetivos={objetivosNaTela}
+          concluidos={estado.concluidos}
+          ativo={objetivoAtivo}
+          checklist={
+            desafio && checklist
+              ? {
+                  total: desafio.partes.length,
+                  resumo: estado.etapa === "concluida" ? "Desafio completo!" : "Checklist do desafio",
+                  lista: checklist,
+                }
+              : undefined
+          }
+        />
       )}
       <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
         <section
@@ -847,9 +860,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
           aoAlternar={setBalaoAberto}
           mini={layout === "paisagem"}
           recado={recado}
+          tropecando={estado.roteiro === "esbarrao"}
           chaveFala={falaNaTela.texto}
           fecharDepoisDe={
-            layout === "paisagem" && emObjetivo && !estado.confirmandoSolucao && !tutor.carregando && !sobrecargaNaTela
+            layout === "paisagem" &&
+            emObjetivo &&
+            !estado.confirmandoSolucao &&
+            !previsaoPendente &&
+            !estado.listaRever &&
+            !tutor.carregando &&
+            !sobrecargaNaTela
               ? tempoDeLeitura(falaNaTela.texto)
               : null
           }
@@ -858,10 +878,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
         </MascoteFlutuante>
       ) : (
         <AreaMascote
-          mascote={<Mascote expressao={falaNaTela.expressao} tamanho={112} className="h-auto w-16 sm:w-20 lg:w-28" />}
+          mascote={
+            <Tropeco ativo={estado.roteiro === "esbarrao"}>
+              <Mascote expressao={falaNaTela.expressao} tamanho={112} className="h-auto w-16 sm:w-20 lg:w-28" />
+            </Tropeco>
+          }
           conversa={conversa}
           objetivos={
-            <ListaObjetivos objetivos={objetivosNaTela} concluidos={estado.concluidos} ativo={objetivoAtivo} />
+            checklist ?? (
+              <ListaObjetivos objetivos={objetivosNaTela} concluidos={estado.concluidos} ativo={objetivoAtivo} />
+            )
           }
         />
       )}
@@ -885,23 +911,43 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
           apresentacoes.rever(id);
         }}
       />
+      {desafioParaMeta && (
+        <TelaMeta
+          aberta={estado.etapa === "meta"}
+          unidade={local.unidade}
+          desafio={desafioParaMeta}
+          noDesafio={fase.tipo === "desafio"}
+          aoComecar={comClique(motor.avancarFala)}
+        />
+      )}
+      <ListaFases
+        aberta={listaFasesAberta}
+        faseAtual={fase.id}
+        aoEscolher={irParaFase}
+        aoFechar={fecharListaFases}
+      />
+      {!(estado.etapa === "concluida" && estado.conclusaoAberta) && <ComemoracaoSozinho vez={estado.comemoracoesSozinho} />}
       <TelaConclusao
         aberta={estado.etapa === "concluida" && estado.conclusaoAberta}
         local={local}
+        modo={modo}
         falaFinal={falaFinalDe(fase)}
         estrelas={estado.estrelas}
         indiceFala={estado.indiceFala}
         fala={estado.fala}
         missaoFeita={progresso.missoesDeCampo[fase.id] ?? false}
+        proxima={proxima ? `${proxima.tipo === "desafio" ? "Desafio: " : ""}${proxima.titulo}` : null}
         aoAlternarMissao={(feita) =>
           atualizarProgresso((atual) => ({
             ...atual,
             missoesDeCampo: { ...atual.missoesDeCampo, [fase.id]: feita },
           }))
         }
-        aoAvancar={avancarFala}
-        aoFechar={fecharConclusao}
+        aoAvancar={motor.avancarFala}
+        aoFechar={motor.fecharConclusao}
         aoRecomecar={aoRecomecar}
+        aoProxima={() => proxima && aoIrParaFase?.(proxima.id)}
+        aoVoltarAoDesafio={() => aoVoltarAoDesafio?.()}
       />
       {lab && painelLab?.(apiLab)}
     </div>

@@ -327,7 +327,8 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Duplique um elemento (um card, por exemplo): toque nele e depois em Duplicar.",
     },
     uso: "sinal",
-    liberarNoExperimente: [MENU_DO_NO],
+    // A trilha fica livre para subir do título até o card inteiro antes de duplicar.
+    liberarNoExperimente: [MENU_DO_NO, seletorFerramenta("trilha")],
     demo: DemoDuplicar,
   },
 };

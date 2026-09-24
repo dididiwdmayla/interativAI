@@ -18,7 +18,6 @@ export function LabFases() {
 
   if (!carregado) return <TelaCarregando />;
   const fase = faseDoId(faseId) ?? FASE_INICIAL;
-  if (fase.tipo !== "pratica") return null;
 
   const resetar = () => setRodada((valor) => valor + 1);
 

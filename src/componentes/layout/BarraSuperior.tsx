@@ -2,16 +2,18 @@ import type { ReactNode } from "react";
 import { BotaoSom } from "./BotaoSom";
 import { EstrelasFase } from "./EstrelasFase";
 import { SeletorTema } from "./SeletorTema";
-import { Trilha } from "./Trilha";
+import { OndeEstou } from "./OndeEstou";
 
 type Props = {
-  trilha: readonly string[];
-  estrelas: number;
+  /** Onde o jogador está (ilha, zona, unidade, fase). */
+  caminho: readonly string[];
+  /** Estrelas da fase, ou null na revisão (sem estrelas). */
+  estrelas: number | null;
   logo?: ReactNode;
   acoes?: ReactNode;
 };
 
-export function BarraSuperior({ trilha, estrelas, logo, acoes }: Props) {
+export function BarraSuperior({ caminho, estrelas, logo, acoes }: Props) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie px-3 sm:gap-4 sm:px-4">
       <div className="flex items-center gap-2">
@@ -20,10 +22,16 @@ export function BarraSuperior({ trilha, estrelas, logo, acoes }: Props) {
       </div>
       <div className="hidden h-6 w-0.5 rounded-full bg-borda sm:block" aria-hidden="true" />
       <div className="hidden min-w-0 flex-1 sm:block">
-        <Trilha partes={trilha} />
+        <OndeEstou partes={caminho} />
       </div>
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        <EstrelasFase quantidade={estrelas} />
+        {estrelas === null ? (
+          <span className="rounded-full bg-painel px-3 py-1 text-xs font-black uppercase tracking-wide text-texto-suave">
+            Revisão
+          </span>
+        ) : (
+          <EstrelasFase quantidade={estrelas} />
+        )}
         {acoes}
         <SeletorTema />
         <BotaoSom />
