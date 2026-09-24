@@ -52,7 +52,99 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   inspecionar troca de aba sozinho, mascote compacto e objetivo atual em uma
   linha), dicas que não estouram a largura, contraste revisado nos três temas.
 
-## Critérios de pronto (verificados na Etapa 7)
+## Rodada 2: tutor resistente, sincronia, ferramentas e mobile
+
+- [x] **Etapa 8: Tutor resistente.** `gerarComResiliencia`
+  (`src/lib/tutor/resiliencia.ts`): 503/429 (ou UNAVAILABLE /
+  RESOURCE_EXHAUSTED) tentam de novo 2 vezes com backoff exponencial e jitter
+  (~1 s, ~2 s) e depois 1 vez no modelo reserva (`GEMINI_MODEL_RESERVA`,
+  padrão `gemini-3.5-flash-lite`). Orçamento de 45 s, cada tentativa até 15 s,
+  `maxDuration = 60`. Resposta de falha `{ erro: { tipo } }` com `sobrecarga`,
+  `sem_chave`, `rede` ou `desconhecido`; log no servidor com tipo, status e
+  modelo. No cliente: sobrecarga (pensativo + "Tentar de novo"), sem chave
+  (dormindo), rede/desconhecido (preocupado, "sem sinal"). Simulação local com
+  `TUTOR_SIMULAR=sobrecarga | sobrecarga-total | rede` (ignorada em produção).
+  Teste: `testes/tutor.mjs`.
+- [x] **Etapa 9: Sincronia tripla.** Caminho "só de elementos"
+  (`src/lib/caminhoElementos.ts`, ignora textos e comentários dos dois lados)
+  ligando o código (árvore sintática Lezer do CodeMirror,
+  `editor/mapaElementos.ts`) ao DOM. Selecionar pela árvore, inspeção ou
+  ajuda acende o nó, o trecho inteiro no editor (fundo animado + barrinha,
+  `editor/destaqueTrecho.ts`, rola até ele) e a caixa no preview (sem hover,
+  a caixa mostra o selecionado). Cursor no editor (150 ms de espera)
+  seleciona o elemento mais interno, conferindo as tags nos dois lados;
+  se não bater, não destaca nada. Seleção vinda do editor não mexe no
+  cursor (transações externas são anotadas). Teste: `testes/sincronia.mjs`.
+- [x] **Etapa 10: Sistema de apresentação de ferramentas.** Registro central
+  data-driven em `src/ferramentas/registro.ts` (9 ferramentas, ícones SVG
+  próprios, 4 mini demos), `data-ferramenta` nos elementos reais via
+  `AlvoFerramenta` (também dá o "?" no desktop e o toque longo no celular).
+  Spotlight `ApresentacaoFerramenta`: véu com recorte arredondado (máscara
+  SVG) e contorno pulsante, mascote ao lado do alvo, 3 falas (Enter, clique
+  ou toque avançam; Esc pula), passo "Experimente" em que só o alvo fica
+  livre (bloqueio com `clip-path` evenodd, com áreas extras como a tela no
+  modo inspecionar) e fecha quando o jogador usa a ferramenta de verdade
+  (`sinalizarUso` ou toque no alvo), com comemoração. "Pular" sempre visível.
+  Vistas salvas em `apresentacoesVistas` no progresso. Caixa de Ferramentas
+  (gaveta no desktop, folha arrastável no celular) com cards, silhuetas
+  dormindo e "Rever apresentação". `apresentar` em `Fase` e `Objetivo`;
+  Fase 1 configurada; enunciados com variação de toque (`enunciadoToque`).
+  Testes: `testes/fase-completa.mjs`, `testes/ferramentas.mjs`.
+- [x] **Etapa 11: Mobile retrato e toque.** Três composições
+  (`jogo/movel/useLayoutJogo.ts`): desktop (>= 1024 px), retrato (abaixo
+  disso, inclusive tablets) e paisagem (deitado e com altura < 500 px). A
+  árvore de componentes é a mesma nos três (só mudam classes e ordem), então
+  editor, iframe e seleção não remontam ao girar. Retrato: prévia em cima
+  (40%, alça arrastável de 25% a 60%, salva em `proporcaoPrevia`), painel
+  embaixo com "Árvore | Código" (as duas áreas continuam montadas; trocar
+  para Código rola até o trecho selecionado), barra superior compacta com
+  menu (Ferramentas, tema, som, recomeçar), barra de objetivos (2/4, toque
+  expande), computadorzinho flutuante de 56 px com balão que abre sozinho a
+  cada fala nova e fecha com toque fora ou arrastando para baixo. Teclado:
+  `interactiveWidget: "resizes-content"` na viewport + VisualViewport (altura
+  real e teclado aberto com campo focado); com teclado, a prévia vai a 25% e
+  a barra de objetivos some. Toque: `touch-action: manipulation`, inspecionar
+  arrastando o dedo (soltar escolhe), duplo toque e botão "Editar" no nó
+  selecionado, linhas da árvore e botões com 44 px. Testes:
+  `testes/fase-completa.mjs retrato`, `testes/movel.mjs`.
+- [x] **Etapa 12: Mobile paisagem.** Deitado e com altura < 500 px: painel e
+  prévia lado a lado (50/50), barra superior fina, árvore por padrão no
+  painel, mini avatar (44 px) com balão sobreposto que fecha sozinho depois
+  do tempo de leitura (não fecha se a fala pede um botão, se o dedo ou o
+  foco estão nele). Focar o editor deitado mostra o recado "Pra digitar,
+  fica mais confortável com o celular em pé" sem bloquear. Girar mantém
+  seleção, código, objetivo, balão e rascunho do tutor (mesma árvore de
+  componentes nos três layouts). Menu do celular fecha ao escolher um item
+  e mantém o conteúdo montado. Teste: `testes/movel.mjs` (giro e spotlight
+  nos dois modos).
+- [x] **Etapa 13: Testes, acabamento e docs.** Bateria completa rodada em
+  `next dev` e em `next start` (build de produção): `testes/todos.mjs`
+  (sincronia, ferramentas, fase inteira nos três modos, celular) e
+  `testes/tutor.mjs` nos três cenários (sobrecarga total, reserva, sem
+  chave), todos com console limpo. `PROJETO.md` com as decisões novas e
+  `testes/README.md` com como rodar.
+
+## Critérios de pronto (verificados na Etapa 13)
+
+- [x] `npm run build` e `npm run lint` passam; console limpo em todos os testes.
+- [x] Tutor: 503 simulado faz 4 tentativas (3 no principal + reserva); com a
+  reserva respondendo o jogador vê a resposta; com tudo falhando aparece a
+  fala de sobrecarga e "Tentar de novo" reenvia. Sem chave: chat desligado.
+- [x] Sincronia: árvore acende código e tela; cursor no código acende árvore
+  e tela; HTML quebrado ao digitar não gera erro.
+- [x] Apresentações: fase do zero passa por todas na ordem; recarregar não
+  repete; "Rever apresentação" e "Pular" funcionam.
+- [x] Mobile (Playwright, `hasTouch`, 390×844 e 844×390): fase inteira
+  jogável nos dois modos; prévia visível ao editar; giro não perde nada;
+  spotlight dentro da tela sem cobrir o alvo; teclado simulado encolhe a
+  prévia sem sumir.
+- [x] Desktop igual ao anterior, fora o botão Ferramentas, os "?" e a sincronia.
+- [x] grep: nenhum emoji, nenhuma cor fora dos tokens (exceto o site-alvo),
+  nenhum `NEXT_PUBLIC_GEMINI`.
+
+## Critérios de pronto da rodada 1 (verificados na Etapa 7)
+
+
 
 - [x] `npm run build` e `npm run lint` passam; sem erros no console do
   navegador (testado com Playwright no Chromium, desktop e celular).
@@ -70,8 +162,11 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
 
 ## Próximos passos sugeridos
 
-- Configurar `GEMINI_API_KEY` na Vercel e testar o tutor com uma chave real.
-- Mapa das ilhas e as próximas fases da zona Elementos.
+- Testar num celular de verdade (Android e iPhone), principalmente o teclado
+  virtual no iOS, que ainda não tem `interactive-widget`.
+- Configurar `GEMINI_MODEL_RESERVA` na Vercel só se quiser outro reserva.
+- Ferramentas novas do DevTools e a Fase 2, já usando o registro de
+  ferramentas e o `apresentar` dos objetivos.
 
 ## Notas da sessão
 

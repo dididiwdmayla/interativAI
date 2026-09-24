@@ -45,6 +45,14 @@ const aparencia = EditorView.theme({
     animation: "pulsar-linha 1.1s ease-in-out infinite",
     boxShadow: "inset 4px 0 0 var(--cor-destaque)",
   },
+  ".cm-trecho-selecionado": {
+    backgroundColor: "color-mix(in srgb, var(--cor-realce-inspecao) 16%, transparent)",
+    borderRadius: "3px",
+    animation: "surgir-trecho 0.6s ease-out",
+  },
+  ".cm-linha-no-trecho": {
+    boxShadow: "inset 3px 0 0 var(--cor-realce-inspecao)",
+  },
   ".cm-tooltip": {
     backgroundColor: "var(--cor-superficie)",
     color: "var(--cor-texto)",

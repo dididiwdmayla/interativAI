@@ -12,11 +12,15 @@ type Props = {
   recolhidos: ReadonlySet<string>;
   caminhoSelecionado: readonly number[] | null;
   destaque: DestaqueArvore | null;
+  /** Tela de toque: linhas mais altas e botão "Editar" no selecionado. */
+  toque?: boolean;
   aoSelecionar: (caminho: number[], origem: "arvore" | "teclado") => void;
   aoAlternar: (chave: string, recolher: boolean) => void;
   aoPassarMouse: (no: Node | null) => void;
   aoEditarTexto: (caminho: number[], texto: string) => void;
   aoEditarAtributo: (caminho: number[], nome: string, valor: string) => void;
+  /** Avisado quando uma edição começa (dois cliques, Enter ou F2). */
+  aoComecarEdicao?: () => void;
 };
 
 /** Árvore de Elementos no estilo do F12, construída do body do iframe. */
@@ -25,11 +29,13 @@ export function ArvoreElementos({
   recolhidos,
   caminhoSelecionado,
   destaque,
+  toque = false,
   aoSelecionar,
   aoAlternar,
   aoPassarMouse,
   aoEditarTexto,
   aoEditarAtributo,
+  aoComecarEdicao,
 }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [edicao, setEdicao] = useState<EdicaoArvore | null>(null);
@@ -101,6 +107,7 @@ export function ArvoreElementos({
       case "F2":
         if (atual && (atual.tipo === "texto" || (atual.tipo === "elemento" && atual.filhos.length === 0))) {
           setEdicao({ chave: atual.chave, alvo: "texto" });
+          aoComecarEdicao?.();
         }
         break;
       default:
@@ -150,6 +157,7 @@ export function ArvoreElementos({
             recolhido={recolhidos.has(chave)}
             selecionada={chave === chaveSelecionada}
             destaque={chave === chaveDestaque && destaque ? destaque.parte : null}
+            toque={toque}
             edicao={edicao}
             aoClicar={() => {
               aoSelecionar(linha.no.caminho, "arvore");
@@ -160,6 +168,7 @@ export function ArvoreElementos({
             aoIniciarEdicao={(nova) => {
               aoSelecionar(linha.no.caminho, "arvore");
               setEdicao(nova);
+              aoComecarEdicao?.();
             }}
             aoCancelarEdicao={terminarEdicao}
             aoConfirmarTexto={(alvo, texto) => {

@@ -7,7 +7,7 @@ type Props = {
 
 export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra }: Props) {
   return (
-    <div className="flex shrink-0 items-center gap-2 border-b-2 border-borda bg-painel px-3 py-1.5">
+    <div className="flex shrink-0 items-center gap-2 border-b-2 border-borda bg-painel px-3 py-1.5 pointer-fine:pr-9">
       <span className="text-xs font-black uppercase tracking-wide text-texto-suave">
         Código do <span className="font-codigo normal-case text-codigo-tag">&lt;body&gt;</span>
       </span>

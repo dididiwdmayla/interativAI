@@ -1,6 +1,7 @@
 "use client";
 
 import { IconeChevron } from "@/componentes/icones/IconeChevron";
+import { IconeEditar } from "@/componentes/icones/IconeEditar";
 import type { LinhaArvore, NoArvore } from "@/lib/arvore";
 import { TagAbertura } from "./TagAbertura";
 import { TextoEditavel } from "./TextoEditavel";
@@ -11,6 +12,7 @@ type Props = {
   recolhido: boolean;
   selecionada: boolean;
   destaque: "no" | "texto" | null;
+  toque?: boolean;
   edicao: EdicaoArvore | null;
   aoClicar: () => void;
   aoPassarMouse: () => void;
@@ -30,6 +32,7 @@ export function LinhaNo({
   recolhido,
   selecionada,
   destaque,
+  toque = false,
   edicao,
   aoClicar,
   aoPassarMouse,
@@ -42,6 +45,8 @@ export function LinhaNo({
   const { no } = linha;
   const temFilhos = no.filhos.length > 0;
   const editandoTexto = edicao?.alvo === "texto" && edicao.chave === no.chave;
+  const podeEditarTexto =
+    no.tipo === "texto" || (no.tipo === "elemento" && no.filhos.length === 0 && !TAGS_VAZIAS.has(no.tag));
 
   const textoEditavel = (alvo: NoArvore, valor: string, marcadorVazio?: string) => (
     <TextoEditavel
@@ -98,7 +103,7 @@ export function LinhaNo({
       data-chave={no.chave}
       onClick={aoClicar}
       onMouseEnter={aoPassarMouse}
-      className={`relative flex cursor-default items-start rounded-md py-px pr-2 ${
+      className={`relative flex cursor-default items-start rounded-md py-px pr-2 pointer-coarse:py-2.5 ${
         selecionada ? "bg-selecao" : "hover:bg-hover"
       } ${destaque === "no" ? CLASSE_PULSO : ""}`}
       style={{ paddingLeft: linha.profundidade * RECUO_PX + 4 }}
@@ -113,7 +118,7 @@ export function LinhaNo({
               evento.stopPropagation();
               aoAlternar();
             }}
-            className="grid h-4 w-4 place-items-center rounded text-texto-suave hover:bg-borda hover:text-texto"
+            className="relative grid h-4 w-4 place-items-center rounded text-texto-suave after:absolute after:-inset-3.5 hover:bg-borda hover:text-texto pointer-fine:after:hidden"
           >
             <IconeChevron direcao={recolhido ? "direita" : "baixo"} tamanho={10} />
           </button>
@@ -125,6 +130,19 @@ export function LinhaNo({
           <span className="ml-2 select-none text-texto-suave opacity-70" title="No F12 de verdade, $0 é o elemento selecionado">
             == $0
           </span>
+        )}
+        {selecionada && toque && podeEditarTexto && !editandoTexto && (
+          <button
+            type="button"
+            onClick={(evento) => {
+              evento.stopPropagation();
+              aoIniciarEdicao({ chave: no.chave, alvo: "texto" });
+            }}
+            className="ml-2 inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-primaria bg-superficie px-3 align-middle font-ui text-xs font-black text-primaria"
+          >
+            <IconeEditar tamanho={14} />
+            Editar
+          </button>
         )}
       </span>
     </div>

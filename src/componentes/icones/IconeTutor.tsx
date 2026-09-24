@@ -1,0 +1,24 @@
+import type { PropsIcone } from "./tipos";
+
+/** Balão de conversa com três pontinhos. */
+export function IconeTutor({ className, tamanho = 18 }: PropsIcone) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width={tamanho}
+      height={tamanho}
+      className={className}
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h12a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 16 14H9l-4 3v-3H4a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 4 4z" fill="currentColor" fillOpacity={0.12} />
+      <circle cx="7" cy="9" r="0.8" fill="currentColor" />
+      <circle cx="10" cy="9" r="0.8" fill="currentColor" />
+      <circle cx="13" cy="9" r="0.8" fill="currentColor" />
+    </svg>
+  );
+}

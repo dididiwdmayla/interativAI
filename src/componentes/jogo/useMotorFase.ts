@@ -31,6 +31,8 @@ type Opcoes = {
   editarTextoCaminho: (caminho: number[], texto: string) => void;
   substituirHtml: (html: string) => void;
   destacarNaArvore: (destaque: DestaqueArvore | null) => void;
+  /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
+  toque: boolean;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -50,8 +52,9 @@ export function useMotorFase({
   editarTextoCaminho,
   substituirHtml,
   destacarNaArvore,
+  toque,
 }: Opcoes) {
-  const [estado, setEstado] = useState<EstadoMotor>(() => criarEstadoInicial(fase, salvo));
+  const [estado, setEstado] = useState<EstadoMotor>(() => criarEstadoInicial(fase, salvo, toque));
   const [pulsarInspecionar, setPulsarInspecionar] = useState(false);
   const [documentoInicial] = useState(() => criarDocumentoSolto(fase.headSiteAlvo, fase.bodyInicial));
   const eventosObjetivo = useRef<EventoFase[]>([]);
@@ -173,7 +176,7 @@ export function useMotorFase({
         setEstado({ ...estado, indiceFala: proxima, fala: fase.introducao[proxima] });
       } else {
         eventosObjetivo.current = [];
-        setEstado({ ...estado, etapa: "objetivos", indiceFala: 0, fala: falaDoObjetivo(fase, 0) });
+        setEstado({ ...estado, etapa: "objetivos", indiceFala: 0, fala: falaDoObjetivo(fase, 0, toque) });
       }
       return;
     }
@@ -210,7 +213,7 @@ export function useMotorFase({
       pausa: null,
       degrau: 0,
       confirmandoSolucao: false,
-      fala: falaDoObjetivo(fase, estado.concluidos),
+      fala: falaDoObjetivo(fase, estado.concluidos, toque),
     });
   };
 

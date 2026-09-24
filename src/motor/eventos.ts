@@ -1,4 +1,4 @@
-export type OrigemSelecao = "arvore" | "teclado" | "inspecao" | "ajuda";
+export type OrigemSelecao = "arvore" | "teclado" | "inspecao" | "ajuda" | "codigo";
 
 export type EventoFase =
   | { tipo: "selecionou"; tag: string; caminho: number[]; origem: OrigemSelecao }

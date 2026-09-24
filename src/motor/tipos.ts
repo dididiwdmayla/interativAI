@@ -1,3 +1,4 @@
+import type { IdFerramenta } from "@/ferramentas/ids";
 import type { Aba } from "./abas";
 import type { EventoFase } from "./eventos";
 import type { Expressao } from "./expressao";
@@ -50,7 +51,12 @@ export type Ajudas = {
 
 export type Objetivo = {
   id: string;
+  /** Texto do objetivo para mouse. */
   enunciado: string;
+  /** Variação para telas de toque ("toque" em vez de "clique"). */
+  enunciadoToque?: string;
+  /** Ferramentas apresentadas antes deste objetivo começar. */
+  apresentar?: IdFerramenta[];
   validar: (contexto: ContextoValidacao) => boolean;
   ajudas: Ajudas;
   falaAoConcluir: Fala;
@@ -63,6 +69,8 @@ export type Fase = {
   numero: number;
   titulo: string;
   introducao: Fala[];
+  /** Ferramentas apresentadas logo depois da introdução. */
+  apresentar?: IdFerramenta[];
   urlSiteAlvo: string;
   tituloSiteAlvo: string;
   headSiteAlvo: string;

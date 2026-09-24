@@ -1,5 +1,12 @@
 import type { EstadoFaseSalvo } from "@/lib/progresso";
-import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala, type Fase } from "./tipos";
+import {
+  type DegrauAjuda,
+  ESTRELAS_INICIAIS,
+  ESTRELAS_MINIMAS,
+  type Fala,
+  type Fase,
+  type Objetivo,
+} from "./tipos";
 
 export type EtapaFase = "introducao" | "objetivos" | "concluida";
 
@@ -27,11 +34,16 @@ function limitar(valor: number, minimo: number, maximo: number): number {
   return Math.min(maximo, Math.max(minimo, Math.round(valor)));
 }
 
-export function falaDoObjetivo(fase: Fase, indice: number): Fala {
-  return { texto: fase.objetivos[indice].enunciado, expressao: "feliz" };
+/** Enunciado certo para o jeito de apontar do jogador (mouse ou toque). */
+export function enunciadoDe(objetivo: Objetivo, toque: boolean): string {
+  return toque && objetivo.enunciadoToque ? objetivo.enunciadoToque : objetivo.enunciado;
 }
 
-export function criarEstadoInicial(fase: Fase, salvo: EstadoFaseSalvo | undefined): EstadoMotor {
+export function falaDoObjetivo(fase: Fase, indice: number, toque: boolean): Fala {
+  return { texto: enunciadoDe(fase.objetivos[indice], toque), expressao: "feliz" };
+}
+
+export function criarEstadoInicial(fase: Fase, salvo: EstadoFaseSalvo | undefined, toque: boolean): EstadoMotor {
   const total = fase.objetivos.length;
   const base: EstadoMotor = {
     etapa: "introducao",
@@ -68,7 +80,7 @@ export function criarEstadoInicial(fase: Fase, salvo: EstadoFaseSalvo | undefine
     concluidos,
     estrelas,
     fala: {
-      texto: `Que bom te ver de novo! Continuando: ${fase.objetivos[concluidos].enunciado}`,
+      texto: `Que bom te ver de novo! Continuando: ${enunciadoDe(fase.objetivos[concluidos], toque)}`,
       expressao: "feliz",
     },
   };

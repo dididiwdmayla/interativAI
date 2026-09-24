@@ -3,7 +3,14 @@
 import { useRef, useState } from "react";
 import { tocarSom } from "@/lib/som";
 import { perguntarAoTutor } from "@/lib/tutor/perguntarAoTutor";
-import { FALA_SEM_SINAL, LIMITES_TUTOR, type MensagemTutor } from "@/lib/tutor/tipos";
+import {
+  FALA_SEM_CHAVE,
+  FALA_SEM_SINAL,
+  FALA_SOBRECARGA,
+  LIMITES_TUTOR,
+  type MensagemTutor,
+  type TipoErroTutor,
+} from "@/lib/tutor/tipos";
 import type { DegrauAjuda, Fala } from "@/motor/tipos";
 
 type Opcoes = {
@@ -16,11 +23,20 @@ type Opcoes = {
   interceptar?: (pergunta: string) => Fala | null;
 };
 
+/** Fala e expressão do mascote para cada tipo de falha. */
+function falaDaFalha(tipo: TipoErroTutor): Fala {
+  if (tipo === "sobrecarga") return { texto: FALA_SOBRECARGA, expressao: "pensativo" };
+  if (tipo === "sem_chave") return { texto: FALA_SEM_CHAVE, expressao: "dormindo" };
+  return { texto: FALA_SEM_SINAL, expressao: "preocupado" };
+}
+
 /** Conversa com o computadorzinho pela rota /api/tutor. */
 export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, interceptar }: Opcoes) {
   const [pendente, setPendente] = useState<string | null>(null);
   const carregando = pendente !== null;
   const [ultima, setUltima] = useState<{ pergunta: string; fala: Fala } | null>(null);
+  /** Pergunta que falhou por sobrecarga: o balão oferece "Tentar de novo". */
+  const [repetir, setRepetir] = useState<{ pergunta: string; fala: Fala } | null>(null);
   const historico = useRef<MensagemTutor[]>([]);
 
   const responder = (pergunta: string, fala: Fala) => {
@@ -38,8 +54,9 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
     }
 
     setPendente(pergunta);
+    setRepetir(null);
     try {
-      const saida = await perguntarAoTutor({
+      const resposta = await perguntarAoTutor({
         faseId,
         objetivoId: objetivo?.id ?? "livre",
         enunciado: objetivo?.enunciado ?? "Modo livre: a fase já foi concluída.",
@@ -48,19 +65,29 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
         pergunta,
         historico: historico.current,
       });
+      if (!resposta.ok) {
+        tocarSom("aviso");
+        const fala = falaDaFalha(resposta.tipo);
+        responder(pergunta, fala);
+        if (resposta.tipo === "sobrecarga") setRepetir({ pergunta, fala });
+        return;
+      }
+      const saida = resposta.saida;
       historico.current = [
         ...historico.current,
         { papel: "aluno" as const, texto: pergunta },
         { papel: "tutor" as const, texto: saida.texto },
       ].slice(-LIMITES_TUTOR.historico);
       responder(pergunta, saida);
-    } catch {
-      tocarSom("aviso");
-      responder(pergunta, { texto: FALA_SEM_SINAL, expressao: "preocupado" });
     } finally {
       setPendente(null);
     }
   };
 
-  return { carregando, pendente, ultima, enviar };
+  /** Reenvia a mesma pergunta depois de uma sobrecarga. */
+  const tentarDeNovo = () => {
+    if (repetir) void enviar(repetir.pergunta);
+  };
+
+  return { carregando, pendente, ultima, repetir, enviar, tentarDeNovo };
 }

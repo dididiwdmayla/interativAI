@@ -41,6 +41,7 @@
   --cor-selecao: #ffdcee;
   --cor-hover: #f6e4ff;
   --cor-sombra: #d6337f2e;
+  --cor-veu: #2a0f3bb8;
 
   /* Codigo */
   --cor-codigo-fundo: #fffbfe;
@@ -87,6 +88,7 @@
   --cor-selecao: #342a6e;
   --cor-hover: #251f4d;
   --cor-sombra: #00000099;
+  --cor-veu: #000000c2;
 
   --cor-codigo-fundo: #110f26;
   --cor-codigo-linha-ativa: #1c1940;
@@ -131,6 +133,7 @@
   --cor-selecao: #13402f;
   --cor-hover: #0f3326;
   --cor-sombra: #00000099;
+  --cor-veu: #000000c2;
 
   --cor-codigo-fundo: #061a13;
   --cor-codigo-linha-ativa: #0b271d;

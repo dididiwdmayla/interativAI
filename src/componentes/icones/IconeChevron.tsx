@@ -1,11 +1,12 @@
 import type { PropsIcone } from "./tipos";
 
-type Props = PropsIcone & { direcao?: "direita" | "esquerda" | "baixo" };
+type Props = PropsIcone & { direcao?: "direita" | "esquerda" | "baixo" | "cima" };
 
 const ROTACAO: Record<NonNullable<Props["direcao"]>, number> = {
   direita: 0,
   baixo: 90,
   esquerda: 180,
+  cima: 270,
 };
 
 export function IconeChevron({ className, tamanho = 12, direcao = "direita" }: Props) {

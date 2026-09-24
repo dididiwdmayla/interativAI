@@ -1,3 +1,4 @@
+import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { ehTemaId, TEMA_PADRAO, TEMAS_INICIAIS, type TemaId } from "@/tema/temas";
 
 export const CHAVE_PROGRESSO = "ilha-sites:progresso:v1";
@@ -20,7 +21,13 @@ export type Progresso = {
   temasDesbloqueados: TemaId[];
   som: boolean;
   missoesDeCampo: Record<string, boolean>;
+  /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
+  apresentacoesVistas: IdFerramenta[];
+  /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
+  proporcaoPrevia: number;
 };
+
+export const PROPORCAO_PREVIA = { minima: 0.25, padrao: 0.4, maxima: 0.6 } as const;
 
 export const PROGRESSO_PADRAO: Progresso = {
   versao: 1,
@@ -31,6 +38,8 @@ export const PROGRESSO_PADRAO: Progresso = {
   temasDesbloqueados: [...TEMAS_INICIAIS],
   som: true,
   missoesDeCampo: {},
+  apresentacoesVistas: [],
+  proporcaoPrevia: PROPORCAO_PREVIA.padrao,
 };
 
 function ehObjeto(valor: unknown): valor is Record<string, unknown> {
@@ -94,6 +103,12 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     temasDesbloqueados,
     som: ehBooleano(bruto.som) ? bruto.som : PROGRESSO_PADRAO.som,
     missoesDeCampo: lerRegistro(bruto.missoesDeCampo, ehBooleano),
+    apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
+      ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]
+      : [],
+    proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
+      ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
+      : PROPORCAO_PREVIA.padrao,
   };
 }
 

@@ -25,6 +25,7 @@ export const FASE_SITES_ELEMENTOS_1: Fase = {
   headSiteAlvo: HEAD_PADARIA,
   bodyInicial: BODY_INICIAL_PADARIA,
   abasDesbloqueadas: ["elementos"],
+  apresentar: ["painel", "previa", "me-ajuda", "tutor"],
 
   introducao: [
     {
@@ -49,6 +50,8 @@ export const FASE_SITES_ELEMENTOS_1: Fase = {
       id: "selecionar-manchete",
       enunciado:
         "Passe o mouse pela árvore e veja o que acende na tela. Depois clique na manchete principal.",
+      enunciadoToque: "Toque nos itens da árvore e veja o que acende na tela. Depois toque na manchete principal.",
+      apresentar: ["arvore"],
       validar: ({ selecionado }) => tagSelecionada(selecionado) === "h1",
       ajudas: {
         pergunta: "Qual peça da árvore acende o texto maior da página?",
@@ -73,6 +76,9 @@ export const FASE_SITES_ELEMENTOS_1: Fase = {
       id: "inspecionar-botao",
       enunciado:
         "Agora ao contrário: use o modo inspecionar (a setinha) e clique no botão Encomendar lá na tela.",
+      enunciadoToque:
+        "Agora ao contrário: toque na setinha do modo inspecionar e depois no botão Encomendar lá na tela.",
+      apresentar: ["inspecionar"],
       validar: ({ eventos, selecionado }) =>
         eventos.some((evento) => evento.tipo === "inspecionou" && evento.tag === "button") &&
         tagSelecionada(selecionado) === "button",
@@ -98,6 +104,9 @@ export const FASE_SITES_ELEMENTOS_1: Fase = {
       id: "trocar-manchete",
       enunciado:
         "Dê dois cliques no texto da manchete, na árvore, e troque por qualquer frase sua.",
+      enunciadoToque:
+        "Dê dois toques no texto da manchete, na árvore (ou toque em Editar), e troque por qualquer frase sua.",
+      apresentar: ["editar-duplo-clique"],
       validar: ({ documento, inicial }) => {
         const atual = textoLimpo(documento.querySelector("h1"));
         const original = textoLimpo(inicial.querySelector("h1"));
@@ -125,6 +134,7 @@ export const FASE_SITES_ELEMENTOS_1: Fase = {
     {
       id: "novo-produto",
       enunciado: "Agora pelo código: adicione um produto novo na lista.",
+      apresentar: ["editor", "sincronia"],
       validar: ({ documento, inicial }) =>
         itensComTexto(documento.querySelector("ul")) > itensComTexto(inicial.querySelector("ul")),
       ajudas: {
