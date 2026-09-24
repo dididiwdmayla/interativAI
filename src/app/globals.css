@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "../tema/tokens.css";
+
+/*
+ * O Tailwind le as cores dos tokens de tema. A paleta padrao do Tailwind
+ * e desligada para que ninguem use cores fora dos tokens por engano.
+ */
+@theme inline {
+  --color-*: initial;
+
+  --color-fundo: var(--cor-fundo);
+  --color-superficie: var(--cor-superficie);
+  --color-painel: var(--cor-painel);
+  --color-borda: var(--cor-borda);
+  --color-texto: var(--cor-texto);
+  --color-texto-suave: var(--cor-texto-suave);
+  --color-primaria: var(--cor-primaria);
+  --color-sobre-primaria: var(--cor-texto-sobre-primaria);
+  --color-secundaria: var(--cor-secundaria);
+  --color-sobre-secundaria: var(--cor-texto-sobre-secundaria);
+  --color-destaque: var(--cor-destaque);
+  --color-sobre-destaque: var(--cor-texto-sobre-destaque);
+  --color-sucesso: var(--cor-sucesso);
+  --color-alerta: var(--cor-alerta);
+  --color-erro: var(--cor-erro);
+  --color-realce: var(--cor-realce-inspecao);
+  --color-selecao: var(--cor-selecao);
+  --color-hover: var(--cor-hover);
+  --color-sombra: var(--cor-sombra);
+  --color-codigo-fundo: var(--cor-codigo-fundo);
+  --color-codigo-tag: var(--cor-codigo-tag);
+  --color-codigo-atributo: var(--cor-codigo-atributo);
+  --color-codigo-valor: var(--cor-codigo-valor);
+  --color-codigo-texto: var(--cor-codigo-texto);
+  --color-codigo-comentario: var(--cor-codigo-comentario);
+
+  --font-ui: var(--fonte-ui);
+  --font-codigo: var(--fonte-codigo);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--cor-fundo);
+  background-image: radial-gradient(
+    var(--cor-fundo-padrao) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+  color: var(--cor-texto);
+  font-family: var(--fonte-ui), system-ui, sans-serif;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+:focus-visible {
+  outline: 3px solid var(--cor-secundaria);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background-color: var(--cor-destaque);
+  color: var(--cor-texto-sobre-destaque);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
