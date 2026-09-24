@@ -52,6 +52,25 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   inspecionar troca de aba sozinho, mascote compacto e objetivo atual em uma
   linha), dicas que não estouram a largura, contraste revisado nos três temas.
 
+## Rodada 2: tutor resistente, sincronia, ferramentas e mobile
+
+- [x] **Etapa 8: Tutor resistente.** `gerarComResiliencia`
+  (`src/lib/tutor/resiliencia.ts`): 503/429 (ou UNAVAILABLE /
+  RESOURCE_EXHAUSTED) tentam de novo 2 vezes com backoff exponencial e jitter
+  (~1 s, ~2 s) e depois 1 vez no modelo reserva (`GEMINI_MODEL_RESERVA`,
+  padrão `gemini-3.5-flash-lite`). Orçamento de 45 s, cada tentativa até 15 s,
+  `maxDuration = 60`. Resposta de falha `{ erro: { tipo } }` com `sobrecarga`,
+  `sem_chave`, `rede` ou `desconhecido`; log no servidor com tipo, status e
+  modelo. No cliente: sobrecarga (pensativo + "Tentar de novo"), sem chave
+  (dormindo), rede/desconhecido (preocupado, "sem sinal"). Simulação local com
+  `TUTOR_SIMULAR=sobrecarga | sobrecarga-total | rede` (ignorada em produção).
+  Teste: `testes/tutor.mjs`.
+- [ ] **Etapa 9: Sincronia tripla** (árvore, código e tela).
+- [ ] **Etapa 10: Sistema de apresentação de ferramentas.**
+- [ ] **Etapa 11: Mobile retrato e toque.**
+- [ ] **Etapa 12: Mobile paisagem.**
+- [ ] **Etapa 13: Testes, acabamento e docs.**
+
 ## Critérios de pronto (verificados na Etapa 7)
 
 - [x] `npm run build` e `npm run lint` passam; sem erros no console do

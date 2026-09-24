@@ -213,7 +213,14 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const naIntroducao = estado.etapa === "introducao";
   const emObjetivo = estado.etapa === "objetivos" && estado.pausa === null;
 
-  const acoesConversa = (() => {
+  const sobrecargaNaTela = tutor.repetir !== null && tutor.repetir.fala === estado.fala && !tutor.carregando;
+  const botaoTentarDeNovo = sobrecargaNaTela ? (
+    <Botao variante="secundario" onClick={comClique(tutor.tentarDeNovo)}>
+      Tentar de novo
+    </Botao>
+  ) : null;
+
+  const acoesConversaRoteiro = (() => {
     if (naIntroducao) {
       const ultima = estado.indiceFala >= fase.introducao.length - 1;
       return (
@@ -253,6 +260,13 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
       </Botao>
     );
   })();
+
+  const acoesConversa = (
+    <>
+      {botaoTentarDeNovo}
+      {acoesConversaRoteiro}
+    </>
+  );
 
   const objetivoAtivo = estado.etapa === "objetivos" ? estado.objetivoAtual : null;
   const falaNaTela = tutor.pendente !== null ? FALA_PENSANDO : estado.fala;
