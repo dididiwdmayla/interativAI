@@ -33,7 +33,7 @@ export function ListaObjetivos({ objetivos, concluidos, ativo }: Props) {
               aria-current={atual ? "step" : undefined}
               className={`flex items-start gap-2 rounded-xl px-2 py-0.5 text-sm leading-5 ${
                 atual ? "bg-superficie font-bold text-texto ring-2 ring-primaria" : ""
-              } ${feito ? "text-texto-suave" : ""} ${!feito && !atual ? "text-texto-suave opacity-55" : ""}`}
+              } ${feito || !atual ? "text-texto-suave" : ""}`}
             >
               <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center">
                 <AnimatePresence initial={false} mode="wait">

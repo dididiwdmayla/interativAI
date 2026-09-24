@@ -44,7 +44,7 @@ export function TelaConclusao({
         </p>
         <p className="text-2xl font-black text-primaria">{fase.titulo}: completa!</p>
         <div className="my-2">
-          <EstrelasFase quantidade={estrelas} tamanho={40} />
+          <EstrelasFase quantidade={estrelas} tamanho={40} entrada />
         </div>
       </div>
 

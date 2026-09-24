@@ -21,9 +21,12 @@ import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
 import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { Botao } from "@/componentes/ui/Botao";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { tocarSom } from "@/lib/som";
+import { desbloquearTema, escolherTema } from "@/lib/tema";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import type { Fala, Fase } from "@/motor/tipos";
+import { SeletorVista } from "./SeletorVista";
 import { TelaConclusao } from "./TelaConclusao";
 import { useMotorFase } from "./useMotorFase";
 import { usePainelElementos } from "./usePainelElementos";
@@ -37,6 +40,29 @@ type Props = {
 
 const FALA_PENSANDO: Fala = { texto: "Hmm, deixa eu pensar...", expressao: "pensativo" };
 
+const PALAVRA_SECRETA = "curioso";
+
+function telaPequena(): boolean {
+  return window.matchMedia("(max-width: 1023.98px)").matches;
+}
+
+/** Easter egg: a palavra do F12 libera o tema Segredo, sem chamar o Gemini. */
+function responderSegredo(pergunta: string, falar: (fala: Fala) => void): Fala | null {
+  if (pergunta.trim().toLowerCase() !== PALAVRA_SECRETA) return null;
+  const jaTinha = obterProgresso().temasDesbloqueados.includes("segredo");
+  desbloquearTema("segredo");
+  escolherTema("segredo");
+  tocarSom("conclusao");
+  const fala: Fala = {
+    texto: jaTinha
+      ? "Olha só quem voltou para investigar! O tema Segredo já é seu. Troque quando quiser na paleta lá em cima."
+      : "Você me achou pelo F12! Isso é investigar do jeitinho de quem programa. Liberei o tema Segredo pra você: já liguei, e dá pra trocar na paleta lá em cima.",
+    expressao: "comemorando",
+  };
+  falar(fala);
+  return fala;
+}
+
 /** Elementos que já usam Enter sozinhos; aí o atalho global não age. */
 function focoUsaEnter(alvo: EventTarget | null): boolean {
   if (!(alvo instanceof HTMLElement)) return false;
@@ -49,6 +75,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
+  const [vistaMovel, setVistaMovel] = useState<"painel" | "tela">("painel");
   const progresso = useProgresso();
 
   const {
@@ -114,7 +141,39 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     degrau: estado.degrau,
     htmlAtual,
     falar,
+    interceptar: (pergunta) => responderSegredo(pergunta, falar),
   });
+
+  // Sons: acerto a cada objetivo, fanfarra na conclusão, aviso antes da solução.
+  const acertosAnteriores = useRef(estado.acertos);
+  useEffect(() => {
+    if (estado.acertos > acertosAnteriores.current) tocarSom("acerto");
+    acertosAnteriores.current = estado.acertos;
+  }, [estado.acertos]);
+  useEffect(() => {
+    if (estado.etapa === "concluida" && estado.conclusaoAberta && estado.indiceFala === 0) {
+      tocarSom("conclusao");
+    }
+  }, [estado.etapa, estado.conclusaoAberta, estado.indiceFala]);
+  useEffect(() => {
+    if (estado.confirmandoSolucao) tocarSom("aviso");
+  }, [estado.confirmandoSolucao]);
+
+  const comClique = (acao: () => void) => () => {
+    tocarSom("clique");
+    acao();
+  };
+
+  // Em telas pequenas, painel e tela são abas: o modo inspecionar mostra a tela.
+  const alternarInspecaoResponsiva = () => {
+    tocarSom("clique");
+    if (!inspecionando && telaPequena()) setVistaMovel("tela");
+    alternarInspecao();
+  };
+  const escolherNaTelaResponsiva = (x: number, y: number) => {
+    escolherNaTela(x, y);
+    if (telaPequena()) setVistaMovel("painel");
+  };
 
   const aoEditarNoEditor = useCallback(
     (texto: string) => {
@@ -137,8 +196,8 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   const atalhoEnter = useRef<() => void>(() => {});
   useEffect(() => {
     atalhoEnter.current = () => {
-      if (estado.etapa === "introducao") avancarFala();
-      else if (estado.pausa !== null) seguir();
+      if (estado.etapa === "introducao") comClique(avancarFala)();
+      else if (estado.pausa !== null) comClique(seguir)();
     };
   });
   useEffect(() => {
@@ -162,7 +221,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
           <span className="text-xs text-texto-suave">
             {estado.indiceFala + 1} de {fase.introducao.length}
           </span>
-          <Botao onClick={avancarFala} className="ml-auto">
+          <Botao onClick={comClique(avancarFala)} className="ml-auto">
             {ultima ? "Vamos lá!" : "Continuar"}
           </Botao>
         </>
@@ -170,7 +229,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     }
     if (estado.pausa !== null) {
       return (
-        <Botao onClick={seguir} className="ml-auto">
+        <Botao onClick={comClique(seguir)} className="ml-auto">
           {ultimoObjetivo ? "Ver resultado" : "Próximo objetivo"}
         </Botao>
       );
@@ -178,7 +237,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     if (emObjetivo && estado.confirmandoSolucao) {
       return (
         <>
-          <Botao variante="secundario" onClick={cancelarSolucao}>
+          <Botao variante="secundario" onClick={comClique(cancelarSolucao)}>
             Não, vou tentar
           </Botao>
           <Botao onClick={confirmarSolucao}>Sim, mostrar a solução</Botao>
@@ -186,10 +245,10 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
       );
     }
     if (emObjetivo) {
-      return <BotaoAjuda degrau={estado.degrau} desativado={false} aoAjudar={ajudar} />;
+      return <BotaoAjuda degrau={estado.degrau} desativado={false} aoAjudar={comClique(ajudar)} />;
     }
     return (
-      <Botao variante="secundario" onClick={abrirConclusao} className="ml-auto">
+      <Botao variante="secundario" onClick={comClique(abrirConclusao)} className="ml-auto">
         Ver conclusão
       </Botao>
     );
@@ -201,15 +260,22 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <BarraSuperior
         trilha={[fase.ilha, fase.zona, `Fase ${fase.numero}`]}
         estrelas={estado.estrelas}
         logo={<Mascote tamanho={34} />}
         acoes={<BotaoRecomecar aoRecomecar={aoRecomecar} />}
       />
-      <main className="flex min-h-0 flex-1 gap-4 p-4">
-        <section aria-label="Painel" className="flex min-h-0 w-[45%] flex-col">
+      <div className="flex shrink-0 justify-center px-3 pt-3 lg:hidden">
+        <SeletorVista vista={vistaMovel} aoTrocar={setVistaMovel} />
+      </div>
+      <main className="flex min-h-0 flex-1 gap-4 p-3 lg:p-4">
+        <section
+          id="vista-painel"
+          aria-label="Painel"
+          className={`${vistaMovel === "painel" ? "flex" : "hidden"} min-h-0 w-full min-w-0 flex-col lg:flex lg:w-[45%]`}
+        >
           <Painel
             abaAtiva={aba}
             abasDesbloqueadas={fase.abasDesbloqueadas}
@@ -218,7 +284,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
               <BotaoInspecionar
                 ativo={inspecionando}
                 pulsando={pulsarInspecionar && !inspecionando}
-                aoAlternar={alternarInspecao}
+                aoAlternar={alternarInspecaoResponsiva}
               />
             }
           >
@@ -258,7 +324,11 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
             />
           </Painel>
         </section>
-        <section aria-label="Tela do site" className="flex min-h-0 flex-1 flex-col">
+        <section
+          id="vista-tela"
+          aria-label="Tela do site"
+          className={`${vistaMovel === "tela" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col lg:flex`}
+        >
           <JanelaNavegador url={fase.urlSiteAlvo}>
             <PreviewSiteAlvo
               ref={previewRef}
@@ -271,7 +341,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
               <CamadaInspecao
                 ativa={inspecionando}
                 aoApontar={apontarNaTela}
-                aoEscolher={escolherNaTela}
+                aoEscolher={escolherNaTelaResponsiva}
                 aoSair={() => realcar(null)}
                 aoRolar={rolarTela}
               />
@@ -280,9 +350,16 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
         </section>
       </main>
       <AreaMascote
-        mascote={<Mascote expressao={falaNaTela.expressao} tamanho={112} />}
+        mascote={
+          <Mascote expressao={falaNaTela.expressao} tamanho={112} className="h-auto w-16 sm:w-20 lg:w-28" />
+        }
         conversa={
           <>
+            {objetivoAtivo !== null && (
+              <p className="mb-1 line-clamp-1 text-xs font-bold text-texto-suave lg:hidden">
+                Objetivo {objetivoAtivo + 1} de {fase.objetivos.length}: {fase.objetivos[objetivoAtivo].enunciado}
+              </p>
+            )}
             <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala}>
               {acoesConversa}
             </BalaoFala>

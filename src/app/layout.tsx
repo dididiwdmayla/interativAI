@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Nunito } from "next/font/google";
+import { Provedores } from "@/componentes/ui/Provedores";
+import { SegredoDoF12 } from "@/componentes/ui/SegredoDoF12";
 import { SCRIPT_TEMA_INICIAL } from "@/tema/scriptTemaInicial";
 import { TEMA_PADRAO } from "@/tema/temas";
 import "./globals.css";
@@ -38,7 +40,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA_INICIAL }} />
       </head>
-      <body className="font-ui antialiased">{children}</body>
+      <body className="font-ui antialiased">
+        <SegredoDoF12 />
+        <Provedores>{children}</Provedores>
+      </body>
     </html>
   );
 }

@@ -4,8 +4,8 @@ type Props = {
   texto: string;
   children: ReactNode;
   lado?: "baixo" | "cima";
-  /** "centro" centraliza; "inicio" encosta na esquerda (bom perto de bordas). */
-  alinhar?: "centro" | "inicio";
+  /** "centro" centraliza; "inicio" e "fim" encostam numa borda (bom perto das bordas da tela). */
+  alinhar?: "centro" | "inicio" | "fim";
   className?: string;
 };
 
@@ -17,8 +17,8 @@ export function Dica({ texto, children, lado = "baixo", alinhar = "centro", clas
       <span
         role="tooltip"
         className={`pointer-events-none absolute z-50 whitespace-nowrap ${
-          alinhar === "centro" ? "left-1/2 -translate-x-1/2" : "left-0"
-        } rounded-lg bg-texto px-2.5 py-1 text-xs font-bold text-fundo opacity-0 shadow-md transition-opacity duration-150 group-focus-within/dica:opacity-100 group-hover/dica:opacity-100 ${
+          alinhar === "centro" ? "left-1/2 -translate-x-1/2" : alinhar === "inicio" ? "left-0" : "right-0"
+        } rounded-lg bg-texto px-2.5 py-1 text-xs font-bold text-fundo shadow-md hidden group-focus-within/dica:block group-hover/dica:block ${
           lado === "baixo" ? "top-full mt-2" : "bottom-full mb-2"
         }`}
       >

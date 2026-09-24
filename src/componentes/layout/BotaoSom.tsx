@@ -3,17 +3,21 @@
 import { IconeSom } from "@/componentes/icones/IconeSom";
 import { Dica } from "@/componentes/ui/Dica";
 import { atualizarProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { tocarSom } from "@/lib/som";
 
 export function BotaoSom() {
   const { som } = useProgresso();
 
   return (
-    <Dica texto={som ? "Som ligado" : "Som desligado"}>
+    <Dica texto={som ? "Som ligado" : "Som desligado"} alinhar="fim">
       <button
         type="button"
         aria-pressed={som}
         aria-label={som ? "Desligar som" : "Ligar som"}
-        onClick={() => atualizarProgresso((atual) => ({ ...atual, som: !atual.som }))}
+        onClick={() => {
+          atualizarProgresso((atual) => ({ ...atual, som: !atual.som }));
+          tocarSom("clique");
+        }}
         className="grid h-9 w-9 place-items-center rounded-full border-2 border-borda bg-superficie text-texto transition-colors hover:border-primaria hover:text-primaria"
       >
         <IconeSom ligado={som} />

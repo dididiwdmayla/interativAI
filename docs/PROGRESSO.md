@@ -43,8 +43,35 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   a espera e preocupado na falha ("Estou sem sinal agora. Tenta o botão Me
   ajuda!"). Falhas esperadas respondem 200 com `{ erro }` para não sujar o
   console do navegador. Testado sem chave e com chave inválida.
-- [ ] **Etapa 7: Acabamento.** Sons, easter egg, polimento, responsivo,
-  acessibilidade.
+- [x] **Etapa 7: Acabamento.** Sons com Web Audio (acerto, clique, conclusão,
+  aviso; volume baixo, respeitam o botão de som, AudioContext só depois da
+  primeira interação), easter egg (comentário HTML e `data-segredo` no HTML do
+  jogo; a palavra "curioso" no campo do tutor libera e liga o tema Segredo sem
+  chamar o Gemini), estrelas surgindo uma a uma na conclusão, `MotionConfig`
+  com movimento reduzido, responsivo abaixo de 1024 px (abas "Painel" | "Tela",
+  inspecionar troca de aba sozinho, mascote compacto e objetivo atual em uma
+  linha), dicas que não estouram a largura, contraste revisado nos três temas.
+
+## Critérios de pronto (verificados na Etapa 7)
+
+- [x] `npm run build` e `npm run lint` passam; sem erros no console do
+  navegador (testado com Playwright no Chromium, desktop e celular).
+- [x] Fase jogável do início ao fim com mouse e teclado (inclusive modo
+  inspecionar pelo teclado: setas + Enter).
+- [x] Recarregar mantém objetivo, HTML do site, estrelas, tema, som e missão.
+- [x] Trocar o tema muda painel, editor, árvore, mascote e carinhas; o
+  site-alvo continua igual.
+- [x] grep: nenhum emoji; nenhuma cor hex/rgb/hsl fora de `src/tema/tokens.css`
+  e `src/fases/sites-elementos-1/siteAlvo.ts`; nenhum `NEXT_PUBLIC_GEMINI`.
+- [x] Sem `GEMINI_API_KEY`, o jogo funciona e o chat mostra "Estou sem sinal
+  agora. Tenta o botão Me ajuda!".
+- [x] Editar pela árvore não recarrega o iframe (conferido com uma marca na
+  janela do iframe que sobrevive à edição) nem entra em loop.
+
+## Próximos passos sugeridos
+
+- Configurar `GEMINI_API_KEY` na Vercel e testar o tutor com uma chave real.
+- Mapa das ilhas e as próximas fases da zona Elementos.
 
 ## Notas da sessão
 

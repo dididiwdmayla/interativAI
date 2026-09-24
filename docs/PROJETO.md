@@ -121,6 +121,18 @@ src/
   entrada inválida usa 400. Assim o console do navegador fica limpo.
 - O enunciado enviado ao modelo vem dos dados da fase no servidor.
 
+### Som
+
+- `src/lib/som.ts`: Web Audio, sem arquivos. Sons: acerto, clique, conclusão,
+  aviso. Volume baixo, botão liga/desliga salvo no progresso. O AudioContext só
+  é criado depois da primeira interação (`Provedores` libera no primeiro
+  clique ou tecla).
+
+### Responsivo
+
+- Desktop primeiro (>= 1024 px). Abaixo disso, painel e tela viram abas
+  ("Painel" | "Tela") e o mascote fica compacto no rodapé.
+
 ### Easter egg
 
 - O HTML do próprio jogo tem um comentário e um elemento `data-segredo` pedindo

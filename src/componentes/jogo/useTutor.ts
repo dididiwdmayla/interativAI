@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { tocarSom } from "@/lib/som";
 import { perguntarAoTutor } from "@/lib/tutor/perguntarAoTutor";
 import { FALA_SEM_SINAL, LIMITES_TUTOR, type MensagemTutor } from "@/lib/tutor/tipos";
 import type { DegrauAjuda, Fala } from "@/motor/tipos";
@@ -11,8 +12,8 @@ type Opcoes = {
   degrau: DegrauAjuda;
   htmlAtual: string;
   falar: (fala: Fala) => void;
-  /** Chance de responder sem ir ao servidor (easter egg). Devolve true se tratou. */
-  interceptar?: (pergunta: string) => boolean;
+  /** Chance de responder sem ir ao servidor (easter egg). Devolve a fala, se tratou. */
+  interceptar?: (pergunta: string) => Fala | null;
 };
 
 /** Conversa com o computadorzinho pela rota /api/tutor. */
@@ -30,8 +31,9 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
   const enviar = async (bruta: string) => {
     const pergunta = bruta.trim().slice(0, LIMITES_TUTOR.pergunta);
     if (!pergunta || carregando) return;
-    if (interceptar?.(pergunta)) {
-      setUltima(null);
+    const falaLocal = interceptar?.(pergunta) ?? null;
+    if (falaLocal) {
+      responder(pergunta, falaLocal);
       return;
     }
 
@@ -53,6 +55,7 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
       ].slice(-LIMITES_TUTOR.historico);
       responder(pergunta, saida);
     } catch {
+      tocarSom("aviso");
       responder(pergunta, { texto: FALA_SEM_SINAL, expressao: "preocupado" });
     } finally {
       setPendente(null);
