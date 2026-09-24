@@ -117,6 +117,9 @@ src/
   HTML atual, pergunta, histórico (últimas 6). Saída `{ texto, expressao }`.
 - Variáveis: `GEMINI_API_KEY`, `GEMINI_MODEL`. Sem chave o jogo funciona e o
   chat mostra "Estou sem sinal agora. Tenta o botão Me ajuda!".
+- Falhas esperadas (sem chave, 429, rede) respondem 200 com `{ erro }`; só
+  entrada inválida usa 400. Assim o console do navegador fica limpo.
+- O enunciado enviado ao modelo vem dos dados da fase no servidor.
 
 ### Easter egg
 

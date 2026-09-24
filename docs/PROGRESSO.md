@@ -34,8 +34,15 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   campo (checkbox salvo) e gancho do easter egg, persistência em
   `ilha-sites:progresso:v1` (retoma objetivo, HTML e estrelas), "Recomeçar
   fase" com confirmação. Barramento de eventos liga o painel ao motor.
-- [ ] **Etapa 6: Tutor Gemini.** Rota, system prompt, chat no mascote,
-  expressões vindas da resposta, tratamento de erro.
+- [x] **Etapa 6: Tutor Gemini.** Rota `POST /api/tutor` (runtime nodejs,
+  `@google/genai`, `responseMimeType` JSON + `responseJsonSchema`, thinking
+  LOW nos modelos Gemini 3, tempo limite de 20 s, sem novas tentativas),
+  system prompt completo em `src/lib/tutor/promptTutor.ts`, validação e corte
+  da entrada, parse seguro (cercas, JSON cortado, texto puro, sem emojis e sem
+  markdown), campo "Pergunte ao computadorzinho" com mascote pensativo durante
+  a espera e preocupado na falha ("Estou sem sinal agora. Tenta o botão Me
+  ajuda!"). Falhas esperadas respondem 200 com `{ erro }` para não sujar o
+  console do navegador. Testado sem chave e com chave inválida.
 - [ ] **Etapa 7: Acabamento.** Sons, easter egg, polimento, responsivo,
   acessibilidade.
 

@@ -6,11 +6,13 @@ import type { Fala } from "@/motor/tipos";
 
 type Props = {
   fala: Fala;
+  /** Pergunta do aluno que gerou esta fala (mostrada pequena, acima). */
+  pergunta?: string | null;
   children?: ReactNode;
 };
 
 /** Balão de fala do computadorzinho, com rabinho apontando para ele. */
-export function BalaoFala({ fala, children }: Props) {
+export function BalaoFala({ fala, pergunta, children }: Props) {
   return (
     <div className="relative flex min-h-[5.5rem] flex-1 flex-col justify-between gap-2 rounded-2xl border-2 border-borda bg-painel px-4 py-3">
       <span
@@ -18,6 +20,11 @@ export function BalaoFala({ fala, children }: Props) {
         aria-hidden="true"
       />
       <div aria-live="polite" className="relative">
+        {pergunta && (
+          <p className="mb-0.5 line-clamp-1 text-xs text-texto-suave">
+            <span className="font-black">Você perguntou:</span> {pergunta}
+          </p>
+        )}
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
             key={fala.texto}

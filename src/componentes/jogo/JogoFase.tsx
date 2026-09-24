@@ -6,6 +6,7 @@ import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
 import { BalaoFala } from "@/componentes/mascote/BalaoFala";
 import { BotaoAjuda } from "@/componentes/mascote/BotaoAjuda";
+import { CampoTutor } from "@/componentes/mascote/CampoTutor";
 import { ListaObjetivos } from "@/componentes/mascote/ListaObjetivos";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
@@ -22,16 +23,19 @@ import { Botao } from "@/componentes/ui/Botao";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
-import type { Fase } from "@/motor/tipos";
+import type { Fala, Fase } from "@/motor/tipos";
 import { TelaConclusao } from "./TelaConclusao";
 import { useMotorFase } from "./useMotorFase";
 import { usePainelElementos } from "./usePainelElementos";
 import { useSiteAlvo } from "./useSiteAlvo";
+import { useTutor } from "./useTutor";
 
 type Props = {
   fase: Fase;
   aoRecomecar: () => void;
 };
+
+const FALA_PENSANDO: Fala = { texto: "Hmm, deixa eu pensar...", expressao: "pensativo" };
 
 /** Elementos que já usam Enter sozinhos; aí o atalho global não age. */
 function focoUsaEnter(alvo: EventTarget | null): boolean {
@@ -80,6 +84,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
 
   const {
     estado,
+    objetivo,
     pulsarInspecionar,
     verificar,
     avancarFala,
@@ -87,6 +92,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     ajudar,
     cancelarSolucao,
     confirmarSolucao,
+    falar,
     abrirConclusao,
     fecharConclusao,
   } = useMotorFase({
@@ -100,6 +106,14 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     editarTextoCaminho: editarTexto,
     substituirHtml,
     destacarNaArvore,
+  });
+
+  const tutor = useTutor({
+    faseId: fase.id,
+    objetivo: objetivo ? { id: objetivo.id, enunciado: objetivo.enunciado } : null,
+    degrau: estado.degrau,
+    htmlAtual,
+    falar,
   });
 
   const aoEditarNoEditor = useCallback(
@@ -182,7 +196,9 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
   })();
 
   const objetivoAtivo = estado.etapa === "objetivos" ? estado.objetivoAtual : null;
-  const pensando = false;
+  const falaNaTela = tutor.pendente !== null ? FALA_PENSANDO : estado.fala;
+  const perguntaDaFala =
+    tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
   return (
     <div className="flex h-dvh flex-col">
@@ -264,8 +280,20 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
         </section>
       </main>
       <AreaMascote
-        mascote={<Mascote expressao={pensando ? "pensativo" : estado.fala.expressao} tamanho={112} />}
-        conversa={<BalaoFala fala={estado.fala}>{acoesConversa}</BalaoFala>}
+        mascote={<Mascote expressao={falaNaTela.expressao} tamanho={112} />}
+        conversa={
+          <>
+            <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala}>
+              {acoesConversa}
+            </BalaoFala>
+            <CampoTutor
+              carregando={tutor.carregando}
+              desativado={naIntroducao}
+              motivoDesativado="Primeiro, termine a conversa inicial"
+              aoEnviar={tutor.enviar}
+            />
+          </>
+        }
         objetivos={
           <ListaObjetivos objetivos={fase.objetivos} concluidos={estado.concluidos} ativo={objetivoAtivo} />
         }
