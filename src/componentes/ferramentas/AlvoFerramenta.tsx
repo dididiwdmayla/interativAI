@@ -26,6 +26,15 @@ const TOLERANCIA_PX = 10;
 let ultimoTratado: Event | null = null;
 
 /**
+ * Um elemento de dentro (um nó da árvore, por exemplo) avisa que vai
+ * cuidar deste toque. Aí o toque longo abre o menu dele, e não o card da
+ * ferramenta: os dois nunca disputam o mesmo dedo.
+ */
+export function reivindicarToque(evento: Event): void {
+  ultimoTratado = evento;
+}
+
+/**
  * Embrulha o elemento real de uma ferramenta: marca data-ferramenta para a
  * apresentação achar, mostra um "?" discreto no desktop e abre o card da
  * ferramenta com toque longo no celular.

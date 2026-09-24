@@ -155,6 +155,20 @@ src/
   "Rever apresentação". O "?" discreto (só com mouse) e o toque longo
   (550 ms, cancela se o dedo andar) abrem direto o card.
 
+### Ferramentas da aba Elementos (Unidade 2)
+
+- Trilha de elementos no rodapé da árvore (clicar seleciona o ancestral).
+- Esconder como o Chrome (tecla H): classe `__web-inspector-hide-shortcut__`
+  no elemento e regra `visibility: hidden !important` no head do site-alvo
+  (`src/lib/esconder.ts`); o espaço continua e a classe aparece na árvore
+  e no código.
+- Apagar (Delete), duplicar (Shift+Alt+seta para baixo), desfazer e
+  refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y com o foco no painel; botões no
+  topo do painel). Tudo passa pelo núcleo `src/motor/nucleoPainel.ts`.
+- Menu do nó: botão direito (desktop) ou toque longo (celular). No
+  celular, o nó selecionado ganha uma barra com Editar, Esconder, Apagar,
+  Duplicar, Desfazer e Refazer.
+
 ### Mascote
 
 - Computadorzinho: monitor retrô em SVG puro, rosto estilo `:)`.

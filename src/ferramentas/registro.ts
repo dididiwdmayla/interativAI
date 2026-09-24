@@ -1,18 +1,27 @@
 import type { ComponentType } from "react";
+import { IconeApagar } from "@/componentes/icones/IconeApagar";
 import { IconeArvore } from "@/componentes/icones/IconeArvore";
 import { IconeCodigo } from "@/componentes/icones/IconeCodigo";
+import { IconeDesfazer } from "@/componentes/icones/IconeDesfazer";
+import { IconeDuplicar } from "@/componentes/icones/IconeDuplicar";
 import { IconeEditarDuplo } from "@/componentes/icones/IconeEditarDuplo";
+import { IconeEsconder } from "@/componentes/icones/IconeEsconder";
 import { IconeInspecionar } from "@/componentes/icones/IconeInspecionar";
 import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
 import { IconePainel } from "@/componentes/icones/IconePainel";
 import { IconePrevia } from "@/componentes/icones/IconePrevia";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
+import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
 import type { PropsIcone } from "@/componentes/icones/tipos";
+import { DemoApagar } from "./demos/DemoApagar";
 import { DemoArvore } from "./demos/DemoArvore";
+import { DemoDuplicar } from "./demos/DemoDuplicar";
 import { DemoEditarDuploClique } from "./demos/DemoEditarDuploClique";
+import { DemoEsconder } from "./demos/DemoEsconder";
 import { DemoInspecionar } from "./demos/DemoInspecionar";
 import { DemoSincronia } from "./demos/DemoSincronia";
+import { DemoTrilha } from "./demos/DemoTrilha";
 import { IDS_FERRAMENTAS, type IdFerramenta, seletorFerramenta } from "./ids";
 
 export type { IdFerramenta } from "./ids";
@@ -44,6 +53,9 @@ export type Ferramenta = {
   /** Mini animação SVG opcional mostrando o gesto. */
   demo?: ComponentType;
 };
+
+/** O menu do botão direito (e do toque longo) fica livre no "Experimente". */
+const MENU_DO_NO = "[data-menu-no]";
 
 /** Registro central: toda ferramenta do jogo mora aqui. */
 export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
@@ -213,6 +225,110 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     demo: DemoSincronia,
+  },
+  trilha: {
+    id: "trilha",
+    nome: "Trilha de elementos",
+    Icone: IconeTrilha,
+    alvo: seletorFerramenta("trilha"),
+    oQueFaz: "Mostra o caminho da peça selecionada: quem é o pai dela, o avô, e assim até o html.",
+    praQueServe:
+      "Serve para subir de andar sem se perder. Selecionou um link? Um clique na trilha e você pega a notícia inteira em volta dele.",
+    comoUsarAqui: {
+      mouse: "Selecione uma peça e clique num nome da trilha, embaixo da árvore, para pegar aquele pai.",
+      toque: "Selecione uma peça e toque num nome da trilha, embaixo da árvore. Ela rola para o lado.",
+    },
+    noF12DeVerdade:
+      "a trilha fica no rodapé da aba Elements, com o mesmo caminho (html, body, main...). Clicar num nome seleciona aquele elemento.",
+    experimente: {
+      mouse: "Selecione algo dentro de outra peça na árvore e clique num nome da trilha.",
+      toque: "Toque em algo dentro de outra peça na árvore e depois num nome da trilha.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [seletorFerramenta("arvore")],
+    demo: DemoTrilha,
+  },
+  esconder: {
+    id: "esconder",
+    nome: "Esconder elemento",
+    Icone: IconeEsconder,
+    alvo: seletorFerramenta("arvore"),
+    oQueFaz: "Deixa uma peça invisível, mas ela continua no lugar, guardando o espaço dela.",
+    praQueServe:
+      "Bom para tirar da frente um banner chato sem bagunçar a página: o resto não sai do lugar. Esconder de novo faz a peça voltar.",
+    comoUsarAqui: {
+      mouse: "Clique com o botão direito num elemento da árvore e escolha Esconder. Ou selecione e aperte H.",
+      toque: "Toque num elemento da árvore e depois em Esconder, na barrinha que aparece embaixo dele.",
+    },
+    noF12DeVerdade:
+      "botão direito no elemento e Hide element, ou a tecla H. O Chrome põe nele uma classe de nome esquisito com visibility: hidden.",
+    experimente: {
+      mouse: "Esconda algum elemento (um anúncio, por exemplo): botão direito nele e Esconder.",
+      toque: "Esconda algum elemento (um anúncio, por exemplo): toque nele e depois em Esconder.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [MENU_DO_NO],
+    demo: DemoEsconder,
+  },
+  apagar: {
+    id: "apagar",
+    nome: "Apagar elemento",
+    Icone: IconeApagar,
+    alvo: seletorFerramenta("arvore"),
+    oQueFaz: "Tira a peça da página de vez. O que vinha depois dela sobe e ocupa o lugar.",
+    praQueServe:
+      "Bom para sumir com um pop-up que tampa tudo. Apagou a peça errada? O Desfazer traz de volta.",
+    comoUsarAqui: {
+      mouse: "Clique com o botão direito no elemento da árvore e escolha Apagar. Ou selecione e aperte Delete.",
+      toque: "Toque no elemento da árvore e depois em Apagar, na barrinha que aparece embaixo dele.",
+    },
+    noF12DeVerdade:
+      "botão direito e Delete element, ou a tecla Delete. Só some pra você, e tudo volta quando recarregar a página.",
+    experimente: {
+      mouse: "Apague algo que atrapalha (um pop-up, por exemplo): botão direito nele e Apagar.",
+      toque: "Apague algo que atrapalha (um pop-up, por exemplo): toque nele e depois em Apagar.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [MENU_DO_NO],
+    demo: DemoApagar,
+  },
+  desfazer: {
+    id: "desfazer",
+    nome: "Desfazer e refazer",
+    Icone: IconeDesfazer,
+    alvo: seletorFerramenta("desfazer"),
+    oQueFaz: "Volta a última mudança que você fez pelo painel. O Refazer vai para a frente de novo.",
+    praQueServe: "Apagou a peça errada? Sem susto: um Desfazer e ela volta, do jeitinho que estava.",
+    comoUsarAqui: {
+      mouse:
+        "Clique na setinha curva no topo do painel, ou aperte Ctrl+Z com o painel em foco. Ctrl+Shift+Z ou Ctrl+Y refaz.",
+      toque: "Toque na setinha curva no topo do painel (ou em Desfazer, na barrinha do elemento selecionado).",
+    },
+    noF12DeVerdade:
+      "Ctrl+Z desfaz e Ctrl+Y refaz o que você mudou na aba Elements (no Mac, Cmd+Z e Cmd+Shift+Z).",
+    experimente: { mouse: "Clique em Desfazer.", toque: "Toque em Desfazer." },
+    uso: "sinal",
+  },
+  duplicar: {
+    id: "duplicar",
+    nome: "Duplicar elemento",
+    Icone: IconeDuplicar,
+    alvo: seletorFerramenta("arvore"),
+    oQueFaz: "Faz uma cópia da peça, com tudo o que tem dentro, logo depois dela.",
+    praQueServe: "Quer mais um card igualzinho? Duplique e depois só troque o texto da cópia.",
+    comoUsarAqui: {
+      mouse: "Clique com o botão direito no elemento e escolha Duplicar, ou Shift+Alt+seta para baixo. A cópia já fica selecionada.",
+      toque: "Toque no elemento da árvore e depois em Duplicar, na barrinha. A cópia já fica selecionada.",
+    },
+    noF12DeVerdade:
+      "botão direito e Duplicate element, ou Shift+Alt+seta para baixo (no Mac, Shift+Option+seta para baixo).",
+    experimente: {
+      mouse: "Duplique um elemento (um card, por exemplo): botão direito nele e Duplicar.",
+      toque: "Duplique um elemento (um card, por exemplo): toque nele e depois em Duplicar.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [MENU_DO_NO],
+    demo: DemoDuplicar,
   },
 };
 

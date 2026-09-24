@@ -33,7 +33,8 @@ conferir(salvo.length === 5, `puladas ficam salvas (${salvo.join(", ")})`);
 await pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }).click();
 const caixa = pagina.getByRole("dialog", { name: "Caixa de Ferramentas" });
 await caixa.waitFor();
-conferir((await caixa.getByText("Você conhece essa em breve").count()) === 4, "4 ferramentas ainda em silhueta");
+const totalCards = await caixa.locator("[data-card]").count();
+conferir((await caixa.getByText("Você conhece essa em breve").count()) === totalCards - 5, `${totalCards - 5} ferramentas ainda em silhueta`);
 conferir((await caixa.getByRole("button", { name: "Rever apresentação" }).count()) === 5, "5 cards com Rever");
 await pagina.screenshot({ path: "/tmp/claude-0/caixa.png" });
 

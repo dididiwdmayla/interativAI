@@ -167,7 +167,7 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
         case "editor":
           return "sincronia";
         case "trilha":
-          return null;
+          return "trilha";
       }
       return null;
     case "definirTexto":
@@ -176,9 +176,13 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "inserirHTML":
       return "editor";
     case "esconder":
+      return "esconder";
     case "apagar":
+      return "apagar";
     case "duplicar":
+      return "duplicar";
     case "desfazer":
+      return "desfazer";
     case "responderPrevisao":
       return null;
   }

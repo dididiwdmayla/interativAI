@@ -1,27 +1,49 @@
 "use client";
 
-import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { achatarArvore, type NoArvore } from "@/lib/arvore";
 import { chaveDoCaminho } from "@/lib/dom";
+import { CLASSE_ESCONDER } from "@/lib/esconder";
+import { BarraAcoesNo } from "./BarraAcoesNo";
 import { LinhaFechamento } from "./LinhaFechamento";
 import { LinhaNo } from "./LinhaNo";
-import type { DestaqueArvore, EdicaoArvore } from "./tipos";
+import { MenuNo } from "./MenuNo";
+import { type AcoesNo, type DestaqueArvore, type EdicaoArvore, TAGS_VAZIAS } from "./tipos";
 
 type Props = {
   raiz: NoArvore | null;
   recolhidos: ReadonlySet<string>;
   caminhoSelecionado: readonly number[] | null;
   destaque: DestaqueArvore | null;
-  /** Tela de toque: linhas mais altas e botão "Editar" no selecionado. */
+  /** Tela de toque: linhas mais altas e a barra de ações no selecionado. */
   toque?: boolean;
   aoSelecionar: (caminho: number[], origem: "arvore" | "teclado") => void;
   aoAlternar: (chave: string, recolher: boolean) => void;
   aoPassarMouse: (no: Node | null) => void;
   aoEditarTexto: (caminho: number[], texto: string) => void;
   aoEditarAtributo: (caminho: number[], nome: string, valor: string) => void;
-  /** Avisado quando uma edição começa (dois cliques, Enter ou F2). */
+  aoEsconder: (caminho: number[]) => void;
+  aoApagar: (caminho: number[]) => void;
+  aoDuplicar: (caminho: number[]) => void;
+  aoDesfazer: () => void;
+  aoRefazer: () => void;
+  podeDesfazer: boolean;
+  podeRefazer: boolean;
+  /** Avisado quando uma edição começa (dois cliques, Enter, F2 ou "Editar"). */
   aoComecarEdicao?: () => void;
 };
+
+type MenuAberto = { x: number; y: number; chave: string };
+
+function podeEditarTexto(no: NoArvore): boolean {
+  return no.tipo === "texto" || (no.tipo === "elemento" && no.filhos.length === 0 && !TAGS_VAZIAS.has(no.tag));
+}
+
+function rotuloDo(no: NoArvore): string {
+  if (no.tipo === "texto") return "texto";
+  if (no.tipo === "comentario") return "comentário";
+  return `<${no.tag}>`;
+}
 
 /** Árvore de Elementos no estilo do F12, construída do body do iframe. */
 export function ArvoreElementos({
@@ -35,22 +57,31 @@ export function ArvoreElementos({
   aoPassarMouse,
   aoEditarTexto,
   aoEditarAtributo,
+  aoEsconder,
+  aoApagar,
+  aoDuplicar,
+  aoDesfazer,
+  aoRefazer,
+  podeDesfazer,
+  podeRefazer,
   aoComecarEdicao,
 }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [edicao, setEdicao] = useState<EdicaoArvore | null>(null);
+  const [menu, setMenu] = useState<MenuAberto | null>(null);
+  const fecharMenu = useCallback(() => setMenu(null), []);
 
   const linhas = useMemo(() => (raiz ? achatarArvore(raiz, recolhidos) : []), [raiz, recolhidos]);
   const nos = useMemo(() => linhas.filter((linha) => linha.tipo === "abertura"), [linhas]);
   const chaveSelecionada = caminhoSelecionado ? chaveDoCaminho(caminhoSelecionado) : null;
   const chaveDestaque = destaque ? chaveDoCaminho(destaque.caminho) : null;
   const indiceSelecionado = nos.findIndex((linha) => linha.no.chave === chaveSelecionada);
+  const noDoMenu = menu ? nos.find((linha) => linha.no.chave === menu.chave)?.no : undefined;
 
   useEffect(() => {
     if (chaveSelecionada === null) return;
-    recipiente.current
-      ?.querySelector(`[data-chave="${chaveSelecionada}"]`)
-      ?.scrollIntoView({ block: "nearest" });
+    const linha = recipiente.current?.querySelector(`[data-chave="${chaveSelecionada}"]`);
+    linha?.scrollIntoView({ block: "nearest" });
   }, [chaveSelecionada, raiz]);
 
   useEffect(() => {
@@ -65,14 +96,84 @@ export function ArvoreElementos({
     recipiente.current?.focus();
   };
 
+  const comecarEdicao = (nova: EdicaoArvore) => {
+    setEdicao(nova);
+    aoComecarEdicao?.();
+  };
+
+  /** Ações do nó para o menu e a barra. Mexer num nó seleciona ele antes, como no F12. */
+  const acoesDo = (no: NoArvore): AcoesNo => {
+    const elemento = no.tipo === "elemento";
+    const escondido = no.atributos.some(
+      (atributo) => atributo.nome === "class" && atributo.valor.split(/\s+/).includes(CLASSE_ESCONDER),
+    );
+    const antes = () => aoSelecionar(no.caminho, "arvore");
+    return {
+      podeEditar: podeEditarTexto(no),
+      podeEsconder: elemento,
+      podeApagar: no.caminho.length > 0,
+      podeDuplicar: elemento && no.caminho.length > 0,
+      escondido,
+      editar: () => {
+        antes();
+        comecarEdicao({ chave: no.chave, alvo: "texto" });
+      },
+      esconder: () => {
+        antes();
+        aoEsconder(no.caminho);
+        recipiente.current?.focus();
+      },
+      apagar: () => {
+        antes();
+        aoApagar(no.caminho);
+        recipiente.current?.focus();
+      },
+      duplicar: () => {
+        antes();
+        aoDuplicar(no.caminho);
+        recipiente.current?.focus();
+      },
+    };
+  };
+
   const selecionarPorTeclado = (no: NoArvore) => {
     aoSelecionar(no.caminho, "teclado");
     aoPassarMouse(no.no);
   };
 
+  const abrirMenuNoSelecionado = (no: NoArvore) => {
+    const linha = recipiente.current?.querySelector(`[data-chave="${no.chave}"]`)?.getBoundingClientRect();
+    if (linha) setMenu({ x: linha.left + 24, y: linha.bottom, chave: no.chave });
+  };
+
   const aoTeclar = (evento: KeyboardEvent<HTMLDivElement>) => {
     if (edicao || nos.length === 0) return;
+    if (evento.target instanceof HTMLElement && evento.target.closest("[data-barra-acoes], input")) return;
     const atual = indiceSelecionado >= 0 ? nos[indiceSelecionado].no : null;
+    const semModificador = !evento.ctrlKey && !evento.metaKey && !evento.altKey;
+
+    // Atalhos do F12: H esconde, Delete apaga, Shift+Alt+seta para baixo duplica.
+    if (atual && (evento.key === "h" || evento.key === "H") && semModificador && !evento.shiftKey) {
+      if (atual.tipo === "elemento") aoEsconder(atual.caminho);
+      evento.preventDefault();
+      return;
+    }
+    if (atual && (evento.key === "Delete" || evento.key === "Backspace") && semModificador) {
+      if (atual.caminho.length > 0) aoApagar(atual.caminho);
+      evento.preventDefault();
+      return;
+    }
+    if (atual && evento.key === "ArrowDown" && evento.shiftKey && evento.altKey) {
+      if (atual.tipo === "elemento" && atual.caminho.length > 0) aoDuplicar(atual.caminho);
+      evento.preventDefault();
+      return;
+    }
+    if (atual && (evento.key === "ContextMenu" || (evento.key === "F10" && evento.shiftKey))) {
+      abrirMenuNoSelecionado(atual);
+      evento.preventDefault();
+      return;
+    }
+
     switch (evento.key) {
       case "ArrowDown": {
         const proximo = nos[Math.min(indiceSelecionado + 1, nos.length - 1)];
@@ -105,10 +206,7 @@ export function ArvoreElementos({
         break;
       case "Enter":
       case "F2":
-        if (atual && (atual.tipo === "texto" || (atual.tipo === "elemento" && atual.filhos.length === 0))) {
-          setEdicao({ chave: atual.chave, alvo: "texto" });
-          aoComecarEdicao?.();
-        }
+        if (atual && podeEditarTexto(atual)) comecarEdicao({ chave: atual.chave, alvo: "texto" });
         break;
       default:
         return;
@@ -125,7 +223,7 @@ export function ArvoreElementos({
       ref={recipiente}
       role="tree"
       tabIndex={0}
-      aria-label="Árvore de elementos da página. Setas navegam, Enter edita o texto."
+      aria-label="Árvore de elementos da página. Setas navegam, Enter edita o texto, H esconde, Delete apaga."
       aria-activedescendant={indiceSelecionado >= 0 ? nos[indiceSelecionado].id : undefined}
       onKeyDown={aoTeclar}
       onMouseLeave={() => aoPassarMouse(null)}
@@ -150,25 +248,39 @@ export function ArvoreElementos({
           );
         }
         const chave = linha.no.chave;
+        const selecionada = chave === chaveSelecionada;
         return (
           <LinhaNo
             key={linha.id}
             linha={linha}
             recolhido={recolhidos.has(chave)}
-            selecionada={chave === chaveSelecionada}
+            selecionada={selecionada}
             destaque={chave === chaveDestaque && destaque ? destaque.parte : null}
-            toque={toque}
             edicao={edicao}
+            barra={
+              toque && selecionada && !edicao ? (
+                <BarraAcoesNo
+                  acoes={acoesDo(linha.no)}
+                  podeDesfazer={podeDesfazer}
+                  podeRefazer={podeRefazer}
+                  aoDesfazer={aoDesfazer}
+                  aoRefazer={aoRefazer}
+                />
+              ) : undefined
+            }
             aoClicar={() => {
               aoSelecionar(linha.no.caminho, "arvore");
               if (!edicao) recipiente.current?.focus();
             }}
             aoPassarMouse={() => aoPassarMouse(linha.no.no)}
             aoAlternar={() => aoAlternar(chave, !recolhidos.has(chave))}
+            aoPedirMenu={(x, y) => {
+              aoSelecionar(linha.no.caminho, "arvore");
+              setMenu({ x, y, chave });
+            }}
             aoIniciarEdicao={(nova) => {
               aoSelecionar(linha.no.caminho, "arvore");
-              setEdicao(nova);
-              aoComecarEdicao?.();
+              comecarEdicao(nova);
             }}
             aoCancelarEdicao={terminarEdicao}
             aoConfirmarTexto={(alvo, texto) => {
@@ -182,6 +294,16 @@ export function ArvoreElementos({
           />
         );
       })}
+      {menu && noDoMenu && (
+        <MenuNo
+          x={menu.x}
+          y={menu.y}
+          rotulo={rotuloDo(noDoMenu)}
+          acoes={acoesDo(noDoMenu)}
+          mostrarAtalhos={!toque}
+          aoFechar={fecharMenu}
+        />
+      )}
     </div>
   );
 }

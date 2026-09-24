@@ -22,6 +22,8 @@ import { ListaObjetivos } from "@/componentes/mascote/ListaObjetivos";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
+import { BotoesHistorico } from "@/componentes/painel/BotoesHistorico";
+import { TrilhaElementos } from "@/componentes/painel/arvore/TrilhaElementos";
 import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
@@ -101,6 +103,36 @@ function responderSegredo(pergunta: string, falar: (fala: Fala) => void): Fala |
   return fala;
 }
 
+/** Ferramentas que moram na árvore: no celular, a apresentação mostra a Árvore. */
+const FERRAMENTAS_DA_ARVORE: readonly IdFerramenta[] = [
+  "arvore",
+  "editar-duplo-clique",
+  "trilha",
+  "esconder",
+  "apagar",
+  "duplicar",
+];
+
+/** Ctrl+Z (desfazer) e Ctrl+Shift+Z ou Ctrl+Y (refazer), como no F12. */
+function atalhoHistorico(evento: {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+  shiftKey: boolean;
+}): "desfazer" | "refazer" | null {
+  if (!(evento.ctrlKey || evento.metaKey) || evento.altKey) return null;
+  const tecla = evento.key.toLowerCase();
+  if (tecla === "z") return evento.shiftKey ? "refazer" : "desfazer";
+  if (tecla === "y" && !evento.shiftKey) return "refazer";
+  return null;
+}
+
+/** Com o foco no editor ou num campo, vale o desfazer deles. */
+function focoTemDesfazerProprio(alvo: EventTarget | null): boolean {
+  return alvo instanceof HTMLElement && Boolean(alvo.closest(".cm-editor, input, textarea, [contenteditable]"));
+}
+
 /** Elementos que já usam Enter sozinhos; aí o atalho global não age. */
 function focoUsaEnter(alvo: EventTarget | null): boolean {
   if (!(alvo instanceof HTMLElement)) return false;
@@ -160,6 +192,7 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     rolarTela,
     noSelecionado,
     selecao,
+    historico,
     editarTexto,
     editarAtributo,
     alternarEsconder,
@@ -167,6 +200,7 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
     duplicar,
     inserirHtml,
     desfazer,
+    refazer,
     antesDeEditarCodigo,
     aoRecarregarDocumento,
   } = usePainelElementos({
@@ -260,7 +294,7 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
   const prepararAlvo = (ferramenta: Ferramenta) => {
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
-    if (ferramenta.id === "arvore" || ferramenta.id === "editar-duplo-clique") trocarSegmento("arvore");
+    if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
     if (ferramenta.id === "editor" || ferramenta.id === "sincronia") trocarSegmento("codigo");
   };
 
@@ -276,6 +310,16 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
           sinalizarUso("inspecionar");
         } else if (evento.tipo === "editouCodigo") {
           sinalizarUso("editor");
+        } else if (evento.tipo === "trilha") {
+          sinalizarUso("trilha");
+        } else if (evento.tipo === "escondeu" || evento.tipo === "mostrou") {
+          sinalizarUso("esconder");
+        } else if (evento.tipo === "apagou") {
+          sinalizarUso("apagar");
+        } else if (evento.tipo === "duplicou") {
+          sinalizarUso("duplicar");
+        } else if (evento.tipo === "desfez" || evento.tipo === "refez") {
+          sinalizarUso("desfazer");
         }
       }),
     [barramento],
@@ -598,7 +642,17 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
         <BarraObjetivosMovel objetivos={objetivosNaTela} concluidos={estado.concluidos} ativo={objetivoAtivo} />
       )}
       <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
-        <section aria-label="Painel" className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}>
+        <section
+          aria-label="Painel"
+          className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}
+          onKeyDown={(evento) => {
+            const atalho = atalhoHistorico(evento);
+            if (!atalho || evento.defaultPrevented || focoTemDesfazerProprio(evento.target)) return;
+            evento.preventDefault();
+            if (atalho === "desfazer") desfazer();
+            else refazer();
+          }}
+        >
           <AlvoFerramenta
             ids={["painel"]}
             marcador="painel"
@@ -611,20 +665,43 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
               abasDesbloqueadas={ABAS_DESBLOQUEADAS}
               aoTrocarAba={setAba}
               ferramentas={
-                <AlvoFerramenta
-                  ids={["inspecionar"]}
-                  marcador="inspecionar"
-                  aoAbrirCard={abrirCard}
-                  classeMarcador="-right-2 -top-1.5"
-                  as="span"
-                  className="inline-flex"
-                >
-                  <BotaoInspecionar
-                    ativo={inspecionando}
-                    pulsando={pulsarFerramenta === "inspecionar" && !inspecionando}
-                    aoAlternar={alternarInspecaoResponsiva}
-                  />
-                </AlvoFerramenta>
+                <>
+                  <AlvoFerramenta
+                    ids={["inspecionar"]}
+                    marcador="inspecionar"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="inline-flex"
+                  >
+                    <BotaoInspecionar
+                      ativo={inspecionando}
+                      pulsando={pulsarFerramenta === "inspecionar" && !inspecionando}
+                      aoAlternar={alternarInspecaoResponsiva}
+                    />
+                  </AlvoFerramenta>
+                  <AlvoFerramenta
+                    ids={["desfazer"]}
+                    marcador="desfazer"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="ml-1 inline-flex"
+                  >
+                    <BotoesHistorico
+                      podeDesfazer={historico.podeDesfazer}
+                      podeRefazer={historico.podeRefazer}
+                      aoDesfazer={() => {
+                        tocarSom("clique");
+                        desfazer();
+                      }}
+                      aoRefazer={() => {
+                        tocarSom("clique");
+                        refazer();
+                      }}
+                    />
+                  </AlvoFerramenta>
+                </>
               }
             >
               {movel && (
@@ -646,27 +723,44 @@ export function JogoFase({ fase, local, aoRecomecar, modo = "jogo", painelLab }:
                 proporcaoInicial={0.5}
                 mostrar={movel ? (segmento === "arvore" ? "cima" : "baixo") : "ambas"}
                 cima={
-                  <AlvoFerramenta
-                    ids={["arvore"]}
-                    marcador="arvore"
-                    aoAbrirCard={abrirCard}
-                    classeMarcador="bottom-2 right-3"
-                    className="h-full"
-                  >
-                    <ArvoreElementos
-                      raiz={arvore}
-                      recolhidos={recolhidos}
-                      caminhoSelecionado={caminhoSelecionado}
-                      destaque={destaque}
-                      toque={toque}
-                      aoSelecionar={selecionar}
-                      aoAlternar={alternarRecolhido}
-                      aoPassarMouse={aoPassarMouseArvore}
-                      aoEditarTexto={editarTexto}
-                      aoEditarAtributo={editarAtributo}
-                      aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
-                    />
-                  </AlvoFerramenta>
+                  <div className="flex h-full min-h-0 flex-col">
+                    <AlvoFerramenta
+                      ids={["arvore", "esconder", "apagar", "duplicar"]}
+                      marcador="arvore"
+                      aoAbrirCard={abrirCard}
+                      classeMarcador="bottom-2 right-3"
+                      className="min-h-0 flex-1"
+                    >
+                      <ArvoreElementos
+                        raiz={arvore}
+                        recolhidos={recolhidos}
+                        caminhoSelecionado={caminhoSelecionado}
+                        destaque={destaque}
+                        toque={toque}
+                        aoSelecionar={selecionar}
+                        aoAlternar={alternarRecolhido}
+                        aoPassarMouse={aoPassarMouseArvore}
+                        aoEditarTexto={editarTexto}
+                        aoEditarAtributo={editarAtributo}
+                        aoEsconder={alternarEsconder}
+                        aoApagar={apagar}
+                        aoDuplicar={duplicar}
+                        aoDesfazer={desfazer}
+                        aoRefazer={refazer}
+                        podeDesfazer={historico.podeDesfazer}
+                        podeRefazer={historico.podeRefazer}
+                        aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
+                      />
+                    </AlvoFerramenta>
+                    <AlvoFerramenta ids={["trilha"]} marcador="trilha" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
+                      <TrilhaElementos
+                        raiz={arvore}
+                        caminhoSelecionado={caminhoSelecionado}
+                        aoSelecionar={(caminho) => selecionar(caminho, "trilha")}
+                        recuoDireita={layout === "retrato"}
+                      />
+                    </AlvoFerramenta>
+                  </div>
                 }
                 baixo={
                   <AlvoFerramenta

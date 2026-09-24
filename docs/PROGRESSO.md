@@ -152,6 +152,27 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
   com gaveta de validadores ao vivo, "Aplicar solução do objetivo atual",
   "Resetar fase", checagens rodando no navegador e índice de conceitos.
   Sabotagem de seletor conferida: a falha diz fase, objetivo, ação e motivo.
+- [x] **Etapa 16: Ferramentas novas do DevTools.** Registro com `trilha`,
+  `esconder`, `apagar`, `desfazer` (e refazer) e `duplicar`, cada uma com
+  ícone SVG, card, apresentação (texto de mouse e de toque, "No F12 de
+  verdade" conferido na doc do Chrome e no código do devtools-frontend) e
+  mini demo (trilha, esconder, apagar, duplicar). Trilha
+  (`TrilhaElementos`) no rodapé da árvore: `html › body › ... ›
+  tag#id.classe`, clicar seleciona o ancestral (evento `trilha`), rola na
+  horizontal no celular. Esconder igual ao Chrome: tecla H alterna a classe
+  `__web-inspector-hide-shortcut__`, que aparece na árvore e no código, com
+  a regra `visibility: hidden !important` no head do site-alvo. Apagar
+  (Delete ou Backspace; seleção vai ao próximo irmão ou ao pai), duplicar
+  (Shift+Alt+seta para baixo, cópia selecionada), desfazer/refazer (pilha
+  de 50 fotos, Ctrl+Z e Ctrl+Shift+Z ou Ctrl+Y com o foco no painel e
+  botões no topo do painel; no editor vale o do CodeMirror; a primeira
+  tecla de uma digitação no código também vira foto). Menu do nó
+  (`MenuNo`): botão direito, tecla Menu/Shift+F10 ou toque longo no nó (o
+  toque longo em botões de ferramenta continua abrindo o card:
+  `reivindicarToque`). Barra de ações no nó selecionado no celular
+  (`BarraAcoesNo`, 6 botões de 44 px). No "Experimente", o cartão do
+  mascote também evita as áreas liberadas. Teste:
+  `testes/ferramentas-novas.mjs` (desktop e celular, apresentações).
 
 ## Critérios de pronto (verificados na Etapa 13)
 
