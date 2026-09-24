@@ -26,7 +26,7 @@ for (const id of ["previa", "me-ajuda", "tutor", "arvore"]) {
 }
 await pagina.waitForTimeout(400);
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "Esc pula também");
-const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v1")).apresentacoesVistas);
+const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")).apresentacoesVistas);
 conferir(salvo.length === 5, `puladas ficam salvas (${salvo.join(", ")})`);
 
 // Caixa: conhecidas e silhuetas.

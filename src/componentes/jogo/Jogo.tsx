@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FASE_INICIAL } from "@/fases";
+import { FASE_INICIAL, localDaFase } from "@/conteudo";
 import { atualizarProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
 import { JogoFase } from "./JogoFase";
@@ -17,16 +17,19 @@ export function Jogo() {
 
   if (!carregado) return <TelaCarregando />;
 
+  const fase = FASE_INICIAL;
+  if (fase.tipo !== "pratica") return null;
+
   const recomecar = () => {
     atualizarProgresso((atual) => {
       const fasesEmAndamento: Record<string, EstadoFaseSalvo> = {};
       for (const [id, estado] of Object.entries(atual.fasesEmAndamento)) {
-        if (id !== FASE_INICIAL.id) fasesEmAndamento[id] = estado;
+        if (id !== fase.id) fasesEmAndamento[id] = estado;
       }
       return { ...atual, fasesEmAndamento };
     });
     setRodada((valor) => valor + 1);
   };
 
-  return <JogoFase key={rodada} fase={FASE_INICIAL} aoRecomecar={recomecar} />;
+  return <JogoFase key={rodada} fase={fase} local={localDaFase(fase)} aoRecomecar={recomecar} />;
 }

@@ -1,14 +1,13 @@
 /*
- * Site-alvo da Fase 1: "Padaria Pão Quentinho".
+ * Site-alvo da Unidade 1: "Padaria Pão Quentinho".
  *
- * Este arquivo representa "o site de outra pessoa". Por isso é a única
- * exceção à regra de cores: o CSS abaixo tem cores próprias e fixas, que
- * não mudam com o tema do jogo.
+ * Este arquivo representa "o site de outra pessoa". Por isso os arquivos
+ * em sites/ são a única exceção à regra de cores: o CSS abaixo tem cores
+ * próprias e fixas, que não mudam com o tema do jogo.
  */
+import type { SiteAlvo } from "@/conteudo/tipos";
 
-export const URL_PADARIA = "padaria-pao-quentinho.site";
-
-export const HEAD_PADARIA = `<meta charset="utf-8">
+const HEAD_PADARIA = `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Padaria Pão Quentinho</title>
 <style>
@@ -98,7 +97,7 @@ export const HEAD_PADARIA = `<meta charset="utf-8">
   }
 </style>`;
 
-export const BODY_INICIAL_PADARIA = `<header class="topo">Padaria Pão Quentinho</header>
+const BODY_PADARIA = `<header class="topo">Padaria Pão Quentinho</header>
 <h1>Pão quentinho toda manhã</h1>
 <p class="descricao">Fornadas fresquinhas desde as 6 da manhã, feitas com carinho aqui no bairro.</p>
 <button class="botao">Encomendar</button>
@@ -109,3 +108,10 @@ export const BODY_INICIAL_PADARIA = `<header class="topo">Padaria Pão Quentinho
   <li>Bolo de cenoura</li>
 </ul>
 <footer class="rodape">Rua das Flores, 123. Aberto todos os dias, das 6h às 20h.</footer>`;
+
+export const SITE_PADARIA: SiteAlvo = {
+  url: "padaria-pao-quentinho.site",
+  titulo: "Site da Padaria Pão Quentinho",
+  head: HEAD_PADARIA,
+  body: BODY_PADARIA,
+};

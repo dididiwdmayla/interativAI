@@ -31,8 +31,8 @@ seu", que valida o loop de aprendizado.
 5. **Zero emojis** em qualquer lugar (UI, falas, código de conteúdo, commits).
    Expressividade visual vem de SVG.
 6. **Zero cores literais** fora de `src/tema/tokens.css`. Única exceção: o CSS
-   do site-alvo fictício (`src/fases/**/siteAlvo.ts`), que representa "o site
-   de outra pessoa".
+   dos sites-alvo fictícios (`src/conteudo/**/sites/*.ts`), que representam
+   "o site de outra pessoa".
 7. Interface 100% em PT-BR.
 8. A chave do Gemini nunca vai para o cliente. Nada de `NEXT_PUBLIC_` com chave.
 
@@ -46,8 +46,9 @@ seu", que valida o loop de aprendizado.
   (Flash mais recente GA na doc oficial em 2026-09), configurável por
   `GEMINI_MODEL`. Reserva em sobrecarga: `gemini-3.5-flash-lite` (Flash-Lite
   atual recomendado na doc em 2026-09), configurável por `GEMINI_MODEL_RESERVA`.
-- Persistência: `localStorage`, chave `ilha-sites:progresso:v1`, sempre com
-  try/catch e normalização.
+- Persistência: `localStorage`, chave `ilha-sites:progresso:v2`, sempre com
+  try/catch e normalização. A v1 é migrada sozinha na primeira leitura
+  (ids de fase renomeados, nada se perde) e fica intacta como cópia.
 - Fontes via `next/font/google`: Nunito (UI) e JetBrains Mono (código).
 - Sem banco, sem login, sem backend além da rota do tutor.
 
@@ -59,8 +60,9 @@ src/
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
-  motor/                tipos das fases, validação, escada de ajuda, abas
-  fases/                dados das fases (uma pasta por fase)
+  conteudo/             conteúdo declarativo: tipos, catálogo de conceitos, unidades e fases
+    ilhas/sites/elementos/unidade-N/   uma pasta por unidade (fases, unidade.ts, sites/)
+  motor/                núcleo do painel, validadores, executor de ações, estado do motor
   componentes/
     layout/             barra superior, trilha, estrelas, seletor de tema, som
     painel/             DevTools simplificado: abas, árvore, editor, divisor
@@ -115,9 +117,12 @@ src/
 
 ### Motor de fases
 
-- Fases são **dados** (`src/fases/<id>/`), o motor é genérico.
-- Tipos principais em `src/motor/tipos.ts`: `Fase`, `Objetivo`, `Ajudas`,
-  `Fala`, `ContextoValidacao`, `ContextoFase`.
+- Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
+  genérico. Tipos em `src/conteudo/tipos.ts`: `Validador`, `Acao`,
+  `Objetivo`, `Fase` (`pratica` | `desafio`), `Unidade`, `SiteAlvo`.
+- Validadores são interpretados por `src/motor/validadores.ts`; ações, por
+  `src/motor/executarAcao.ts`, que chama o núcleo do painel
+  (`src/motor/nucleoPainel.ts`): as mesmas funções que a interface usa.
 - Objetivos sequenciais, validação a cada mudança e evento
   (`selecionou`, `inspecionou`, `editouTexto`, `editouAtributo`, `editouCodigo`).
 - Escada de ajuda "Me ajuda": pergunta, dica, aponta a linha, solução (custa

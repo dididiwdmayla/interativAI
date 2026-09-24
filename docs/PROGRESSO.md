@@ -124,6 +124,25 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   chave), todos com console limpo. `PROJETO.md` com as decisões novas e
   `testes/README.md` com como rodar.
 
+## Rodada 3: fábrica de conteúdo, ferramentas novas e Unidade 2
+
+Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
+
+- [x] **Etapa 14: Formato declarativo.** Tipos em `src/conteudo/tipos.ts`
+  (`Validador`, `Acao`, `Objetivo` guiado/sozinho e ação/previsão, `Fase`
+  prática/desafio, `Unidade`, `SiteAlvo`), catálogo `src/conteudo/conceitos.ts`,
+  registro `src/conteudo/index.ts`, registro de tipos de fase
+  `src/motor/tiposDeFase.ts`. Interpretador `src/motor/validadores.ts` (com
+  resultado detalhado), executor `src/motor/executarAcao.ts` (`$0`, via
+  trilha sobe pelos ancestrais) e núcleo sem React `src/motor/nucleoPainel.ts`
+  (seleção, texto, atributo, esconder do Chrome, apagar, duplicar, inserir
+  HTML, pilha de 50 fotos para desfazer/refazer), usado pelo
+  `usePainelElementos`. Fase 1 migrada para
+  `src/conteudo/ilhas/sites/elementos/unidade-1/` (id
+  `sites-elementos-u1-f1`), comportamento igual (bateria Playwright antiga
+  passou inteira). Progresso `ilha-sites:progresso:v2` com migração
+  automática da v1 (ids renomeados, fase atual, campos novos com padrão).
+
 ## Critérios de pronto (verificados na Etapa 13)
 
 - [x] `npm run build` e `npm run lint` passam; console limpo em todos os testes.

@@ -1,12 +1,6 @@
+import type { FasePratica, Objetivo } from "@/conteudo/tipos";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
-import {
-  type DegrauAjuda,
-  ESTRELAS_INICIAIS,
-  ESTRELAS_MINIMAS,
-  type Fala,
-  type Fase,
-  type Objetivo,
-} from "./tipos";
+import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "./tipos";
 
 export type EtapaFase = "introducao" | "objetivos" | "concluida";
 
@@ -36,14 +30,19 @@ function limitar(valor: number, minimo: number, maximo: number): number {
 
 /** Enunciado certo para o jeito de apontar do jogador (mouse ou toque). */
 export function enunciadoDe(objetivo: Objetivo, toque: boolean): string {
-  return toque && objetivo.enunciadoToque ? objetivo.enunciadoToque : objetivo.enunciado;
+  return toque ? objetivo.enunciado.toque : objetivo.enunciado.mouse;
 }
 
-export function falaDoObjetivo(fase: Fase, indice: number, toque: boolean): Fala {
+export function falaDoObjetivo(fase: FasePratica, indice: number, toque: boolean): Fala {
   return { texto: enunciadoDe(fase.objetivos[indice], toque), expressao: "feliz" };
 }
 
-export function criarEstadoInicial(fase: Fase, salvo: EstadoFaseSalvo | undefined, toque: boolean): EstadoMotor {
+/** Fala final da fase (depois da missão de campo). */
+export function falaFinalDe(fase: FasePratica): Fala {
+  return fase.falaFinal ?? fase.conclusao[fase.conclusao.length - 1];
+}
+
+export function criarEstadoInicial(fase: FasePratica, salvo: EstadoFaseSalvo | undefined, toque: boolean): EstadoMotor {
   const total = fase.objetivos.length;
   const base: EstadoMotor = {
     etapa: "introducao",
@@ -70,7 +69,7 @@ export function criarEstadoInicial(fase: Fase, salvo: EstadoFaseSalvo | undefine
       concluidos: total,
       estrelas,
       indiceFala: fase.conclusao.length,
-      fala: fase.falaFinal,
+      fala: falaFinalDe(fase),
     };
   }
   return {

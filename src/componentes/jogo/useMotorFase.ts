@@ -3,33 +3,31 @@
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
+import type { AjudaLinha, FasePratica, ViaSelecao } from "@/conteudo/tipos";
+import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso } from "@/lib/armazemProgresso";
-import { caminhoDoNo, noPeloCaminho } from "@/lib/dom";
+import { alvoDoElemento } from "@/lib/caminhoElementos";
+import { caminhoDoNo } from "@/lib/dom";
 import { criarDocumentoSolto } from "@/lib/documentoSiteAlvo";
-import { linhasComTexto } from "@/lib/linhasCodigo";
-import type { EstadoFaseSalvo } from "@/lib/progresso";
+import { ESTADO_FASE_PADRAO, type EstadoFaseSalvo } from "@/lib/progresso";
 import type { Barramento } from "@/motor/barramento";
-import { criarEstadoInicial, type EstadoMotor, falaDoObjetivo } from "@/motor/estadoMotor";
-import type { EventoFase, OrigemSelecao } from "@/motor/eventos";
-import {
-  type AjudaLinha,
-  type ContextoFase,
-  type DegrauAjuda,
-  ESTRELAS_MINIMAS,
-  type Fala,
-  type Fase,
-} from "@/motor/tipos";
+import { criarEstadoInicial, type EstadoMotor, falaDoObjetivo, falaFinalDe } from "@/motor/estadoMotor";
+import type { EventoFase } from "@/motor/eventos";
+import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
+import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
+import { avaliarValidador, consultar } from "@/motor/validadores";
 
 type Opcoes = {
-  fase: Fase;
+  fase: FasePratica;
   salvo: EstadoFaseSalvo | undefined;
   barramento: Barramento;
   htmlAtual: string;
   editorRef: RefObject<ApiEditor | null>;
   obterDocumento: () => Document | null;
-  selecionarCaminho: (caminho: number[], origem: OrigemSelecao) => void;
-  editarTextoCaminho: (caminho: number[], texto: string) => void;
-  substituirHtml: (html: string) => void;
+  /** Nó selecionado agora e por onde foi escolhido. */
+  obterSelecao: () => { no: Node; via: ViaSelecao | null } | null;
+  /** As mesmas funções que a interface usa: a solução passa por elas. */
+  painel: PainelDasAcoes;
   destacarNaArvore: (destaque: DestaqueArvore | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
@@ -48,18 +46,15 @@ export function useMotorFase({
   htmlAtual,
   editorRef,
   obterDocumento,
-  selecionarCaminho,
-  editarTextoCaminho,
-  substituirHtml,
+  obterSelecao,
+  painel,
   destacarNaArvore,
   toque,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() => criarEstadoInicial(fase, salvo, toque));
-  const [pulsarInspecionar, setPulsarInspecionar] = useState(false);
-  const [documentoInicial] = useState(() => criarDocumentoSolto(fase.headSiteAlvo, fase.bodyInicial));
+  const [pulsarFerramenta, setPulsarFerramenta] = useState<IdFerramenta | null>(null);
+  const [documentoInicial] = useState(() => criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body));
   const eventosObjetivo = useRef<EventoFase[]>([]);
-  const todosEventos = useRef<EventoFase[]>([]);
-  const caminhoSelecionado = useRef<number[] | null>(null);
   const aplicandoSolucao = useRef(false);
 
   const total = fase.objetivos.length;
@@ -68,7 +63,7 @@ export function useMotorFase({
   const limparAjudasVisuais = useCallback(() => {
     destacarNaArvore(null);
     editorRef.current?.destacarLinhas([]);
-    setPulsarInspecionar(false);
+    setPulsarFerramenta(null);
   }, [destacarNaArvore, editorRef]);
 
   const concluirObjetivo = useCallback(
@@ -91,27 +86,29 @@ export function useMotorFase({
     [fase, limparAjudasVisuais],
   );
 
-  /** Roda a validação do objetivo ativo contra o documento vivo. */
+  /** Roda o validador do objetivo ativo contra o documento vivo. */
   const verificar = useCallback(() => {
     if (estado.etapa !== "objetivos" || estado.pausa !== null || aplicandoSolucao.current) return;
     const documento = obterDocumento();
     if (!documento?.body) return;
     const atual = fase.objetivos[estado.objetivoAtual];
-    const caminho = caminhoSelecionado.current;
-    let passou = false;
-    try {
-      passou = atual.validar({
-        documento,
-        selecionado: caminho ? noPeloCaminho(documento.body, caminho) : null,
-        eventos: eventosObjetivo.current,
-        todosEventos: todosEventos.current,
-        inicial: documentoInicial,
-      });
-    } catch {
-      passou = false;
-    }
+    const passou = avaliarValidador(atual.validador, {
+      documento,
+      inicial: documentoInicial,
+      selecao: obterSelecao(),
+      eventos: eventosObjetivo.current,
+    });
     if (passou) concluirObjetivo(estado.objetivoAtual);
-  }, [estado.etapa, estado.pausa, estado.objetivoAtual, obterDocumento, fase, documentoInicial, concluirObjetivo]);
+  }, [
+    estado.etapa,
+    estado.pausa,
+    estado.objetivoAtual,
+    obterDocumento,
+    obterSelecao,
+    fase,
+    documentoInicial,
+    concluirObjetivo,
+  ]);
 
   const verificarAtual = useRef(verificar);
   useEffect(() => {
@@ -122,11 +119,7 @@ export function useMotorFase({
   useEffect(
     () =>
       barramento.assinar((evento) => {
-        todosEventos.current.push(evento);
         eventosObjetivo.current.push(evento);
-        if (evento.tipo === "selecionou" || evento.tipo === "inspecionou") {
-          caminhoSelecionado.current = evento.caminho;
-        }
         if (evento.tipo !== "editouCodigo") verificarAtual.current();
       }),
     [barramento],
@@ -148,10 +141,12 @@ export function useMotorFase({
         fasesEmAndamento: {
           ...progresso.fasesEmAndamento,
           [fase.id]: {
+            ...ESTADO_FASE_PADRAO,
             objetivoAtual: estado.concluidos,
             htmlAtual,
             estrelas: estado.estrelas,
             introducaoVista: estado.etapa !== "introducao",
+            metaVista: true,
           },
         },
         fasesConcluidas:
@@ -185,7 +180,7 @@ export function useMotorFase({
       setEstado({
         ...estado,
         indiceFala: proxima,
-        fala: proxima < fase.conclusao.length ? fase.conclusao[proxima] : fase.falaFinal,
+        fala: proxima < fase.conclusao.length ? fase.conclusao[proxima] : falaFinalDe(fase),
       });
     }
   };
@@ -218,22 +213,28 @@ export function useMotorFase({
   };
 
   const aplicarLinha = (linha: AjudaLinha) => {
+    const documento = obterDocumento();
     if (linha.alvo === "arvore") {
-      const documento = obterDocumento();
-      const elemento = documento?.body.querySelector(linha.seletor);
+      const elemento = documento ? consultar(documento, linha.seletor)[0] : undefined;
       const caminho = documento && elemento ? caminhoDoNo(documento.body, elemento) : null;
       if (caminho) destacarNaArvore({ caminho, parte: linha.parte ?? "no" });
     } else if (linha.alvo === "editor") {
       const editor = editorRef.current;
-      if (editor) editor.destacarLinhas(linhasComTexto(editor.obterTexto(), linha.buscarTexto));
+      if (!editor || !documento?.body) return;
+      const linhas = consultar(documento, linha.seletor).flatMap((elemento) => {
+        const alvo = alvoDoElemento(documento.body, elemento);
+        return alvo ? editor.linhasDoAlvo(alvo) : [];
+      });
+      editor.destacarLinhas(linhas);
     } else {
-      setPulsarInspecionar(true);
+      setPulsarFerramenta(linha.ferramenta);
     }
   };
 
   /** Botão "Me ajuda": sobe um degrau por clique. */
   const ajudar = () => {
     if (!objetivo || estado.pausa !== null) return;
+    if (objetivo.modo !== "guiado") return;
     const { ajudas } = objetivo;
     const proximo = Math.min(estado.degrau + 1, 4) as DegrauAjuda;
     if (proximo === 1) {
@@ -267,40 +268,14 @@ export function useMotorFase({
     });
   };
 
-  /** Degrau 4: aplica a solução, explica e cobra 1 estrela. */
+  /** Degrau 4: aplica a solução pelas funções da interface, explica e cobra 1 estrela. */
   const confirmarSolucao = () => {
-    const documento = obterDocumento();
-    if (!objetivo || !documento?.body) return;
-    const caminhoDe = (seletor: string) => {
-      const elemento = documento.body.querySelector(seletor);
-      return elemento ? caminhoDoNo(documento.body, elemento) : null;
-    };
-    const contexto: ContextoFase = {
-      documento,
-      selecionar(seletor, opcoes) {
-        const caminho = caminhoDe(seletor);
-        if (!caminho) return;
-        selecionarCaminho(caminho, opcoes?.comoInspecao ? "inspecao" : "ajuda");
-        if (opcoes?.comoInspecao) {
-          const tag = seletor.toLowerCase();
-          barramento.emitir({ tipo: "inspecionou", tag, caminho });
-        }
-      },
-      editarTexto(seletor, texto) {
-        const caminho = caminhoDe(seletor);
-        if (caminho) editarTextoCaminho(caminho, texto);
-      },
-      editarCodigo(transformar) {
-        const editor = editorRef.current;
-        if (!editor) return;
-        substituirHtml(transformar(editor.obterTexto()));
-        barramento.emitir({ tipo: "editouCodigo" });
-      },
-    };
-
+    if (!objetivo || objetivo.modo !== "guiado" || !obterDocumento()?.body) return;
     aplicandoSolucao.current = true;
     try {
-      objetivo.ajudas.solucao.aplicar(contexto);
+      executarAcoes(objetivo.ajudas.solucao.acoes, painel);
+    } catch {
+      // Conteúdo quebrado é pego pelo npm run testar:conteudo; aqui o jogo segue.
     } finally {
       aplicandoSolucao.current = false;
     }
@@ -323,12 +298,12 @@ export function useMotorFase({
 
   const abrirConclusao = () => setEstado({ ...estado, conclusaoAberta: true });
   const fecharConclusao = () =>
-    setEstado({ ...estado, conclusaoAberta: false, indiceFala: fase.conclusao.length, fala: fase.falaFinal });
+    setEstado({ ...estado, conclusaoAberta: false, indiceFala: fase.conclusao.length, fala: falaFinalDe(fase) });
 
   return {
     estado,
     objetivo,
-    pulsarInspecionar,
+    pulsarFerramenta,
     verificar,
     avancarFala,
     seguir,

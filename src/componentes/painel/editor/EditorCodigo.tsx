@@ -32,6 +32,8 @@ export type ApiEditor = {
    * existe no código limpa o destaque. Devolve se achou o trecho.
    */
   destacarElemento: (alvo: AlvoCodigo | null, opcoes?: { rolar?: boolean }) => boolean;
+  /** Linhas (a partir de 1) que o trecho do elemento ocupa; vazio se não achar. */
+  linhasDoAlvo: (alvo: AlvoCodigo) => number[];
   obterTexto: () => string;
 };
 
@@ -179,6 +181,14 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
           view.dispatch({ effects: efeitos, annotations: origemExterna.of(true) });
         }
         return trecho !== null;
+      },
+      linhasDoAlvo(alvo) {
+        const view = visao.current;
+        const trecho = view ? trechoDoAlvo(view.state, alvo) : null;
+        if (!view || !trecho) return [];
+        const primeira = view.state.doc.lineAt(trecho.de).number;
+        const ultima = view.state.doc.lineAt(trecho.ate).number;
+        return Array.from({ length: ultima - primeira + 1 }, (_, indice) => primeira + indice);
       },
       obterTexto() {
         return visao.current?.state.doc.toString() ?? "";

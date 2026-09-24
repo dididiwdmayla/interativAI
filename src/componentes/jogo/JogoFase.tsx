@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
 import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
@@ -39,10 +39,14 @@ import { PROPORCAO_PREVIA } from "@/lib/progresso";
 import { tocarSom } from "@/lib/som";
 import { desbloquearTema, escolherTema } from "@/lib/tema";
 import { useToque } from "@/lib/useConsultaMidia";
+import type { LocalDaFase } from "@/conteudo";
+import type { FasePratica } from "@/conteudo/tipos";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
-import { enunciadoDe } from "@/motor/estadoMotor";
-import type { Fala, Fase } from "@/motor/tipos";
+import { enunciadoDe, falaFinalDe } from "@/motor/estadoMotor";
+import type { PainelDasAcoes } from "@/motor/executarAcao";
+import { viaDaOrigem } from "@/motor/nucleoPainel";
+import type { Fala } from "@/motor/tipos";
 import { AlcaDivisoria } from "./movel/AlcaDivisoria";
 import { useLayoutJogo, useViewportVisivel } from "./movel/useLayoutJogo";
 import { TelaConclusao } from "./TelaConclusao";
@@ -52,9 +56,13 @@ import { useSiteAlvo } from "./useSiteAlvo";
 import { useTutor } from "./useTutor";
 
 type Props = {
-  fase: Fase;
+  fase: FasePratica;
+  local: LocalDaFase;
   aoRecomecar: () => void;
 };
+
+/** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
+const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
 
 const FALA_PENSANDO: Fala = {
   texto: "Hmm, deixa eu pensar...",
@@ -93,9 +101,9 @@ function focoUsaEnter(alvo: EventTarget | null): boolean {
   return Boolean(alvo.closest("input, textarea, button, a, select, [contenteditable], [role=tree], .cm-editor"));
 }
 
-export function JogoFase({ fase, aoRecomecar }: Props) {
+export function JogoFase({ fase, local, aoRecomecar }: Props) {
   const [salvo] = useState(() => obterProgresso().fasesEmAndamento[fase.id]);
-  const [bodyInicial] = useState(() => salvo?.htmlAtual ?? fase.bodyInicial);
+  const [bodyInicial] = useState(() => salvo?.htmlAtual ?? fase.siteAlvo.body);
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
@@ -125,7 +133,6 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,
-    substituirHtml,
   } = useSiteAlvo(bodyInicial);
 
   const {
@@ -144,8 +151,16 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     apontarNaTela,
     escolherNaTela,
     rolarTela,
+    noSelecionado,
+    selecao,
     editarTexto,
     editarAtributo,
+    alternarEsconder,
+    apagar,
+    duplicar,
+    inserirHtml,
+    desfazer,
+    antesDeEditarCodigo,
     aoRecarregarDocumento,
   } = usePainelElementos({
     editorRef,
@@ -154,10 +169,45 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     aoEvento: barramento.emitir,
   });
 
+  /** As mesmas funções que a interface usa; a solução do "Me ajuda" passa por elas. */
+  const painel = useMemo<PainelDasAcoes>(
+    () => ({
+      obterDocumento,
+      noSelecionado,
+      selecionar,
+      editarTexto,
+      editarAtributo,
+      alternarEsconder,
+      apagar,
+      duplicar,
+      inserirHtml,
+      desfazer,
+      responderPrevisao: () => {},
+    }),
+    [
+      obterDocumento,
+      noSelecionado,
+      selecionar,
+      editarTexto,
+      editarAtributo,
+      alternarEsconder,
+      apagar,
+      duplicar,
+      inserirHtml,
+      desfazer,
+    ],
+  );
+
+  const obterSelecao = useCallback(() => {
+    const atual = selecao();
+    const no = noSelecionado();
+    return atual && no ? { no, via: viaDaOrigem(atual.origem) } : null;
+  }, [noSelecionado, selecao]);
+
   const {
     estado,
     objetivo,
-    pulsarInspecionar,
+    pulsarFerramenta,
     verificar,
     avancarFala,
     seguir,
@@ -174,9 +224,8 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     htmlAtual,
     editorRef,
     obterDocumento,
-    selecionarCaminho: selecionar,
-    editarTextoCaminho: editarTexto,
-    substituirHtml,
+    obterSelecao,
+    painel,
     destacarNaArvore,
     toque,
   });
@@ -225,7 +274,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
 
   const tutor = useTutor({
     faseId: fase.id,
-    objetivo: objetivo ? { id: objetivo.id, enunciado: objetivo.enunciado } : null,
+    objetivo: objetivo ? { id: objetivo.id, enunciado: objetivo.enunciado.mouse } : null,
     degrau: estado.degrau,
     htmlAtual,
     falar,
@@ -293,10 +342,11 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
 
   const aoEditarNoEditor = useCallback(
     (texto: string) => {
+      antesDeEditarCodigo();
       aoEditarCodigo(texto);
       barramento.emitir({ tipo: "editouCodigo" });
     },
-    [aoEditarCodigo, barramento],
+    [antesDeEditarCodigo, aoEditarCodigo, barramento],
   );
 
   const aoCarregar = useCallback(
@@ -473,7 +523,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
     >
       {movel ? (
         <BarraSuperiorMovel
-          titulo={`${fase.zona} › Fase ${fase.numero}`}
+          titulo={`${local.unidade.zona} › Fase ${local.numero}`}
           estrelas={estado.estrelas}
           fina={layout === "paisagem"}
           menu={
@@ -489,7 +539,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
         />
       ) : (
         <BarraSuperior
-          trilha={[fase.ilha, fase.zona, `Fase ${fase.numero}`]}
+          trilha={[local.unidade.ilha, local.unidade.zona, `Fase ${local.numero}`]}
           estrelas={estado.estrelas}
           logo={<Mascote tamanho={34} />}
           acoes={
@@ -514,7 +564,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
           >
             <Painel
               abaAtiva={aba}
-              abasDesbloqueadas={fase.abasDesbloqueadas}
+              abasDesbloqueadas={ABAS_DESBLOQUEADAS}
               aoTrocarAba={setAba}
               ferramentas={
                 <AlvoFerramenta
@@ -527,7 +577,7 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
                 >
                   <BotaoInspecionar
                     ativo={inspecionando}
-                    pulsando={pulsarInspecionar && !inspecionando}
+                    pulsando={pulsarFerramenta === "inspecionar" && !inspecionando}
                     aoAlternar={alternarInspecaoResponsiva}
                   />
                 </AlvoFerramenta>
@@ -630,12 +680,12 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
             classeMarcador="right-3 top-3"
             className="flex min-h-0 flex-1 flex-col"
           >
-            <JanelaNavegador url={fase.urlSiteAlvo} compacta={movel}>
+            <JanelaNavegador url={fase.siteAlvo.url} compacta={movel}>
               <PreviewSiteAlvo
                 ref={previewRef}
-                head={fase.headSiteAlvo}
+                head={fase.siteAlvo.head}
                 bodyInicial={bodyInicial}
-                titulo={fase.tituloSiteAlvo}
+                titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
               >
                 <SobreposicaoInspecao realce={realce} />
@@ -699,7 +749,8 @@ export function JogoFase({ fase, aoRecomecar }: Props) {
       />
       <TelaConclusao
         aberta={estado.etapa === "concluida" && estado.conclusaoAberta}
-        fase={fase}
+        local={local}
+        falaFinal={falaFinalDe(fase)}
         estrelas={estado.estrelas}
         indiceFala={estado.indiceFala}
         fala={estado.fala}

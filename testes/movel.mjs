@@ -55,7 +55,7 @@ await pagina.mouse.down();
 await pagina.mouse.move(caixaAlca.x + caixaAlca.width / 2, 790, { steps: 5 });
 await pagina.mouse.up();
 await pagina.waitForTimeout(300);
-const proporcao = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v1")).proporcaoPrevia);
+const proporcao = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")).proporcaoPrevia);
 conferir(Math.abs(proporcao - 0.6) < 0.001, `alça respeita o máximo de 60% e salva (${proporcao})`);
 
 // Girar no meio da fase não perde nada.

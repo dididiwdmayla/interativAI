@@ -1,5 +1,5 @@
 import { ApiError, type Content, GoogleGenAI, ThinkingLevel } from "@google/genai";
-import { FASES } from "@/fases";
+import { faseDoId } from "@/conteudo";
 import { interpretarRespostaTutor } from "@/lib/tutor/interpretarResposta";
 import { ESQUEMA_RESPOSTA_TUTOR, montarMensagemAtual, PROMPT_SISTEMA_TUTOR } from "@/lib/tutor/promptTutor";
 import { gerarComResiliencia, type Tentativa } from "@/lib/tutor/resiliencia";
@@ -71,10 +71,10 @@ export async function POST(requisicao: Request) {
   if (!entrada) return erro("desconhecido", 400);
 
   // O enunciado oficial vem dos dados da fase; o do cliente é só reserva.
-  const objetivo = FASES.find((fase) => fase.id === entrada.faseId)?.objetivos.find(
-    (item) => item.id === entrada.objetivoId,
-  );
-  const enunciado = objetivo?.enunciado ?? entrada.enunciado;
+  const fase = faseDoId(entrada.faseId);
+  const objetivo =
+    fase?.tipo === "pratica" ? fase.objetivos.find((item) => item.id === entrada.objetivoId) : undefined;
+  const enunciado = objetivo?.enunciado.mouse ?? entrada.enunciado;
 
   const historico: Content[] = entrada.historico.map((mensagem) => ({
     role: mensagem.papel === "aluno" ? "user" : "model",
