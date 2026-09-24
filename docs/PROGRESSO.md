@@ -121,9 +121,8 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   `next dev` e em `next start` (build de produção): `testes/todos.mjs`
   (sincronia, ferramentas, fase inteira nos três modos, celular) e
   `testes/tutor.mjs` nos três cenários (sobrecarga total, reserva, sem
-  chave), todos com console limpo. Corrigido: menu do celular não fechava ao
-  escolher item; círculo da demo sem raio inicial. `PROJETO.md` com as
-  decisões novas.
+  chave), todos com console limpo. `PROJETO.md` com as decisões novas e
+  `testes/README.md` com como rodar.
 
 ## Critérios de pronto (verificados na Etapa 13)
 
