@@ -1,5 +1,6 @@
-/** Todas as ferramentas do jogo, na ordem em que aparecem na Fase 1. */
+/** Todas as ferramentas do jogo, na ordem em que são apresentadas. */
 export const IDS_FERRAMENTAS = [
+  // Unidade 1
   "painel",
   "previa",
   "me-ajuda",
@@ -9,6 +10,12 @@ export const IDS_FERRAMENTAS = [
   "editar-duplo-clique",
   "editor",
   "sincronia",
+  // Unidade 2
+  "trilha",
+  "esconder",
+  "apagar",
+  "desfazer",
+  "duplicar",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

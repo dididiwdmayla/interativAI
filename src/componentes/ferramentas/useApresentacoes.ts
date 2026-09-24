@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso, useProgresso } from "@/lib/armazemProgresso";
 import type { EtapaFase, PausaMotor } from "@/motor/estadoMotor";
-import type { Fase } from "@/motor/tipos";
+import type { Fase } from "@/conteudo/tipos";
 
 type Opcoes = {
   fase: Fase;
@@ -30,7 +30,9 @@ export function useApresentacoes({ fase, etapa, objetivoAtual, pausa, bloqueada 
     if (etapa !== "objetivos" || pausa !== null) return [];
     const pedidas = [
       ...(fase.apresentar ?? []),
-      ...fase.objetivos.slice(0, objetivoAtual + 1).flatMap((objetivo) => objetivo.apresentar ?? []),
+      ...(fase.tipo === "pratica" ? fase.objetivos : [])
+        .slice(0, objetivoAtual + 1)
+        .flatMap((objetivo) => objetivo.apresentar ?? []),
     ];
     return [...new Set(pedidas)].filter((id) => !apresentacoesVistas.includes(id));
   }, [fase, etapa, objetivoAtual, pausa, apresentacoesVistas]);

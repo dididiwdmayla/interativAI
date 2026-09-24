@@ -18,23 +18,44 @@ Estrutura futura (não construir agora, só não bloquear):
   Console, Rede, Aplicação.
 - Cada zona tem várias fases.
 
-Hoje existe **uma fase completa**: Ilha Sites › Elementos › Fase 1, "O site é
-seu", que valida o loop de aprendizado.
+Hoje existem duas unidades na Ilha Sites › Elementos:
+
+- **Unidade 1, "O site é seu"**: a Fase 1 (só objetivos guiados; os objetivos
+  sozinho e o desafio dela são o primeiro trabalho a fazer com a fábrica).
+- **Unidade 2, "Faxina no site"**: a unidade-modelo, completa (3 fases de
+  micro-passos no Jornal da Vila e o desafio na loja Brinquedos Arco-Íris).
+
+O conteúdo é produzido em massa a partir do formato declarativo, das
+checagens automáticas e do guia `docs/GUIA-DE-CONTEUDO.md`.
+
+### Modelo pedagógico (regra do projeto)
+
+Cada conteúdo X é uma **unidade**: (1) meta no começo, com o site do desafio
+antes e depois; (2) micro-passos, cada habilidade primeiro **guiada** (ajuda
+completa) e depois **sozinho** (só pergunta e dica) em outra situação; (3)
+**desafio** num site diferente, sem passo a passo, com checklist e "Rever";
+(4) **revisão espaçada**: cada fase revisita algo de antes, misturado na
+tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
 
 ## Regras de trabalho (obrigatórias)
 
-1. Trabalhar em etapas. No fim de cada etapa: `npm run build` e `npm run lint`
-   passando, commit em PT-BR, `docs/PROGRESSO.md` atualizado.
+1. Trabalhar em etapas. No fim de cada etapa: `npm run build`, `npm run lint`
+   e `npm run testar:conteudo` passando, commit em PT-BR,
+   `docs/PROGRESSO.md` atualizado.
 2. Se o contexto ficar pesado, parar num fim de etapa, com commit feito.
 3. Não inventar APIs, pacotes ou nomes de modelo. Confirmar na doc oficial.
 4. TypeScript estrito, sem `any`. Componentes pequenos, um por arquivo.
 5. **Zero emojis** em qualquer lugar (UI, falas, código de conteúdo, commits).
    Expressividade visual vem de SVG.
 6. **Zero cores literais** fora de `src/tema/tokens.css`. Única exceção: o CSS
-   do site-alvo fictício (`src/fases/**/siteAlvo.ts`), que representa "o site
-   de outra pessoa".
+   dos sites-alvo fictícios (`src/conteudo/**/sites/*.ts`), que representam
+   "o site de outra pessoa".
 7. Interface 100% em PT-BR.
 8. A chave do Gemini nunca vai para o cliente. Nada de `NEXT_PUBLIC_` com chave.
+9. Conteúdo é **só dado** (nada de função em fase) e segue o
+   `docs/GUIA-DE-CONTEUDO.md`. Toda ferramenta nova entra no registro de
+   ferramentas, com apresentação, card, `data-ferramenta` e variantes de
+   mouse e toque.
 
 ## Stack
 
@@ -46,27 +67,32 @@ seu", que valida o loop de aprendizado.
   (Flash mais recente GA na doc oficial em 2026-09), configurável por
   `GEMINI_MODEL`. Reserva em sobrecarga: `gemini-3.5-flash-lite` (Flash-Lite
   atual recomendado na doc em 2026-09), configurável por `GEMINI_MODEL_RESERVA`.
-- Persistência: `localStorage`, chave `ilha-sites:progresso:v1`, sempre com
-  try/catch e normalização.
+- Persistência: `localStorage`, chave `ilha-sites:progresso:v2`, sempre com
+  try/catch e normalização. A v1 é migrada sozinha na primeira leitura
+  (ids de fase renomeados, nada se perde) e fica intacta como cópia.
 - Fontes via `next/font/google`: Nunito (UI) e JetBrains Mono (código).
+- Testes de conteúdo: Vitest + jsdom (`npm run testar:conteudo`). Testes de
+  navegador: scripts Playwright em `testes/`.
 - Sem banco, sem login, sem backend além da rota do tutor.
 
 ## Arquitetura
 
 ```
 src/
-  app/                  rotas (/, /lab/mascote, /api/tutor)
+  app/                  rotas (/, /lab/mascote, /lab/fases, /api/tutor)
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
-  motor/                tipos das fases, validação, escada de ajuda, abas
-  fases/                dados das fases (uma pasta por fase)
+  conteudo/             conteúdo declarativo: tipos, conceitos, registro, checagens, índice
+    ilhas/sites/elementos/unidade-N/   uma pasta por unidade (fases, unidade.ts, sites/)
+  motor/                núcleo do painel, validadores, executor de ações, simulação, estado do motor
   componentes/
-    layout/             barra superior, trilha, estrelas, seletor de tema, som
-    painel/             DevTools simplificado: abas, árvore, editor, divisor
+    layout/             barra superior, onde estou, estrelas, botão Fases, tema, som
+    painel/             DevTools simplificado: abas, árvore (menu do nó, barra, trilha), editor
     preview/            janela de navegador falsa, iframe, sobreposição
-    mascote/            Mascote, Carinha, balão de fala, área inferior
-    jogo/               composição da tela e estado da fase (movel/: layouts e teclado)
+    mascote/            Mascote, Carinha, balão, previsão, checklist, Rever, selo Sozinho
+    jogo/               composição da tela, motor, meta, conclusão, Lista de fases (movel/)
+    lab/                o /lab/fases (validadores ao vivo, checagens, índice)
     ferramentas/        apresentação (spotlight), Caixa de Ferramentas, AlvoFerramenta
     icones/             ícones SVG (um por arquivo)
     ui/                 peças genéricas (dica, botão, modal)
@@ -87,7 +113,8 @@ src/
 
 - O estado principal é uma string: o HTML do `<body>` do site-alvo.
 - O `<head>` do site-alvo é fixo na fase e não aparece no editor.
-- Preview: `<iframe sandbox="allow-same-origin">` com `srcdoc` = head + body.
+- Preview: `<iframe sandbox="allow-same-origin">` com `srcdoc` = head + body
+  (+ a regra de esconder do F12, ver "Ferramentas da aba Elementos").
 - A árvore é construída do `contentDocument.body` depois do `load`.
 - **Caminho A** (editor): editor muda, debounce 300 ms, novo `srcdoc`, no
   `load` reconstrói a árvore e valida objetivos.
@@ -115,13 +142,62 @@ src/
 
 ### Motor de fases
 
-- Fases são **dados** (`src/fases/<id>/`), o motor é genérico.
-- Tipos principais em `src/motor/tipos.ts`: `Fase`, `Objetivo`, `Ajudas`,
-  `Fala`, `ContextoValidacao`, `ContextoFase`.
-- Objetivos sequenciais, validação a cada mudança e evento
-  (`selecionou`, `inspecionou`, `editouTexto`, `editouAtributo`, `editouCodigo`).
+- Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
+  genérico. Tipos em `src/conteudo/tipos.ts`: `Validador`, `Acao`,
+  `Objetivo`, `Fase` (`pratica` | `desafio`), `Unidade`, `SiteAlvo`.
+- Validadores são interpretados por `src/motor/validadores.ts`; ações, por
+  `src/motor/executarAcao.ts`, que chama o núcleo do painel
+  (`src/motor/nucleoPainel.ts`): as mesmas funções que a interface usa.
+- Objetivos sequenciais, validação a cada mudança e evento (`selecionou`,
+  `inspecionou`, `trilha`, `editouTexto`, `editouAtributo`, `editouCodigo`,
+  `escondeu`, `mostrou`, `apagou`, `duplicou`, `desfez`, `refez`,
+  `respondeuPrevisao`). Eventos contam a partir do começo do objetivo; os
+  dos momentos roteirizados não contam.
 - Escada de ajuda "Me ajuda": pergunta, dica, aponta a linha, solução (custa
   1 estrela; mínimo de 1 estrela ao concluir).
+- Estado em `src/motor/estadoMotor.ts`, comportamento em
+  `componentes/jogo/useMotorFase.ts`. Etapas: `meta`, `introducao`,
+  `objetivos`, `concluida`. Modos de jogo: `jogo`, `revisao` (aberta pelo
+  "Rever": sem estrelas, sem salvar, começa nos objetivos, botão "Voltar ao
+  desafio") e `lab` (/lab/fases: sem salvar, sem apresentações).
+- **Guiado**: os 4 degraus. **Sozinho**: selo "Sozinho" (carinha
+  determinada), "Me ajuda" até a dica, tutor só pergunta, comemoração "Fez
+  sozinho!". **Previsão**: card com opções no balão (sem "Me ajuda" e sem
+  apresentações até o palpite), resultado com a explicação, errar não custa
+  estrela; depois o jogador faz a ação e vê acontecer.
+- **Momentos roteirizados** (`eventosIniciais`, `eventoAoComecar`): o
+  computadorzinho faz ações pelo painel, com animação de esbarrão opcional.
+  Ao retomar no meio, a página volta ao HTML de antes (`htmlInicioObjetivo`)
+  e o momento roda de novo.
+- **Desafio**: meta com antes/depois (o depois sai de
+  `estadoFinalDoDesafio`, aplicando as soluções das partes), checklist ao
+  vivo (parte marcada fica marcada), "Me ajuda" vira "Rever" (lista das
+  partes pendentes; cada uso custa 1 estrela, salva o desafio e abre a fase
+  de `revisarEm` em modo revisão), tutor só pergunta.
+- **Meta**: mostrada na primeira fase da unidade e antes do desafio, quando
+  a unidade tem `meta.desafioId`.
+
+### Navegação (provisória, até existir o mapa)
+
+- `Jogo` abre a fase salva em `faseAtual` (ou a primeira). "Lista de fases"
+  (gaveta no desktop, folha no celular) mostra unidades e fases com cadeado
+  nas bloqueadas (`src/lib/liberacao.ts`: abre quando a anterior foi
+  concluída) e estrelas nas concluídas. A conclusão tem "Próxima fase".
+- A palavra "trilha" fica reservada para a ferramenta; o "onde estou" da
+  barra superior é o componente `OndeEstou`.
+
+### Fábrica de conteúdo
+
+- Guia: `docs/GUIA-DE-CONTEUDO.md`. Template anotado: `docs/TEMPLATE-FASE.ts`.
+- Catálogo de conceitos: `src/conteudo/conceitos.ts`; índice conceito ->
+  fases que ensinam, praticam, revisam e pedem: `montarIndice()`
+  (`src/conteudo/indice.ts`), base do futuro computadorzinho navegador.
+- Checagens: `src/conteudo/checagens.ts` (regras gerais, de dados e de
+  simulação), rodando em `npm run testar:conteudo` e no `/lab/fases`.
+- Simulação headless: `src/motor/simulacao.ts` (Document solto + o mesmo
+  núcleo do painel da interface).
+- `/lab/fases`: qualquer fase direto, validadores ao vivo, aplicar a solução
+  do objetivo atual, resetar, checagens e índice.
 
 ### Apresentação de ferramentas
 
@@ -145,10 +221,28 @@ src/
   interface ou, para `uso: "tocar"`, por toque/rolagem no alvo (inclusive
   dentro do iframe). "Pular" sempre visível. Vistas e puladas ficam em
   `apresentacoesVistas`.
+- A fila espera enquanto um momento roteirizado roda, enquanto um card de
+  previsão não foi respondido e na revisão/lab (no lab não há
+  apresentações). No "Experimente", o cartão do mascote também evita as
+  áreas liberadas (a árvore da trilha, a tela do inspecionar), se couber.
 - Caixa de Ferramentas: gaveta (desktop) ou folha arrastável (celular), card
   por ferramenta, silhueta com carinha dormindo para as ainda não vistas,
   "Rever apresentação". O "?" discreto (só com mouse) e o toque longo
   (550 ms, cancela se o dedo andar) abrem direto o card.
+
+### Ferramentas da aba Elementos (Unidade 2)
+
+- Trilha de elementos no rodapé da árvore (clicar seleciona o ancestral).
+- Esconder como o Chrome (tecla H): classe `__web-inspector-hide-shortcut__`
+  no elemento e regra `visibility: hidden !important` no head do site-alvo
+  (`src/lib/esconder.ts`); o espaço continua e a classe aparece na árvore
+  e no código.
+- Apagar (Delete), duplicar (Shift+Alt+seta para baixo), desfazer e
+  refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y com o foco no painel; botões no
+  topo do painel). Tudo passa pelo núcleo `src/motor/nucleoPainel.ts`.
+- Menu do nó: botão direito (desktop) ou toque longo (celular). No
+  celular, o nó selecionado ganha uma barra com Editar, Esconder, Apagar,
+  Duplicar, Desfazer e Refazer.
 
 ### Mascote
 
@@ -162,6 +256,9 @@ src/
 
 - `POST /api/tutor` (runtime nodejs). Entrada: fase, objetivo, degrau atual,
   HTML atual, pergunta, histórico (últimas 6). Saída `{ texto, expressao }`.
+- O servidor tira dos dados da fase (`src/lib/tutor/contextoDoTutor.ts`) o
+  enunciado oficial, o site-alvo e o **modo** (`guiado`, `sozinho` ou
+  `desafio`); no sozinho e no desafio o prompt manda só fazer perguntas.
 - Variáveis: `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_MODEL_RESERVA`
   (opcional).
 - Resistência a sobrecarga (`src/lib/tutor/resiliencia.ts`): 503/429 ou
@@ -224,15 +321,26 @@ src/
 
 ## Testes
 
-Scripts Playwright em `testes/` (ver `testes/README.md`), rodando contra o
-jogo no ar: sincronia, apresentações e Caixa, a fase inteira em desktop,
-retrato (390×844, toque) e paisagem (844×390, toque), celular (prévia ao
-editar, teclado simulado, alça, giro, spotlight) e tutor (sobrecarga,
-reserva, sem chave).
+- **Conteúdo** (`npm run testar:conteudo`, Vitest + jsdom, `testes/conteudo/`):
+  cada regra de `src/conteudo/checagens.ts` vira um teste por fase (ids,
+  conceitos, ferramentas apresentadas, limites de texto, emojis, previsões,
+  estado inicial, soluções de teste e do "Me ajuda" cumprindo cada objetivo
+  na hora certa, momentos roteirizados, partes do desafio), mais o índice de
+  conceitos, o núcleo do painel, a migração do progresso, o contexto do
+  tutor e o próprio template anotado.
+- **Navegador** (Playwright em `testes/`, ver `testes/README.md`), contra o
+  jogo no ar: sincronia, apresentações e Caixa, ferramentas novas (desktop,
+  celular, toque longo, apresentações), a Fase 1 e as Unidades 1 e 2
+  inteiras em desktop, retrato (390×844, toque) e paisagem (844×390, toque),
+  retomar no meio de um momento roteirizado, celular (prévia ao editar,
+  teclado simulado, alça, giro, spotlight) e tutor (sobrecarga, reserva,
+  sem chave).
 
 ## Fora do escopo agora
 
-Mapa das ilhas, outras zonas e fases, abas além de Elementos, site-alvo
-externo validado, login, banco de dados, Monaco. Ferramentas novas do
-DevTools (trilha de hierarquia, apagar/esconder elemento, desfazer,
-duplicar) e a Fase 2.
+Mapa das ilhas (a Lista de fases é provisória), computadorzinho navegador
+(o índice `montarIndice()` já existe), atividades teóricas (linha do tempo,
+comparador de linguagens, diagrama de rede; o registro de tipos de fase já
+está pronto para elas), outras zonas, abas além de Elementos, objetivos
+sozinho e desafio da Unidade 1 (primeiro trabalho com a fábrica), site-alvo
+externo validado, login, banco de dados, Monaco.

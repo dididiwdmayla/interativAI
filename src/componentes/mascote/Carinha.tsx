@@ -1,4 +1,4 @@
-export type VarianteCarinha = "feliz" | "dormindo" | "surpresa";
+export type VarianteCarinha = "feliz" | "dormindo" | "surpresa" | "determinada";
 export type TomCarinha = "destaque" | "sucesso" | "primaria" | "suave";
 
 type Props = {
@@ -66,6 +66,15 @@ export function Carinha({ variante, tom = "destaque", tamanho = 20, className, r
           <path d="M6.8 10.5 Q8.6 12.3 10.4 10.5" {...traco} />
           <path d="M13.6 10.5 Q15.4 12.3 17.2 10.5" {...traco} />
           <path d="M10.5 15.5 h3" {...traco} />
+        </g>
+      )}
+      {variante === "determinada" && (
+        <g>
+          <path d="M6.6 7.4 L10.2 8.8" {...traco} />
+          <path d="M17.4 7.4 L13.8 8.8" {...traco} />
+          <circle cx="8.8" cy="11" r="1.4" fill={cores.rosto} />
+          <circle cx="15.2" cy="11" r="1.4" fill={cores.rosto} />
+          <path d="M9 15.4 Q12 17.2 15 15.4" {...traco} />
         </g>
       )}
       {variante === "surpresa" && (

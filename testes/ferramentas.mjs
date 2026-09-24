@@ -26,14 +26,15 @@ for (const id of ["previa", "me-ajuda", "tutor", "arvore"]) {
 }
 await pagina.waitForTimeout(400);
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "Esc pula também");
-const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v1")).apresentacoesVistas);
+const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")).apresentacoesVistas);
 conferir(salvo.length === 5, `puladas ficam salvas (${salvo.join(", ")})`);
 
 // Caixa: conhecidas e silhuetas.
 await pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }).click();
 const caixa = pagina.getByRole("dialog", { name: "Caixa de Ferramentas" });
 await caixa.waitFor();
-conferir((await caixa.getByText("Você conhece essa em breve").count()) === 4, "4 ferramentas ainda em silhueta");
+const totalCards = await caixa.locator("[data-card]").count();
+conferir((await caixa.getByText("Você conhece essa em breve").count()) === totalCards - 5, `${totalCards - 5} ferramentas ainda em silhueta`);
 conferir((await caixa.getByRole("button", { name: "Rever apresentação" }).count()) === 5, "5 cards com Rever");
 await pagina.screenshot({ path: "/tmp/claude-0/caixa.png" });
 

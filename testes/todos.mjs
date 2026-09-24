@@ -9,6 +9,12 @@ const TESTES = [
   ["fase-completa.mjs", "retrato"],
   ["fase-completa.mjs", "paisagem"],
   ["movel.mjs"],
+  ["ferramentas-novas.mjs"],
+  ["unidades.mjs", "desktop"],
+  ["unidades.mjs", "retrato"],
+  ["unidades.mjs", "paisagem"],
+  ["retomar.mjs"],
+  ["migracao.mjs"],
 ];
 
 let falhas = 0;

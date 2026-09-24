@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { type ReactNode, useEffect, useRef } from "react";
 import type { Expressao } from "@/motor/expressao";
 import { Mascote } from "./Mascote";
+import { Tropeco } from "./Tropeco";
 
 type Props = {
   expressao: Expressao;
@@ -20,6 +21,8 @@ type Props = {
   chaveFala?: string;
   /** Recadinho curto ao lado do avatar, sem abrir o balão. */
   recado?: string | null;
+  /** Momento roteirizado: o avatar esbarra e quase cai. */
+  tropecando?: boolean;
   /** Fala, objetivo, "Me ajuda" e campo do tutor. */
   children: ReactNode;
 };
@@ -37,6 +40,7 @@ export function MascoteFlutuante({
   fecharDepoisDe = null,
   chaveFala,
   recado = null,
+  tropecando = false,
   children,
 }: Props) {
   const arrasto = useDragControls();
@@ -132,7 +136,9 @@ export function MascoteFlutuante({
         className="fixed bottom-3 right-3 z-40 grid place-items-center rounded-full border-2 border-borda bg-superficie shadow-[0_4px_0_var(--cor-sombra)]"
         style={{ width: tamanho, height: tamanho }}
       >
-        <Mascote expressao={expressao} tamanho={tamanho - 12} />
+        <Tropeco ativo={tropecando}>
+          <Mascote expressao={expressao} tamanho={tamanho - 12} />
+        </Tropeco>
       </button>
     </>
   );

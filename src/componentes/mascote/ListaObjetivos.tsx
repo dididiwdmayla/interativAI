@@ -2,9 +2,12 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Carinha } from "./Carinha";
+import { SeloSozinho } from "./SeloSozinho";
+
+export type ObjetivoNaTela = { id: string; enunciado: string; sozinho: boolean };
 
 type Props = {
-  objetivos: readonly { id: string; enunciado: string }[];
+  objetivos: readonly ObjetivoNaTela[];
   concluidos: number;
   /** Índice do objetivo ativo, ou null se nenhum está ativo. */
   ativo: number | null;
@@ -60,6 +63,7 @@ export function ListaObjetivos({ objetivos, concluidos, ativo }: Props) {
                 </AnimatePresence>
               </span>
               <span className={`${atual ? "" : "line-clamp-1"} ${feito ? "line-through decoration-2" : ""}`}>
+                {objetivo.sozinho && <SeloSozinho compacto className="mr-1 align-middle" />}
                 {objetivo.enunciado}
               </span>
             </motion.li>

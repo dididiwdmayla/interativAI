@@ -23,3 +23,17 @@ export const TAGS_VAZIAS = new Set([
   "track",
   "wbr",
 ]);
+
+/** O que dá para fazer com um nó da árvore (menu do botão direito e barra do celular). */
+export type AcoesNo = {
+  podeEditar: boolean;
+  podeEsconder: boolean;
+  podeApagar: boolean;
+  podeDuplicar: boolean;
+  /** Já está escondido: o item vira "Mostrar de novo". */
+  escondido: boolean;
+  editar: () => void;
+  esconder: () => void;
+  apagar: () => void;
+  duplicar: () => void;
+};

@@ -16,7 +16,7 @@ type Props = {
 /** Balão de fala do computadorzinho, com rabinho apontando para ele. */
 export function BalaoFala({ fala, pergunta, children, rabo = "esquerda" }: Props) {
   return (
-    <div className="relative flex min-h-[5.5rem] flex-1 flex-col justify-between gap-2 rounded-2xl border-2 border-borda bg-painel px-4 py-3">
+    <div className="relative flex min-h-[5.5rem] flex-1 shrink-0 flex-col justify-between gap-2 rounded-2xl border-2 border-borda bg-painel px-4 py-3">
       <span
         className={`absolute h-4 w-4 border-b-2 border-l-2 border-borda bg-painel ${
           rabo === "esquerda" ? "-left-[9px] bottom-6 rotate-45" : "-bottom-[9px] right-6 -rotate-45"

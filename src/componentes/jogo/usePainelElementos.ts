@@ -5,9 +5,10 @@ import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import { chavesAncestrais, elementoDoNo } from "@/lib/arvore";
 import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo } from "@/lib/caminhoElementos";
-import { caminhoDoNo, ehElemento, ehTexto, noPeloCaminho } from "@/lib/dom";
+import { caminhoDoNo } from "@/lib/dom";
 import { medirNo, type Realce } from "@/lib/medirElemento";
 import type { EventoFase, OrigemSelecao } from "@/motor/eventos";
+import { criarNucleoPainel, type Selecao } from "@/motor/nucleoPainel";
 
 type Opcoes = {
   editorRef: RefObject<ApiEditor | null>;
@@ -15,11 +16,6 @@ type Opcoes = {
   editarDocumento: (mutar: (documento: Document) => boolean) => boolean;
   aoEvento: (evento: EventoFase) => void;
 };
-
-function tagDoNo(no: Node | null): string {
-  if (ehElemento(no)) return no.tagName.toLowerCase();
-  return elementoDoNo(no)?.tagName.toLowerCase() ?? "";
-}
 
 /** Elemento sob um ponto do iframe; o <html> vira <body>. */
 function elementoNoPonto(documento: Document, x: number, y: number): Element | null {
@@ -36,12 +32,16 @@ function alvoDoNo(documento: Document | null, no: Node | null): AlvoCodigo | nul
 }
 
 /**
- * Estado da aba Elementos: seleção, nós recolhidos, realce no preview,
- * modo inspecionar e edição pela árvore (caminho B).
+ * Estado da aba Elementos na interface: seleção, nós recolhidos, realce no
+ * preview, modo inspecionar e as edições pela árvore (caminho B).
  *
- * Sincronia tripla: a seleção (pela árvore, inspeção ou código) acende o nó
- * na árvore, o trecho no editor e a caixa no preview. O hover na árvore só
- * troca a caixa do preview, sem mudar a seleção.
+ * Seleção, edições e a pilha de desfazer moram no núcleo
+ * (src/motor/nucleoPainel.ts), que é o mesmo código que os testes de
+ * conteúdo usam. Este hook só liga o núcleo à interface.
+ *
+ * Sincronia tripla: a seleção (pela árvore, inspeção, trilha ou código)
+ * acende o nó na árvore, o trecho no editor e a caixa no preview. O hover
+ * na árvore só troca a caixa do preview, sem mudar a seleção.
  */
 export function usePainelElementos({ editorRef, obterDocumento, editarDocumento, aoEvento }: Opcoes) {
   const [caminhoSelecionado, setCaminhoSelecionado] = useState<number[] | null>(null);
@@ -49,24 +49,16 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const [realce, setRealce] = useState<Realce | null>(null);
   const [inspecionando, setInspecionando] = useState(false);
   const [destaque, setDestaque] = useState<DestaqueArvore | null>(null);
+  const [historico, setHistorico] = useState({ podeDesfazer: false, podeRefazer: false });
   const noRealcado = useRef<Node | null>(null);
-  const caminhoAtual = useRef<number[] | null>(null);
   const inspecionandoAtual = useRef(false);
-  const aoEventoAtual = useRef(aoEvento);
-
-  useEffect(() => {
-    aoEventoAtual.current = aoEvento;
-  }, [aoEvento]);
+  const [nucleo] = useState(() => criarNucleoPainel({ obterDocumento, mutarDocumento: editarDocumento }));
 
   useEffect(() => {
     inspecionandoAtual.current = inspecionando;
   }, [inspecionando]);
 
-  const noSelecionado = useCallback((): Node | null => {
-    const documento = obterDocumento();
-    const caminho = caminhoAtual.current;
-    return documento?.body && caminho ? noPeloCaminho(documento.body, caminho) : null;
-  }, [obterDocumento]);
+  const noSelecionado = nucleo.noSelecionado;
 
   /** A caixa do preview mostra o nó sob o mouse ou, sem hover, o selecionado. */
   const remedirRealce = useCallback(() => {
@@ -100,18 +92,41 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     });
   }, []);
 
+  // Avisos do núcleo viram efeitos na interface.
+  useEffect(() => {
+    nucleo.definirAvisos({
+      aoEvento,
+      aoSelecionar: (selecao: Selecao | null) => {
+        setCaminhoSelecionado(selecao?.caminho ?? null);
+        if (selecao) expandirAte(selecao.caminho);
+        // Seleção vinda do código não mexe no editor: o cursor já está lá.
+        if (selecao?.origem !== "codigo") destacarNoEditor(selecao?.origem !== "sistema");
+        remedirRealce();
+      },
+      aoMudar: () => {
+        destacarNoEditor(false);
+        remedirRealce();
+      },
+      aoMudarHistorico: () => {
+        setHistorico({ podeDesfazer: nucleo.podeDesfazer(), podeRefazer: nucleo.podeRefazer() });
+      },
+    });
+  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirRealce]);
+
+  /**
+   * Seleciona um nó. É a função que a árvore, a setinha, a trilha, o
+   * código e as soluções chamam; a setinha também sai do modo inspecionar.
+   */
   const selecionar = useCallback(
     (caminho: number[], origem: OrigemSelecao) => {
-      caminhoAtual.current = caminho;
-      setCaminhoSelecionado(caminho);
-      expandirAte(caminho);
-      const no = noSelecionado();
-      // Seleção vinda do código não mexe no editor: o cursor já está lá.
-      if (origem !== "codigo") destacarNoEditor(true);
-      remedirRealce();
-      aoEventoAtual.current({ tipo: "selecionou", tag: tagDoNo(no), caminho, origem });
+      if (origem === "inspecao") {
+        inspecionandoAtual.current = false;
+        setInspecionando(false);
+        noRealcado.current = null;
+      }
+      nucleo.selecionar(caminho, origem);
     },
-    [destacarNoEditor, expandirAte, noSelecionado, remedirRealce],
+    [nucleo],
   );
 
   /** Cursor no editor: seleciona o elemento mais interno ali, se o DOM concordar. */
@@ -173,13 +188,9 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     (elemento: Element) => {
       const documento = obterDocumento();
       if (!documento?.body) return;
-      const caminho = caminhoDoNo(documento.body, elemento);
+      const caminho = elemento === documento.body ? [] : caminhoDoNo(documento.body, elemento);
       if (!caminho) return;
-      inspecionandoAtual.current = false;
-      setInspecionando(false);
-      noRealcado.current = null;
       selecionar(caminho, "inspecao");
-      aoEventoAtual.current({ tipo: "inspecionou", tag: tagDoNo(elemento), caminho });
     },
     [obterDocumento, selecionar],
   );
@@ -236,53 +247,6 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     return () => window.removeEventListener("keydown", aoTeclar, true);
   }, [inspecionando, obterDocumento, realcar, sairDaInspecao, escolherElemento]);
 
-  const editarTexto = useCallback(
-    (caminho: number[], texto: string) => {
-      let tag = "";
-      const mudou = editarDocumento((documento) => {
-        const no = noPeloCaminho(documento.body, caminho);
-        if (!no) return false;
-        tag = tagDoNo(no);
-        if (ehTexto(no)) {
-          if (no.nodeValue === texto) return false;
-          no.nodeValue = texto;
-          return true;
-        }
-        if (ehElemento(no)) {
-          if (no.textContent === texto) return false;
-          no.textContent = texto;
-          return true;
-        }
-        return false;
-      });
-      if (mudou) {
-        destacarNoEditor(false);
-        remedirRealce();
-        aoEventoAtual.current({ tipo: "editouTexto", tag, caminho, texto });
-      }
-    },
-    [destacarNoEditor, editarDocumento, remedirRealce],
-  );
-
-  const editarAtributo = useCallback(
-    (caminho: number[], nome: string, valor: string) => {
-      let tag = "";
-      const mudou = editarDocumento((documento) => {
-        const no = noPeloCaminho(documento.body, caminho);
-        if (!ehElemento(no) || no.getAttribute(nome) === valor) return false;
-        tag = tagDoNo(no);
-        no.setAttribute(nome, valor);
-        return true;
-      });
-      if (mudou) {
-        destacarNoEditor(false);
-        remedirRealce();
-        aoEventoAtual.current({ tipo: "editouAtributo", tag, caminho, atributo: nome, valor });
-      }
-    },
-    [destacarNoEditor, editarDocumento, remedirRealce],
-  );
-
   /** Chamado a cada novo load do iframe (caminho A). */
   const aoRecarregarDocumento = useCallback(
     (documento: Document) => {
@@ -299,6 +263,7 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     realce,
     inspecionando,
     destaque,
+    historico,
     destacarNaArvore,
     selecionar,
     selecionarPeloCodigo,
@@ -310,8 +275,17 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     apontarNaTela,
     escolherNaTela,
     rolarTela,
-    editarTexto,
-    editarAtributo,
+    noSelecionado,
+    selecao: nucleo.selecao,
+    editarTexto: nucleo.editarTexto,
+    editarAtributo: nucleo.editarAtributo,
+    alternarEsconder: nucleo.alternarEsconder,
+    apagar: nucleo.apagar,
+    duplicar: nucleo.duplicar,
+    inserirHtml: nucleo.inserirHtml,
+    desfazer: nucleo.desfazer,
+    refazer: nucleo.refazer,
+    antesDeEditarCodigo: nucleo.antesDeEditarCodigo,
     aoRecarregarDocumento,
   };
 }

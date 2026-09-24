@@ -1,7 +1,12 @@
 # Progresso
 
-Checklist das etapas da Fase 1 jogável (Ilha Sites › Zona Elementos).
-Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
+Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
+`npm run build`, `npm run lint` e (a partir da Etapa 15)
+`npm run testar:conteudo` passando e um commit.
+
+**Estado atual:** rodada 3 concluída (fábrica de conteúdo, ferramentas
+novas, motor dos modos e Unidade 2). Próximo trabalho: objetivos sozinho e
+desafio da Unidade 1, usando a fábrica (ver "Próximos passos").
 
 - [x] **Etapa 1: Fundação.** Next + TS + Tailwind + Framer Motion, tokens e
   temas Doce e Fliperama (Segredo já definido, bloqueado), seletor de tema,
@@ -124,6 +129,128 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
   chave), todos com console limpo. `PROJETO.md` com as decisões novas e
   `testes/README.md` com como rodar.
 
+## Rodada 3: fábrica de conteúdo, ferramentas novas e Unidade 2
+
+Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
+
+- [x] **Etapa 14: Formato declarativo.** Tipos em `src/conteudo/tipos.ts`
+  (`Validador`, `Acao`, `Objetivo` guiado/sozinho e ação/previsão, `Fase`
+  prática/desafio, `Unidade`, `SiteAlvo`), catálogo `src/conteudo/conceitos.ts`,
+  registro `src/conteudo/index.ts`, registro de tipos de fase
+  `src/motor/tiposDeFase.ts`. Interpretador `src/motor/validadores.ts` (com
+  resultado detalhado), executor `src/motor/executarAcao.ts` (`$0`, via
+  trilha sobe pelos ancestrais) e núcleo sem React `src/motor/nucleoPainel.ts`
+  (seleção, texto, atributo, esconder do Chrome, apagar, duplicar, inserir
+  HTML, pilha de 50 fotos para desfazer/refazer), usado pelo
+  `usePainelElementos`. Fase 1 migrada para
+  `src/conteudo/ilhas/sites/elementos/unidade-1/` (id
+  `sites-elementos-u1-f1`), comportamento igual (bateria Playwright antiga
+  passou inteira). Progresso `ilha-sites:progresso:v2` com migração
+  automática da v1 (ids renomeados, fase atual, campos novos com padrão).
+- [x] **Etapa 15: Testes de conteúdo e /lab/fases.** `npm run testar:conteudo`
+  (Vitest + jsdom, `vitest.config.mts`, testes em `testes/conteudo/`).
+  Regras em `src/conteudo/checagens.ts` (gerais, de dados e de simulação),
+  simulação headless `src/motor/simulacao.ts` (mesmo núcleo da interface),
+  `montarIndice()` em `src/conteudo/indice.ts`. Testes do núcleo, dos
+  validadores e da migração v1. Rota `/lab/fases` (fora da navegação):
+  abre qualquer fase no primeiro objetivo, sem salvar e sem apresentações,
+  com gaveta de validadores ao vivo, "Aplicar solução do objetivo atual",
+  "Resetar fase", checagens rodando no navegador e índice de conceitos.
+  Sabotagem de seletor conferida: a falha diz fase, objetivo, ação e motivo.
+- [x] **Etapa 16: Ferramentas novas do DevTools.** Registro com `trilha`,
+  `esconder`, `apagar`, `desfazer` (e refazer) e `duplicar`, cada uma com
+  ícone SVG, card, apresentação (texto de mouse e de toque, "No F12 de
+  verdade" conferido na doc do Chrome e no código do devtools-frontend) e
+  mini demo (trilha, esconder, apagar, duplicar). Trilha
+  (`TrilhaElementos`) no rodapé da árvore: `html › body › ... ›
+  tag#id.classe`, clicar seleciona o ancestral (evento `trilha`), rola na
+  horizontal no celular. Esconder igual ao Chrome: tecla H alterna a classe
+  `__web-inspector-hide-shortcut__`, que aparece na árvore e no código, com
+  a regra `visibility: hidden !important` no head do site-alvo. Apagar
+  (Delete ou Backspace; seleção vai ao próximo irmão ou ao pai), duplicar
+  (Shift+Alt+seta para baixo, cópia selecionada), desfazer/refazer (pilha
+  de 50 fotos, Ctrl+Z e Ctrl+Shift+Z ou Ctrl+Y com o foco no painel e
+  botões no topo do painel; no editor vale o do CodeMirror; a primeira
+  tecla de uma digitação no código também vira foto). Menu do nó
+  (`MenuNo`): botão direito, tecla Menu/Shift+F10 ou toque longo no nó (o
+  toque longo em botões de ferramenta continua abrindo o card:
+  `reivindicarToque`). Barra de ações no nó selecionado no celular
+  (`BarraAcoesNo`, 6 botões de 44 px). No "Experimente", o cartão do
+  mascote também evita as áreas liberadas. Teste:
+  `testes/ferramentas-novas.mjs` (desktop e celular, apresentações).
+- [x] **Etapa 17: Motor dos modos.** `useMotorFase` reescrito para prática
+  e desafio, com modos de jogo `jogo`, `revisao` e `lab`
+  (`src/motor/estadoMotor.ts`). Meta com antes/depois (`TelaMeta`,
+  `MiniPrevia`; o depois sai de `estadoFinalDoDesafio`) no começo da
+  unidade e antes do desafio, quando a unidade tem desafio. Sozinho: selo
+  "Sozinho" com carinha determinada (lista, barra do celular, linha do
+  balão), "Me ajuda" só até a dica, comemoração "Fez sozinho!". Previsão:
+  card com opções no balão (sem "Me ajuda" antes do palpite), resultado
+  com a explicação, errar não custa estrela, apresentações esperam o
+  palpite. Momentos roteirizados (`eventosIniciais`, `eventoAoComecar`)
+  com a animação de esbarrão (`Tropeco`); retomar no meio volta ao HTML de
+  antes e roda o momento de novo. Desafio: checklist que marca as partes
+  ao vivo (e elas ficam marcadas), "Me ajuda" vira "Rever" com a lista das
+  partes pendentes, cada Rever custa 1 estrela (mínimo 1), salva o desafio
+  e abre a fase em modo revisão (sem estrelas, sem salvar, "Voltar ao
+  desafio"). Navegação: Lista de fases (gaveta ou folha) com cadeados,
+  "Próxima fase" na conclusão, fase atual salva em `faseAtual`. Tutor
+  recebe o modo (guiado, sozinho, desafio) calculado no servidor e só faz
+  perguntas nos dois últimos.
+- [x] **Etapa 18: Unidade 2, "Faxina no site" (a unidade-modelo).** Pasta
+  `src/conteudo/ilhas/sites/elementos/unidade-2/` com um arquivo por fase
+  (cada um explica as decisões pedagógicas no topo) e `unidade.ts` (meta e
+  desafio). Sites-alvo novos em `sites/`: Jornal da Vila (banner
+  `#banner-topo`, pop-up `#popup-cookies` no meio da página, três
+  `article.noticia`, `#anuncio-lateral`, `#rodape`; versão limpa para a
+  fase 3) e Brinquedos Arco-Íris (pop-up `#popup-oferta` flutuando,
+  banner, anúncio, `#vitrine` com 4 produtos desenhados em CSS). Fases:
+  família de elementos (trilha, previsão sobre o main, sozinho com a
+  setinha), esconder ou apagar (previsão, esbarrão que apaga o rodapé,
+  desfazer, faxina sozinho revisando edição de texto), copia e cola
+  (trilha + duplicar + editar, sozinho com duas cópias) e o desafio de 5
+  partes. `testar:conteudo` verde (90 testes). Jornada inteira das
+  Unidades 1 e 2 em Playwright nos três layouts (`testes/unidades.mjs`) e
+  retomada no meio do esbarrão (`testes/retomar.mjs`).
+  Nota: o pedido previa "terminando com 5 notícias" no sozinho da fase 3,
+  mas com as 3 originais, a cópia do guiado e as 2 novas são 6; o
+  validador pede 6 notícias e 3 títulos novos diferentes entre si.
+- [x] **Etapa 19: Guia, template, docs e testes gerais.**
+  `docs/GUIA-DE-CONTEUDO.md` (voz do computadorzinho, modelo pedagógico,
+  formato com tabelas de validadores e ações, escada de ajuda, previsão,
+  momentos roteirizados, desafio, regras de dificuldade, limites,
+  ferramentas, sites-alvo, conceitos, validador custom, passo a passo e
+  checklist) e `docs/TEMPLATE-FASE.ts` (prática e desafio anotados; compila
+  e passa nas regras de fase, conferido em `testes/conteudo/template.test.ts`).
+  Contexto do tutor extraído para `src/lib/tutor/contextoDoTutor.ts` e
+  testado. Teste de navegador da migração v1 (`testes/migracao.mjs`).
+  `PROJETO.md`, `README.md` e `testes/README.md` atualizados.
+
+## Critérios de pronto da rodada 3 (verificados na Etapa 19)
+
+- [x] `npm run build`, `npm run lint` e `npm run testar:conteudo` (119
+  testes) passam; console limpo em todos os testes de navegador.
+- [x] Playwright: Unidades 1 e 2 jogadas do começo ao fim no desktop, em
+  retrato (390×844, toque) e em paisagem (844×390, toque)
+  (`testes/unidades.mjs`), no build de produção e no dev. Bateria inteira
+  (`testes/todos.mjs`, 12 scripts) e os três cenários do tutor verdes.
+- [x] Progresso antigo (v1) migra sem perda (`testes/migracao.mjs` e
+  `testes/conteudo/progresso.test.ts`).
+- [x] Sabotagem: trocar `#popup-cookies` por `#popup-cookie` na solução do
+  objetivo 2 da fase `sites-elementos-u2-f2` faz o `testar:conteudo` falhar
+  com "objetivo 2 "apagar-popup": a solucaoDeTeste quebrou na ação 2 de 2
+  (apagar #popup-cookie): o seletor "#popup-cookie" não achou nenhum
+  elemento". Sabotagem desfeita.
+- [x] Buscas no repositório: nenhum emoji, nenhuma cor literal fora de
+  `src/tema/tokens.css` e dos sites-alvo (`src/conteudo/**/sites/`),
+  nenhum `NEXT_PUBLIC_GEMINI`.
+- [x] Atalhos e comportamentos do Chrome conferidos na doc oficial (fonte
+  do developer.chrome.com no GitHub: H esconde, Delete apaga, Ctrl+Z
+  desfaz, Ctrl+Y ou Cmd+Shift+Z refaz, Shift+Alt+seta para baixo duplica,
+  trilha no rodapé da aba Elements) e no código do devtools-frontend
+  (classe `__web-inspector-hide-shortcut__` com `visibility: hidden
+  !important`).
+
 ## Critérios de pronto (verificados na Etapa 13)
 
 - [x] `npm run build` e `npm run lint` passam; console limpo em todos os testes.
@@ -162,14 +289,26 @@ Cada etapa termina com `npm run build` e `npm run lint` passando e um commit.
 
 ## Próximos passos sugeridos
 
+- Objetivos sozinho e desafio da Unidade 1 com a fábrica
+  (`docs/GUIA-DE-CONTEUDO.md`), preenchendo `meta.desafioId` dela.
+- Próximas unidades da zona Elementos, copiando a pasta da Unidade 2.
+- Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.
 - Configurar `GEMINI_MODEL_RESERVA` na Vercel só se quiser outro reserva.
-- Ferramentas novas do DevTools e a Fase 2, já usando o registro de
-  ferramentas e o `apresentar` dos objetivos.
 
 ## Notas da sessão
 
 - Etapa 1: `ai.google.dev` está bloqueado pela rede do ambiente; o nome do
   pacote (`@google/genai`) e do modelo (`gemini-3.8-flash`) foram confirmados
   pela busca na doc oficial e pelo README do pacote no npm.
+- Etapa 16: `developer.chrome.com` está bloqueado pela rede do ambiente; a
+  doc oficial foi lida pelo repositório de fontes dela no GitHub
+  (GoogleChrome/developer.chrome.com) e o mecanismo de esconder pelo
+  ChromeDevTools/devtools-frontend.
+- Etapa 15: Vitest 5 pede `@types/node` 22 ou mais; ele subiu de 20 para 22
+  (o Node do ambiente é o 22).
+- Testes de navegador: o `addInitScript` do Playwright gera um aviso no
+  console dos iframes com sandbox (mini prévias) em contexto de celular.
+  Sem o script do teste, o jogo não gera o aviso; `errosRelevantes` ignora
+  só essa mensagem.

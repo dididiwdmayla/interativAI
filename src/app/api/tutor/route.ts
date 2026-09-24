@@ -1,6 +1,6 @@
 import { ApiError, type Content, GoogleGenAI, ThinkingLevel } from "@google/genai";
-import { FASES } from "@/fases";
 import { interpretarRespostaTutor } from "@/lib/tutor/interpretarResposta";
+import { contextoDoTutor } from "@/lib/tutor/contextoDoTutor";
 import { ESQUEMA_RESPOSTA_TUTOR, montarMensagemAtual, PROMPT_SISTEMA_TUTOR } from "@/lib/tutor/promptTutor";
 import { gerarComResiliencia, type Tentativa } from "@/lib/tutor/resiliencia";
 import type { TipoErroTutor } from "@/lib/tutor/tipos";
@@ -70,11 +70,8 @@ export async function POST(requisicao: Request) {
   const entrada = validarEntradaTutor(corpo);
   if (!entrada) return erro("desconhecido", 400);
 
-  // O enunciado oficial vem dos dados da fase; o do cliente é só reserva.
-  const objetivo = FASES.find((fase) => fase.id === entrada.faseId)?.objetivos.find(
-    (item) => item.id === entrada.objetivoId,
-  );
-  const enunciado = objetivo?.enunciado ?? entrada.enunciado;
+  // Enunciado e modo oficiais vêm dos dados da fase; os do cliente são só reserva.
+  const { modo, enunciado, siteAlvo } = contextoDoTutor(entrada.faseId, entrada.objetivoId, entrada.enunciado);
 
   const historico: Content[] = entrada.historico.map((mensagem) => ({
     role: mensagem.papel === "aluno" ? "user" : "model",
@@ -83,7 +80,7 @@ export async function POST(requisicao: Request) {
   while (historico.length > 0 && historico[0].role !== "user") historico.shift();
   const contents: Content[] = [
     ...historico,
-    { role: "user", parts: [{ text: montarMensagemAtual({ ...entrada, enunciado }) }] },
+    { role: "user", parts: [{ text: montarMensagemAtual({ ...entrada, enunciado, modo, siteAlvo }) }] },
   ];
 
   const ai = chave ? new GoogleGenAI({ apiKey: chave }) : null;

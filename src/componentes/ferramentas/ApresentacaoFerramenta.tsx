@@ -59,6 +59,19 @@ function iguais(a: Caixa | null, b: Caixa | null): boolean {
   );
 }
 
+/** A menor caixa que cobre todas. */
+function uniao(caixas: readonly Caixa[]): Caixa | null {
+  if (caixas.length === 0) return null;
+  const x = Math.min(...caixas.map((item) => item.x));
+  const y = Math.min(...caixas.map((item) => item.y));
+  const direita = Math.max(...caixas.map((item) => item.x + item.largura));
+  const baixo = Math.max(...caixas.map((item) => item.y + item.altura));
+  return { x, y, largura: direita - x, altura: baixo - y };
+}
+
+/** Fração da altura da tela acima da qual as áreas extras não entram na conta do cartão. */
+const LIMITE_AREA_LIVRE = 0.75;
+
 /** Lugar do cartão do mascote: ao lado do alvo, sem cobri-lo, se couber. */
 function posicionarCartao(alvo: Caixa | null, largura: number, altura: number): { x: number; y: number } {
   const telaL = window.innerWidth;
@@ -240,7 +253,14 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const falas = [ferramenta.oQueFaz, ferramenta.praQueServe, ferramenta.comoUsarAqui[modo]];
   const expressoes: Expressao[] = ["feliz", "curioso", "apontando"];
   const expressao: Expressao = comemorando ? "comemorando" : experimentando ? "apontando" : expressoes[passo];
-  const posicao = posicionarCartao(caixa, tamanhoCartao.largura, tamanhoCartao.altura);
+  // No "Experimente", o cartão também evita as áreas extras (a árvore da trilha, a tela do
+  // inspecionar), se todas juntas não tomarem a tela quase inteira.
+  const areaLivre = experimentando
+    ? uniao([caixa, ...extras].filter((item): item is Caixa => item !== null))
+    : null;
+  const areaDoCartao =
+    areaLivre && areaLivre.altura <= window.innerHeight * LIMITE_AREA_LIVRE ? areaLivre : caixa;
+  const posicao = posicionarCartao(areaDoCartao, tamanhoCartao.largura, tamanhoCartao.altura);
   const { Icone } = ferramenta;
 
   const buracos = [caixa, ...extras].filter((item): item is Caixa => item !== null);
