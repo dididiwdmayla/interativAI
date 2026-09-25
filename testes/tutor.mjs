@@ -4,7 +4,7 @@ import { abrir, conferir, errosRelevantes } from "./util.mjs";
 
 const { navegador, pagina, erros } = await abrir({ progresso: null });
 for (let i = 0; i < 12; i++) {
-  const botao = pagina.getByRole("button", { name: /Continuar|Vamos lá|Pular/ }).first();
+  const botao = pagina.getByRole("button", { name: /Continuar|Vamos lá|Pular|Bora!/ }).first();
   if (!(await botao.isVisible().catch(() => false))) break;
   await botao.click();
   await pagina.waitForTimeout(150);

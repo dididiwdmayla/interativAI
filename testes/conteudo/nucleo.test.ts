@@ -3,11 +3,13 @@
  * Se isto quebrar, os testes de conteúdo perdem o sentido.
  */
 import { describe, expect, it } from "vitest";
+import { FASE_U2_F4 } from "@/conteudo/ilhas/sites/elementos/unidade-2/fase-4-desafio";
 import type { FasePratica, Validador } from "@/conteudo/tipos";
 import { CLASSE_ESCONDER } from "@/lib/esconder";
 import { ErroAcao } from "@/motor/executarAcao";
 import { LIMITE_HISTORICO } from "@/motor/nucleoPainel";
 import { criarSimulacao } from "@/motor/simulacao";
+import { recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 
 const FASE: FasePratica = {
   id: "teste-u0-f1",
@@ -161,5 +163,74 @@ describe("validadores", () => {
     expect(passa(simulacao, { tipo: "todos", validadores: [existeTopo, existeNada] })).toBe(false);
     expect(passa(simulacao, { tipo: "algum", validadores: [existeTopo, existeNada] })).toBe(true);
     expect(passa(simulacao, { tipo: "nao", validador: existeNada })).toBe(true);
+  });
+});
+
+describe("validadorTravado", () => {
+  it("selecionado e evento travam; o resto é avaliado ao vivo", () => {
+    expect(validadorTravado({ tipo: "selecionado", seletor: "#a1" })).toBe(true);
+    expect(validadorTravado({ tipo: "evento", evento: "duplicou" })).toBe(true);
+    expect(validadorTravado({ tipo: "naoExiste", seletor: "#a1" })).toBe(false);
+    expect(validadorTravado({ tipo: "escondido", seletor: "#a1" })).toBe(false);
+    expect(validadorTravado({ tipo: "contagem", seletor: "#a1", op: ">=", valor: 1 })).toBe(false);
+  });
+
+  it("todos, algum e nao travam se algum validador de dentro travar", () => {
+    const trava: Validador = { tipo: "evento", evento: "trilha" };
+    const naoTrava: Validador = { tipo: "naoExiste", seletor: "#a1" };
+    expect(validadorTravado({ tipo: "todos", validadores: [naoTrava, trava] })).toBe(true);
+    expect(validadorTravado({ tipo: "algum", validadores: [naoTrava, trava] })).toBe(true);
+    expect(validadorTravado({ tipo: "todos", validadores: [naoTrava] })).toBe(false);
+    expect(validadorTravado({ tipo: "nao", validador: trava })).toBe(true);
+    expect(validadorTravado({ tipo: "nao", validador: naoTrava })).toBe(false);
+  });
+});
+
+describe("checklist do desafio (recalcularPartesFeitas)", () => {
+  it("no desafio da Unidade 2, apagar o pop-up marca a parte, e desfazer desmarca", () => {
+    const simulacao = criarSimulacao(FASE_U2_F4);
+    simulacao.comecarObjetivo(null);
+    let feitas: string[] = [];
+
+    simulacao.executar([{ tipo: "apagar", seletor: "#popup-oferta" }]);
+    feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    expect(feitas).toContain("apagar-popup");
+
+    simulacao.executar([{ tipo: "desfazer" }]);
+    feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    expect(feitas).not.toContain("apagar-popup");
+  });
+
+  it("parte travada (seleção pela trilha) continua marcada mesmo perdendo a seleção depois", () => {
+    const simulacao = criarSimulacao(FASE_U2_F4);
+    simulacao.comecarObjetivo(null);
+    let feitas: string[] = [];
+
+    simulacao.executar([
+      { tipo: "selecionar", seletor: "#vitrine .produto h3" },
+      { tipo: "selecionar", seletor: "#vitrine", via: "trilha" },
+    ]);
+    feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    expect(feitas).toContain("selecionar-vitrine");
+
+    simulacao.executar([{ tipo: "selecionar", seletor: "#banner-topo" }]);
+    feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    expect(feitas).toContain("selecionar-vitrine");
+  });
+
+  it("o desafio só conclui quando as partes ao vivo passam juntas e as travadas já foram marcadas", () => {
+    const simulacao = criarSimulacao(FASE_U2_F4);
+    simulacao.comecarObjetivo(null);
+    let feitas: string[] = [];
+    for (const parte of FASE_U2_F4.partes) {
+      simulacao.executar(parte.solucaoDeTeste);
+      feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    }
+    expect(feitas.length).toBe(FASE_U2_F4.partes.length);
+
+    // Desfazer a última ação (parte de estado: duplicar produto) desmarca a parte dela.
+    simulacao.executar([{ tipo: "desfazer" }]);
+    feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
+    expect(feitas.length).toBeLessThan(FASE_U2_F4.partes.length);
   });
 });

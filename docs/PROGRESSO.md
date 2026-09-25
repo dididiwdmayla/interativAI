@@ -4,9 +4,62 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 3 concluída (fábrica de conteúdo, ferramentas
-novas, motor dos modos e Unidade 2). Próximo trabalho: objetivos sozinho e
-desafio da Unidade 1, usando a fábrica (ver "Próximos passos").
+**Estado atual:** rodada 4 concluída (primeiro teste da fábrica: checklist
+do desafio ao vivo, Unidade 1 completa e relatório de atritos). Ver
+`docs/ATRITOS-FABRICA.md` para o que deve melhorar antes da produção em
+massa das próximas unidades.
+
+## Rodada 4: primeiro teste da fábrica (Unidade 1)
+
+- [x] **Etapa 1: checklist do desafio ao vivo.** Partes do desafio cujo
+  validador depende de seleção ou evento (`selecionado`, `evento`, ou
+  `todos`/`algum`/`nao` que contenham algum deles) continuam travando (uma
+  vez marcadas, ficam marcadas); as demais (estado da página: `existe`,
+  `naoExiste`, `escondido`, `contagem`, `atributo`, texto) passam a ser
+  avaliadas ao vivo a cada checagem e desmarcam se o jogador desfizer a
+  ação. `validadorTravado` e `recalcularPartesFeitas` em
+  `src/motor/validadores.ts`; `useMotorFase` troca `marcarPartes` (só
+  adicionava) por `atualizarChecklist` (recalcula tudo a cada verificação).
+  O desafio só conclui com as partes ao vivo passando juntas e as travadas
+  já marcadas. Teste novo em `testes/conteudo/nucleo.test.ts`
+  (`validadorTravado` e `checklist do desafio`, com o desafio da Unidade 2:
+  apagar o pop-up marca, desfazer desmarca; selecionar a vitrine pela
+  trilha continua marcado mesmo perdendo a seleção depois). Regra
+  documentada em `docs/PROJETO.md` e `docs/GUIA-DE-CONTEUDO.md`. Bateria
+  Playwright `unidades.mjs` (desktop, retrato, paisagem) continua verde.
+
+- [x] **Etapa 2: conteúdo da Unidade 1.** u1-f1 intocada (ids, objetivos e
+  textos iguais: progresso salvo e testes antigos continuam valendo).
+  Fase 2, "Agora sem rodinhas" (`fase-2.ts`): as mesmas 4 habilidades da
+  Fase 1 (árvore, setinha, editar texto, adicionar pelo código), todas em
+  modo `sozinho`, na página de encomendas da mesma padaria
+  (`sites/padariaEncomendas.ts`, âncoras diferentes: `h2`, `.sabores`,
+  `ul.sabores > li`). Fase 3, o desafio "Lanchonete Sabor Rápido"
+  (`fase-3-desafio.ts`), num site novo e diferente da padaria
+  (`sites/lanchoneteSaborRapido.ts`, só CSS): 4 partes, uma por habilidade,
+  todas com `revisarEm: "sites-elementos-u1-f1"` (a fase guiada, com a
+  escada de ajuda completa). Pelas regras da Etapa 1: as partes de seleção
+  (árvore, setinha) travam; as de texto e contagem são ao vivo.
+  `unidade.ts` com as 3 fases em ordem e `meta.desafioId` apontando para a
+  Fase 3. `npm run testar:conteudo` (150 testes), `lint` e `build` verdes.
+  Jogado em `/lab/fases` e pela bateria Playwright: `unidades.mjs`
+  estendido para jogar u1-f2 e u1-f3 (checklist travando/desmarcando de
+  verdade) nos três layouts; `fase-completa.mjs` e `tutor.mjs` ajustados
+  para passar pela tela de meta que agora abre a Unidade 1 (efeito
+  colateral de preencher `meta.desafioId`, ver atritos). Bateria inteira
+  (`testes/todos.mjs`, 12 scripts) verde, console limpo.
+
+- [x] **Etapa 3: relatório de atritos.** `docs/ATRITOS-FABRICA.md`: fase
+  só de objetivos sozinho sem ensinar conceito novo (checagem exige
+  `conceitos` não vazio), `meta.desafioId` novo mudando o comportamento da
+  primeira fase já publicada (invisível ao `testar:conteudo`, só apareceu
+  na bateria Playwright), esquema do `data-chave` da árvore não
+  documentado, conflito entre a previsão guiada opcional do guia e a regra
+  "guiado antes de sozinho", ambiguidade do `revisarEm` quando guiado e
+  sozinho moram em fases separadas, e uma lacuna na simulação de desafio
+  do `checagens.ts` (não confere a conclusão simultânea das partes ao
+  vivo). Nada do guia, do template ou do motor foi corrigido nesta etapa,
+  só relatado.
 
 - [x] **Etapa 1: Fundação.** Next + TS + Tailwind + Framer Motion, tokens e
   temas Doce e Fliperama (Segredo já definido, bloqueado), seletor de tema,
@@ -289,9 +342,9 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
-- Objetivos sozinho e desafio da Unidade 1 com a fábrica
-  (`docs/GUIA-DE-CONTEUDO.md`), preenchendo `meta.desafioId` dela.
-- Próximas unidades da zona Elementos, copiando a pasta da Unidade 2.
+- Próximas unidades da zona Elementos, copiando a pasta da Unidade 2 (ou a
+  Unidade 1, se a próxima precisar separar guiado e sozinho em fases
+  diferentes). Ler `docs/ATRITOS-FABRICA.md` antes.
 - Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.

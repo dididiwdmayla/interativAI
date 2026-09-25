@@ -61,6 +61,13 @@ async function mostrarPainel(segmento) {
 const arvore = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"]`).first();
 const iframe = pagina.frameLocator("iframe").first();
 
+// A Unidade 1 agora tem desafio: a meta (antes/depois) abre a primeira fase.
+const metaInicio = pagina.locator("[data-meta]");
+if (await metaInicio.isVisible().catch(() => false)) {
+  await tocar(pagina.getByRole("button", { name: "Bora!" }));
+  await pagina.waitForTimeout(300);
+}
+
 await continuarConversa();
 
 await apresentacao("painel", () => tocar(pagina.getByRole("tab", { name: "Elementos" }).first()));

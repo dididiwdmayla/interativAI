@@ -38,7 +38,7 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `fase-completa.mjs [desktop\|retrato\|paisagem]` | a Fase 1 do zero, com todas as apresentações na ordem, e recarregar sem repetir |
 | `movel.mjs` | prévia visível ao editar, teclado simulado, alça, giro sem perder nada, spotlight nos dois modos, dica deitado |
 | `ferramentas-novas.mjs` | trilha, esconder (classe do Chrome), apagar, desfazer/refazer (botões e atalhos), duplicar, menu do nó (botão direito e toque longo), barra do celular e as apresentações novas |
-| `unidades.mjs [desktop\|retrato\|paisagem]` | as Unidades 1 e 2 inteiras: meta com antes/depois, previsões (certa e errada), esbarrão e desfazer, sozinho ("Fez sozinho!"), desafio com checklist, Rever, revisão e volta, estrelas, Lista de fases e Próxima fase |
+| `unidades.mjs [desktop\|retrato\|paisagem]` | as Unidades 1 e 2 inteiras: meta com antes/depois, previsões (certa e errada), esbarrão e desfazer, sozinho ("Fez sozinho!"), desafio com checklist (parte de seleção trava, parte de estado desmarca ao desfazer), Rever, revisão e volta, estrelas, Lista de fases e Próxima fase |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
 | `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada |
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
