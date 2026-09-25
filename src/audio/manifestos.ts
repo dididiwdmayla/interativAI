@@ -29,11 +29,18 @@ export type ManifestoMusicas = {
   faixas: Record<string, FaixaMusica>;
 };
 
+/**
+ * Um efeito gravado. O formato do efeitos.json é o contrato: só tem entrada
+ * o id que tem arquivo; id sem entrada toca a versão sintetizada.
+ */
 export type EntradaEfeito = {
-  /** Arquivos gravados do efeito. Null (ou ausente): toca a versão sintetizada. */
-  arquivos: ArquivosAudio | null;
-  /** Pré-carregar ao entrar no mapa (momentos grandes). */
-  preCarregar?: boolean;
+  descricao: string;
+  arquivos: ArquivosAudio;
+  /**
+   * Duração do som. Como na música, os containers reportam alguns ms a mais:
+   * o fim do efeito usa este número quando ele vem.
+   */
+  duracaoSegundos: number | null;
 };
 
 export type ManifestoEfeitos = {
@@ -55,6 +62,10 @@ function lerArquivos(valor: unknown): ArquivosAudio | null {
   return arquivos.webm || arquivos.m4a ? arquivos : null;
 }
 
+function lerDuracao(valor: unknown): number | null {
+  return typeof valor === "number" && Number.isFinite(valor) && valor > 0 ? valor : null;
+}
+
 /** Lê o musicas.json com tolerância: entrada malformada é ignorada, nunca quebra o jogo. */
 export function lerManifestoMusicas(bruto: unknown): ManifestoMusicas {
   if (!ehObjeto(bruto)) return MANIFESTO_MUSICAS_VAZIO;
@@ -66,21 +77,30 @@ export function lerManifestoMusicas(bruto: unknown): ManifestoMusicas {
     for (const [id, item] of Object.entries(bruto.faixas)) {
       if (!ehObjeto(item)) continue;
       const arquivos = lerArquivos(item.arquivos);
-      const duracao = item.duracaoSegundos;
-      if (!arquivos || typeof duracao !== "number" || !Number.isFinite(duracao) || duracao <= 0) continue;
+      const duracao = lerDuracao(item.duracaoSegundos);
+      if (!arquivos || duracao === null) continue;
       faixas[id] = { titulo: typeof item.titulo === "string" ? item.titulo : id, arquivos, duracaoSegundos: duracao };
     }
   }
   return { pendentes, faixas };
 }
 
-/** Lê o efeitos.json com tolerância. */
+/**
+ * Lê o efeitos.json com tolerância: entrada sem arquivo válido é ignorada
+ * (o id toca o sintetizado), nunca quebra o jogo.
+ */
 export function lerManifestoEfeitos(bruto: unknown): ManifestoEfeitos {
   if (!ehObjeto(bruto) || !ehObjeto(bruto.efeitos)) return MANIFESTO_EFEITOS_VAZIO;
   const efeitos: Record<string, EntradaEfeito> = {};
   for (const [id, item] of Object.entries(bruto.efeitos)) {
     if (!ehObjeto(item)) continue;
-    efeitos[id] = { arquivos: lerArquivos(item.arquivos), ...(item.preCarregar === true ? { preCarregar: true } : {}) };
+    const arquivos = lerArquivos(item.arquivos);
+    if (!arquivos) continue;
+    efeitos[id] = {
+      descricao: typeof item.descricao === "string" ? item.descricao : id,
+      arquivos,
+      duracaoSegundos: lerDuracao(item.duracaoSegundos),
+    };
   }
   return { efeitos };
 }

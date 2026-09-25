@@ -397,14 +397,15 @@ Detalhes em `docs/AUDIO.md`.
   master, música, efeitos e voz, suspenso com a aba escondida.
 - Música por tela (tabela única em `src/audio/telas.ts`): cada ilha e tudo
   dentro dela tocam a faixa da ilha, o museu toca `origens`, o mapa do
-  mundo pede `mapa` (ainda pendente: silêncio). Arquivos em
-  `public/audio/musica/` (`.webm` Opus e `.m4a` AAC) e o `musicas.json`.
+  mundo toca `mapa`. Arquivos em `public/audio/musica/` (`.webm` Opus e
+  `.m4a` AAC) e o `musicas.json`.
 - Voz de modem do computadorzinho: gerador puro e determinístico
   (`vozModem.ts`), um humor por expressão, teto de 2,5 s, a música abaixa
   enquanto ele fala.
-- Efeitos por id (`efeitos.ts`), sintetizados, com arquivo opcional pelo
-  `public/audio/efeitos/efeitos.json`. Os sons antigos (acerto, clique,
-  conclusão e aviso) foram migrados iguais.
+- Efeitos por id (`efeitos.ts`): todo id tem versão sintetizada; o id com
+  entrada no `public/audio/efeitos/efeitos.json` toca o arquivo gravado (os
+  11 momentos grandes já têm), e cai no sintetizado se o arquivo falhar.
+  Os sons antigos (acerto, clique, conclusão e aviso) foram migrados iguais.
 - Ajustes de som (música, efeitos, voz, silenciar tudo, testar voz) no
   botão de som (desktop) e no menu (celular), salvos no progresso.
 

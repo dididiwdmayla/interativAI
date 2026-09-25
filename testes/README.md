@@ -25,8 +25,10 @@ npm run testar:audio
 ```
 
 `testes/audio/`: a voz de modem (determinismo, teto, pausas, pergunta,
-humores, taxa de blips), o registro de efeitos, a tabela tela -> faixa, os
-manifestos em `public/audio` e a escolha de formato. Também rodam no
+humores, taxa de blips), o registro de efeitos (arquivo, sintetizado e
+arquivo que falha), a tabela tela -> faixa, os manifestos em
+`public/audio` (arquivos citados existem, `.webm` com `.m4a`) e a escolha
+de formato. Também rodam no
 `npm run testar:conteudo`.
 
 ## Navegador
@@ -61,7 +63,7 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `mapa.mjs [desktop\|retrato\|paisagem]` | o mundo (estados das ilhas, Opcional, computadorzinho, rola no celular), ilha em construção (placas, tudo planejado, sem texto técnico), voltar do navegador, a ilha Sites (pontos de 44 px, caminho horizontal ou vertical, cards, Jogar abre a fase), o museu das Origens, a comemoração ao concluir a U1 (ponto aceso, caminho desenhado, registrada uma vez só, 9 estrelas), deep links (recarregar mantém fase e ilha), voltar e avançar do navegador (fase -> ilha -> mundo), o botão Mapa da fase, fase trancada pelo endereço e o `/lab/mapa` (desbloquear tudo, Lista de fases, resetar) |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
 | `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada, entrando pelo mapa (computadorzinho em Sites, U1 com "Continuar", sem a meta de novo) |
-| `audio.mjs` | ajustes de som (padrões, mudar pelo mouse e pelo teclado, silenciar, salvos depois de recarregar), navegação mapa -> ilha -> fase -> ilha -> mapa -> museu com o AudioContext real (faixa certa em cada tela, sem reiniciar entre ilha e fase, silêncio no mapa e em Frameworks, console limpo) e os controles no toque, em pé |
+| `audio.mjs` | ajustes de som (padrões, mudar pelo mouse e pelo teclado, silenciar, salvos depois de recarregar), navegação mapa -> ilha -> fase -> ilha -> mapa -> museu com o AudioContext real (faixa certa em cada tela, `mapa` no mundo, sem reiniciar entre ilha e fase, silêncio em Frameworks, boot do arquivo no primeiro gesto, momentos grandes tocando os arquivos, console limpo), efeitos em 404 caindo no sintetizado e os controles no toque, em pé |
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
 
 Todos falham se aparecer erro ou aviso no console do navegador.

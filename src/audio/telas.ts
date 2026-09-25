@@ -16,7 +16,7 @@ export type TelaDoJogo =
   /** Uma fase (/fase/[id]), dentro de uma zona e unidade de alguma ilha. */
   | { tipo: "fase"; ilhaId: string | null };
 
-/** Faixa do mapa do mundo. Ainda pendente: chega com o arquivo e a entrada no manifesto. */
+/** Faixa do mapa do mundo. */
 export const FAIXA_DO_MUNDO = "mapa";
 
 /** Faixa do Museu das Origens. */

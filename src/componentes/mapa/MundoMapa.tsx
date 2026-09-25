@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useMusicaDaTela } from "@/audio/ganchos";
-import { audioLiberado, preCarregarEfeitosGrandes, tocarEfeito, tocarHover } from "@/audio/motor";
+import { audioLiberado, tocarEfeito, tocarHover } from "@/audio/motor";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
@@ -88,11 +88,9 @@ function MundoCarregado() {
   const [aviso, setAviso] = useState<string | null>(null);
   const centralizado = useRef(false);
 
-  // Voltar ao mapa (depois do primeiro gesto) tem som de chegada; os arquivos grandes já vão carregando.
+  // Voltar ao mapa (depois do primeiro gesto) tem som de chegada.
   useEffect(() => {
-    if (!audioLiberado()) return;
-    tocarEfeito("entrar-mapa");
-    preCarregarEfeitosGrandes();
+    if (audioLiberado()) tocarEfeito("entrar-mapa");
   }, []);
 
   // O mundo cobre a tela e rola o resto (no celular, arrasta de lado).
