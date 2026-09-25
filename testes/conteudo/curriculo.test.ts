@@ -21,8 +21,9 @@ describe("currículo em dados", () => {
   it("status vem do conteúdo registrado, não é guardado à mão", () => {
     expect(statusDaUnidade("sites-elementos-u1")).toBe("pronta");
     expect(statusDaUnidade("sites-elementos-u2")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u3")).toBe("planejada");
-    expect(statusDaUnidade("sites-elementos-u3", [...UNIDADES, { ...U1, id: "sites-elementos-u3" }])).toBe("pronta");
+    expect(statusDaUnidade("sites-elementos-u3")).toBe("pronta");
+    expect(statusDaUnidade("sites-elementos-u4")).toBe("planejada");
+    expect(statusDaUnidade("sites-elementos-u4", [...UNIDADES, { ...U1, id: "sites-elementos-u4" }])).toBe("pronta");
   });
 
   it("U1 e U2 usam os ids do conteúdo, na zona Elementos da ilha Sites", () => {

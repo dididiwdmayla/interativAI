@@ -100,6 +100,8 @@ async function apresentacao(id, experimentar) {
 
 const no = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"] > div`).first();
 const textoDoNo = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para editar']`).first();
+const nomeDaTag = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para renomear a tag']`).first();
+const campoDaTag = () => pagina.locator("[role=tree] input[aria-label^='Nome da tag']");
 
 /** Ação do menu do nó (no primeiro elemento do seletor): botão direito no desktop, barra de ações no celular. */
 async function acaoNoNo(seletor, acao) {
@@ -129,6 +131,38 @@ async function editarTexto(seletor, texto) {
   await campo.fill(texto);
   await campo.press("Enter");
   await esperar(200);
+}
+
+/** Renomeia a tag do primeiro elemento do seletor: dois cliques (ou toques) no nome dela. */
+async function renomearTag(seletor, novaTag) {
+  const chave = await chaveDoSeletor(pagina, seletor);
+  await mostrarPainel("Árvore");
+  await esperar(200);
+  const campo = campoDaTag();
+  if (toque) {
+    // No celular, a barra de ações do nó selecionado é mais estável do que o duplo toque em sequência.
+    await no(chave).tap();
+    await pagina.locator("[data-barra-acoes] [data-acao=renomear]").tap();
+  } else {
+    await nomeDaTag(chave).dblclick();
+  }
+  await campo.waitFor({ timeout: 8000 });
+  await campo.fill(novaTag);
+  await campo.press("Enter");
+  await esperar(300);
+}
+
+/** Clica numa linha do código, rolando o editor até o fim primeiro (CodeMirror só renderiza linhas visíveis). */
+async function clicarLinhaCodigo(texto) {
+  await mostrarPainel("Código");
+  const scroller = pagina.locator(".cm-scroller").first();
+  await scroller.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await esperar(200);
+  const linha = pagina.locator(".cm-line", { hasText: texto }).first();
+  await linha.waitFor({ timeout: 8000 });
+  await tocar(linha);
 }
 
 async function trilha(rotulo) {
@@ -486,17 +520,124 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio completo!").count()) > 0, "desafio: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='2 de 3 estrelas']").count()) === 1, "desafio: 2 estrelas");
 
-// Volta para a ilha: a U2 acende e o próximo ponto aparece como planejado.
+// Volta para a ilha: a U2 acende e o próximo ponto (U3, já pronta) aparece bloqueado até jogar.
 await conclusaoEVoltarAIlha("U2");
 conferir((await estadoDoPonto("sites-elementos-u2")) === "concluida", "ilha: U2 concluída");
-conferir((await estadoDoPonto("sites-elementos-u3")) === "planejada", "ilha: a U3 aparece como planejada");
-conferir((await pagina.locator("[data-trecho-andado]").count()) === 2, "ilha: o caminho até a U3 está desenhado");
+conferir((await estadoDoPonto("sites-elementos-u3")) === "disponivel", "ilha: a U3 abriu");
+await jogarUnidade("sites-elementos-u3", "Jogar");
+
+// ------------------------------------------------------------ U3 fase 1
+await metaDaUnidade("U3 começo");
+await conversar(3);
+await apresentacao("renomear-tag", () => renomearTag("#titulo-principal", "h1"));
+await proximoObjetivo("U3F1 objetivo 1 (renomear tag)");
+
+// Previsão: acerta o palpite (índice 1) e confirma renomeando o h5 para h2.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+conferir(true, "U3F1: previsão sobre o nível do título acertou");
+await renomearTag("#passos-titulo", "h2");
+await proximoObjetivo("U3F1 objetivo 2 (previsão)");
+
+// Código: escreve um novo parágrafo no fim do article.
+await clicarLinhaCodigo("encharcar demais");
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("<p>Tomate colhido na hora tem um sabor que nenhum de mercado alcança.</p>");
+await proximoObjetivo("U3F1 objetivo 3 (parágrafo pelo código)");
+
+// Sozinho: setinha no título da dica, renomeia para h3, e mais um parágrafo pelo código.
+await inspecionar("#dica-titulo");
+await renomearTag("#dica-titulo", "h3");
+await clicarLinhaCodigo("mercado alcança");
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("<p>Plantas de tomate gostam de um espaço para as raízes respirarem.</p>");
+await proximoObjetivo("U3F1 objetivo 4 (sozinho)");
+await conclusaoEProxima("U3F1");
+
+// ------------------------------------------------------------ U3 fase 2
+await conversar(3);
+// Previsão: b vira strong, sem mudar o visual.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await renomearTag("#aviso .destaque-importante", "strong");
+await proximoObjetivo("U3F2 objetivo 1 (previsão strong)");
+
+await renomearTag("#curiosidade .destaque-tom", "em");
+await proximoObjetivo("U3F2 objetivo 2 (em)");
+
+// Sozinho: as duas trocas no último aviso.
+await renomearTag("#extra .destaque-importante", "strong");
+await renomearTag("#extra .destaque-tom", "em");
+await proximoObjetivo("U3F2 objetivo 3 (sozinho)");
+await conclusaoEProxima("U3F2");
+
+// ------------------------------------------------------------ U3 fase 3
+await conversar(3);
+await selecionarNo(pagina, "#passos li");
+await trilha("ul#passos");
+await renomearTag("#passos", "ol");
+await proximoObjetivo("U3F3 objetivo 1 (trilha + numerar)");
+
+// Previsão: duplicar um item de materiais não pede números.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(0));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await acaoNoNo("#materiais li", "duplicar");
+await editarTexto("#materiais li:nth-child(2)", "Regador pequeno");
+await proximoObjetivo("U3F3 objetivo 2 (previsão duplicar)");
+
+// Sozinho: outra lista cuja ordem importa, sem dizer qual.
+await renomearTag("#cuidados", "ol");
+await proximoObjetivo("U3F3 objetivo 3 (sozinho)");
+await conclusaoEProxima("U3F3");
+
+// ------------------------------------------------------------ Desafio U3
+await metaDaUnidade("Desafio U3");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio U3: checklist no lugar dos objetivos");
+
+await renomearTag("#titulo-receita", "h1");
+conferir((await partesFeitas()) === 1, "desafio U3: título principal marca a parte");
+
+await renomearTag("#ingredientes-titulo", "h2");
+await renomearTag("#modo-titulo", "h2");
+conferir((await partesFeitas()) === 2, "desafio U3: os dois subtítulos marcam a parte");
+
+await renomearTag("#aviso-receita .destaque-importante", "strong");
+conferir((await partesFeitas()) === 3, "desafio U3: aviso importante marca a parte");
+
+await acaoNoNo("#passos-receita li", "duplicar");
+await editarTexto("#passos-receita li:nth-child(2)", "Deixe esfriar antes de desenformar");
+await renomearTag("#passos-receita", "ol");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-u3", erro);
+}
+conferir((await partesFeitas()) === 4, "desafio U3: as 4 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U3: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U3: 3 estrelas");
+
+// Volta para a ilha: a U3 acende e o próximo ponto aparece como planejado.
+await conclusaoEVoltarAIlha("U3");
+conferir((await estadoDoPonto("sites-elementos-u3")) === "concluida", "ilha: U3 concluída");
+conferir((await estadoDoPonto("sites-elementos-u4")) === "planejada", "ilha: a U4 aparece como planejada");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
-conferir(salvo.fasesConcluidas.length === 7, `7 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as duas unidades concluídas.
+conferir(salvo.fasesConcluidas.length === 11, `11 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as três unidades concluídas.
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("2 de 2 unidades"), "mundo: Sites com 2 de 2 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("3 de 3 unidades"), "mundo: Sites com 3 de 3 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();
