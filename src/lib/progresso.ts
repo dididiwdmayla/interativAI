@@ -47,6 +47,11 @@ export type Progresso = {
   missoesDeCampo: Record<string, boolean>;
   /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
   apresentacoesVistas: IdFerramenta[];
+  /**
+   * Unidades cuja meta (antes/depois) já foi vista na entrada. A meta da
+   * entrada aparece uma vez só por unidade; a do desafio continua.
+   */
+  metasVistas: string[];
   /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
   proporcaoPrevia: number;
 };
@@ -64,6 +69,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   som: true,
   missoesDeCampo: {},
   apresentacoesVistas: [],
+  metasVistas: [],
   proporcaoPrevia: PROPORCAO_PREVIA.padrao,
 };
 
@@ -159,6 +165,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
       ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]
       : [],
+    metasVistas: [...new Set(listaDeTextos(bruto.metasVistas))],
     proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
       ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
       : PROPORCAO_PREVIA.padrao,

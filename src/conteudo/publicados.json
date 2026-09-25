@@ -1,0 +1,72 @@
+{
+  "aviso": "Ids publicados: nunca mude nem apague (isso apaga o progresso de quem já jogou). Atualize só com npm run publicar:conteudo.",
+  "unidades": {
+    "sites-elementos-u1": [
+      "sites-elementos-u1-f1",
+      "sites-elementos-u1-f2",
+      "sites-elementos-u1-f3"
+    ],
+    "sites-elementos-u2": [
+      "sites-elementos-u2-f1",
+      "sites-elementos-u2-f2",
+      "sites-elementos-u2-f3",
+      "sites-elementos-u2-f4"
+    ]
+  },
+  "fases": {
+    "sites-elementos-u1-f1": {
+      "objetivos": [
+        "selecionar-manchete",
+        "inspecionar-botao",
+        "trocar-manchete",
+        "novo-produto"
+      ]
+    },
+    "sites-elementos-u1-f2": {
+      "objetivos": [
+        "achar-sabores-sozinho",
+        "inspecionar-sabor",
+        "trocar-sabor",
+        "novo-sabor-pelo-codigo"
+      ]
+    },
+    "sites-elementos-u1-f3": {
+      "partes": [
+        "selecionar-aviso",
+        "inspecionar-botao",
+        "trocar-prato",
+        "novo-prato"
+      ]
+    },
+    "sites-elementos-u2-f1": {
+      "objetivos": [
+        "subir-ate-a-noticia",
+        "prever-o-main",
+        "pai-das-noticias"
+      ]
+    },
+    "sites-elementos-u2-f2": {
+      "objetivos": [
+        "esconder-banner",
+        "apagar-popup",
+        "desfazer-esbarrao",
+        "faxina-sozinho"
+      ]
+    },
+    "sites-elementos-u2-f3": {
+      "objetivos": [
+        "duplicar-noticia",
+        "duas-copias"
+      ]
+    },
+    "sites-elementos-u2-f4": {
+      "partes": [
+        "apagar-popup",
+        "esconder-banner",
+        "apagar-lateral",
+        "duplicar-produto",
+        "selecionar-vitrine"
+      ]
+    }
+  }
+}

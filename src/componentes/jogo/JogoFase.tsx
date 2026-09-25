@@ -44,6 +44,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { tocarSom } from "@/lib/som";
 import { useToque } from "@/lib/useConsultaMidia";
@@ -138,11 +139,13 @@ export function JogoFase({
   const progresso = useProgresso();
   const toque = useToque();
 
-  // A meta (antes/depois) abre a unidade e o desafio, quando a unidade já tem desafio.
+  // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
+  // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
   const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
   const desafioParaMeta = desafioDaUnidade?.tipo === "desafio" ? desafioDaUnidade : null;
-  const mostrarMeta =
-    modo === "jogo" && desafioParaMeta !== null && (fase.tipo === "desafio" || local.unidade.fases[0] === fase.id);
+  const [mostrarMeta] = useState(
+    () => modo === "jogo" && desafioParaMeta !== null && faseAbreComMeta(fase, local.unidade, obterProgresso()),
+  );
   const proxima = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
 
   const {

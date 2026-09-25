@@ -1,6 +1,6 @@
 // Joga a Fase 1 do zero passando por todas as apresentações, na ordem.
 // Uso: node testes/fase-completa.mjs [desktop|retrato|paisagem]
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, pularMeta, selecionarNo } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -61,12 +61,8 @@ async function mostrarPainel(segmento) {
 const arvore = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"]`).first();
 const iframe = pagina.frameLocator("iframe").first();
 
-// A Unidade 1 agora tem desafio: a meta (antes/depois) abre a primeira fase.
-const metaInicio = pagina.locator("[data-meta]");
-if (await metaInicio.isVisible().catch(() => false)) {
-  await tocar(pagina.getByRole("button", { name: "Bora!" }));
-  await pagina.waitForTimeout(300);
-}
+// Sem progresso nenhum na unidade, a meta (antes/depois) abre a primeira fase.
+conferir(await pularMeta(pagina), "a meta da unidade abre o jogo do zero");
 
 await continuarConversa();
 
@@ -93,7 +89,7 @@ await apresentacao("arvore", async () => {
   else await arvore("0").hover();
 });
 await mostrarPainel("Árvore");
-await tocar(arvore("1"));
+await selecionarNo(pagina, "h1");
 await pagina.getByRole("button", { name: /Próximo objetivo/ }).first().waitFor({ timeout: 5000 });
 conferir(true, "objetivo 1 concluído");
 await continuarConversa();
@@ -152,6 +148,7 @@ await pagina.reload();
 await pagina.waitForSelector("iframe");
 await pagina.waitForTimeout(1500);
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "recarregar não repete apresentações");
+conferir((await pagina.locator("[data-meta]").count()) === 0, "recarregar não mostra a meta de novo");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

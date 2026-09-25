@@ -11,7 +11,10 @@ export type EntradaIndice = {
   conceito: Conceito;
   /** Fases de prática que ensinam o conceito (campo `conceitos`). */
   ensinam: string[];
-  /** Desafios que praticam o conceito (campo `conceitos` do desafio). */
+  /**
+   * Fases que praticam o conceito: o campo `pratica` das fases de prática
+   * (treino sozinho do que já foi ensinado) e o `conceitos` dos desafios.
+   */
   praticam: string[];
   /** Fases que revisitam o conceito (campo `revisa`). */
   revisam: string[];
@@ -39,6 +42,7 @@ export function montarIndice(fases: readonly Fase[] = FASES): EntradaIndice[] {
       if (fase.tipo === "desafio") entrada(id).praticam.push(fase.id);
       else entrada(id).ensinam.push(fase.id);
     }
+    if (fase.tipo === "pratica") for (const id of fase.pratica ?? []) entrada(id).praticam.push(fase.id);
     for (const id of fase.revisa) entrada(id).revisam.push(fase.id);
     for (const id of fase.prerequisitos) entrada(id).pedem.push(fase.id);
   }

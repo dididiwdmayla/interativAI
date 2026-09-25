@@ -1,8 +1,9 @@
 // Servidor em dev com TUTOR_SIMULAR=sobrecarga-total (padrão deste teste),
 // TUTOR_SIMULAR=sobrecarga (rode com RESERVA=1) ou sem chave (rode com SEM_CHAVE=1).
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, pularMeta } from "./util.mjs";
 
 const { navegador, pagina, erros } = await abrir({ progresso: null });
+await pularMeta(pagina);
 for (let i = 0; i < 12; i++) {
   const botao = pagina.getByRole("button", { name: /Continuar|Vamos lá|Pular|Bora!/ }).first();
   if (!(await botao.isVisible().catch(() => false))) break;

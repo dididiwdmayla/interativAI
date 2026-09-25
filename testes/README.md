@@ -10,7 +10,12 @@ Vitest com jsdom (`vitest.config.mts`). Os arquivos ficam em
 `testes/conteudo/`: as regras de `src/conteudo/checagens.ts` viram um teste
 por fase (ids, conceitos, ferramentas apresentadas, limites de texto,
 emojis, previsões, soluções que cumprem cada objetivo na hora certa...),
-mais o índice de conceitos, o núcleo do painel e a migração do progresso.
+mais o índice de conceitos, o núcleo do painel, a migração do progresso,
+o congelamento dos ids publicados (`src/conteudo/publicados.json`) e
+sabotagens de propósito que confirmam as mensagens das checagens
+(`checagens.test.ts`: desafio cuja parte seguinte desfaz a anterior, id
+publicado alterado, fase só de sozinho com conceito, `revisarEm` sem
+guiado...).
 As mesmas checagens rodam no navegador em `/lab/fases` (aba Checagens).
 
 ## Navegador
@@ -44,3 +49,37 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
 
 Todos falham se aparecer erro ou aviso no console do navegador.
+
+## Ajudantes (`testes/util.mjs`)
+
+| Ajudante | O que faz |
+| --- | --- |
+| `abrir({ largura, altura, toque, progresso })` | abre o jogo num Chromium; `progresso: null` começa do zero, um objeto grava o progresso antes |
+| `progressoComFase(faseId, estadoFase, extra)` | progresso v2 com uma fase em andamento (introdução e meta vistas) |
+| `pularMeta(page)` | passa pela tela de meta (antes/depois) se ela abrir; devolve `true` se passou |
+| `selecionarNo(page, seletor)` | seleciona pela árvore o primeiro elemento do site-alvo que casa com o seletor CSS (clique ou toque; no celular fecha o balão e mostra a Árvore) |
+| `chaveDoSeletor(page, seletor)` | só calcula o `data-chave` da linha da árvore desse elemento |
+| `linhaDaArvore(page, chave)` | a linha clicável da árvore de uma chave |
+| `conferir`, `errosRelevantes` | asserção com mensagem e filtro do console |
+
+### O `data-chave` da árvore
+
+Cada linha da árvore de elementos tem um `data-chave`:
+
+- é o caminho de índices do `<body>` até o nó, separado por ponto; o
+  próprio `<body>` é `"body"`, o primeiro filho dele é `"0"`, o segundo
+  filho do primeiro filho é `"0.1"`;
+- os índices contam só os filhos que **aparecem na árvore**: elementos,
+  comentários e textos que não são só espaço (espaços e quebras de linha
+  entre as tags não contam);
+- um texto também tem chave: em `<li>Sonho</li>`, se o `li` é `"5"`, o
+  texto é `"5.0"`.
+
+Não calcule à mão: `selecionarNo` e `chaveDoSeletor` usam as MESMAS
+funções que a árvore usa (`src/motor/chaveArvore.ts`, transpilado pelo
+TypeScript do projeto e executado dentro da página), e
+`testes/conteudo/chaveArvore.test.ts` confere que elas dão a mesma chave
+que a árvore desenha, em todos os sites-alvo. Prefira seletores com
+âncoras do site (`#aviso`, `.cardapio li`); lembre que duplicar copia o
+`id`, então a cópia de `#noticia-praca` é achada por posição
+(`#noticias > .noticia:nth-child(2)`).

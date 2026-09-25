@@ -184,8 +184,10 @@ src/
   (`recalcularPartesFeitas`), e desfazer a ação desmarca a parte. O desafio
   só conclui quando todas as partes ao vivo passam ao mesmo tempo e todas as
   travadas já foram marcadas.
-- **Meta**: mostrada na primeira fase da unidade e antes do desafio, quando
-  a unidade tem `meta.desafioId`.
+- **Meta**: quando a unidade tem `meta.desafioId`, aparece antes do
+  desafio (sempre que ele começa) e, uma vez só por unidade, na primeira
+  fase, se a pessoa não tem nenhum progresso nela (`faseAbreComMeta`,
+  `src/lib/metaDaUnidade.ts`; vistas em `metasVistas`).
 
 ### Navegação (provisória, até existir o mapa)
 
@@ -204,6 +206,15 @@ src/
   (`src/conteudo/indice.ts`), base do futuro computadorzinho navegador.
 - Checagens: `src/conteudo/checagens.ts` (regras gerais, de dados e de
   simulação), rodando em `npm run testar:conteudo` e no `/lab/fases`.
+  A simulação do desafio usa o mesmo `recalcularPartesFeitas` do motor.
+- `pratica` na fase: conceitos já ensinados que a fase só treina (fase
+  só de sozinho: `conceitos` vazio, sem guiado). `revisarEm` aponta para
+  a fase guiada.
+- Congelamento: `src/conteudo/publicados.json` (ids de unidades, fases,
+  objetivos e partes publicados, na ordem). O `testar:conteudo` falha se
+  algum sumir ou mudar; `npm run publicar:conteudo` atualiza de propósito.
+- `data-chave` da árvore: `src/motor/chaveArvore.ts` (sem imports, para os
+  testes Playwright executarem as mesmas funções dentro da página).
 - Simulação headless: `src/motor/simulacao.ts` (Document solto + o mesmo
   núcleo do painel da interface).
 - `/lab/fases`: qualquer fase direto, validadores ao vivo, aplicar a solução

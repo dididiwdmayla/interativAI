@@ -83,6 +83,14 @@ Cada conteúdo X é ensinado como uma **unidade**:
    conceito de fases anteriores, **misturado na tarefa** (sem avisar "agora
    é revisão"). Liste esses conceitos em `revisa`.
 
+**Formato padrão: guiado e sozinho da mesma habilidade moram na MESMA
+fase** (modelo da Unidade 2: a fase ensina com um objetivo guiado e
+termina com o sozinho dele, numa situação diferente). Separar o guiado e o
+sozinho em fases diferentes é **exceção**, só quando não dá para mexer na
+fase guiada: o caso real é uma fase já publicada e congelada (seção 10).
+Foi o que aconteceu na Unidade 1: a Fase 1 (guiada) já estava publicada,
+então o sozinho veio numa fase nova, só de treino (seção 3.9).
+
 Estrutura típica de uma unidade (veja a Unidade 2):
 
 ```
@@ -134,6 +142,11 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
 
 - `conceitos`: o que a fase **ensina** (no desafio: o que ele **pratica**,
   e tudo precisa ter sido ensinado na unidade).
+- `pratica` (só fase de prática, opcional): o que a fase **treina**,
+  conceitos que já foram ensinados antes (com objetivo guiado) e aqui
+  voltam só para o jogador fazer sozinho. Toda fase de prática precisa ter
+  `conceitos` ou `pratica` não vazio, e um conceito não fica nos dois. No
+  índice de conceitos (`montarIndice()`), `pratica` entra em "praticam".
 - `revisa` e `prerequisitos`: só conceitos ensinados em fases anteriores.
 - `usaFerramentas`: toda ferramenta usada, inclusive pelas soluções. Cada
   uma precisa ter sido apresentada nesta fase ou antes.
@@ -141,6 +154,7 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
   da conclusão se repete; então escreva uma.
 
 ### 3.3 Objetivo (fase de prática)
+
 
 | Campo | O que é |
 | --- | --- |
@@ -303,6 +317,49 @@ partes: [
   visual, outra estrutura), para o jogador aplicar e não decorar.
 - As soluções das partes, aplicadas em ordem, geram o "depois" da meta:
   confira no `/lab/fases` ou na própria meta se ele ficou bonito.
+- **`revisarEm` aponta sempre para a fase onde a habilidade foi ensinada
+  de forma GUIADA** (a fase apontada precisa ter pelo menos 1 objetivo
+  guiado; o teste acusa). O "Rever" existe para socorrer quem travou, e só
+  a fase guiada tem a escada de ajuda completa. Numa unidade com guiado e
+  sozinho em fases separadas (Unidade 1), aponte para a guiada (u1-f1),
+  nunca para a só de sozinho (u1-f2).
+- O `testar:conteudo` joga o desafio com o MESMO checklist do motor
+  (`recalcularPartesFeitas`): depois de aplicar as soluções de todas as
+  partes, confere que todas as partes de estado passam ao mesmo tempo e
+  que as travadas foram marcadas. Se a solução de uma parte desfizer outra
+  (ex.: devolver um texto que a parte anterior trocou), ele falha com
+  "no fim, a parte X (avaliada ao vivo) não passa mais".
+
+### 3.9 Fase só de sozinho (exceção)
+
+Uma fase cujos objetivos são **todos** `sozinho` não ensina nada novo: ela
+só treina. Regras (conferidas pelo `testar:conteudo`):
+
+- `conceitos` fica **vazio** e tudo o que ela treina vai em `pratica`;
+- ela não pode ter objetivo guiado nem previsão guiada (guiado ensina algo
+  novo, e aí o conceito precisaria de um sozinho depois dele);
+- tudo em `pratica` precisa ter sido ensinado numa fase anterior.
+
+Use só quando o formato padrão não dá (fase guiada publicada e congelada).
+Modelo: `unidade-1/fase-2.ts`.
+
+### 3.10 A tela de meta
+
+A meta (antes/depois do site do desafio) aparece:
+
+- **uma vez só por unidade na entrada**: ao abrir a primeira fase da
+  unidade sem nenhum progresso nela. Ao passar da meta, o id da unidade
+  vai para `metasVistas` no progresso, e ela não volta (nem recomeçando a
+  fase). Quem já tinha progresso na unidade não vê a meta de entrada;
+- **sempre antes do desafio**: a meta é o X, então ela abre o desafio
+  toda vez que ele começa do zero.
+
+Só aparece quando a unidade tem `meta.desafioId`. A checagem confere que
+ele aponta para uma fase do tipo `desafio`, da mesma unidade, e que ela é
+a última da lista. Preencher `meta.desafioId` numa unidade já jogada não
+muda nada para quem tem progresso nela, mas muda a entrada de quem começa
+do zero: confira os testes de navegador que abrem o jogo do zero (eles
+usam `pularMeta`, seção 11).
 
 ---
 
@@ -455,7 +512,50 @@ objetivo está pedindo coisa demais: divida.
 
 ---
 
-## 10. Passo a passo para criar uma unidade
+## 10. Conteúdo publicado é congelado
+
+**Nunca mude ids publicados; isso apaga o progresso de quem já jogou.** O
+progresso guarda fases concluídas, estrelas e fases em andamento pelo id
+da fase, o objetivo atual pela POSIÇÃO na lista de objetivos, o checklist
+do desafio pelos ids das partes e a meta vista pelo id da unidade.
+
+- `src/conteudo/publicados.json` guarda os ids de todas as unidades
+  (com as fases em ordem), fases e objetivos (ou partes) publicados.
+- `npm run testar:conteudo` falha se algum id publicado sumir ou mudar:
+  fase renomeada, objetivo renomeado, objetivos em outra ordem, fase
+  inserida numa unidade publicada. A mensagem diz o que era e o que ficou.
+- Texto, dica, validador e site de uma fase publicada podem melhorar à
+  vontade; o que não muda são os ids e a ordem.
+- Precisa de um objetivo novo numa habilidade publicada? Ele vai numa
+  fase nova de uma unidade nova (ou, como na Unidade 1, numa fase nova
+  que ainda não foi publicada).
+- Ao publicar uma unidade nova: `npm run publicar:conteudo`. Ele se recusa
+  a gravar se algum id publicado sumiu ou se alguma checagem falha, e
+  então grava o registro com tudo o que está no jogo agora. Faça o commit
+  do `publicados.json` junto com a unidade.
+
+## 11. Testes de navegador
+
+Os scripts Playwright ficam em `testes/` (como rodar: `testes/README.md`).
+Ao estender um deles para a sua unidade, use os ajudantes de
+`testes/util.mjs`:
+
+- `pularMeta(page)`: passa pela tela de meta se ela abrir (o jogo do zero
+  abre com a meta da Unidade 1);
+- `selecionarNo(page, seletor)`: seleciona pela árvore o primeiro elemento
+  do site-alvo que casa com o seletor CSS (clique ou toque);
+- `chaveDoSeletor(page, seletor)`: o `data-chave` da linha da árvore
+  desse elemento, para as outras ações (menu do nó, editar texto).
+
+O `data-chave` é o caminho de índices do `<body>` até o nó ("body", "0",
+"0.1"...), contando só o que aparece na árvore: elementos, comentários e
+textos que não são só espaço. O texto de `<li>Sonho</li>` (li "5") é
+"5.0". Não calcule à mão: os ajudantes usam as mesmas funções da árvore
+(`src/motor/chaveArvore.ts`).
+
+---
+
+## 12. Passo a passo para criar uma unidade
 
 1. **Planeje no papel.** A meta ("No fim desta unidade, você..."), as
    habilidades (Ys), o site dos micro-passos e o do desafio (diferente).
@@ -487,7 +587,7 @@ objetivo está pedindo coisa demais: divida.
 
 ---
 
-## 11. Checklist final antes do commit
+## 13. Checklist final antes do commit
 
 - [ ] Meta da unidade escrita ("No fim desta unidade, você...") e
       `desafioId` apontando para a última fase.
@@ -495,7 +595,11 @@ objetivo está pedindo coisa demais: divida.
       situação.
 - [ ] Cada fase revisa algo de antes (`revisa`), misturado na tarefa.
 - [ ] O desafio usa um site diferente e cada parte aponta (`revisarEm`)
-      para a fase onde foi ensinada.
+      para a fase onde foi ensinada de forma guiada.
+- [ ] Guiado e sozinho da mesma habilidade na mesma fase (fase só de
+      sozinho só como exceção, com `conceitos` vazio e tudo em `pratica`).
+- [ ] Nenhum id publicado mudou; unidade nova publicada com
+      `npm run publicar:conteudo`.
 - [ ] Falas até 160, enunciados até 140, nenhum emoji, `toque` preenchido.
 - [ ] Falas neutras (sem "clique"); enunciados com as duas versões.
 - [ ] Todo termo técnico explicado na primeira vez; pelo menos uma ligação

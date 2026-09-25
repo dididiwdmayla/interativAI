@@ -3,7 +3,7 @@
 // objetivos sozinho, o desafio com checklist, o Rever (revisão e volta) e a
 // Lista de fases com cadeados.
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, chaveDoSeletor, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -100,8 +100,9 @@ async function apresentacao(id, experimentar) {
 const no = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"] > div`).first();
 const textoDoNo = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para editar']`).first();
 
-/** Ação do menu do nó: botão direito no desktop, barra de ações no celular. */
-async function acaoNoNo(chave, acao) {
+/** Ação do menu do nó (no primeiro elemento do seletor): botão direito no desktop, barra de ações no celular. */
+async function acaoNoNo(seletor, acao) {
+  const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
   if (toque) {
     await no(chave).tap();
@@ -113,7 +114,9 @@ async function acaoNoNo(chave, acao) {
   await esperar(200);
 }
 
-async function editarTexto(chave, texto) {
+/** Troca o texto do primeiro elemento do seletor pela árvore. */
+async function editarTexto(seletor, texto) {
+  const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
   if (toque) {
     await no(chave).tap();
@@ -231,7 +234,7 @@ await apresentacao("arvore", async () => {
   else await no("0").hover();
 });
 await mostrarPainel("Árvore");
-await tocar(no("1"));
+await selecionarNo(pagina, "h1");
 await proximoObjetivo("U1 objetivo 1");
 await apresentacao("inspecionar", () => inspecionar("button"));
 await proximoObjetivo("U1 objetivo 2");
@@ -268,11 +271,11 @@ await conclusaoEProxima("U1");
 // Mesmas 4 habilidades da Fase 1, sem ajuda completa, na página de encomendas.
 await conversar(3);
 await mostrarPainel("Árvore");
-await tocar(no("4")); // h2 "Sabores de hoje"
+await selecionarNo(pagina, "h2"); // "Sabores de hoje"
 await proximoObjetivo("U1F2 objetivo 1 (árvore, sozinho)");
 await inspecionar(".sabores li");
 await proximoObjetivo("U1F2 objetivo 2 (inspecionar, sozinho)");
-await editarTexto("5.0", "Torta de limão");
+await editarTexto(".sabores li", "Torta de limão");
 await proximoObjetivo("U1F2 objetivo 3 (editar texto, sozinho)");
 await mostrarPainel("Código");
 await tocar(pagina.locator(".cm-line", { hasText: "Cajuzinho" }).first());
@@ -288,20 +291,20 @@ await conversar(3);
 if (!movel) conferir(await checklist().isVisible(), "desafio U1: checklist no lugar dos objetivos");
 
 await mostrarPainel("Árvore");
-await tocar(no("1")); // #aviso
+await selecionarNo(pagina, "#aviso");
 conferir((await partesFeitas()) === 1, "desafio U1: selecionar o aviso pela árvore marca a parte");
 
 await inspecionar(".botao");
 conferir((await partesFeitas()) === 2, "desafio U1: inspecionar o botão marca a parte");
 
-await editarTexto("6.0", "Wrap de frango");
+await editarTexto(".cardapio li", "Wrap de frango");
 conferir((await partesFeitas()) === 3, "desafio U1: trocar o prato marca a parte");
 
 // Regra da Etapa 1 da fábrica: parte de estado (texto) desmarca ao desfazer;
 // parte de seleção (árvore, setinha) continua marcada.
 await tocar(pagina.getByRole("button", { name: /^Desfazer a última mudança/ }));
 conferir((await partesFeitas()) === 2, "desafio U1: desfazer desmarca a parte de texto (ao vivo)");
-await editarTexto("6.0", "Wrap de frango");
+await editarTexto(".cardapio li", "Wrap de frango");
 conferir((await partesFeitas()) === 3, "desafio U1: refazer a troca marca a parte de novo");
 
 await mostrarPainel("Código");
@@ -327,7 +330,7 @@ await metaDaUnidade("U2 começo");
 await conversar(3);
 await apresentacao("trilha", async () => {
   await mostrarPainel("Árvore");
-  await tocar(no("3.0.0.2")); // link "Leia mais" da primeira notícia
+  await selecionarNo(pagina, "#noticia-praca .leia-mais");
   await trilha("article#noticia-praca.noticia");
 });
 await proximoObjetivo("U2F1 objetivo 1 (trilha)");
@@ -340,7 +343,7 @@ await tocar(pagina.locator("[data-previsao] button").nth(1));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 conferir(true, "previsão: acertou e mostra a explicação");
 await mostrarPainel("Árvore");
-await tocar(no("3"));
+await selecionarNo(pagina, "main");
 await proximoObjetivo("U2F1 objetivo 2 (previsão)");
 
 // Sozinho: selo, só 2 degraus de ajuda, setinha + trilha.
@@ -359,7 +362,7 @@ await conclusaoEProxima("U2F1");
 
 // ------------------------------------------------------------ U2 fase 2
 await conversar(3);
-await apresentacao("esconder", () => acaoNoNo("0", "esconder"));
+await apresentacao("esconder", () => acaoNoNo("#banner-topo", "esconder"));
 const alturaBanner = (await iframe.locator("#banner-topo").boundingBox())?.height ?? 0;
 conferir(alturaBanner > 20, "esconder: o banner guarda o espaço");
 await proximoObjetivo("U2F2 objetivo 1 (esconder)");
@@ -372,7 +375,7 @@ await tocar(pagina.locator("[data-previsao] button").nth(0));
 await pagina.locator('[data-previsao-respondida="errou"]').waitFor();
 conferir(true, "previsão errada mostra a certa e a explicação");
 const noticiasAntes = (await iframe.locator("#noticias").boundingBox()).y;
-await apresentacao("apagar", () => acaoNoNo("2", "apagar"));
+await apresentacao("apagar", () => acaoNoNo("#popup-cookies", "apagar"));
 const noticiasDepois = (await iframe.locator("#noticias").boundingBox()).y;
 conferir(noticiasDepois < noticiasAntes, `apagar: as notícias sobem (${Math.round(noticiasAntes)} -> ${Math.round(noticiasDepois)})`);
 await proximoObjetivo("U2F2 objetivo 2 (previsão + apagar)");
@@ -388,8 +391,8 @@ conferir((await iframe.locator("#rodape").count()) === 1, "desfazer: o rodapé v
 await proximoObjetivo("U2F2 objetivo 3 (desfazer)");
 
 // Sozinho: apaga o anúncio e troca uma manchete.
-await acaoNoNo("2.1", "apagar"); // main > aside (o pop-up já saiu)
-await editarTexto("2.0.2.0", "Goleiro vira artilheiro da vila");
+await acaoNoNo("#anuncio-lateral", "apagar");
+await editarTexto("#noticia-time h3", "Goleiro vira artilheiro da vila");
 await pagina.locator("[data-fez-sozinho]").waitFor({ timeout: 5000 });
 await proximoObjetivo("U2F2 objetivo 4 (sozinho)");
 conferir((await pagina.locator("[aria-label='3 de 3 estrelas']").count()) > 0, "previsão errada não custou estrela");
@@ -399,16 +402,17 @@ await conclusaoEProxima("U2F2");
 await conversar(3);
 await apresentacao("duplicar", async () => {
   await mostrarPainel("Árvore");
-  await tocar(no("1.0.0.0")); // h3 da primeira notícia
+  await selecionarNo(pagina, "#noticia-praca h3");
   await trilha("article#noticia-praca.noticia");
-  await acaoNoNo("1.0.0", "duplicar");
+  await acaoNoNo("#noticia-praca", "duplicar");
 });
-await editarTexto("1.0.1.0", "Biblioteca da vila abre à noite");
+// A cópia leva o mesmo id: ela é a segunda notícia da seção.
+await editarTexto("#noticias > .noticia:nth-child(2) h3", "Biblioteca da vila abre à noite");
 await proximoObjetivo("U2F3 objetivo 1 (duplicar)");
-await acaoNoNo("1.0.3", "duplicar");
-await editarTexto("1.0.4.0", "Horta da escola colhe a primeira alface");
-await acaoNoNo("1.0.3", "duplicar");
-await editarTexto("1.0.4.0", "Padaria nova abre na rua de cima");
+await acaoNoNo("#noticias > .noticia:nth-child(4)", "duplicar");
+await editarTexto("#noticias > .noticia:nth-child(5) h3", "Horta da escola colhe a primeira alface");
+await acaoNoNo("#noticias > .noticia:nth-child(4)", "duplicar");
+await editarTexto("#noticias > .noticia:nth-child(5) h3", "Padaria nova abre na rua de cima");
 conferir((await iframe.locator("#noticias .noticia").count()) === 6, "seis notícias na página");
 await proximoObjetivo("U2F3 objetivo 2 (sozinho)");
 await conclusaoEProxima("U2F3");
@@ -417,7 +421,7 @@ await conclusaoEProxima("U2F3");
 await metaDaUnidade("Desafio");
 await conversar(3);
 if (!movel) conferir(await checklist().isVisible(), "desafio: checklist no lugar dos objetivos");
-await acaoNoNo("2", "apagar"); // pop-up de oferta
+await acaoNoNo("#popup-oferta", "apagar");
 conferir((await partesFeitas()) === 1, "desafio: a parte se marca sozinha");
 
 // Rever: abre a fase 2 em revisão, sem estrelas, e volta.
@@ -435,13 +439,12 @@ conferir((await iframe.locator("#popup-oferta").count()) === 0, "o desafio ficou
 conferir((await partesFeitas()) === 1, "o checklist continua com a parte feita");
 conferir((await pagina.locator("[aria-label='2 de 3 estrelas']").count()) > 0, "o Rever custou 1 estrela");
 
-// Sem o pop-up, o main passou a ser o filho 2 do body.
-await acaoNoNo("0", "esconder");
-await acaoNoNo("2.1", "apagar");
-await acaoNoNo("2.0.0", "duplicar");
-await editarTexto("2.0.1.1", "Robô dançarino");
+await acaoNoNo("#banner-topo", "esconder");
+await acaoNoNo("#anuncio-lateral", "apagar");
+await acaoNoNo("#vitrine .produto", "duplicar");
+await editarTexto("#vitrine .produto:nth-child(2) h3", "Robô dançarino");
 await mostrarPainel("Árvore");
-await tocar(no("2.0.0.1"));
+await selecionarNo(pagina, "#vitrine .produto h3");
 await trilha("section#vitrine");
 try {
   await abrirBalao();

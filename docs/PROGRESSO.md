@@ -4,10 +4,41 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 4 concluída (primeiro teste da fábrica: checklist
-do desafio ao vivo, Unidade 1 completa e relatório de atritos). Ver
-`docs/ATRITOS-FABRICA.md` para o que deve melhorar antes da produção em
-massa das próximas unidades.
+**Estado atual:** rodada 5 em andamento (fábrica corrigida, currículo em
+dados e mapa das ilhas). Etapa 1 concluída.
+
+## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
+
+- [x] **Etapa 1: correções da fábrica** (resposta ao
+  `docs/ATRITOS-FABRICA.md`). Campo `pratica` em `FasePratica`
+  (conceitos já ensinados que a fase só treina); fase de prática precisa
+  de `conceitos` ou `pratica`; `montarIndice()` põe `pratica` em
+  "praticam"; u1-f2 migrada (`conceitos: []`, as 4 habilidades em
+  `pratica`). Regra nova `fase-so-sozinho` (todos sozinho = `conceitos`
+  vazio; fase que só treina não tem guiado nem previsão guiada); `pratica`
+  só com conceitos ensinados antes; `revisarEm` precisa apontar para fase
+  com objetivo guiado; `meta.desafioId` confere tipo, unidade e posição.
+  Meta de entrada uma vez só por unidade (`metasVistas` no progresso,
+  `faseAbreComMeta` em `src/lib/metaDaUnidade.ts`), só sem progresso na
+  unidade; a do desafio continua. `jogarDesafio` usa
+  `recalcularPartesFeitas` e confere a conclusão simultânea no fim.
+  Congelamento: `src/conteudo/publicados.json` + regra
+  `publicados-congelados` + `npm run publicar:conteudo`
+  (`scripts/publicarConteudo.ts`, recusa publicar com id sumido ou
+  checagem falhando). `src/motor/chaveArvore.ts` (esquema do
+  `data-chave`, sem imports) e ajudantes `pularMeta`, `selecionarNo` e
+  `chaveDoSeletor` em `testes/util.mjs` (transpilam o arquivo do motor
+  com o TypeScript do projeto e executam dentro da página); testes
+  `fase-completa`, `tutor` e `unidades` usam os ajudantes. Testes novos:
+  `checagens.test.ts` (sabotagens: parte seguinte que desfaz a anterior,
+  id de objetivo publicado alterado, fase renomeada, ordem trocada, fase
+  só de sozinho com conceito, guiado em fase de treino, `revisarEm` para
+  a fase sozinha, `meta.desafioId` de outra unidade),
+  `chaveArvore.test.ts` (chave da árvore = chave calculada, em todos os
+  sites) e meta uma vez só em `progresso.test.ts`. Guia (seções 2, 3.2,
+  3.8, 3.9, 3.10, 10, 11 e checklist), template, `testes/README.md` e
+  atritos atualizados. `testar:conteudo` (182 testes), `lint`, `build` e
+  bateria Playwright inteira verdes.
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 

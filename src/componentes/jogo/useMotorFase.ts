@@ -156,6 +156,11 @@ export function useMotorFase({
               reveres: atual.reveres,
             },
           },
+          // Passou da meta: a da entrada da unidade não aparece de novo.
+          metasVistas:
+            mostrarMeta && atual.etapa !== "meta" && !progresso.metasVistas.includes(fase.unidadeId)
+              ? [...progresso.metasVistas, fase.unidadeId]
+              : progresso.metasVistas,
           fasesConcluidas:
             concluida && !progresso.fasesConcluidas.includes(fase.id)
               ? [...progresso.fasesConcluidas, fase.id]
@@ -169,7 +174,7 @@ export function useMotorFase({
         };
       });
     },
-    [fase.id, htmlAtual, modo],
+    [fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
   );
 
   useEffect(() => {
