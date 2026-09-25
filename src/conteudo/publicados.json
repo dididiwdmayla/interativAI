@@ -23,6 +23,12 @@
       "sites-elementos-u4-f2",
       "sites-elementos-u4-f3",
       "sites-elementos-u4-f4"
+    ],
+    "sites-elementos-u5": [
+      "sites-elementos-u5-f1",
+      "sites-elementos-u5-f2",
+      "sites-elementos-u5-f3",
+      "sites-elementos-u5-f4"
     ]
   },
   "fases": {
@@ -135,6 +141,34 @@
         "aba-nova",
         "alt-foto",
         "class-musicos"
+      ]
+    },
+    "sites-elementos-u5-f1": {
+      "objetivos": [
+        "prever-div-nova",
+        "topo-vira-header",
+        "rodape-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f2": {
+      "objetivos": [
+        "servicos-vira-section",
+        "prever-article",
+        "secoes-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f3": {
+      "objetivos": [
+        "preco-vira-span",
+        "span-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f4": {
+      "partes": [
+        "cabecalho-rodape",
+        "secao-servicos",
+        "cards-artigo",
+        "precos-span"
       ]
     }
   }
