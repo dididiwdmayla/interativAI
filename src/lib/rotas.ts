@@ -1,17 +1,16 @@
 /** Endereços do jogo, num lugar só. */
 
 /** O mundo (mapa das ilhas). */
-export const ROTA_MUNDO = "/mapa";
+export const ROTA_MUNDO = "/";
 
 export function rotaDaIlha(ilhaId: string): string {
   return `/ilha/${ilhaId}`;
 }
 
-/**
- * Onde uma fase abre. Por enquanto o jogo mora na raiz e abre a fase
- * salva em faseAtual (quem chama grava a fase antes de ir).
- */
+/** A fase, direto (deep link): recarregar volta nela. */
 export function rotaDaFase(faseId: string): string {
-  void faseId;
-  return "/";
+  return `/fase/${faseId}`;
 }
+
+/** Só para testes: desbloquear tudo, resetar o mapa e a Lista de fases. */
+export const ROTA_LAB_MAPA = "/lab/mapa";

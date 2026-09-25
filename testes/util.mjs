@@ -19,7 +19,15 @@ const { chromium } = carregarPlaywright();
 
 export const URL_JOGO = process.env.URL_JOGO ?? "http://localhost:3000";
 
-export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null, rota = "/", esperar = "iframe" } = {}) {
+/** A primeira fase do jogo (o endereço padrão quando o teste não diz outro). */
+export const FASE_INICIAL = "sites-elementos-u1-f1";
+
+/**
+ * Abre o jogo. Sem `rota`, vai direto para a fase atual do progresso (ou a
+ * primeira), em /fase/<id>; o mundo é "/" e a ilha, /ilha/<id>.
+ */
+export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null, rota, esperar = "iframe" } = {}) {
+  const destino = rota ?? `/fase/${progresso?.faseAtual ?? FASE_INICIAL}`;
   const navegador = await chromium.launch();
   const contexto = await navegador.newContext({
     viewport: { width: largura, height: altura },
@@ -47,7 +55,7 @@ export async function abrir({ largura = 1440, altura = 900, toque = false, progr
       }
     }, progresso);
   }
-  await pagina.goto(`${URL_JOGO}${rota}`);
+  await pagina.goto(`${URL_JOGO}${destino}`);
   await pagina.waitForSelector(esperar);
   return { navegador, contexto, pagina, erros };
 }

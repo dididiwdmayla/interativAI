@@ -9,7 +9,7 @@ import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
-import { BotaoFases } from "@/componentes/layout/BotaoFases";
+import { BotaoMapa } from "@/componentes/layout/BotaoMapa";
 import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
 import { SeletorTema } from "@/componentes/layout/SeletorTema";
@@ -67,7 +67,6 @@ import {
   tempoDeLeitura,
 } from "./ajudantesJogo";
 import { ComemoracaoSozinho } from "./ComemoracaoSozinho";
-import { ListaFases } from "./ListaFases";
 import { AlcaDivisoria } from "./movel/AlcaDivisoria";
 import { useLayoutJogo, useViewportVisivel } from "./movel/useLayoutJogo";
 import { TelaConclusao } from "./TelaConclusao";
@@ -83,8 +82,12 @@ type Props = {
   aoRecomecar: () => void;
   /** "jogo" (normal), "revisao" (aberta pelo Rever do desafio) ou "lab" (/lab/fases). */
   modo?: ModoJogo;
-  /** Abre outra fase (Lista de fases, Próxima fase). */
+  /** Abre outra fase (Próxima fase, dentro da mesma unidade). */
   aoIrParaFase?: (faseId: string) => void;
+  /** Botão "Mapa": a ilha desta fase. Sem ele (lab), não aparece. */
+  rotaDoMapa?: string;
+  /** Depois da última fase da unidade: volta para a ilha, que comemora. */
+  aoVoltarAIlha?: () => void;
   /** Desafio: abre a fase onde uma parte foi ensinada, em modo revisão. */
   aoRever?: (faseId: string) => void;
   /** Revisão: volta para o desafio. */
@@ -112,6 +115,8 @@ export function JogoFase({
   aoRecomecar,
   modo = "jogo",
   aoIrParaFase,
+  rotaDoMapa,
+  aoVoltarAIlha,
   aoRever,
   aoVoltarAoDesafio,
   painelLab,
@@ -128,7 +133,6 @@ export function JogoFase({
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
   const [recado, setRecado] = useState<string | null>(null);
-  const [listaFasesAberta, setListaFasesAberta] = useState(false);
   const esperaRecado = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
@@ -148,7 +152,9 @@ export function JogoFase({
   const [mostrarMeta] = useState(
     () => modo === "jogo" && desafioParaMeta !== null && faseAbreComMeta(fase, local.unidade, obterProgresso()),
   );
-  const proxima = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
+  // "Próxima fase" só dentro da unidade; depois da última, o caminho é voltar para a ilha.
+  const seguinte = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
+  const proxima = seguinte && seguinte.unidadeId === fase.unidadeId ? seguinte : null;
 
   const {
     editorRef,
@@ -306,7 +312,6 @@ export function JogoFase({
     bloqueada:
       lab ||
       caixa.aberta ||
-      listaFasesAberta ||
       estado.roteiro !== null ||
       previsaoPendente ||
       (estado.etapa === "concluida" && estado.conclusaoAberta),
@@ -506,13 +511,6 @@ export function JogoFase({
     return () => window.removeEventListener("keydown", aoTeclar);
   }, []);
 
-  const fecharListaFases = useCallback(() => setListaFasesAberta(false), []);
-
-  const irParaFase = (faseId: string) => {
-    setListaFasesAberta(false);
-    if (faseId !== fase.id || revisao) aoIrParaFase?.(faseId);
-  };
-
   const reverParte = (parteId: string) => {
     tocarSom("clique");
     const alvo = motor.rever(parteId);
@@ -631,9 +629,7 @@ export function JogoFase({
   );
 
   const rotuloFase = fase.tipo === "desafio" ? "Desafio" : `Fase ${local.numero}`;
-  const botaoFases = aoIrParaFase && !lab ? (
-    <BotaoFases aoAbrir={() => setListaFasesAberta(true)} noMenu={movel} />
-  ) : null;
+  const botaoMapa = rotaDoMapa && !lab ? <BotaoMapa href={rotaDoMapa} compacto={movel} /> : null;
   const botaoVoltar = revisao ? (
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
       Voltar ao desafio
@@ -667,10 +663,10 @@ export function JogoFase({
           titulo={`Unidade ${local.unidade.numero} › ${rotuloFase}`}
           estrelas={revisao ? null : estado.estrelas}
           fina={layout === "paisagem"}
+          inicio={botaoMapa}
           acaoFixa={botaoVoltar}
           menu={
             <>
-              {botaoFases}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
               <div className="flex items-center justify-between gap-2">
                 <SeletorTema />
@@ -688,7 +684,7 @@ export function JogoFase({
           acoes={
             <>
               {botaoVoltar}
-              {botaoFases}
+              {botaoMapa}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
               {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
@@ -979,12 +975,6 @@ export function JogoFase({
           aoComecar={comClique(motor.avancarFala)}
         />
       )}
-      <ListaFases
-        aberta={listaFasesAberta}
-        faseAtual={fase.id}
-        aoEscolher={irParaFase}
-        aoFechar={fecharListaFases}
-      />
       {!(estado.etapa === "concluida" && estado.conclusaoAberta) && <ComemoracaoSozinho vez={estado.comemoracoesSozinho} />}
       <TelaConclusao
         aberta={estado.etapa === "concluida" && estado.conclusaoAberta}
@@ -1006,6 +996,7 @@ export function JogoFase({
         aoFechar={motor.fecharConclusao}
         aoRecomecar={aoRecomecar}
         aoProxima={() => proxima && aoIrParaFase?.(proxima.id)}
+        aoVoltarAIlha={modo === "jogo" && !proxima ? aoVoltarAIlha : undefined}
         aoVoltarAoDesafio={() => aoVoltarAoDesafio?.()}
       />
       {lab && painelLab?.(apiLab)}

@@ -11,7 +11,7 @@ const TAMANHOS = {
   paisagem: { largura: 844, altura: 390, toque: true },
 };
 const toque = TAMANHOS[MODO].toque;
-const ROTA_MUNDO = "/mapa";
+const ROTA_MUNDO = "/";
 const U1 = ["sites-elementos-u1-f1", "sites-elementos-u1-f2", "sites-elementos-u1-f3"];
 
 async function tocar(localizador) {
@@ -80,7 +80,39 @@ async function tocar(localizador) {
   conferir((await card.textContent()).includes("Mexer em qualquer site sozinho"), `${MODO}: card mostra a meta da U1`);
   await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Jogar" }));
   await pagina.waitForSelector("section[data-previa] iframe");
-  conferir(await pularMeta(pagina), `${MODO}: Jogar abre a primeira fase da U1, com a meta`);
+  conferir(new URL(pagina.url()).pathname === "/fase/sites-elementos-u1-f1", `${MODO}: Jogar abre /fase/sites-elementos-u1-f1`);
+  conferir(await pularMeta(pagina), `${MODO}: a primeira fase da U1 abre com a meta`);
+
+  // Recarregar mantém o lugar; o voltar do navegador faz fase -> ilha -> mundo.
+  await pagina.reload();
+  await pagina.waitForSelector("section[data-previa] iframe");
+  conferir(new URL(pagina.url()).pathname === "/fase/sites-elementos-u1-f1", `${MODO}: recarregar mantém a fase`);
+  conferir((await pagina.locator("[data-meta]").count()) === 0, `${MODO}: e a meta não volta`);
+  await pagina.goBack();
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  conferir(true, `${MODO}: voltar do navegador: da fase para a ilha`);
+  await pagina.reload();
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  conferir(true, `${MODO}: recarregar mantém a ilha`);
+  conferir(
+    (await pagina.locator("[data-mascote-no-ponto]").getAttribute("data-mascote-no-ponto")) === "sites-elementos-u1",
+    `${MODO}: o computadorzinho está na U1`,
+  );
+  await pagina.goBack();
+  await pagina.locator("[data-mapa=mundo]").waitFor();
+  conferir(true, `${MODO}: voltar do navegador: da ilha para o mundo`);
+  await pagina.goForward();
+  await pagina.locator("[data-mapa=ilha]").waitFor();
+  await pagina.goForward();
+  await pagina.waitForSelector("section[data-previa] iframe");
+  // O botão Mapa, dentro da fase, volta para a ilha.
+  await tocar(pagina.locator("[data-botao-mapa]").first());
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  conferir(true, `${MODO}: o botão Mapa da fase volta para a ilha`);
+  // Fase trancada digitada no endereço: não abre.
+  await pagina.goto(`${URL_JOGO}/fase/sites-elementos-u2-f1`);
+  await pagina.locator("[data-fase-trancada]").waitFor();
+  conferir(true, `${MODO}: fase trancada pelo endereço mostra o aviso e o caminho de volta`);
 
   // Museu das Origens.
   await pagina.goto(`${URL_JOGO}/ilha/origens`);
@@ -115,5 +147,36 @@ async function tocar(localizador) {
   conferir((await pagina.locator("[data-comemoracao]").count()) === 0, `${MODO}: recarregar não comemora de novo`);
   conferir((await pagina.locator("[data-total-estrelas]").getAttribute("data-total-estrelas")) === "9", `${MODO}: 9 estrelas no total`);
   conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo na comemoração ${JSON.stringify(errosRelevantes(erros))}`);
+  await navegador.close();
+}
+
+// ---------------------------------------------------------------- /lab/mapa
+if (MODO === "desktop") {
+  const { navegador, pagina, erros } = await abrir({ progresso: null, rota: "/lab/mapa", esperar: "[data-lab-mapa]" });
+  await pagina.getByRole("button", { name: "Desbloquear tudo" }).click();
+  conferir((await pagina.locator("[data-desbloqueado=true]").count()) === 1, "lab: desbloquear tudo");
+  await pagina.goto(`${URL_JOGO}/ilha/sites`);
+  await pagina.locator("[data-mapa=ilha]").waitFor();
+  conferir((await pagina.locator('[data-unidade="sites-elementos-u2"]').getAttribute("data-estado")) === "disponivel", "lab: com tudo desbloqueado, a U2 abre");
+  await pagina.goto(`${URL_JOGO}/fase/sites-elementos-u2-f4`);
+  await pagina.waitForSelector("section[data-previa] iframe");
+  conferir((await pagina.locator("[data-fase-trancada]").count()) === 0, "lab: o desafio da U2 abre direto pelo endereço");
+  await pagina.goto(`${URL_JOGO}/lab/mapa`);
+  await pagina.locator("[data-lab-mapa]").waitFor();
+  await pagina.getByRole("button", { name: "Abrir a Lista de fases" }).click();
+  await pagina.getByRole("dialog", { name: "Lista de fases" }).waitFor();
+  await pagina.locator('[data-fase="sites-elementos-u1-f2"]').click();
+  await pagina.waitForURL("**/fase/sites-elementos-u1-f2");
+  conferir(true, "lab: a Lista de fases mora no /lab/mapa e abre a fase escolhida");
+  await pagina.goto(`${URL_JOGO}/lab/mapa`);
+  await pagina.locator("[data-lab-mapa]").waitFor();
+  await pagina.getByRole("button", { name: "Resetar o progresso do mapa" }).click();
+  await pagina.getByRole("button", { name: "Sim, resetar" }).click();
+  const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+  conferir(
+    !salvo.mapaDesbloqueado && salvo.fasesConcluidas.length === 0 && Object.keys(salvo.fasesEmAndamento).length === 0,
+    "lab: resetar limpa o progresso do mapa",
+  );
+  conferir(errosRelevantes(erros).length === 0, `lab: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
 }

@@ -1,16 +1,16 @@
 // Retomar no meio de um momento roteirizado: a página volta para antes do
 // esbarrão, o computadorzinho esbarra de novo e o Desfazer continua valendo.
-// Também confere a Lista de fases e o custo das soluções.
+// Também confere o custo das soluções. A fase abre direto pelo endereço
+// (/fase/sites-elementos-u2-f2), sem introdução vista.
 import { abrir, conferir, errosRelevantes, progressoComFase } from "./util.mjs";
 const TODAS = ["painel","previa","me-ajuda","tutor","arvore","inspecionar","editar-duplo-clique","editor","sincronia","trilha","esconder","apagar","desfazer","duplicar"];
 const concl = ["sites-elementos-u1-f1","sites-elementos-u2-f1"];
-const { navegador, pagina, erros } = await abrir({ progresso: progressoComFase("sites-elementos-u2-f1", {}, { apresentacoesVistas: TODAS, fasesConcluidas: concl, faseAtual: "sites-elementos-u2-f1" }) });
-const iframe = pagina.frameLocator("iframe[title^='Site']").first();
-// Vai para a fase 2 pela lista de fases.
-await pagina.getByRole("button", { name: "Abrir a lista de fases" }).click();
-await pagina.locator('[data-fase="sites-elementos-u2-f2"]').click();
+const { navegador, pagina, erros } = await abrir({
+  progresso: progressoComFase("sites-elementos-u2-f1", {}, { apresentacoesVistas: TODAS, fasesConcluidas: concl, faseAtual: "sites-elementos-u2-f2" }),
+});
+const iframe = pagina.frameLocator("section[data-previa] iframe");
 await pagina.waitForTimeout(800);
-conferir((await iframe.locator("#popup-cookies").count()) === 1, "lista de fases abre a fase 2");
+conferir((await iframe.locator("#popup-cookies").count()) === 1, "o endereço abre a fase 2");
 // Pula a introdução e faz os objetivos 1 e 2 pela solução do Me ajuda.
 for (let i = 0; i < 3; i++) { await pagina.getByRole("button", { name: /^(Continuar|Vamos lá!)$/ }).first().click(); await pagina.waitForTimeout(150); }
 for (const previsao of [false, true]) {

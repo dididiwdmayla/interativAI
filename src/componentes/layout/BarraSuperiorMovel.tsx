@@ -13,6 +13,8 @@ type Props = {
   menu: ReactNode;
   /** Botão que fica sempre à vista, fora do menu (ex.: "Voltar ao desafio"). */
   acaoFixa?: ReactNode;
+  /** Antes do título (ex.: o botão "Mapa"). */
+  inicio?: ReactNode;
 };
 
 /**
@@ -20,11 +22,12 @@ type Props = {
  * resto num menu. Fica acima do fundo do balão do computadorzinho, então
  * os botões dela funcionam mesmo com a conversa aberta.
  */
-export function BarraSuperiorMovel({ titulo, estrelas, fina = false, menu, acaoFixa }: Props) {
+export function BarraSuperiorMovel({ titulo, estrelas, fina = false, menu, acaoFixa, inicio }: Props) {
   return (
     <header
-      className={`relative z-[45] flex shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie pl-3 pr-1 ${fina ? "h-10" : "h-12"}`}
+      className={`relative z-[45] flex shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie pr-1 ${inicio ? "pl-1" : "pl-3"} ${fina ? "h-10" : "h-12"}`}
     >
+      {inicio}
       <span className="min-w-0 flex-1 truncate text-sm font-black text-texto">{titulo}</span>
       {estrelas === null ? (
         <span className="rounded-full bg-painel px-2 py-0.5 text-[11px] font-black uppercase text-texto-suave">Revisão</span>

@@ -79,7 +79,7 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
 
 ```
 src/
-  app/                  rotas (/, /lab/mascote, /lab/fases, /api/tutor)
+  app/                  rotas (/ mundo, /ilha/[id], /fase/[id], /lab/mapa, /lab/fases, /lab/mascote, /api/tutor)
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
@@ -93,8 +93,8 @@ src/
     painel/             DevTools simplificado: abas, árvore (menu do nó, barra, trilha), editor
     preview/            janela de navegador falsa, iframe, sobreposição
     mascote/            Mascote, Carinha, balão, previsão, checklist, Rever, selo Sozinho
-    jogo/               composição da tela, motor, meta, conclusão, Lista de fases (movel/)
-    lab/                o /lab/fases (validadores ao vivo, checagens, índice)
+    jogo/               composição da tela, motor, meta, conclusão, Lista de fases (usada no /lab/mapa) (movel/)
+    lab/                o /lab/fases (validadores ao vivo, checagens, índice) e o /lab/mapa
     ferramentas/        apresentação (spotlight), Caixa de Ferramentas, AlvoFerramenta
     icones/             ícones SVG (um por arquivo)
     ui/                 peças genéricas (dica, botão, modal)
@@ -191,12 +191,25 @@ src/
   fase, se a pessoa não tem nenhum progresso nela (`faseAbreComMeta`,
   `src/lib/metaDaUnidade.ts`; vistas em `metasVistas`).
 
-### Navegação (provisória, até existir o mapa)
+### Navegação (o mapa)
 
-- `Jogo` abre a fase salva em `faseAtual` (ou a primeira). "Lista de fases"
-  (gaveta no desktop, folha no celular) mostra unidades e fases com cadeado
-  nas bloqueadas (`src/lib/liberacao.ts`: abre quando a anterior foi
-  concluída) e estrelas nas concluídas. A conclusão tem "Próxima fase".
+- Rotas (`src/lib/rotas.ts`), todas com deep link: `/` é o mundo,
+  `/ilha/[id]` a ilha (ou o museu, em `/ilha/origens`), `/fase/[id]` a
+  fase. Recarregar mantém o lugar e o voltar do navegador faz fase ->
+  ilha -> mundo. Ids fora do currículo ou do conteúdo dão 404
+  (`generateStaticParams` + `dynamicParams = false`).
+- `Jogo` recebe o id da rota; fase ainda trancada
+  (`src/lib/liberacao.ts`: abre quando a anterior foi concluída) mostra um
+  aviso com o caminho de volta. A fase aberta vira `faseAtual` (o mapa põe
+  o computadorzinho nela e o card diz "Continuar").
+- Dentro da fase, o botão "Mapa" (barra do desktop; no celular, à esquerda
+  do título) volta para a ilha. "Próxima fase" só aparece dentro da
+  unidade; depois da última fase (o desafio), a conclusão tem "Voltar pra
+  ilha", e a ilha comemora. O "Rever" do desafio continua na mesma página
+  (sem mudar o endereço).
+- A Lista de fases saiu da navegação: mora no `/lab/mapa`, junto com
+  "Desbloquear tudo" (`mapaDesbloqueado`) e "Resetar o progresso do mapa",
+  só para testes.
 - A palavra "trilha" fica reservada para a ferramenta; o "onde estou" da
   barra superior é o componente `OndeEstou`.
 
@@ -425,7 +438,7 @@ src/
 
 ## Fora do escopo agora
 
-Mapa das ilhas (a Lista de fases é provisória), computadorzinho navegador
+Computadorzinho navegador
 (o índice `montarIndice()` já existe), atividades teóricas (linha do tempo,
 comparador de linguagens, diagrama de rede; o registro de tipos de fase já
 está pronto para elas), outras zonas, abas além de Elementos, objetivos

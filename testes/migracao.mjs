@@ -23,9 +23,20 @@ const V1 = {
   proporcaoPrevia: 0.5,
 };
 
-const { navegador, pagina, erros } = await abrir({ progresso: V1 });
+// Entra pelo mapa, como quem volta a jogar depois da atualização.
+const { navegador, pagina, erros } = await abrir({ progresso: V1, rota: "/", esperar: "[data-mapa=mundo]" });
+conferir((await pagina.locator("[data-mascote-no-mapa=sites]").count()) === 1, "mundo: o computadorzinho está em Sites");
+await pagina.locator("[data-ilha=sites]").click();
+await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+await pagina.locator('[data-unidade="sites-elementos-u1"]').click();
+const continuar = pagina.getByRole("dialog").getByRole("button", { name: "Continuar", exact: true });
+conferir((await continuar.count()) === 1, "ilha: a U1 aparece em andamento (Continuar)");
+await continuar.click();
+await pagina.waitForSelector("section[data-previa] iframe");
 await pagina.waitForTimeout(1200);
-const iframe = pagina.frameLocator("iframe").first();
+conferir(new URL(pagina.url()).pathname === "/fase/sites-elementos-u1-f1", "abre a fase migrada");
+conferir((await pagina.locator("[data-meta]").count()) === 0, "quem já tinha progresso não vê a meta de novo");
+const iframe = pagina.frameLocator("section[data-previa] iframe");
 conferir((await iframe.locator("p.descricao").textContent()) === "Minha descrição", "o HTML salvo na v1 volta");
 conferir((await pagina.locator("[aria-current=step]").textContent()).includes("Dê dois cliques"), "continua no objetivo 3");
 conferir((await pagina.locator("html").getAttribute("data-theme")) === "fliperama", "tema mantido");

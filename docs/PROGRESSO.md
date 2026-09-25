@@ -5,7 +5,7 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run testar:conteudo` passando e um commit.
 
 **Estado atual:** rodada 5 em andamento (fábrica corrigida, currículo em
-dados e mapa das ilhas). Etapas 1 a 4 concluídas.
+dados e mapa das ilhas). Etapas 1 a 5 concluídas.
 
 ## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
 
@@ -97,6 +97,19 @@ dados e mapa das ilhas). Etapas 1 a 4 concluídas.
   Ferramentas (Caixa só de leitura: `aoRever` ficou opcional), tema e
   som. Tudo respeita `prefers-reduced-motion`. Teste
   `testes/mapa.mjs` nos três layouts.
+
+- [x] **Etapa 5: integração do mapa com o jogo.** `/` virou o mundo;
+  fases em `/fase/[id]` (deep link, 404 fora do conteúdo, aviso de fase
+  trancada com volta para a ilha); o `/mapa` provisório saiu. Botão
+  "Mapa" dentro da fase (desktop na barra; celular à esquerda do título,
+  44 px), que volta para a ilha. "Próxima fase" só dentro da unidade;
+  depois do desafio, "Voltar pra ilha" (a ilha comemora, o ponto acende e
+  o próximo aparece). A Lista de fases saiu do jogo e foi para o
+  `/lab/mapa` (com "Desbloquear tudo" e "Resetar o progresso do mapa").
+  Testes: `unidades.mjs` joga as Unidades 1 e 2 começando pelo mapa e
+  voltando para a ilha, nos três layouts; `mapa.mjs` com deep links,
+  voltar e avançar do navegador, botão Mapa, fase trancada e o lab;
+  `migracao.mjs` entra pelo mapa; `abrir()` abre `/fase/<faseAtual>`.
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 

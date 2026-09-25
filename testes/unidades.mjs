@@ -1,7 +1,8 @@
-// Joga as Unidades 1 e 2 do começo ao fim, como um jogador: apresentações,
-// meta com antes/depois, previsões, o esbarrão do computadorzinho,
-// objetivos sozinho, o desafio com checklist, o Rever (revisão e volta) e a
-// Lista de fases com cadeados.
+// Joga as Unidades 1 e 2 do começo ao fim, como um jogador, a partir do
+// mapa: mundo -> ilha Sites -> unidade -> fases -> volta para a ilha, que
+// comemora. No caminho: apresentações, meta com antes/depois, previsões, o
+// esbarrão do computadorzinho, objetivos sozinho, o desafio com checklist e
+// o Rever (revisão e volta).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
 import { abrir, chaveDoSeletor, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
 
@@ -11,7 +12,7 @@ const TAMANHOS = {
   retrato: { largura: 390, altura: 844, toque: true },
   paisagem: { largura: 844, altura: 390, toque: true },
 };
-const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null });
+const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: "/", esperar: "[data-mapa=mundo]" });
 const toque = TAMANHOS[MODO].toque;
 const movel = MODO !== "desktop";
 const iframe = pagina.frameLocator("iframe[title^='Site']").first();
@@ -163,15 +164,6 @@ async function conclusaoEProxima(nome) {
   await esperar(900);
 }
 
-async function abrirListaFases() {
-  if (movel) {
-    await fecharBalao();
-    await pagina.getByRole("button", { name: "Mais opções" }).tap();
-  }
-  await tocar(pagina.getByRole("button", { name: "Abrir a lista de fases" }));
-  await pagina.getByRole("dialog", { name: "Lista de fases" }).waitFor();
-}
-
 const checklist = () => pagina.locator("[data-checklist]").first();
 /** Partes marcadas no checklist (no celular em pé ele abre na barra; deitado, fica no balão). */
 async function partesFeitas() {
@@ -201,15 +193,48 @@ async function metaDaUnidade(nome) {
   await esperar(300);
 }
 
+// ------------------------------------------------------------ mapa
+const ponto = (id) => pagina.locator(`[data-unidade="${id}"]`);
+const estadoDoPonto = (id) => ponto(id).getAttribute("data-estado");
+
+/** Na ilha: abre o card da unidade e aperta o botão (Jogar, Continuar...). */
+async function jogarUnidade(unidadeId, rotulo) {
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  await ponto(unidadeId).scrollIntoViewIfNeeded();
+  await tocar(ponto(unidadeId));
+  const botao = pagina.getByRole("dialog").getByRole("button", { name: rotulo, exact: true });
+  await botao.waitFor();
+  await tocar(botao);
+  await pagina.waitForSelector("section[data-previa] iframe");
+  await esperar(400);
+}
+
+/** Fim da última fase da unidade: missão de campo e "Voltar pra ilha", que comemora. */
+async function conclusaoEVoltarAIlha(nome) {
+  const conclusao = pagina.locator("[data-conclusao]");
+  await conclusao.waitFor({ timeout: 8000 });
+  for (let i = 0; i < 4; i++) {
+    const continuar = pagina.getByRole("dialog").getByRole("button", { name: "Continuar", exact: true });
+    if (!(await continuar.isVisible().catch(() => false))) break;
+    await tocar(continuar);
+    await esperar(200);
+  }
+  conferir((await pagina.getByRole("button", { name: "Próxima fase" }).count()) === 0, `${nome}: depois do desafio não tem Próxima fase`);
+  await tocar(pagina.getByRole("button", { name: "Voltar pra ilha" }));
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  await pagina.locator("[data-comemoracao]").waitFor({ timeout: 6000 });
+  conferir(true, `${nome}: voltou para a ilha, que comemora`);
+}
+
+// Mundo -> ilha Sites. No começo, só a U1 está aberta.
+await tocar(pagina.locator("[data-ilha=sites]"));
+await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+conferir((await estadoDoPonto("sites-elementos-u2")) === "bloqueada", "ilha no começo: U2 com cadeado");
+await jogarUnidade("sites-elementos-u1", "Jogar");
+
 // ------------------------------------------------------------ Unidade 1
 // A meta (antes/depois) cobre a tela: passa por ela antes de mais nada.
 await metaDaUnidade("U1 começo");
-
-// Lista de fases no começo: só a primeira aberta.
-await abrirListaFases();
-conferir(await pagina.locator('[data-fase="sites-elementos-u2-f1"]').isDisabled(), "lista de fases: Unidade 2 com cadeado no começo");
-await pagina.keyboard.press("Escape");
-await esperar(400);
 
 await conversar(3);
 await apresentacao("painel", () => tocar(pagina.getByRole("tab", { name: "Elementos" }).first()));
@@ -323,7 +348,10 @@ await botaoConversa("Ver resultado");
 await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U1: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U1: 3 estrelas");
-await conclusaoEProxima("U1F3");
+await conclusaoEVoltarAIlha("U1");
+conferir((await estadoDoPonto("sites-elementos-u1")) === "concluida", "ilha: U1 concluída");
+conferir((await estadoDoPonto("sites-elementos-u2")) === "disponivel", "ilha: U2 abriu");
+await jogarUnidade("sites-elementos-u2", "Jogar");
 
 // ------------------------------------------------------------ U2 fase 1
 await metaDaUnidade("U2 começo");
@@ -458,12 +486,17 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio completo!").count()) > 0, "desafio: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='2 de 3 estrelas']").count()) === 1, "desafio: 2 estrelas");
 
-// Tudo concluído na lista de fases.
-await pagina.keyboard.press("Escape");
-await esperar(400);
-await abrirListaFases();
-const concluidas = await pagina.getByRole("dialog", { name: "Lista de fases" }).getByRole("img", { name: "Concluída" }).count();
-conferir(concluidas === 7, `lista de fases: 7 fases concluídas (${concluidas})`);
+// Volta para a ilha: a U2 acende e o próximo ponto aparece como planejado.
+await conclusaoEVoltarAIlha("U2");
+conferir((await estadoDoPonto("sites-elementos-u2")) === "concluida", "ilha: U2 concluída");
+conferir((await estadoDoPonto("sites-elementos-u3")) === "planejada", "ilha: a U3 aparece como planejada");
+conferir((await pagina.locator("[data-trecho-andado]").count()) === 2, "ilha: o caminho até a U3 está desenhado");
+const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvo.fasesConcluidas.length === 7, `7 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as duas unidades concluídas.
+await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
+await pagina.locator("[data-mapa=mundo]").waitFor();
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("2 de 2 unidades"), "mundo: Sites com 2 de 2 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

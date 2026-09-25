@@ -20,7 +20,9 @@ As mesmas checagens rodam no navegador em `/lab/fases` (aba Checagens).
 
 ## Navegador
 
-Scripts Playwright que jogam o jogo de verdade num Chromium. Eles usam o
+Scripts Playwright que jogam o jogo de verdade num Chromium. Sem `rota`,
+`abrir()` vai direto para a fase atual do progresso (ou a primeira), em
+`/fase/<id>`; o mundo é `/` e a ilha, `/ilha/<id>`. Eles usam o
 Playwright do projeto ou, se não houver, o instalado globalmente
 (`npm root -g`). Todos precisam do jogo no ar em `URL_JOGO`
 (padrão `http://localhost:3000`).
@@ -43,11 +45,11 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `fase-completa.mjs [desktop\|retrato\|paisagem]` | a Fase 1 do zero, com todas as apresentações na ordem, e recarregar sem repetir |
 | `movel.mjs` | prévia visível ao editar, teclado simulado, alça, giro sem perder nada, spotlight nos dois modos, dica deitado |
 | `ferramentas-novas.mjs` | trilha, esconder (classe do Chrome), apagar, desfazer/refazer (botões e atalhos), duplicar, menu do nó (botão direito e toque longo), barra do celular e as apresentações novas |
-| `unidades.mjs [desktop\|retrato\|paisagem]` | as Unidades 1 e 2 inteiras: meta com antes/depois, previsões (certa e errada), esbarrão e desfazer, sozinho ("Fez sozinho!"), desafio com checklist (parte de seleção trava, parte de estado desmarca ao desfazer), Rever, revisão e volta, estrelas, Lista de fases e Próxima fase |
+| `unidades.mjs [desktop\|retrato\|paisagem]` | as Unidades 1 e 2 inteiras começando pelo mapa (mundo -> ilha Sites -> card -> Jogar), com meta com antes/depois, previsões (certa e errada), esbarrão e desfazer, sozinho ("Fez sozinho!"), desafio com checklist (parte de seleção trava, parte de estado desmarca ao desfazer), Rever, revisão e volta, estrelas, Próxima fase dentro da unidade e "Voltar pra ilha" depois do desafio (ponto aceso, próximo aberto, U3 planejada, Sites 2 de 2 no mundo) |
 | `renomear-links.mjs` | renomear tag pela árvore (dois cliques, Enter, Espaço, Esc, nome inválido, desfazer/refazer, menu do nó, barra e dois toques no celular), a apresentação e o card da ferramenta nova, e links na prévia (href="#", externo com aba nova, botão do meio, quebrado, sem href, âncora que rola) no desktop e em pé |
-| `mapa.mjs [desktop\|retrato\|paisagem]` | o mundo (estados das ilhas, Opcional, computadorzinho, rola no celular), ilha em construção (placas, tudo planejado, sem texto técnico), voltar do navegador, a ilha Sites (pontos de 44 px, caminho horizontal ou vertical, cards, Jogar abre a fase), o museu das Origens e a comemoração ao concluir a U1 (ponto aceso, caminho desenhado, registrada uma vez só, 9 estrelas) |
+| `mapa.mjs [desktop\|retrato\|paisagem]` | o mundo (estados das ilhas, Opcional, computadorzinho, rola no celular), ilha em construção (placas, tudo planejado, sem texto técnico), voltar do navegador, a ilha Sites (pontos de 44 px, caminho horizontal ou vertical, cards, Jogar abre a fase), o museu das Origens, a comemoração ao concluir a U1 (ponto aceso, caminho desenhado, registrada uma vez só, 9 estrelas), deep links (recarregar mantém fase e ilha), voltar e avançar do navegador (fase -> ilha -> mundo), o botão Mapa da fase, fase trancada pelo endereço e o `/lab/mapa` (desbloquear tudo, Lista de fases, resetar) |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
-| `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada |
+| `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada, entrando pelo mapa (computadorzinho em Sites, U1 com "Continuar", sem a meta de novo) |
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
 
 Todos falham se aparecer erro ou aviso no console do navegador.

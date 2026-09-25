@@ -20,7 +20,7 @@ type Props = {
 };
 
 /**
- * Navegação provisória (até existir o mapa): unidades e fases em ordem,
+ * Lista de fases (antes a navegação provisória; agora só no /lab/mapa): unidades e fases em ordem,
  * com cadeado nas que ainda não abriram. Gaveta no desktop, folha no celular.
  */
 export function ListaFases({ aberta, faseAtual, aoEscolher, aoFechar }: Props) {
