@@ -159,8 +159,11 @@ async function editarValorAtributo(seletor, novoValor) {
 
 /**
  * Acrescenta um atributo novo pelo código (a árvore não cria atributo que
- * não existe): clica na linha que tem `buscaTexto`, anda até logo depois
- * de `apos` e digita `textoNovo` ali.
+ * não existe): acha a linha com `buscaTexto`, anda até logo depois de
+ * `apos` (Home duas vezes — a primeira só vai até o começo do texto,
+ * pulando a indentação — e então ArrowRight) e digita `textoNovo` ali.
+ * `clicarLinhaCodigo` já desliga a quebra de linha, para Home/End andarem
+ * pela linha lógica inteira, não só pela linha visual.
  */
 async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   await clicarLinhaCodigo(buscaTexto);
@@ -169,12 +172,14 @@ async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   const indice = texto.indexOf(apos);
   if (indice < 0) throw new Error(`Falhou: "${apos}" não está na linha "${texto}"`);
   const posicao = indice + apos.length;
-  // Duas vezes: a primeira pode ir só até o começo do texto (smart Home).
   await pagina.keyboard.press("Home");
   await pagina.keyboard.press("Home");
   for (let i = 0; i < posicao; i++) await pagina.keyboard.press("ArrowRight");
   await pagina.keyboard.type(textoNovo);
   await esperar(250);
+  const novaLinha = texto.slice(0, posicao) + textoNovo + texto.slice(posicao);
+  const conferida = await pagina.locator(".cm-line", { hasText: buscaTexto }).first().textContent();
+  if (conferida !== novaLinha) throw new Error(`Falhou: linha ficou "${conferida}", esperava "${novaLinha}"`);
 }
 
 /** Renomeia a tag do primeiro elemento do seletor: dois cliques (ou toques) no nome dela. */
@@ -199,6 +204,13 @@ async function renomearTag(seletor, novaTag) {
 /** Clica numa linha do código, rolando o editor até o fim primeiro (CodeMirror só renderiza linhas visíveis). */
 async function clicarLinhaCodigo(texto) {
   await mostrarPainel("Código");
+  // Com quebra de linha, Home/End andam pela linha VISUAL, não pela lógica:
+  // desliga para os cálculos de posição por caractere ficarem confiáveis.
+  const quebra = pagina.getByRole("switch", { name: /Quebrar linhas/ });
+  if ((await quebra.count()) > 0 && (await quebra.getAttribute("aria-checked")) === "true") {
+    await tocar(quebra);
+    await esperar(150);
+  }
   const scroller = pagina.locator(".cm-scroller").first();
   await scroller.evaluate((el) => {
     el.scrollTop = el.scrollHeight;
