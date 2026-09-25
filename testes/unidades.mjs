@@ -133,6 +133,48 @@ async function editarTexto(seletor, texto) {
   await esperar(200);
 }
 
+/**
+ * Troca o valor do PRIMEIRO atributo do primeiro elemento do seletor (a
+ * árvore só edita atributo que já existe): dois cliques nele.
+ */
+async function editarValorAtributo(seletor, novoValor) {
+  const chave = await chaveDoSeletor(pagina, seletor);
+  await mostrarPainel("Árvore");
+  await esperar(150);
+  const alvo = pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para editar']`).first();
+  await alvo.scrollIntoViewIfNeeded();
+  if (toque) {
+    await alvo.tap();
+    await esperar(180);
+    await alvo.tap();
+  } else {
+    await alvo.dblclick();
+  }
+  const campo = pagina.locator("[role=tree] input").first();
+  await campo.waitFor({ timeout: 8000 });
+  await campo.fill(novoValor);
+  await campo.press("Enter");
+  await esperar(250);
+}
+
+/**
+ * Acrescenta um atributo novo pelo código (a árvore não cria atributo que
+ * não existe): clica na linha que tem `buscaTexto`, anda até logo depois
+ * de `apos` e digita `textoNovo` ali.
+ */
+async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
+  await clicarLinhaCodigo(buscaTexto);
+  const linha = pagina.locator(".cm-line", { hasText: buscaTexto }).first();
+  const texto = (await linha.textContent()) ?? "";
+  const indice = texto.indexOf(apos);
+  if (indice < 0) throw new Error(`Falhou: "${apos}" não está na linha "${texto}"`);
+  const posicao = indice + apos.length;
+  await pagina.keyboard.press("Home");
+  for (let i = 0; i < posicao; i++) await pagina.keyboard.press("ArrowRight");
+  await pagina.keyboard.type(textoNovo);
+  await esperar(250);
+}
+
 /** Renomeia a tag do primeiro elemento do seletor: dois cliques (ou toques) no nome dela. */
 async function renomearTag(seletor, novaTag) {
   const chave = await chaveDoSeletor(pagina, seletor);
@@ -628,16 +670,99 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U3: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U3: 3 estrelas");
 
-// Volta para a ilha: a U3 acende e o próximo ponto aparece como planejado.
+// Volta para a ilha: a U3 acende e o próximo ponto (U4, já pronta) aparece bloqueado até jogar.
 await conclusaoEVoltarAIlha("U3");
 conferir((await estadoDoPonto("sites-elementos-u3")) === "concluida", "ilha: U3 concluída");
-conferir((await estadoDoPonto("sites-elementos-u4")) === "planejada", "ilha: a U4 aparece como planejada");
+conferir((await estadoDoPonto("sites-elementos-u4")) === "disponivel", "ilha: a U4 abriu");
+await jogarUnidade("sites-elementos-u4", "Jogar");
+
+// ------------------------------------------------------------ U4 fase 1
+await metaDaUnidade("U4 começo");
+await conversar(3);
+await editarValorAtributo("#nav-contato", "#rodape");
+await proximoObjetivo("U4F1 objetivo 1 (href quebrado)");
+
+// Previsão: acerta o palpite e escreve target="_blank" pelo código (o atributo ainda não existe).
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+conferir(true, "U4F1: previsão sobre target acertou");
+await acrescentarAtributoPeloCodigo("link-ingressos", 'id="link-ingressos"', ' target="_blank"');
+await proximoObjetivo("U4F1 objetivo 2 (previsão + código)");
+
+// Sozinho: href existente pela árvore, target novo pelo código.
+await editarValorAtributo("#nav-integrantes", "#integrantes");
+await acrescentarAtributoPeloCodigo("link-video", 'id="link-video"', ' target="_blank"');
+await proximoObjetivo("U4F1 objetivo 3 (sozinho)");
+await conclusaoEProxima("U4F1");
+
+// ------------------------------------------------------------ U4 fase 2
+await conversar(3);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await acrescentarAtributoPeloCodigo("foto-coral", 'id="foto-coral"', ' alt="Coral Vozes da Vila cantando em um palco de igreja"');
+await proximoObjetivo("U4F2 objetivo 1 (previsão alt)");
+
+await acrescentarAtributoPeloCodigo("icone-ingressos", 'id="icone-ingressos"', ' alt="Ícone de um ingresso"');
+await proximoObjetivo("U4F2 objetivo 2 (sozinho)");
+await conclusaoEProxima("U4F2");
+
+// ------------------------------------------------------------ U4 fase 3
+await conversar(3);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await acrescentarAtributoPeloCodigo("integrante-bruno", "<article", ' class="integrante"');
+await acrescentarAtributoPeloCodigo("integrante-carla", "<article", ' class="integrante"');
+await proximoObjetivo("U4F3 objetivo 1 (previsão id duplicado)");
+
+await acaoNoNo("#integrante-ana", "duplicar");
+await editarTexto(".cards > article:nth-child(2) h3", "Duda");
+await proximoObjetivo("U4F3 objetivo 2 (sozinho, duplicar)");
+await conclusaoEProxima("U4F3");
+
+// ------------------------------------------------------------ Desafio U4
+await metaDaUnidade("Desafio U4");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio U4: checklist no lugar dos objetivos");
+
+await editarValorAtributo("#nav-contato", "#rodape");
+conferir((await partesFeitas()) === 1, "desafio U4: link do menu marca a parte");
+
+await acrescentarAtributoPeloCodigo("link-ingressos-banda", 'id="link-ingressos-banda"', ' target="_blank"');
+conferir((await partesFeitas()) === 2, "desafio U4: aba nova marca a parte");
+
+await acrescentarAtributoPeloCodigo("foto-banda", 'id="foto-banda"', ' alt="Os quatro integrantes da banda Trovão de Lata"');
+conferir((await partesFeitas()) === 3, "desafio U4: alt da foto marca a parte");
+
+await acrescentarAtributoPeloCodigo("musico-rita", "<article", ' class="musico"');
+await acrescentarAtributoPeloCodigo("musico-davi", "<article", ' class="musico"');
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-u4", erro);
+}
+conferir((await partesFeitas()) === 4, "desafio U4: as 4 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U4: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U4: 3 estrelas");
+
+// Volta para a ilha: a U4 acende e o próximo ponto aparece como planejado.
+await conclusaoEVoltarAIlha("U4");
+conferir((await estadoDoPonto("sites-elementos-u4")) === "concluida", "ilha: U4 concluída");
+conferir((await estadoDoPonto("sites-elementos-u5")) === "planejada", "ilha: a U5 aparece como planejada");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
-conferir(salvo.fasesConcluidas.length === 11, `11 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as três unidades concluídas.
+conferir(salvo.fasesConcluidas.length === 15, `15 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as quatro unidades concluídas.
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("3 de 3 unidades"), "mundo: Sites com 3 de 3 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("4 de 4 unidades"), "mundo: Sites com 4 de 4 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

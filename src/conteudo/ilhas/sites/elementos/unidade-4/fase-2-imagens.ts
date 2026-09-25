@@ -6,8 +6,12 @@
  * aparece se a imagem não carregar. Ataca de frente a confusão "alt é
  * legenda".
  *
- * REVISÃO ESPAÇADA: editar atributo (fase 1 desta unidade) volta na
- * segunda imagem, numa seção diferente.
+ * ATENÇÃO DE MOTOR: nenhuma das duas imagens tem alt no começo, e a árvore
+ * só edita atributo que já existe. Por isso as duas escritas são pelo
+ * código (revisão do editor da Unidade 1), não pela árvore.
+ *
+ * REVISÃO ESPAÇADA: o código HTML (Unidade 1) volta na segunda imagem,
+ * numa seção diferente.
  *
  * POR QUE ESTA ORDEM:
  * 1. Guiado, previsão: antes de escrever o alt da foto do coral, o jogador
@@ -25,9 +29,9 @@ export const FASE_U4_F2: FasePratica = {
   unidadeId: "sites-elementos-u4",
   titulo: "Imagens que todo mundo entende",
   conceitos: ["imagem-alt"],
-  revisa: ["editar-atributo"],
-  prerequisitos: ["tag", "selecionar-pela-arvore"],
-  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique"],
+  revisa: ["editar-atributo", "codigo-html"],
+  prerequisitos: ["tag", "selecionar-pela-arvore", "codigo-html"],
+  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique", "editor", "sincronia"],
   siteAlvo: SITE_CORAL,
 
   introducao: [
@@ -52,8 +56,8 @@ export const FASE_U4_F2: FasePratica = {
         explicacao: "O alt não aparece na tela como legenda. Um leitor de tela lê esse texto em voz alta, e ele também aparece no lugar da imagem se ela não carregar.",
       },
       enunciado: {
-        mouse: "Agora escreva um alt de verdade pra essa imagem: descreva o que ela mostra.",
-        toque: "Agora escreva um alt de verdade pra essa imagem: descreva o que ela mostra.",
+        mouse: "Essa imagem ainda não tem alt. Pelo código, escreva um alt de verdade descrevendo o que ela mostra.",
+        toque: "Essa imagem ainda não tem alt. Pelo código, escreva um alt de verdade descrevendo o que ela mostra.",
       },
       validador: {
         tipo: "todos",
@@ -64,10 +68,10 @@ export const FASE_U4_F2: FasePratica = {
       },
       ajudas: {
         pergunta: "Se você fechasse os olhos, o que precisaria ouvir pra saber o que essa imagem mostra?",
-        dica: "O alt é um texto curto que descreve a imagem, como se você a explicasse por telefone.",
-        linha: { alvo: "arvore", seletor: "#foto-coral", fala: "Essa é a foto do coral. Adicione o atributo alt com uma descrição." },
+        dica: "O alt é um texto curto que descreve a imagem, como se você a explicasse por telefone. Como ele ainda não existe, escreva pelo código.",
+        linha: { alvo: "editor", seletor: "#foto-coral", fala: "Essa é a linha da foto do coral. Escreva alt=\"...\" dentro da tag img, antes do >." },
         solucao: {
-          fala: "Escrevi 'Coral Vozes da Vila cantando em um palco de igreja': quem não vê a imagem agora sabe o que ela mostra.",
+          fala: "Escrevi alt=\"Coral Vozes da Vila cantando em um palco de igreja\" pelo código: quem não vê a imagem agora sabe o que ela mostra.",
           acoes: [{ tipo: "definirAtributo", seletor: "#foto-coral", nome: "alt", valor: "Coral Vozes da Vila cantando em um palco de igreja" }],
         },
       },
@@ -94,7 +98,7 @@ export const FASE_U4_F2: FasePratica = {
       },
       ajudas: {
         pergunta: "O que esse desenho representa? Descreva em poucas palavras.",
-        dica: "Um alt curto e direto já resolve: não precisa ser um texto longo.",
+        dica: "Como o atributo ainda não existe, escreva ele pelo código, dentro da tag da imagem.",
       },
       falaAoConcluir: { texto: "Perfeito! Agora as duas imagens fazem sentido pra quem não consegue vê-las.", expressao: "comemorando" },
       solucaoDeTeste: [{ tipo: "definirAtributo", seletor: "#icone-ingressos", nome: "alt", valor: "Ícone de um ingresso" }],

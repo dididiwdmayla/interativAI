@@ -6,17 +6,23 @@
  * (endereço ou #id da própria página) e o target="_blank" (abrir numa aba
  * nova sem sair da página atual).
  *
+ * ATENÇÃO DE MOTOR: a árvore só deixa editar o VALOR de um atributo que já
+ * existe (dois cliques nele); não existe um jeito de criar um atributo novo
+ * pela árvore. Trocar um href já existente usa a árvore; ACRESCENTAR um
+ * atributo que a peça não tem (como target) precisa ser pelo código.
+ *
  * REVISÃO ESPAÇADA: nenhum conceito novo revisita ainda (é a primeira fase
- * da unidade); a "casa" (elemento pai/filho) e a árvore da Unidade 1 e 2
- * aparecem naturalmente ao localizar os links no menu.
+ * da unidade); a árvore da Unidade 1 e o editor de código aparecem
+ * misturados ao localizar e consertar os links do menu.
  *
  * POR QUE ESTA ORDEM:
  * 1. Guiado, ação: conserta o link do menu que não leva a lugar nenhum,
- *    trocando o href para o id certo. É o gesto mínimo de editar atributo.
- * 2. Guiado, previsão: antes de adicionar target="_blank" no link da
- *    bilheteria, o jogador aposta o que muda.
+ *    trocando o href (que já existe) para o id certo, pela árvore.
+ * 2. Guiado, previsão: antes de acrescentar target="_blank" no link da
+ *    bilheteria (um atributo que ele ainda não tem), o jogador aposta o
+ *    que muda, e escreve o atributo novo pelo código.
  * 3. Sozinho: as duas habilidades juntas, em dois links diferentes, sem
- *    dizer qual arrumar primeiro.
+ *    dizer qual arrumar primeiro nem qual ferramenta usar.
  */
 import type { FasePratica } from "@/conteudo/tipos";
 import { SITE_CORAL } from "./sites/coralVozesDaVila";
@@ -27,9 +33,9 @@ export const FASE_U4_F1: FasePratica = {
   unidadeId: "sites-elementos-u4",
   titulo: "Links que funcionam",
   conceitos: ["editar-atributo", "link-href", "link-ancora", "link-aba-nova"],
-  revisa: ["selecionar-pela-arvore"],
-  prerequisitos: ["elemento", "tag", "selecionar-pela-arvore"],
-  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique"],
+  revisa: ["selecionar-pela-arvore", "codigo-html"],
+  prerequisitos: ["elemento", "tag", "selecionar-pela-arvore", "codigo-html"],
+  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique", "editor", "sincronia"],
   siteAlvo: SITE_CORAL,
 
   introducao: [
@@ -69,22 +75,22 @@ export const FASE_U4_F1: FasePratica = {
       tipo: "previsao",
       modo: "guiado",
       previsao: {
-        pergunta: "Palpite: o que muda se a gente adicionar target=\"_blank\" no link da bilheteria?",
+        pergunta: "Palpite: o que muda se a gente acrescentar target=\"_blank\" no link da bilheteria?",
         opcoes: ["Ele some da página", "Abre numa aba nova, sem sair daqui", "Fica sublinhado"],
         correta: 1,
         explicacao: "target=\"_blank\" faz o link abrir numa aba nova. A página do coral continua aberta do jeito que estava.",
       },
       enunciado: {
-        mouse: "Agora confira: adicione o atributo target com o valor _blank no link da bilheteria.",
-        toque: "Agora confira: adicione o atributo target com o valor _blank no link da bilheteria.",
+        mouse: "Agora confira: esse link ainda não tem target. Pelo código, escreva target=\"_blank\" dentro da tag dele.",
+        toque: "Agora confira: esse link ainda não tem target. Pelo código, escreva target=\"_blank\" dentro da tag dele.",
       },
       validador: { tipo: "atributo", seletor: "#link-ingressos", nome: "target", valor: "_blank" },
       ajudas: {
-        pergunta: "Você já viu um link abrir sem fechar a página em que você estava?",
-        dica: "target=\"_blank\" é o atributo que faz o link abrir numa aba nova.",
-        linha: { alvo: "arvore", seletor: "#link-ingressos", fala: "Esse é o link da bilheteria. Adicione o atributo target com o valor _blank." },
+        pergunta: "Esse link já tem um atributo target? Se não tem, dá pra editar pela árvore?",
+        dica: "A árvore só edita atributos que já existem. Um atributo novo (como target) se escreve direto no código.",
+        linha: { alvo: "editor", seletor: "#link-ingressos", fala: "Essas são as linhas do link da bilheteria. Escreva target=\"_blank\" dentro da tag, antes do >." },
         solucao: {
-          fala: "Adicionei target=\"_blank\": agora o link abre numa aba nova, sem perder a página do coral.",
+          fala: "Escrevi target=\"_blank\" pelo código: como o atributo ainda não existia, a árvore não tinha como criar ele.",
           acoes: [{ tipo: "definirAtributo", seletor: "#link-ingressos", nome: "target", valor: "_blank" }],
         },
       },
@@ -110,8 +116,8 @@ export const FASE_U4_F1: FasePratica = {
         ],
       },
       ajudas: {
-        pergunta: "Esse menu devia levar pra qual seção? E esse link de vídeo devia abrir onde?",
-        dica: "Href com # rola até um id da página; target=\"_blank\" abre em aba nova.",
+        pergunta: "Esse menu devia levar pra qual seção? E o link do vídeo já tem um target pra editar, ou precisa escrever um?",
+        dica: "Href que já existe: árvore. Atributo que ainda não existe: pelo código.",
       },
       falaAoConcluir: { texto: "Show! Dois links consertados de uma vez, sem passo a passo.", expressao: "comemorando" },
       solucaoDeTeste: [
@@ -123,7 +129,7 @@ export const FASE_U4_F1: FasePratica = {
 
   conclusao: [
     { texto: "Agora você conserta qualquer link: href é o endereço, # rola pra um id, target=\"_blank\" abre aba nova.", expressao: "comemorando" },
-    { texto: "No F12 de verdade, dois cliques no valor do atributo (ou o + pra criar um novo) fazem a mesma troca.", expressao: "feliz" },
+    { texto: "No F12 de verdade, dois cliques trocam um atributo que já existe; um atributo novo se escreve na aba Estilos ou direto no HTML.", expressao: "feliz" },
   ],
 
   missaoDeCampo:

@@ -5,6 +5,10 @@
  * repetir em várias peças parecidas. Ataca a confusão "id e class são a
  * mesma coisa" com uma previsão sobre id duplicado.
  *
+ * ATENÇÃO DE MOTOR: os cards do Bruno e da Carla ainda não têm class
+ * nenhuma, e a árvore só edita atributo que já existe. Por isso o
+ * primeiro objetivo escreve a class pelo código, não pela árvore.
+ *
  * REVISÃO ESPAÇADA: duplicar elemento (Unidade 2) volta no objetivo
  * sozinho: duplicar um integrante e ver que a class copiada continua
  * funcionando.
@@ -28,8 +32,8 @@ export const FASE_U4_F3: FasePratica = {
   titulo: "Id é um, class é vários",
   conceitos: ["id-unico", "class-repetivel"],
   revisa: ["duplicar-elemento"],
-  prerequisitos: ["editar-atributo"],
-  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique", "duplicar"],
+  prerequisitos: ["editar-atributo", "codigo-html"],
+  usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "editar-duplo-clique", "editor", "sincronia", "duplicar"],
   siteAlvo: SITE_CORAL,
 
   introducao: [
@@ -47,23 +51,23 @@ export const FASE_U4_F3: FasePratica = {
         pergunta: "Palpite: e se a gente desse o MESMO id pros três cards de integrante, em vez de uma class?",
         opcoes: [
           "Nada acontece, os três funcionam normalmente",
-          "O navegador só reconhece um id por vez, e quem busca por ele pode pegar o card errado",
+          "O navegador só reconhece um id por vez, e quem busca por ele pode achar o errado",
           "A página para de funcionar totalmente",
         ],
         correta: 1,
         explicacao: "Id deveria ser único. Com três iguais, quem busca por aquele id (como um seletor #id) só acha o primeiro, e o resto vira bagunça.",
       },
       enunciado: {
-        mouse: "Agora arrume direito: dê a class integrante para o card do Bruno e o da Carla.",
-        toque: "Agora arrume direito: dê a class integrante para o card do Bruno e o da Carla.",
+        mouse: "Agora arrume direito: os cards do Bruno e da Carla ainda não têm class. Escreva class=\"integrante\" pelo código nos dois.",
+        toque: "Agora arrume direito: os cards do Bruno e da Carla ainda não têm class. Escreva class=\"integrante\" pelo código nos dois.",
       },
       validador: { tipo: "contagem", seletor: ".integrante", op: ">=", valor: 3 },
       ajudas: {
         pergunta: "Os três cards precisam do MESMO estilo. Isso pede um id (único) ou uma class (repetível)?",
-        dica: "Class é feita pra se repetir em várias peças parecidas. Id é único: um só por página.",
-        linha: { alvo: "arvore", seletor: "#integrante-bruno", fala: "Esse card ainda não tem a class integrante. Adicione o atributo class com o valor integrante." },
+        dica: "Class é feita pra se repetir em várias peças parecidas. Como esses cards ainda não têm class, escreva ela pelo código.",
+        linha: { alvo: "editor", seletor: "#integrante-bruno", fala: "Essa é a linha do card do Bruno. Escreva class=\"integrante\" dentro da tag article, antes do >." },
         solucao: {
-          fala: "Dei a class integrante para os dois cards: agora os três têm o mesmo estilo, sem repetir id.",
+          fala: "Escrevi class=\"integrante\" pelo código nos dois cards: agora os três têm o mesmo estilo, sem repetir id.",
           acoes: [
             { tipo: "definirAtributo", seletor: "#integrante-bruno", nome: "class", valor: "integrante" },
             { tipo: "definirAtributo", seletor: "#integrante-carla", nome: "class", valor: "integrante" },
