@@ -14,6 +14,8 @@ type Props = {
   selecionada: boolean;
   destaque: "no" | "texto" | null;
   edicao: EdicaoArvore | null;
+  /** Nome novo sendo digitado para a tag deste nó (o fechamento acompanha). */
+  rascunhoTag: string | null;
   /** Barra de ações do celular, mostrada embaixo do nó selecionado. */
   barra?: ReactNode;
   aoClicar: () => void;
@@ -25,6 +27,8 @@ type Props = {
   aoCancelarEdicao: () => void;
   aoConfirmarTexto: (alvo: NoArvore, texto: string) => void;
   aoConfirmarAtributo: (alvo: NoArvore, nome: string, valor: string) => void;
+  aoConfirmarTag: (alvo: NoArvore, novaTag: string) => void;
+  aoDigitarTag: (rascunho: string) => void;
 };
 
 const RECUO_PX = 16;
@@ -39,6 +43,7 @@ export function LinhaNo({
   selecionada,
   destaque,
   edicao,
+  rascunhoTag,
   barra,
   aoClicar,
   aoPassarMouse,
@@ -48,6 +53,8 @@ export function LinhaNo({
   aoCancelarEdicao,
   aoConfirmarTexto,
   aoConfirmarAtributo,
+  aoConfirmarTag,
+  aoDigitarTag,
 }: Props) {
   const { no } = linha;
   const temFilhos = no.filhos.length > 0;
@@ -91,6 +98,9 @@ export function LinhaNo({
           edicao={edicao}
           aoIniciarAtributo={(nome) => aoIniciarEdicao({ chave: no.chave, alvo: "atributo", nome })}
           aoConfirmarAtributo={(nome, valor) => aoConfirmarAtributo(no, nome, valor)}
+          aoIniciarTag={() => aoIniciarEdicao({ chave: no.chave, alvo: "tag" })}
+          aoConfirmarTag={(novaTag) => aoConfirmarTag(no, novaTag)}
+          aoDigitarTag={aoDigitarTag}
           aoCancelar={aoCancelarEdicao}
         />
         {no.textoEmLinha && textoEditavel(no.textoEmLinha, no.textoEmLinha.texto)}
@@ -100,7 +110,9 @@ export function LinhaNo({
             …
           </span>
         )}
-        {!vazia && (!temFilhos || recolhido) && <span className="text-codigo-tag">&lt;/{no.tag}&gt;</span>}
+        {!vazia && (!temFilhos || recolhido) && (
+          <span className="text-codigo-tag">&lt;/{rascunhoTag ?? no.tag}&gt;</span>
+        )}
       </>
     );
   }

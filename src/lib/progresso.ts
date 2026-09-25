@@ -47,6 +47,17 @@ export type Progresso = {
   missoesDeCampo: Record<string, boolean>;
   /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
   apresentacoesVistas: IdFerramenta[];
+  /**
+   * Unidades cuja meta (antes/depois) já foi vista na entrada. A meta da
+   * entrada aparece uma vez só por unidade; a do desafio continua.
+   */
+  metasVistas: string[];
+  /** Mapa: unidades cuja conclusão já foi comemorada na ilha (o ponto acende uma vez). */
+  unidadesComemoradas: string[];
+  /** Mapa: onde o computadorzinho parou em cada ilha (id da unidade), para andar dali. */
+  posicaoNoMapa: Record<string, string>;
+  /** Só /lab/mapa: abre todas as ilhas, zonas, unidades e fases que têm conteúdo. */
+  mapaDesbloqueado: boolean;
   /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
   proporcaoPrevia: number;
 };
@@ -64,6 +75,10 @@ export const PROGRESSO_PADRAO: Progresso = {
   som: true,
   missoesDeCampo: {},
   apresentacoesVistas: [],
+  metasVistas: [],
+  unidadesComemoradas: [],
+  posicaoNoMapa: {},
+  mapaDesbloqueado: false,
   proporcaoPrevia: PROPORCAO_PREVIA.padrao,
 };
 
@@ -159,6 +174,10 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
       ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]
       : [],
+    metasVistas: [...new Set(listaDeTextos(bruto.metasVistas))],
+    unidadesComemoradas: [...new Set(listaDeTextos(bruto.unidadesComemoradas))],
+    posicaoNoMapa: lerRegistro(bruto.posicaoNoMapa, (item) => (typeof item === "string" ? item : null)),
+    mapaDesbloqueado: ehBooleano(bruto.mapaDesbloqueado) ? bruto.mapaDesbloqueado : false,
     proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
       ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
       : PROPORCAO_PREVIA.padrao,

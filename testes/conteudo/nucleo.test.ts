@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { FASE_U2_F4 } from "@/conteudo/ilhas/sites/elementos/unidade-2/fase-4-desafio";
 import type { FasePratica, Validador } from "@/conteudo/tipos";
 import { CLASSE_ESCONDER } from "@/lib/esconder";
+import { classificarLink, falaDoLink } from "@/lib/linksPrevia";
 import { ErroAcao } from "@/motor/executarAcao";
 import { LIMITE_HISTORICO } from "@/motor/nucleoPainel";
 import { criarSimulacao } from "@/motor/simulacao";
@@ -232,5 +233,107 @@ describe("checklist do desafio (recalcularPartesFeitas)", () => {
     simulacao.executar([{ tipo: "desfazer" }]);
     feitas = recalcularPartesFeitas(FASE_U2_F4, feitas, simulacao.contexto());
     expect(feitas.length).toBeLessThan(FASE_U2_F4.partes.length);
+  });
+});
+
+describe("renomear tag (dois cliques no nome da tag)", () => {
+  it("troca a tag preservando atributos e filhos, no mesmo lugar, e gera renomeouTag", () => {
+    const simulacao = nova();
+    simulacao.executar([{ tipo: "renomearTag", seletor: "#a1", novaTag: "section" }]);
+    const renomeado = simulacao.documento.querySelector("#a1");
+    expect(renomeado?.tagName.toLowerCase()).toBe("section");
+    expect(renomeado?.getAttribute("class")).toBe("card");
+    expect(renomeado?.querySelector("h3")?.textContent).toBe("Um");
+    expect(simulacao.documento.querySelector("#lista")?.firstElementChild).toBe(renomeado);
+    expect(passa(simulacao, { tipo: "tag", seletor: "#a1", nome: "section" })).toBe(true);
+    expect(passa(simulacao, { tipo: "evento", evento: "renomeouTag" })).toBe(true);
+    expect(passa(simulacao, { tipo: "selecionado", seletor: "#a1" })).toBe(true);
+  });
+
+  it("entra no desfazer e no refazer", () => {
+    const simulacao = nova();
+    simulacao.executar([{ tipo: "renomearTag", seletor: "#a1 h3", novaTag: "h2" }]);
+    expect(passa(simulacao, { tipo: "tag", seletor: "#a1 > *:first-child", nome: "h2" })).toBe(true);
+    simulacao.executar([{ tipo: "desfazer" }]);
+    expect(passa(simulacao, { tipo: "tag", seletor: "#a1 > *:first-child", nome: "h3" })).toBe(true);
+    simulacao.nucleo.refazer();
+    expect(passa(simulacao, { tipo: "tag", seletor: "#a1 > *:first-child", nome: "h2" })).toBe(true);
+  });
+
+  it("recusa nome igual, vazio, inválido, body, html/head/body e tag vazia numa peça com filhos", () => {
+    const simulacao = nova();
+    const renomear = (seletor: string, novaTag: string) => () =>
+      simulacao.executar([{ tipo: "renomearTag", seletor, novaTag }]);
+    expect(renomear("#a1", "article")).toThrow(ErroAcao);
+    expect(renomear("#a1", "")).toThrow(ErroAcao);
+    expect(renomear("#a1", "2x")).toThrow(ErroAcao);
+    expect(renomear("#a1", "body")).toThrow(ErroAcao);
+    expect(renomear("body", "div")).toThrow(/body não pode ser renomeado/);
+    expect(renomear("#a1", "img")).toThrow(ErroAcao);
+    expect(simulacao.nucleo.podeDesfazer()).toBe(false);
+    expect(simulacao.nucleo.renomearTag([0], "H2")).toBe(true);
+    expect(simulacao.documento.body.firstElementChild?.tagName.toLowerCase()).toBe("h2");
+  });
+});
+
+describe("links na prévia", () => {
+  const LINKS: FasePratica = {
+    ...FASE,
+    siteAlvo: {
+      ...FASE.siteAlvo,
+      body: `<nav>
+  <a id="ancora" href="#rodape">Ir ao rodapé</a>
+  <a id="quebrado" href="#sumiu">Quebrado</a>
+  <a id="topo" href="#">Topo</a>
+  <a id="vazio">Sem href</a>
+  <a id="fora" href="https://exemplo.site/banda" target="_blank"><strong id="dentro">Banda</strong></a>
+</nav>
+<p id="texto">Texto</p>
+<footer id="rodape">Rodapé</footer>`,
+    },
+  };
+
+  function comLinks() {
+    const simulacao = criarSimulacao(LINKS);
+    simulacao.comecarObjetivo(null);
+    return simulacao;
+  }
+
+  it("classifica âncora, quebrado, vazio e externo, e gera clicouLink com o href", () => {
+    const simulacao = comLinks();
+    simulacao.executar([
+      { tipo: "clicarLink", seletor: "#ancora" },
+      { tipo: "clicarLink", seletor: "#quebrado" },
+      { tipo: "clicarLink", seletor: "#topo" },
+      { tipo: "clicarLink", seletor: "#vazio" },
+      { tipo: "clicarLink", seletor: "#dentro" },
+    ]);
+    const eventos = simulacao.contexto().eventos.filter((evento) => evento.tipo === "clicouLink");
+    expect(eventos.map((evento) => (evento.tipo === "clicouLink" ? [evento.href, evento.destino] : null))).toEqual([
+      ["#rodape", "ancora"],
+      ["#sumiu", "quebrado"],
+      ["#", "vazio"],
+      ["", "vazio"],
+      ["https://exemplo.site/banda", "externo"],
+    ]);
+    expect(passa(simulacao, { tipo: "evento", evento: "clicouLink", minimo: 5 })).toBe(true);
+    expect(passa(simulacao, { tipo: "evento", evento: "clicouLink", href: "#rodape" })).toBe(true);
+    expect(passa(simulacao, { tipo: "evento", evento: "clicouLink", href: "#outro" })).toBe(false);
+  });
+
+  it("clicar fora de um link é erro de conteúdo", () => {
+    const simulacao = comLinks();
+    expect(() => simulacao.executar([{ tipo: "clicarLink", seletor: "#texto" }])).toThrow(/não é um link/);
+  });
+
+  it("as falas: externo diz para onde levaria, quebrado e vazio têm fala própria, âncora só rola", () => {
+    const simulacao = comLinks();
+    const link = (id: string) => classificarLink(simulacao.documento.querySelector(id) as Element);
+    expect(falaDoLink(link("#fora"))?.texto).toBe("Esse link levaria para: https://exemplo.site/banda (numa aba nova)");
+    expect(falaDoLink(link("#quebrado"))?.texto).toContain("link quebrado");
+    expect(falaDoLink(link("#vazio"))?.texto).toContain("href dele está vazio");
+    expect(falaDoLink(link("#topo"))?.texto).toContain('href="#"');
+    expect(falaDoLink(link("#ancora"))).toBeNull();
+    expect(link("#ancora").alvo?.id).toBe("rodape");
   });
 });

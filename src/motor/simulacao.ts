@@ -34,6 +34,8 @@ export function criarSimulacao(fase: Fase) {
     alternarEsconder: nucleo.alternarEsconder,
     apagar: nucleo.apagar,
     duplicar: nucleo.duplicar,
+    renomearTag: nucleo.renomearTag,
+    clicarLink: nucleo.clicarLink,
     inserirHtml: nucleo.inserirHtml,
     desfazer: nucleo.desfazer,
     responderPrevisao: (opcao) => {

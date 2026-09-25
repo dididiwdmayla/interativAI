@@ -4,10 +4,156 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 4 concluída (primeiro teste da fábrica: checklist
-do desafio ao vivo, Unidade 1 completa e relatório de atritos). Ver
-`docs/ATRITOS-FABRICA.md` para o que deve melhorar antes da produção em
-massa das próximas unidades.
+**Estado atual:** rodada 5 concluída (fábrica corrigida, currículo em
+dados, renomear tag e links na prévia, e o mapa das ilhas integrado ao
+jogo). A próxima unidade é a U3 da zona Elementos, "Títulos e textos",
+seguindo `docs/GUIA-DE-CONTEUDO.md` (seção 0).
+
+## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
+
+- [x] **Etapa 1: correções da fábrica** (resposta ao
+  `docs/ATRITOS-FABRICA.md`). Campo `pratica` em `FasePratica`
+  (conceitos já ensinados que a fase só treina); fase de prática precisa
+  de `conceitos` ou `pratica`; `montarIndice()` põe `pratica` em
+  "praticam"; u1-f2 migrada (`conceitos: []`, as 4 habilidades em
+  `pratica`). Regra nova `fase-so-sozinho` (todos sozinho = `conceitos`
+  vazio; fase que só treina não tem guiado nem previsão guiada); `pratica`
+  só com conceitos ensinados antes; `revisarEm` precisa apontar para fase
+  com objetivo guiado; `meta.desafioId` confere tipo, unidade e posição.
+  Meta de entrada uma vez só por unidade (`metasVistas` no progresso,
+  `faseAbreComMeta` em `src/lib/metaDaUnidade.ts`), só sem progresso na
+  unidade; a do desafio continua. `jogarDesafio` usa
+  `recalcularPartesFeitas` e confere a conclusão simultânea no fim.
+  Congelamento: `src/conteudo/publicados.json` + regra
+  `publicados-congelados` + `npm run publicar:conteudo`
+  (`scripts/publicarConteudo.ts`, recusa publicar com id sumido ou
+  checagem falhando). `src/motor/chaveArvore.ts` (esquema do
+  `data-chave`, sem imports) e ajudantes `pularMeta`, `selecionarNo` e
+  `chaveDoSeletor` em `testes/util.mjs` (transpilam o arquivo do motor
+  com o TypeScript do projeto e executam dentro da página); testes
+  `fase-completa`, `tutor` e `unidades` usam os ajudantes. Testes novos:
+  `checagens.test.ts` (sabotagens: parte seguinte que desfaz a anterior,
+  id de objetivo publicado alterado, fase renomeada, ordem trocada, fase
+  só de sozinho com conceito, guiado em fase de treino, `revisarEm` para
+  a fase sozinha, `meta.desafioId` de outra unidade),
+  `chaveArvore.test.ts` (chave da árvore = chave calculada, em todos os
+  sites) e meta uma vez só em `progresso.test.ts`. Guia (seções 2, 3.2,
+  3.8, 3.9, 3.10, 10, 11 e checklist), template, `testes/README.md` e
+  atritos atualizados. `testar:conteudo` (182 testes), `lint`, `build` e
+  bateria Playwright inteira verdes.
+
+- [x] **Etapa 2: currículo em dados.** `docs/MAPA-CURRICULAR.md` (o
+  Anexo A inteiro, formatado, com o id de cada unidade no currículo).
+  `src/curriculo/`: tipos (`IlhaCurriculo`, `ZonaCurriculo` com `icone`
+  para o mapa, `UnidadeCurriculo` com `requerMotor` opcional, porque a U6
+  requer motor numa zona pronta), dados na ordem do mapa (Origens com as
+  5 salas, Sites com Elementos/Estilos/Layout/Responsivo/Publicar,
+  Lógica, Páginas vivas, Rede e Servidor e Ofício com uma unidade
+  planejada por zona, Frameworks opcional) e consultas (`statusDaUnidade`
+  a partir do conteúdo registrado, `localNoCurriculo`, `motorQueFalta`).
+  Ofício ganhou `requerMotor` por zona (o anexo não listava, mas o motor
+  só tem a aba Elementos). Regras gerais novas: `curriculo-ids`,
+  `curriculo-conteudo` (id `<ilha>-<zona>-u<n>`, número, ilha, zona,
+  título e ordem) e `curriculo-motor`. Testes em `curriculo.test.ts`
+  (com sabotagens: id repetido, unidade fora do currículo, zona errada,
+  conteúdo em zona com `requerMotor`, a U6).
+
+- [x] **Etapa 3: renomear tag e links na prévia.** Renomear tag
+  conferido na doc do Chrome ("Edit node type") e no devtools-frontend
+  (`startEditingTagName`/`tagNameEditingCommitted`: Enter e Espaço
+  confirmam, Esc desiste, fechamento acompanha, nome vazio ou igual
+  desiste, `html`/`head`/`body` bloqueados, `setNodeName` preserva
+  atributos e filhos). Núcleo `renomearTag` (desfazer/refazer, seleção
+  continua na peça), evento `renomeouTag`, ação
+  `{ tipo: "renomearTag", seletor, novaTag }`, validador
+  `{ tipo: "tag", seletor, nome }`. Interface: dois cliques (ou dois
+  toques) no nome da tag, item "Renomear tag" no menu do nó e botão
+  "Renomear" na barra do celular (7 botões de 44 px). Ferramenta
+  `renomear-tag` no registro com ícone, card, apresentação (mouse e
+  toque) e mini demo. Links: `src/lib/linksPrevia.ts` (âncora, quebrado,
+  vazio, externo, aba nova) e núcleo `clicarLink` (evento `clicouLink`
+  com `href`); a prévia segura clique, botão do meio e envio de
+  formulário; âncora rola, `#` volta ao topo, e o computadorzinho diz
+  "Esse link levaria para: <href>" (ou a fala de quebrado e de vazio).
+  Ação `clicarLink` e `href` opcional no validador `evento`. Testes:
+  `nucleo.test.ts` (renomear, recusas, desfazer, links e falas) e
+  `testes/renomear-links.mjs` (desktop e em pé), `ferramentas-novas.mjs`
+  com 5 itens no menu e 7 na barra.
+
+- [x] **Etapa 4: mapa (mundo, ilha, museu e desbloqueios).** Regras em
+  `src/lib/mapa.ts` (estado da ilha, zona aberta, estado da unidade,
+  ação do card, estrelas, ilha e ponto atuais), com testes. Progresso
+  ganha `unidadesComemoradas`, `posicaoNoMapa` e `mapaDesbloqueado` (o
+  último abre tudo, inclusive as fases em `faseLiberada`). Mundo em
+  `/mapa` (provisório nesta etapa: o jogo continua em `/` até a Etapa 5),
+  ilha e museu em `/ilha/[id]` (só os ids do currículo, 404 no resto).
+  Arte SVG de cada ilha (museu com colunas, cartão perfurado e terminal;
+  prédios `< >` e blocos; engrenagens; peças que pulam, faíscas e botão;
+  antenas e cabos no mar; oficina com ferramentas; blocos montados),
+  estados (brilho, andaimes com computadorzinho dormindo, névoa e
+  cadeado), mar com ondas, rota com barquinho e o computadorzinho na ilha
+  atual. Ilha: zonas ao longo do caminho (horizontal ou vertical em pé),
+  ícone da aba por zona (`IconeZona`), placa "Em construção", pontos,
+  card com Jogar/Continuar/Jogar de novo, caminhada do computadorzinho e
+  comemoração ao concluir. Barra do mapa com total de estrelas,
+  Ferramentas (Caixa só de leitura: `aoRever` ficou opcional), tema e
+  som. Tudo respeita `prefers-reduced-motion`. Teste
+  `testes/mapa.mjs` nos três layouts.
+
+- [x] **Etapa 5: integração do mapa com o jogo.** `/` virou o mundo;
+  fases em `/fase/[id]` (deep link, 404 fora do conteúdo, aviso de fase
+  trancada com volta para a ilha); o `/mapa` provisório saiu. Botão
+  "Mapa" dentro da fase (desktop na barra; celular à esquerda do título,
+  44 px), que volta para a ilha. "Próxima fase" só dentro da unidade;
+  depois do desafio, "Voltar pra ilha" (a ilha comemora, o ponto acende e
+  o próximo aparece). A Lista de fases saiu do jogo e foi para o
+  `/lab/mapa` (com "Desbloquear tudo" e "Resetar o progresso do mapa").
+  Testes: `unidades.mjs` joga as Unidades 1 e 2 começando pelo mapa e
+  voltando para a ilha, nos três layouts; `mapa.mjs` com deep links,
+  voltar e avançar do navegador, botão Mapa, fase trancada e o lab;
+  `migracao.mjs` entra pelo mapa; `abrir()` abre `/fase/<faseAtual>`.
+
+- [x] **Etapa 6: guia, docs e verificação final.** Guia com a seção 0
+  ("Como escolher a próxima unidade": seguir o `docs/MAPA-CURRICULAR.md`
+  na ordem, com o id do currículo; a regra de parada para zona ou unidade
+  com `requerMotor`), a unidade no formato do currículo (3.1), o passo a
+  passo e o checklist com o mapa, `npm run publicar:conteudo`, as
+  checagens e o commit, links nos sites-alvo e os endereços nos testes de
+  navegador (além do que entrou na Etapa 1: `pratica`, fase só de
+  sozinho, `revisarEm`, formato padrão, meta, congelamento, ajudantes).
+  `PROJETO.md` (visão com o mapa, navegação, testes, fora do escopo),
+  `README.md` e este arquivo atualizados.
+
+## Critérios de pronto da rodada 5 (verificados na Etapa 6)
+
+- [x] `npm run build`, `npm run lint` e `npm run testar:conteudo` (209
+  testes) verdes; bateria Playwright inteira (`testes/todos.mjs`, 16
+  execuções) verde com console limpo, no `next dev` e no `next start`
+  (build de produção), e `tutor.mjs` sem chave.
+- [x] `prefers-reduced-motion`: mapa sem ondas, caminhada ou pulsos, a
+  comemoração ainda registra, e sem erro de hidratação (o computadorzinho
+  e a arte do mapa só animam depois de montar: `useMontado`).
+- [x] Unidades 1 e 2 jogadas começando pelo mapa nos três layouts
+  (`unidades.mjs desktop|retrato|paisagem`): ao concluir cada desafio,
+  "Voltar pra ilha", o ponto acende, o caminho até o próximo se desenha e
+  a U3 aparece como planejada.
+- [x] Progresso antigo preservado: v1 migra e o mapa mostra a U1 com
+  "Continuar", sem a meta de novo (`migracao.mjs`); campos novos com
+  padrão (`progresso.test.ts`).
+- [x] Sabotagens: (1) a solução da parte "novo-prato" do desafio da U1
+  devolvendo o nome do prato faz o `testar:conteudo` falhar com 'no fim,
+  a parte "trocar-prato" (avaliada ao vivo) não passa mais: a solução de
+  uma parte seguinte desfez o efeito dela, e o desafio nunca
+  concluiria...'; (2) renomear o objetivo publicado "duas-copias" da
+  u2-f3 falha com 'a fase publicada "sites-elementos-u2-f3" mudou os
+  objetivos (...; sumiram "duas-copias"; entraram "duas-copias-novas").
+  Ids publicados nunca mudam: isso apaga o progresso de quem já jogou.'.
+  As duas desfeitas; as mesmas sabotagens também são testes permanentes
+  em `testes/conteudo/checagens.test.ts`.
+- [x] Buscas no repositório: nenhum emoji (só o aviso do guia sobre `©` e
+  `™`), nenhuma cor literal fora de `src/tema/tokens.css` e dos
+  sites-alvo (os `white`/`black` de `ApresentacaoFerramenta` são valores
+  de máscara SVG, de antes), nenhum `NEXT_PUBLIC_GEMINI`.
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 
@@ -342,9 +488,10 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
-- Próximas unidades da zona Elementos, copiando a pasta da Unidade 2 (ou a
-  Unidade 1, se a próxima precisar separar guiado e sozinho em fases
-  diferentes). Ler `docs/ATRITOS-FABRICA.md` antes.
+- Próximas unidades da zona Elementos (U3, U4, U5), na ordem do
+  `docs/MAPA-CURRICULAR.md`, copiando a pasta da Unidade 2 (formato
+  padrão). A U6 e as zonas seguintes pedem motor antes (ver
+  `requerMotor` em `src/curriculo/curriculo.ts`).
 - Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.

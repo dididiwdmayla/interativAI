@@ -23,7 +23,20 @@ export type EventoFase =
   | { tipo: "duplicou"; tag: string; caminho: number[] }
   | { tipo: "desfez" }
   | { tipo: "refez" }
-  | { tipo: "respondeuPrevisao"; opcao: number; acertou: boolean };
+  | { tipo: "respondeuPrevisao"; opcao: number; acertou: boolean }
+  /** Trocou o nome da tag (h2 virou h4). `tag` é a nova; `de`, a antiga. O caminho não muda. */
+  | { tipo: "renomeouTag"; tag: string; de: string; caminho: number[] }
+  /** Clicou num link da prévia (a navegação é segurada; ver src/lib/linksPrevia.ts). */
+  | { tipo: "clicouLink"; href: string; destino: DestinoLink; caminho: number[] };
+
+/**
+ * Para onde um link levaria:
+ * - "ancora": #id de um elemento que existe na página (a prévia rola até ele);
+ * - "quebrado": #id que nenhum elemento tem;
+ * - "vazio": sem href, href vazio ou só "#";
+ * - "externo": outra página ou site (a prévia não navega).
+ */
+export type DestinoLink = "ancora" | "quebrado" | "vazio" | "externo";
 
 export type TipoEvento = EventoFase["tipo"];
 
@@ -42,4 +55,6 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "desfez",
   "refez",
   "respondeuPrevisao",
+  "renomeouTag",
+  "clicouLink",
 ];

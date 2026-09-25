@@ -52,6 +52,10 @@ export const TEMPLATE_PRATICA: FasePratica = {
   // Conceitos que esta fase ENSINA (um objetivo guiado para cada, no mínimo).
   // Todos precisam existir em src/conteudo/conceitos.ts.
   conceitos: ["duplicar-elemento"],
+  // Opcional: conceitos já ensinados (com guiado) numa fase ANTERIOR que
+  // aqui voltam só para treinar sozinho. Fase só de sozinho (exceção, ver
+  // o guia) deixa `conceitos: []` e põe tudo aqui.
+  // pratica: ["editar-texto"],
   // Conceitos de fases ANTERIORES que voltam misturados na tarefa.
   revisa: ["editar-texto"],
   // O que o jogador já precisa saber (ensinado antes).

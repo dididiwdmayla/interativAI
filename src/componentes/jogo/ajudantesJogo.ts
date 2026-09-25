@@ -40,6 +40,7 @@ export const FERRAMENTAS_DA_ARVORE: readonly IdFerramenta[] = [
   "esconder",
   "apagar",
   "duplicar",
+  "renomear-tag",
 ];
 
 /** Ctrl+Z (desfazer) e Ctrl+Shift+Z ou Ctrl+Y (refazer), como no F12. */

@@ -9,7 +9,7 @@ import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
-import { BotaoFases } from "@/componentes/layout/BotaoFases";
+import { BotaoMapa } from "@/componentes/layout/BotaoMapa";
 import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
 import { SeletorTema } from "@/componentes/layout/SeletorTema";
@@ -39,11 +39,14 @@ import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
 import { faseDoId, type LocalDaFase, proximaFase } from "@/conteudo";
-import type { Fase } from "@/conteudo/tipos";
+import type { Fala, Fase } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { caminhoDoNo } from "@/lib/dom";
+import { falaDoLink } from "@/lib/linksPrevia";
+import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { tocarSom } from "@/lib/som";
 import { useToque } from "@/lib/useConsultaMidia";
@@ -64,7 +67,6 @@ import {
   tempoDeLeitura,
 } from "./ajudantesJogo";
 import { ComemoracaoSozinho } from "./ComemoracaoSozinho";
-import { ListaFases } from "./ListaFases";
 import { AlcaDivisoria } from "./movel/AlcaDivisoria";
 import { useLayoutJogo, useViewportVisivel } from "./movel/useLayoutJogo";
 import { TelaConclusao } from "./TelaConclusao";
@@ -80,8 +82,12 @@ type Props = {
   aoRecomecar: () => void;
   /** "jogo" (normal), "revisao" (aberta pelo Rever do desafio) ou "lab" (/lab/fases). */
   modo?: ModoJogo;
-  /** Abre outra fase (Lista de fases, Próxima fase). */
+  /** Abre outra fase (Próxima fase, dentro da mesma unidade). */
   aoIrParaFase?: (faseId: string) => void;
+  /** Botão "Mapa": a ilha desta fase. Sem ele (lab), não aparece. */
+  rotaDoMapa?: string;
+  /** Depois da última fase da unidade: volta para a ilha, que comemora. */
+  aoVoltarAIlha?: () => void;
   /** Desafio: abre a fase onde uma parte foi ensinada, em modo revisão. */
   aoRever?: (faseId: string) => void;
   /** Revisão: volta para o desafio. */
@@ -109,6 +115,8 @@ export function JogoFase({
   aoRecomecar,
   modo = "jogo",
   aoIrParaFase,
+  rotaDoMapa,
+  aoVoltarAIlha,
   aoRever,
   aoVoltarAoDesafio,
   painelLab,
@@ -125,7 +133,6 @@ export function JogoFase({
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
   const [recado, setRecado] = useState<string | null>(null);
-  const [listaFasesAberta, setListaFasesAberta] = useState(false);
   const esperaRecado = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
@@ -138,12 +145,16 @@ export function JogoFase({
   const progresso = useProgresso();
   const toque = useToque();
 
-  // A meta (antes/depois) abre a unidade e o desafio, quando a unidade já tem desafio.
+  // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
+  // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
   const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
   const desafioParaMeta = desafioDaUnidade?.tipo === "desafio" ? desafioDaUnidade : null;
-  const mostrarMeta =
-    modo === "jogo" && desafioParaMeta !== null && (fase.tipo === "desafio" || local.unidade.fases[0] === fase.id);
-  const proxima = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
+  const [mostrarMeta] = useState(
+    () => modo === "jogo" && desafioParaMeta !== null && faseAbreComMeta(fase, local.unidade, obterProgresso()),
+  );
+  // "Próxima fase" só dentro da unidade; depois da última, o caminho é voltar para a ilha.
+  const seguinte = modo === "jogo" && aoIrParaFase ? proximaFase(fase) : null;
+  const proxima = seguinte && seguinte.unidadeId === fase.unidadeId ? seguinte : null;
 
   const {
     editorRef,
@@ -180,6 +191,8 @@ export function JogoFase({
     alternarEsconder,
     apagar,
     duplicar,
+    renomearTag,
+    clicarLink,
     inserirHtml,
     desfazer,
     refazer,
@@ -192,6 +205,41 @@ export function JogoFase({
     aoEvento: barramento.emitir,
   });
 
+  /** Quem fala sobre o link clicado (ligado ao motor mais abaixo). */
+  const falarSobreLink = useRef<(fala: Fala) => void>(() => {});
+
+  /**
+   * Clique num link da prévia (à mão ou pela ação clicarLink): a prévia não
+   * navega; âncora rola até o alvo, "#" volta ao topo, e o computadorzinho
+   * conta para onde o link levaria (externo, quebrado ou vazio).
+   */
+  const clicarLinkNaTela = useCallback(
+    (caminho: number[]) => {
+      const resultado = clicarLink(caminho);
+      if (!resultado) return null;
+      const janela = obterDocumento()?.defaultView;
+      const comportamento: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      if (janela && resultado.destino === "ancora" && resultado.alvo) {
+        janela.scrollTo({ top: resultado.alvo.getBoundingClientRect().top + janela.scrollY, behavior: comportamento });
+      } else if (janela && resultado.href === "#") {
+        janela.scrollTo({ top: 0, behavior: comportamento });
+      }
+      const fala = falaDoLink(resultado);
+      if (fala) falarSobreLink.current(fala);
+      return resultado;
+    },
+    [clicarLink, obterDocumento],
+  );
+
+  const aoClicarLink = useCallback(
+    (link: Element) => {
+      const body = obterDocumento()?.body;
+      const caminho = body ? caminhoDoNo(body, link) : null;
+      if (caminho) clicarLinkNaTela(caminho);
+    },
+    [clicarLinkNaTela, obterDocumento],
+  );
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -203,6 +251,8 @@ export function JogoFase({
       alternarEsconder,
       apagar,
       duplicar,
+      renomearTag,
+      clicarLink: clicarLinkNaTela,
       inserirHtml,
       desfazer,
     }),
@@ -215,6 +265,8 @@ export function JogoFase({
       alternarEsconder,
       apagar,
       duplicar,
+      renomearTag,
+      clicarLinkNaTela,
       inserirHtml,
       desfazer,
     ],
@@ -241,6 +293,15 @@ export function JogoFase({
     toque,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
+
+  // A fala do link só entra quando não atrapalha: fora da conversa, da
+  // pausa, do card de previsão e dos momentos roteirizados.
+  useEffect(() => {
+    const livre =
+      (estado.etapa === "objetivos" && estado.pausa === null && !previsaoPendente && estado.roteiro === null) ||
+      (estado.etapa === "concluida" && !estado.conclusaoAberta);
+    falarSobreLink.current = livre ? falar : () => {};
+  }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
@@ -251,7 +312,6 @@ export function JogoFase({
     bloqueada:
       lab ||
       caixa.aberta ||
-      listaFasesAberta ||
       estado.roteiro !== null ||
       previsaoPendente ||
       (estado.etapa === "concluida" && estado.conclusaoAberta),
@@ -296,6 +356,8 @@ export function JogoFase({
           sinalizarUso("duplicar");
         } else if (evento.tipo === "desfez" || evento.tipo === "refez") {
           sinalizarUso("desfazer");
+        } else if (evento.tipo === "renomeouTag") {
+          sinalizarUso("renomear-tag");
         }
       }),
     [barramento],
@@ -449,13 +511,6 @@ export function JogoFase({
     return () => window.removeEventListener("keydown", aoTeclar);
   }, []);
 
-  const fecharListaFases = useCallback(() => setListaFasesAberta(false), []);
-
-  const irParaFase = (faseId: string) => {
-    setListaFasesAberta(false);
-    if (faseId !== fase.id || revisao) aoIrParaFase?.(faseId);
-  };
-
   const reverParte = (parteId: string) => {
     tocarSom("clique");
     const alvo = motor.rever(parteId);
@@ -574,9 +629,7 @@ export function JogoFase({
   );
 
   const rotuloFase = fase.tipo === "desafio" ? "Desafio" : `Fase ${local.numero}`;
-  const botaoFases = aoIrParaFase && !lab ? (
-    <BotaoFases aoAbrir={() => setListaFasesAberta(true)} noMenu={movel} />
-  ) : null;
+  const botaoMapa = rotaDoMapa && !lab ? <BotaoMapa href={rotaDoMapa} compacto={movel} /> : null;
   const botaoVoltar = revisao ? (
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
       Voltar ao desafio
@@ -610,10 +663,10 @@ export function JogoFase({
           titulo={`Unidade ${local.unidade.numero} › ${rotuloFase}`}
           estrelas={revisao ? null : estado.estrelas}
           fina={layout === "paisagem"}
+          inicio={botaoMapa}
           acaoFixa={botaoVoltar}
           menu={
             <>
-              {botaoFases}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
               <div className="flex items-center justify-between gap-2">
                 <SeletorTema />
@@ -631,7 +684,7 @@ export function JogoFase({
           acoes={
             <>
               {botaoVoltar}
-              {botaoFases}
+              {botaoMapa}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
               {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
@@ -738,7 +791,7 @@ export function JogoFase({
                 cima={
                   <div className="flex h-full min-h-0 flex-col">
                     <AlvoFerramenta
-                      ids={["arvore", "esconder", "apagar", "duplicar"]}
+                      ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
                       marcador="arvore"
                       aoAbrirCard={abrirCard}
                       classeMarcador="bottom-2 right-3"
@@ -758,6 +811,7 @@ export function JogoFase({
                         aoEsconder={alternarEsconder}
                         aoApagar={apagar}
                         aoDuplicar={duplicar}
+                        aoRenomearTag={renomearTag}
                         aoDesfazer={desfazer}
                         aoRefazer={refazer}
                         podeDesfazer={historico.podeDesfazer}
@@ -838,6 +892,7 @@ export function JogoFase({
                 bodyInicial={bodyInicial}
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
+                aoClicarLink={aoClicarLink}
               >
                 <SobreposicaoInspecao realce={realce} />
                 <CamadaInspecao
@@ -920,12 +975,6 @@ export function JogoFase({
           aoComecar={comClique(motor.avancarFala)}
         />
       )}
-      <ListaFases
-        aberta={listaFasesAberta}
-        faseAtual={fase.id}
-        aoEscolher={irParaFase}
-        aoFechar={fecharListaFases}
-      />
       {!(estado.etapa === "concluida" && estado.conclusaoAberta) && <ComemoracaoSozinho vez={estado.comemoracoesSozinho} />}
       <TelaConclusao
         aberta={estado.etapa === "concluida" && estado.conclusaoAberta}
@@ -947,6 +996,7 @@ export function JogoFase({
         aoFechar={motor.fecharConclusao}
         aoRecomecar={aoRecomecar}
         aoProxima={() => proxima && aoIrParaFase?.(proxima.id)}
+        aoVoltarAIlha={modo === "jogo" && !proxima ? aoVoltarAIlha : undefined}
         aoVoltarAoDesafio={() => aoVoltarAoDesafio?.()}
       />
       {lab && painelLab?.(apiLab)}

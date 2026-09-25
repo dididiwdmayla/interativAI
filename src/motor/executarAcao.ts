@@ -23,6 +23,9 @@ export type PainelDasAcoes = {
   alternarEsconder: (caminho: number[]) => boolean;
   apagar: (caminho: number[]) => boolean;
   duplicar: (caminho: number[]) => boolean;
+  renomearTag: (caminho: number[], novaTag: string) => boolean;
+  /** Devolve null se o caminho não é (nem está dentro de) um link. */
+  clicarLink: (caminho: number[]) => unknown;
   inserirHtml: (caminho: number[], posicao: Extract<Acao, { tipo: "inserirHTML" }>["posicao"], html: string) => boolean;
   desfazer: () => boolean;
   responderPrevisao: (opcao: number) => void;
@@ -51,6 +54,10 @@ export function descreverAcao(acao: Acao): string {
       return `apagar ${acao.seletor}`;
     case "duplicar":
       return `duplicar ${acao.seletor}`;
+    case "renomearTag":
+      return `renomearTag ${acao.seletor} para ${acao.novaTag}`;
+    case "clicarLink":
+      return `clicarLink ${acao.seletor}`;
     case "desfazer":
       return "desfazer";
     case "inserirHTML":
@@ -179,6 +186,27 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       if (caminho.length === 0) throw new ErroAcao("o body não pode ser duplicado");
       selecionarPelaArvore(painel, caminho);
       painel.duplicar(caminho);
+      return;
+    }
+    case "renomearTag": {
+      const elemento = resolverElemento(painel, acao.seletor);
+      const caminho = caminhoDe(painel, elemento, acao.seletor);
+      if (caminho.length === 0) throw new ErroAcao("o body não pode ser renomeado");
+      selecionarPelaArvore(painel, caminho);
+      if (!painel.renomearTag(caminho, acao.novaTag)) {
+        throw new ErroAcao(
+          `não deu para renomear <${elemento.tagName.toLowerCase()}> para "${acao.novaTag}" ` +
+            "(nome igual, inválido, html/head/body, ou tag sem conteúdo numa peça com filhos)",
+        );
+      }
+      return;
+    }
+    case "clicarLink": {
+      const elemento = resolverElemento(painel, acao.seletor);
+      if (!elemento.closest("a, area")) throw new ErroAcao(`"${acao.seletor}" não é um link (a) nem está dentro de um`);
+      if (painel.clicarLink(caminhoDe(painel, elemento, acao.seletor)) === null) {
+        throw new ErroAcao(`não deu para clicar no link "${acao.seletor}"`);
+      }
       return;
     }
     case "desfazer": {

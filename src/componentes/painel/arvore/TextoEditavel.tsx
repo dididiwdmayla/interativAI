@@ -9,6 +9,12 @@ type Props = {
   className?: string;
   /** Mostrado quando o valor está vazio, para ainda dar onde clicar. */
   marcadorVazio?: string;
+  /** Dica do trecho (title), para o mouse. */
+  titulo?: string;
+  /** Espaço também confirma (nome de tag não tem espaço; igual ao F12). */
+  confirmarComEspaco?: boolean;
+  /** A cada tecla, com o valor do campo (o fechamento da tag acompanha). */
+  aoDigitar?: (valor: string) => void;
   aoIniciar: () => void;
   aoConfirmar: (novo: string) => void;
   aoCancelar: () => void;
@@ -21,6 +27,9 @@ export function TextoEditavel({
   rotulo,
   className = "",
   marcadorVazio,
+  titulo = "Dois cliques para editar",
+  confirmarComEspaco = false,
+  aoDigitar,
   aoIniciar,
   aoConfirmar,
   aoCancelar,
@@ -31,7 +40,7 @@ export function TextoEditavel({
   if (editando) {
     const aoTeclar = (evento: KeyboardEvent<HTMLInputElement>) => {
       evento.stopPropagation();
-      if (evento.key === "Enter") {
+      if (evento.key === "Enter" || (confirmarComEspaco && evento.key === " ")) {
         evento.preventDefault();
         finalizado.current = true;
         aoConfirmar(evento.currentTarget.value);
@@ -53,6 +62,7 @@ export function TextoEditavel({
           evento.currentTarget.select();
         }}
         onKeyDown={aoTeclar}
+        onChange={aoDigitar ? (evento) => aoDigitar(evento.currentTarget.value) : undefined}
         onClick={(evento) => evento.stopPropagation()}
         onDoubleClick={(evento) => evento.stopPropagation()}
         onBlur={(evento) => {
@@ -82,7 +92,7 @@ export function TextoEditavel({
           ultimoToque.current = agora;
         }
       }}
-      title="Dois cliques para editar"
+      title={titulo}
     >
       {valor.length > 0 ? valor : (marcadorVazio ?? "")}
     </span>

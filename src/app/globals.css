@@ -34,6 +34,13 @@
   --color-codigo-valor: var(--cor-codigo-valor);
   --color-codigo-texto: var(--cor-codigo-texto);
   --color-codigo-comentario: var(--cor-codigo-comentario);
+  --color-mar: var(--cor-mar);
+  --color-mar-fundo: var(--cor-mar-fundo);
+  --color-areia: var(--cor-areia);
+  --color-grama: var(--cor-grama);
+  --color-madeira: var(--cor-madeira);
+  --color-pedra: var(--cor-pedra);
+  --color-nevoa: var(--cor-nevoa);
 
   --font-ui: var(--fonte-ui);
   --font-codigo: var(--fonte-codigo);

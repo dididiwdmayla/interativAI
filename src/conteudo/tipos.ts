@@ -69,8 +69,18 @@ export type Validador =
    * um texto, vale o elemento dono dele. `via` exige o caminho usado.
    */
   | { tipo: "selecionado"; seletor: string; via?: ViaSelecao }
-  /** O evento aconteceu pelo menos `minimo` vezes (padrão 1) desde que o objetivo começou. */
-  | { tipo: "evento"; evento: TipoEvento; minimo?: number }
+  /**
+   * O evento aconteceu pelo menos `minimo` vezes (padrão 1) desde que o
+   * objetivo começou. Com `evento: "clicouLink"`, `href` só conta os
+   * cliques em links com esse href (ex.: "#rodape").
+   */
+  | { tipo: "evento"; evento: TipoEvento; minimo?: number; href?: string }
+  /**
+   * Algum elemento do seletor tem esta tag (em minúsculas). Renomear
+   * preserva os atributos, então um seletor por id continua achando a peça
+   * depois de h2 virar h4.
+   */
+  | { tipo: "tag"; seletor: string; nome: string }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -108,6 +118,10 @@ export type Acao =
   | { tipo: "apagar"; seletor: string }
   /** Duplica o elemento logo depois dele; a cópia fica selecionada. */
   | { tipo: "duplicar"; seletor: string }
+  /** Troca o nome da tag pela árvore (dois cliques no nome); atributos e filhos ficam. */
+  | { tipo: "renomearTag"; seletor: string; novaTag: string }
+  /** Clica num link da prévia (a prévia não navega; ver src/lib/linksPrevia.ts). */
+  | { tipo: "clicarLink"; seletor: string }
   /** Desfaz a última mudança feita pelo painel. */
   | { tipo: "desfazer" }
   /** Escreve HTML novo perto de um elemento (o que o jogador faria no editor de código). */
@@ -228,7 +242,11 @@ export type ParteDesafio = {
   /** Aparece no checklist. Até 140 caracteres. */
   descricao: string;
   validador: Validador;
-  /** Id da fase (da mesma unidade) onde isso foi ensinado: abre no "Rever". */
+  /**
+   * Id da fase (da mesma unidade) onde isso foi ensinado de forma GUIADA:
+   * abre no "Rever". A fase apontada tem pelo menos 1 objetivo guiado
+   * (a escada de ajuda completa socorre quem travou).
+   */
   revisarEm: string;
   /** Ações que cumprem esta parte (testes, /lab/fases e a prévia do "depois"). */
   solucaoDeTeste: Acao[];
@@ -261,7 +279,17 @@ type FaseBase = {
 };
 
 /** Micro-passos: objetivos guiados e sozinho, em sequência. */
-export type FasePratica = FaseBase & { tipo: "pratica"; objetivos: Objetivo[] };
+export type FasePratica = FaseBase & {
+  tipo: "pratica";
+  objetivos: Objetivo[];
+  /**
+   * O que a fase TREINA: conceitos já ensinados (com objetivo guiado) numa
+   * fase anterior e que aqui voltam só para o jogador fazer sozinho. Uma
+   * fase de prática precisa ter `conceitos` ou `pratica` não vazio; uma
+   * fase só de objetivos sozinho deixa `conceitos` vazio e põe tudo aqui.
+   */
+  pratica?: IdConceito[];
+};
 
 /** Desafio: sem passo a passo, só o checklist das partes. */
 export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[] };
@@ -291,8 +319,10 @@ export type Unidade = {
     /** "No fim desta unidade, você..." Até 200 caracteres. */
     enunciado: string;
     /**
-     * Fase de desafio da unidade (a última). A prévia antes/depois vem do
-     * site dela. Opcional só enquanto a unidade ainda não tem desafio.
+     * Fase de desafio da unidade (a última, do tipo desafio, da mesma
+     * unidade). A prévia antes/depois vem do site dela. Opcional só enquanto
+     * a unidade ainda não tem desafio. A meta aparece uma vez na entrada da
+     * unidade (primeira fase, sem progresso nenhum nela) e antes do desafio.
      */
     desafioId?: string;
   };

@@ -1,14 +1,16 @@
 /*
  * Unidade 1, Fase 2: "Agora sem rodinhas".
  *
- * O QUE ENSINA: nada de novo em nome (nenhum conceito novo no catálogo),
- * mas é a primeira vez que o jogador faz as 4 habilidades da Fase 1
- * SOZINHO, sem os quatro degraus de ajuda. Por isso `conceitos` repete os
- * ids das habilidades: aqui elas deixam de ser "o computadorzinho mostrou"
- * e passam a ser "eu sei fazer sem ajuda" (ver docs/ATRITOS-FABRICA.md
- * sobre essa decisão: a checagem de conteúdo exige ao menos um conceito
- * ensinado numa fase de prática, e não existe uma categoria própria para
- * "fase que só treina sozinho o que a anterior ensinou").
+ * O QUE TREINA: nada de novo (`conceitos` vazio). É a primeira vez que o
+ * jogador faz as 4 habilidades da Fase 1 SOZINHO, sem os quatro degraus
+ * de ajuda. Por isso elas moram em `pratica` ("já foi ensinado antes, aqui
+ * é treino"), e a fase não tem objetivo guiado nem previsão guiada (regra
+ * da fase só de sozinho, conferida pelo testar:conteudo).
+ *
+ * POR QUE UMA FASE SEPARADA: o formato padrão (Unidade 2) põe o guiado e o
+ * sozinho da mesma habilidade na mesma fase. Aqui é a exceção: a Fase 1 já
+ * estava publicada e congelada (src/conteudo/publicados.json), então o
+ * sozinho veio numa fase nova, logo depois dela.
  *
  * REVISÃO ESPAÇADA: `elemento`, `tag` e `codigo-html` (o vocabulário da
  * Fase 1) voltam em `revisa`, sem aviso — o jogador só usa de novo.
@@ -28,7 +30,8 @@ export const FASE_U1_F2: FasePratica = {
   tipo: "pratica",
   unidadeId: "sites-elementos-u1",
   titulo: "Agora sem rodinhas",
-  conceitos: ["selecionar-pela-arvore", "modo-inspecionar", "editar-texto", "lista-e-itens"],
+  conceitos: [],
+  pratica: ["selecionar-pela-arvore", "modo-inspecionar", "editar-texto", "lista-e-itens"],
   revisa: ["elemento", "tag", "codigo-html"],
   prerequisitos: ["selecionar-pela-arvore", "modo-inspecionar", "editar-texto", "lista-e-itens"],
   usaFerramentas: ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique", "editor", "sincronia"],

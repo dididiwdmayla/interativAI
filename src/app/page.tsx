@@ -1,5 +1,5 @@
-import { Jogo } from "@/componentes/jogo/Jogo";
+import { MundoMapa } from "@/componentes/mapa/MundoMapa";
 
 export default function Pagina() {
-  return <Jogo />;
+  return <MundoMapa />;
 }

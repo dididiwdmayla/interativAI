@@ -11,12 +11,16 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
+import { CURRICULO } from "@/curriculo/curriculo";
+import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo } from "@/curriculo/conferir";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
 import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
-import { explicarResultado } from "@/motor/validadores";
+import { nomeDeTagValido } from "@/motor/nucleoPainel";
+import { explicarResultado, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { ehIdConceito, type IdConceito } from "./conceitos";
+import { conferirPublicados, PUBLICADOS } from "./publicados";
 import type { Acao, Fase, FaseDesafio, FasePratica, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
 
@@ -181,6 +185,10 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "apagar";
     case "duplicar":
       return "duplicar";
+    case "renomearTag":
+      return "renomear-tag";
+    case "clicarLink":
+      return "previa";
     case "desfazer":
       return "desfazer";
     case "responderPrevisao":
@@ -193,8 +201,18 @@ function apresentadasPor(fase: Fase): IdFerramenta[] {
   return [...(fase.apresentar ?? []), ...objetivosDe(fase).flatMap((objetivo) => objetivo.apresentar ?? [])];
 }
 
+/** O que a fase treina (campo `pratica`; só fases de prática têm). */
+function praticaDe(fase: Fase): readonly IdConceito[] {
+  return fase.tipo === "pratica" ? (fase.pratica ?? []) : [];
+}
+
 function conceitosDe(fase: Fase): IdConceito[] {
-  return [...fase.conceitos, ...fase.revisa, ...fase.prerequisitos];
+  return [...fase.conceitos, ...praticaDe(fase), ...fase.revisa, ...fase.prerequisitos];
+}
+
+/** Fase de prática com pelo menos um objetivo guiado (ação ou previsão). */
+function temObjetivoGuiado(fase: Fase): boolean {
+  return objetivosDe(fase).some((objetivo) => objetivo.modo === "guiado");
 }
 
 /** Seletores de validadores, linhas e ações (sem o $0 do começo). */
@@ -283,7 +301,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
         }
         if (id !== undefined) {
           const fase = fases.find((item) => item.id === id);
-          if (!fase || fase.tipo !== "desafio") problemas.push(`meta.desafioId "${id}" não é uma fase de desafio`);
+          if (!fase) problemas.push(`meta.desafioId "${id}" da unidade "${unidade.id}" não existe`);
+          else if (fase.tipo !== "desafio") problemas.push(`meta.desafioId "${id}" não é uma fase do tipo desafio`);
+          if (fase && fase.unidadeId !== unidade.id) {
+            problemas.push(`meta.desafioId "${id}" é da unidade "${fase.unidadeId}", não da "${unidade.id}"`);
+          }
           if (unidade.fases[unidade.fases.length - 1] !== id) {
             problemas.push(`o desafio "${id}" precisa ser a última fase da unidade "${unidade.id}"`);
           }
@@ -300,7 +322,7 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
   },
   {
     id: "revisao-depois-do-ensino",
-    nome: "revisa e prerequisitos só usam conceitos ensinados antes",
+    nome: "revisa, prerequisitos e pratica só usam conceitos ensinados antes",
     checar: ({ fases }) => {
       const problemas: string[] = [];
       const ensinados = new Set<IdConceito>();
@@ -308,6 +330,14 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
         for (const conceito of [...fase.revisa, ...fase.prerequisitos]) {
           if (!ensinados.has(conceito)) {
             problemas.push(`a fase "${fase.id}" revisa ou pede "${conceito}", que nenhuma fase anterior ensinou`);
+          }
+        }
+        for (const conceito of praticaDe(fase)) {
+          if (!ensinados.has(conceito)) {
+            problemas.push(
+              `a fase "${fase.id}" treina (pratica) "${conceito}", que nenhuma fase anterior ensinou: ` +
+                "pratica é só para o que já foi ensinado com objetivo guiado; o que é novo vai em conceitos",
+            );
           }
         }
         if (fase.tipo === "desafio") {
@@ -345,6 +375,26 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
       return problemas;
     },
   },
+  {
+    id: "curriculo-ids",
+    nome: "os ids do currículo (src/curriculo) são únicos e em kebab-case",
+    checar: () => conferirIdsDoCurriculo(CURRICULO),
+  },
+  {
+    id: "curriculo-conteudo",
+    nome: "toda unidade de conteúdo está no currículo, na ilha e zona certas",
+    checar: ({ unidades }) => conferirConteudoNoCurriculo(CURRICULO, unidades),
+  },
+  {
+    id: "curriculo-motor",
+    nome: "nenhuma unidade de conteúdo mora em zona (ou unidade) que requer motor",
+    checar: ({ unidades }) => conferirMotorDoConteudo(CURRICULO, unidades),
+  },
+  {
+    id: "publicados-congelados",
+    nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
+    checar: (contexto) => conferirPublicados(PUBLICADOS, contexto),
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -366,13 +416,44 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
   },
   {
     id: "conceitos-do-catalogo",
-    nome: "conceitos, revisa e prerequisitos existem no catálogo",
+    nome: "conceitos, pratica, revisa e prerequisitos existem no catálogo",
     checar: (fase) => [
       ...conceitosDe(fase)
         .filter((id) => !ehIdConceito(id))
         .map((id) => `o conceito "${id}" não existe em src/conteudo/conceitos.ts`),
-      ...(fase.tipo === "pratica" && fase.conceitos.length === 0 ? ["a fase não ensina nenhum conceito"] : []),
+      ...(fase.tipo === "pratica" && fase.conceitos.length === 0 && praticaDe(fase).length === 0
+        ? ["a fase não ensina (conceitos) nem treina (pratica) nenhum conceito: preencha um dos dois"]
+        : []),
+      ...praticaDe(fase)
+        .filter((id) => fase.conceitos.includes(id))
+        .map((id) => `"${id}" está em conceitos e em pratica: ou a fase ensina (conceitos), ou só treina (pratica)`),
     ],
+  },
+  {
+    id: "fase-so-sozinho",
+    nome: "fase só de sozinho só treina: conceitos vazio e nenhum objetivo guiado",
+    checar: (fase) => {
+      if (fase.tipo !== "pratica" || fase.objetivos.length === 0) return [];
+      const problemas: string[] = [];
+      const todosSozinho = fase.objetivos.every((objetivo) => objetivo.modo === "sozinho");
+      if (todosSozinho && fase.conceitos.length > 0) {
+        problemas.push(
+          `todos os objetivos são sozinho, então a fase só treina: conceitos precisa ficar vazio e ` +
+            `${fase.conceitos.map((id) => `"${id}"`).join(", ")} vão para pratica`,
+        );
+      }
+      if (fase.conceitos.length === 0) {
+        fase.objetivos.forEach((objetivo, indice) => {
+          if (objetivo.modo !== "guiado") return;
+          const tipo = objetivo.tipo === "previsao" ? "uma previsão guiada" : "um objetivo guiado";
+          problemas.push(
+            `${nomeObjetivo(objetivo, indice)} é ${tipo}, mas a fase só treina (conceitos vazio): ` +
+              "guiado ensina algo novo, então precisa de um conceito em conceitos (e do sozinho dele depois)",
+          );
+        });
+      }
+      return problemas;
+    },
   },
   {
     id: "modos-e-ajudas",
@@ -487,6 +568,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if (item.tipo === "contagem" && (item.valor < 0 || !Number.isInteger(item.valor))) {
             problemas.push(`${onde}: contagem com valor ${item.valor}`);
           }
+          if (item.tipo === "evento" && item.href !== undefined && item.evento !== "clicouLink") {
+            problemas.push(`${onde}: href só vale no evento "clicouLink"`);
+          }
+          if (item.tipo === "tag" && !nomeDeTagValido(item.nome)) {
+            problemas.push(`${onde}: "${item.nome}" não é um nome de tag válido (minúsculas, como "h4" ou "section")`);
+          }
           return problemas;
         }),
       ),
@@ -524,7 +611,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
   },
   {
     id: "partes-do-desafio",
-    nome: "cada parte do desafio aponta para uma fase anterior da mesma unidade",
+    nome: "cada parte do desafio aponta para uma fase guiada anterior da mesma unidade",
     checar: (fase, { fases }) => {
       if (fase.tipo !== "desafio") return [];
       const indice = fases.indexOf(fase);
@@ -534,6 +621,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         if (alvo.unidadeId !== fase.unidadeId) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" é de outra unidade`];
         if (alvo.tipo !== "pratica") return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
         if (fases.indexOf(alvo) > indice) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" vem depois do desafio`];
+        if (!temObjetivoGuiado(alvo)) {
+          return [
+            `parte "${parte.id}": revisarEm "${parte.revisarEm}" não tem nenhum objetivo guiado; ` +
+              "aponte para a fase onde a habilidade foi ensinada com ajuda completa",
+          ];
+        }
         return [];
       });
     },
@@ -610,6 +703,13 @@ function jogarObjetivos(fase: FasePratica, usarAjuda: boolean): Jogada {
   return jogada;
 }
 
+/**
+ * Joga o desafio parte por parte, com o MESMO checklist do motor
+ * (`recalcularPartesFeitas`): partes travadas (seleção ou evento) ficam
+ * marcadas; as de estado são conferidas de novo a cada passo. No fim,
+ * confere a regra de conclusão: todas as partes de estado passando ao
+ * mesmo tempo e todas as travadas já marcadas.
+ */
 function jogarDesafio(fase: FaseDesafio): Jogada {
   const simulacao = criarSimulacao(fase);
   const jogada: Jogada = { eventos: [], solucoes: [] };
@@ -623,12 +723,13 @@ function jogarDesafio(fase: FaseDesafio): Jogada {
     }
   }
   simulacao.comecarObjetivo(null);
-  const feitas = new Set<string>();
-  const marcar = () => {
-    for (const parte of fase.partes) if (simulacao.avaliar(parte.validador).passou) feitas.add(parte.id);
+  let feitas: string[] = [];
+  const atualizar = () => {
+    feitas = recalcularPartesFeitas(fase, feitas, simulacao.contexto());
   };
   for (const parte of fase.partes) {
-    if (feitas.has(parte.id)) {
+    atualizar();
+    if (feitas.includes(parte.id)) {
       problemas.push(`a parte "${parte.id}" já estava marcada antes da própria solução (as partes se misturam)`);
     }
     try {
@@ -642,10 +743,21 @@ function jogarDesafio(fase: FaseDesafio): Jogada {
       problemas.push(`parte "${parte.id}": depois da solucaoDeTeste, o validador ainda não passa:\n${explicarResultado(resultado)}`);
       return jogada;
     }
-    marcar();
+    atualizar();
   }
-  const faltando = fase.partes.filter((parte) => !feitas.has(parte.id));
-  if (faltando.length > 0) problemas.push(`no fim, faltaram as partes ${faltando.map((parte) => parte.id).join(", ")}`);
+  for (const parte of fase.partes) {
+    if (feitas.includes(parte.id)) continue;
+    if (validadorTravado(parte.validador)) {
+      problemas.push(`no fim, a parte travada "${parte.id}" não ficou marcada`);
+      continue;
+    }
+    const agora = simulacao.avaliar(parte.validador);
+    problemas.push(
+      `no fim, a parte "${parte.id}" (avaliada ao vivo) não passa mais: a solução de uma parte seguinte ` +
+        "desfez o efeito dela, e o desafio nunca concluiria (as partes de estado precisam passar ao mesmo tempo):\n" +
+        explicarResultado(agora),
+    );
+  }
   try {
     estadoFinalDoDesafio(fase);
   } catch (erro) {

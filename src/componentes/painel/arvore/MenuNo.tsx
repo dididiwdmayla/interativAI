@@ -6,6 +6,7 @@ import { IconeApagar } from "@/componentes/icones/IconeApagar";
 import { IconeDuplicar } from "@/componentes/icones/IconeDuplicar";
 import { IconeEditar } from "@/componentes/icones/IconeEditar";
 import { IconeEsconder } from "@/componentes/icones/IconeEsconder";
+import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
 import type { AcoesNo } from "./tipos";
 
 type Props = {
@@ -25,13 +26,23 @@ const ESPERA_ROLAGEM_MS = 500;
 
 /**
  * Menu do botão direito (ou do toque longo) num nó da árvore, como o do
- * F12: Editar, Esconder, Apagar e Duplicar.
+ * F12: Editar, Renomear tag, Esconder, Apagar e Duplicar. (No F12 de
+ * verdade, renomear é só pelos dois cliques no nome da tag; aqui o menu
+ * também leva lá, para quem usa teclado ou toque.)
  */
 export function MenuNo({ x, y, rotulo, acoes, mostrarAtalhos, aoFechar }: Props) {
   const caixa = useRef<HTMLDivElement>(null);
   const [posicao, setPosicao] = useState({ x, y });
   const itens = [
     { id: "editar", nome: "Editar texto", atalho: "Enter", Icone: IconeEditar, ativo: acoes.podeEditar, fazer: acoes.editar },
+    {
+      id: "renomear",
+      nome: "Renomear tag",
+      atalho: "2 cliques",
+      Icone: IconeRenomearTag,
+      ativo: acoes.podeRenomear,
+      fazer: acoes.renomear,
+    },
     {
       id: "esconder",
       nome: acoes.escondido ? "Mostrar de novo" : "Esconder",

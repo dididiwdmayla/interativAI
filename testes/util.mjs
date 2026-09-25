@@ -2,6 +2,7 @@
 //   node testes/<arquivo>.mjs
 // Usa o Playwright do projeto ou, se não houver, o instalado globalmente.
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -18,7 +19,15 @@ const { chromium } = carregarPlaywright();
 
 export const URL_JOGO = process.env.URL_JOGO ?? "http://localhost:3000";
 
-export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null } = {}) {
+/** A primeira fase do jogo (o endereço padrão quando o teste não diz outro). */
+export const FASE_INICIAL = "sites-elementos-u1-f1";
+
+/**
+ * Abre o jogo. Sem `rota`, vai direto para a fase atual do progresso (ou a
+ * primeira), em /fase/<id>; o mundo é "/" e a ilha, /ilha/<id>.
+ */
+export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null, rota, esperar = "iframe" } = {}) {
+  const destino = rota ?? `/fase/${progresso?.faseAtual ?? FASE_INICIAL}`;
   const navegador = await chromium.launch();
   const contexto = await navegador.newContext({
     viewport: { width: largura, height: altura },
@@ -46,8 +55,8 @@ export async function abrir({ largura = 1440, altura = 900, toque = false, progr
       }
     }, progresso);
   }
-  await pagina.goto(URL_JOGO);
-  await pagina.waitForSelector("iframe");
+  await pagina.goto(`${URL_JOGO}${destino}`);
+  await pagina.waitForSelector(esperar);
   return { navegador, contexto, pagina, erros };
 }
 
@@ -66,9 +75,95 @@ export function progressoComFase(faseId, estadoFase = {}, extra = {}) {
     som: false,
     missoesDeCampo: {},
     apresentacoesVistas: [],
+    metasVistas: [],
+    unidadesComemoradas: [],
+    posicaoNoMapa: {},
+    mapaDesbloqueado: false,
     proporcaoPrevia: 0.4,
     ...extra,
   };
+}
+
+// ------------------------------------------------------------ data-chave da árvore
+// A chave de cada linha da árvore (esquema em src/motor/chaveArvore.ts e em
+// testes/README.md) é calculada com as MESMAS funções do app: o arquivo do
+// motor é transpilado aqui (TypeScript do projeto) e o código vai para
+// dentro da página. Ele não importa nada, justamente para isso funcionar.
+const CODIGO_CHAVE_ARVORE = (() => {
+  const ts = exigir("typescript");
+  const fonte = readFileSync(new URL("../src/motor/chaveArvore.ts", import.meta.url), "utf8");
+  const { outputText } = ts.transpileModule(fonte, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+  });
+  return outputText.replace(/^export /gm, "");
+})();
+
+/** O data-chave do primeiro elemento do site-alvo (prévia principal) que casa com o seletor. */
+export async function chaveDoSeletor(pagina, seletor) {
+  const chave = await pagina.evaluate(`(() => {
+    ${CODIGO_CHAVE_ARVORE}
+    const iframe = document.querySelector("section[data-previa] iframe");
+    const documento = iframe && iframe.contentDocument;
+    return documento ? chaveDoSeletor(documento, ${JSON.stringify(seletor)}) : null;
+  })()`);
+  if (chave === null) throw new Error(`Falhou: o seletor "${seletor}" não achou nenhum elemento no site-alvo`);
+  return chave;
+}
+
+/** No celular, garante a Árvore à vista (fecha o balão e escolhe o segmento). */
+export async function mostrarArvore(pagina) {
+  const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
+  if (await fechar.isVisible().catch(() => false)) {
+    await fechar.tap();
+    await pagina.waitForTimeout(250);
+  }
+  const aba = pagina.getByRole("tab", { name: "Árvore", exact: true });
+  if ((await aba.count()) > 0 && (await aba.getAttribute("aria-selected")) !== "true") {
+    await aba.tap();
+    await pagina.waitForTimeout(150);
+  }
+}
+
+/** Linha da árvore (a parte clicável) de uma chave. */
+export function linhaDaArvore(pagina, chave) {
+  return pagina.locator(`[role=treeitem][data-chave="${chave}"] > div`).first();
+}
+
+/**
+ * Seleciona pela árvore o primeiro elemento que casa com o seletor CSS
+ * (clique no desktop, toque no celular). Devolve a chave usada.
+ */
+export async function selecionarNo(pagina, seletor) {
+  const chave = await chaveDoSeletor(pagina, seletor);
+  const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  if (toque) {
+    await mostrarArvore(pagina);
+    await linhaDaArvore(pagina, chave).tap();
+  } else {
+    await linhaDaArvore(pagina, chave).click();
+  }
+  await pagina.waitForTimeout(200);
+  return chave;
+}
+
+/**
+ * Passa pela tela de meta da unidade (antes/depois), se ela estiver
+ * aberta ou abrir em até `espera` ms. Devolve true se passou por ela.
+ */
+export async function pularMeta(pagina, espera = 3000) {
+  const meta = pagina.locator("[data-meta]");
+  try {
+    await meta.waitFor({ timeout: espera });
+  } catch {
+    return false;
+  }
+  const botao = pagina.getByRole("dialog").getByRole("button", { name: /^(Bora!|Começar o desafio)$/ });
+  const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  if (toque) await botao.tap();
+  else await botao.click();
+  await meta.waitFor({ state: "detached", timeout: 5000 }).catch(() => {});
+  await pagina.waitForTimeout(300);
+  return true;
 }
 
 export function conferir(condicao, mensagem) {

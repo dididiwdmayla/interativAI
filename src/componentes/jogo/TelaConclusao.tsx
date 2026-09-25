@@ -25,6 +25,8 @@ type Props = {
   aoFechar: () => void;
   aoRecomecar: () => void;
   aoProxima: () => void;
+  /** Fim da unidade: volta para a ilha (que acende o ponto). */
+  aoVoltarAIlha?: () => void;
   /** Revisão: volta para o desafio que abriu esta fase. */
   aoVoltarAoDesafio: () => void;
 };
@@ -45,6 +47,7 @@ export function TelaConclusao({
   aoFechar,
   aoRecomecar,
   aoProxima,
+  aoVoltarAIlha,
   aoVoltarAoDesafio,
 }: Props) {
   const { fase, unidade, numero } = local;
@@ -103,10 +106,11 @@ export function TelaConclusao({
                 <Botao variante="secundario" onClick={aoRecomecar}>
                   Jogar de novo
                 </Botao>
-                <Botao variante={proxima ? "secundario" : "primario"} onClick={aoFechar}>
+                <Botao variante={proxima || aoVoltarAIlha ? "secundario" : "primario"} onClick={aoFechar}>
                   Continuar mexendo no site
                 </Botao>
                 {proxima && <Botao onClick={aoProxima}>Próxima fase</Botao>}
+                {!proxima && aoVoltarAIlha && <Botao onClick={aoVoltarAIlha}>Voltar pra ilha</Botao>}
               </>
             )}
           </div>

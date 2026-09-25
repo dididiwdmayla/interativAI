@@ -9,6 +9,29 @@ pego e não pegou. O objetivo é melhorar a fábrica antes da produção em
 massa das próximas unidades — nada aqui foi corrigido no guia ou no
 template, só relatado.
 
+## Resposta (rodada 5, Etapa 1)
+
+Todos os itens abaixo foram tratados na Etapa 1 da rodada 5 (ver
+`docs/PROGRESSO.md` e `docs/GUIA-DE-CONTEUDO.md`):
+
+- item 1: campo `pratica` na fase ("já foi ensinado antes, aqui é
+  treino"); u1-f2 migrada (`conceitos: []`, tudo em `pratica`), e a regra
+  "fase só de sozinho" é conferida (seção 3.9 do guia);
+- item 2: a meta de entrada aparece uma vez só por unidade, e só para quem
+  não tem progresso nela (`metasVistas`); a do desafio continua; checagem
+  de `meta.desafioId` (desafio, mesma unidade, última fase); ajudante
+  `pularMeta` nos testes de navegador;
+- item 3: esquema do `data-chave` documentado (guia, seção 11, e
+  `testes/README.md`) e ajudantes `selecionarNo`/`chaveDoSeletor` que usam
+  a mesma função da árvore (`src/motor/chaveArvore.ts`);
+- item 4: guiado e sozinho da mesma habilidade na mesma fase é o formato
+  padrão; fase só de sozinho não tem guiado nem previsão guiada;
+- item 5: `revisarEm` aponta sempre para a fase guiada (checado);
+- item 6: `jogarDesafio` usa `recalcularPartesFeitas` e confere a
+  conclusão simultânea, com teste de sabotagem;
+- além disso: congelamento dos ids publicados (`publicados.json`,
+  `npm run publicar:conteudo`).
+
 ## 1. Fase "só sozinho" não tem uma casa clara no formato
 
 O pedido da Etapa 2 pedia uma fase inteira de objetivos `sozinho` (u1-f2)

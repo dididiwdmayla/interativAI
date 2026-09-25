@@ -1,6 +1,7 @@
 "use client";
 
 import type { NoArvore } from "@/lib/arvore";
+import { TAGS_SEM_RENOMEAR } from "@/motor/nucleoPainel";
 import { TextoEditavel } from "./TextoEditavel";
 import type { EdicaoArvore } from "./tipos";
 
@@ -9,14 +10,46 @@ type Props = {
   edicao: EdicaoArvore | null;
   aoIniciarAtributo: (nome: string) => void;
   aoConfirmarAtributo: (nome: string, valor: string) => void;
+  /** Dois cliques no nome da tag (como no F12). */
+  aoIniciarTag: () => void;
+  aoConfirmarTag: (novaTag: string) => void;
+  /** Enquanto digita o nome novo: o fechamento da tag acompanha. */
+  aoDigitarTag: (rascunho: string) => void;
   aoCancelar: () => void;
 };
 
 /** <tag atributo="valor"> com as cores de sintaxe do tema. */
-export function TagAbertura({ no, edicao, aoIniciarAtributo, aoConfirmarAtributo, aoCancelar }: Props) {
+export function TagAbertura({
+  no,
+  edicao,
+  aoIniciarAtributo,
+  aoConfirmarAtributo,
+  aoIniciarTag,
+  aoConfirmarTag,
+  aoDigitarTag,
+  aoCancelar,
+}: Props) {
+  const podeRenomear = no.caminho.length > 0 && !TAGS_SEM_RENOMEAR.has(no.tag);
+  const editandoTag = edicao?.alvo === "tag" && edicao.chave === no.chave;
   return (
     <span className="text-codigo-tag">
-      &lt;{no.tag}
+      &lt;
+      {podeRenomear ? (
+        <TextoEditavel
+          valor={no.tag}
+          editando={editandoTag}
+          rotulo={`Nome da tag ${no.tag}`}
+          titulo="Dois cliques para renomear a tag"
+          className="text-codigo-tag"
+          confirmarComEspaco
+          aoDigitar={aoDigitarTag}
+          aoIniciar={aoIniciarTag}
+          aoConfirmar={aoConfirmarTag}
+          aoCancelar={aoCancelar}
+        />
+      ) : (
+        no.tag
+      )}
       {no.atributos.map((atributo) => {
         const editando =
           edicao?.alvo === "atributo" && edicao.chave === no.chave && edicao.nome === atributo.nome;

@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useMontado } from "@/lib/useMontado";
 import type { Expressao } from "@/motor/expressao";
 import type { DirecaoApontar } from "./partes/BracoApontando";
 import { CorpoMonitor } from "./partes/CorpoMonitor";
@@ -30,7 +31,10 @@ const DESCRICAO: Record<Expressao, string> = {
 /** O computadorzinho: um monitor retrô fofo, 100% SVG. */
 export function Mascote({ expressao = "feliz", direcao = "cima", tamanho = 120, className }: Props) {
   const reduzirMovimento = useReducedMotion() ?? false;
-  const animar = !reduzirMovimento;
+  // Só anima depois de montar: no servidor não dá para saber se a pessoa pediu
+  // menos movimento, e o HTML da hidratação precisa ser igual dos dois lados.
+  const montado = useMontado();
+  const animar = montado && !reduzirMovimento;
   const piscando = usePiscar(animar && PISCA_EM.includes(expressao));
 
   const inclinacao = expressao === "curioso" ? -7 : 0;

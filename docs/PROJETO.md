@@ -10,20 +10,27 @@ O jogador aprende usando uma versão simplificada do DevTools (F12) e vê a
 página mudar em tempo real. Tudo o que ele aprende funciona "lá fora", no F12
 de qualquer site real. O gancho emocional: "eu consigo mexer em qualquer site".
 
-Estrutura futura (não construir agora, só não bloquear):
+Estrutura (o mapa, rodada 5):
 
-- Mapa estilo Mario World com ilhas. Cada ilha é uma esfera de conteúdo; a
-  primeira é a **Ilha Sites**.
-- Dentro da ilha, zonas seguindo os painéis do DevTools: Elementos, Estilos,
-  Console, Rede, Aplicação.
-- Cada zona tem várias fases.
+- Mapa estilo Mario World com ilhas, na ordem do currículo
+  (`docs/MAPA-CURRICULAR.md`, em dados em `src/curriculo/`): Origens (o
+  museu, sempre aberto), Sites, Lógica, Páginas vivas, Rede e Servidor,
+  Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
+- Dentro da ilha, zonas (na Ilha Sites: Elementos, Estilos, Layout,
+  Responsivo e Publicar), cada uma com unidades em sequência. Todas as
+  unidades planejadas aparecem no mapa, "Em breve".
+- Cada unidade tem várias fases, terminando no desafio.
 
-Hoje existem duas unidades na Ilha Sites › Elementos:
+Hoje existem duas unidades prontas, na Ilha Sites › Elementos:
 
-- **Unidade 1, "O site é seu"**: a Fase 1 (só objetivos guiados; os objetivos
-  sozinho e o desafio dela são o primeiro trabalho a fazer com a fábrica).
+- **Unidade 1, "O site é seu"**: Fase 1 guiada, Fase 2 só de sozinho (a
+  exceção: a Fase 1 já estava publicada) e o desafio na Lanchonete Sabor
+  Rápido.
 - **Unidade 2, "Faxina no site"**: a unidade-modelo, completa (3 fases de
   micro-passos no Jornal da Vila e o desafio na loja Brinquedos Arco-Íris).
+
+A próxima é a U3, "Títulos e textos" (motor pronto: renomear tag). Zonas
+com `requerMotor` no currículo esperam trabalho de motor.
 
 O conteúdo é produzido em massa a partir do formato declarativo, das
 checagens automáticas e do guia `docs/GUIA-DE-CONTEUDO.md`.
@@ -69,7 +76,10 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
   atual recomendado na doc em 2026-09), configurável por `GEMINI_MODEL_RESERVA`.
 - Persistência: `localStorage`, chave `ilha-sites:progresso:v2`, sempre com
   try/catch e normalização. A v1 é migrada sozinha na primeira leitura
-  (ids de fase renomeados, nada se perde) e fica intacta como cópia.
+  (ids de fase renomeados, nada se perde) e fica intacta como cópia. Campos
+  novos da rodada 5 (`metasVistas`, `unidadesComemoradas`, `posicaoNoMapa`,
+  `mapaDesbloqueado`) nascem com padrão na normalização: progresso antigo
+  continua valendo.
 - Fontes via `next/font/google`: Nunito (UI) e JetBrains Mono (código).
 - Testes de conteúdo: Vitest + jsdom (`npm run testar:conteudo`). Testes de
   navegador: scripts Playwright em `testes/`.
@@ -79,10 +89,12 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
 
 ```
 src/
-  app/                  rotas (/, /lab/mascote, /lab/fases, /api/tutor)
+  app/                  rotas (/ mundo, /ilha/[id], /fase/[id], /lab/mapa, /lab/fases, /lab/mascote, /api/tutor)
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
+  curriculo/            o currículo inteiro em dados (ilhas, zonas, unidades) e a consistência com o conteúdo
+  componentes/mapa/     o mapa: mundo, ilha (pontos e card), museu das Origens, arte SVG das ilhas
   conteudo/             conteúdo declarativo: tipos, conceitos, registro, checagens, índice
     ilhas/sites/elementos/unidade-N/   uma pasta por unidade (fases, unidade.ts, sites/)
   motor/                núcleo do painel, validadores, executor de ações, simulação, estado do motor
@@ -91,8 +103,8 @@ src/
     painel/             DevTools simplificado: abas, árvore (menu do nó, barra, trilha), editor
     preview/            janela de navegador falsa, iframe, sobreposição
     mascote/            Mascote, Carinha, balão, previsão, checklist, Rever, selo Sozinho
-    jogo/               composição da tela, motor, meta, conclusão, Lista de fases (movel/)
-    lab/                o /lab/fases (validadores ao vivo, checagens, índice)
+    jogo/               composição da tela, motor, meta, conclusão, Lista de fases (usada no /lab/mapa) (movel/)
+    lab/                o /lab/fases (validadores ao vivo, checagens, índice) e o /lab/mapa
     ferramentas/        apresentação (spotlight), Caixa de Ferramentas, AlvoFerramenta
     icones/             ícones SVG (um por arquivo)
     ui/                 peças genéricas (dica, botão, modal)
@@ -184,17 +196,82 @@ src/
   (`recalcularPartesFeitas`), e desfazer a ação desmarca a parte. O desafio
   só conclui quando todas as partes ao vivo passam ao mesmo tempo e todas as
   travadas já foram marcadas.
-- **Meta**: mostrada na primeira fase da unidade e antes do desafio, quando
-  a unidade tem `meta.desafioId`.
+- **Meta**: quando a unidade tem `meta.desafioId`, aparece antes do
+  desafio (sempre que ele começa) e, uma vez só por unidade, na primeira
+  fase, se a pessoa não tem nenhum progresso nela (`faseAbreComMeta`,
+  `src/lib/metaDaUnidade.ts`; vistas em `metasVistas`).
 
-### Navegação (provisória, até existir o mapa)
+### Navegação (o mapa)
 
-- `Jogo` abre a fase salva em `faseAtual` (ou a primeira). "Lista de fases"
-  (gaveta no desktop, folha no celular) mostra unidades e fases com cadeado
-  nas bloqueadas (`src/lib/liberacao.ts`: abre quando a anterior foi
-  concluída) e estrelas nas concluídas. A conclusão tem "Próxima fase".
+- Rotas (`src/lib/rotas.ts`), todas com deep link: `/` é o mundo,
+  `/ilha/[id]` a ilha (ou o museu, em `/ilha/origens`), `/fase/[id]` a
+  fase. Recarregar mantém o lugar e o voltar do navegador faz fase ->
+  ilha -> mundo. Ids fora do currículo ou do conteúdo dão 404
+  (`generateStaticParams` + `dynamicParams = false`).
+- `Jogo` recebe o id da rota; fase ainda trancada
+  (`src/lib/liberacao.ts`: abre quando a anterior foi concluída) mostra um
+  aviso com o caminho de volta. A fase aberta vira `faseAtual` (o mapa põe
+  o computadorzinho nela e o card diz "Continuar").
+- Dentro da fase, o botão "Mapa" (barra do desktop; no celular, à esquerda
+  do título) volta para a ilha. "Próxima fase" só aparece dentro da
+  unidade; depois da última fase (o desafio), a conclusão tem "Voltar pra
+  ilha", e a ilha comemora. O "Rever" do desafio continua na mesma página
+  (sem mudar o endereço).
+- A Lista de fases saiu da navegação: mora no `/lab/mapa`, junto com
+  "Desbloquear tudo" (`mapaDesbloqueado`) e "Resetar o progresso do mapa",
+  só para testes.
 - A palavra "trilha" fica reservada para a ferramenta; o "onde estou" da
   barra superior é o componente `OndeEstou`.
+
+### Mapa das ilhas
+
+- Regras em `src/lib/mapa.ts` (testadas em `testes/conteudo/mapa.test.ts`),
+  tudo derivado do currículo, do conteúdo e do progresso. Ilha sem unidade
+  pronta: "em construção"; Origens (sempre aberta) e Sites abertas; cada
+  ilha seguinte da rota abre quando a anterior está aberta e com todas as
+  unidades prontas concluídas (a opcional segue a última da rota); com
+  unidade pronta e sem essa condição: "bloqueada". Dentro da ilha, a zona
+  abre quando as anteriores têm tudo pronto concluído, e as unidades
+  prontas da zona vão em sequência. Unidade: planejada (sem conteúdo),
+  concluída (todas as fases), disponível ou bloqueada.
+- Mundo (`MundoMapa`): mar com ondas SVG, ilhas na ordem do currículo
+  ligadas por uma rota pontilhada com um barquinho, Frameworks afastada e
+  marcada "Opcional", arte própria de cada ilha em SVG
+  (`componentes/mapa/arte/`, só tokens) e o estado dela (brilho, andaimes
+  com o computadorzinho dormindo, névoa com cadeado). O computadorzinho
+  fica na ilha da última fase aberta. Dá para arrastar (mouse) e rolar
+  (dedo, rodinha, teclado): `AreaArrastavel`.
+- Ilha (`TelaIlha`, `/ilha/[id]`): zonas como regiões ao longo de um
+  caminho sinuoso (horizontal no desktop e deitado, vertical em pé), com
+  o ícone da aba do DevTools da zona e a placa "Em construção" nas zonas
+  com `requerMotor` (sem o texto técnico). Pontos de 52 px: concluída
+  (carinha feliz e estrelas), disponível (pulsando), bloqueada (cadeado),
+  planejada (andaime, "Em breve"). O card mostra título, meta, estrelas e
+  Jogar / Continuar / Jogar de novo (a próxima fase não concluída; "Jogar
+  de novo" recomeça as fases da unidade, sem perder estrelas). O
+  computadorzinho anda do ponto onde parou (`posicaoNoMapa`) até o atual;
+  unidade concluída desde a última visita acende com festa e desenha o
+  trecho até a próxima (`unidadesComemoradas`, uma vez só).
+- Museu das Origens (`/ilha/origens`): fachada, os antepassados do
+  computadorzinho em silhueta (cartão perfurado, terminal verde, primeiro
+  PC) e as 5 salas do currículo como portas fechadas "Em breve".
+- Tokens novos do mapa em `tokens.css` (mar, onda, areia, grama, rota,
+  névoa, madeira, pedra, terminal), nos três temas.
+
+### Currículo
+
+- `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,
+  Lógica, Páginas vivas, Rede e Servidor, Ofício e a opcional
+  Frameworks). `src/curriculo/curriculo.ts` é a versão em dados: ilha
+  (`opcional`, `sempreAberta`), zona (`icone`, `requerMotor`) e unidade
+  (id `<ilha>-<zona>-u<n>`, título, meta em uma frase e, raro,
+  `requerMotor` só dela, como a U6).
+- Status não é guardado: unidade com conteúdo registrado de mesmo id é
+  "pronta"; o resto é "planejada" (`statusDaUnidade`).
+- Checagens (`src/curriculo/conferir.ts`, no `testar:conteudo`): ids
+  únicos; toda unidade de conteúdo está no currículo, com id, número,
+  ilha, zona, título e ordem batendo; nenhuma unidade de conteúdo mora em
+  zona (ou unidade) com `requerMotor`.
 
 ### Fábrica de conteúdo
 
@@ -204,6 +281,15 @@ src/
   (`src/conteudo/indice.ts`), base do futuro computadorzinho navegador.
 - Checagens: `src/conteudo/checagens.ts` (regras gerais, de dados e de
   simulação), rodando em `npm run testar:conteudo` e no `/lab/fases`.
+  A simulação do desafio usa o mesmo `recalcularPartesFeitas` do motor.
+- `pratica` na fase: conceitos já ensinados que a fase só treina (fase
+  só de sozinho: `conceitos` vazio, sem guiado). `revisarEm` aponta para
+  a fase guiada.
+- Congelamento: `src/conteudo/publicados.json` (ids de unidades, fases,
+  objetivos e partes publicados, na ordem). O `testar:conteudo` falha se
+  algum sumir ou mudar; `npm run publicar:conteudo` atualiza de propósito.
+- `data-chave` da árvore: `src/motor/chaveArvore.ts` (sem imports, para os
+  testes Playwright executarem as mesmas funções dentro da página).
 - Simulação headless: `src/motor/simulacao.ts` (Document solto + o mesmo
   núcleo do painel da interface).
 - `/lab/fases`: qualquer fase direto, validadores ao vivo, aplicar a solução
@@ -251,8 +337,22 @@ src/
   refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y com o foco no painel; botões no
   topo do painel). Tudo passa pelo núcleo `src/motor/nucleoPainel.ts`.
 - Menu do nó: botão direito (desktop) ou toque longo (celular). No
-  celular, o nó selecionado ganha uma barra com Editar, Esconder, Apagar,
-  Duplicar, Desfazer e Refazer.
+  celular, o nó selecionado ganha uma barra com Editar, Renomear, Esconder,
+  Apagar, Duplicar, Desfazer e Refazer.
+- Renomear tag (ferramenta `renomear-tag`, rodada 5): dois cliques no nome
+  da tag, como o "Edit node type" do Chrome (doc e devtools-frontend:
+  `setNodeName` troca a peça por outra com os mesmos atributos e filhos;
+  Enter ou Espaço confirmam, Esc desiste, nome vazio ou igual não faz
+  nada, `html`/`head`/`body` não renomeiam). O fechamento acompanha o nome
+  enquanto digita. Núcleo `renomearTag` (entra no desfazer), evento
+  `renomeouTag`, ação `renomearTag` e validador `tag`.
+- Links na prévia (rodada 5): o iframe nunca navega (clique, botão do
+  meio e envio de formulário são segurados em `PreviewSiteAlvo`). O
+  núcleo `clicarLink` classifica o link (`src/lib/linksPrevia.ts`:
+  âncora, quebrado, vazio, externo) e gera `clicouLink` com o `href`; a
+  interface rola até a âncora (e ao topo no `href="#"`) e o
+  computadorzinho fala para onde o link levaria. Ação `clicarLink`;
+  validador `evento` com `href` opcional.
 
 ### Mascote
 
@@ -335,22 +435,27 @@ src/
   cada regra de `src/conteudo/checagens.ts` vira um teste por fase (ids,
   conceitos, ferramentas apresentadas, limites de texto, emojis, previsões,
   estado inicial, soluções de teste e do "Me ajuda" cumprindo cada objetivo
-  na hora certa, momentos roteirizados, partes do desafio), mais o índice de
-  conceitos, o núcleo do painel, a migração do progresso, o contexto do
-  tutor e o próprio template anotado.
+  na hora certa, momentos roteirizados, partes do desafio com o checklist
+  do motor, fase só de sozinho, `revisarEm` guiado), mais as regras gerais
+  (currículo, ids publicados congelados, meta), o índice de conceitos, o
+  núcleo do painel (inclusive renomear tag e links), o `data-chave`, as
+  regras do mapa, a migração do progresso, o contexto do tutor, o próprio
+  template anotado e sabotagens que confirmam as mensagens.
 - **Navegador** (Playwright em `testes/`, ver `testes/README.md`), contra o
   jogo no ar: sincronia, apresentações e Caixa, ferramentas novas (desktop,
-  celular, toque longo, apresentações), a Fase 1 e as Unidades 1 e 2
-  inteiras em desktop, retrato (390×844, toque) e paisagem (844×390, toque),
+  celular, toque longo, apresentações), renomear tag e links na prévia, o
+  mapa (mundo, ilha, museu, deep links, voltar do navegador, /lab/mapa), a
+  Fase 1 e as Unidades 1 e 2 inteiras começando pelo mapa em desktop,
+  retrato (390×844, toque) e paisagem (844×390, toque),
   retomar no meio de um momento roteirizado, celular (prévia ao editar,
   teclado simulado, alça, giro, spotlight) e tutor (sobrecarga, reserva,
   sem chave).
 
 ## Fora do escopo agora
 
-Mapa das ilhas (a Lista de fases é provisória), computadorzinho navegador
-(o índice `montarIndice()` já existe), atividades teóricas (linha do tempo,
+Conteúdo novo (a U3 em diante é trabalho da fábrica), aba Estilos, modo
+documento inteiro (head editável), atividades das Origens (linha do tempo,
 comparador de linguagens, diagrama de rede; o registro de tipos de fase já
-está pronto para elas), outras zonas, abas além de Elementos, objetivos
-sozinho e desafio da Unidade 1 (primeiro trabalho com a fábrica), site-alvo
-externo validado, login, banco de dados, Monaco.
+está pronto para elas), computadorzinho navegador (o índice
+`montarIndice()` já existe), abas além de Elementos, site-alvo externo
+validado, login, banco de dados, Monaco.
