@@ -20,7 +20,7 @@ computadorzinho e os efeitos sonoros. Web Audio puro, sem bibliotecas.
 | `src/componentes/ui/AudioDoJogo.tsx` | Liga o motor à página (gestos, boot, volumes salvos) |
 | `src/componentes/layout/AjustesSom.tsx` | A seção "Som" dos ajustes |
 | `public/audio/musica/` | As músicas (`.webm` e `.m4a`) e o `musicas.json` |
-| `public/audio/efeitos/efeitos.json` | Os efeitos gravados (por enquanto nenhum: tudo sintetizado) |
+| `public/audio/efeitos/` | Os efeitos gravados (`.webm` e `.m4a`, os 11 momentos grandes) e o `efeitos.json` |
 
 ## Arquitetura
 
@@ -35,6 +35,13 @@ voz (eventos) -> ganho da fala (interromper) -> passa-baixa 4,5 kHz -> voz -----
   `AudioDoJogo`). Cada gesto seguinte chama `liberarAudio()` de novo, que
   retoma o contexto se o navegador o suspendeu. Antes do primeiro gesto
   nada toca e nada vai para o console.
+- **Antes do primeiro gesto** (`prepararAudio`, na montagem de
+  `AudioDoJogo`) só se baixa: os dois manifestos e, na tela inicial, o
+  arquivo do `boot`, já decodificado num `OfflineAudioContext` (que não
+  depende de gesto; o `AudioBuffer` serve depois no contexto de verdade).
+  Assim o boot toca do arquivo no próprio primeiro gesto.
+- **No primeiro gesto**: o contexto nasce, o boot toca (na tela inicial) e
+  os arquivos dos outros momentos grandes começam a ser pré-carregados.
 - **Barramentos**: `master` (0 quando "Silenciar tudo"), `música`,
   `efeitos` e `voz`. O ganho de cada um é `volume² × referência`
   (referência 1 na música, 4 nos efeitos e 7 na voz). O quadrado deixa o
@@ -43,7 +50,16 @@ voz (eventos) -> ganho da fala (interromper) -> passa-baixa 4,5 kHz -> voz -----
   música a 50% em cerca de -32 dB; voz em -36 dB, uns 3 dB acima da música
   abaixada pelo ducking; acerto em -31 dB; clique em -40 dB; tecla em
   -42 dB (discreta, porque toca muito). Nenhum som passa de 0,21 de pico.
-  O equilíbrio fino precisa de ouvido: ajuste `REFERENCIA` em `motor.ts`.
+- **Efeitos em arquivo** entram no barramento de efeitos com ganho 0,13
+  (`GANHO_ARQUIVO_EFEITO`): eles vêm em -16 LUFS e a música em -18, e com
+  os barramentos nos padrões esse ganho devolve os 2 dB a mais do efeito
+  sobre a música. Medido no Chromium (RMS máximo em janelas de 400 ms, nos
+  padrões): música em -29 a -30 dB; arquivos de -23 dB (boot) a -27 dB
+  (fase concluída); fanfarras sintetizadas em -28 a -30 dB. As versões
+  sintetizadas de reserva dos momentos grandes ficaram mais baixas (-31 a
+  -40 dB), o que só se ouve se o arquivo falhar.
+- O equilíbrio fino precisa de ouvido: ajuste `REFERENCIA` e
+  `GANHO_ARQUIVO_EFEITO` em `motor.ts`.
 - **Aba escondida** (`visibilitychange`): o contexto é suspenso; ao voltar,
   retomado.
 - **Rampas**: todo som começa e termina com rampa de ganho de pelo menos
@@ -83,7 +99,7 @@ voz (eventos) -> ganho da fala (interromper) -> passa-baixa 4,5 kHz -> voz -----
 
 | Tela | Rota | Faixa |
 | --- | --- | --- |
-| Mapa do mundo | `/` | `mapa` (pendente: silêncio com fade out) |
+| Mapa do mundo | `/` | `mapa` |
 | Museu das Origens | `/ilha/origens` | `origens` |
 | Ilha Origens (e o que houver dentro) | `/ilha/origens` | `origens` |
 | Ilha Sites, zonas, unidades e fases | `/ilha/sites`, `/fase/sites-*` | `sites` |
@@ -107,13 +123,16 @@ então uma fase nova de qualquer ilha já toca a faixa certa.
 2. No `public/audio/musica/musicas.json`, acrescente a entrada em `faixas`
    (`titulo`, `arquivos` com `webm` e `m4a`, `sampleRate`, `amostras` e
    `duracaoSegundos` exatos do loop) e tire o id de `pendentes`, se estiver
-   lá.
+   lá. Uma faixa planejada que ainda não chegou pode ficar em `pendentes`:
+   ela toca silêncio.
 3. Se for uma ilha nova, acrescente `id-da-ilha: "id-da-faixa"` em
    `FAIXA_DA_ILHA` (`src/audio/telas.ts`).
 
-Para a faixa do mapa, os passos 1 e 2 bastam: o mundo já pede `mapa`.
-`npm run testar:audio` confere que todo arquivo citado existe e que todo
-`.webm` tem o `.m4a`.
+O mundo pede sempre `mapa` e o museu, `origens`: para trocar a música do
+mapa, substitua `mapa.webm` e `mapa.m4a` e atualize `amostras` e
+`duracaoSegundos` da entrada `mapa` (passos 1 e 2, sem código).
+`npm run testar:audio` confere que todo arquivo citado existe, que todo
+`.webm` tem o `.m4a` e que não sobra arquivo sem entrada.
 
 ## Efeitos sonoros
 
@@ -123,69 +142,97 @@ Todo efeito tem um id (`IDS_EFEITOS` em `src/audio/efeitos.ts`) e uma
 versão sintetizada (`RECEITAS` em `src/audio/receitas.ts`). Chamar
 `tocarEfeito(id)`:
 
-- se o `public/audio/efeitos/efeitos.json` listar um arquivo para o id,
-  toca o arquivo (carregado sob demanda e guardado num cache dos 8 mais
-  recentes; se o arquivo falhar, toca o sintetizado);
+- se o `public/audio/efeitos/efeitos.json` tem entrada para o id, toca o
+  arquivo (`fonteDoEfeito`). O arquivo é carregado sob demanda e guardado
+  decodificado num cache dos 16 mais recentes (cerca de 4 MB com os 11
+  momentos grandes). Se ele não carregar (404, rede, formato que o
+  navegador não abre), toca o sintetizado (`resolverEfeito`);
 - senão, toca o sintetizado.
 
-Os de momentos grandes têm `"preCarregar": true` e são carregados ao
-entrar no mapa (quando tiverem arquivo).
+Os momentos grandes (`EFEITOS_GRANDES`) são pré-carregados no primeiro
+gesto do jogador, e o `boot` antes dele (ver Arquitetura). O boot usa
+`tocarEfeito("boot", { naHora: true })`: se o arquivo ainda não estiver
+decodificado, toca o sintetizado em vez de esperar. O efeito em arquivo
+termina em `duracaoSegundos` do manifesto (os containers reportam alguns
+ms a mais), com rampa de 5 ms na entrada e na saída.
 
-### Formato do `efeitos.json`
+A página marca o último efeito em
+`<html data-ultimo-efeito="..." data-ultimo-efeito-fonte="arquivo|sintetizado">`
+(usado pelos testes de navegador).
+
+### Formato do `efeitos.json` (o contrato)
+
+Um objeto `efeitos` com uma entrada por id **que tem arquivo**. Id sem
+entrada toca o sintetizado.
 
 ```json
 {
   "descricao": "...",
   "efeitos": {
-    "clique": { "arquivos": null },
-    "boot": { "arquivos": null, "preCarregar": true }
+    "boot": {
+      "descricao": "Computador ligando: ventoinha, HD e bip de inicialização",
+      "arquivos": { "webm": "/audio/efeitos/boot.webm", "m4a": "/audio/efeitos/boot.m4a" },
+      "duracaoSegundos": 3.584
+    }
   }
 }
 ```
 
+- `descricao`: o que o som é (texto livre).
+- `arquivos`: `webm` (Opus, preferido) e `m4a` (AAC, reserva), caminhos a
+  partir de `public/`. O formato sai do `canPlayType`, como na música; se só
+  um dos dois existir, ele é usado.
+- `duracaoSegundos`: duração real do som (sem o preenchimento do container).
+
+A leitura é tolerante (`lerManifestoEfeitos`): entrada sem arquivo válido é
+ignorada (o id continua sintetizado) e `duracaoSegundos` faltando faz o
+efeito ir até o fim do arquivo.
+
 ### Como trocar um efeito sintetizado por um arquivo gravado
 
-1. Grave o efeito e exporte em `.webm` (Opus, preferido) e `.m4a` (AAC, de
-   reserva), com o nome do id: `public/audio/efeitos/boot.webm` e
-   `public/audio/efeitos/boot.m4a`.
-2. No `efeitos.json`, troque `"arquivos": null` por
-   `"arquivos": { "webm": "/audio/efeitos/boot.webm", "m4a": "/audio/efeitos/boot.m4a" }`.
+1. Grave o efeito, mono, sem silêncio no início, com fade curto no fim,
+   normalizado em -16 LUFS. Exporte em `.webm` (Opus, preferido) e `.m4a`
+   (AAC, de reserva), com o nome do id: `public/audio/efeitos/<id>.webm` e
+   `public/audio/efeitos/<id>.m4a`.
+2. No `efeitos.json`, acrescente a entrada do id com `descricao`,
+   `arquivos` e `duracaoSegundos`.
 
-Sem mexer em código. Para voltar ao sintetizado, `"arquivos": null` de
-novo. O volume de referência do arquivo é 0,5 no barramento de efeitos:
-normalize os arquivos para soarem parecidos com a versão sintetizada.
+Sem mexer em código. Para voltar ao sintetizado, apague a entrada (e os
+arquivos). Um id novo de verdade (um som que o jogo ainda não toca)
+precisa existir em `IDS_EFEITOS`, com uma receita sintetizada de reserva,
+e ser chamado de algum lugar.
 
 ### Ids, onde tocam e o que ficou sem ligação
 
-| Id | Onde toca |
-| --- | --- |
-| `tecla` | Digitação do jogador no editor de código (CodeMirror, `keydown`), com variação aleatória de altura e volume |
-| `tecla-espaco`, `tecla-enter`, `tecla-apagar` | Espaço, Enter, Backspace/Delete no editor. Limite de taxa: 28 ms entre teclas, 90 ms com a tecla segurada |
-| `clique` | Botões que já tinham clique (conversa, Me ajuda, Rever, tema, card da unidade, pontos da ilha), nó da árvore clicado, entrada no museu pelo mapa, sair do modo inspecionar, confirmação de volume dos efeitos |
-| `hover` | Ilhas do mundo e pontos da ilha, só com ponteiro fino (mouse) |
-| `acerto` | Cada objetivo concluído, previsão certa, uso da ferramenta no "Experimente" (som antigo, igual) |
-| `erro` | Previsão errada (novo, macio: errar não custa estrela) |
-| `aviso` | Confirmação antes da solução do "Me ajuda" e falha do tutor (som antigo, igual) |
-| `abrir-painel`, `fechar-painel` | Ajustes de som, menu do celular e Caixa de Ferramentas |
-| `inspecionar` | Ligar o modo inspecionar |
-| `editar` | Editar texto ou atributo pela árvore (evento `editouTexto`/`editouAtributo`) |
-| `esconder` | Esconder e mostrar (tecla H, menu, barra) |
-| `apagar` | Apagar elemento: chiado que desce |
-| `desfazer` | Desfazer: tom que sobe "rebobinando" (bem diferente do apagar) |
-| `refazer` | Refazer: dois blips subindo |
-| `duplicar` | Duplicar: dois blips iguais |
-| `renomear-tag` | Renomear tag |
-| `boot` | Primeiro gesto do jogador na tela inicial (`/`), uma vez por carregamento |
-| `esbarrao` | Momento roteirizado com a animação de esbarrão |
-| `fase-concluida` | Tela de conclusão da fase (som antigo de conclusão, igual) |
-| `fez-sozinho` | Comemoração "Fez sozinho!" (som antigo de conclusão, igual) |
-| `unidade-concluida` | Ilha comemorando a unidade concluída |
-| `desbloqueio` | A unidade seguinte abrindo na comemoração da ilha; tema Segredo liberado pelo easter egg |
-| `entrar-mapa` | Voltar ao mapa do mundo (depois do primeiro gesto) |
-| `viagem-ilha` | Clicar numa ilha aberta no mapa do mundo |
-| `abrir-museu` | Entrar no Museu das Origens (rangido de porta antiga) |
-| `dormir`, `acordar` | **Sem ligação**: o jogo ainda não tem sistema de ociosidade |
-| `insignia` | **Sem ligação**: o jogo ainda não tem insígnias |
+| Id | Fonte | Onde toca |
+| --- | --- | --- |
+| `tecla` | sintetizado | Digitação do jogador no editor de código (CodeMirror, `keydown`), com variação aleatória de altura e volume |
+| `tecla-espaco`, `tecla-enter`, `tecla-apagar` | sintetizado | Espaço, Enter, Backspace/Delete no editor. Limite de taxa: 28 ms entre teclas, 90 ms com a tecla segurada |
+| `clique` | sintetizado | Botões que já tinham clique (conversa, Me ajuda, Rever, tema, card da unidade, pontos da ilha), nó da árvore clicado, entrada no museu pelo mapa, sair do modo inspecionar, confirmação de volume dos efeitos |
+| `hover` | sintetizado | Ilhas do mundo e pontos da ilha, só com ponteiro fino (mouse) |
+| `acerto` | sintetizado | Cada objetivo concluído, previsão certa, uso da ferramenta no "Experimente" (som antigo, igual) |
+| `erro` | sintetizado | Previsão errada (novo, macio: errar não custa estrela) |
+| `aviso` | sintetizado | Confirmação antes da solução do "Me ajuda" e falha do tutor (som antigo, igual) |
+| `abrir-painel`, `fechar-painel` | sintetizado | Ajustes de som, menu do celular e Caixa de Ferramentas |
+| `inspecionar` | sintetizado | Ligar o modo inspecionar |
+| `editar` | sintetizado | Editar texto ou atributo pela árvore (evento `editouTexto`/`editouAtributo`) |
+| `esconder` | sintetizado | Esconder e mostrar (tecla H, menu, barra) |
+| `apagar` | sintetizado | Apagar elemento: chiado que desce |
+| `desfazer` | sintetizado | Desfazer: tom que sobe "rebobinando" (bem diferente do apagar) |
+| `refazer` | sintetizado | Refazer: dois blips subindo |
+| `duplicar` | sintetizado | Duplicar: dois blips iguais |
+| `renomear-tag` | sintetizado | Renomear tag |
+| `boot` | arquivo | Primeiro gesto do jogador na tela inicial (`/`), uma vez por carregamento (arquivo pronto antes do gesto; senão, sintetizado) |
+| `esbarrao` | arquivo | Momento roteirizado com a animação de esbarrão |
+| `fase-concluida` | arquivo | Tela de conclusão da fase (a reserva sintetizada é o som antigo de conclusão) |
+| `fez-sozinho` | sintetizado | Comemoração "Fez sozinho!" (som antigo de conclusão, igual) |
+| `unidade-concluida` | arquivo | Ilha comemorando a unidade concluída |
+| `desbloqueio` | arquivo | A unidade seguinte abrindo na comemoração da ilha; tema Segredo liberado pelo easter egg |
+| `entrar-mapa` | arquivo | Voltar ao mapa do mundo (depois do primeiro gesto) |
+| `viagem-ilha` | arquivo | Clicar numa ilha aberta no mapa do mundo |
+| `abrir-museu` | arquivo | Entrar no Museu das Origens (rangido de porta antiga) |
+| `dormir`, `acordar` | arquivo | **Sem ligação**: o jogo ainda não tem sistema de ociosidade (arquivo instalado, pronto para quando tiver) |
+| `insignia` | arquivo | **Sem ligação**: o jogo ainda não tem insígnias (arquivo instalado, pronto para quando tiver) |
 
 As ferramentas tocam pelo evento do painel, então valem também para as
 soluções do "Me ajuda" e para os momentos roteirizados (o computadorzinho
@@ -283,11 +330,16 @@ e `preocupado`/`dormindo` (o chat desligado) ficam com a voz triste.
   `testes/audio/voz.test.ts` (determinismo, teto de 2,5 s, final natural,
   pausas, pergunta subindo, handshake, taxa de blips, sílabas, ruído abaixo
   dos tons, assinaturas por humor) e `testes/audio/registro.test.ts`
-  (arquivo ou sintetizado, tabela tela -> faixa, manifestos e arquivos em
-  `public/`, escolha de formato, ajustes no progresso).
+  (arquivo quando está no manifesto, sintetizado quando não está e quando
+  o carregamento falha, o contrato do `efeitos.json`, tabela tela -> faixa
+  com mapa, museu, ilhas, pendente e desconhecida, todo arquivo citado
+  existe e todo `.webm` tem o `.m4a`, sem arquivo órfão, escolha de
+  formato, ajustes no progresso).
 - `node testes/audio.mjs` (Playwright, com o jogo no ar): ajustes aparecem,
   mudam e continuam depois de recarregar; navegação mapa -> ilha -> fase ->
   ilha -> mapa -> museu -> ilhas com o AudioContext real do Chromium
-  (faixas decodificadas de verdade, sem reiniciar entre ilha e fase,
-  silêncio no mapa e em Frameworks) e console limpo; celular em pé com os
-  controles no toque.
+  (faixas decodificadas de verdade, `mapa` no mundo, sem reiniciar entre
+  ilha e fase, silêncio em Frameworks; boot do arquivo já no primeiro
+  gesto; viagem, chegada ao mapa e museu tocando os arquivos) e console
+  limpo; efeitos com os arquivos em 404 caindo no sintetizado; celular em
+  pé com os controles no toque.

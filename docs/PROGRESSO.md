@@ -4,7 +4,8 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 7 (sistema de áudio) concluída; antes dela, a
+**Estado atual:** rodada 8 (áudio v2: música do mapa e efeitos gravados)
+concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
@@ -12,6 +13,31 @@ seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
 inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
 que também requer motor (aba Estilos) — parar e relatar antes de
 produzir, seguindo a seção 0 do guia.
+
+## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
+
+Detalhes em `docs/AUDIO.md`.
+
+- [x] **Etapa 0: reconhecimento.** O motor da rodada 7 já cobria música,
+  voz, efeitos e ajustes. O que mudou: o `audio-v2.zip` traz a faixa
+  `mapa` (sai de `pendentes`) e 11 efeitos gravados, com o `efeitos.json`
+  num formato novo (só ids com arquivo, cada um com `descricao`,
+  `arquivos` e `duracaoSegundos`; sem `"arquivos": null` nem
+  `preCarregar`). Nenhum evento novo no jogo: `dormir`, `acordar` e
+  `insignia` seguem sem ligação.
+- [x] **Etapa 1: arquivos.** 17 arquivos em `public/audio/musica/` e 23 em
+  `public/audio/efeitos/`, sem renomear nem editar os json; zip removido.
+- [x] **Etapa 2: motor.** Leitura do contrato novo do `efeitos.json`;
+  `resolverEfeito` (arquivo que falha cai no sintetizado); boot baixado e
+  decodificado antes do primeiro gesto (`prepararAudio`, com
+  `OfflineAudioContext`) e tocado "na hora" no gesto; momentos grandes
+  pré-carregados no primeiro gesto; efeito em arquivo termina em
+  `duracaoSegundos`; ganho 0,13 dos arquivos medido contra a música.
+- [x] **Etapa 3: testes e docs.** `registro.test.ts` no contrato novo
+  (arquivo, sintetizado, falha, sem arquivo órfão, `mapa` no mundo);
+  `testes/audio.mjs` com a faixa `mapa`, boot do arquivo no primeiro
+  gesto, momentos grandes do arquivo e efeitos em 404 caindo no
+  sintetizado. `AUDIO.md`, `PROJETO.md` e `testes/README.md` atualizados.
 
 ## Rodada 7: sistema de áudio
 
