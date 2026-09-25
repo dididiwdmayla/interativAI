@@ -11,6 +11,12 @@
       "sites-elementos-u2-f2",
       "sites-elementos-u2-f3",
       "sites-elementos-u2-f4"
+    ],
+    "sites-elementos-u3": [
+      "sites-elementos-u3-f1",
+      "sites-elementos-u3-f2",
+      "sites-elementos-u3-f3",
+      "sites-elementos-u3-f4"
     ]
   },
   "fases": {
@@ -66,6 +72,36 @@
         "apagar-lateral",
         "duplicar-produto",
         "selecionar-vitrine"
+      ]
+    },
+    "sites-elementos-u3-f1": {
+      "objetivos": [
+        "corrigir-titulo-principal",
+        "prever-subtitulo",
+        "acrescentar-paragrafo",
+        "hierarquia-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f2": {
+      "objetivos": [
+        "aviso-forte",
+        "curiosidade-em",
+        "enfase-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f3": {
+      "objetivos": [
+        "passos-numerados",
+        "prever-materiais",
+        "lista-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f4": {
+      "partes": [
+        "titulo-principal",
+        "subtitulos",
+        "aviso-forte",
+        "passos-numerados"
       ]
     }
   }
