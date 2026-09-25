@@ -239,18 +239,21 @@ async function clicarLinhaCodigo(texto) {
   await linha.waitFor({ timeout: 8000 });
   await linha.scrollIntoViewIfNeeded();
   await esperar(100);
-  // Clica pelas coordenadas da página (perto do começo da linha, mas
-  // depois da régua de números): linhas compridas (como o data URI de
-  // uma imagem) passam da largura da tela, e tanto o centro da caixa
-  // quanto uma posição relativa pequena demais podem cair em cima da
-  // régua de números, que rouba o toque/clique.
-  const caixa = await linha.boundingBox();
-  if (!caixa) throw new Error(`Falhou: a linha "${texto}" não está visível`);
-  const x = caixa.x + Math.min(30, Math.max(5, caixa.width - 5));
-  const y = caixa.y + caixa.height / 2;
-  if (toque) await pagina.touchscreen.tap(x, y);
-  else await pagina.mouse.click(x, y);
-  await esperar(150);
+  // Perto do começo da linha, mas depois da régua de números (linhas
+  // compridas, como o data URI de uma imagem, passam da largura da tela).
+  // Tenta alguns deslocamentos: a régua muda de largura com a
+  // quantidade de dígitos do número da linha.
+  let ultimoErro;
+  for (const x of [16, 28, 44, 70]) {
+    try {
+      await tocar(linha, { position: { x, y: 10 }, timeout: 4000 });
+      ultimoErro = undefined;
+      break;
+    } catch (erro) {
+      ultimoErro = erro;
+    }
+  }
+  if (ultimoErro) throw ultimoErro;
 }
 
 async function trilha(rotulo) {
