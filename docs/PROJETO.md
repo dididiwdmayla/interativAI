@@ -170,10 +170,20 @@ src/
   Ao retomar no meio, a página volta ao HTML de antes (`htmlInicioObjetivo`)
   e o momento roda de novo.
 - **Desafio**: meta com antes/depois (o depois sai de
-  `estadoFinalDoDesafio`, aplicando as soluções das partes), checklist ao
-  vivo (parte marcada fica marcada), "Me ajuda" vira "Rever" (lista das
-  partes pendentes; cada uso custa 1 estrela, salva o desafio e abre a fase
-  de `revisarEm` em modo revisão), tutor só pergunta.
+  `estadoFinalDoDesafio`, aplicando as soluções das partes), "Me ajuda" vira
+  "Rever" (lista das partes pendentes; cada uso custa 1 estrela, salva o
+  desafio e abre a fase de `revisarEm` em modo revisão), tutor só pergunta.
+  **Checklist**: parte cujo validador depende de seleção ou evento
+  (`selecionado`, `evento`, ou `todos`/`algum`/`nao` que contenham algum
+  deles — `validadorTravado` em `src/motor/validadores.ts`) **trava**: uma
+  vez marcada, fica marcada, porque são momentos, não estado da página, e
+  desfazer não teria como "voltar" a eles (ex.: "selecionar a vitrine pela
+  trilha"). As demais (`existe`, `naoExiste`, `escondido`, `contagem`,
+  `atributo`, validadores de texto e combinações só com eles) são
+  **avaliadas ao vivo**: a cada checagem o motor confere de novo
+  (`recalcularPartesFeitas`), e desfazer a ação desmarca a parte. O desafio
+  só conclui quando todas as partes ao vivo passam ao mesmo tempo e todas as
+  travadas já foram marcadas.
 - **Meta**: mostrada na primeira fase da unidade e antes do desafio, quando
   a unidade tem `meta.desafioId`.
 

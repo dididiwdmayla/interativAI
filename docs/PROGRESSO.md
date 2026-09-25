@@ -5,8 +5,28 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run testar:conteudo` passando e um commit.
 
 **Estado atual:** rodada 3 concluída (fábrica de conteúdo, ferramentas
-novas, motor dos modos e Unidade 2). Próximo trabalho: objetivos sozinho e
-desafio da Unidade 1, usando a fábrica (ver "Próximos passos").
+novas, motor dos modos e Unidade 2). Rodada 4 (primeiro teste da fábrica)
+em andamento: Etapa 1 (checklist do desafio ao vivo) feita. Próximo
+trabalho: conteúdo da Unidade 1 (Etapa 2) e relatório de atritos (Etapa 3).
+
+## Rodada 4: primeiro teste da fábrica (Unidade 1)
+
+- [x] **Etapa 1: checklist do desafio ao vivo.** Partes do desafio cujo
+  validador depende de seleção ou evento (`selecionado`, `evento`, ou
+  `todos`/`algum`/`nao` que contenham algum deles) continuam travando (uma
+  vez marcadas, ficam marcadas); as demais (estado da página: `existe`,
+  `naoExiste`, `escondido`, `contagem`, `atributo`, texto) passam a ser
+  avaliadas ao vivo a cada checagem e desmarcam se o jogador desfizer a
+  ação. `validadorTravado` e `recalcularPartesFeitas` em
+  `src/motor/validadores.ts`; `useMotorFase` troca `marcarPartes` (só
+  adicionava) por `atualizarChecklist` (recalcula tudo a cada verificação).
+  O desafio só conclui com as partes ao vivo passando juntas e as travadas
+  já marcadas. Teste novo em `testes/conteudo/nucleo.test.ts`
+  (`validadorTravado` e `checklist do desafio`, com o desafio da Unidade 2:
+  apagar o pop-up marca, desfazer desmarca; selecionar a vitrine pela
+  trilha continua marcado mesmo perdendo a seleção depois). Regra
+  documentada em `docs/PROJETO.md` e `docs/GUIA-DE-CONTEUDO.md`. Bateria
+  Playwright `unidades.mjs` (desktop, retrato, paisagem) continua verde.
 
 - [x] **Etapa 1: Fundação.** Next + TS + Tailwind + Framer Motion, tokens e
   temas Doce e Fliperama (Segredo já definido, bloqueado), seletor de tema,

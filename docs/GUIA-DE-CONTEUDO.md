@@ -288,7 +288,16 @@ partes: [
 
 - Uma parte por habilidade da unidade. As partes não podem se misturar: a
   solução de uma não pode marcar outra.
-- Parte marcada fica marcada (desfazer não desmarca).
+- **Parte marcada fica marcada só se o validador dela depende de seleção ou
+  evento** (`selecionado`, `evento`, ou `todos`/`algum`/`nao` que contenham
+  algum deles). É o caso de "selecionar X pela trilha": são momentos, e
+  desfazer não teria como voltar a eles. **As demais partes (estado da
+  página: `existe`, `naoExiste`, `escondido`, `contagem`, `atributo`, texto)
+  são avaliadas ao vivo a cada checagem**: se o jogador desfizer a ação, a
+  parte desmarca. O desafio só conclui quando todas as partes ao vivo
+  passam ao mesmo tempo e todas as travadas já foram marcadas. Pense nisso
+  ao escrever o validador de cada parte: misturar os dois tipos num `todos`
+  trava a parte inteira.
 - Sem `apresentar` e sem ferramenta nova.
 - O site é **diferente** do dos micro-passos (outro assunto, outro
   visual, outra estrutura), para o jogador aplicar e não decorar.

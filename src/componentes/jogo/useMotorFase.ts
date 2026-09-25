@@ -24,7 +24,7 @@ import {
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
-import { avaliarValidador, consultar, type ContextoValidacao } from "@/motor/validadores";
+import { avaliarValidador, consultar, type ContextoValidacao, recalcularPartesFeitas } from "@/motor/validadores";
 
 type Opcoes = {
   fase: Fase;
@@ -297,26 +297,34 @@ export function useMotorFase({
     [limparAjudasVisuais, pratica],
   );
 
-  /** Desafio: marca as partes novas no checklist (e elas ficam marcadas). */
-  const marcarPartes = useCallback(
-    (ids: readonly string[]) => {
+  /**
+   * Desafio: recalcula o checklist. Partes travadas (seleção ou evento)
+   * ficam marcadas para sempre; as demais são avaliadas ao vivo e desmarcam
+   * se o jogador desfizer a ação (ver `validadorTravado` no motor).
+   */
+  const atualizarChecklist = useCallback(
+    (contexto: ContextoValidacao) => {
       if (!desafio) return;
       setEstado((atual) => {
-        const novas = ids.filter((id) => !atual.partesFeitas.includes(id));
-        if (novas.length === 0 || atual.pausa !== null) return atual;
-        const partesFeitas = [...atual.partesFeitas, ...novas];
+        if (atual.pausa !== null) return atual;
+        const partesFeitas = recalcularPartesFeitas(desafio, atual.partesFeitas, contexto);
+        const novas = partesFeitas.filter((id) => !atual.partesFeitas.includes(id));
+        const mesmas = partesFeitas.length === atual.partesFeitas.length && novas.length === 0;
+        if (mesmas) return atual;
         const todas = partesFeitas.length >= desafio.partes.length;
         const parte = desafio.partes.find((item) => item.id === novas[novas.length - 1]);
         return {
           ...atual,
           partesFeitas,
           concluidos: partesFeitas.length,
-          acertos: atual.acertos + 1,
-          listaRever: false,
+          acertos: novas.length > 0 ? atual.acertos + 1 : atual.acertos,
+          listaRever: novas.length > 0 ? false : atual.listaRever,
           pausa: todas ? "desafioConcluido" : null,
           fala: todas
             ? { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" }
-            : { texto: `Isso! Parte feita: ${parte?.descricao ?? ""}`, expressao: "comemorando" },
+            : novas.length > 0
+              ? { texto: `Isso! Parte feita: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
+              : atual.fala,
         };
       });
     },
@@ -333,10 +341,7 @@ export function useMotorFase({
       if (atual.tipo === "previsao" && estado.previsao === null) return;
       if (avaliarValidador(atual.validador, contexto)) concluirObjetivo(estado.objetivoAtual);
     } else if (desafio) {
-      const novas = desafio.partes
-        .filter((parte) => !estado.partesFeitas.includes(parte.id) && avaliarValidador(parte.validador, contexto))
-        .map((parte) => parte.id);
-      if (novas.length > 0) marcarPartes(novas);
+      atualizarChecklist(contexto);
     }
   }, [
     estado.etapa,
@@ -344,12 +349,11 @@ export function useMotorFase({
     estado.roteiro,
     estado.objetivoAtual,
     estado.previsao,
-    estado.partesFeitas,
     contextoValidacao,
     pratica,
     desafio,
     concluirObjetivo,
-    marcarPartes,
+    atualizarChecklist,
   ]);
 
   const verificarAtual = useRef(verificar);

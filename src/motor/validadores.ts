@@ -4,7 +4,7 @@
  * (DOMParser) e com o jsdom dos testes: só usa APIs comuns de DOM.
  */
 import { VALIDADORES_CUSTOM } from "@/conteudo/validadoresCustom";
-import type { OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
+import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { estaEscondido } from "@/lib/esconder";
 import type { EventoFase } from "./eventos";
@@ -213,6 +213,47 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
 
 export function avaliarValidador(validador: Validador, contexto: ContextoValidacao): boolean {
   return avaliarDetalhado(validador, contexto).passou;
+}
+
+/**
+ * Uma parte do desafio TRAVA (fica marcada mesmo desfazendo) quando o
+ * validador depende de seleção ou de evento: são momentos, não estado da
+ * página, e o motor não tem como "voltar" para eles. As demais (existe,
+ * naoExiste, escondido, contagem, atributo, texto...) são AVALIADAS AO VIVO:
+ * se o jogador desfizer a ação, a parte desmarca. Ver docs/PROJETO.md.
+ */
+export function validadorTravado(validador: Validador): boolean {
+  switch (validador.tipo) {
+    case "selecionado":
+    case "evento":
+      return true;
+    case "todos":
+    case "algum":
+      return validador.validadores.some(validadorTravado);
+    case "nao":
+      return validadorTravado(validador.validador);
+    default:
+      return false;
+  }
+}
+
+/**
+ * Desafio: recalcula quais partes estão marcadas no checklist. As partes
+ * travadas (`validadorTravado`) continuam marcadas para sempre, uma vez que
+ * passem; as demais são conferidas de novo a cada checagem.
+ */
+export function recalcularPartesFeitas(
+  desafio: FaseDesafio,
+  partesFeitas: readonly string[],
+  contexto: ContextoValidacao,
+): string[] {
+  return desafio.partes
+    .filter((parte) => {
+      const passaAgora = avaliarValidador(parte.validador, contexto);
+      if (validadorTravado(parte.validador)) return partesFeitas.includes(parte.id) || passaAgora;
+      return passaAgora;
+    })
+    .map((parte) => parte.id);
 }
 
 /** Texto de várias linhas explicando um resultado (mensagens de teste). */
