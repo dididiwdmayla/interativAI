@@ -13,6 +13,8 @@ type Props = {
   titulo?: string;
   /** Espaço também confirma (nome de tag não tem espaço; igual ao F12). */
   confirmarComEspaco?: boolean;
+  /** O campo cresce enquanto digita, a partir desta largura em letras (o atributo novo). */
+  crescerDesde?: number;
   /** A cada tecla, com o valor do campo (o fechamento da tag acompanha). */
   aoDigitar?: (valor: string) => void;
   aoIniciar: () => void;
@@ -29,6 +31,7 @@ export function TextoEditavel({
   marcadorVazio,
   titulo = "Dois cliques para editar",
   confirmarComEspaco = false,
+  crescerDesde,
   aoDigitar,
   aoIniciar,
   aoConfirmar,
@@ -56,7 +59,14 @@ export function TextoEditavel({
         autoFocus
         defaultValue={valor}
         aria-label={rotulo}
-        size={Math.max(valor.length + 2, 6)}
+        size={Math.max(valor.length + 2, crescerDesde ?? 6)}
+        onInput={
+          crescerDesde !== undefined
+            ? (evento) => {
+                evento.currentTarget.size = Math.max(evento.currentTarget.value.length + 2, crescerDesde);
+              }
+            : undefined
+        }
         onFocus={(evento) => {
           finalizado.current = false;
           evento.currentTarget.select();

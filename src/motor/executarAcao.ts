@@ -8,7 +8,7 @@
  */
 import type { Acao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
-import { caminhoDoNo, ehTexto, filhosVisiveis } from "@/lib/dom";
+import { caminhoDoNo, ehTexto, filhosVisiveis, raizDaArvore } from "@/lib/dom";
 import { temClasseEsconder } from "@/lib/esconder";
 import type { OrigemSelecao } from "./eventos";
 import { origemDaVia } from "./nucleoPainel";
@@ -20,6 +20,7 @@ export type PainelDasAcoes = {
   selecionar: (caminho: number[], origem: OrigemSelecao) => void;
   editarTexto: (caminho: number[], texto: string) => boolean;
   editarAtributo: (caminho: number[], nome: string, valor: string) => boolean;
+  adicionarAtributos: (caminho: number[], atributos: readonly { nome: string; valor: string }[]) => boolean;
   alternarEsconder: (caminho: number[]) => boolean;
   apagar: (caminho: number[]) => boolean;
   duplicar: (caminho: number[]) => boolean;
@@ -55,6 +56,8 @@ export function descreverAcao(acao: Acao): string {
       return `definirTexto ${acao.seletor} = "${acao.valor}"`;
     case "definirAtributo":
       return `definirAtributo ${acao.seletor} ${acao.nome}="${acao.valor}"`;
+    case "adicionarAtributo":
+      return `adicionarAtributo ${acao.seletor} ${acao.nome}="${acao.valor}"`;
     case "esconder":
       return `esconder ${acao.seletor}`;
     case "apagar":
@@ -123,8 +126,9 @@ export function resolverElemento(painel: PainelDasAcoes, seletor: string): Eleme
 
 function caminhoDe(painel: PainelDasAcoes, elemento: Element, seletor: string): number[] {
   const documento = documentoDo(painel);
-  const caminho = elemento === documento.body ? [] : caminhoDoNo(documento.body, elemento);
-  if (!caminho) throw new ErroAcao(`o seletor "${seletor}" achou algo fora do body`);
+  const raiz = raizDaArvore(documento) ?? documento.body;
+  const caminho = elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
+  if (!caminho) throw new ErroAcao(`o seletor "${seletor}" achou algo fora do ${raiz.tagName.toLowerCase()}`);
   return caminho;
 }
 
@@ -184,6 +188,13 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       const caminho = caminhoDe(painel, elemento, acao.seletor);
       selecionarPelaArvore(painel, caminho);
       painel.editarAtributo(caminho, acao.nome, acao.valor);
+      return;
+    }
+    case "adicionarAtributo": {
+      const elemento = resolverElemento(painel, acao.seletor);
+      const caminho = caminhoDe(painel, elemento, acao.seletor);
+      selecionarPelaArvore(painel, caminho);
+      painel.adicionarAtributos(caminho, [{ nome: acao.nome, valor: acao.valor }]);
       return;
     }
     case "esconder": {

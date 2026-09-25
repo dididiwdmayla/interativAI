@@ -24,10 +24,20 @@ export function ehComentario(no: unknown): no is Comment {
 
 // O esquema das chaves da árvore mora no motor (e os testes Playwright usam
 // as mesmas funções): ver src/motor/chaveArvore.ts.
-export { caminhoDoNo, chaveDoCaminho, ehNoVisivel, filhosVisiveis } from "@/motor/chaveArvore";
+export {
+  ATRIBUTO_INJETADO,
+  ATRIBUTO_MODO_DOCUMENTO,
+  caminhoDoNo,
+  chaveDoCaminho,
+  ehDocumentoInteiro,
+  ehNoVisivel,
+  filhosVisiveis,
+  marcarDocumentoInteiro,
+  raizDaArvore,
+} from "@/motor/chaveArvore";
 
-export function noPeloCaminho(body: Element, caminho: readonly number[]): Node | null {
-  let atual: Node = body;
+export function noPeloCaminho(raiz: Element, caminho: readonly number[]): Node | null {
+  let atual: Node = raiz;
   for (const indice of caminho) {
     const filho = filhosVisiveis(atual)[indice];
     if (!filho) return null;

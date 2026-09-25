@@ -17,6 +17,7 @@ const TESTES = [
   ["css.mjs"],
   ["estilos.mjs"],
   ["calculado.mjs"],
+  ["documento.mjs"],
   ["mapa.mjs", "desktop"],
   ["mapa.mjs", "retrato"],
   ["mapa.mjs", "paisagem"],

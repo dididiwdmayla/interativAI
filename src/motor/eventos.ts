@@ -15,6 +15,8 @@ export type EventoFase =
   | { tipo: "trilha"; tag: string; caminho: number[] }
   | { tipo: "editouTexto"; tag: string; caminho: number[]; texto: string }
   | { tipo: "editouAtributo"; tag: string; caminho: number[]; atributo: string; valor: string }
+  /** Criou um atributo que o elemento não tinha ("Adicionar atributo" do menu do nó). */
+  | { tipo: "adicionouAtributo"; tag: string; caminho: number[]; atributo: string; valor: string }
   | { tipo: "editouCodigo" }
   | { tipo: "escondeu"; tag: string; caminho: number[] }
   | { tipo: "mostrou"; tag: string; caminho: number[] }
@@ -58,6 +60,7 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "trilha",
   "editouTexto",
   "editouAtributo",
+  "adicionouAtributo",
   "editouCodigo",
   "escondeu",
   "mostrou",

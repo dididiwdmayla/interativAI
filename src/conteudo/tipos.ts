@@ -81,6 +81,12 @@ export type Validador =
    * depois de h2 virar h4.
    */
   | { tipo: "tag"; seletor: string; nome: string }
+  /**
+   * (Modo documento) O título da aba do navegador, que vem do <title>:
+   * igual a `valor` (sem os espaços das pontas) ou, sem `valor`, qualquer
+   * título que não esteja vazio.
+   */
+  | { tipo: "tituloDaAba"; valor?: string }
   /*
    * Validadores de CSS: usam o motor de cascata do jogo (src/motor/css),
    * o mesmo que o painel Estilos mostra. Ver "Como escrever fases de CSS"
@@ -143,6 +149,11 @@ export type Acao =
   | { tipo: "definirTexto"; seletor: string; valor: string }
   /** Troca o valor de um atributo pela árvore (seleciona o elemento antes). */
   | { tipo: "definirAtributo"; seletor: string; nome: string; valor: string }
+  /**
+   * Cria um atributo novo pelo menu do nó ("Adicionar atributo", como o
+   * Chrome). Se o elemento já tem o atributo, o valor é trocado.
+   */
+  | { tipo: "adicionarAtributo"; seletor: string; nome: string; valor: string }
   /** Esconde mantendo o espaço, como a tecla H (seleciona o elemento antes). */
   | { tipo: "esconder"; seletor: string }
   /** Apaga o elemento, como a tecla Delete (seleciona o elemento antes). */
@@ -276,7 +287,10 @@ export type SiteAlvo = {
   url: string;
   /** Título acessível do iframe. */
   titulo: string;
-  /** <head> fixo (estilos). Não aparece no editor. */
+  /**
+   * <head> fixo (estilos). Não aparece no editor. Numa fase com
+   * `modoDocumento`, é o head INICIAL, editável como o resto.
+   */
   head: string;
   /** <body> inicial: é o que aparece na árvore e no editor. */
   body: string;
@@ -332,6 +346,15 @@ type FaseBase = {
    * Calculado). Sem o campo, a fase não mostra nenhum.
    */
   paineisElementos?: PainelElementos[];
+  /**
+   * Modo documento: o jogador edita o documento INTEIRO (doctype, html,
+   * head e body). O editor mostra tudo, a árvore começa no <html> (com o
+   * head, o title e os meta, como no Chrome), a aba do navegador falso
+   * mostra o <title> ao vivo e, sem <meta charset>, a prévia simula os
+   * acentos quebrados. O documento inicial é montado de siteAlvo.head e
+   * siteAlvo.body.
+   */
+  modoDocumento?: true;
   conclusao: Fala[];
   /** Algo para o jogador fazer num site de verdade, pelo F12. */
   missaoDeCampo?: string;

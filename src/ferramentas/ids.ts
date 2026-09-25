@@ -18,6 +18,8 @@ export const IDS_FERRAMENTAS = [
   "duplicar",
   // Unidade 3 em diante
   "renomear-tag",
+  // Rodada 9: modo documento e atributo novo (fases futuras)
+  "adicionar-atributo",
   // Zona Estilos
   "editor-css",
   "painel-estilos",

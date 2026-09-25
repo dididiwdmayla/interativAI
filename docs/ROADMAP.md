@@ -70,12 +70,17 @@ núcleo comum.
     as medidas reais, camadas acesas na prévia com as cores do Chrome,
     lista das calculadas com filtro, "Mostrar todas" e o rastro de cada
     propriedade.
+  - Modo documento (destrava a U6): o documento inteiro no editor e na
+    árvore, a aba com o `<title>` ao vivo, simulação honesta dos acentos
+    sem meta charset, validador `tituloDaAba`. "Adicionar atributo" pelo
+    menu do nó (e toque longo), com a ferramenta `adicionar-atributo`:
+    fases futuras podem usar o gesto (as U1 a U5 publicadas não mudam; a
+    U4 continua como está).
 
 ### Em andamento
 
-- Rodada 9, etapas 5 a 7: modo documento, adicionar atributo pela
-  árvore, mobile dos painéis novos, liberações no currículo e a
-  unidade-modelo E1 ("A aba Estilos").
+- Rodada 9, etapas 6 e 7: mobile dos painéis novos, guia de CSS,
+  liberações no currículo e a unidade-modelo E1 ("A aba Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.

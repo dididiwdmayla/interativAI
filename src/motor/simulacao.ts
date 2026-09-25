@@ -6,23 +6,46 @@
  * /lab/fases (no navegador) e para gerar o "depois" da meta do desafio.
  */
 import type { Acao, Fase, FaseDesafio, Previsao, Validador } from "@/conteudo/tipos";
-import { criarDocumentoSolto, lerCssDoDocumento } from "@/lib/documentoSiteAlvo";
+import {
+  atualizarAcentos,
+  criarDocumentoInteiroSolto,
+  criarDocumentoSolto,
+  documentoInteiroInicial,
+  lerCssDoDocumento,
+  serializarDocumentoInteiro,
+} from "@/lib/documentoSiteAlvo";
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
-export function criarSimulacao(fase: Fase) {
+/**
+ * O documento inicial da fase, solto (fora da tela): o head fixo com o
+ * body ou, no modo documento, o documento inteiro já preparado como a
+ * prévia (estilos do jogo e simulação dos acentos).
+ */
+export function documentoSoltoDaFase(fase: Fase): Document {
   const css = fase.siteAlvo.css ?? null;
-  const documento = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
-  const inicial = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+  return fase.modoDocumento
+    ? criarDocumentoInteiroSolto(documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body), css)
+    : criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+}
+
+export function criarSimulacao(fase: Fase) {
+  const documento = documentoSoltoDaFase(fase);
+  const inicial = documentoSoltoDaFase(fase);
   let eventos: EventoFase[] = [];
   let previsaoAtual: Previsao | null = null;
   let respostaPrevisao: number | null = null;
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
-    mutarDocumento: (mutar) => mutar(documento),
+    mutarDocumento: (mutar) => {
+      const mudou = mutar(documento);
+      // Como a prévia: o meta charset entrou ou saiu, os acentos acompanham.
+      if (mudou && fase.modoDocumento) atualizarAcentos(documento);
+      return mudou;
+    },
     aoEvento: (evento) => eventos.push(evento),
   });
 
@@ -32,6 +55,7 @@ export function criarSimulacao(fase: Fase) {
     selecionar: nucleo.selecionar,
     editarTexto: nucleo.editarTexto,
     editarAtributo: nucleo.editarAtributo,
+    adicionarAtributos: nucleo.adicionarAtributos,
     alternarEsconder: nucleo.alternarEsconder,
     apagar: nucleo.apagar,
     duplicar: nucleo.duplicar,
@@ -76,7 +100,8 @@ export function criarSimulacao(fase: Fase) {
     avaliar: (validador: Validador): ResultadoValidador => avaliarDetalhado(validador, contexto()),
     /** Executa ações pelo painel. Lança ErroAcao dizendo qual quebrou. */
     executar: (acoes: readonly Acao[]) => executarAcoes(acoes, painel),
-    htmlAtual: () => documento.body.innerHTML,
+    /** O texto do editor: o body ou, no modo documento, o documento inteiro. */
+    htmlAtual: () => (fase.modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
     cssAtual: () => lerCssDoDocumento(documento),
   };
 }

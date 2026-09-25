@@ -186,6 +186,17 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
   uma precisa ter sido apresentada nesta fase ou antes.
 - `falaFinal`: aparece depois da missão de campo. Sem ela, a última fala
   da conclusão se repete; então escreva uma.
+- `modoDocumento: true`: o jogador edita o documento INTEIRO (doctype,
+  html, head e body). O editor mostra tudo ("Código da página
+  index.html"), a árvore começa no `<!DOCTYPE html>` e no `<html>` (o head
+  é "0", o body é "1"; o `head` do site-alvo vira o head inicial,
+  editável), a aba do navegador falso mostra o `<title>` ao vivo e,
+  enquanto não houver `<meta charset="utf-8">`, a prévia SIMULA os
+  acentos quebrados ("CartÃ£o") com um aviso e uma fala do
+  computadorzinho. Os validadores olham o texto de verdade (a quebra é só
+  da tela), `existe` acha o que está no head (`head > meta[charset]`) e
+  `tituloDaAba` só vale nesse modo. Exemplo: a Bancada do documento
+  (`src/conteudo/laboratorio/bancadaDocumento.ts`). É o modo da U6.
 - `paineisElementos` (só em fase com `siteAlvo.css`): os sub-painéis da
   aba Elementos que a fase mostra, `["estilos"]` ou
   `["estilos", "calculado"]`, como o Chrome (Styles e Computed dentro de
@@ -233,6 +244,7 @@ os conjuntos de textos.
 | `{ tipo: "selecionado", seletor, via? }` | o selecionado agora casa (texto selecionado vale pelo elemento dono); `via`: `"arvore"`, `"inspecionar"`, `"trilha"` ou `"editor"` |
 | `{ tipo: "evento", evento, minimo?, href? }` | o evento aconteceu `minimo` vezes (padrão 1) desde que o objetivo começou; com `evento: "clicouLink"`, `href` só conta cliques em links com esse href (ex.: `"#rodape"`) |
 | `{ tipo: "tag", seletor, nome }` | algum elemento do seletor tem essa tag (minúsculas). Renomear mantém os atributos: `{ tipo: "tag", seletor: "#titulo", nome: "h1" }` continua achando a peça depois da troca |
+| `{ tipo: "tituloDaAba", valor? }` | (modo documento) o `<title>` da página, que a aba do navegador falso mostra: igual a `valor` ou, sem `valor`, qualquer título não vazio. Olha o texto que o jogador escreveu (a quebra dos acentos é só da prévia) |
 | `{ tipo: "valorEfetivo", seletor, propriedade, valor }` | (CSS) o valor que VENCE a cascata em algum elemento do seletor (declarado, herdado ou inicial), comparado normalizado; atalho confere cada propriedade longa; incerto não passa |
 | `{ tipo: "declaracao", seletorRegra, propriedade, valor?, ativa? }` | (CSS) a regra tem a declaração (com o valor, se vier; `ativa: true` ligada, `false` desligada, sem `ativa` qualquer uma) |
 | `{ tipo: "regraExiste", seletorRegra }` | (CSS) existe uma regra com esse seletor nas folhas do site |
@@ -243,7 +255,8 @@ os conjuntos de textos.
 | `{ tipo: "custom", id }` | quase nunca (seção 9) |
 
 Eventos (`evento`): `selecionou`, `inspecionou`, `trilha`, `editouTexto`,
-`editouAtributo`, `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
+`editouAtributo`, `adicionouAtributo` (criou um atributo que o elemento
+não tinha, pelo "Adicionar atributo"), `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
 `duplicou`, `desfez`, `refez`, `respondeuPrevisao`, `renomeouTag` (trocou o
 nome da tag), `clicouLink` (clicou num link da prévia, com o `href`),
 `editouCss` (digitou no editor CSS), `editouPropriedade`,
@@ -277,6 +290,7 @@ soluções testam o caminho real.
 | `{ tipo: "selecionar", seletor, via? }` | seleciona (padrão: pela árvore). Com `via: "trilha"`, sobe até o ancestral mais próximo do selecionado que casa com o seletor, como a trilha de verdade (precisa ter algo selecionado dentro dele) |
 | `{ tipo: "definirTexto", seletor, valor }` | os dois cliques da árvore: seleciona o elemento e troca o texto (o elemento precisa ter só texto dentro) |
 | `{ tipo: "definirAtributo", seletor, nome, valor }` | troca o valor de um atributo pela árvore |
+| `{ tipo: "adicionarAtributo", seletor, nome, valor }` | cria um atributo pelo "Adicionar atributo" do menu do nó (ferramenta `adicionar-atributo`); se já existe, troca o valor. Gera `adicionouAtributo` |
 | `{ tipo: "esconder", seletor }` | seleciona e esconde (se já está escondido, não mexe) |
 | `{ tipo: "apagar", seletor }` | seleciona e apaga; a seleção vai para o próximo irmão ou para o pai |
 | `{ tipo: "duplicar", seletor }` | seleciona e duplica; **a cópia fica selecionada** |
@@ -510,6 +524,7 @@ apresentadas:
 | `esconder`, `apagar`, `duplicar` | menu do nó (botão direito, toque longo, barra no celular) e atalhos H, Delete, Shift+Alt+seta | Unidade 2 |
 | `desfazer` | desfazer e refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y) | Unidade 2 |
 | `renomear-tag` | dois cliques (ou dois toques) no nome da tag; também no menu do nó e na barra do celular ("Renomear"). Enter ou Espaço confirmam, Esc desiste | a partir da Unidade 3 (ainda não apresentada: apresente no primeiro objetivo que renomeia) |
+| `adicionar-atributo` | "Adicionar atributo" no menu do nó (botão direito; toque longo no celular), como o Add attribute do Chrome: um espaço aparece dentro da tag e o jogador escreve o atributo inteiro (`target="_blank"`, ou mais de um). Enter confirma, Esc desiste. O item só aparece nas fases que têm a ferramenta em `usaFerramentas` | fases futuras (U6 em diante); as U1 a U5 publicadas seguem sem ele |
 | `editor-css` | a aba CSS do editor (a folha `estilo.css`) | Estilos |
 | `painel-estilos` | o painel Estilos dentro de Elementos: `element.style`, as regras da que vence para a que perde, a folha do navegador e "Herdado de", com as riscadas e o link `estilo.css:N` | Estilos, Unidade 1 |
 | `editar-valor-css` | clicar no nome ou no valor de uma declaração e digitar (Enter confirma, Esc desiste, Tab vai para o próximo campo); "+ declaração" no fim do bloco | Estilos, Unidade 1 |

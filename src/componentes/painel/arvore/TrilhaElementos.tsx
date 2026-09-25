@@ -66,18 +66,23 @@ export function TrilhaElementos({ raiz, caminhoSelecionado, aoSelecionar, recuoD
             recuoDireita ? "pr-20" : "pr-2"
           }`}
         >
-          <li className="flex items-center">
-            <span className="px-1.5 py-0.5 text-texto-suave" title="O html é a raiz de tudo. Aqui o painel começa no body.">
-              html
-            </span>
-          </li>
+          {/* No modo documento, a árvore já começa no html (ele é o primeiro item). */}
+          {raiz?.tag !== "html" && (
+            <li className="flex items-center">
+              <span className="px-1.5 py-0.5 text-texto-suave" title="O html é a raiz de tudo. Aqui o painel começa no body.">
+                html
+              </span>
+            </li>
+          )}
           {itens.map((item, indice) => {
             const ultimo = indice === itens.length - 1;
             return (
               <li key={item.chave} className="flex items-center">
-                <span className="px-0.5 text-texto-suave" aria-hidden="true">
-                  ›
-                </span>
+                {(indice > 0 || raiz?.tag !== "html") && (
+                  <span className="px-0.5 text-texto-suave" aria-hidden="true">
+                    ›
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => aoSelecionar(item.caminho)}

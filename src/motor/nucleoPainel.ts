@@ -14,9 +14,9 @@
  */
 import type { PosicaoInsercao, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
-import { caminhoDoNo, ehElemento, ehTexto, filhosVisiveis, noPeloCaminho } from "@/lib/dom";
+import { caminhoDoNo, ehElemento, ehTexto, filhosVisiveis, noPeloCaminho, raizDaArvore } from "@/lib/dom";
 import { CLASSE_ESCONDER, temClasseEsconder } from "@/lib/esconder";
-import { escreverCssNoDocumento, lerCssDoDocumento } from "@/lib/documentoSiteAlvo";
+import { escreverCssNoDocumento, fotografarRaiz, lerCssDoDocumento, restaurarRaiz } from "@/lib/documentoSiteAlvo";
 import { classificarLink, type LinkClicado } from "@/lib/linksPrevia";
 import { analisarCss } from "./css/analisarCss";
 import {
@@ -128,6 +128,16 @@ export function origemDaVia(via: ViaSelecao): OrigemSelecao {
   }
 }
 
+/** A raiz da árvore (o body ou, no modo documento, o html), ou null se não há página. */
+function raizDe(documento: Document | null): Element | null {
+  return documento?.body ? raizDaArvore(documento) : null;
+}
+
+/** A raiz de um documento que já está carregado (dentro das operações). */
+function raizDoDocumento(documento: Document): Element {
+  return raizDaArvore(documento) ?? documento.body;
+}
+
 export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   let avisos: AvisosNucleo = opcoes;
   const emitir = (evento: EventoFase) => avisos.aoEvento?.(evento);
@@ -140,8 +150,8 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   const avisarHistorico = () => avisos.aoMudarHistorico?.();
 
   const noSelecionado = (): Node | null => {
-    const documento = opcoes.obterDocumento();
-    return documento?.body && selecao ? noPeloCaminho(documento.body, selecao.caminho) : null;
+    const raiz = raizDe(opcoes.obterDocumento());
+    return raiz && selecao ? noPeloCaminho(raiz, selecao.caminho) : null;
   };
 
   const definirSelecao = (nova: Selecao | null) => {
@@ -151,8 +161,8 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
 
   /** Seleciona sem gerar evento (o próprio jogo mudou a seleção). */
   const selecionarEmSilencio = (caminho: number[] | null) => {
-    const documento = opcoes.obterDocumento();
-    const existe = documento?.body && caminho ? noPeloCaminho(documento.body, caminho) !== null : false;
+    const raiz = raizDe(opcoes.obterDocumento());
+    const existe = raiz && caminho ? noPeloCaminho(raiz, caminho) !== null : false;
     definirSelecao(existe && caminho ? { caminho, origem: "sistema" } : null);
   };
 
@@ -194,7 +204,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     const antes: { foto: Foto | null } = { foto: null };
     const css = lerCss();
     const mudou = opcoes.mutarDocumento((documento) => {
-      antes.foto = { html: documento.body.innerHTML, css, caminho: selecao?.caminho ?? null };
+      antes.foto = { html: fotografarRaiz(documento), css, caminho: selecao?.caminho ?? null };
       return mutar(documento);
     });
     if (mudou && antes.foto) {
@@ -224,7 +234,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   const editarTexto = (caminho: number[], texto: string): boolean => {
     let tag = "";
     const mudou = operar((documento) => {
-      const no = noPeloCaminho(documento.body, caminho);
+      const no = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!no) return false;
       tag = tagDoNo(no);
       if (ehTexto(no)) {
@@ -246,7 +256,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   const editarAtributo = (caminho: number[], nome: string, valor: string): boolean => {
     let tag = "";
     const mudou = operar((documento) => {
-      const no = noPeloCaminho(documento.body, caminho);
+      const no = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!ehElemento(no) || no.getAttribute(nome) === valor) return false;
       tag = tagDoNo(no);
       no.setAttribute(nome, valor);
@@ -256,15 +266,38 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     return mudou;
   };
 
+  /**
+   * "Adicionar atributo" do menu do nó (Chrome: Add attribute): põe um ou
+   * mais atributos no elemento. Se ele já tem um, o valor é trocado.
+   */
+  const adicionarAtributos = (caminho: number[], atributos: readonly { nome: string; valor: string }[]): boolean => {
+    let tag = "";
+    const novos: { nome: string; valor: string }[] = [];
+    const mudou = operar((documento) => {
+      const no = noPeloCaminho(raizDoDocumento(documento), caminho);
+      if (!ehElemento(no)) return false;
+      tag = tagDoNo(no);
+      for (const { nome, valor } of atributos) {
+        const limpo = nome.trim().toLowerCase();
+        if (!/^[a-z_:][-a-z0-9_:.]*$/.test(limpo) || no.getAttribute(limpo) === valor) continue;
+        no.setAttribute(limpo, valor);
+        novos.push({ nome: limpo, valor });
+      }
+      return novos.length > 0;
+    });
+    if (mudou) for (const { nome, valor } of novos) emitir({ tipo: "adicionouAtributo", tag, caminho, atributo: nome, valor });
+    return mudou;
+  };
+
   /** Liga e desliga o esconder do Chrome (tecla H). */
   const alternarEsconder = (caminho: number[]): boolean => {
     let tag = "";
     let escondeu = false;
     let caminhoElemento = caminho;
     const mudou = operar((documento) => {
-      const elemento = elementoDoNo(noPeloCaminho(documento.body, caminho));
+      const elemento = elementoDoNo(noPeloCaminho(raizDoDocumento(documento), caminho));
       if (!elemento) return false;
-      caminhoElemento = caminhoDoNo(documento.body, elemento) ?? caminho;
+      caminhoElemento = caminhoDoNo(raizDoDocumento(documento), elemento) ?? caminho;
       tag = elemento.tagName.toLowerCase();
       escondeu = !temClasseEsconder(elemento);
       elemento.classList.toggle(CLASSE_ESCONDER, escondeu);
@@ -280,7 +313,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     let tag = "";
     let proximaSelecao: number[] = caminho.slice(0, -1);
     const mudou = operar((documento) => {
-      const no = noPeloCaminho(documento.body, caminho);
+      const no = noPeloCaminho(raizDoDocumento(documento), caminho);
       const pai = no?.parentNode;
       if (!no || !pai) return false;
       tag = tagDoNo(no);
@@ -304,12 +337,12 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     let tag = "";
     let caminhoCopia = caminho;
     const mudou = operar((documento) => {
-      const elemento = noPeloCaminho(documento.body, caminho);
+      const elemento = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!ehElemento(elemento) || !elemento.parentNode) return false;
       tag = elemento.tagName.toLowerCase();
       const copia = elemento.cloneNode(true);
       elemento.parentNode.insertBefore(copia, elemento.nextSibling);
-      caminhoCopia = caminhoDoNo(documento.body, copia) ?? caminho;
+      caminhoCopia = caminhoDoNo(raizDoDocumento(documento), copia) ?? caminho;
       return true;
     });
     if (mudou) {
@@ -330,7 +363,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     if (caminho.length === 0 || !nomeDeTagValido(nova) || TAGS_SEM_RENOMEAR.has(nova)) return false;
     let de = "";
     const mudou = operar((documento) => {
-      const elemento = noPeloCaminho(documento.body, caminho);
+      const elemento = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!ehElemento(elemento) || !elemento.parentNode) return false;
       de = elemento.tagName.toLowerCase();
       if (de === nova || TAGS_SEM_RENOMEAR.has(de)) return false;
@@ -360,11 +393,12 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
    */
   const clicarLink = (caminho: number[]): LinkClicado | null => {
     const documento = opcoes.obterDocumento();
-    const elemento = documento?.body ? noPeloCaminho(documento.body, caminho) : null;
+    const raiz = raizDe(documento);
+    const elemento = raiz ? noPeloCaminho(raiz, caminho) : null;
     const link = ehElemento(elemento) ? elemento.closest("a, area") : null;
-    if (!link || !documento?.body) return null;
+    if (!link || !documento || !raiz) return null;
     const resultado = classificarLink(link);
-    emitir({ tipo: "clicouLink", href: resultado.href, destino: resultado.destino, caminho: caminhoDoNo(documento.body, link) ?? caminho });
+    emitir({ tipo: "clicouLink", href: resultado.href, destino: resultado.destino, caminho: caminhoDoNo(raiz, link) ?? caminho });
     return resultado;
   };
 
@@ -372,7 +406,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   const inserirHtml = (caminho: number[], posicao: PosicaoInsercao, html: string): boolean => {
     if (caminho.length === 0 && (posicao === "antes" || posicao === "depois")) return false;
     const mudou = operar((documento) => {
-      const elemento = noPeloCaminho(documento.body, caminho);
+      const elemento = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!ehElemento(elemento)) return false;
       elemento.insertAdjacentHTML(POSICOES[posicao], html);
       return true;
@@ -385,11 +419,13 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   };
 
   const restaurar = (foto: Foto) => {
+    // O CSS de agora é lido antes: no modo documento, a folha mora no <html> que a foto troca.
+    const cssAgora = lerCss();
     opcoes.mutarDocumento((documento) => {
-      documento.body.innerHTML = foto.html;
+      restaurarRaiz(documento, foto.html);
       return true;
     });
-    if (foto.css !== null && foto.css !== lerCss()) aplicarCss(foto.css);
+    if (foto.css !== null && foto.css !== cssAgora) aplicarCss(foto.css);
     digitando = null;
     selecionarEmSilencio(foto.caminho);
     avisos.aoMudar?.();
@@ -398,7 +434,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
   const fotoAtual = (): Foto | null => {
     const documento = opcoes.obterDocumento();
     return documento?.body
-      ? { html: documento.body.innerHTML, css: lerCssDoDocumento(documento), caminho: selecao?.caminho ?? null }
+      ? { html: fotografarRaiz(documento), css: lerCssDoDocumento(documento), caminho: selecao?.caminho ?? null }
       : null;
   };
 
@@ -542,7 +578,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
    */
   const editarEstiloInline = (caminho: number[], estilo: string, detalhe: { propriedade: string; valor: string }): boolean => {
     const mudou = operar((documento) => {
-      const elemento = noPeloCaminho(documento.body, caminho);
+      const elemento = noPeloCaminho(raizDoDocumento(documento), caminho);
       if (!ehElemento(elemento)) return false;
       const novo = estilo.trim();
       if ((elemento.getAttribute("style") ?? "") === novo) return false;
@@ -564,6 +600,7 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     selecionar,
     editarTexto,
     editarAtributo,
+    adicionarAtributos,
     alternarEsconder,
     apagar,
     duplicar,

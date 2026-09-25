@@ -2,6 +2,7 @@
 
 import { type KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { IconeAdicionarAtributo } from "@/componentes/icones/IconeAdicionarAtributo";
 import { IconeApagar } from "@/componentes/icones/IconeApagar";
 import { IconeDuplicar } from "@/componentes/icones/IconeDuplicar";
 import { IconeEditar } from "@/componentes/icones/IconeEditar";
@@ -35,6 +36,19 @@ export function MenuNo({ x, y, rotulo, acoes, mostrarAtalhos, aoFechar }: Props)
   const [posicao, setPosicao] = useState({ x, y });
   const itens = [
     { id: "editar", nome: "Editar texto", atalho: "Enter", Icone: IconeEditar, ativo: acoes.podeEditar, fazer: acoes.editar },
+    // Só nas fases com a ferramenta adicionar-atributo (Add attribute do Chrome).
+    ...(acoes.adicionarAtributo
+      ? [
+          {
+            id: "adicionar-atributo",
+            nome: "Adicionar atributo",
+            atalho: "",
+            Icone: IconeAdicionarAtributo,
+            ativo: acoes.podeAdicionarAtributo,
+            fazer: acoes.adicionarAtributo,
+          },
+        ]
+      : []),
     {
       id: "renomear",
       nome: "Renomear tag",

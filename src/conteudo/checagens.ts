@@ -178,6 +178,8 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "definirTexto":
     case "definirAtributo":
       return "editar-duplo-clique";
+    case "adicionarAtributo":
+      return "adicionar-atributo";
     case "inserirHTML":
       return "editor";
     case "esconder":
@@ -702,6 +704,18 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         if (seletor.trim().length === 0 || /[{}]/.test(seletor)) problemas.push(`${onde}: seletorRegra "${seletor}" não serve`);
       }
       return problemas;
+    },
+  },
+  {
+    id: "modo-documento",
+    nome: "tituloDaAba só no modo documento (a aba do navegador falso só aparece nele)",
+    checar: (fase) => {
+      if (fase.modoDocumento) return [];
+      return validadoresDe(fase).flatMap(({ onde, validador }) =>
+        achatarValidador(validador)
+          .filter((item) => item.tipo === "tituloDaAba")
+          .map(() => `${onde}: validador tituloDaAba numa fase sem modoDocumento (o title fica no head fixo, que o jogador não vê)`),
+      );
     },
   },
   {

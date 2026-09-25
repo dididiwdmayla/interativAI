@@ -273,6 +273,49 @@ src/
   layout, iguais no jsdom).
 - Ferramentas `painel-calculado` e `modelo-de-caixa`, com apresentação.
 
+### Modo documento e atributo novo (rodada 9, etapa 5)
+
+- Fase com `modoDocumento: true`: o texto do editor é o documento INTEIRO
+  (montado de `siteAlvo.head` e `siteAlvo.body` no começo:
+  `documentoInteiroInicial`) e vai direto para o srcdoc. A raiz da árvore
+  vira o `<html>` (`raizDaArvore` em `motor/chaveArvore.ts`, que também
+  serve os testes Playwright): o iframe leva `data-modo-documento`, os
+  documentos soltos são marcados (`marcarDocumentoInteiro`). O código
+  conta os caminhos a partir do documento (`raizDoCodigo`), então a
+  sincronia código, árvore e tela continua valendo com o head.
+- Depois do load, `prepararDocumentoInteiro` põe no head os estilos do
+  jogo (a regra do esconder e, se a fase tem CSS, a folha editável) com
+  `data-jogo-injetado`: eles valem na página mas não aparecem na árvore
+  nem no código (`serializarDocumentoInteiro`). A foto do desfazer, no
+  modo documento, é o `<html>` inteiro limpo, com os atributos dele
+  (`fotografarRaiz` e `restaurarRaiz` no núcleo).
+- Aba do navegador falso com o `<title>` ao vivo (sem título, o endereço,
+  como o Chrome); a árvore mostra a linha `<!DOCTYPE html>`; o cabeçalho
+  do editor diz "Código da página index.html".
+- **Charset: simulação honesta (decisão).** Não dá para reproduzir o
+  acento quebrado de verdade: srcdoc já é texto (não há bytes para
+  decodificar) e um blob: da mesma origem herda o UTF-8 da página do jogo
+  (HTML Living Standard, "determining the character encoding"). Então,
+  sem `<meta charset>`, `atualizarAcentos` troca os textos da página pelo
+  que um navegador mostraria lendo UTF-8 como Windows-1252 ("CartÃ£o"),
+  com um aviso na prévia ("simulação") e a fala do computadorzinho
+  explicando. O código e os validadores veem o texto certo
+  (`consertarAcentos`, `textoVerdadeiro`); pôr ou tirar o meta charset
+  (pelo código ou pela árvore) liga e desliga a simulação na hora.
+  Detalhe em `src/lib/codificacao.ts`.
+- Validador `tituloDaAba` (só no modo documento, a checagem acusa fora
+  dele).
+- "Adicionar atributo" (Add attribute do Chrome, conferido no
+  devtools-frontend: item do menu de contexto do nó, que abre um atributo
+  vazio no fim da tag; o texto escrito é lido como atributos): item do
+  menu do nó (botão direito, toque longo), campo dentro da tag que cresce
+  enquanto digita, Enter confirma e Esc desiste; mais de um atributo de
+  uma vez; uma foto do desfazer; evento `adicionouAtributo`; ação
+  `adicionarAtributo`; ferramenta `adicionar-atributo` com apresentação.
+  O item só aparece nas fases com a ferramenta: as U1 a U5 publicadas
+  continuam com o menu de sempre. (Dois cliques no nome da tag, no
+  Chrome, renomeiam a tag: é o `renomear-tag`.)
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
@@ -591,9 +634,8 @@ Detalhes em `docs/AUDIO.md`.
 
 ## Fora do escopo agora
 
-Conteúdo novo (a U3 em diante é trabalho da fábrica), modo
-documento inteiro (head editável), atividades das Origens (linha do tempo,
-comparador de linguagens, diagrama de rede; o registro de tipos de fase já
-está pronto para elas), computadorzinho navegador (o índice
+Conteúdo novo (a U3 em diante é trabalho da fábrica), atividades das
+Origens (linha do tempo, comparador de linguagens, diagrama de rede; o
+registro de tipos de fase já está pronto para elas), computadorzinho navegador (o índice
 `montarIndice()` já existe), abas além de Elementos, site-alvo externo
 validado, login, banco de dados, Monaco.

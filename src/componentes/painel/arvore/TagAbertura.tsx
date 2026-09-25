@@ -10,6 +10,8 @@ type Props = {
   edicao: EdicaoArvore | null;
   aoIniciarAtributo: (nome: string) => void;
   aoConfirmarAtributo: (nome: string, valor: string) => void;
+  /** O texto escrito no espaço do atributo novo (ex.: target="_blank"). */
+  aoConfirmarNovoAtributo: (texto: string) => void;
   /** Dois cliques no nome da tag (como no F12). */
   aoIniciarTag: () => void;
   aoConfirmarTag: (novaTag: string) => void;
@@ -24,6 +26,7 @@ export function TagAbertura({
   edicao,
   aoIniciarAtributo,
   aoConfirmarAtributo,
+  aoConfirmarNovoAtributo,
   aoIniciarTag,
   aoConfirmarTag,
   aoDigitarTag,
@@ -31,6 +34,7 @@ export function TagAbertura({
 }: Props) {
   const podeRenomear = no.caminho.length > 0 && !TAGS_SEM_RENOMEAR.has(no.tag);
   const editandoTag = edicao?.alvo === "tag" && edicao.chave === no.chave;
+  const novoAtributo = edicao?.alvo === "novoAtributo" && edicao.chave === no.chave;
   return (
     <span className="text-codigo-tag">
       &lt;
@@ -74,6 +78,21 @@ export function TagAbertura({
           </span>
         );
       })}
+      {novoAtributo && (
+        <span data-atributo-novo>
+          {" "}
+          <TextoEditavel
+            valor=""
+            editando
+            rotulo={`Atributo novo de ${no.tag} (nome="valor")`}
+            className="text-codigo-atributo"
+            crescerDesde={16}
+            aoIniciar={() => {}}
+            aoConfirmar={aoConfirmarNovoAtributo}
+            aoCancelar={aoCancelar}
+          />
+        </span>
+      )}
       &gt;
     </span>
   );

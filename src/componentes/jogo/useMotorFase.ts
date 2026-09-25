@@ -6,9 +6,8 @@ import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import type { AjudaLinha, EventoRoteirizado, Fase, ViaSelecao } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso } from "@/lib/armazemProgresso";
-import { alvoDoElemento } from "@/lib/caminhoElementos";
-import { caminhoDoNo } from "@/lib/dom";
-import { criarDocumentoSolto } from "@/lib/documentoSiteAlvo";
+import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -23,6 +22,7 @@ import {
 } from "@/motor/estadoMotor";
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
+import { documentoSoltoDaFase } from "@/motor/simulacao";
 import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
 import { avaliarValidador, consultar, type ContextoValidacao, recalcularPartesFeitas } from "@/motor/validadores";
 
@@ -88,9 +88,7 @@ export function useMotorFase({
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
   );
   const [pulsarFerramenta, setPulsarFerramenta] = useState<IdFerramenta | null>(null);
-  const [documentoInicial] = useState(() =>
-    criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, fase.siteAlvo.css ?? null),
-  );
+  const [documentoInicial] = useState(() => documentoSoltoDaFase(fase));
   const eventosObjetivo = useRef<EventoFase[]>([]);
   /** Soluções e roteiros sendo aplicados: a validação espera. */
   const aplicando = useRef(false);
@@ -465,13 +463,14 @@ export function useMotorFase({
     const documento = obterDocumento();
     if (linha.alvo === "arvore") {
       const elemento = documento ? consultar(documento, linha.seletor)[0] : undefined;
-      const caminho = documento && elemento ? caminhoDoNo(documento.body, elemento) : null;
+      const raiz = documento ? raizDaArvore(documento) : null;
+      const caminho = raiz && elemento ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
       if (caminho) destacarNaArvore({ caminho, parte: linha.parte ?? "no" });
     } else if (linha.alvo === "editor") {
       const editor = editorRef.current;
       if (!editor || !documento?.body) return;
       const linhas = consultar(documento, linha.seletor).flatMap((elemento) => {
-        const alvo = alvoDoElemento(documento.body, elemento);
+        const alvo = alvoDoElemento(raizDoCodigo(documento), elemento);
         return alvo ? editor.linhasDoAlvo(alvo) : [];
       });
       editor.destacarLinhas(linhas);

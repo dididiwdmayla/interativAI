@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { IconeAdicionarAtributo } from "@/componentes/icones/IconeAdicionarAtributo";
 import { IconeApagar } from "@/componentes/icones/IconeApagar";
 import { IconeArvore } from "@/componentes/icones/IconeArvore";
 import { IconeCodigo } from "@/componentes/icones/IconeCodigo";
@@ -367,6 +368,31 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     uso: "sinal",
     liberarNoExperimente: [MENU_DO_NO],
     demo: DemoRenomearTag,
+  },
+  // Conferido no devtools-frontend: o item "Add attribute" do menu do nó
+  // (DOMTreeContextMenu) abre um atributo vazio no fim da tag, e o que se
+  // escreve ali é lido como atributos de verdade (ElementsTreeElement,
+  // addNewAttribute). Dois cliques no nome da tag renomeiam (renomear-tag).
+  "adicionar-atributo": {
+    id: "adicionar-atributo",
+    nome: "Adicionar atributo",
+    Icone: IconeAdicionarAtributo,
+    alvo: seletorFerramenta("arvore"),
+    oQueFaz: "Cria um atributo que a peça ainda não tem, como o target de um link ou o alt de uma imagem.",
+    praQueServe:
+      "Editar só troca o valor de um atributo que já existe. Para criar um novo, escreva ele inteiro: nome, sinal de igual e o valor entre aspas.",
+    comoUsarAqui: {
+      mouse: "Clique com o botão direito na peça, escolha Adicionar atributo, escreva algo como target=\"_blank\" e aperte Enter.",
+      toque: "Toque e segure na peça, escolha Adicionar atributo, escreva algo como target=\"_blank\" e confirme.",
+    },
+    noF12DeVerdade:
+      "botão direito no elemento, na aba Elements, e Add attribute. Um espaço vazio aparece dentro da tag: escreva o atributo e aperte Enter.",
+    experimente: {
+      mouse: 'Clique com o botão direito numa peça da árvore, escolha Adicionar atributo e escreva title="oi".',
+      toque: 'Toque e segure numa peça da árvore, escolha Adicionar atributo e escreva title="oi".',
+    },
+    uso: "sinal",
+    liberarNoExperimente: [MENU_DO_NO],
   },
   // O Chrome não tem uma aba "CSS" no editor: as folhas de estilo abrem na
   // aba Sources (Fontes). Aqui a folha do site mora ao lado do HTML, e o

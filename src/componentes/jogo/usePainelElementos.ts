@@ -4,8 +4,8 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from "react"
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import { chavesAncestrais, elementoDoNo } from "@/lib/arvore";
-import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo } from "@/lib/caminhoElementos";
-import { caminhoDoNo } from "@/lib/dom";
+import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo, raizDoCodigo } from "@/lib/caminhoElementos";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { medirNo, type Realce } from "@/lib/medirElemento";
 import { type CamadaCaixa, medirModeloCaixa, type RealceCaixa } from "@/lib/modeloCaixa";
 import type { EventoFase, OrigemSelecao } from "@/motor/eventos";
@@ -31,7 +31,7 @@ function elementoNoPonto(documento: Document, x: number, y: number): Element | n
 function alvoDoNo(documento: Document | null, no: Node | null): AlvoCodigo | null {
   const elemento = elementoDoNo(no);
   if (!documento?.body || !elemento) return null;
-  return alvoDoElemento(documento.body, elemento);
+  return alvoDoElemento(raizDoCodigo(documento), elemento);
 }
 
 /**
@@ -179,8 +179,9 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const selecionarPeloCodigo = useCallback(
     (alvo: AlvoCodigo | null) => {
       const documento = obterDocumento();
-      const elemento = documento?.body && alvo ? elementoDoAlvo(documento.body, alvo) : null;
-      const caminho = documento?.body && elemento ? caminhoDoNo(documento.body, elemento) : null;
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      const elemento = documento && raiz && alvo ? elementoDoAlvo(raizDoCodigo(documento), alvo) : null;
+      const caminho = raiz && elemento ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
       if (!caminho) {
         editorRef.current?.destacarElemento(null);
         return;
@@ -233,8 +234,9 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const escolherElemento = useCallback(
     (elemento: Element) => {
       const documento = obterDocumento();
-      if (!documento?.body) return;
-      const caminho = elemento === documento.body ? [] : caminhoDoNo(documento.body, elemento);
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      if (!raiz) return;
+      const caminho = elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
       if (!caminho) return;
       selecionar(caminho, "inspecao");
     },
@@ -334,6 +336,7 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     selecao: nucleo.selecao,
     editarTexto: nucleo.editarTexto,
     editarAtributo: nucleo.editarAtributo,
+    adicionarAtributos: nucleo.adicionarAtributos,
     alternarEsconder: nucleo.alternarEsconder,
     apagar: nucleo.apagar,
     duplicar: nucleo.duplicar,

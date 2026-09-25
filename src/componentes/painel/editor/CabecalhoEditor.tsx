@@ -7,11 +7,14 @@ type Props = {
   aoAlternarQuebra: () => void;
   /** Fases com CSS: as abas HTML e CSS. Sem elas, só o título do código do body. */
   abas?: { ativa: AbaEditor; aoTrocar: (aba: AbaEditor) => void; nomeCss: string };
+  /** Modo documento: o código é a página inteira (e não só o do body). */
+  documentoInteiro?: boolean;
 };
 
 const ROTULO_ABA: Record<AbaEditor, string> = { html: "HTML", css: "CSS" };
 
-export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra, abas }: Props) {
+export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra, abas, documentoInteiro = false }: Props) {
+  const nomeHtml = <span className="text-codigo-tag">{documentoInteiro ? "index.html" : "<body>"}</span>;
   return (
     <div className="flex shrink-0 items-center gap-2 border-b-2 border-borda bg-painel px-3 py-1.5 pointer-fine:pr-9">
       {abas ? (
@@ -35,12 +38,13 @@ export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra, abas }: Props
             );
           })}
           <span className="ml-1 truncate font-codigo text-xs text-texto-suave">
-            {abas.ativa === "css" ? abas.nomeCss : <span className="text-codigo-tag">&lt;body&gt;</span>}
+            {abas.ativa === "css" ? abas.nomeCss : nomeHtml}
           </span>
         </div>
       ) : (
         <span className="text-xs font-black uppercase tracking-wide text-texto-suave">
-          Código do <span className="font-codigo normal-case text-codigo-tag">&lt;body&gt;</span>
+          {documentoInteiro ? "Código da página" : "Código do"}{" "}
+          <span className="font-codigo normal-case">{nomeHtml}</span>
         </span>
       )}
       <button

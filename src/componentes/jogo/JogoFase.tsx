@@ -8,6 +8,7 @@ import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFe
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
+import { IconeAviso } from "@/componentes/icones/IconeAviso";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
@@ -51,7 +52,9 @@ import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
 import { elementoDoNo } from "@/lib/arvore";
-import { caminhoDoNo } from "@/lib/dom";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
+import { lerAtributosDigitados } from "@/lib/atributosDigitados";
+import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
@@ -116,6 +119,7 @@ type Props = {
 const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   editouTexto: "editar",
   editouAtributo: "editar",
+  adicionouAtributo: "editar",
   escondeu: "esconder",
   mostrou: "esconder",
   apagou: "apagar",
@@ -142,14 +146,30 @@ function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | 
   return salvo.cssAtual ?? fase.siteAlvo.css;
 }
 
+/** O texto inicial do editor: o body ou, no modo documento, o documento inteiro. */
+function htmlInicialDaFase(fase: Fase): string {
+  return fase.modoDocumento ? documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body) : fase.siteAlvo.body;
+}
+
+/**
+ * O computadorzinho explica a simulação dos acentos (modo documento sem
+ * meta charset). A prévia usa srcdoc, que já é texto, então a quebra não
+ * aconteceria sozinha: ver src/lib/codificacao.ts.
+ */
+const FALA_ACENTOS: Fala = {
+  texto:
+    "Isto é uma simulação: sem <meta charset=\"utf-8\"> no head, um navegador de verdade pode ler os acentos errado e mostrar CartÃ£o no lugar de Cartão. Com essa linha no head, tudo volta ao normal.",
+  expressao: "curioso",
+};
+
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
 function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
-  if (!salvo) return fase.siteAlvo.body;
+  if (!salvo) return htmlInicialDaFase(fase);
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
     return salvo.htmlInicioObjetivo;
   }
-  return salvo.htmlAtual ?? fase.siteAlvo.body;
+  return salvo.htmlAtual ?? htmlInicialDaFase(fase);
 }
 
 export function JogoFase({
@@ -224,7 +244,10 @@ export function JogoFase({
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,
-  } = useSiteAlvo(bodyInicial, cssInicial);
+    tituloAba,
+    simulandoAcentos,
+    doctype,
+  } = useSiteAlvo(bodyInicial, cssInicial, fase.modoDocumento === true);
 
   const {
     caminhoSelecionado,
@@ -251,6 +274,7 @@ export function JogoFase({
     historico,
     editarTexto,
     editarAtributo,
+    adicionarAtributos,
     alternarEsconder,
     apagar,
     duplicar,
@@ -306,8 +330,9 @@ export function JogoFase({
 
   const aoClicarLink = useCallback(
     (link: Element) => {
-      const body = obterDocumento()?.body;
-      const caminho = body ? caminhoDoNo(body, link) : null;
+      const documento = obterDocumento();
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      const caminho = raiz ? caminhoDoNo(raiz, link) : null;
       if (caminho) clicarLinkNaTela(caminho);
     },
     [clicarLinkNaTela, obterDocumento],
@@ -321,6 +346,7 @@ export function JogoFase({
       selecionar,
       editarTexto,
       editarAtributo,
+      adicionarAtributos,
       alternarEsconder,
       apagar,
       duplicar,
@@ -345,6 +371,7 @@ export function JogoFase({
       selecionar,
       editarTexto,
       editarAtributo,
+      adicionarAtributos,
       alternarEsconder,
       apagar,
       duplicar,
@@ -439,6 +466,15 @@ export function JogoFase({
       (estado.etapa === "concluida" && !estado.conclusaoAberta);
     falarSobreLink.current = livre ? falar : () => {};
   }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
+
+  // Na primeira vez que a prévia quebra os acentos, o computadorzinho explica (quando não atrapalha).
+  const explicouAcentos = useRef(false);
+  useEffect(() => {
+    if (!simulandoAcentos || explicouAcentos.current) return;
+    if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
+    explicouAcentos.current = true;
+    falar(FALA_ACENTOS);
+  }, [simulandoAcentos, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
@@ -509,6 +545,8 @@ export function JogoFase({
           sinalizarUso("desfazer");
         } else if (evento.tipo === "renomeouTag") {
           sinalizarUso("renomear-tag");
+        } else if (evento.tipo === "adicionouAtributo") {
+          sinalizarUso("adicionar-atributo");
         } else if (evento.tipo === "editouCss") {
           sinalizarUso("editor-css");
         } else if (evento.tipo === "editouPropriedade") {
@@ -698,6 +736,16 @@ export function JogoFase({
   /** O elemento selecionado (o dono, se a seleção é um texto): o painel Estilos mostra as regras dele. */
   const elementoSelecionado = caminhoSelecionado ? elementoDoNo(noSelecionado()) : null;
 
+  /** Caminho de um elemento da página na árvore (a raiz é o body ou, no modo documento, o html). */
+  const caminhoDoElemento = useCallback(
+    (elemento: Element): number[] | null => {
+      const documento = obterDocumento();
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      return raiz ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
+    },
+    [obterDocumento],
+  );
+
   const acoesEstilos = useMemo<AcoesEstilos>(
     () => ({
       editarDeclaracao,
@@ -705,16 +753,14 @@ export function JogoFase({
       adicionarDeclaracao,
       adicionarRegra: (seletor) => adicionarRegra(seletor),
       editarInline: (elemento, estilo, detalhe) => {
-        const body = obterDocumento()?.body;
-        const caminho = body ? (elemento === body ? [] : caminhoDoNo(body, elemento)) : null;
+        const caminho = caminhoDoElemento(elemento);
         return caminho ? editarEstiloInline(caminho, estilo, detalhe) : false;
       },
       previsualizarCss,
       irParaFonte,
       realcar: realcarVarios,
       selecionarElemento: (elemento) => {
-        const body = obterDocumento()?.body;
-        const caminho = body ? (elemento === body ? [] : caminhoDoNo(body, elemento)) : null;
+        const caminho = caminhoDoElemento(elemento);
         if (caminho) selecionar(caminho, "arvore");
       },
     }),
@@ -722,10 +768,10 @@ export function JogoFase({
       adicionarDeclaracao,
       adicionarRegra,
       alternarDeclaracao,
+      caminhoDoElemento,
       editarDeclaracao,
       editarEstiloInline,
       irParaFonte,
-      obterDocumento,
       previsualizarCss,
       realcarVarios,
       selecionar,
@@ -1053,6 +1099,12 @@ export function JogoFase({
                             aoApagar={apagar}
                             aoDuplicar={duplicar}
                             aoRenomearTag={renomearTag}
+                        aoAdicionarAtributos={
+                          fase.usaFerramentas.includes("adicionar-atributo")
+                            ? (caminho, texto) => adicionarAtributos(caminho, lerAtributosDigitados(texto))
+                            : undefined
+                        }
+                        doctype={doctype}
                             aoDesfazer={desfazer}
                             aoRefazer={refazer}
                             podeDesfazer={historico.podeDesfazer}
@@ -1128,6 +1180,7 @@ export function JogoFase({
                       quebrarLinhas={quebrarLinhas}
                       aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
                       abas={temCss ? { ativa: abaEditor, aoTrocar: trocarAbaEditor, nomeCss: NOME_FOLHA_DO_JOGO } : undefined}
+                      documentoInteiro={fase.modoDocumento === true}
                     />
                     <div className={`min-h-0 flex-1 ${abaEditor === "html" ? "" : "hidden"}`}>
                       <EditorCodigo
@@ -1137,7 +1190,7 @@ export function JogoFase({
                         quebrarLinhas={quebrarLinhas}
                         aoMoverCursor={aoMoverCursor}
                         aoFocar={aoFocarEditor}
-                        rotulo="Editor do código HTML do corpo da página"
+                        rotulo={fase.modoDocumento ? "Editor do código HTML da página inteira" : "Editor do código HTML do corpo da página"}
                       />
                     </div>
                     {cssInicial !== null && (
@@ -1187,11 +1240,29 @@ export function JogoFase({
             classeMarcador="right-3 top-3"
             className="flex min-h-0 flex-1 flex-col"
           >
-            <JanelaNavegador url={fase.siteAlvo.url} compacta={movel}>
+            <JanelaNavegador
+              url={fase.siteAlvo.url}
+              compacta={movel}
+              tituloAba={fase.modoDocumento ? tituloAba : undefined}
+              aviso={
+                simulandoAcentos ? (
+                  <button
+                    type="button"
+                    data-aviso-acentos
+                    onClick={() => falar(FALA_ACENTOS)}
+                    className="absolute bottom-2 left-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full border-2 border-alerta bg-superficie px-3 py-1 text-left text-xs font-bold text-texto shadow-[0_3px_0_var(--cor-sombra)] pointer-coarse:min-h-11"
+                  >
+                    <IconeAviso className="shrink-0 text-alerta" />
+                    Acentos quebrados: simulação (sem meta charset)
+                  </button>
+                ) : undefined
+              }
+            >
               <PreviewSiteAlvo
                 ref={previewRef}
                 head={fase.siteAlvo.head}
                 bodyInicial={bodyInicial}
+                modoDocumento={fase.modoDocumento === true}
                 cssInicial={cssInicial}
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}

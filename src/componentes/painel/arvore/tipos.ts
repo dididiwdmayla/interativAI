@@ -4,7 +4,9 @@ export type EdicaoArvore =
   | { chave: string; alvo: "texto" }
   | { chave: string; alvo: "atributo"; nome: string }
   /** O nome da tag (dois cliques no h2 de <h2>). */
-  | { chave: string; alvo: "tag" };
+  | { chave: string; alvo: "tag" }
+  /** Um atributo novo, escrito inteiro no fim da tag ("Adicionar atributo" do menu). */
+  | { chave: string; alvo: "novoAtributo" };
 
 export type DestaqueArvore = {
   caminho: number[];
@@ -29,4 +31,10 @@ export type AcoesNo = {
   duplicar: () => void;
   /** Começa a editar o nome da tag. */
   renomear: () => void;
+  /**
+   * Começa um atributo novo. Só existe nas fases que usam a ferramenta
+   * adicionar-atributo (nas outras, o menu fica como sempre foi).
+   */
+  adicionarAtributo?: () => void;
+  podeAdicionarAtributo: boolean;
 };

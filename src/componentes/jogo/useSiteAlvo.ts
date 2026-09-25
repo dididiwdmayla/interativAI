@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import type { ApiPreview } from "@/componentes/preview/PreviewSiteAlvo";
 import { construirArvore, type NoArvore } from "@/lib/arvore";
+import { acentosQuebrados, atualizarAcentos, serializarDocumentoInteiro } from "@/lib/documentoSiteAlvo";
+import { raizDaArvore } from "@/lib/dom";
 import { formatarHtml } from "@/lib/formatarHtml";
 
 const ESPERA_EDITOR_MS = 300;
@@ -26,8 +28,13 @@ const ESPERA_CSS_MS = 300;
  * textContent do <style> no iframe na hora, sem recarregar: a prévia muda
  * instantaneamente e a seleção fica onde estava. A versão do CSS sobe
  * (logo, para o painel; com espera, para a validação).
+ *
+ * Modo documento: o texto do editor é o documento inteiro (e não só o
+ * body), a árvore começa no <html> e a aba do navegador falso mostra o
+ * <title>. Se uma edição pela árvore liga ou desliga o meta charset, a
+ * simulação dos acentos quebrados liga ou desliga na hora.
  */
-export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
+export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modoDocumento = false) {
   const editorRef = useRef<ApiEditor>(null);
   const editorCssRef = useRef<ApiEditor>(null);
   const previewRef = useRef<ApiPreview>(null);
@@ -41,6 +48,28 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
   /** Sobe um pouco depois da última mudança de CSS (a validação confere). */
   const [versaoCssCalma, setVersaoCssCalma] = useState(0);
   const [arvore, setArvore] = useState<NoArvore | null>(null);
+  /** O <title> da página (a aba do navegador falso, no modo documento). */
+  const [tituloAba, setTituloAba] = useState<string | null>(null);
+  /** A prévia está simulando acentos quebrados (modo documento sem meta charset). */
+  const [simulandoAcentos, setSimulandoAcentos] = useState(false);
+  /** O <!DOCTYPE> do documento (a primeira linha da árvore no modo documento). */
+  const [doctype, setDoctype] = useState<string | null>(null);
+
+  /** O texto do editor a partir do documento vivo: o body ou, no modo documento, o documento inteiro. */
+  const serializar = useCallback(
+    (documento: Document) =>
+      formatarHtml(modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
+    [modoDocumento],
+  );
+
+  /** A árvore e a aba acompanham o documento. */
+  const lerDocumento = useCallback((documento: Document) => {
+    const raiz = raizDaArvore(documento);
+    setArvore(raiz ? construirArvore(raiz) : null);
+    setTituloAba(documento.title);
+    setSimulandoAcentos(acentosQuebrados(documento));
+    setDoctype(modoDocumento ? (documento.doctype?.name ?? null) : null);
+  }, [modoDocumento]);
 
   const cancelarEspera = useCallback(() => {
     if (temporizador.current !== null) {
@@ -103,10 +132,13 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
   /** Enquanto o jogador digita no painel Estilos: a prévia mostra sem mudar a fonte de verdade. */
   const previsualizarCss = useCallback((texto: string | null) => previewRef.current?.mostrarCssProvisorio(texto), []);
 
-  const aoCarregarDocumento = useCallback((documento: Document) => {
-    setArvore(construirArvore(documento.body));
-    setVersaoDocumento((versao) => versao + 1);
-  }, []);
+  const aoCarregarDocumento = useCallback(
+    (documento: Document) => {
+      lerDocumento(documento);
+      setVersaoDocumento((versao) => versao + 1);
+    },
+    [lerDocumento],
+  );
 
   const obterDocumento = useCallback(() => previewRef.current?.obterDocumento() ?? null, []);
 
@@ -119,15 +151,16 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
       const documento = previewRef.current?.obterDocumento();
       if (!documento?.body) return false;
       if (!mutar(documento)) return false;
+      if (modoDocumento) atualizarAcentos(documento);
       cancelarEspera();
-      const novo = formatarHtml(documento.body.innerHTML);
+      const novo = serializar(documento);
       editorRef.current?.definirTexto(novo);
       setHtmlAtual(novo);
-      setArvore(construirArvore(documento.body));
+      lerDocumento(documento);
       setVersaoDocumento((versao) => versao + 1);
       return true;
     },
-    [cancelarEspera],
+    [cancelarEspera, lerDocumento, modoDocumento, serializar],
   );
 
   /** Troca o HTML inteiro (solução, recomeçar fase): editor e iframe juntos. */
@@ -151,6 +184,9 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
     versaoCss,
     versaoCssCalma,
     arvore,
+    tituloAba,
+    simulandoAcentos,
+    doctype,
     aoEditarCodigo,
     aoEditarCss,
     editarCss,

@@ -6,6 +6,7 @@
 import { VALIDADORES_CUSTOM } from "@/conteudo/validadoresCustom";
 import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
+import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
 import { calcularCascata, folhasDoDocumento, normalizarSeletor, valorEfetivo } from "./css/cascata";
 import { ehAtalho } from "./css/propriedades";
@@ -71,7 +72,7 @@ function comparar(quantidade: number, op: OperadorContagem, valor: number): bool
 }
 
 function textosDe(elementos: readonly Element[]): string[] {
-  return elementos.map((elemento) => normalizarTexto(elemento.textContent));
+  return elementos.map((elemento) => normalizarTexto(textoVerdadeiro(elemento)));
 }
 
 function lista(itens: readonly string[]): string {
@@ -103,6 +104,8 @@ export function descreverValidador(validador: Validador): string {
       return `evento ${validador.evento}${validador.href !== undefined ? ` com href "${validador.href}"` : ""} pelo menos ${validador.minimo ?? 1} vez(es)`;
     case "tag":
       return `${validador.seletor} é <${validador.nome}>`;
+    case "tituloDaAba":
+      return validador.valor !== undefined ? `título da aba igual a "${validador.valor}"` : "a aba tem título";
     case "valorEfetivo":
       return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"`;
     case "declaracao":
@@ -140,7 +143,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     }
     case "contagem": {
       let elementos = consultar(documento, validador.seletor);
-      if (validador.comTexto) elementos = elementos.filter((elemento) => normalizarTexto(elemento.textContent).length > 0);
+      if (validador.comTexto) elementos = elementos.filter((elemento) => normalizarTexto(textoVerdadeiro(elemento)).length > 0);
       const quantidade = elementos.length;
       return { passou: comparar(quantidade, validador.op, validador.valor), descricao, detalhe: `achou ${quantidade}` };
     }
@@ -207,6 +210,13 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     case "tag": {
       const tags = consultar(documento, validador.seletor).map((elemento) => elemento.tagName.toLowerCase());
       return { passou: tags.includes(validador.nome.toLowerCase()), descricao, detalhe: `tags: ${lista(tags)}` };
+    }
+    case "tituloDaAba": {
+      // O que a aba mostra é o <title> (document.title junta os espaços).
+      const titulo = documento.querySelector("title");
+      const texto = titulo ? normalizarTexto(textoVerdadeiro(titulo)) : "";
+      const passou = validador.valor !== undefined ? texto === normalizarTexto(validador.valor) : texto.length > 0;
+      return { passou, descricao, detalhe: titulo ? `título: "${texto}"` : "a página não tem <title>" };
     }
     case "valorEfetivo":
       return avaliarValorEfetivo(validador, contexto, descricao);

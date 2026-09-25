@@ -113,6 +113,25 @@ desta rodada).
   sub-aba). Checagem: Calculado precisa de `"calculado"` (e de
   `"estilos"`) em `paineisElementos`. Testes: `modeloCaixa.test.ts` (3) e
   `testes/calculado.mjs` (Playwright, desktop e em pé, na bateria).
+- [x] **Etapa 5: modo documento e adicionar atributo.** `modoDocumento:
+  true` (fase): editor com o documento inteiro, árvore a partir do
+  `<!DOCTYPE>` e do `<html>` com head, title e meta (estilos do jogo
+  injetados e escondidos), aba do navegador falso com o `<title>` ao vivo,
+  cabeçalho "Código da página index.html", foto do desfazer com o `<html>`
+  inteiro. Charset: não dá para reproduzir de verdade num iframe (srcdoc é
+  texto; blob: herda o UTF-8 do pai), então a prévia SIMULA os acentos
+  quebrados sem meta charset (aviso "simulação" e fala do
+  computadorzinho); código e validadores veem o texto certo; o meta
+  charset liga e desliga a simulação na hora. Validador `tituloDaAba`
+  (checagem: só no modo documento). "Adicionar atributo" como o Add
+  attribute do Chrome (conferido no devtools-frontend): item do menu do
+  nó (botão direito, toque longo), campo dentro da tag, mais de um
+  atributo de uma vez, desfazer, evento `adicionouAtributo`, ação
+  `adicionarAtributo`, ferramenta `adicionar-atributo` com apresentação;
+  só nas fases que usam a ferramenta (U1 a U5 intactas). Bancada do
+  documento (`lab-motor-u1-f2`) no `/lab/fases`. Testes:
+  `documento.test.ts` (14), `codificacao.test.ts` (3) e
+  `testes/documento.mjs` (Playwright, desktop e em pé, na bateria).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 
