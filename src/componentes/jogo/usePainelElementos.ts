@@ -7,6 +7,7 @@ import { chavesAncestrais, elementoDoNo } from "@/lib/arvore";
 import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo } from "@/lib/caminhoElementos";
 import { caminhoDoNo } from "@/lib/dom";
 import { medirNo, type Realce } from "@/lib/medirElemento";
+import { type CamadaCaixa, medirModeloCaixa, type RealceCaixa } from "@/lib/modeloCaixa";
 import type { EventoFase, OrigemSelecao } from "@/motor/eventos";
 import { criarNucleoPainel, type Selecao } from "@/motor/nucleoPainel";
 
@@ -87,6 +88,26 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     );
   }, []);
 
+  /** Camada do modelo de caixa acesa na prévia (hover no diagrama da aba Calculado). */
+  const camadaAtual = useRef<CamadaCaixa | "todas" | null>(null);
+  const [realceCaixa, setRealceCaixa] = useState<RealceCaixa | null>(null);
+
+  const remedirCaixa = useCallback(() => {
+    const camada = camadaAtual.current;
+    const elemento = camada ? elementoDoNo(noSelecionado()) : null;
+    const modelo = elemento ? medirModeloCaixa(elemento) : null;
+    setRealceCaixa(camada && modelo ? { camada, modelo } : null);
+  }, [noSelecionado]);
+
+  /** Acende uma camada (ou todas) do selecionado na prévia; null apaga. */
+  const realcarCamada = useCallback(
+    (camada: CamadaCaixa | "todas" | null) => {
+      camadaAtual.current = camada;
+      remedirCaixa();
+    },
+    [remedirCaixa],
+  );
+
   /** Acende várias peças de uma vez (lista vazia apaga). */
   const realcarVarios = useCallback(
     (elementos: readonly Element[]) => {
@@ -124,17 +145,19 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
         // Seleção vinda do código não mexe no editor: o cursor já está lá.
         if (selecao?.origem !== "codigo") destacarNoEditor(selecao?.origem !== "sistema");
         remedirRealce();
+        remedirCaixa();
       },
       aoMudar: () => {
         destacarNoEditor(false);
         remedirRealce();
         remedirExtras();
+        remedirCaixa();
       },
       aoMudarHistorico: () => {
         setHistorico({ podeDesfazer: nucleo.podeDesfazer(), podeRefazer: nucleo.podeRefazer() });
       },
     });
-  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirExtras, remedirRealce]);
+  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirCaixa, remedirExtras, remedirRealce]);
 
   /**
    * Seleciona um nó. É a função que a árvore, a setinha, a trilha, o
@@ -275,11 +298,13 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     (documento: Document) => {
       realcar(null);
       realcarVarios([]);
+      realcarCamada(null);
       destacarNoEditor(false);
       documento.defaultView?.addEventListener("scroll", remedirRealce, { passive: true });
       documento.defaultView?.addEventListener("scroll", remedirExtras, { passive: true });
+      documento.defaultView?.addEventListener("scroll", remedirCaixa, { passive: true });
     },
-    [destacarNoEditor, realcar, realcarVarios, remedirExtras, remedirRealce],
+    [destacarNoEditor, realcar, realcarCamada, realcarVarios, remedirCaixa, remedirExtras, remedirRealce],
   );
 
   return {
@@ -289,6 +314,8 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     realcesExtras,
     realcarVarios,
     remedirExtras,
+    realceCaixa,
+    realcarCamada,
     inspecionando,
     destaque,
     historico,

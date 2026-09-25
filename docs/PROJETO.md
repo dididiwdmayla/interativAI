@@ -250,6 +250,29 @@ src/
   `editar-valor-css`, `ligar-desligar-declaracao`, `setas-numericas`,
   `seletor-de-cor`, `nova-regra`. Linha de ajuda `{ alvo: "estilos" }`.
 
+### Aba Calculado (rodada 9, etapa 4)
+
+- Sub-aba ao lado de Estilos (Computed do Chrome), ligada por
+  `paineisElementos: ["estilos", "calculado"]`. A sub-aba aberta mora no
+  jogo (`JogoFase`), para a apresentação e a linha de ajuda trocarem.
+- `PainelCalculado`: diagrama do modelo de caixa com as medidas REAIS do
+  iframe (`lib/modeloCaixa.ts`: `getComputedStyle` e
+  `getBoundingClientRect`), no formato do `MetricsSidebarPane` (zero é
+  "0", quebrado com 3 casas, camada "position" quando não é static com
+  "auto" como traço); lista das calculadas em ordem alfabética (-webkit-
+  e variáveis no fim), sem "Mostrar todas" só as que o próprio elemento
+  declara mais display, width e height (`ComputedStyleWidget`), filtro
+  por nome ou valor e o rastro de cada propriedade pelo motor de cascata
+  (a que vence primeiro, as outras riscadas, link `estilo.css:N`).
+- Passar o mouse numa camada do diagrama acende só ela na prévia (o anel
+  entre a caixa dela e a de dentro, como o Chrome pinta); no diagrama
+  todo, todas; no toque, tocar liga e desliga. As cores são as do
+  `Color.PageHighlight` do Chrome, nos tokens `--cor-caixa-*`
+  (`usePainelElementos.realcarCamada`, `SobreposicaoInspecao`).
+- É só para ver: os validadores continuam no motor de cascata (sem
+  layout, iguais no jsdom).
+- Ferramentas `painel-calculado` e `modelo-de-caixa`, com apresentação.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é

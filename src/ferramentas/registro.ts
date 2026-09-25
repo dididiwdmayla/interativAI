@@ -8,7 +8,9 @@ import { IconeEditarDuplo } from "@/componentes/icones/IconeEditarDuplo";
 import { IconeEditarValorCss } from "@/componentes/icones/IconeEditarValorCss";
 import { IconeEditorCss } from "@/componentes/icones/IconeEditorCss";
 import { IconeLigarDesligar } from "@/componentes/icones/IconeLigarDesligar";
+import { IconeModeloCaixa } from "@/componentes/icones/IconeModeloCaixa";
 import { IconeNovaRegra } from "@/componentes/icones/IconeNovaRegra";
+import { IconePainelCalculado } from "@/componentes/icones/IconePainelCalculado";
 import { IconePainelEstilos } from "@/componentes/icones/IconePainelEstilos";
 import { IconeSeletorCor } from "@/componentes/icones/IconeSeletorCor";
 import { IconeSetasNumericas } from "@/componentes/icones/IconeSetasNumericas";
@@ -508,6 +510,50 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     liberarNoExperimente: [seletorFerramenta("painel-estilos")],
+  },
+  // Aba Calculado: conferida na doc do Chrome ("View an element's box
+  // model", "Computed tab") e no devtools-frontend (ComputedStyleWidget,
+  // MetricsSidebarPane).
+  "painel-calculado": {
+    id: "painel-calculado",
+    nome: "Aba Calculado",
+    Icone: IconePainelCalculado,
+    alvo: seletorFerramenta("painel-calculado"),
+    oQueFaz: "Mostra o valor final de cada propriedade do elemento selecionado, depois de todas as regras brigarem.",
+    praQueServe:
+      "Serve para tirar a dúvida \"que cor ficou, afinal?\" sem ler regra por regra. A seta de cada propriedade mostra quais regras deram valor para ela.",
+    comoUsarAqui: {
+      mouse: "Selecione uma peça e clique em Calculado, ao lado de Estilos. Use o filtro para achar uma propriedade.",
+      toque: "Selecione uma peça, abra Estilos e toque em Calculado. Use o filtro para achar uma propriedade.",
+    },
+    noF12DeVerdade:
+      "é a aba Computed, ao lado de Styles na aba Elements. Show all mostra todas as propriedades, até as que ninguém declarou.",
+    experimente: {
+      mouse: "Clique em qualquer lugar da aba Calculado.",
+      toque: "Toque em qualquer lugar da aba Calculado.",
+    },
+    uso: "tocar",
+  },
+  "modelo-de-caixa": {
+    id: "modelo-de-caixa",
+    nome: "Modelo de caixa",
+    Icone: IconeModeloCaixa,
+    alvo: seletorFerramenta("painel-calculado"),
+    oQueFaz: "Desenha o elemento como caixas uma dentro da outra: margin, border, padding e o conteúdo, com as medidas em pixels.",
+    praQueServe:
+      "Serve para descobrir de onde vem um espaço: se é margem (fora da borda) ou preenchimento (dentro dela). Cada camada acende na tela.",
+    comoUsarAqui: {
+      mouse: "Na aba Calculado, passe o mouse numa camada do desenho: a mesma camada acende na tela do site.",
+      toque: "Na aba Calculado, toque numa camada do desenho: a mesma camada acende na tela do site. Toque de novo para apagar.",
+    },
+    noF12DeVerdade:
+      "fica no alto da aba Computed. Passar o mouse numa camada acende ela na página, com as mesmas cores; dois cliques num número editam o valor.",
+    experimente: {
+      mouse: "Passe o mouse na camada padding do desenho.",
+      toque: "Toque na camada padding do desenho.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [seletorFerramenta("previa")],
   },
 };
 

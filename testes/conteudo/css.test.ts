@@ -214,6 +214,13 @@ describe("checagens de fases de CSS", () => {
     expect(problemas(sabotada).join("\n")).toContain('não liga o painel: ponha paineisElementos: ["estilos"]');
   });
 
+  it("sabotagem: ferramenta do Calculado sem a aba ligada", () => {
+    const sabotada = { ...FASE, usaFerramentas: [...FASE.usaFerramentas, "modelo-de-caixa" as const], apresentar: [...(FASE.apresentar ?? []), "modelo-de-caixa" as const] };
+    expect(problemas(sabotada).join("\n")).toContain('não liga a aba: ponha paineisElementos: ["estilos", "calculado"]');
+    const semEstilos = { ...FASE, paineisElementos: ["calculado" as const] };
+    expect(problemas(semEstilos).join("\n")).toContain('com "calculado" precisa de "estilos" também');
+  });
+
   it("sabotagem: definirPropriedade sem editar-valor-css em usaFerramentas", () => {
     const sabotada = { ...FASE, usaFerramentas: FASE.usaFerramentas.filter((id) => id !== "editar-valor-css") };
     expect(problemas(sabotada).join("\n")).toContain('usa a ferramenta "editar-valor-css", que não está em usaFerramentas');

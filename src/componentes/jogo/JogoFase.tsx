@@ -35,6 +35,7 @@ import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
 import { PainelDividido } from "@/componentes/painel/PainelDividido";
 import { PainelLadoALado } from "@/componentes/painel/PainelLadoALado";
+import { PainelCalculado } from "@/componentes/painel/estilos/PainelCalculado";
 import { PainelEstilos } from "@/componentes/painel/estilos/PainelEstilos";
 import type { AcoesEstilos, DestaqueEstilos } from "@/componentes/painel/estilos/tipos";
 import { CamadaInspecao } from "@/componentes/preview/CamadaInspecao";
@@ -44,7 +45,7 @@ import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
 import { faseDoId, type LocalDaFase, proximaFase } from "@/conteudo";
-import type { Fala, Fase } from "@/conteudo/tipos";
+import type { Fala, Fase, PainelElementos } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
@@ -70,6 +71,7 @@ import {
   atalhoHistorico,
   FALA_PENSANDO,
   FERRAMENTAS_DA_ARVORE,
+  FERRAMENTAS_DO_CALCULADO,
   FERRAMENTAS_DOS_ESTILOS,
   focoTemDesfazerProprio,
   focoUsaEnter,
@@ -176,6 +178,7 @@ export function JogoFase({
   /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
   const paineis = fase.paineisElementos ?? [];
   const comEstilos = paineis.length > 0;
+  const [subAbaElementos, setSubAbaElementos] = useState<PainelElementos>("estilos");
   const [destaqueEstilos, setDestaqueEstilos] = useState<DestaqueEstilos | null>(null);
   const [balaoAberto, setBalaoAberto] = useState(true);
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
@@ -229,6 +232,8 @@ export function JogoFase({
     realce,
     realcesExtras,
     realcarVarios,
+    realceCaixa,
+    realcarCamada,
     inspecionando,
     destaque,
     destacarNaArvore,
@@ -387,6 +392,7 @@ export function JogoFase({
   const destacarNoEstilos = useCallback(
     (novo: DestaqueEstilos | null) => {
       setDestaqueEstilos(novo);
+      if (novo) setSubAbaElementos("estilos");
       if (novo && movel) setSegmento("estilos");
     },
     [movel],
@@ -454,11 +460,20 @@ export function JogoFase({
   /** Mostra o trecho do selecionado quando o código aparece de novo. */
   const trocarSegmento = (novo: "arvore" | "estilos" | "codigo") => {
     setSegmento(novo);
+    if (novo !== "estilos") realcarCamada(null);
     if (novo === "codigo") requestAnimationFrame(() => destacarNoEditor(true));
+  };
+
+  /** Troca Estilos | Calculado; sair do Calculado apaga a camada acesa na prévia. */
+  const trocarSubAba = (nova: PainelElementos) => {
+    setSubAbaElementos(nova);
+    if (nova !== "calculado") realcarCamada(null);
   };
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    if (FERRAMENTAS_DO_CALCULADO.includes(ferramenta.id)) trocarSubAba("calculado");
+    else if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSubAba("estilos");
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
     if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
@@ -1058,8 +1073,15 @@ export function JogoFase({
                     direita={
                       comEstilos ? (
                         <AlvoFerramenta
-                          ids={["painel-estilos", "editar-valor-css", "ligar-desligar-declaracao", "setas-numericas", "seletor-de-cor"]}
-                          marcador="painel-estilos"
+                          ids={[
+                            "painel-estilos",
+                            "editar-valor-css",
+                            "ligar-desligar-declaracao",
+                            "setas-numericas",
+                            "seletor-de-cor",
+                            ...(paineis.includes("calculado") ? (["painel-calculado", "modelo-de-caixa"] as const) : []),
+                          ]}
+                          marcador={subAbaElementos === "calculado" ? "painel-calculado" : "painel-estilos"}
                           aoAbrirCard={abrirCard}
                           classeMarcador="right-2 top-1.5"
                           className="h-full min-h-0"
@@ -1073,6 +1095,20 @@ export function JogoFase({
                             destaque={destaqueEstilos}
                             lerCss={lerCss}
                             acoes={acoesEstilos}
+                            aba={subAbaElementos}
+                            aoTrocarAba={trocarSubAba}
+                            calculado={
+                              paineis.includes("calculado") ? (
+                                <PainelCalculado
+                                  elemento={elementoSelecionado}
+                                  versao={versaoDocumento * 100000 + versaoCss}
+                                  toque={toque}
+                                  camada={realceCaixa?.camada ?? null}
+                                  aoRealcarCamada={realcarCamada}
+                                  aoIrParaFonte={irParaFonte}
+                                />
+                              ) : undefined
+                            }
                             aoAbrirCard={abrirCard}
                           />
                         </AlvoFerramenta>
@@ -1161,7 +1197,7 @@ export function JogoFase({
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
               >
-                <SobreposicaoInspecao realce={realce} extras={realcesExtras} />
+                <SobreposicaoInspecao realce={realce} extras={realcesExtras} caixa={realceCaixa} />
                 <CamadaInspecao
                   ativa={inspecionando}
                   toque={toque}

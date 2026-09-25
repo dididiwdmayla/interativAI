@@ -688,6 +688,15 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
             'mas não liga o painel: ponha paineisElementos: ["estilos"]',
         );
       }
+      const ferramentasDoCalculado = fase.usaFerramentas.filter((id) => id === "painel-calculado" || id === "modelo-de-caixa");
+      if (ferramentasDoCalculado.length > 0 && !(fase.paineisElementos ?? []).includes("calculado")) {
+        problemas.push(
+          `a fase usa a aba Calculado (${ferramentasDoCalculado.join("; ")}), mas não liga a aba: ponha paineisElementos: ["estilos", "calculado"]`,
+        );
+      }
+      if ((fase.paineisElementos ?? []).includes("calculado") && !(fase.paineisElementos ?? []).includes("estilos")) {
+        problemas.push('paineisElementos com "calculado" precisa de "estilos" também (no Chrome, Computed mora ao lado de Styles)');
+      }
       for (const { onde, seletor } of seletoresDeRegraDe(fase)) {
         if (seletor.trim() === "element.style") continue;
         if (seletor.trim().length === 0 || /[{}]/.test(seletor)) problemas.push(`${onde}: seletorRegra "${seletor}" não serve`);

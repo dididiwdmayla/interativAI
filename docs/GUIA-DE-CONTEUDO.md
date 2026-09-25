@@ -191,7 +191,9 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
   `["estilos", "calculado"]`, como o Chrome (Styles e Computed dentro de
   Elements). Sem o campo, a aba Elementos fica como nas U1 a U5 (só
   árvore). A checagem exige `"estilos"` quando a fase usa as ações ou as
-  ferramentas do painel, ou a linha `alvo: "estilos"`.
+  ferramentas do painel, ou a linha `alvo: "estilos"`, e `"calculado"`
+  quando usa `painel-calculado` ou `modelo-de-caixa`. O Calculado é só
+  para ver (medidas de layout reais): nenhum validador olha pixels.
 
 ### 3.3 Objetivo (fase de prática)
 
@@ -515,6 +517,8 @@ apresentadas:
 | `setas-numericas` | setas no valor numérico: 1, Shift 10, Alt 0,1; no toque, botões de seta de 44 px | Estilos |
 | `seletor-de-cor` | o quadradinho de cor ao lado de um valor de cor (abre o seletor do sistema) | Estilos |
 | `nova-regra` | o botão "+" do painel Estilos: regra nova no fim da folha, com o seletor que o Chrome sugere (id, senão classes, senão a tag) | Estilos |
+| `painel-calculado` | a sub-aba Calculado (Computed): o valor final de cada propriedade, filtro, "Mostrar todas" e o rastro (as regras que deram valor, a que vence primeiro) | Estilos (precisa de `"calculado"` em `paineisElementos`) |
+| `modelo-de-caixa` | o diagrama de caixas no alto do Calculado: margin, border, padding e conteúdo com as medidas reais; passar o mouse (ou tocar) numa camada acende ela na prévia | Estilos (idem) |
 
 A ferramenta de cada ação (para a checagem de `usaFerramentas`):
 `selecionar` pela árvore = `arvore`, pela setinha = `inspecionar`, pela

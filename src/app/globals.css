@@ -41,6 +41,10 @@
   --color-madeira: var(--cor-madeira);
   --color-pedra: var(--cor-pedra);
   --color-nevoa: var(--cor-nevoa);
+  --color-caixa-margem: var(--cor-caixa-margem);
+  --color-caixa-borda: var(--cor-caixa-borda);
+  --color-caixa-preenchimento: var(--cor-caixa-preenchimento);
+  --color-caixa-conteudo: var(--cor-caixa-conteudo);
 
   --font-ui: var(--fonte-ui);
   --font-codigo: var(--fonte-codigo);

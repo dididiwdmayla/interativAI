@@ -76,6 +76,12 @@
   --cor-pedra-sombra: #d9c9e6;
   --cor-terminal-fundo: #1d3328;
   --cor-terminal-texto: #7dffb0;
+
+  /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
+  --cor-caixa-margem: #fbc79a;
+  --cor-caixa-borda: #fde39b;
+  --cor-caixa-preenchimento: #c6dd96;
+  --cor-caixa-conteudo: #9cc8e0;
 }
 
 [data-theme="fliperama"] {
@@ -136,6 +142,12 @@
   --cor-pedra-sombra: #211c4c;
   --cor-terminal-fundo: #05040f;
   --cor-terminal-texto: #38f28b;
+
+  /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
+  --cor-caixa-margem: #a95a1c;
+  --cor-caixa-borda: #9e8420;
+  --cor-caixa-preenchimento: #4f7d24;
+  --cor-caixa-conteudo: #236a94;
 }
 
 [data-theme="segredo"] {
@@ -196,4 +208,10 @@
   --cor-pedra-sombra: #0a2a1f;
   --cor-terminal-fundo: #010a06;
   --cor-terminal-texto: #3dff8f;
+
+  /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
+  --cor-caixa-margem: #9a5a26;
+  --cor-caixa-borda: #98812a;
+  --cor-caixa-preenchimento: #447238;
+  --cor-caixa-conteudo: #27637e;
 }

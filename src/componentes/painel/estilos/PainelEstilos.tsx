@@ -37,7 +37,10 @@ type Props = {
   /** Texto da folha editável agora (para a prévia provisória). */
   lerCss: () => string | null;
   acoes: AcoesEstilos;
-  /** O conteúdo da aba Calculado (etapa 4). */
+  /** Sub-aba aberta (quem controla é o jogo: a apresentação e a linha de ajuda trocam). */
+  aba: PainelElementos;
+  aoTrocarAba: (aba: PainelElementos) => void;
+  /** O conteúdo da aba Calculado. */
   calculado?: ReactNode;
   aoAbrirCard?: (id: IdFerramenta) => void;
 };
@@ -107,10 +110,11 @@ export function PainelEstilos({
   destaque,
   lerCss,
   acoes,
+  aba,
+  aoTrocarAba,
   calculado,
   aoAbrirCard,
 }: Props) {
-  const [aba, setAba] = useState<PainelElementos>(paineis[0] ?? "estilos");
   const [filtro, setFiltro] = useState("");
   const [edicao, setEdicao] = useState<EdicaoEstilos | null>(null);
   const recipiente = useRef<HTMLDivElement>(null);
@@ -328,7 +332,7 @@ export function PainelEstilos({
               role="tab"
               aria-selected={aba === painel}
               data-sub-aba={painel}
-              onClick={() => setAba(painel)}
+              onClick={() => aoTrocarAba(painel)}
               className={`rounded-lg px-2 py-0.5 text-xs font-black transition-colors pointer-coarse:min-h-11 pointer-coarse:px-3 ${
                 aba === painel ? "bg-superficie text-primaria shadow-[0_2px_0_var(--cor-sombra)]" : "text-texto-suave hover:bg-hover"
               }`}
@@ -337,7 +341,7 @@ export function PainelEstilos({
             </button>
           ))}
         </div>
-        {aba === "estilos" && (
+        {aba !== "calculado" && (
           <>
             <input
               type="search"
@@ -363,7 +367,7 @@ export function PainelEstilos({
           </>
         )}
       </div>
-      {aba === "estilos" ? conteudoEstilos : <div className="min-h-0 flex-1 overflow-auto">{calculado}</div>}
+      {aba === "calculado" && calculado !== undefined ? <div className="min-h-0 flex-1">{calculado}</div> : conteudoEstilos}
     </div>
   );
 }

@@ -26,6 +26,8 @@ export const IDS_FERRAMENTAS = [
   "setas-numericas",
   "seletor-de-cor",
   "nova-regra",
+  "painel-calculado",
+  "modelo-de-caixa",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

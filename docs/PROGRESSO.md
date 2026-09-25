@@ -98,6 +98,21 @@ desta rodada).
   (15, com as sabotagens novas), `numeros.test.ts` (5) e
   `testes/estilos.mjs` (Playwright, desktop, em pé e deitado, na
   bateria).
+- [x] **Etapa 4: aba Calculado e diagrama de caixa.** Sub-aba Calculado
+  ao lado de Estilos (`paineisElementos: ["estilos", "calculado"]`),
+  conferida no devtools-frontend (`MetricsSidebarPane`,
+  `ComputedStyleWidget`, `Color.PageHighlight`): diagrama do modelo de
+  caixa com as medidas reais do iframe (zero é "0", 3 casas, camada
+  "position"), lista das calculadas (sem "Mostrar todas", só as
+  declaradas no elemento mais display, width e height; ordem do Chrome),
+  filtro e rastro de cada propriedade pelo motor de cascata. Passar o
+  mouse numa camada acende ela na prévia com as cores do Chrome (tokens
+  `--cor-caixa-*` nos três temas); no toque, tocar liga e desliga; trocar
+  de sub-aba ou de segmento apaga. Ferramentas `painel-calculado` e
+  `modelo-de-caixa` com card e apresentação (a apresentação abre a
+  sub-aba). Checagem: Calculado precisa de `"calculado"` (e de
+  `"estilos"`) em `paineisElementos`. Testes: `modeloCaixa.test.ts` (3) e
+  `testes/calculado.mjs` (Playwright, desktop e em pé, na bateria).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

@@ -66,12 +66,16 @@ núcleo comum.
     editor CSS, celular em pé e deitado; 6 ferramentas novas com
     apresentação. Abas de cima na ordem do Chrome (Fontes entrou,
     Estilos saiu).
+  - Aba Calculado ao lado de Estilos: diagrama do modelo de caixa com
+    as medidas reais, camadas acesas na prévia com as cores do Chrome,
+    lista das calculadas com filtro, "Mostrar todas" e o rastro de cada
+    propriedade.
 
 ### Em andamento
 
-- Rodada 9, etapas 4 a 7: aba Calculado dentro de Elementos, modo
-  documento, adicionar atributo pela árvore, mobile dos painéis novos,
-  liberações no currículo e a unidade-modelo E1 ("A aba Estilos").
+- Rodada 9, etapas 5 a 7: modo documento, adicionar atributo pela
+  árvore, mobile dos painéis novos, liberações no currículo e a
+  unidade-modelo E1 ("A aba Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.

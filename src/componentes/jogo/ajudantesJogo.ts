@@ -51,7 +51,12 @@ export const FERRAMENTAS_DOS_ESTILOS: readonly IdFerramenta[] = [
   "setas-numericas",
   "seletor-de-cor",
   "nova-regra",
+  "painel-calculado",
+  "modelo-de-caixa",
 ];
+
+/** Ferramentas da aba Calculado (a apresentação abre a sub-aba antes). */
+export const FERRAMENTAS_DO_CALCULADO: readonly IdFerramenta[] = ["painel-calculado", "modelo-de-caixa"];
 
 /** Ctrl+Z (desfazer) e Ctrl+Shift+Z ou Ctrl+Y (refazer), como no F12. */
 export function atalhoHistorico(evento: {
