@@ -1,4 +1,4 @@
-import { EFEITOS_GRANDES, fonteDoEfeito, type IdEfeito } from "./efeitos";
+import { EFEITOS_GRANDES, fonteDoEfeito, type IdEfeito, resolverEfeito } from "./efeitos";
 import {
   arquivoNoFormato,
   escolherFormato,
@@ -21,7 +21,8 @@ import { duracaoDaFala, gerarFala, type HumorVoz, PASSA_BAIXA_VOZ } from "./vozM
 /*
  * Motor de áudio do jogo, sem React. Um único AudioContext, criado ou
  * retomado no primeiro gesto do jogador (liberarAudio). Antes disso, nada
- * toca e nada reclama.
+ * toca e nada reclama: só os manifestos e o arquivo do boot são baixados
+ * (prepararAudio), para o boot estar pronto no primeiro gesto.
  *
  * Grafo:
  *   música (faixas) -> barramento música -> abaixar (ducking) -\
@@ -51,8 +52,19 @@ const GANHO_DUCKING = 0.5;
  * interação um pouco abaixo da música.
  */
 const REFERENCIA = { musica: 1, efeitos: 4, voz: 7 } as const;
-/** Arquivos de efeito guardados decodificados (os mais recentes). */
-const CACHE_EFEITOS = 8;
+/**
+ * Ganho dos efeitos em arquivo no barramento de efeitos. Os arquivos vêm
+ * normalizados em -16 LUFS e as músicas em -18; com os barramentos nos
+ * padrões (música 0,25, efeitos 1,96), 0,13 devolve a diferença de 2 dB
+ * entre os dois (efeito gravado um pouco acima da música), perto das
+ * fanfarras sintetizadas (medições em docs/AUDIO.md).
+ */
+const GANHO_ARQUIVO_EFEITO = 0.13;
+/**
+ * Arquivos de efeito guardados decodificados (os mais recentes). Os 11 dos
+ * momentos grandes somam uns 21 s de mono, cerca de 4 MB decodificados.
+ */
+const CACHE_EFEITOS = 16;
 
 type Barramentos = {
   master: GainNode;
@@ -76,7 +88,10 @@ let formato: FormatoAudio | null = null;
 let manifestoMusicas: ManifestoMusicas | null = null;
 let carregandoMusicas: Promise<ManifestoMusicas> | null = null;
 let manifestoEfeitos: ManifestoEfeitos = MANIFESTO_EFEITOS_VAZIO;
+let manifestoEfeitosPronto = false;
 let carregandoEfeitos: Promise<void> | null = null;
+/** Decodifica arquivos antes do primeiro gesto (não conta para a política de autoplay). */
+let decodificadorOffline: BaseAudioContext | null = null;
 
 // Música.
 let telaAtual: TelaDoJogo | null = null;
@@ -119,6 +134,33 @@ function formatoDoNavegador(): FormatoAudio {
   const elemento = document.createElement("audio");
   formato = escolherFormato((tipo) => elemento.canPlayType(tipo));
   return formato;
+}
+
+/** decodeAudioData com promessa, também no Safari antigo (que só aceita callbacks). */
+function decodificar(ctx: BaseAudioContext, bytes: ArrayBuffer): Promise<AudioBuffer> {
+  return new Promise((resolver, rejeitar) => {
+    const promessa = ctx.decodeAudioData(bytes, resolver, rejeitar) as Promise<AudioBuffer> | undefined;
+    promessa?.then(resolver, rejeitar);
+  });
+}
+
+/**
+ * Onde decodificar: no AudioContext, se já existe; antes do primeiro gesto,
+ * num OfflineAudioContext (o AudioBuffer serve para qualquer contexto).
+ */
+function contextoDeDecodificacao(): BaseAudioContext | null {
+  if (contexto) return contexto;
+  if (decodificadorOffline) return decodificadorOffline;
+  const Offline =
+    window.OfflineAudioContext ??
+    (window as unknown as { webkitOfflineAudioContext?: typeof OfflineAudioContext }).webkitOfflineAudioContext;
+  if (!Offline) return null;
+  try {
+    decodificadorOffline = new Offline(1, 1, 48000);
+  } catch {
+    return null;
+  }
+  return decodificadorOffline;
 }
 
 function criarGrafo(ctx: AudioContext): Barramentos {
@@ -186,9 +228,25 @@ export function liberarAudio(): void {
   liberado = true;
   if (contexto.state === "suspended" && !document.hidden) void contexto.resume().catch(() => {});
   if (primeiraVez) {
-    void carregarManifestoEfeitos();
+    decodificadorOffline = null;
+    preCarregarEfeitosGrandes();
     if (telaAtual) void resolverMusica();
   }
+}
+
+/**
+ * Antes do primeiro gesto: baixa os manifestos e, na tela inicial, o arquivo
+ * do boot, já decodificado, para ele tocar no primeiro gesto. Não cria o
+ * AudioContext nem toca nada.
+ */
+export function prepararAudio({ boot }: { boot: boolean }): void {
+  if (!temJanela()) return;
+  void obterManifestoMusicas();
+  void carregarManifestoEfeitos().then(() => {
+    if (!boot || liberado) return;
+    const fonte = fonteDoEfeito("boot", manifestoEfeitos, formatoDoNavegador());
+    if (fonte.tipo === "arquivo") void carregarEfeito(fonte.url);
+  });
 }
 
 export function audioLiberado(): boolean {
@@ -301,7 +359,7 @@ async function carregarFaixa(faixa: string, pedido: number): Promise<AudioBuffer
     if (!resposta.ok || pedido !== pedidoMusica) return null;
     const bytes = await resposta.arrayBuffer();
     if (pedido !== pedidoMusica || !contexto) return null;
-    const buffer = await contexto.decodeAudioData(bytes);
+    const buffer = await decodificar(contexto, bytes);
     if (pedido !== pedidoMusica) return null;
     buffersMusica.set(faixa, buffer);
     return buffer;
@@ -424,26 +482,34 @@ async function carregarManifestoEfeitos(): Promise<void> {
       })
       .catch(() => {
         manifestoEfeitos = MANIFESTO_EFEITOS_VAZIO;
+      })
+      .finally(() => {
+        manifestoEfeitosPronto = true;
       });
   }
   return carregandoEfeitos;
 }
 
-function carregarEfeito(url: string): Promise<AudioBuffer | null> {
+/** O arquivo já decodificado, se estiver no cache (e passa a ser o mais recente). */
+function efeitoPronto(url: string): AudioBuffer | null {
   const pronto = buffersEfeitos.get(url);
-  if (pronto) {
-    // Mais recente vai para o fim (o cache solta os mais antigos).
-    buffersEfeitos.delete(url);
-    buffersEfeitos.set(url, pronto);
-    return Promise.resolve(pronto);
-  }
+  if (!pronto) return null;
+  // Mais recente vai para o fim (o cache solta os mais antigos).
+  buffersEfeitos.delete(url);
+  buffersEfeitos.set(url, pronto);
+  return pronto;
+}
+
+function carregarEfeito(url: string): Promise<AudioBuffer | null> {
+  const pronto = efeitoPronto(url);
+  if (pronto) return Promise.resolve(pronto);
   const emAndamento = carregandoEfeito.get(url);
   if (emAndamento) return emAndamento;
-  const ctx = contexto;
+  const ctx = contextoDeDecodificacao();
   if (!ctx) return Promise.resolve(null);
   const promessa = fetch(url)
     .then((resposta) => (resposta.ok ? resposta.arrayBuffer() : Promise.reject(new Error("sem arquivo"))))
-    .then((bytes) => ctx.decodeAudioData(bytes))
+    .then((bytes) => decodificar(ctx, bytes))
     .then((buffer) => {
       buffersEfeitos.set(url, buffer);
       while (buffersEfeitos.size > CACHE_EFEITOS) {
@@ -459,33 +525,56 @@ function carregarEfeito(url: string): Promise<AudioBuffer | null> {
   return promessa;
 }
 
+/** Último efeito tocado e de onde veio, em <html> (usado pelos testes de navegador). */
+function marcarEfeitoNaPagina(id: IdEfeito, fonte: "arquivo" | "sintetizado"): void {
+  document.documentElement.dataset.ultimoEfeito = id;
+  document.documentElement.dataset.ultimoEfeitoFonte = fonte;
+}
+
 function tocarSintetizado(id: IdEfeito): void {
   if (!contexto || !barramentos) return;
   RECEITAS[id](criarSintetizador(contexto, barramentos.efeitos, contexto.currentTime + 0.01));
+  marcarEfeitoNaPagina(id, "sintetizado");
 }
 
-function tocarBuffer(buffer: AudioBuffer): void {
+function tocarBuffer(id: IdEfeito, buffer: AudioBuffer, duracaoSegundos: number | null): void {
   if (!contexto || !barramentos) return;
   const agora = contexto.currentTime;
+  // O fim vem do manifesto (o container reporta alguns ms a mais), nunca além do arquivo.
+  const duracao = Math.max(RAMPA_MINIMA * 2, Math.min(buffer.duration, duracaoSegundos ?? buffer.duration));
   const fonte = contexto.createBufferSource();
   const ganho = contexto.createGain();
   fonte.buffer = buffer;
   ganho.gain.value = 0;
   ganho.gain.setValueAtTime(0, agora);
-  ganho.gain.linearRampToValueAtTime(0.5, agora + RAMPA_MINIMA);
-  ganho.gain.setValueAtTime(0.5, agora + Math.max(RAMPA_MINIMA, buffer.duration - RAMPA_MINIMA));
-  ganho.gain.linearRampToValueAtTime(0, agora + buffer.duration);
+  ganho.gain.linearRampToValueAtTime(GANHO_ARQUIVO_EFEITO, agora + RAMPA_MINIMA);
+  ganho.gain.setValueAtTime(GANHO_ARQUIVO_EFEITO, agora + duracao - RAMPA_MINIMA);
+  ganho.gain.linearRampToValueAtTime(0, agora + duracao);
   fonte.connect(ganho);
   ganho.connect(barramentos.efeitos);
   fonte.onended = () => ganho.disconnect();
   fonte.start(agora);
+  fonte.stop(agora + duracao + 0.02);
+  marcarEfeitoNaPagina(id, "arquivo");
 }
 
 /** Última vez (tempo do contexto) que cada momento grande tocou. */
 const ultimaVezGrande = new Map<IdEfeito, number>();
 
-/** Toca um efeito pelo id: o arquivo, se o efeitos.json listar um; senão, o sintetizado. */
-export function tocarEfeito(id: IdEfeito): void {
+export type OpcoesEfeito = {
+  /**
+   * Tocar agora ou nunca: se o arquivo ainda não estiver decodificado, toca
+   * o sintetizado em vez de esperar (o boot no primeiro gesto).
+   */
+  naHora?: boolean;
+};
+
+/**
+ * Toca um efeito pelo id: o arquivo, se o efeitos.json tiver entrada para
+ * ele (carregado sob demanda, com cache); senão, ou se o arquivo falhar, o
+ * sintetizado.
+ */
+export function tocarEfeito(id: IdEfeito, { naHora = false }: OpcoesEfeito = {}): void {
   if (!podeTocar("efeitos") || !contexto) return;
   // Momento grande pedido duas vezes quase juntas (efeito montado duas vezes) toca uma só.
   if (EFEITOS_GRANDES.includes(id)) {
@@ -493,24 +582,43 @@ export function tocarEfeito(id: IdEfeito): void {
     if (antes !== undefined && contexto.currentTime - antes < 0.2) return;
     ultimaVezGrande.set(id, contexto.currentTime);
   }
+  if (!manifestoEfeitosPronto) {
+    // O manifesto é pedido antes do primeiro gesto; se ainda não chegou, espera (ou, na hora, sintetiza).
+    if (naHora) tocarSintetizado(id);
+    else void carregarManifestoEfeitos().then(() => tocarDaFonte(id, false));
+    return;
+  }
+  tocarDaFonte(id, naHora);
+}
+
+function tocarDaFonte(id: IdEfeito, naHora: boolean): void {
+  if (!podeTocar("efeitos")) return;
   const fonte = fonteDoEfeito(id, manifestoEfeitos, formatoDoNavegador());
   if (fonte.tipo === "sintetizado") {
     tocarSintetizado(id);
     return;
   }
-  void carregarEfeito(fonte.url).then((buffer) => {
+  const pronto = efeitoPronto(fonte.url);
+  if (pronto) {
+    tocarBuffer(id, pronto, fonte.duracaoSegundos);
+    return;
+  }
+  if (naHora) {
+    tocarSintetizado(id);
+    void carregarEfeito(fonte.url);
+    return;
+  }
+  void resolverEfeito(fonte, carregarEfeito).then((tocavel) => {
     if (!podeTocar("efeitos")) return;
-    if (buffer) tocarBuffer(buffer);
+    if (tocavel.tipo === "arquivo") tocarBuffer(id, tocavel.buffer, tocavel.duracaoSegundos);
     else tocarSintetizado(id);
   });
 }
 
-/** Pré-carrega os arquivos dos momentos grandes (chamado ao entrar no mapa). */
-export function preCarregarEfeitosGrandes(): void {
-  if (!liberado) return;
+/** Pré-carrega os arquivos dos momentos grandes (no primeiro gesto do jogador). */
+function preCarregarEfeitosGrandes(): void {
   void carregarManifestoEfeitos().then(() => {
     for (const id of EFEITOS_GRANDES) {
-      if (!manifestoEfeitos.efeitos[id]?.preCarregar) continue;
       const fonte = fonteDoEfeito(id, manifestoEfeitos, formatoDoNavegador());
       if (fonte.tipo === "arquivo") void carregarEfeito(fonte.url);
     }

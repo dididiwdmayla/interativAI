@@ -4,9 +4,10 @@ import type { Sintetizador } from "./sintese";
 /*
  * Versão sintetizada de cada efeito. Os quatro sons que o jogo já tinha
  * (clique, acerto, conclusão e aviso, do antigo src/lib/som.ts) foram
- * trazidos iguais: mesmas notas, formas e envelope. Os de momentos grandes
- * são provisórios, no espírito chiptune de computador antigo das músicas,
- * até chegarem os arquivos gravados (ver public/audio/efeitos/efeitos.json).
+ * trazidos iguais: mesmas notas, formas e envelope. Os de momentos grandes,
+ * no espírito chiptune de computador antigo das músicas, são a reserva dos
+ * arquivos gravados (public/audio/efeitos/efeitos.json): tocam se o arquivo
+ * não carregar.
  *
  * V é o volume de referência do som antigo; o barramento de efeitos aplica
  * o volume escolhido pelo jogador por cima.

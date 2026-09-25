@@ -1,11 +1,22 @@
 // Áudio: ajustes de som (mudam, ficam salvos, funcionam no toque) e a
 // navegação mapa -> ilha -> fase -> mapa -> museu com o AudioContext real
-// do Chromium, trocando a música certa, sem erro no console.
+// do Chromium, trocando a música certa e tocando os efeitos gravados, sem
+// erro no console.
 import { abrir, conferir, errosRelevantes, pularMeta } from "./util.mjs";
 
 const faixaTocando = (pagina) => pagina.evaluate(() => document.documentElement.dataset.faixaMusica ?? null);
 const esperarFaixa = (pagina, faixa) =>
   pagina.waitForFunction((alvo) => (document.documentElement.dataset.faixaMusica ?? null) === alvo, faixa, { timeout: 15000 });
+const ultimoEfeito = (pagina) =>
+  pagina.evaluate(() => {
+    const { ultimoEfeito: id, ultimoEfeitoFonte: fonte } = document.documentElement.dataset;
+    return id ? `${id}:${fonte}` : null;
+  });
+/** Espera um momento grande tocar e devolve de onde ele veio (arquivo ou sintetizado). */
+const esperarEfeito = async (pagina, id) => {
+  await pagina.waitForFunction((alvo) => document.documentElement.dataset.ultimoEfeito === alvo, id, { timeout: 10000 });
+  return pagina.evaluate(() => document.documentElement.dataset.ultimoEfeitoFonte);
+};
 
 // ---------------------------------------------------------------- desktop: ajustes salvos
 {
@@ -63,15 +74,23 @@ const esperarFaixa = (pagina, faixa) =>
 {
   const { navegador, pagina, erros } = await abrir({ progresso: null, rota: "/", esperar: "[data-mapa=mundo]" });
   // Nada toca antes do primeiro gesto; o primeiro gesto libera o áudio (e toca o boot).
-  conferir((await faixaTocando(pagina)) === null, "navegação: nada toca antes do primeiro gesto");
+  conferir(
+    (await faixaTocando(pagina)) === null && (await ultimoEfeito(pagina)) === null,
+    "navegação: nada toca antes do primeiro gesto",
+  );
+  // O arquivo do boot é baixado e decodificado antes do gesto, para já estar pronto nele.
+  await pagina.waitForLoadState("networkidle");
   await pagina.locator("[data-total-estrelas]").click();
-  await pagina.waitForTimeout(300);
-  conferir((await faixaTocando(pagina)) === null, "navegação: mapa do mundo em silêncio (faixa mapa pendente)");
+  const boot = await ultimoEfeito(pagina);
+  conferir(boot === "boot:arquivo", `navegação: o boot toca do arquivo, já no primeiro gesto (${boot})`);
+  await esperarFaixa(pagina, "mapa");
+  conferir(true, "navegação: o mapa do mundo toca a faixa mapa");
 
   await pagina.locator('[data-ilha="sites"]').first().click();
+  conferir((await esperarEfeito(pagina, "viagem-ilha")) === "arquivo", "navegação: viagem para a ilha toca o arquivo gravado");
   await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
   await esperarFaixa(pagina, "sites");
-  conferir(true, "navegação: a ilha Sites toca a faixa sites (decodificada de verdade)");
+  conferir(true, "navegação: a ilha Sites toca a faixa sites (decodificada de verdade, com crossfade)");
   // A partir daqui, qualquer recomeço da faixa marcaria a página de novo.
   await pagina.evaluate(() => {
     window.__trocasDeFaixa = 0;
@@ -101,15 +120,17 @@ const esperarFaixa = (pagina, faixa) =>
 
   await pagina.getByRole("link", { name: /mundo/i }).first().click();
   await pagina.locator("[data-mapa=mundo]").waitFor();
-  await esperarFaixa(pagina, null);
-  conferir(true, "navegação: de volta ao mundo, a música sai (fade) e fica o silêncio");
+  conferir((await esperarEfeito(pagina, "entrar-mapa")) === "arquivo", "navegação: voltar ao mundo toca o arquivo de chegada");
+  await esperarFaixa(pagina, "mapa");
+  conferir(true, "navegação: de volta ao mundo, a faixa mapa entra no lugar da sites");
 
   await pagina.locator('[data-ilha="origens"]').first().click();
   await pagina.locator("[data-mapa=museu]").waitFor();
+  conferir((await esperarEfeito(pagina, "abrir-museu")) === "arquivo", "navegação: o museu abre com a porta gravada");
   await esperarFaixa(pagina, "origens");
   conferir(true, "navegação: o Museu das Origens toca a faixa origens");
 
-  // Voltar ao mapa e entrar numa ilha sem música (em construção, mas com faixa): troca direto.
+  // Voltar ao mapa e entrar numa ilha em construção (que já tem faixa): troca direto.
   await pagina.goBack();
   await pagina.locator("[data-mapa=mundo]").waitFor();
   await pagina.locator('[data-ilha="logica"]').first().click();
@@ -124,6 +145,31 @@ const esperarFaixa = (pagina, faixa) =>
   conferir(true, "navegação: ilha sem faixa (Frameworks) fica em silêncio, sem erro");
 
   conferir(errosRelevantes(erros).length === 0, `navegação: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
+  await navegador.close();
+}
+
+// ---------------------------------------------------------------- efeito gravado que não carrega
+{
+  const { navegador, contexto, pagina, erros } = await abrir({ progresso: null, rota: "/", esperar: "[data-mapa=mundo]" });
+  // Os arquivos de efeito somem (404): cada momento grande cai na versão sintetizada.
+  await contexto.route(/\/audio\/efeitos\/[^/]+\.(webm|m4a)$/, (rota) => rota.fulfill({ status: 404, body: "" }));
+  await pagina.reload();
+  await pagina.locator("[data-mapa=mundo]").waitFor();
+  await pagina.waitForLoadState("networkidle");
+  await pagina.locator("[data-total-estrelas]").click();
+  const boot = await ultimoEfeito(pagina);
+  conferir(boot === "boot:sintetizado", `sem arquivo: o boot toca a versão sintetizada (${boot})`);
+  await pagina.locator('[data-ilha="sites"]').first().click();
+  conferir(
+    (await esperarEfeito(pagina, "viagem-ilha")) === "sintetizado",
+    "sem arquivo: a viagem para a ilha toca a versão sintetizada",
+  );
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  await esperarFaixa(pagina, "sites");
+  conferir(true, "sem arquivo: a música segue normal");
+  // O 404 aparece no console pelo próprio navegador; fora ele, nada.
+  const outros = errosRelevantes(erros).filter((texto) => !/Failed to load resource/.test(texto));
+  conferir(outros.length === 0, `sem arquivo: console limpo ${JSON.stringify(outros)}`);
   await navegador.close();
 }
 
