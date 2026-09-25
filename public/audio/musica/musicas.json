@@ -1,9 +1,17 @@
 {
-  "descricao": "Loops de música por ilha. Cada arquivo é um loop completo: tocar do início até duracaoSegundos e voltar ao início, sem crossfade extra (a emenda já está embutida). Use Web Audio com loop=true e loopEnd=duracaoSegundos, porque os containers reportam duração com alguns ms de preenchimento. webm = Opus 64 kbps (preferencial); m4a = AAC 96 kbps (fallback via canPlayType). Todas normalizadas em -18 LUFS.",
-  "pendentes": [
-    "mapa"
-  ],
+  "descricao": "Loops de música por tela. Cada arquivo é um loop completo: tocar do início até duracaoSegundos e voltar ao início, sem crossfade extra (a emenda já está embutida). Use Web Audio com loop=true e loopEnd=duracaoSegundos, porque os containers reportam duração com alguns ms de preenchimento. webm = Opus 64 kbps (preferencial); m4a = AAC 96 kbps (reserva via canPlayType). Todas normalizadas em -18 LUFS.",
+  "pendentes": [],
   "faixas": {
+    "mapa": {
+      "titulo": "Mapa do mundo",
+      "arquivos": {
+        "webm": "/audio/musica/mapa.webm",
+        "m4a": "/audio/musica/mapa.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 4564950,
+      "duracaoSegundos": 95.103125
+    },
     "origens": {
       "titulo": "Origens (Museu)",
       "arquivos": {

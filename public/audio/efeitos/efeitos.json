@@ -1,110 +1,93 @@
 {
-  "descricao": "Efeitos sonoros gravados, por id. Todo id abaixo já toca uma versão sintetizada (src/audio/receitas.ts). Para trocar um efeito por um arquivo gravado: coloque o arquivo nesta pasta em .webm (Opus, preferido) e .m4a (AAC, reserva), com o mesmo nome, e troque \"arquivos\": null por {\"webm\": \"/audio/efeitos/<id>.webm\", \"m4a\": \"/audio/efeitos/<id>.m4a\"}. Sem arquivo (null), toca o sintetizado. \"preCarregar\": true carrega o arquivo ao entrar no mapa (momentos grandes); os outros carregam sob demanda. Ids novos precisam existir também em src/audio/efeitos.ts.",
+  "descricao": "Efeitos sonoros em arquivo, por id. Se um id do registro de efeitos tem entrada aqui, toca o arquivo; se não, toca a versão sintetizada. Para adicionar ou trocar um efeito: colocar <id>.webm (Opus) e <id>.m4a (AAC) nesta pasta e criar ou atualizar a entrada. Todos mono, sem silêncio no início, normalizados em -16 LUFS (um pouco acima da música, que está em -18).",
   "efeitos": {
-    "tecla": {
-      "arquivos": null
-    },
-    "tecla-espaco": {
-      "arquivos": null
-    },
-    "tecla-enter": {
-      "arquivos": null
-    },
-    "tecla-apagar": {
-      "arquivos": null
-    },
-    "clique": {
-      "arquivos": null
-    },
-    "hover": {
-      "arquivos": null
-    },
-    "acerto": {
-      "arquivos": null
-    },
-    "erro": {
-      "arquivos": null
-    },
-    "aviso": {
-      "arquivos": null
-    },
-    "abrir-painel": {
-      "arquivos": null
-    },
-    "fechar-painel": {
-      "arquivos": null
-    },
-    "inspecionar": {
-      "arquivos": null
-    },
-    "editar": {
-      "arquivos": null
-    },
-    "esconder": {
-      "arquivos": null
-    },
-    "apagar": {
-      "arquivos": null
-    },
-    "desfazer": {
-      "arquivos": null
-    },
-    "refazer": {
-      "arquivos": null
-    },
-    "duplicar": {
-      "arquivos": null
-    },
-    "renomear-tag": {
-      "arquivos": null
-    },
     "boot": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Computador ligando: ventoinha, HD e bip de inicialização",
+      "arquivos": {
+        "webm": "/audio/efeitos/boot.webm",
+        "m4a": "/audio/efeitos/boot.m4a"
+      },
+      "duracaoSegundos": 3.584
     },
     "dormir": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Mascote pegando no sono",
+      "arquivos": {
+        "webm": "/audio/efeitos/dormir.webm",
+        "m4a": "/audio/efeitos/dormir.m4a"
+      },
+      "duracaoSegundos": 1.8
     },
     "acordar": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Mascote acordando",
+      "arquivos": {
+        "webm": "/audio/efeitos/acordar.webm",
+        "m4a": "/audio/efeitos/acordar.m4a"
+      },
+      "duracaoSegundos": 1.24
     },
     "esbarrao": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Easter egg do esbarrão: batida seca e boing",
+      "arquivos": {
+        "webm": "/audio/efeitos/esbarrao.webm",
+        "m4a": "/audio/efeitos/esbarrao.m4a"
+      },
+      "duracaoSegundos": 0.695
     },
     "fase-concluida": {
-      "arquivos": null,
-      "preCarregar": true
-    },
-    "fez-sozinho": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Fanfarra curta de fase concluída",
+      "arquivos": {
+        "webm": "/audio/efeitos/fase-concluida.webm",
+        "m4a": "/audio/efeitos/fase-concluida.m4a"
+      },
+      "duracaoSegundos": 1.618
     },
     "unidade-concluida": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Fanfarra maior de unidade concluída",
+      "arquivos": {
+        "webm": "/audio/efeitos/unidade-concluida.webm",
+        "m4a": "/audio/efeitos/unidade-concluida.m4a"
+      },
+      "duracaoSegundos": 3.484
     },
     "desbloqueio": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Ilha ou zona desbloqueada",
+      "arquivos": {
+        "webm": "/audio/efeitos/desbloqueio.webm",
+        "m4a": "/audio/efeitos/desbloqueio.m4a"
+      },
+      "duracaoSegundos": 2.25
     },
     "insignia": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Insígnia de tema conquistada",
+      "arquivos": {
+        "webm": "/audio/efeitos/insignia.webm",
+        "m4a": "/audio/efeitos/insignia.m4a"
+      },
+      "duracaoSegundos": 0.92
     },
     "entrar-mapa": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Transição para o mapa do mundo",
+      "arquivos": {
+        "webm": "/audio/efeitos/entrar-mapa.webm",
+        "m4a": "/audio/efeitos/entrar-mapa.m4a"
+      },
+      "duracaoSegundos": 1.25
     },
     "viagem-ilha": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Viagem entre ilhas",
+      "arquivos": {
+        "webm": "/audio/efeitos/viagem-ilha.webm",
+        "m4a": "/audio/efeitos/viagem-ilha.m4a"
+      },
+      "duracaoSegundos": 1.697
     },
     "abrir-museu": {
-      "arquivos": null,
-      "preCarregar": true
+      "descricao": "Abertura do Museu das Origens",
+      "arquivos": {
+        "webm": "/audio/efeitos/abrir-museu.webm",
+        "m4a": "/audio/efeitos/abrir-museu.m4a"
+      },
+      "duracaoSegundos": 2.476
     }
   }
 }
