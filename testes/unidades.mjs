@@ -237,11 +237,20 @@ async function clicarLinhaCodigo(texto) {
     await esperar(70);
   }
   await linha.waitFor({ timeout: 8000 });
-  // Perto do começo da linha (mas depois da régua de números): linhas
-  // compridas (como o data URI de uma imagem) passam da largura da tela,
-  // e o centro delas pode ficar fora da área visível, principalmente no
-  // painel estreito da paisagem.
-  await tocar(linha, { position: { x: 20, y: 10 } });
+  await linha.scrollIntoViewIfNeeded();
+  await esperar(100);
+  // Clica pelas coordenadas da página (perto do começo da linha, mas
+  // depois da régua de números): linhas compridas (como o data URI de
+  // uma imagem) passam da largura da tela, e tanto o centro da caixa
+  // quanto uma posição relativa pequena demais podem cair em cima da
+  // régua de números, que rouba o toque/clique.
+  const caixa = await linha.boundingBox();
+  if (!caixa) throw new Error(`Falhou: a linha "${texto}" não está visível`);
+  const x = caixa.x + Math.min(30, Math.max(5, caixa.width - 5));
+  const y = caixa.y + caixa.height / 2;
+  if (toque) await pagina.touchscreen.tap(x, y);
+  else await pagina.mouse.click(x, y);
+  await esperar(150);
 }
 
 async function trilha(rotulo) {
