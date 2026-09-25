@@ -176,7 +176,8 @@ async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   await pagina.keyboard.press("Home");
   for (let i = 0; i < posicao; i++) await pagina.keyboard.press("ArrowRight");
   await pagina.keyboard.type(textoNovo);
-  await esperar(250);
+  // O caminho do editor tem debounce de 300 ms antes de revalidar.
+  await esperar(450);
   const novaLinha = texto.slice(0, posicao) + textoNovo + texto.slice(posicao);
   const conferida = await pagina.locator(".cm-line", { hasText: buscaTexto }).first().textContent();
   if (conferida !== novaLinha) throw new Error(`Falhou: linha ficou "${conferida}", esperava "${novaLinha}"`);
