@@ -3,11 +3,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useVozDoMascote } from "@/audio/ganchos";
+import { tocarEfeito } from "@/audio/motor";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { Botao } from "@/componentes/ui/Botao";
 import type { Ferramenta } from "@/ferramentas/registro";
 import { assinarUso } from "@/ferramentas/uso";
-import { tocarSom } from "@/lib/som";
 import type { Expressao } from "@/motor/expressao";
 
 type Props = {
@@ -181,7 +182,7 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
 
   const avancar = useCallback(() => {
     if (experimentando) return;
-    tocarSom("clique");
+    tocarEfeito("clique");
     setPasso((atual) => Math.min(atual + 1, PASSOS_FALA));
   }, [experimentando]);
 
@@ -190,7 +191,7 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
     if (jaComemorou.current) return;
     jaComemorou.current = true;
     setComemorando(true);
-    tocarSom("acerto");
+    tocarEfeito("acerto");
     setTimeout(() => aoConcluirAtual.current(), ESPERA_COMEMORAR_MS);
   }, []);
 
@@ -253,6 +254,8 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const falas = [ferramenta.oQueFaz, ferramenta.praQueServe, ferramenta.comoUsarAqui[modo]];
   const expressoes: Expressao[] = ["feliz", "curioso", "apontando"];
   const expressao: Expressao = comemorando ? "comemorando" : experimentando ? "apontando" : expressoes[passo];
+  // O computadorzinho fala cada passo com a voz de modem (pular cala na hora).
+  useVozDoMascote(comemorando ? "" : experimentando ? ferramenta.experimente[modo] : falas[passo], expressao);
   // No "Experimente", o cartão também evita as áreas extras (a árvore da trilha, a tela do
   // inspecionar), se todas juntas não tomarem a tela quase inteira.
   const areaLivre = experimentando

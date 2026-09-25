@@ -14,6 +14,7 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { tocarTecla } from "@/audio/motor";
 import type { AlvoCodigo } from "@/lib/caminhoElementos";
 import { definirLinhasDestacadas, destaqueLinhas } from "./destaqueLinhas";
 import { definirTrechoSelecionado, destaqueTrecho } from "./destaqueTrecho";
@@ -105,6 +106,11 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
           EditorView.domEventHandlers({
             focus: () => {
               aoFocarAtual.current?.();
+            },
+            // Só a digitação do jogador (teclado físico ou virtual) faz barulho de tecla.
+            keydown: (evento) => {
+              if (evento.ctrlKey || evento.metaKey || evento.altKey) return;
+              tocarTecla(evento.key, evento.repeat);
             },
           }),
           EditorView.updateListener.of((atualizacao) => {

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "testar:conteudo": "vitest run --config vitest.config.mts",
+    "testar:audio": "vitest run --config vitest.config.mts testes/audio",
     "publicar:conteudo": "vitest run --config scripts/vitest.publicar.mts"
   },
   "dependencies": {

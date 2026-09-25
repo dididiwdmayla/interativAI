@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { useMusicaDaTela } from "@/audio/ganchos";
+import { audioLiberado, tocarEfeito } from "@/audio/motor";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { ilhaDoId } from "@/curriculo";
@@ -99,6 +102,11 @@ type Props = { ilhaId: string };
 export function MuseuOrigens({ ilhaId }: Props) {
   const carregado = useProgressoCarregado();
   const ilha = ilhaDoId(ilhaId);
+  useMusicaDaTela({ tipo: "museu" });
+  // Porta antiga rangendo (só depois do primeiro gesto; no endereço direto, fica quieto).
+  useEffect(() => {
+    if (audioLiberado()) tocarEfeito("abrir-museu");
+  }, []);
   if (!carregado || !ilha) return <TelaCarregando />;
   const salas = ilha.zonas.flatMap((zona) => zona.unidades);
   return (

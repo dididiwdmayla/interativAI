@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { tocarSom } from "@/lib/som";
+import { tocarEfeito } from "@/audio/motor";
 import { perguntarAoTutor } from "@/lib/tutor/perguntarAoTutor";
 import {
   FALA_SEM_CHAVE,
@@ -66,7 +66,7 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
         historico: historico.current,
       });
       if (!resposta.ok) {
-        tocarSom("aviso");
+        tocarEfeito("aviso");
         const fala = falaDaFalha(resposta.tipo);
         responder(pergunta, fala);
         if (resposta.tipo === "sobrecarga") setRepetir({ pergunta, fala });

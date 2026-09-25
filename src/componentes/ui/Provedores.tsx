@@ -1,24 +1,15 @@
 "use client";
 
 import { MotionConfig } from "framer-motion";
-import { type ReactNode, useEffect } from "react";
-import { liberarAudio } from "@/lib/som";
+import type { ReactNode } from "react";
+import { AudioDoJogo } from "./AudioDoJogo";
 
-/** Configurações globais do cliente: movimento reduzido e liberação do áudio. */
+/** Configurações globais do cliente: movimento reduzido e o áudio do jogo. */
 export function Provedores({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    const liberar = () => {
-      liberarAudio();
-      window.removeEventListener("pointerdown", liberar);
-      window.removeEventListener("keydown", liberar);
-    };
-    window.addEventListener("pointerdown", liberar);
-    window.addEventListener("keydown", liberar);
-    return () => {
-      window.removeEventListener("pointerdown", liberar);
-      window.removeEventListener("keydown", liberar);
-    };
-  }, []);
-
-  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
+  return (
+    <MotionConfig reducedMotion="user">
+      <AudioDoJogo />
+      {children}
+    </MotionConfig>
+  );
 }

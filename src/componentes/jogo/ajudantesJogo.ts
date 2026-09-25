@@ -1,6 +1,6 @@
+import { tocarEfeito } from "@/audio/motor";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { obterProgresso } from "@/lib/armazemProgresso";
-import { tocarSom } from "@/lib/som";
 import { desbloquearTema, escolherTema } from "@/lib/tema";
 import type { Fala } from "@/motor/tipos";
 
@@ -21,7 +21,7 @@ export function responderSegredo(pergunta: string, falar: (fala: Fala) => void):
   const jaTinha = obterProgresso().temasDesbloqueados.includes("segredo");
   desbloquearTema("segredo");
   escolherTema("segredo");
-  tocarSom("conclusao");
+  tocarEfeito("desbloqueio");
   const fala: Fala = {
     texto: jaTinha
       ? "Olha só quem voltou para investigar! O tema Segredo já é seu. Troque quando quiser na paleta lá em cima."

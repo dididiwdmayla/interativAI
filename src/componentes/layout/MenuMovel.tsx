@@ -1,13 +1,15 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { tocarEfeito } from "@/audio/motor";
 import { IconeMenu } from "@/componentes/icones/IconeMenu";
 
 type Props = { children: ReactNode };
 
 /**
- * Menu da barra superior no celular (tema, som, Ferramentas, recomeçar).
- * Fecha ao escolher um item, com toque fora ou Esc. O conteúdo fica sempre
+ * Menu da barra superior no celular (tema, ajustes de som, Ferramentas,
+ * recomeçar). Fecha ao escolher um item, com toque fora ou Esc; os botões
+ * dentro de [data-manter-menu] (ajustes de som) não fecham. O conteúdo fica sempre
  * montado (só escondido), para janelas abertas a partir dele, como a
  * confirmação de recomeçar, continuarem vivas depois que ele fecha.
  */
@@ -23,6 +25,7 @@ export function MenuMovel({ children }: Props) {
       // Janelas em portal (modal) contam como dentro.
       if (alvo instanceof Element && alvo.closest("[role=dialog]")) return;
       setAberto(false);
+      tocarEfeito("fechar-painel");
     };
     const aoTeclar = (evento: KeyboardEvent) => {
       if (evento.key === "Escape") setAberto(false);
@@ -41,16 +44,20 @@ export function MenuMovel({ children }: Props) {
         type="button"
         aria-expanded={aberto}
         aria-label="Mais opções"
-        onClick={() => setAberto((valor) => !valor)}
+        onClick={() => {
+          tocarEfeito(aberto ? "fechar-painel" : "abrir-painel");
+          setAberto(!aberto);
+        }}
         className="grid h-11 w-11 place-items-center rounded-full text-texto hover:bg-hover"
       >
         <IconeMenu />
       </button>
       <div
         onClick={(evento) => {
-          if (evento.target instanceof Element && evento.target.closest("button")) setAberto(false);
+          const alvo = evento.target instanceof Element ? evento.target : null;
+          if (alvo?.closest("button") && !alvo.closest("[data-manter-menu]")) setAberto(false);
         }}
-        className={`absolute right-0 top-full z-50 mt-1 w-60 flex-col items-stretch gap-3 rounded-2xl border-2 border-borda bg-superficie p-3 shadow-[0_6px_0_var(--cor-sombra)] ${
+        className={`absolute right-0 top-full z-50 mt-1 max-h-[calc(100dvh-4rem)] w-64 flex-col overflow-y-auto items-stretch gap-3 rounded-2xl border-2 border-borda bg-superficie p-3 shadow-[0_6px_0_var(--cor-sombra)] ${
           aberto ? "flex" : "hidden"
         }`}
       >

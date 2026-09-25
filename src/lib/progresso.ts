@@ -43,7 +43,12 @@ export type Progresso = {
   faseAtual: string | null;
   tema: TemaId;
   temasDesbloqueados: TemaId[];
+  /** Som ligado. Desligado é o "Silenciar tudo" dos ajustes de som. */
   som: boolean;
+  /** Volumes de 0 a 1 (ajustes de som): música, efeitos e voz do computadorzinho. */
+  volumeMusica: number;
+  volumeEfeitos: number;
+  volumeVoz: number;
   missoesDeCampo: Record<string, boolean>;
   /** Ferramentas já apresentadas (vistas ou puladas); não repetem sozinhas. */
   apresentacoesVistas: IdFerramenta[];
@@ -64,6 +69,9 @@ export type Progresso = {
 
 export const PROPORCAO_PREVIA = { minima: 0.25, padrao: 0.4, maxima: 0.6 } as const;
 
+/** Volumes padrão dos ajustes de som. */
+export const VOLUMES_PADRAO = { musica: 0.5, efeitos: 0.7, voz: 0.7 } as const;
+
 export const PROGRESSO_PADRAO: Progresso = {
   versao: 2,
   fasesConcluidas: [],
@@ -73,6 +81,9 @@ export const PROGRESSO_PADRAO: Progresso = {
   tema: TEMA_PADRAO,
   temasDesbloqueados: [...TEMAS_INICIAIS],
   som: true,
+  volumeMusica: VOLUMES_PADRAO.musica,
+  volumeEfeitos: VOLUMES_PADRAO.efeitos,
+  volumeVoz: VOLUMES_PADRAO.voz,
   missoesDeCampo: {},
   apresentacoesVistas: [],
   metasVistas: [],
@@ -110,6 +121,11 @@ function lerRegistro<T>(valor: unknown, ler: (item: unknown) => T | null): Recor
 
 function ehNumero(valor: unknown): valor is number {
   return typeof valor === "number" && Number.isFinite(valor);
+}
+
+/** Volume salvo (0 a 1) ou o padrão, se não for número. */
+function lerVolume(valor: unknown, padrao: number): number {
+  return ehNumero(valor) ? Math.min(1, Math.max(0, valor)) : padrao;
 }
 
 function ehBooleano(valor: unknown): valor is boolean {
@@ -170,6 +186,9 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     tema,
     temasDesbloqueados,
     som: ehBooleano(bruto.som) ? bruto.som : PROGRESSO_PADRAO.som,
+    volumeMusica: lerVolume(bruto.volumeMusica, VOLUMES_PADRAO.musica),
+    volumeEfeitos: lerVolume(bruto.volumeEfeitos, VOLUMES_PADRAO.efeitos),
+    volumeVoz: lerVolume(bruto.volumeVoz, VOLUMES_PADRAO.voz),
     missoesDeCampo: lerRegistro(bruto.missoesDeCampo, (item) => (ehBooleano(item) ? item : null)),
     apresentacoesVistas: Array.isArray(bruto.apresentacoesVistas)
       ? [...new Set(bruto.apresentacoesVistas.filter(ehIdFerramenta))]

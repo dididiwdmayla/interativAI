@@ -6,6 +6,7 @@ import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { IconeEstrela } from "@/componentes/icones/IconeEstrela";
 import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
+import { AjustesSom } from "@/componentes/layout/AjustesSom";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
 import { MenuMovel } from "@/componentes/layout/MenuMovel";
 import { OndeEstou } from "@/componentes/layout/OndeEstou";
@@ -74,9 +75,9 @@ export function BarraMapa({ caminho, voltar }: Props) {
         {compacto ? (
           <MenuMovel>
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
-            <div className="flex items-center justify-between gap-2">
-              <SeletorTema />
-              <BotaoSom />
+            <SeletorTema />
+            <div data-manter-menu className="border-t-2 border-borda pt-2">
+              <AjustesSom />
             </div>
           </MenuMovel>
         ) : (

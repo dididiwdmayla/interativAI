@@ -1,0 +1,110 @@
+{
+  "descricao": "Efeitos sonoros gravados, por id. Todo id abaixo já toca uma versão sintetizada (src/audio/receitas.ts). Para trocar um efeito por um arquivo gravado: coloque o arquivo nesta pasta em .webm (Opus, preferido) e .m4a (AAC, reserva), com o mesmo nome, e troque \"arquivos\": null por {\"webm\": \"/audio/efeitos/<id>.webm\", \"m4a\": \"/audio/efeitos/<id>.m4a\"}. Sem arquivo (null), toca o sintetizado. \"preCarregar\": true carrega o arquivo ao entrar no mapa (momentos grandes); os outros carregam sob demanda. Ids novos precisam existir também em src/audio/efeitos.ts.",
+  "efeitos": {
+    "tecla": {
+      "arquivos": null
+    },
+    "tecla-espaco": {
+      "arquivos": null
+    },
+    "tecla-enter": {
+      "arquivos": null
+    },
+    "tecla-apagar": {
+      "arquivos": null
+    },
+    "clique": {
+      "arquivos": null
+    },
+    "hover": {
+      "arquivos": null
+    },
+    "acerto": {
+      "arquivos": null
+    },
+    "erro": {
+      "arquivos": null
+    },
+    "aviso": {
+      "arquivos": null
+    },
+    "abrir-painel": {
+      "arquivos": null
+    },
+    "fechar-painel": {
+      "arquivos": null
+    },
+    "inspecionar": {
+      "arquivos": null
+    },
+    "editar": {
+      "arquivos": null
+    },
+    "esconder": {
+      "arquivos": null
+    },
+    "apagar": {
+      "arquivos": null
+    },
+    "desfazer": {
+      "arquivos": null
+    },
+    "refazer": {
+      "arquivos": null
+    },
+    "duplicar": {
+      "arquivos": null
+    },
+    "renomear-tag": {
+      "arquivos": null
+    },
+    "boot": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "dormir": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "acordar": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "esbarrao": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "fase-concluida": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "fez-sozinho": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "unidade-concluida": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "desbloqueio": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "insignia": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "entrar-mapa": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "viagem-ilha": {
+      "arquivos": null,
+      "preCarregar": true
+    },
+    "abrir-museu": {
+      "arquivos": null,
+      "preCarregar": true
+    }
+  }
+}

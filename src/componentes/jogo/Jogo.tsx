@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useMusicaDaTela } from "@/audio/ganchos";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { faseDoId, localDaFase } from "@/conteudo";
 import { localNoCurriculo } from "@/curriculo";
@@ -51,6 +52,8 @@ export function Jogo({ faseId }: { faseId: string }) {
   const [revisao, setRevisao] = useState<Revisao | null>(null);
   const faseDaRota = faseDoId(faseId);
   const liberada = carregado && faseDaRota !== undefined && faseLiberada(faseDaRota, progresso);
+  // A fase toca a música da ilha dela (a mesma do mapa da ilha: não reinicia).
+  useMusicaDaTela({ tipo: "fase", ilhaId: faseDaRota ? ilhaDaUnidade(faseDaRota.unidadeId) : null });
 
   // A fase aberta vira a fase atual: o mapa põe o computadorzinho nela e o card diz "Continuar".
   useEffect(() => {
