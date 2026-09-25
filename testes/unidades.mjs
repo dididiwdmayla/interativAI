@@ -220,17 +220,28 @@ async function clicarLinhaCodigo(texto) {
     await tocar(quebra);
     await esperar(150);
   }
+  // O CodeMirror só mantém no DOM as linhas perto da rolagem atual: desce
+  // aos poucos até a linha procurada aparecer, em vez de pular direto pro
+  // fim (ela pode estar no meio do arquivo).
   const scroller = pagina.locator(".cm-scroller").first();
-  await scroller.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-  await esperar(200);
   const linha = pagina.locator(".cm-line", { hasText: texto }).first();
+  await scroller.evaluate((el) => {
+    el.scrollTop = 0;
+  });
+  await esperar(150);
+  for (let tentativa = 0; tentativa < 40; tentativa++) {
+    if ((await linha.count()) > 0) break;
+    await scroller.evaluate((el) => {
+      el.scrollTop += el.clientHeight * 0.8;
+    });
+    await esperar(70);
+  }
   await linha.waitFor({ timeout: 8000 });
-  // Perto do começo da linha: linhas compridas (como o data URI de uma
-  // imagem) passam da largura da tela, e o centro delas pode ficar fora
-  // da área visível, principalmente no painel estreito da paisagem.
-  await tocar(linha, { position: { x: 4, y: 4 } });
+  // Perto do começo da linha (mas depois da régua de números): linhas
+  // compridas (como o data URI de uma imagem) passam da largura da tela,
+  // e o centro delas pode ficar fora da área visível, principalmente no
+  // painel estreito da paisagem.
+  await tocar(linha, { position: { x: 20, y: 10 } });
 }
 
 async function trilha(rotulo) {
