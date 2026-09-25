@@ -6,12 +6,19 @@ import { FASES_UNIDADE_1, UNIDADE_1 } from "./ilhas/sites/elementos/unidade-1/un
 import { FASES_UNIDADE_2, UNIDADE_2 } from "./ilhas/sites/elementos/unidade-2/unidade";
 import { FASES_UNIDADE_3, UNIDADE_3 } from "./ilhas/sites/elementos/unidade-3/unidade";
 import { FASES_UNIDADE_4, UNIDADE_4 } from "./ilhas/sites/elementos/unidade-4/unidade";
+import { FASES_UNIDADE_5, UNIDADE_5 } from "./ilhas/sites/elementos/unidade-5/unidade";
 import type { Fase, Unidade } from "./tipos";
 
-export const UNIDADES: readonly Unidade[] = [UNIDADE_1, UNIDADE_2, UNIDADE_3, UNIDADE_4];
+export const UNIDADES: readonly Unidade[] = [UNIDADE_1, UNIDADE_2, UNIDADE_3, UNIDADE_4, UNIDADE_5];
 
 /** Todas as fases, na ordem das unidades. */
-export const FASES: readonly Fase[] = [...FASES_UNIDADE_1, ...FASES_UNIDADE_2, ...FASES_UNIDADE_3, ...FASES_UNIDADE_4];
+export const FASES: readonly Fase[] = [
+  ...FASES_UNIDADE_1,
+  ...FASES_UNIDADE_2,
+  ...FASES_UNIDADE_3,
+  ...FASES_UNIDADE_4,
+  ...FASES_UNIDADE_5,
+];
 
 export const FASE_INICIAL: Fase = FASES[0];
 

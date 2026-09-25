@@ -802,16 +802,101 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U4: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U4: 3 estrelas");
 
-// Volta para a ilha: a U4 acende e o próximo ponto aparece como planejado.
+// Volta para a ilha: a U4 acende e o próximo ponto (U5, já pronta) aparece bloqueado até jogar.
 await conclusaoEVoltarAIlha("U4");
 conferir((await estadoDoPonto("sites-elementos-u4")) === "concluida", "ilha: U4 concluída");
-conferir((await estadoDoPonto("sites-elementos-u5")) === "planejada", "ilha: a U5 aparece como planejada");
+conferir((await estadoDoPonto("sites-elementos-u5")) === "disponivel", "ilha: a U5 abriu");
+await jogarUnidade("sites-elementos-u5", "Jogar");
+
+// ------------------------------------------------------------ U5 fase 1
+await metaDaUnidade("U5 começo");
+await conversar(3);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await clicarLinhaCodigo("Consertamos bicicletas");
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("ArrowDown");
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type('<div id="aviso-oficina">Aberta também em feriados, mediante agendamento.</div>');
+await proximoObjetivo("U5F1 objetivo 1 (previsão div nova)");
+
+await renomearTag("#topo", "header");
+await proximoObjetivo("U5F1 objetivo 2 (header)");
+
+await inspecionar("#rodape");
+await renomearTag("#rodape", "footer");
+await proximoObjetivo("U5F1 objetivo 3 (sozinho)");
+await conclusaoEProxima("U5F1");
+
+// ------------------------------------------------------------ U5 fase 2
+await conversar(3);
+await renomearTag("#servicos", "section");
+await proximoObjetivo("U5F2 objetivo 1 (section)");
+
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await renomearTag("#servico-revisao", "article");
+await proximoObjetivo("U5F2 objetivo 2 (previsão article)");
+
+await renomearTag("#servico-pintura", "article");
+await renomearTag("#sobre", "section");
+await proximoObjetivo("U5F2 objetivo 3 (sozinho)");
+await conclusaoEProxima("U5F2");
+
+// ------------------------------------------------------------ U5 fase 3
+await conversar(3);
+await renomearTag("#servico-revisao .preco", "span");
+await proximoObjetivo("U5F3 objetivo 1 (span)");
+
+await renomearTag("#servico-pintura .preco", "span");
+await proximoObjetivo("U5F3 objetivo 2 (sozinho)");
+await conclusaoEProxima("U5F3");
+
+// ------------------------------------------------------------ Desafio U5
+await metaDaUnidade("Desafio U5");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio U5: checklist no lugar dos objetivos");
+
+await renomearTag("#topo", "header");
+await renomearTag("#rodape", "footer");
+conferir((await partesFeitas()) === 1, "desafio U5: cabeçalho e rodapé marcam a parte");
+
+await renomearTag("#servicos", "section");
+conferir((await partesFeitas()) === 2, "desafio U5: a seção de serviços marca a parte");
+
+await renomearTag("#servico-banho", "article");
+await renomearTag("#servico-vet", "article");
+conferir((await partesFeitas()) === 3, "desafio U5: os dois cards marcam a parte");
+
+await renomearTag("#servico-banho .preco", "span");
+await renomearTag("#servico-vet .preco", "span");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-u5", erro);
+}
+conferir((await partesFeitas()) === 4, "desafio U5: as 4 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U5: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U5: 3 estrelas");
+
+// Volta para a ilha: a U5 acende; U6 exige motor e continua planejada.
+await conclusaoEVoltarAIlha("U5");
+conferir((await estadoDoPonto("sites-elementos-u5")) === "concluida", "ilha: U5 concluída");
+conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (requer motor)");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
-conferir(salvo.fasesConcluidas.length === 15, `15 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as quatro unidades concluídas.
+conferir(salvo.fasesConcluidas.length === 19, `19 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as cinco unidades concluídas.
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("4 de 4 unidades"), "mundo: Sites com 4 de 4 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("5 de 5 unidades"), "mundo: Sites com 5 de 5 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();
