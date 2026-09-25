@@ -11,6 +11,8 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
+import { CURRICULO } from "@/curriculo/curriculo";
+import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo } from "@/curriculo/conferir";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
@@ -367,6 +369,21 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
       }
       return problemas;
     },
+  },
+  {
+    id: "curriculo-ids",
+    nome: "os ids do currículo (src/curriculo) são únicos e em kebab-case",
+    checar: () => conferirIdsDoCurriculo(CURRICULO),
+  },
+  {
+    id: "curriculo-conteudo",
+    nome: "toda unidade de conteúdo está no currículo, na ilha e zona certas",
+    checar: ({ unidades }) => conferirConteudoNoCurriculo(CURRICULO, unidades),
+  },
+  {
+    id: "curriculo-motor",
+    nome: "nenhuma unidade de conteúdo mora em zona (ou unidade) que requer motor",
+    checar: ({ unidades }) => conferirMotorDoConteudo(CURRICULO, unidades),
   },
   {
     id: "publicados-congelados",

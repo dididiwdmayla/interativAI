@@ -5,7 +5,7 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run testar:conteudo` passando e um commit.
 
 **Estado atual:** rodada 5 em andamento (fábrica corrigida, currículo em
-dados e mapa das ilhas). Etapa 1 concluída.
+dados e mapa das ilhas). Etapas 1 e 2 concluídas.
 
 ## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
 
@@ -39,6 +39,22 @@ dados e mapa das ilhas). Etapa 1 concluída.
   3.8, 3.9, 3.10, 10, 11 e checklist), template, `testes/README.md` e
   atritos atualizados. `testar:conteudo` (182 testes), `lint`, `build` e
   bateria Playwright inteira verdes.
+
+- [x] **Etapa 2: currículo em dados.** `docs/MAPA-CURRICULAR.md` (o
+  Anexo A inteiro, formatado, com o id de cada unidade no currículo).
+  `src/curriculo/`: tipos (`IlhaCurriculo`, `ZonaCurriculo` com `icone`
+  para o mapa, `UnidadeCurriculo` com `requerMotor` opcional, porque a U6
+  requer motor numa zona pronta), dados na ordem do mapa (Origens com as
+  5 salas, Sites com Elementos/Estilos/Layout/Responsivo/Publicar,
+  Lógica, Páginas vivas, Rede e Servidor e Ofício com uma unidade
+  planejada por zona, Frameworks opcional) e consultas (`statusDaUnidade`
+  a partir do conteúdo registrado, `localNoCurriculo`, `motorQueFalta`).
+  Ofício ganhou `requerMotor` por zona (o anexo não listava, mas o motor
+  só tem a aba Elementos). Regras gerais novas: `curriculo-ids`,
+  `curriculo-conteudo` (id `<ilha>-<zona>-u<n>`, número, ilha, zona,
+  título e ordem) e `curriculo-motor`. Testes em `curriculo.test.ts`
+  (com sabotagens: id repetido, unidade fora do currículo, zona errada,
+  conteúdo em zona com `requerMotor`, a U6).
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 

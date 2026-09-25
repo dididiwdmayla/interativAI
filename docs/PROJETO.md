@@ -83,6 +83,7 @@ src/
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
+  curriculo/            o currículo inteiro em dados (ilhas, zonas, unidades) e a consistência com o conteúdo
   conteudo/             conteúdo declarativo: tipos, conceitos, registro, checagens, índice
     ilhas/sites/elementos/unidade-N/   uma pasta por unidade (fases, unidade.ts, sites/)
   motor/                núcleo do painel, validadores, executor de ações, simulação, estado do motor
@@ -197,6 +198,21 @@ src/
   concluída) e estrelas nas concluídas. A conclusão tem "Próxima fase".
 - A palavra "trilha" fica reservada para a ferramenta; o "onde estou" da
   barra superior é o componente `OndeEstou`.
+
+### Currículo
+
+- `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,
+  Lógica, Páginas vivas, Rede e Servidor, Ofício e a opcional
+  Frameworks). `src/curriculo/curriculo.ts` é a versão em dados: ilha
+  (`opcional`, `sempreAberta`), zona (`icone`, `requerMotor`) e unidade
+  (id `<ilha>-<zona>-u<n>`, título, meta em uma frase e, raro,
+  `requerMotor` só dela, como a U6).
+- Status não é guardado: unidade com conteúdo registrado de mesmo id é
+  "pronta"; o resto é "planejada" (`statusDaUnidade`).
+- Checagens (`src/curriculo/conferir.ts`, no `testar:conteudo`): ids
+  únicos; toda unidade de conteúdo está no currículo, com id, número,
+  ilha, zona, título e ordem batendo; nenhuma unidade de conteúdo mora em
+  zona (ou unidade) com `requerMotor`.
 
 ### Fábrica de conteúdo
 
