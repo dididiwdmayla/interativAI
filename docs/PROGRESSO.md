@@ -47,6 +47,9 @@ Detalhes em `docs/AUDIO.md`.
 - [x] **Etapa 6: testes.** `testes/audio/` (Vitest, também no
   `testar:conteudo`) e `testes/audio.mjs` (Playwright: ajustes salvos,
   navegação com o AudioContext real, toque em pé), na `testes/todos.mjs`.
+  Achado de passagem: `testes/mapa.mjs` ainda esperava a U3 como
+  planejada (não foi atualizado na rodada 6); agora espera U3 bloqueada e
+  usa a U6 para o card "Em breve".
 
 ## Rodada 6: Unidades 3, 4 e 5 da zona Elementos
 

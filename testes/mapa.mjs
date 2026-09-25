@@ -48,13 +48,14 @@ async function tocar(localizador) {
   await pagina.locator("[data-mapa=mundo]").waitFor();
   conferir(true, `${MODO}: o voltar do navegador volta ao mundo`);
 
-  // Sites: U1 disponível, U2 bloqueada, U3 em diante planejadas.
+  // Sites: U1 disponível, U2 a U5 (prontas) bloqueadas, U6 planejada.
   await tocar(ilha("sites"));
   await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
   const ponto = (id) => pagina.locator(`[data-unidade="${id}"]`);
   conferir((await ponto("sites-elementos-u1").getAttribute("data-estado")) === "disponivel", `${MODO}: U1 disponível`);
   conferir((await ponto("sites-elementos-u2").getAttribute("data-estado")) === "bloqueada", `${MODO}: U2 bloqueada`);
-  conferir((await ponto("sites-elementos-u3").getAttribute("data-estado")) === "planejada", `${MODO}: U3 planejada`);
+  conferir((await ponto("sites-elementos-u3").getAttribute("data-estado")) === "bloqueada", `${MODO}: U3 bloqueada`);
+  conferir((await ponto("sites-elementos-u6").getAttribute("data-estado")) === "planejada", `${MODO}: U6 planejada`);
   const tamanhoPonto = await ponto("sites-elementos-u1").boundingBox();
   conferir(tamanhoPonto.width >= 44 && tamanhoPonto.height >= 44, `${MODO}: pontos com pelo menos 44 px`);
   if (MODO === "retrato") {
@@ -70,7 +71,7 @@ async function tocar(localizador) {
   await card.waitFor();
   conferir((await card.textContent()).includes("Termine a unidade O site é seu para abrir"), `${MODO}: card da U2 diz o que falta`);
   await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
-  await tocar(ponto("sites-elementos-u3"));
+  await tocar(ponto("sites-elementos-u6"));
   await card.waitFor();
   conferir((await card.textContent()).includes("Em breve"), `${MODO}: card da planejada diz Em breve`);
   await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
