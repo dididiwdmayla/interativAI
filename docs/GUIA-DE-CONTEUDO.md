@@ -13,6 +13,8 @@ Arquivos que você vai usar:
 
 | Arquivo | Para quê |
 | --- | --- |
+| `docs/MAPA-CURRICULAR.md` | o percurso inteiro: qual unidade vem agora, a meta, os conceitos, o desafio e as confusões a atacar |
+| `src/curriculo/curriculo.ts` | o mesmo currículo em dados: o id, o título e a meta da unidade, e se ela requer motor |
 | `docs/TEMPLATE-FASE.ts` | template anotado de fase de prática e de desafio |
 | `src/conteudo/tipos.ts` | os tipos (o TypeScript reclama de campo faltando) |
 | `src/conteudo/conceitos.ts` | o catálogo de conceitos |
@@ -20,9 +22,35 @@ Arquivos que você vai usar:
 | `src/conteudo/index.ts` | o registro das unidades, na ordem do jogo |
 | `npm run testar:conteudo` | as checagens automáticas |
 | `/lab/fases` | abrir qualquer fase, ver os validadores ao vivo |
+| `/lab/mapa` | desbloquear tudo no mapa, resetar o progresso e a Lista de fases |
+| `npm run publicar:conteudo` | congela os ids da unidade nova em `src/conteudo/publicados.json` |
 
 Regras do projeto que valem aqui também (ver `docs/PROJETO.md`): zero
 emojis, PT-BR, cores só nos sites-alvo, nada de função dentro de fase.
+
+---
+
+## 0. Como escolher a próxima unidade (leia antes de tudo)
+
+1. **Siga o `docs/MAPA-CURRICULAR.md` na ordem.** A próxima unidade é a
+   primeira do currículo que ainda não tem conteúdo (no mapa do jogo, o
+   primeiro ponto "Em breve"). Hoje: Ilha Sites, zona Elementos, U3
+   ("Títulos e textos").
+2. **Use o id do currículo.** A unidade nova tem o id, o título, a ilha e
+   a zona que estão em `src/curriculo/curriculo.ts` (ex.:
+   `sites-elementos-u3`, "Títulos e textos", "Ilha Sites", "Elementos",
+   `numero: 3`). O `testar:conteudo` confere tudo isso e a ordem em
+   `UNIDADES`. A unidade vira "pronta" no mapa sozinha, quando é
+   registrada: ninguém marca status à mão.
+3. **Regra de parada: NUNCA produza uma unidade de zona com
+   `requerMotor`** (nem uma unidade que tenha `requerMotor` própria, como
+   a U6). Pare e relate o que falta no motor (o texto do `requerMotor` diz
+   o quê). Conteúdo não inventa ferramenta, aba nem tipo de fase: isso é
+   trabalho de motor. Se mesmo assim uma unidade dessas for registrada, o
+   `testar:conteudo` falha dizendo o que falta.
+4. **Leia a unidade no mapa curricular inteira:** meta, conceitos,
+   micro-passos sugeridos, desafio, o que revisa e as confusões de leigo
+   a atacar. As confusões viram previsões e perguntas do "Me ajuda".
 
 ---
 
@@ -69,7 +97,8 @@ Cada conteúdo X é ensinado como uma **unidade**:
 1. **Meta.** No começo da unidade o jogador vê o X pronto: "No fim desta
    unidade, você faz isso sozinho", com o site do desafio antes e depois
    lado a lado. O "depois" é gerado sozinho aplicando as soluções das
-   partes do desafio. A meta aparece de novo antes do desafio.
+   partes do desafio. Ela aparece uma vez só na entrada da unidade e
+   sempre antes do desafio (seção 3.10).
 2. **Micro-passos (Y).** Cada habilidade aparece primeiro num objetivo
    **guiado** (ajuda completa: pergunta, dica, onde olhar, solução) e
    depois num objetivo **sozinho** (só pergunta e dica), com a mesma
@@ -114,11 +143,11 @@ testar sozinho. Os tipos estão comentados em `src/conteudo/tipos.ts`.
 
 ```ts
 {
-  id: "sites-elementos-u3",          // "<ilha>-<zona>-u<numero>"
-  ilha: "Ilha Sites",
-  zona: "Elementos",
-  numero: 3,
-  titulo: "Nome da unidade",
+  id: "sites-elementos-u3",          // o id do currículo: "<ilha>-<zona>-u<numero>"
+  ilha: "Ilha Sites",                // "Ilha " + o nome da ilha no currículo
+  zona: "Elementos",                 // o nome da zona no currículo
+  numero: 3,                         // a posição na zona
+  titulo: "Títulos e textos",        // igual ao do currículo
   meta: {
     enunciado: "No fim desta unidade, você ...",   // até 200
     desafioId: FASE_U3_F4.id,                      // o desafio (última fase)
@@ -494,6 +523,12 @@ cores do jogo.
 - Pode haver variações do mesmo site para fases diferentes (o Jornal da
   Vila "limpo" da fase 3).
 - Nada de marca, pessoa ou empresa real. Nada de `©`.
+- **Links:** a prévia nunca navega. Âncora (`href="#id"`) rola até o
+  elemento; link externo, quebrado (`#id` que não existe) ou vazio (sem
+  href, `""` ou `"#"`) faz o computadorzinho falar para onde levaria. Para
+  ensinar links (U4), use `clicarLink` nas soluções e o validador
+  `{ tipo: "evento", evento: "clicouLink", href }`. Endereços externos
+  sempre de mentirinha (`https://exemplo.site/...`).
 
 ---
 
@@ -565,37 +600,56 @@ textos que não são só espaço. O texto de `<li>Sonho</li>` (li "5") é
 "5.0". Não calcule à mão: os ajudantes usam as mesmas funções da árvore
 (`src/motor/chaveArvore.ts`).
 
+Endereços: `abrir()` sem `rota` vai direto para `/fase/<faseAtual>` (ou a
+primeira fase); o mundo é `/` e a ilha, `/ilha/<id>`. A jornada completa
+(`testes/unidades.mjs`) começa no mapa: mundo, ilha Sites, card da
+unidade, "Jogar", e depois do desafio "Voltar pra ilha". Unidade nova:
+estenda essa jornada, e confira no fim que o ponto dela acende e que o
+próximo aparece "Em breve".
+
 ---
 
 ## 12. Passo a passo para criar uma unidade
 
-1. **Planeje no papel.** A meta ("No fim desta unidade, você..."), as
+1. **Escolha a unidade** pela seção 0: a próxima do
+   `docs/MAPA-CURRICULAR.md`, com o id do currículo. Zona (ou unidade) com
+   `requerMotor`: pare e relate.
+2. **Planeje no papel.** A meta ("No fim desta unidade, você..."), as
    habilidades (Ys), o site dos micro-passos e o do desafio (diferente).
-   Para cada Y: o guiado, o sozinho (que muda a situação) e o que ele
-   revisa de antes.
-2. **Copie a pasta modelo.** Duplique
+   Para cada Y: o guiado e o sozinho **na mesma fase** (formato padrão),
+   com o sozinho mudando a situação, e o que ele revisa de antes.
+3. **Copie a pasta modelo.** Duplique
    `src/conteudo/ilhas/sites/elementos/unidade-2/` como `unidade-N/`.
    Troque os nomes das constantes (`FASE_UN_F1`...) e os ids
    (`sites-elementos-uN-f1`...).
-3. **Faça os sites** em `sites/`, com as âncoras que os validadores vão
+4. **Faça os sites** em `sites/`, com as âncoras que os validadores vão
    usar.
-4. **Escreva as fases** seguindo o `docs/TEMPLATE-FASE.ts`: um comentário
+5. **Escreva as fases** seguindo o `docs/TEMPLATE-FASE.ts`: um comentário
    no topo (o que ensina, revisão, por que esta ordem), depois os dados.
-5. **Conceitos novos** no catálogo, se precisar.
-6. **Registre:** `unidade.ts` da unidade (com `meta.desafioId`) e, em
+6. **Conceitos novos** no catálogo, se precisar.
+7. **Registre:** `unidade.ts` da unidade (com `meta.desafioId`) e, em
    `src/conteudo/index.ts`, a unidade em `UNIDADES` e as fases em `FASES`,
    na ordem.
-7. **Rode `npm run testar:conteudo`.** Ele diz a fase, a regra e o motivo
+8. **Rode `npm run testar:conteudo`.** Ele diz a fase, a regra e o motivo
    de cada problema (ex.: "objetivo 3: a solucaoDeTeste quebrou na ação 1
    de 1 (apagar #popup-cookie): o seletor não achou nenhum elemento").
    Corrija até ficar verde.
-8. **Jogue em `/lab/fases`.** Escolha a fase, veja os validadores ao vivo
+9. **Jogue em `/lab/fases`.** Escolha a fase, veja os validadores ao vivo
    enquanto faz à mão, use "Aplicar solução do objetivo atual" e "Resetar
    fase". Rode as checagens pela aba Checagens. Olhe a meta com
    antes/depois (no jogo normal, na primeira fase da unidade).
-9. **Jogue de verdade** pelo menos uma vez no desktop e uma no celular
-   (DevTools do navegador, 390 x 844), do começo ao fim.
-10. **Rode `npm run lint` e `npm run build`** e só então faça o commit.
+10. **Jogue de verdade, começando pelo mapa**, pelo menos uma vez no
+    desktop e uma no celular (DevTools do navegador, 390 x 844), do começo
+    ao fim: mundo, ilha, o ponto da unidade nova, as fases, o desafio e a
+    volta para a ilha (o ponto acende). No `/lab/mapa`, "Desbloquear tudo"
+    abre a unidade sem jogar as anteriores.
+11. **Estenda os testes de navegador** se a unidade trouxer algo novo
+    (seção 11), e rode a bateria (`node testes/todos.mjs`).
+12. **Ao terminar a unidade:** `npm run publicar:conteudo` (congela os ids
+    dela em `src/conteudo/publicados.json`; ele se recusa se algum id
+    publicado sumiu ou se alguma checagem falha), depois as checagens
+    (`npm run testar:conteudo`, `npm run lint`, `npm run build`) e só então
+    o commit, com o `publicados.json` junto.
 
 ---
 
@@ -612,6 +666,9 @@ textos que não são só espaço. O texto de `<li>Sonho</li>` (li "5") é
       sozinho só como exceção, com `conceitos` vazio e tudo em `pratica`).
 - [ ] Nenhum id publicado mudou; unidade nova publicada com
       `npm run publicar:conteudo`.
+- [ ] A unidade é a próxima do `docs/MAPA-CURRICULAR.md`, com o id, o
+      título, a ilha e a zona do currículo, e a zona não tem `requerMotor`.
+- [ ] Jogada começando pelo mapa, e o ponto dela acende ao concluir.
 - [ ] Falas até 160, enunciados até 140, nenhum emoji, `toque` preenchido.
 - [ ] Falas neutras (sem "clique"); enunciados com as duas versões.
 - [ ] Todo termo técnico explicado na primeira vez; pelo menos uma ligação

@@ -10,20 +10,27 @@ O jogador aprende usando uma versão simplificada do DevTools (F12) e vê a
 página mudar em tempo real. Tudo o que ele aprende funciona "lá fora", no F12
 de qualquer site real. O gancho emocional: "eu consigo mexer em qualquer site".
 
-Estrutura futura (não construir agora, só não bloquear):
+Estrutura (o mapa, rodada 5):
 
-- Mapa estilo Mario World com ilhas. Cada ilha é uma esfera de conteúdo; a
-  primeira é a **Ilha Sites**.
-- Dentro da ilha, zonas seguindo os painéis do DevTools: Elementos, Estilos,
-  Console, Rede, Aplicação.
-- Cada zona tem várias fases.
+- Mapa estilo Mario World com ilhas, na ordem do currículo
+  (`docs/MAPA-CURRICULAR.md`, em dados em `src/curriculo/`): Origens (o
+  museu, sempre aberto), Sites, Lógica, Páginas vivas, Rede e Servidor,
+  Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
+- Dentro da ilha, zonas (na Ilha Sites: Elementos, Estilos, Layout,
+  Responsivo e Publicar), cada uma com unidades em sequência. Todas as
+  unidades planejadas aparecem no mapa, "Em breve".
+- Cada unidade tem várias fases, terminando no desafio.
 
-Hoje existem duas unidades na Ilha Sites › Elementos:
+Hoje existem duas unidades prontas, na Ilha Sites › Elementos:
 
-- **Unidade 1, "O site é seu"**: a Fase 1 (só objetivos guiados; os objetivos
-  sozinho e o desafio dela são o primeiro trabalho a fazer com a fábrica).
+- **Unidade 1, "O site é seu"**: Fase 1 guiada, Fase 2 só de sozinho (a
+  exceção: a Fase 1 já estava publicada) e o desafio na Lanchonete Sabor
+  Rápido.
 - **Unidade 2, "Faxina no site"**: a unidade-modelo, completa (3 fases de
   micro-passos no Jornal da Vila e o desafio na loja Brinquedos Arco-Íris).
+
+A próxima é a U3, "Títulos e textos" (motor pronto: renomear tag). Zonas
+com `requerMotor` no currículo esperam trabalho de motor.
 
 O conteúdo é produzido em massa a partir do formato declarativo, das
 checagens automáticas e do guia `docs/GUIA-DE-CONTEUDO.md`.
@@ -69,7 +76,10 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
   atual recomendado na doc em 2026-09), configurável por `GEMINI_MODEL_RESERVA`.
 - Persistência: `localStorage`, chave `ilha-sites:progresso:v2`, sempre com
   try/catch e normalização. A v1 é migrada sozinha na primeira leitura
-  (ids de fase renomeados, nada se perde) e fica intacta como cópia.
+  (ids de fase renomeados, nada se perde) e fica intacta como cópia. Campos
+  novos da rodada 5 (`metasVistas`, `unidadesComemoradas`, `posicaoNoMapa`,
+  `mapaDesbloqueado`) nascem com padrão na normalização: progresso antigo
+  continua valendo.
 - Fontes via `next/font/google`: Nunito (UI) e JetBrains Mono (código).
 - Testes de conteúdo: Vitest + jsdom (`npm run testar:conteudo`). Testes de
   navegador: scripts Playwright em `testes/`.
@@ -425,22 +435,27 @@ src/
   cada regra de `src/conteudo/checagens.ts` vira um teste por fase (ids,
   conceitos, ferramentas apresentadas, limites de texto, emojis, previsões,
   estado inicial, soluções de teste e do "Me ajuda" cumprindo cada objetivo
-  na hora certa, momentos roteirizados, partes do desafio), mais o índice de
-  conceitos, o núcleo do painel, a migração do progresso, o contexto do
-  tutor e o próprio template anotado.
+  na hora certa, momentos roteirizados, partes do desafio com o checklist
+  do motor, fase só de sozinho, `revisarEm` guiado), mais as regras gerais
+  (currículo, ids publicados congelados, meta), o índice de conceitos, o
+  núcleo do painel (inclusive renomear tag e links), o `data-chave`, as
+  regras do mapa, a migração do progresso, o contexto do tutor, o próprio
+  template anotado e sabotagens que confirmam as mensagens.
 - **Navegador** (Playwright em `testes/`, ver `testes/README.md`), contra o
   jogo no ar: sincronia, apresentações e Caixa, ferramentas novas (desktop,
-  celular, toque longo, apresentações), a Fase 1 e as Unidades 1 e 2
-  inteiras em desktop, retrato (390×844, toque) e paisagem (844×390, toque),
+  celular, toque longo, apresentações), renomear tag e links na prévia, o
+  mapa (mundo, ilha, museu, deep links, voltar do navegador, /lab/mapa), a
+  Fase 1 e as Unidades 1 e 2 inteiras começando pelo mapa em desktop,
+  retrato (390×844, toque) e paisagem (844×390, toque),
   retomar no meio de um momento roteirizado, celular (prévia ao editar,
   teclado simulado, alça, giro, spotlight) e tutor (sobrecarga, reserva,
   sem chave).
 
 ## Fora do escopo agora
 
-Computadorzinho navegador
-(o índice `montarIndice()` já existe), atividades teóricas (linha do tempo,
+Conteúdo novo (a U3 em diante é trabalho da fábrica), aba Estilos, modo
+documento inteiro (head editável), atividades das Origens (linha do tempo,
 comparador de linguagens, diagrama de rede; o registro de tipos de fase já
-está pronto para elas), outras zonas, abas além de Elementos, objetivos
-sozinho e desafio da Unidade 1 (primeiro trabalho com a fábrica), site-alvo
-externo validado, login, banco de dados, Monaco.
+está pronto para elas), computadorzinho navegador (o índice
+`montarIndice()` já existe), abas além de Elementos, site-alvo externo
+validado, login, banco de dados, Monaco.
