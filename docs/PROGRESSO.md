@@ -4,13 +4,49 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 6 concluída — Unidades 3, 4 e 5 da zona
+**Estado atual:** rodada 7 (sistema de áudio) concluída; antes dela, a
+rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
 ("Página do zero") segue planejada, por exigir motor (modo documento
 inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
 que também requer motor (aba Estilos) — parar e relatar antes de
 produzir, seguindo a seção 0 do guia.
+
+## Rodada 7: sistema de áudio
+
+Detalhes em `docs/AUDIO.md`.
+
+- [x] **Etapa 0: reconhecimento.** Som antigo em `src/lib/som.ts` (acerto,
+  clique, conclusão, aviso; liga/desliga em `som` no progresso). Balão
+  (`BalaoFala`) mostra o texto de uma vez, sem digitação. 7 expressões
+  (`src/motor/expressao.ts`). Eventos que existem: conclusão de fase,
+  comemoração de unidade na ilha (com a próxima abrindo), esbarrão,
+  previsão certa/errada, ferramentas pelo barramento do painel. Não
+  existem: ociosidade (dormir/acordar), insígnias, evento de ilha ou zona
+  desbloqueada (o estado é derivado).
+- [x] **Etapa 1: músicas.** 14 arquivos e o `musicas.json` em
+  `public/audio/musica/`; zip removido.
+- [x] **Etapa 2: motor.** `src/audio/`: `AudioContext` único no primeiro
+  gesto, barramentos, suspensão com a aba escondida, rampas, música por
+  tela (tabela única `telas.ts`, crossfade de 1,5 s, `loopEnd` do
+  manifesto, no máximo duas faixas decodificadas), ducking. O
+  `src/lib/som.ts` foi absorvido (mesmos sons). Ajustes de som
+  (`AjustesSom`) no botão de som e no menu do celular, salvos no progresso
+  (`volumeMusica`, `volumeEfeitos`, `volumeVoz`; `som` preservado).
+- [x] **Etapa 3: voz de modem.** Gerador puro e determinístico
+  (`vozModem.ts`) + tocador; 4 assinaturas (feliz, pensativo, triste,
+  surpreso) para as 7 expressões; teto de 2,5 s com cauda natural; uma
+  voz por vez; balão saindo de cena cala.
+- [x] **Etapa 4: efeitos.** Registro de 31 ids com versão sintetizada e
+  arquivo opcional pelo `public/audio/efeitos/efeitos.json`; teclas do
+  editor, ferramentas do DevTools, painéis, momentos grandes. `dormir`,
+  `acordar` e `insignia` sem ligação (não há evento).
+- [x] **Etapa 5: docs.** `docs/AUDIO.md`, este arquivo, `PROJETO.md` e
+  `testes/README.md`.
+- [x] **Etapa 6: testes.** `testes/audio/` (Vitest, também no
+  `testar:conteudo`) e `testes/audio.mjs` (Playwright: ajustes salvos,
+  navegação com o AudioContext real, toque em pé), na `testes/todos.mjs`.
 
 ## Rodada 6: Unidades 3, 4 e 5 da zona Elementos
 

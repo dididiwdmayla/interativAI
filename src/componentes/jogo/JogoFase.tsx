@@ -1,5 +1,7 @@
 "use client";
 
+import { tocarEfeito } from "@/audio/motor";
+import type { IdEfeito } from "@/audio/efeitos";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
 import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
@@ -11,7 +13,7 @@ import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
 import { BotaoMapa } from "@/componentes/layout/BotaoMapa";
 import { BotaoRecomecar } from "@/componentes/layout/BotaoRecomecar";
-import { BotaoSom } from "@/componentes/layout/BotaoSom";
+import { AjustesSom } from "@/componentes/layout/AjustesSom";
 import { SeletorTema } from "@/componentes/layout/SeletorTema";
 import { AreaMascote } from "@/componentes/mascote/AreaMascote";
 import { BalaoFala } from "@/componentes/mascote/BalaoFala";
@@ -48,10 +50,10 @@ import { caminhoDoNo } from "@/lib/dom";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
-import { tocarSom } from "@/lib/som";
 import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
+import type { EventoFase } from "@/motor/eventos";
 import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
@@ -94,6 +96,22 @@ type Props = {
   aoVoltarAoDesafio?: () => void;
   /** Só no lab: a gaveta com os validadores ao vivo. */
   painelLab?: (api: ApiLab) => ReactNode;
+};
+
+/**
+ * Som de cada ferramenta do DevTools, tocado pelo evento do painel (vale
+ * para o jogador, para as soluções e para os momentos roteirizados).
+ */
+const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
+  editouTexto: "editar",
+  editouAtributo: "editar",
+  escondeu: "esconder",
+  mostrou: "esconder",
+  apagou: "apagar",
+  duplicou: "duplicar",
+  desfez: "desfazer",
+  refez: "refazer",
+  renomeouTag: "renomear-tag",
 };
 
 /** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
@@ -338,7 +356,11 @@ export function JogoFase({
   useEffect(
     () =>
       barramento.assinar((evento) => {
+        const som = SOM_DO_EVENTO[evento.tipo];
+        if (som) tocarEfeito(som);
+        if (evento.tipo === "respondeuPrevisao") tocarEfeito(evento.acertou ? "acerto" : "erro");
         if (evento.tipo === "selecionou" && (evento.origem === "arvore" || evento.origem === "teclado")) {
+          if (evento.origem === "arvore") tocarEfeito("clique");
           sinalizarUso("arvore");
         } else if (evento.tipo === "selecionou" && evento.origem === "codigo") {
           sinalizarUso("sincronia");
@@ -415,23 +437,26 @@ export function JogoFase({
   // Sons: acerto a cada objetivo, fanfarra na conclusão, aviso antes da solução.
   const acertosAnteriores = useRef(estado.acertos);
   useEffect(() => {
-    if (estado.acertos > acertosAnteriores.current) tocarSom("acerto");
+    if (estado.acertos > acertosAnteriores.current) tocarEfeito("acerto");
     acertosAnteriores.current = estado.acertos;
   }, [estado.acertos]);
   useEffect(() => {
     if (estado.etapa === "concluida" && estado.conclusaoAberta && estado.indiceFala === 0) {
-      tocarSom("conclusao");
+      tocarEfeito("fase-concluida");
     }
   }, [estado.etapa, estado.conclusaoAberta, estado.indiceFala]);
   useEffect(() => {
-    if (estado.confirmandoSolucao) tocarSom("aviso");
+    if (estado.confirmandoSolucao) tocarEfeito("aviso");
   }, [estado.confirmandoSolucao]);
   useEffect(() => {
-    if (estado.comemoracoesSozinho > 0) tocarSom("conclusao");
+    if (estado.comemoracoesSozinho > 0) tocarEfeito("fez-sozinho");
   }, [estado.comemoracoesSozinho]);
+  useEffect(() => {
+    if (estado.roteiro === "esbarrao") tocarEfeito("esbarrao");
+  }, [estado.roteiro]);
 
   const comClique = (acao: () => void) => () => {
-    tocarSom("clique");
+    tocarEfeito("clique");
     acao();
   };
 
@@ -453,7 +478,7 @@ export function JogoFase({
 
   // No celular a prévia está sempre visível; só o balão sai da frente.
   const alternarInspecaoResponsiva = () => {
-    tocarSom("clique");
+    tocarEfeito(inspecionando ? "clique" : "inspecionar");
     if (!inspecionando && movel) setBalaoAberto(false);
     alternarInspecao();
   };
@@ -512,7 +537,7 @@ export function JogoFase({
   }, []);
 
   const reverParte = (parteId: string) => {
-    tocarSom("clique");
+    tocarEfeito("clique");
     const alvo = motor.rever(parteId);
     if (alvo) aoRever?.(alvo);
   };
@@ -556,10 +581,7 @@ export function JogoFase({
         }}
         aoCancelarSolucao={comClique(motor.cancelarSolucao)}
         aoConfirmarSolucao={motor.confirmarSolucao}
-        aoResponderPrevisao={(opcao) => {
-          tocarSom("clique");
-          motor.responderPrevisao(opcao);
-        }}
+        aoResponderPrevisao={motor.responderPrevisao}
         aoAbrirConclusao={comClique(motor.abrirConclusao)}
         aoAbrirCard={abrirCard}
       />
@@ -668,9 +690,9 @@ export function JogoFase({
           menu={
             <>
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              <div className="flex items-center justify-between gap-2">
-                <SeletorTema />
-                <BotaoSom />
+              <SeletorTema />
+              <div data-manter-menu className="border-t-2 border-borda pt-2">
+                <AjustesSom />
               </div>
               {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
             </>
@@ -757,14 +779,8 @@ export function JogoFase({
                     <BotoesHistorico
                       podeDesfazer={historico.podeDesfazer}
                       podeRefazer={historico.podeRefazer}
-                      aoDesfazer={() => {
-                        tocarSom("clique");
-                        desfazer();
-                      }}
-                      aoRefazer={() => {
-                        tocarSom("clique");
-                        refazer();
-                      }}
+                      aoDesfazer={desfazer}
+                      aoRefazer={refazer}
                     />
                   </AlvoFerramenta>
                 </>

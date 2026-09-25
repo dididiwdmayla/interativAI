@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useMusicaDaTela } from "@/audio/ganchos";
+import { audioLiberado, preCarregarEfeitosGrandes, tocarEfeito, tocarHover } from "@/audio/motor";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
@@ -73,6 +75,7 @@ function Barquinho({ x, y }: Ponto) {
  */
 export function MundoMapa() {
   const carregado = useProgressoCarregado();
+  useMusicaDaTela({ tipo: "mundo" });
   if (!carregado) return <TelaCarregando />;
   return <MundoCarregado />;
 }
@@ -84,6 +87,13 @@ function MundoCarregado() {
   const { largura: larguraTela, altura: alturaTela } = useTamanho(moldura);
   const [aviso, setAviso] = useState<string | null>(null);
   const centralizado = useRef(false);
+
+  // Voltar ao mapa (depois do primeiro gesto) tem som de chegada; os arquivos grandes já vão carregando.
+  useEffect(() => {
+    if (!audioLiberado()) return;
+    tocarEfeito("entrar-mapa");
+    preCarregarEfeitosGrandes();
+  }, []);
 
   // O mundo cobre a tela e rola o resto (no celular, arrasta de lado).
   const escala =
@@ -233,6 +243,8 @@ function MundoCarregado() {
                 <Link
                   key={ilha.id}
                   href={rotaDaIlha(ilha.id)}
+                  onClick={() => tocarEfeito(ilha.sempreAberta ? "clique" : "viagem-ilha")}
+                  onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
                   data-ilha={ilha.id}
                   data-estado={estado}
                   aria-label={rotulo}

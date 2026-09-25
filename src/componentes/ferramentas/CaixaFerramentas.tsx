@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useEffect, useId, useRef } from "react";
+import { tocarEfeito } from "@/audio/motor";
 import { IconeCaixaFerramentas } from "@/componentes/icones/IconeCaixaFerramentas";
 import { IconeFechar } from "@/componentes/icones/IconeFechar";
 import type { IdFerramenta } from "@/ferramentas/ids";
@@ -27,6 +28,14 @@ export function CaixaFerramentas({ aberta, foco, vistas, toque, aoFechar, aoReve
   const caixa = useRef<HTMLDivElement>(null);
   const focoAnterior = useRef<Element | null>(null);
   const arrasto = useDragControls();
+
+  // Abrir e fechar a Caixa tem som (a primeira montagem, fechada, não).
+  const abertaAntes = useRef(aberta);
+  useEffect(() => {
+    if (abertaAntes.current === aberta) return;
+    abertaAntes.current = aberta;
+    tocarEfeito(aberta ? "abrir-painel" : "fechar-painel");
+  }, [aberta]);
 
   useEffect(() => {
     if (!aberta) return;

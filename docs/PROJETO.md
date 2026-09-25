@@ -92,7 +92,8 @@ src/
   app/                  rotas (/ mundo, /ilha/[id], /fase/[id], /lab/mapa, /lab/fases, /lab/mascote, /api/tutor)
   ferramentas/          registro central das ferramentas (dados), ids, sinal de uso, mini demos
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
-  lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
+  lib/                  progresso (localStorage), armazém reativo, tema, DOM
+  audio/                motor de áudio (música, voz de modem, efeitos), sem React; ver docs/AUDIO.md
   curriculo/            o currículo inteiro em dados (ilhas, zonas, unidades) e a consistência com o conteúdo
   componentes/mapa/     o mapa: mundo, ilha (pontos e card), museu das Origens, arte SVG das ilhas
   conteudo/             conteúdo declarativo: tipos, conceitos, registro, checagens, índice
@@ -389,10 +390,23 @@ src/
 
 ### Som
 
-- `src/lib/som.ts`: Web Audio, sem arquivos. Sons: acerto, clique, conclusão,
-  aviso. Volume baixo, botão liga/desliga salvo no progresso. O AudioContext só
-  é criado depois da primeira interação (`Provedores` libera no primeiro
-  clique ou tecla).
+Detalhes em `docs/AUDIO.md`.
+
+- `src/audio/`: motor único de Web Audio (sem bibliotecas), sem React no
+  núcleo. Um `AudioContext` criado no primeiro gesto do jogador, barramentos
+  master, música, efeitos e voz, suspenso com a aba escondida.
+- Música por tela (tabela única em `src/audio/telas.ts`): cada ilha e tudo
+  dentro dela tocam a faixa da ilha, o museu toca `origens`, o mapa do
+  mundo pede `mapa` (ainda pendente: silêncio). Arquivos em
+  `public/audio/musica/` (`.webm` Opus e `.m4a` AAC) e o `musicas.json`.
+- Voz de modem do computadorzinho: gerador puro e determinístico
+  (`vozModem.ts`), um humor por expressão, teto de 2,5 s, a música abaixa
+  enquanto ele fala.
+- Efeitos por id (`efeitos.ts`), sintetizados, com arquivo opcional pelo
+  `public/audio/efeitos/efeitos.json`. Os sons antigos (acerto, clique,
+  conclusão e aviso) foram migrados iguais.
+- Ajustes de som (música, efeitos, voz, silenciar tudo, testar voz) no
+  botão de som (desktop) e no menu (celular), salvos no progresso.
 
 ### Responsivo (três composições)
 
@@ -441,6 +455,9 @@ src/
   núcleo do painel (inclusive renomear tag e links), o `data-chave`, as
   regras do mapa, a migração do progresso, o contexto do tutor, o próprio
   template anotado e sabotagens que confirmam as mensagens.
+- **Áudio** (`npm run testar:audio`, também dentro do `testar:conteudo`,
+  `testes/audio/`): voz de modem, registro de efeitos, tabela tela ->
+  faixa, manifestos e escolha de formato.
 - **Navegador** (Playwright em `testes/`, ver `testes/README.md`), contra o
   jogo no ar: sincronia, apresentações e Caixa, ferramentas novas (desktop,
   celular, toque longo, apresentações), renomear tag e links na prévia, o

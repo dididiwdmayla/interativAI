@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { tocarHover } from "@/audio/motor";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { EstrelasFase } from "@/componentes/layout/EstrelasFase";
 import { Carinha } from "@/componentes/mascote/Carinha";
@@ -83,6 +84,7 @@ export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, aoAbrir
           data-estado={estado}
           aria-label={`${item.titulo}: ${ROTULO[estado]}`}
           onClick={aoAbrir}
+          onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
           initial={acendendo && animar ? { scale: 0.6 } : false}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 12, delay: acendendo ? 0.4 : 0 }}

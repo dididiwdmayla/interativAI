@@ -1,10 +1,10 @@
 "use client";
 
+import { tocarEfeito } from "@/audio/motor";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { IconePaleta } from "@/componentes/icones/IconePaleta";
 import { Dica } from "@/componentes/ui/Dica";
 import { useProgresso } from "@/lib/armazemProgresso";
-import { tocarSom } from "@/lib/som";
 import { escolherTema } from "@/lib/tema";
 import { TEMAS } from "@/tema/temas";
 
@@ -38,7 +38,7 @@ export function SeletorTema() {
               disabled={!livre}
               onClick={() => {
                 escolherTema(tema.id);
-                tocarSom("clique");
+                tocarEfeito("clique");
               }}
               className={`relative grid h-7 w-7 place-items-center rounded-full transition-transform ${
                 ativo ? "scale-110 ring-2 ring-primaria ring-offset-2 ring-offset-superficie" : ""

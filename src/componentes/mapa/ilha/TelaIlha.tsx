@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMusicaDaTela } from "@/audio/ganchos";
+import { tocarEfeito } from "@/audio/motor";
 import { IconeChevron } from "@/componentes/icones/IconeChevron";
 import { IconeZona } from "@/componentes/icones/IconeZona";
 import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
@@ -24,7 +26,6 @@ import {
   zonaAberta,
 } from "@/lib/mapa";
 import { ROTA_MUNDO, rotaDaFase } from "@/lib/rotas";
-import { tocarSom } from "@/lib/som";
 import { Oceano } from "../arte/Oceano";
 import { useAnimarMapa } from "../arte/useAnimarMapa";
 import { type ApiAreaArrastavel, AreaArrastavel } from "../AreaArrastavel";
@@ -72,6 +73,7 @@ function PlacaConstrucao() {
 export function TelaIlha({ ilhaId }: { ilhaId: string }) {
   const carregado = useProgressoCarregado();
   const ilha = ilhaDoId(ilhaId);
+  useMusicaDaTela({ tipo: "ilha", ilhaId });
   if (!carregado || !ilha) return <TelaCarregando />;
   return <IlhaCarregada ilha={ilha} />;
 }
@@ -112,17 +114,25 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
     const titulo = desenho.pontos.find((ponto) => ponto.item.id === comemoracao.acendendo)?.item.titulo ?? "";
     return `Unidade concluída: ${titulo}! O caminho até a próxima já apareceu.`;
   });
+  // A unidade seguinte que a comemoração abre (o caminho até ela se desenha).
+  const indiceAcendendo = comemoracao ? desenho.pontos.findIndex((ponto) => ponto.item.id === comemoracao.acendendo) : -1;
+  const abriuProxima = indiceAcendendo >= 0 && estados[indiceAcendendo + 1] === "disponivel";
+  const [abriuNaComemoracao] = useState(abriuProxima);
   useEffect(() => {
     if (!comemoracao) return;
-    tocarSom("conclusao");
+    tocarEfeito("unidade-concluida");
+    const brilho = abriuNaComemoracao ? setTimeout(() => tocarEfeito("desbloqueio"), 1300) : null;
     const temporizador = setTimeout(() => {
       atualizarProgresso((atual) => ({
         ...atual,
         unidadesComemoradas: [...new Set([...atual.unidadesComemoradas, ...comemoracao.pendentes])],
       }));
     }, 1800);
-    return () => clearTimeout(temporizador);
-  }, [comemoracao]);
+    return () => {
+      clearTimeout(temporizador);
+      if (brilho !== null) clearTimeout(brilho);
+    };
+  }, [comemoracao, abriuNaComemoracao]);
   useEffect(() => {
     if (!mensagem) return;
     const temporizador = setTimeout(() => setMensagem(null), 4200);
@@ -159,7 +169,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
     const unidade = conteudoDe(item);
     if (!unidade) return;
     const acao = acaoDaUnidade(unidade, progresso);
-    tocarSom("clique");
+    tocarEfeito("clique");
     atualizarProgresso((anterior) => {
       const fasesEmAndamento = { ...anterior.fasesEmAndamento };
       // Jogar de novo: as fases recomeçam do zero (estrelas e conclusões ficam).
@@ -311,7 +321,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                   y={px(ponto.y)}
                   acendendo={comemoracao?.acendendo === ponto.item.id}
                   aoAbrir={() => {
-                    tocarSom("clique");
+                    tocarEfeito("clique");
                     setAberto(ponto.item.id);
                   }}
                 />
