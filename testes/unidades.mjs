@@ -169,6 +169,8 @@ async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   const indice = texto.indexOf(apos);
   if (indice < 0) throw new Error(`Falhou: "${apos}" não está na linha "${texto}"`);
   const posicao = indice + apos.length;
+  // Duas vezes: a primeira pode ir só até o começo do texto (smart Home).
+  await pagina.keyboard.press("Home");
   await pagina.keyboard.press("Home");
   for (let i = 0; i < posicao; i++) await pagina.keyboard.press("ArrowRight");
   await pagina.keyboard.type(textoNovo);
