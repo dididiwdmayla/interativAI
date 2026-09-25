@@ -195,8 +195,11 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "responderPrevisao":
       return null;
     case "definirPropriedade":
+      return "editar-valor-css";
     case "alternarDeclaracao":
+      return "ligar-desligar-declaracao";
     case "adicionarRegra":
+      return "nova-regra";
     case "editarCss":
       return "editor-css";
   }
@@ -215,7 +218,8 @@ function usosDeCss(fase: Fase): string[] {
     for (const acao of acoes) if (ACOES_DE_CSS.has(acao.tipo)) usos.push(`${onde}: ação ${acao.tipo}`);
   }
   objetivosDe(fase).forEach((objetivo, indice) => {
-    if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "css") usos.push(`${nomeObjetivo(objetivo, indice)}: linha no CSS`);
+    const { alvo } = objetivo.modo === "guiado" ? objetivo.ajudas.linha : { alvo: null };
+    if (alvo === "css" || alvo === "estilos") usos.push(`${nomeObjetivo(objetivo, indice)}: linha no ${alvo === "css" ? "CSS" : "painel Estilos"}`);
   });
   return usos;
 }
@@ -230,7 +234,7 @@ function seletoresDeRegraDe(fase: Fase): { onde: string; seletor: string }[] {
     for (const acao of acoes) if ("seletorRegra" in acao) lista.push({ onde, seletor: acao.seletorRegra });
   }
   objetivosDe(fase).forEach((objetivo, indice) => {
-    if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "css") {
+    if (objetivo.modo === "guiado" && (objetivo.ajudas.linha.alvo === "css" || objetivo.ajudas.linha.alvo === "estilos")) {
       lista.push({ onde: `${nomeObjetivo(objetivo, indice)} ajudas.linha`, seletor: objetivo.ajudas.linha.seletorRegra });
     }
   });
@@ -640,6 +644,9 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         }
       }
       objetivosDe(fase).forEach((objetivo, indice) => {
+        if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "estilos" && !fase.usaFerramentas.includes("painel-estilos")) {
+          problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta o painel Estilos, que não está em usaFerramentas ("painel-estilos")`);
+        }
         if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "ferramenta") {
           const { ferramenta } = objetivo.ajudas.linha;
           if (!fase.usaFerramentas.includes(ferramenta)) {
@@ -664,6 +671,22 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const problemas: string[] = [];
       if (usos.length > 0 && fase.siteAlvo.css === undefined) {
         problemas.push(`a fase usa CSS (${usos.slice(0, 3).join("; ")}), mas o site-alvo não tem css (a folha editável)`);
+      }
+      // O que o jogador faz pelo painel Estilos precisa do painel na tela.
+      const doPainel = [...acoesDoJogador(fase)].flatMap(({ onde, acoes }) =>
+        acoes
+          .filter((acao) => acao.tipo === "definirPropriedade" || acao.tipo === "alternarDeclaracao" || acao.tipo === "adicionarRegra")
+          .map((acao) => `${onde}: ${acao.tipo}`),
+      );
+      const linhaNoPainel = objetivosDe(fase).some((objetivo) => objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "estilos");
+      const ferramentasDoPainel = fase.usaFerramentas.filter((id) =>
+        ["painel-estilos", "editar-valor-css", "ligar-desligar-declaracao", "setas-numericas", "seletor-de-cor", "nova-regra"].includes(id),
+      );
+      if ((doPainel.length > 0 || linhaNoPainel || ferramentasDoPainel.length > 0) && !(fase.paineisElementos ?? []).includes("estilos")) {
+        problemas.push(
+          `a fase usa o painel Estilos (${[...doPainel, ...ferramentasDoPainel].slice(0, 3).join("; ") || "linha de ajuda"}), ` +
+            'mas não liga o painel: ponha paineisElementos: ["estilos"]',
+        );
       }
       for (const { onde, seletor } of seletoresDeRegraDe(fase)) {
         if (seletor.trim() === "element.style") continue;

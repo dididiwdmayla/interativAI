@@ -36,8 +36,8 @@ const FASE: FasePratica = {
   conceitos: ["elemento"],
   revisa: [],
   prerequisitos: [],
-  usaFerramentas: ["editor-css"],
-  apresentar: ["editor-css"],
+  usaFerramentas: ["editor-css", "painel-estilos", "editar-valor-css", "ligar-desligar-declaracao"],
+  apresentar: ["editor-css", "painel-estilos", "editar-valor-css", "ligar-desligar-declaracao"],
   paineisElementos: ["estilos"],
   introducao: [{ texto: "Oi", expressao: "feliz" }],
   conclusao: [{ texto: "Tchau", expressao: "feliz" }],
@@ -207,6 +207,16 @@ describe("checagens de fases de CSS", () => {
       objetivos: [{ ...primeiro, validador: { tipo: "valorEfetivo", seletor: "h1", propriedade: "box-shadow", valor: "none" } }, segundo],
     };
     expect(problemas(sabotada).join("\n")).toContain('não conhece os valores de "box-shadow"');
+  });
+
+  it("sabotagem: ação do painel Estilos sem o painel ligado na fase", () => {
+    const sabotada = { ...FASE, paineisElementos: undefined };
+    expect(problemas(sabotada).join("\n")).toContain('não liga o painel: ponha paineisElementos: ["estilos"]');
+  });
+
+  it("sabotagem: definirPropriedade sem editar-valor-css em usaFerramentas", () => {
+    const sabotada = { ...FASE, usaFerramentas: FASE.usaFerramentas.filter((id) => id !== "editar-valor-css") };
+    expect(problemas(sabotada).join("\n")).toContain('usa a ferramenta "editar-valor-css", que não está em usaFerramentas');
   });
 
   it("sabotagem: seletorRegra que não é CSS válido", () => {

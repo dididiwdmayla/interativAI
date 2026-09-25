@@ -34,6 +34,9 @@ import { type AbaEditor, CabecalhoEditor } from "@/componentes/painel/editor/Cab
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
 import { PainelDividido } from "@/componentes/painel/PainelDividido";
+import { PainelLadoALado } from "@/componentes/painel/PainelLadoALado";
+import { PainelEstilos } from "@/componentes/painel/estilos/PainelEstilos";
+import type { AcoesEstilos, DestaqueEstilos } from "@/componentes/painel/estilos/tipos";
 import { CamadaInspecao } from "@/componentes/preview/CamadaInspecao";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
 import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
@@ -46,6 +49,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { elementoDoNo } from "@/lib/arvore";
 import { caminhoDoNo } from "@/lib/dom";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
@@ -66,6 +70,7 @@ import {
   atalhoHistorico,
   FALA_PENSANDO,
   FERRAMENTAS_DA_ARVORE,
+  FERRAMENTAS_DOS_ESTILOS,
   focoTemDesfazerProprio,
   focoUsaEnter,
   RECADO_PAISAGEM,
@@ -167,7 +172,11 @@ export function JogoFase({
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
-  const [segmento, setSegmento] = useState<"arvore" | "codigo">("arvore");
+  const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
+  /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
+  const paineis = fase.paineisElementos ?? [];
+  const comEstilos = paineis.length > 0;
+  const [destaqueEstilos, setDestaqueEstilos] = useState<DestaqueEstilos | null>(null);
   const [balaoAberto, setBalaoAberto] = useState(true);
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
@@ -202,10 +211,13 @@ export function JogoFase({
     arvore,
     htmlAtual,
     cssAtual,
+    versaoDocumento,
+    versaoCss,
     versaoCssCalma,
     aoEditarCodigo,
     aoEditarCss,
     editarCss,
+    previsualizarCss,
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,
@@ -245,9 +257,13 @@ export function JogoFase({
     antesDeEditarCodigo,
     lerCss,
     definirPropriedade,
+    editarDeclaracao,
+    alternarDeclaracao,
     alternarPropriedade,
+    adicionarDeclaracao,
     adicionarRegra,
     escreverCss,
+    editarEstiloInline,
     aoRecarregarDocumento,
   } = usePainelElementos({
     editorRef,
@@ -367,6 +383,28 @@ export function JogoFase({
   );
   const limparDestaqueCss = useCallback(() => editorCssRef.current?.destacarLinhas([]), [editorCssRef]);
 
+  /** Degrau 3 no painel Estilos: mostra o painel (no celular, o segmento Estilos) e pisca a regra. */
+  const destacarNoEstilos = useCallback(
+    (novo: DestaqueEstilos | null) => {
+      setDestaqueEstilos(novo);
+      if (novo && movel) setSegmento("estilos");
+    },
+    [movel],
+  );
+
+  /** O link "estilo.css:12" do painel: abre a folha no editor CSS, na regra. */
+  const irParaFonte = useCallback(
+    (posicao: number) => {
+      mostrarEditorCss();
+      requestAnimationFrame(() => {
+        editorCssRef.current?.irParaPosicao(posicao);
+        const texto = lerCss();
+        if (texto !== null) editorCssRef.current?.destacarLinhas([texto.slice(0, posicao).split("\n").length]);
+      });
+    },
+    [editorCssRef, lerCss, mostrarEditorCss],
+  );
+
   const motor = useMotorFase({
     fase,
     modo,
@@ -382,6 +420,7 @@ export function JogoFase({
     destacarNaArvore,
     destacarNoCss,
     limparDestaqueCss,
+    destacarNoEstilos,
     toque,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
@@ -413,7 +452,7 @@ export function JogoFase({
   const abrirCard = useCallback((id: IdFerramenta | null) => setCaixa({ aberta: true, foco: id }), []);
 
   /** Mostra o trecho do selecionado quando o código aparece de novo. */
-  const trocarSegmento = (novo: "arvore" | "codigo") => {
+  const trocarSegmento = (novo: "arvore" | "estilos" | "codigo") => {
     setSegmento(novo);
     if (novo === "codigo") requestAnimationFrame(() => destacarNoEditor(true));
   };
@@ -423,6 +462,7 @@ export function JogoFase({
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
     if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
+    if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSegmento("estilos");
     if (ferramenta.id === "editor" || ferramenta.id === "sincronia" || ferramenta.id === "editor-css") trocarSegmento("codigo");
   };
 
@@ -456,6 +496,12 @@ export function JogoFase({
           sinalizarUso("renomear-tag");
         } else if (evento.tipo === "editouCss") {
           sinalizarUso("editor-css");
+        } else if (evento.tipo === "editouPropriedade") {
+          sinalizarUso("editar-valor-css");
+        } else if (evento.tipo === "alternouDeclaracao") {
+          sinalizarUso("ligar-desligar-declaracao");
+        } else if (evento.tipo === "adicionouRegra") {
+          sinalizarUso("nova-regra");
         }
       }),
     [barramento],
@@ -632,6 +678,43 @@ export function JogoFase({
       aoDocumentoPronto();
     },
     [aoCarregarDocumento, aoRecarregarDocumento, verificar, aoDocumentoPronto],
+  );
+
+  /** O elemento selecionado (o dono, se a seleção é um texto): o painel Estilos mostra as regras dele. */
+  const elementoSelecionado = caminhoSelecionado ? elementoDoNo(noSelecionado()) : null;
+
+  const acoesEstilos = useMemo<AcoesEstilos>(
+    () => ({
+      editarDeclaracao,
+      alternarDeclaracao,
+      adicionarDeclaracao,
+      adicionarRegra: (seletor) => adicionarRegra(seletor),
+      editarInline: (elemento, estilo, detalhe) => {
+        const body = obterDocumento()?.body;
+        const caminho = body ? (elemento === body ? [] : caminhoDoNo(body, elemento)) : null;
+        return caminho ? editarEstiloInline(caminho, estilo, detalhe) : false;
+      },
+      previsualizarCss,
+      irParaFonte,
+      realcar: realcarVarios,
+      selecionarElemento: (elemento) => {
+        const body = obterDocumento()?.body;
+        const caminho = body ? (elemento === body ? [] : caminhoDoNo(body, elemento)) : null;
+        if (caminho) selecionar(caminho, "arvore");
+      },
+    }),
+    [
+      adicionarDeclaracao,
+      adicionarRegra,
+      alternarDeclaracao,
+      editarDeclaracao,
+      editarEstiloInline,
+      irParaFonte,
+      obterDocumento,
+      previsualizarCss,
+      realcarVarios,
+      selecionar,
+    ],
   );
 
   // Enter avança a conversa quando o foco não está num campo ou botão.
@@ -905,10 +988,18 @@ export function JogoFase({
                 <div className="flex shrink-0 border-b-2 border-borda bg-painel px-2 py-1.5">
                   <SeletorSegmentado
                     rotulo="Mostrar no painel"
-                    opcoes={[
-                      { id: "arvore", rotulo: "Árvore" },
-                      { id: "codigo", rotulo: "Código" },
-                    ]}
+                    opcoes={
+                      comEstilos
+                        ? [
+                            { id: "arvore", rotulo: "Árvore" },
+                            { id: "estilos", rotulo: "Estilos" },
+                            { id: "codigo", rotulo: "Código" },
+                          ]
+                        : [
+                            { id: "arvore", rotulo: "Árvore" },
+                            { id: "codigo", rotulo: "Código" },
+                          ]
+                    }
                     valor={segmento}
                     aoTrocar={trocarSegmento}
                     className="w-full"
@@ -917,48 +1008,77 @@ export function JogoFase({
               )}
               <PainelDividido
                 rotulo="Redimensionar árvore e editor"
-                proporcaoInicial={0.5}
-                mostrar={movel ? (segmento === "arvore" ? "cima" : "baixo") : "ambas"}
+                proporcaoInicial={comEstilos ? 0.58 : 0.5}
+                mostrar={movel ? (segmento === "codigo" ? "baixo" : "cima") : "ambas"}
                 cima={
-                  <div className="flex h-full min-h-0 flex-col">
-                    <AlvoFerramenta
-                      ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
-                      marcador="arvore"
-                      aoAbrirCard={abrirCard}
-                      classeMarcador="bottom-2 right-3"
-                      className="min-h-0 flex-1"
-                    >
-                      <ArvoreElementos
-                        raiz={arvore}
-                        recolhidos={recolhidos}
-                        caminhoSelecionado={caminhoSelecionado}
-                        destaque={destaque}
-                        toque={toque}
-                        aoSelecionar={selecionar}
-                        aoAlternar={alternarRecolhido}
-                        aoPassarMouse={aoPassarMouseArvore}
-                        aoEditarTexto={editarTexto}
-                        aoEditarAtributo={editarAtributo}
-                        aoEsconder={alternarEsconder}
-                        aoApagar={apagar}
-                        aoDuplicar={duplicar}
-                        aoRenomearTag={renomearTag}
-                        aoDesfazer={desfazer}
-                        aoRefazer={refazer}
-                        podeDesfazer={historico.podeDesfazer}
-                        podeRefazer={historico.podeRefazer}
-                        aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
-                      />
-                    </AlvoFerramenta>
-                    <AlvoFerramenta ids={["trilha"]} marcador="trilha" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
-                      <TrilhaElementos
-                        raiz={arvore}
-                        caminhoSelecionado={caminhoSelecionado}
-                        aoSelecionar={(caminho) => selecionar(caminho, "trilha")}
-                        recuoDireita={layout === "retrato"}
-                      />
-                    </AlvoFerramenta>
-                  </div>
+                  <PainelLadoALado
+                    rotulo="Redimensionar árvore e painel Estilos"
+                    mostrar={!comEstilos ? "esquerda" : layout === "retrato" ? (segmento === "estilos" ? "direita" : "esquerda") : "ambas"}
+                    esquerda={
+                      <div className="flex h-full min-h-0 flex-col">
+                        <AlvoFerramenta
+                          ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
+                          marcador="arvore"
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="bottom-2 right-3"
+                          className="min-h-0 flex-1"
+                        >
+                          <ArvoreElementos
+                            raiz={arvore}
+                            recolhidos={recolhidos}
+                            caminhoSelecionado={caminhoSelecionado}
+                            destaque={destaque}
+                            toque={toque}
+                            aoSelecionar={selecionar}
+                            aoAlternar={alternarRecolhido}
+                            aoPassarMouse={aoPassarMouseArvore}
+                            aoEditarTexto={editarTexto}
+                            aoEditarAtributo={editarAtributo}
+                            aoEsconder={alternarEsconder}
+                            aoApagar={apagar}
+                            aoDuplicar={duplicar}
+                            aoRenomearTag={renomearTag}
+                            aoDesfazer={desfazer}
+                            aoRefazer={refazer}
+                            podeDesfazer={historico.podeDesfazer}
+                            podeRefazer={historico.podeRefazer}
+                            aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
+                          />
+                        </AlvoFerramenta>
+                        <AlvoFerramenta ids={["trilha"]} marcador="trilha" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
+                          <TrilhaElementos
+                            raiz={arvore}
+                            caminhoSelecionado={caminhoSelecionado}
+                            aoSelecionar={(caminho) => selecionar(caminho, "trilha")}
+                            recuoDireita={layout === "retrato"}
+                          />
+                        </AlvoFerramenta>
+                      </div>
+                    }
+                    direita={
+                      comEstilos ? (
+                        <AlvoFerramenta
+                          ids={["painel-estilos", "editar-valor-css", "ligar-desligar-declaracao", "setas-numericas", "seletor-de-cor"]}
+                          marcador="painel-estilos"
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="right-2 top-1.5"
+                          className="h-full min-h-0"
+                        >
+                          <PainelEstilos
+                            elemento={elementoSelecionado}
+                            versao={versaoDocumento * 100000 + versaoCss}
+                            paineis={paineis}
+                            temFolha={temCss}
+                            toque={toque}
+                            destaque={destaqueEstilos}
+                            lerCss={lerCss}
+                            acoes={acoesEstilos}
+                            aoAbrirCard={abrirCard}
+                          />
+                        </AlvoFerramenta>
+                      ) : null
+                    }
+                  />
                 }
                 baixo={
                   <AlvoFerramenta

@@ -47,6 +47,8 @@ type Opcoes = {
   destacarNoCss: (seletorRegra: string, propriedade?: string) => void;
   /** Apaga os destaques do editor CSS. */
   limparDestaqueCss: () => void;
+  /** Degrau 3 no painel Estilos: pisca a regra (ou só a declaração); null apaga. */
+  destacarNoEstilos: (destaque: { seletorRegra: string; propriedade?: string } | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
 };
@@ -79,6 +81,7 @@ export function useMotorFase({
   destacarNaArvore,
   destacarNoCss,
   limparDestaqueCss,
+  destacarNoEstilos,
   toque,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
@@ -133,8 +136,9 @@ export function useMotorFase({
     destacarNaArvore(null);
     editorRef.current?.destacarLinhas([]);
     limparDestaqueCss();
+    destacarNoEstilos(null);
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, editorRef, limparDestaqueCss]);
+  }, [destacarNaArvore, destacarNoEstilos, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
@@ -473,6 +477,8 @@ export function useMotorFase({
       editor.destacarLinhas(linhas);
     } else if (linha.alvo === "css") {
       destacarNoCss(linha.seletorRegra, linha.propriedade);
+    } else if (linha.alvo === "estilos") {
+      destacarNoEstilos({ seletorRegra: linha.seletorRegra, propriedade: linha.propriedade });
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }

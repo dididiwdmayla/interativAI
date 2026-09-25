@@ -15,6 +15,7 @@ const TESTES = [
   ["unidades.mjs", "paisagem"],
   ["renomear-links.mjs"],
   ["css.mjs"],
+  ["estilos.mjs"],
   ["mapa.mjs", "desktop"],
   ["mapa.mjs", "retrato"],
   ["mapa.mjs", "paisagem"],

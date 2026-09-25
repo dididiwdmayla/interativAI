@@ -184,7 +184,9 @@ export type AjudaLinha =
   /** Pisca o botão ou a área de uma ferramenta (a setinha, a trilha...). */
   | { alvo: "ferramenta"; ferramenta: IdFerramenta; fala: string }
   /** Pisca no editor CSS as linhas da regra (e, com `propriedade`, só a declaração). */
-  | { alvo: "css"; seletorRegra: string; propriedade?: string; fala: string };
+  | { alvo: "css"; seletorRegra: string; propriedade?: string; fala: string }
+  /** Pisca a regra no painel Estilos (e, com `propriedade`, só a declaração). */
+  | { alvo: "estilos"; seletorRegra: string; propriedade?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {

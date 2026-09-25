@@ -213,6 +213,43 @@ src/
   currículo que só abrem no `/lab/fases` (`?fase=<id>` abre direto), para
   testar a interface de CSS e mostrar o motor para quem escreve fases.
 
+### Painel Estilos dentro de Elementos (rodada 9, etapa 3)
+
+- Como no Chrome, Styles e Computed são sub-painéis de Elements: as abas
+  de cima ficam Elementos, Console, Fontes, Rede e Aplicação (a ordem do
+  Chrome; só Elementos funciona por enquanto) e a fase liga os
+  sub-painéis por `paineisElementos` (`["estilos"]` ou
+  `["estilos", "calculado"]`). Sem o campo, a aba Elementos fica como
+  nas U1 a U5.
+- `componentes/painel/estilos/`: `PainelEstilos` (sub-abas, filtro,
+  botão de regra nova), `BlocoEstilo` (um bloco: `element.style`, regra,
+  folha do navegador ou "Herdado de"), `LinhaDeclaracao` (caixinha,
+  nome, valor, amostra de cor, atalho que abre as longas), `CampoEstilo`
+  (o campo de edição) e `numeros.ts` (as setas). Tudo em cima do motor de
+  cascata: ordem, riscadas, herdadas e incertas saem de
+  `calcularCascata`.
+- Comportamento conferido no devtools-frontend: `element.style` sempre
+  em cima (mesmo vazio); regras da que vence para a que perde; folha do
+  navegador no fim com o nome "user agent stylesheet" traduzido; "Herdado
+  de" só com ancestrais que têm propriedade herdável; link da fonte
+  `estilo.css:N` (abre a aba CSS do editor na regra); clique no nome ou
+  no valor edita, Enter confirma (do nome vai para o valor), Esc desiste,
+  Tab e Shift+Tab andam entre campos, `:` no nome e `;` no valor pulam
+  para o próximo campo; setas somam 1, Shift 10, Alt 0,1; a caixinha
+  comenta a declaração no texto; o seletor de cor troca só a cor
+  (hexadecimal); "+ declaração" no fim do bloco; regra nova no fim da
+  folha com o seletor sugerido pelo Chrome (`#id`, senão `.classes`,
+  senão a tag); passar o mouse no seletor acende as peças na prévia.
+- Enquanto digita, a prévia mostra o valor provisório
+  (`previsualizarCss`, sem entrar no desfazer); Enter grava pelo núcleo
+  (uma foto do desfazer), Esc volta. Tudo sem recarregar o iframe.
+- Celular: em pé, o painel alterna "Árvore | Estilos | Código"; deitado,
+  árvore e Estilos lado a lado (`PainelLadoALado`). Alvos de 44 px e
+  botões de seta no campo de número.
+- Ferramentas novas com apresentação: `painel-estilos`,
+  `editar-valor-css`, `ligar-desligar-declaracao`, `setas-numericas`,
+  `seletor-de-cor`, `nova-regra`. Linha de ajuda `{ alvo: "estilos" }`.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
@@ -531,7 +568,7 @@ Detalhes em `docs/AUDIO.md`.
 
 ## Fora do escopo agora
 
-Conteúdo novo (a U3 em diante é trabalho da fábrica), aba Estilos, modo
+Conteúdo novo (a U3 em diante é trabalho da fábrica), modo
 documento inteiro (head editável), atividades das Origens (linha do tempo,
 comparador de linguagens, diagrama de rede; o registro de tipos de fase já
 está pronto para elas), computadorzinho navegador (o índice

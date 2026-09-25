@@ -60,13 +60,18 @@ núcleo comum.
     Editor com abas HTML e CSS; validadores `valorEfetivo`, `declaracao`,
     `regraExiste`, `riscada`; ações de CSS; Bancada do motor no
     `/lab/fases`.
+  - Painel Estilos dentro de Elementos (como no Chrome): ordem das
+    regras, riscadas, "Herdado de", edição de nome e valor, setas,
+    caixinha, seletor de cor, "+ declaração", regra nova, link para o
+    editor CSS, celular em pé e deitado; 6 ferramentas novas com
+    apresentação. Abas de cima na ordem do Chrome (Fontes entrou,
+    Estilos saiu).
 
 ### Em andamento
 
-- Rodada 9, etapas 3 a 7: painel Estilos e Calculado dentro de
-  Elementos, modo documento, adicionar atributo pela árvore, mobile dos
-  painéis novos, liberações no currículo e a unidade-modelo E1 ("A aba
-  Estilos").
+- Rodada 9, etapas 4 a 7: aba Calculado dentro de Elementos, modo
+  documento, adicionar atributo pela árvore, mobile dos painéis novos,
+  liberações no currículo e a unidade-modelo E1 ("A aba Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.

@@ -5,7 +5,13 @@ import { IconeCodigo } from "@/componentes/icones/IconeCodigo";
 import { IconeDesfazer } from "@/componentes/icones/IconeDesfazer";
 import { IconeDuplicar } from "@/componentes/icones/IconeDuplicar";
 import { IconeEditarDuplo } from "@/componentes/icones/IconeEditarDuplo";
+import { IconeEditarValorCss } from "@/componentes/icones/IconeEditarValorCss";
 import { IconeEditorCss } from "@/componentes/icones/IconeEditorCss";
+import { IconeLigarDesligar } from "@/componentes/icones/IconeLigarDesligar";
+import { IconeNovaRegra } from "@/componentes/icones/IconeNovaRegra";
+import { IconePainelEstilos } from "@/componentes/icones/IconePainelEstilos";
+import { IconeSeletorCor } from "@/componentes/icones/IconeSeletorCor";
+import { IconeSetasNumericas } from "@/componentes/icones/IconeSetasNumericas";
 import { IconeEsconder } from "@/componentes/icones/IconeEsconder";
 import { IconeInspecionar } from "@/componentes/icones/IconeInspecionar";
 import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
@@ -382,6 +388,126 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Abra a aba CSS e toque dentro de uma regra.",
     },
     uso: "sinal",
+  },
+  // Conferido na doc do Chrome (developer.chrome.com, "CSS features
+  // reference") e no devtools-frontend (StylesSidebarPane,
+  // StylePropertiesSection, StylePropertyTreeElement).
+  "painel-estilos": {
+    id: "painel-estilos",
+    nome: "Painel Estilos",
+    Icone: IconePainelEstilos,
+    alvo: seletorFerramenta("painel-estilos"),
+    oQueFaz: "Mostra todas as regras de CSS que pegam o elemento selecionado, da que ganha para a que perde.",
+    praQueServe:
+      "Serve para descobrir de onde vem a cor, o tamanho ou a fonte de uma peça. O que está riscado perdeu a briga para outra regra.",
+    comoUsarAqui: {
+      mouse: "Selecione uma peça na árvore: as regras dela aparecem aqui. Passe o mouse num seletor e veja o que ele pega na tela.",
+      toque: "Toque numa peça da árvore e abra Estilos: as regras dela aparecem ali, da que ganha para a que perde.",
+    },
+    noF12DeVerdade:
+      "é o painel Styles, dentro da aba Elements. O element.style fica em cima, as regras no meio, a user agent stylesheet (a do navegador) embaixo e depois as herdadas.",
+    experimente: {
+      mouse: "Passe o mouse por um seletor do painel Estilos.",
+      toque: "Toque em qualquer lugar do painel Estilos.",
+    },
+    uso: "tocar",
+  },
+  "editar-valor-css": {
+    id: "editar-valor-css",
+    nome: "Editar valor no Estilos",
+    Icone: IconeEditarValorCss,
+    alvo: seletorFerramenta("painel-estilos"),
+    oQueFaz: "Troca o nome ou o valor de uma declaração direto no painel Estilos, e a tela muda na hora.",
+    praQueServe:
+      "É o jeito mais rápido de testar uma cor ou um tamanho. Clicar no espaço vazio de uma regra acrescenta uma declaração nova.",
+    comoUsarAqui: {
+      mouse: "Clique no valor, escreva e aperte Enter. Tab vai para o próximo campo e Esc desiste.",
+      toque: "Toque no valor, escreva e confirme. Para acrescentar, toque no + da regra.",
+    },
+    noF12DeVerdade:
+      "clique no nome ou no valor no painel Styles (a doc do Chrome fala em dois cliques; um já abre). Enter confirma, Tab pula de campo, Esc desiste.",
+    experimente: {
+      mouse: "Clique num valor do painel Estilos e troque por outro.",
+      toque: "Toque num valor do painel Estilos e troque por outro.",
+    },
+    uso: "sinal",
+  },
+  "ligar-desligar-declaracao": {
+    id: "ligar-desligar-declaracao",
+    nome: "Ligar e desligar declaração",
+    Icone: IconeLigarDesligar,
+    alvo: seletorFerramenta("painel-estilos"),
+    oQueFaz: "A caixinha ao lado de cada declaração liga e desliga ela, sem apagar.",
+    praQueServe:
+      "Serve para testar: desliga, vê o que muda na tela, liga de novo. No código, a declaração desligada vira um comentário.",
+    comoUsarAqui: {
+      mouse: "Passe o mouse numa regra: as caixinhas aparecem. Clique para desligar ou ligar.",
+      toque: "Toque na caixinha ao lado da declaração para desligar ou ligar.",
+    },
+    noF12DeVerdade:
+      "passe o mouse na regra no painel Styles e desmarque a caixinha. O Chrome risca a declaração e, na folha, ela vira comentário.",
+    experimente: {
+      mouse: "Desligue uma declaração pela caixinha e veja a tela mudar.",
+      toque: "Desligue uma declaração pela caixinha e veja a tela mudar.",
+    },
+    uso: "sinal",
+  },
+  "setas-numericas": {
+    id: "setas-numericas",
+    nome: "Setas nos números",
+    Icone: IconeSetasNumericas,
+    alvo: seletorFerramenta("painel-estilos"),
+    oQueFaz: "Enquanto edita um número, as setas sobem e descem o valor aos pouquinhos.",
+    praQueServe: "Achar o tamanho certo sem ficar digitando: vai subindo e olhando a tela até ficar bom.",
+    comoUsarAqui: {
+      mouse: "Editando um número: seta para cima ou para baixo muda 1, com Shift muda 10 e com Alt muda 0,1.",
+      toque: "Editando um número, toque nos botões de seta que aparecem ao lado do valor.",
+    },
+    noF12DeVerdade:
+      "as mesmas setas: 1 (ou 0,1 entre -1 e 1), Shift 10, Alt (Option no Mac) 0,1 e Ctrl+Shift+Page Up 100.",
+    experimente: {
+      mouse: "Clique num valor com número (como 32px) e aperte a seta para cima.",
+      toque: "Toque num valor com número (como 32px) e use a seta para cima.",
+    },
+    uso: "sinal",
+  },
+  "seletor-de-cor": {
+    id: "seletor-de-cor",
+    nome: "Seletor de cor",
+    Icone: IconeSeletorCor,
+    alvo: seletorFerramenta("painel-estilos"),
+    oQueFaz: "O quadradinho colorido ao lado de uma cor abre um seletor para escolher outra.",
+    praQueServe: "Escolher a cor olhando, em vez de adivinhar o código. O código da cor nova vai sozinho para o CSS.",
+    comoUsarAqui: {
+      mouse: "Clique no quadradinho de cor ao lado do valor e escolha a cor nova.",
+      toque: "Toque no quadradinho de cor ao lado do valor e escolha a cor nova.",
+    },
+    noF12DeVerdade: "clique no quadradinho de cor no painel Styles: abre o Color Picker, com conta-gotas e paletas.",
+    experimente: {
+      mouse: "Clique num quadradinho de cor e escolha outra cor.",
+      toque: "Toque num quadradinho de cor e escolha outra cor.",
+    },
+    uso: "sinal",
+  },
+  "nova-regra": {
+    id: "nova-regra",
+    nome: "Nova regra",
+    Icone: IconeNovaRegra,
+    alvo: seletorFerramenta("nova-regra"),
+    oQueFaz: "Cria uma regra nova para o elemento selecionado, já com o seletor dele.",
+    praQueServe: "Quando nenhuma regra pega só aquela peça, você cria uma e escreve as declarações nela.",
+    comoUsarAqui: {
+      mouse: "Selecione a peça e clique no + do painel Estilos. A regra nova aparece e já abre para escrever.",
+      toque: "Selecione a peça e toque no + do painel Estilos. A regra nova aparece e já abre para escrever.",
+    },
+    noF12DeVerdade:
+      "é o botão New Style Rule (o +) do painel Styles: ele cria a regra com o seletor do elemento, como h1#titulo ou p.nota.",
+    experimente: {
+      mouse: "Clique no + do painel Estilos.",
+      toque: "Toque no + do painel Estilos.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [seletorFerramenta("painel-estilos")],
   },
 };
 

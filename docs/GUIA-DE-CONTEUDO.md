@@ -171,8 +171,8 @@ eles ainda não existem: não use.
 Campos comuns: `id` (`"sites-elementos-u3-f1"`, nunca mude depois de
 publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
 `prerequisitos`, `usaFerramentas`, `apresentar?`, `introducao`,
-`eventosIniciais?`, `siteAlvo`, `conclusao`, `missaoDeCampo?` (até 320),
-`falaFinal?`.
+`eventosIniciais?`, `siteAlvo`, `paineisElementos?`, `conclusao`,
+`missaoDeCampo?` (até 320), `falaFinal?`.
 
 - `conceitos`: o que a fase **ensina** (no desafio: o que ele **pratica**,
   e tudo precisa ter sido ensinado na unidade).
@@ -186,6 +186,12 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
   uma precisa ter sido apresentada nesta fase ou antes.
 - `falaFinal`: aparece depois da missão de campo. Sem ela, a última fala
   da conclusão se repete; então escreva uma.
+- `paineisElementos` (só em fase com `siteAlvo.css`): os sub-painéis da
+  aba Elementos que a fase mostra, `["estilos"]` ou
+  `["estilos", "calculado"]`, como o Chrome (Styles e Computed dentro de
+  Elements). Sem o campo, a aba Elementos fica como nas U1 a U5 (só
+  árvore). A checagem exige `"estilos"` quando a fase usa as ações ou as
+  ferramentas do painel, ou a linha `alvo: "estilos"`.
 
 ### 3.3 Objetivo (fase de prática)
 
@@ -430,7 +436,12 @@ provável do jogador.
    - `{ alvo: "ferramenta", ferramenta, fala }` pisca o botão ou a área de
      uma ferramenta (setinha, trilha, desfazer...);
    - `{ alvo: "css", seletorRegra, propriedade?, fala }` abre a aba CSS e
-     pisca as linhas da regra (ou só a da declaração).
+     pisca as linhas da regra (ou só a da declaração);
+   - `{ alvo: "estilos", seletorRegra, propriedade?, fala }` pisca o bloco
+     da regra no painel Estilos (ou só a declaração). Seleciona antes uma
+     peça que a regra pega, se a selecionada não for; no celular em pé,
+     troca para o segmento Estilos. Exige `painel-estilos` em
+     `usaFerramentas` e `"estilos"` em `paineisElementos`.
 4. **Solução (degrau 4, só guiado): O QUÊ e POR QUÊ.** Custa 1 estrela. A
    fala conta o que foi feito e por que funciona ("Dupliquei o card e
    troquei o título da cópia: a cópia nasce logo depois da original").
@@ -497,6 +508,13 @@ apresentadas:
 | `esconder`, `apagar`, `duplicar` | menu do nó (botão direito, toque longo, barra no celular) e atalhos H, Delete, Shift+Alt+seta | Unidade 2 |
 | `desfazer` | desfazer e refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y) | Unidade 2 |
 | `renomear-tag` | dois cliques (ou dois toques) no nome da tag; também no menu do nó e na barra do celular ("Renomear"). Enter ou Espaço confirmam, Esc desiste | a partir da Unidade 3 (ainda não apresentada: apresente no primeiro objetivo que renomeia) |
+| `editor-css` | a aba CSS do editor (a folha `estilo.css`) | Estilos |
+| `painel-estilos` | o painel Estilos dentro de Elementos: `element.style`, as regras da que vence para a que perde, a folha do navegador e "Herdado de", com as riscadas e o link `estilo.css:N` | Estilos, Unidade 1 |
+| `editar-valor-css` | clicar no nome ou no valor de uma declaração e digitar (Enter confirma, Esc desiste, Tab vai para o próximo campo); "+ declaração" no fim do bloco | Estilos, Unidade 1 |
+| `ligar-desligar-declaracao` | a caixinha de cada declaração (desligada vira comentário no CSS) | Estilos, Unidade 1 |
+| `setas-numericas` | setas no valor numérico: 1, Shift 10, Alt 0,1; no toque, botões de seta de 44 px | Estilos |
+| `seletor-de-cor` | o quadradinho de cor ao lado de um valor de cor (abre o seletor do sistema) | Estilos |
+| `nova-regra` | o botão "+" do painel Estilos: regra nova no fim da folha, com o seletor que o Chrome sugere (id, senão classes, senão a tag) | Estilos |
 
 A ferramenta de cada ação (para a checagem de `usaFerramentas`):
 `selecionar` pela árvore = `arvore`, pela setinha = `inspecionar`, pela
@@ -504,10 +522,11 @@ trilha = `trilha`, pelo editor = `sincronia`; `definirTexto` e
 `definirAtributo` = `editar-duplo-clique`; `inserirHTML` = `editor`;
 `esconder`, `apagar`, `duplicar`, `desfazer` = a ferramenta de mesmo nome;
 `renomearTag` = `renomear-tag`; `clicarLink` = `previa`; `editarCss` =
-`editor-css`. As ações de CSS só funcionam numa fase com `siteAlvo.css`
-(a folha editável). Enquanto o painel Estilos não chega (rodada 9,
-etapa 3), `definirPropriedade`, `alternarDeclaracao` e `adicionarRegra`
-também contam como `editor-css`.
+`editor-css`; `definirPropriedade` = `editar-valor-css`;
+`alternarDeclaracao` = `ligar-desligar-declaracao`; `adicionarRegra` =
+`nova-regra`. As ações de CSS só funcionam numa fase com `siteAlvo.css`
+(a folha editável); as do painel pedem também `"estilos"` em
+`paineisElementos`.
 
 **Links na prévia.** O jogador pode clicar nos links do site-alvo: nada
 navega. Âncora rola a prévia; os demais fazem o computadorzinho falar

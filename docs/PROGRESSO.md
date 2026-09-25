@@ -74,6 +74,30 @@ desta rodada).
   (`src/conteudo/laboratorio/`, `/lab/fases?fase=lab-motor-u1-f1`), fora
   do currículo. Testes: `cascata.test.ts` (56), `css.test.ts` (13, com
   sabotagens), `testes/css.mjs` (Playwright, na bateria).
+- [x] **Etapa 3: painel Estilos dentro de Elementos.** Abas de cima na
+  ordem do Chrome (Elementos, Console, Fontes, Rede, Aplicação; só
+  Elementos funciona) e Estilos como sub-painel de Elementos, ligado
+  pela fase em `paineisElementos`. Painel com `element.style` sempre em
+  cima, regras da que vence para a que perde, folha do navegador e
+  "Herdado de" (só ancestrais com herdável, botão que seleciona o
+  ancestral), riscadas e aviso de valor inválido, link `estilo.css:N`
+  que abre a aba CSS do editor na regra, filtro, atalhos que abrem as
+  longas. Edição como no Chrome (conferida no devtools-frontend): clique
+  no nome ou no valor, Enter, Esc, Tab e Shift+Tab, `:` e `;` pulando
+  de campo, setas (1, Shift 10, Alt 0,1), caixinha que comenta, amostra
+  de cor com o seletor do sistema, "+ declaração", regra nova com o
+  seletor que o Chrome sugere, hover no seletor acendendo as peças,
+  prévia provisória enquanto digita (sem entrar no desfazer), desfazer.
+  Celular: "Árvore | Estilos | Código" em pé, lado a lado deitado,
+  alvos de 44 px e botões de seta. Ferramentas novas com card e
+  apresentação: `painel-estilos`, `editar-valor-css`,
+  `ligar-desligar-declaracao`, `setas-numericas`, `seletor-de-cor`,
+  `nova-regra`; as ações do painel contam como elas. Linha de ajuda
+  `{ alvo: "estilos" }`; checagem pede `"estilos"` em
+  `paineisElementos` quando a fase usa o painel. Testes: `css.test.ts`
+  (15, com as sabotagens novas), `numeros.test.ts` (5) e
+  `testes/estilos.mjs` (Playwright, desktop, em pé e deitado, na
+  bateria).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

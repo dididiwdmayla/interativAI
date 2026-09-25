@@ -43,6 +43,16 @@ export const FERRAMENTAS_DA_ARVORE: readonly IdFerramenta[] = [
   "renomear-tag",
 ];
 
+/** Ferramentas que moram no painel Estilos (no celular em pé, o segmento Estilos). */
+export const FERRAMENTAS_DOS_ESTILOS: readonly IdFerramenta[] = [
+  "painel-estilos",
+  "editar-valor-css",
+  "ligar-desligar-declaracao",
+  "setas-numericas",
+  "seletor-de-cor",
+  "nova-regra",
+];
+
 /** Ctrl+Z (desfazer) e Ctrl+Shift+Z ou Ctrl+Y (refazer), como no F12. */
 export function atalhoHistorico(evento: {
   key: string;

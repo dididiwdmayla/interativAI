@@ -20,6 +20,12 @@ export const IDS_FERRAMENTAS = [
   "renomear-tag",
   // Zona Estilos
   "editor-css",
+  "painel-estilos",
+  "editar-valor-css",
+  "ligar-desligar-declaracao",
+  "setas-numericas",
+  "seletor-de-cor",
+  "nova-regra",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

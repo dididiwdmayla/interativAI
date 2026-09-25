@@ -100,6 +100,9 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
     [aplicarCssNaTela],
   );
 
+  /** Enquanto o jogador digita no painel Estilos: a prévia mostra sem mudar a fonte de verdade. */
+  const previsualizarCss = useCallback((texto: string | null) => previewRef.current?.mostrarCssProvisorio(texto), []);
+
   const aoCarregarDocumento = useCallback((documento: Document) => {
     setArvore(construirArvore(documento.body));
     setVersaoDocumento((versao) => versao + 1);
@@ -151,6 +154,7 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null) {
     aoEditarCodigo,
     aoEditarCss,
     editarCss,
+    previsualizarCss,
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,

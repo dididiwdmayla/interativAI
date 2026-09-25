@@ -12,6 +12,8 @@ export type ApiPreview = {
   definirCss: (css: string) => void;
   /** A fase tem folha editável. */
   temCss: () => boolean;
+  /** Mostra um CSS provisório (o jogador digitando no painel); null volta ao de verdade. */
+  mostrarCssProvisorio: (css: string | null) => void;
   obterDocumento: () => Document | null;
   obterIframe: () => HTMLIFrameElement | null;
 };
@@ -77,6 +79,15 @@ export function PreviewSiteAlvo({ head, bodyInicial, cssInicial = null, titulo, 
       },
       temCss() {
         return ultimoCss.current !== null;
+      },
+      mostrarCssProvisorio(css) {
+        if (ultimoCss.current === null) return;
+        try {
+          const documento = iframe.current?.contentDocument;
+          if (documento) escreverCssNoDocumento(documento, css ?? ultimoCss.current);
+        } catch {
+          // Sem acesso ao documento: nada a mostrar.
+        }
       },
       obterDocumento() {
         try {
