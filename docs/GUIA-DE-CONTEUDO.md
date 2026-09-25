@@ -189,7 +189,8 @@ os conjuntos de textos.
 | `{ tipo: "atributo", seletor, nome, valor? }` | algum tem o atributo (com esse valor, se vier) |
 | `{ tipo: "escondido", seletor }` | algum está invisível **guardando o espaço** (classe de esconder do Chrome ou `visibility: hidden` no style). Apagado não conta |
 | `{ tipo: "selecionado", seletor, via? }` | o selecionado agora casa (texto selecionado vale pelo elemento dono); `via`: `"arvore"`, `"inspecionar"`, `"trilha"` ou `"editor"` |
-| `{ tipo: "evento", evento, minimo? }` | o evento aconteceu `minimo` vezes (padrão 1) desde que o objetivo começou |
+| `{ tipo: "evento", evento, minimo?, href? }` | o evento aconteceu `minimo` vezes (padrão 1) desde que o objetivo começou; com `evento: "clicouLink"`, `href` só conta cliques em links com esse href (ex.: `"#rodape"`) |
+| `{ tipo: "tag", seletor, nome }` | algum elemento do seletor tem essa tag (minúsculas). Renomear mantém os atributos: `{ tipo: "tag", seletor: "#titulo", nome: "h1" }` continua achando a peça depois da troca |
 | `{ tipo: "todos", validadores }` | todos passam |
 | `{ tipo: "algum", validadores }` | algum passa |
 | `{ tipo: "nao", validador }` | o de dentro não passa |
@@ -197,7 +198,8 @@ os conjuntos de textos.
 
 Eventos (`evento`): `selecionou`, `inspecionou`, `trilha`, `editouTexto`,
 `editouAtributo`, `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
-`duplicou`, `desfez`, `refez`, `respondeuPrevisao`. As ações dos momentos
+`duplicou`, `desfez`, `refez`, `respondeuPrevisao`, `renomeouTag` (trocou o
+nome da tag) e `clicouLink` (clicou num link da prévia, com o `href`). As ações dos momentos
 roteirizados (o computadorzinho mexendo) **não contam** como eventos do
 jogador.
 
@@ -230,6 +232,8 @@ soluções testam o caminho real.
 | `{ tipo: "esconder", seletor }` | seleciona e esconde (se já está escondido, não mexe) |
 | `{ tipo: "apagar", seletor }` | seleciona e apaga; a seleção vai para o próximo irmão ou para o pai |
 | `{ tipo: "duplicar", seletor }` | seleciona e duplica; **a cópia fica selecionada** |
+| `{ tipo: "renomearTag", seletor, novaTag }` | seleciona e troca o nome da tag (dois cliques no nome, como no F12): atributos e filhos ficam, a peça continua selecionada. Nome igual, inválido, `html`/`head`/`body` ou tag sem conteúdo (`img`, `br`...) numa peça com filhos quebram a ação |
+| `{ tipo: "clicarLink", seletor }` | clica num link da prévia (ou em algo dentro dele). A prévia **nunca navega**: âncora (`#id` que existe) rola até o alvo; externo, quebrado (`#id` que não existe) e vazio (sem href, `""` ou `"#"`) viram fala do computadorzinho; sempre gera `clicouLink` |
 | `{ tipo: "desfazer" }` | desfaz a última mudança do painel |
 | `{ tipo: "inserirHTML", seletor, posicao, html }` | o que o jogador escreveria no editor: `antes`, `depois`, `inicio` ou `fim` do elemento |
 | `{ tipo: "responderPrevisao", opcao }` | responde o card de previsão (índice a partir de 0) |
@@ -446,12 +450,20 @@ apresentadas:
 | `trilha` | trilha de ancestrais no rodapé da árvore | Unidade 2 |
 | `esconder`, `apagar`, `duplicar` | menu do nó (botão direito, toque longo, barra no celular) e atalhos H, Delete, Shift+Alt+seta | Unidade 2 |
 | `desfazer` | desfazer e refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y) | Unidade 2 |
+| `renomear-tag` | dois cliques (ou dois toques) no nome da tag; também no menu do nó e na barra do celular ("Renomear"). Enter ou Espaço confirmam, Esc desiste | a partir da Unidade 3 (ainda não apresentada: apresente no primeiro objetivo que renomeia) |
 
 A ferramenta de cada ação (para a checagem de `usaFerramentas`):
 `selecionar` pela árvore = `arvore`, pela setinha = `inspecionar`, pela
 trilha = `trilha`, pelo editor = `sincronia`; `definirTexto` e
 `definirAtributo` = `editar-duplo-clique`; `inserirHTML` = `editor`;
-`esconder`, `apagar`, `duplicar`, `desfazer` = a ferramenta de mesmo nome.
+`esconder`, `apagar`, `duplicar`, `desfazer` = a ferramenta de mesmo nome;
+`renomearTag` = `renomear-tag`; `clicarLink` = `previa`.
+
+**Links na prévia.** O jogador pode clicar nos links do site-alvo: nada
+navega. Âncora rola a prévia; os demais fazem o computadorzinho falar
+("Esse link levaria para: https://..." e, com `target="_blank"`, "(numa
+aba nova)"; link quebrado e vazio têm fala própria). A fala só entra
+durante os objetivos (fora da conversa, das pausas e do card de previsão).
 
 Ferramenta nova (outra aba do DevTools, outra ação) é trabalho de motor,
 não de conteúdo: entrada no registro (`src/ferramentas/registro.ts`),

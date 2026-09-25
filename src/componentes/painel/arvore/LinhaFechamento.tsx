@@ -5,13 +5,15 @@ import type { LinhaArvore } from "@/lib/arvore";
 type Props = {
   linha: LinhaArvore;
   selecionada: boolean;
+  /** Nome novo sendo digitado na abertura (o fechamento acompanha, como no F12). */
+  rascunhoTag?: string | null;
   aoClicar: () => void;
   aoPassarMouse: () => void;
 };
 
 const RECUO_PX = 16;
 
-export function LinhaFechamento({ linha, selecionada, aoClicar, aoPassarMouse }: Props) {
+export function LinhaFechamento({ linha, selecionada, rascunhoTag, aoClicar, aoPassarMouse }: Props) {
   return (
     <div
       role="none"
@@ -22,7 +24,7 @@ export function LinhaFechamento({ linha, selecionada, aoClicar, aoPassarMouse }:
       }`}
       style={{ paddingLeft: linha.profundidade * RECUO_PX + 22 }}
     >
-      &lt;/{linha.no.tag}&gt;
+      &lt;/{rascunhoTag ?? linha.no.tag}&gt;
     </div>
   );
 }

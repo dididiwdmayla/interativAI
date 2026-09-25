@@ -3,6 +3,7 @@
 import { type ReactNode, type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { ehElemento } from "@/lib/dom";
 import { montarDocumentoSiteAlvo } from "@/lib/documentoSiteAlvo";
+import { linkDoAlvo } from "@/lib/linksPrevia";
 
 export type ApiPreview = {
   /** Recarrega o iframe com um novo body (caminho A). */
@@ -16,6 +17,8 @@ type Props = {
   bodyInicial: string;
   titulo: string;
   aoCarregar: (documento: Document) => void;
+  /** Clique num link da página: a navegação já foi segurada. */
+  aoClicarLink?: (link: Element) => void;
   ref?: Ref<ApiPreview>;
   /** Camadas desenhadas por cima do iframe (sobreposição de inspeção). */
   children?: ReactNode;
@@ -25,15 +28,17 @@ type Props = {
  * O site-alvo roda num iframe com srcdoc e sandbox sem scripts. Como tem
  * allow-same-origin, o jogo consegue ler e alterar o contentDocument.
  */
-export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, ref, children }: Props) {
+export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, aoClicarLink, ref, children }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
   const ultimoBody = useRef(bodyInicial);
   const headRef = useRef(head);
   const aoCarregarAtual = useRef(aoCarregar);
+  const aoClicarLinkAtual = useRef(aoClicarLink);
 
   useEffect(() => {
     aoCarregarAtual.current = aoCarregar;
-  }, [aoCarregar]);
+    aoClicarLinkAtual.current = aoClicarLink;
+  }, [aoCarregar, aoClicarLink]);
 
   useEffect(() => {
     headRef.current = head;
@@ -84,16 +89,31 @@ export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, ref, ch
       elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, ultimoBody.current);
       return;
     }
+    // A prévia nunca navega: link e formulário não saem do site-alvo (a página
+    // sumiria). O link vira aviso para o jogo (rolar até a âncora, a fala).
     documento.addEventListener(
       "click",
       (evento) => {
-        const alvo = evento.target;
-        if (ehElemento(alvo) && alvo.closest("a, form")) {
+        const link = linkDoAlvo(evento.target);
+        if (link) {
           evento.preventDefault();
+          aoClicarLinkAtual.current?.(link);
+          return;
         }
+        const alvo = evento.target;
+        if (ehElemento(alvo) && alvo.closest("form")) evento.preventDefault();
       },
       true,
     );
+    // Botão do meio (abrir em outra aba) também não sai do lugar.
+    documento.addEventListener(
+      "auxclick",
+      (evento) => {
+        if (linkDoAlvo(evento.target)) evento.preventDefault();
+      },
+      true,
+    );
+    documento.addEventListener("submit", (evento) => evento.preventDefault(), true);
     aoCarregarAtual.current(documento);
   };
 

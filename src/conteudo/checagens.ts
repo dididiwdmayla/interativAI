@@ -17,6 +17,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
 import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
+import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
@@ -184,6 +185,10 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "apagar";
     case "duplicar":
       return "duplicar";
+    case "renomearTag":
+      return "renomear-tag";
+    case "clicarLink":
+      return "previa";
     case "desfazer":
       return "desfazer";
     case "responderPrevisao":
@@ -562,6 +567,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           }
           if (item.tipo === "contagem" && (item.valor < 0 || !Number.isInteger(item.valor))) {
             problemas.push(`${onde}: contagem com valor ${item.valor}`);
+          }
+          if (item.tipo === "evento" && item.href !== undefined && item.evento !== "clicouLink") {
+            problemas.push(`${onde}: href só vale no evento "clicouLink"`);
+          }
+          if (item.tipo === "tag" && !nomeDeTagValido(item.nome)) {
+            problemas.push(`${onde}: "${item.nome}" não é um nome de tag válido (minúsculas, como "h4" ou "section")`);
           }
           return problemas;
         }),

@@ -69,8 +69,18 @@ export type Validador =
    * um texto, vale o elemento dono dele. `via` exige o caminho usado.
    */
   | { tipo: "selecionado"; seletor: string; via?: ViaSelecao }
-  /** O evento aconteceu pelo menos `minimo` vezes (padrão 1) desde que o objetivo começou. */
-  | { tipo: "evento"; evento: TipoEvento; minimo?: number }
+  /**
+   * O evento aconteceu pelo menos `minimo` vezes (padrão 1) desde que o
+   * objetivo começou. Com `evento: "clicouLink"`, `href` só conta os
+   * cliques em links com esse href (ex.: "#rodape").
+   */
+  | { tipo: "evento"; evento: TipoEvento; minimo?: number; href?: string }
+  /**
+   * Algum elemento do seletor tem esta tag (em minúsculas). Renomear
+   * preserva os atributos, então um seletor por id continua achando a peça
+   * depois de h2 virar h4.
+   */
+  | { tipo: "tag"; seletor: string; nome: string }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -108,6 +118,10 @@ export type Acao =
   | { tipo: "apagar"; seletor: string }
   /** Duplica o elemento logo depois dele; a cópia fica selecionada. */
   | { tipo: "duplicar"; seletor: string }
+  /** Troca o nome da tag pela árvore (dois cliques no nome); atributos e filhos ficam. */
+  | { tipo: "renomearTag"; seletor: string; novaTag: string }
+  /** Clica num link da prévia (a prévia não navega; ver src/lib/linksPrevia.ts). */
+  | { tipo: "clicarLink"; seletor: string }
   /** Desfaz a última mudança feita pelo painel. */
   | { tipo: "desfazer" }
   /** Escreve HTML novo perto de um elemento (o que o jogador faria no editor de código). */

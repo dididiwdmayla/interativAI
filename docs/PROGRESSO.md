@@ -5,7 +5,7 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run testar:conteudo` passando e um commit.
 
 **Estado atual:** rodada 5 em andamento (fábrica corrigida, currículo em
-dados e mapa das ilhas). Etapas 1 e 2 concluídas.
+dados e mapa das ilhas). Etapas 1 a 3 concluídas.
 
 ## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
 
@@ -55,6 +55,28 @@ dados e mapa das ilhas). Etapas 1 e 2 concluídas.
   título e ordem) e `curriculo-motor`. Testes em `curriculo.test.ts`
   (com sabotagens: id repetido, unidade fora do currículo, zona errada,
   conteúdo em zona com `requerMotor`, a U6).
+
+- [x] **Etapa 3: renomear tag e links na prévia.** Renomear tag
+  conferido na doc do Chrome ("Edit node type") e no devtools-frontend
+  (`startEditingTagName`/`tagNameEditingCommitted`: Enter e Espaço
+  confirmam, Esc desiste, fechamento acompanha, nome vazio ou igual
+  desiste, `html`/`head`/`body` bloqueados, `setNodeName` preserva
+  atributos e filhos). Núcleo `renomearTag` (desfazer/refazer, seleção
+  continua na peça), evento `renomeouTag`, ação
+  `{ tipo: "renomearTag", seletor, novaTag }`, validador
+  `{ tipo: "tag", seletor, nome }`. Interface: dois cliques (ou dois
+  toques) no nome da tag, item "Renomear tag" no menu do nó e botão
+  "Renomear" na barra do celular (7 botões de 44 px). Ferramenta
+  `renomear-tag` no registro com ícone, card, apresentação (mouse e
+  toque) e mini demo. Links: `src/lib/linksPrevia.ts` (âncora, quebrado,
+  vazio, externo, aba nova) e núcleo `clicarLink` (evento `clicouLink`
+  com `href`); a prévia segura clique, botão do meio e envio de
+  formulário; âncora rola, `#` volta ao topo, e o computadorzinho diz
+  "Esse link levaria para: <href>" (ou a fala de quebrado e de vazio).
+  Ação `clicarLink` e `href` opcional no validador `evento`. Testes:
+  `nucleo.test.ts` (renomear, recusas, desfazer, links e falas) e
+  `testes/renomear-links.mjs` (desktop e em pé), `ferramentas-novas.mjs`
+  com 5 itens no menu e 7 na barra.
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 

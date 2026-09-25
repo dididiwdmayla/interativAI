@@ -13,6 +13,7 @@ const TESTES = [
   ["unidades.mjs", "desktop"],
   ["unidades.mjs", "retrato"],
   ["unidades.mjs", "paisagem"],
+  ["renomear-links.mjs"],
   ["retomar.mjs"],
   ["migracao.mjs"],
 ];

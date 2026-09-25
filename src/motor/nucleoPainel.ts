@@ -15,6 +15,7 @@ import type { PosicaoInsercao, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { caminhoDoNo, ehElemento, ehTexto, filhosVisiveis, noPeloCaminho } from "@/lib/dom";
 import { CLASSE_ESCONDER, temClasseEsconder } from "@/lib/esconder";
+import { classificarLink, type LinkClicado } from "@/lib/linksPrevia";
 import type { EventoFase, OrigemSelecao } from "./eventos";
 
 /** Tamanho máximo da pilha de desfazer. */
@@ -50,6 +51,19 @@ const POSICOES: Record<PosicaoInsercao, InsertPosition> = {
   inicio: "afterbegin",
   fim: "beforeend",
 };
+
+/** Tags que o Chrome não deixa renomear (e que também não viram destino). */
+export const TAGS_SEM_RENOMEAR: ReadonlySet<string> = new Set(["html", "head", "body"]);
+
+/** Tags sem conteúdo nem fechamento: uma peça com filhos não vira uma delas. */
+export const TAGS_SEM_CONTEUDO: ReadonlySet<string> = new Set([
+  "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr",
+]);
+
+/** Nome de tag aceito: letra e depois letras, números ou hífen (em minúsculas). */
+export function nomeDeTagValido(nome: string): boolean {
+  return /^[a-z][a-z0-9-]*$/.test(nome);
+}
 
 /** Tag (minúscula) do nó, ou do elemento dono se for texto. */
 export function tagDoNo(no: Node | null): string {
@@ -251,6 +265,55 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     return mudou;
   };
 
+  /**
+   * Troca o nome da tag, como os dois cliques no nome da tag do F12: uma
+   * peça nova com a tag nova, os mesmos atributos e os mesmos filhos, no
+   * mesmo lugar (a seleção continua nela). Nome vazio, igual, inválido,
+   * html, head e body são recusados (o Chrome também desiste).
+   */
+  const renomearTag = (caminho: number[], novaTag: string): boolean => {
+    const nova = novaTag.trim().toLowerCase();
+    if (caminho.length === 0 || !nomeDeTagValido(nova) || TAGS_SEM_RENOMEAR.has(nova)) return false;
+    let de = "";
+    const mudou = operar((documento) => {
+      const elemento = noPeloCaminho(documento.body, caminho);
+      if (!ehElemento(elemento) || !elemento.parentNode) return false;
+      de = elemento.tagName.toLowerCase();
+      if (de === nova || TAGS_SEM_RENOMEAR.has(de)) return false;
+      if (TAGS_SEM_CONTEUDO.has(nova) && filhosVisiveis(elemento).length > 0) return false;
+      let substituta: Element;
+      try {
+        substituta = documento.createElement(nova);
+      } catch {
+        return false;
+      }
+      for (const atributo of Array.from(elemento.attributes)) substituta.setAttribute(atributo.name, atributo.value);
+      while (elemento.firstChild) substituta.appendChild(elemento.firstChild);
+      elemento.parentNode.replaceChild(substituta, elemento);
+      return true;
+    });
+    if (mudou) {
+      selecionarEmSilencio(caminho);
+      emitir({ tipo: "renomeouTag", tag: nova, de, caminho });
+    }
+    return mudou;
+  };
+
+  /**
+   * Clique num link da prévia: não navega (a página sumiria), só descobre
+   * para onde ele levaria e avisa. Quem usa decide o efeito (rolar até a
+   * âncora, a fala do computadorzinho). Devolve null se não é um link.
+   */
+  const clicarLink = (caminho: number[]): LinkClicado | null => {
+    const documento = opcoes.obterDocumento();
+    const elemento = documento?.body ? noPeloCaminho(documento.body, caminho) : null;
+    const link = ehElemento(elemento) ? elemento.closest("a, area") : null;
+    if (!link || !documento?.body) return null;
+    const resultado = classificarLink(link);
+    emitir({ tipo: "clicouLink", href: resultado.href, destino: resultado.destino, caminho: caminhoDoNo(documento.body, link) ?? caminho });
+    return resultado;
+  };
+
   /** Escreve HTML novo perto de um elemento (o body só aceita início e fim). */
   const inserirHtml = (caminho: number[], posicao: PosicaoInsercao, html: string): boolean => {
     if (caminho.length === 0 && (posicao === "antes" || posicao === "depois")) return false;
@@ -337,6 +400,8 @@ export function criarNucleoPainel(opcoes: OpcoesNucleo) {
     alternarEsconder,
     apagar,
     duplicar,
+    renomearTag,
+    clicarLink,
     inserirHtml,
     desfazer,
     refazer,

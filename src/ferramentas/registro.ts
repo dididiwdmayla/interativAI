@@ -10,6 +10,7 @@ import { IconeInspecionar } from "@/componentes/icones/IconeInspecionar";
 import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
 import { IconePainel } from "@/componentes/icones/IconePainel";
 import { IconePrevia } from "@/componentes/icones/IconePrevia";
+import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -20,6 +21,7 @@ import { DemoDuplicar } from "./demos/DemoDuplicar";
 import { DemoEditarDuploClique } from "./demos/DemoEditarDuploClique";
 import { DemoEsconder } from "./demos/DemoEsconder";
 import { DemoInspecionar } from "./demos/DemoInspecionar";
+import { DemoRenomearTag } from "./demos/DemoRenomearTag";
 import { DemoSincronia } from "./demos/DemoSincronia";
 import { DemoTrilha } from "./demos/DemoTrilha";
 import { IDS_FERRAMENTAS, type IdFerramenta, seletorFerramenta } from "./ids";
@@ -330,6 +332,32 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     // A trilha fica livre para subir do título até o card inteiro antes de duplicar.
     liberarNoExperimente: [MENU_DO_NO, seletorFerramenta("trilha")],
     demo: DemoDuplicar,
+  },
+  // Conferido na doc do Chrome ("Edit node type": dois cliques no tipo,
+  // escreve o novo e Enter) e no devtools-frontend (setNodeName troca a peça
+  // por outra com os mesmos atributos e filhos; nome vazio ou igual desiste;
+  // html, head e body não renomeiam; Espaço também confirma).
+  "renomear-tag": {
+    id: "renomear-tag",
+    nome: "Renomear tag",
+    Icone: IconeRenomearTag,
+    alvo: seletorFerramenta("arvore"),
+    oQueFaz: "Troca o tipo de uma peça: um h2 vira h4, uma div vira section.",
+    praQueServe:
+      "O que tem dentro e os atributos continuam iguais, só muda o que a peça é. Bom para arrumar os títulos de um texto, por exemplo.",
+    comoUsarAqui: {
+      mouse: "Dê dois cliques no nome da tag (o h2 de <h2>), escreva o novo nome e aperte Enter. Esc desiste.",
+      toque: "Dê dois toques no nome da tag (ou selecione e toque em Renomear), escreva o novo nome e confirme.",
+    },
+    noF12DeVerdade:
+      "dois cliques no nome da tag na aba Elements, escreva o novo e aperte Enter. O fechamento muda junto, e tudo volta ao recarregar.",
+    experimente: {
+      mouse: "Dê dois cliques no nome de uma tag da árvore e troque por outra (h2 por h3, por exemplo).",
+      toque: "Dê dois toques no nome de uma tag da árvore (ou toque em Renomear) e troque por outra.",
+    },
+    uso: "sinal",
+    liberarNoExperimente: [MENU_DO_NO],
+    demo: DemoRenomearTag,
   },
 };
 

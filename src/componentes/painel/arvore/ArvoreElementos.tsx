@@ -25,6 +25,8 @@ type Props = {
   aoEsconder: (caminho: number[]) => void;
   aoApagar: (caminho: number[]) => void;
   aoDuplicar: (caminho: number[]) => void;
+  /** Troca o nome da tag; devolve false se o nome não serve (a edição só fecha). */
+  aoRenomearTag: (caminho: number[], novaTag: string) => boolean;
   aoDesfazer: () => void;
   aoRefazer: () => void;
   podeDesfazer: boolean;
@@ -60,6 +62,7 @@ export function ArvoreElementos({
   aoEsconder,
   aoApagar,
   aoDuplicar,
+  aoRenomearTag,
   aoDesfazer,
   aoRefazer,
   podeDesfazer,
@@ -68,6 +71,7 @@ export function ArvoreElementos({
 }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [edicao, setEdicao] = useState<EdicaoArvore | null>(null);
+  const [rascunhoTag, setRascunhoTag] = useState<string | null>(null);
   const [menu, setMenu] = useState<MenuAberto | null>(null);
   const fecharMenu = useCallback(() => setMenu(null), []);
 
@@ -93,13 +97,19 @@ export function ArvoreElementos({
 
   const terminarEdicao = () => {
     setEdicao(null);
+    setRascunhoTag(null);
     recipiente.current?.focus();
   };
 
   const comecarEdicao = (nova: EdicaoArvore) => {
     setEdicao(nova);
-    aoComecarEdicao?.();
+    setRascunhoTag(null);
+    // Renomear é outra ferramenta: não conta como "editar pela árvore".
+    if (nova.alvo !== "tag") aoComecarEdicao?.();
   };
+
+  /** Nó que pode ter a tag renomeada (o F12 não deixa no html, head e body). */
+  const podeRenomear = (no: NoArvore) => no.tipo === "elemento" && no.caminho.length > 0;
 
   /** Ações do nó para o menu e a barra. Mexer num nó seleciona ele antes, como no F12. */
   const acoesDo = (no: NoArvore): AcoesNo => {
@@ -113,6 +123,7 @@ export function ArvoreElementos({
       podeEsconder: elemento,
       podeApagar: no.caminho.length > 0,
       podeDuplicar: elemento && no.caminho.length > 0,
+      podeRenomear: podeRenomear(no),
       escondido,
       editar: () => {
         antes();
@@ -132,6 +143,10 @@ export function ArvoreElementos({
         antes();
         aoDuplicar(no.caminho);
         recipiente.current?.focus();
+      },
+      renomear: () => {
+        antes();
+        comecarEdicao({ chave: no.chave, alvo: "tag" });
       },
     };
   };
@@ -223,7 +238,7 @@ export function ArvoreElementos({
       ref={recipiente}
       role="tree"
       tabIndex={0}
-      aria-label="Árvore de elementos da página. Setas navegam, Enter edita o texto, H esconde, Delete apaga."
+      aria-label="Árvore de elementos da página. Setas navegam, Enter edita o texto, dois cliques no nome da tag renomeiam, H esconde, Delete apaga."
       aria-activedescendant={indiceSelecionado >= 0 ? nos[indiceSelecionado].id : undefined}
       onKeyDown={aoTeclar}
       onMouseLeave={() => aoPassarMouse(null)}
@@ -239,6 +254,7 @@ export function ArvoreElementos({
               key={linha.id}
               linha={linha}
               selecionada={linha.no.chave === chaveSelecionada}
+              rascunhoTag={edicao?.alvo === "tag" && edicao.chave === linha.no.chave ? rascunhoTag : null}
               aoClicar={() => {
                 aoSelecionar(linha.no.caminho, "arvore");
                 recipiente.current?.focus();
@@ -257,6 +273,7 @@ export function ArvoreElementos({
             selecionada={selecionada}
             destaque={chave === chaveDestaque && destaque ? destaque.parte : null}
             edicao={edicao}
+            rascunhoTag={edicao?.alvo === "tag" && edicao.chave === chave ? rascunhoTag : null}
             barra={
               toque && selecionada && !edicao ? (
                 <BarraAcoesNo
@@ -291,6 +308,11 @@ export function ArvoreElementos({
               terminarEdicao();
               aoEditarAtributo(alvo.caminho, nome, valor);
             }}
+            aoConfirmarTag={(alvo, novaTag) => {
+              terminarEdicao();
+              aoRenomearTag(alvo.caminho, novaTag);
+            }}
+            aoDigitarTag={setRascunhoTag}
           />
         );
       })}

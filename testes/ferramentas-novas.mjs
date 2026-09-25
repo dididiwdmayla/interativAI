@@ -21,7 +21,7 @@ const classeDo = (pagina, seletor) =>
   await linha(pagina, "1").click({ button: "right" });
   const menu = pagina.locator("[data-menu-no]");
   await menu.waitFor();
-  conferir((await menu.getByRole("menuitem").count()) === 4, "menu do nó com Editar, Esconder, Apagar e Duplicar");
+  conferir((await menu.getByRole("menuitem").count()) === 5, "menu do nó com Editar, Renomear tag, Esconder, Apagar e Duplicar");
   await menu.locator("[data-acao=esconder]").click();
   conferir((await classeDo(pagina, "h1"))?.includes("__web-inspector-hide-shortcut__"), "esconder põe a classe do Chrome no h1");
   const caixa = await iframe.locator("h1").boundingBox();
@@ -95,7 +95,11 @@ const classeDo = (pagina, seletor) =>
   const barra = pagina.locator("[data-barra-acoes]");
   await barra.waitFor();
   const botoes = await barra.locator("button").evaluateAll((lista) => lista.map((b) => b.getBoundingClientRect().height));
-  conferir(botoes.length === 6 && botoes.every((altura) => altura >= 44), "barra do nó com 6 botões de 44 px");
+  const larguras = await barra.locator("button").evaluateAll((lista) => lista.map((b) => b.getBoundingClientRect().width));
+  conferir(
+    botoes.length === 7 && botoes.every((altura) => altura >= 44) && larguras.every((largura) => largura >= 44),
+    "barra do nó com 7 botões de 44 px",
+  );
   await barra.locator("[data-acao=esconder]").tap();
   conferir((await classeDo(pagina, "header"))?.includes("__web-inspector"), "celular: Esconder pela barra");
   await barra.locator("[data-acao=desfazer]").tap();

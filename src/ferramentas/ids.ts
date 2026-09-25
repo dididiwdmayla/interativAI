@@ -16,6 +16,8 @@ export const IDS_FERRAMENTAS = [
   "apagar",
   "desfazer",
   "duplicar",
+  // Unidade 3 em diante
+  "renomear-tag",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

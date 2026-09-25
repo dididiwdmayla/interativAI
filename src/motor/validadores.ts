@@ -97,7 +97,9 @@ export function descreverValidador(validador: Validador): string {
     case "selecionado":
       return `selecionado ${validador.seletor}${validador.via ? ` pela via ${validador.via}` : ""}`;
     case "evento":
-      return `evento ${validador.evento} pelo menos ${validador.minimo ?? 1} vez(es)`;
+      return `evento ${validador.evento}${validador.href !== undefined ? ` com href "${validador.href}"` : ""} pelo menos ${validador.minimo ?? 1} vez(es)`;
+    case "tag":
+      return `${validador.seletor} é <${validador.nome}>`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -182,8 +184,16 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       };
     }
     case "evento": {
-      const vezes = contexto.eventos.filter((evento) => evento.tipo === validador.evento).length;
+      const vezes = contexto.eventos.filter(
+        (evento) =>
+          evento.tipo === validador.evento &&
+          (validador.href === undefined || (evento.tipo === "clicouLink" && evento.href === validador.href)),
+      ).length;
       return { passou: vezes >= (validador.minimo ?? 1), descricao, detalhe: `aconteceu ${vezes} vez(es)` };
+    }
+    case "tag": {
+      const tags = consultar(documento, validador.seletor).map((elemento) => elemento.tagName.toLowerCase());
+      return { passou: tags.includes(validador.nome.toLowerCase()), descricao, detalhe: `tags: ${lista(tags)}` };
     }
     case "todos": {
       const filhos = validador.validadores.map((filho) => avaliarDetalhado(filho, contexto));

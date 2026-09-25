@@ -39,11 +39,13 @@ import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
 import { faseDoId, type LocalDaFase, proximaFase } from "@/conteudo";
-import type { Fase } from "@/conteudo/tipos";
+import type { Fala, Fase } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
+import { caminhoDoNo } from "@/lib/dom";
+import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { tocarSom } from "@/lib/som";
@@ -183,6 +185,8 @@ export function JogoFase({
     alternarEsconder,
     apagar,
     duplicar,
+    renomearTag,
+    clicarLink,
     inserirHtml,
     desfazer,
     refazer,
@@ -195,6 +199,41 @@ export function JogoFase({
     aoEvento: barramento.emitir,
   });
 
+  /** Quem fala sobre o link clicado (ligado ao motor mais abaixo). */
+  const falarSobreLink = useRef<(fala: Fala) => void>(() => {});
+
+  /**
+   * Clique num link da prévia (à mão ou pela ação clicarLink): a prévia não
+   * navega; âncora rola até o alvo, "#" volta ao topo, e o computadorzinho
+   * conta para onde o link levaria (externo, quebrado ou vazio).
+   */
+  const clicarLinkNaTela = useCallback(
+    (caminho: number[]) => {
+      const resultado = clicarLink(caminho);
+      if (!resultado) return null;
+      const janela = obterDocumento()?.defaultView;
+      const comportamento: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      if (janela && resultado.destino === "ancora" && resultado.alvo) {
+        janela.scrollTo({ top: resultado.alvo.getBoundingClientRect().top + janela.scrollY, behavior: comportamento });
+      } else if (janela && resultado.href === "#") {
+        janela.scrollTo({ top: 0, behavior: comportamento });
+      }
+      const fala = falaDoLink(resultado);
+      if (fala) falarSobreLink.current(fala);
+      return resultado;
+    },
+    [clicarLink, obterDocumento],
+  );
+
+  const aoClicarLink = useCallback(
+    (link: Element) => {
+      const body = obterDocumento()?.body;
+      const caminho = body ? caminhoDoNo(body, link) : null;
+      if (caminho) clicarLinkNaTela(caminho);
+    },
+    [clicarLinkNaTela, obterDocumento],
+  );
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -206,6 +245,8 @@ export function JogoFase({
       alternarEsconder,
       apagar,
       duplicar,
+      renomearTag,
+      clicarLink: clicarLinkNaTela,
       inserirHtml,
       desfazer,
     }),
@@ -218,6 +259,8 @@ export function JogoFase({
       alternarEsconder,
       apagar,
       duplicar,
+      renomearTag,
+      clicarLinkNaTela,
       inserirHtml,
       desfazer,
     ],
@@ -244,6 +287,15 @@ export function JogoFase({
     toque,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
+
+  // A fala do link só entra quando não atrapalha: fora da conversa, da
+  // pausa, do card de previsão e dos momentos roteirizados.
+  useEffect(() => {
+    const livre =
+      (estado.etapa === "objetivos" && estado.pausa === null && !previsaoPendente && estado.roteiro === null) ||
+      (estado.etapa === "concluida" && !estado.conclusaoAberta);
+    falarSobreLink.current = livre ? falar : () => {};
+  }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
@@ -299,6 +351,8 @@ export function JogoFase({
           sinalizarUso("duplicar");
         } else if (evento.tipo === "desfez" || evento.tipo === "refez") {
           sinalizarUso("desfazer");
+        } else if (evento.tipo === "renomeouTag") {
+          sinalizarUso("renomear-tag");
         }
       }),
     [barramento],
@@ -741,7 +795,7 @@ export function JogoFase({
                 cima={
                   <div className="flex h-full min-h-0 flex-col">
                     <AlvoFerramenta
-                      ids={["arvore", "esconder", "apagar", "duplicar"]}
+                      ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
                       marcador="arvore"
                       aoAbrirCard={abrirCard}
                       classeMarcador="bottom-2 right-3"
@@ -761,6 +815,7 @@ export function JogoFase({
                         aoEsconder={alternarEsconder}
                         aoApagar={apagar}
                         aoDuplicar={duplicar}
+                        aoRenomearTag={renomearTag}
                         aoDesfazer={desfazer}
                         aoRefazer={refazer}
                         podeDesfazer={historico.podeDesfazer}
@@ -841,6 +896,7 @@ export function JogoFase({
                 bodyInicial={bodyInicial}
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
+                aoClicarLink={aoClicarLink}
               >
                 <SobreposicaoInspecao realce={realce} />
                 <CamadaInspecao

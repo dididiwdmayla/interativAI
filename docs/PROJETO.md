@@ -278,8 +278,22 @@ src/
   refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y com o foco no painel; botões no
   topo do painel). Tudo passa pelo núcleo `src/motor/nucleoPainel.ts`.
 - Menu do nó: botão direito (desktop) ou toque longo (celular). No
-  celular, o nó selecionado ganha uma barra com Editar, Esconder, Apagar,
-  Duplicar, Desfazer e Refazer.
+  celular, o nó selecionado ganha uma barra com Editar, Renomear, Esconder,
+  Apagar, Duplicar, Desfazer e Refazer.
+- Renomear tag (ferramenta `renomear-tag`, rodada 5): dois cliques no nome
+  da tag, como o "Edit node type" do Chrome (doc e devtools-frontend:
+  `setNodeName` troca a peça por outra com os mesmos atributos e filhos;
+  Enter ou Espaço confirmam, Esc desiste, nome vazio ou igual não faz
+  nada, `html`/`head`/`body` não renomeiam). O fechamento acompanha o nome
+  enquanto digita. Núcleo `renomearTag` (entra no desfazer), evento
+  `renomeouTag`, ação `renomearTag` e validador `tag`.
+- Links na prévia (rodada 5): o iframe nunca navega (clique, botão do
+  meio e envio de formulário são segurados em `PreviewSiteAlvo`). O
+  núcleo `clicarLink` classifica o link (`src/lib/linksPrevia.ts`:
+  âncora, quebrado, vazio, externo) e gera `clicouLink` com o `href`; a
+  interface rola até a âncora (e ao topo no `href="#"`) e o
+  computadorzinho fala para onde o link levaria. Ação `clicarLink`;
+  validador `evento` com `href` opcional.
 
 ### Mascote
 
