@@ -9,7 +9,8 @@ type Props = {
   conhecida: boolean;
   toque: boolean;
   emFoco: boolean;
-  aoRever: () => void;
+  /** Sem ele, o card não mostra "Rever apresentação" (no mapa). */
+  aoRever?: () => void;
 };
 
 /** O texto do F12 é escrito para seguir "No F12 de verdade:"; no card vira frase própria. */
@@ -72,9 +73,13 @@ export function CardFerramenta({ ferramenta, conhecida, toque, emFoco, aoRever }
           <Demo />
         </div>
       )}
-      <Botao variante="secundario" tamanho="p" className="mt-3 min-h-11" onClick={aoRever}>
-        Rever apresentação
-      </Botao>
+      {aoRever ? (
+        <Botao variante="secundario" tamanho="p" className="mt-3 min-h-11" onClick={aoRever}>
+          Rever apresentação
+        </Botao>
+      ) : (
+        <p className="mt-3 text-xs font-bold text-texto-suave">Dentro de uma fase, dá pra rever a apresentação.</p>
+      )}
     </li>
   );
 }

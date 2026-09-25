@@ -19,7 +19,7 @@ const { chromium } = carregarPlaywright();
 
 export const URL_JOGO = process.env.URL_JOGO ?? "http://localhost:3000";
 
-export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null } = {}) {
+export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null, rota = "/", esperar = "iframe" } = {}) {
   const navegador = await chromium.launch();
   const contexto = await navegador.newContext({
     viewport: { width: largura, height: altura },
@@ -47,8 +47,8 @@ export async function abrir({ largura = 1440, altura = 900, toque = false, progr
       }
     }, progresso);
   }
-  await pagina.goto(URL_JOGO);
-  await pagina.waitForSelector("iframe");
+  await pagina.goto(`${URL_JOGO}${rota}`);
+  await pagina.waitForSelector(esperar);
   return { navegador, contexto, pagina, erros };
 }
 
@@ -68,6 +68,9 @@ export function progressoComFase(faseId, estadoFase = {}, extra = {}) {
     missoesDeCampo: {},
     apresentacoesVistas: [],
     metasVistas: [],
+    unidadesComemoradas: [],
+    posicaoNoMapa: {},
+    mapaDesbloqueado: false,
     proporcaoPrevia: 0.4,
     ...extra,
   };

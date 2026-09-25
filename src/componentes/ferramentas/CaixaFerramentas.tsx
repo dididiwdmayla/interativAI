@@ -16,7 +16,8 @@ type Props = {
   vistas: readonly IdFerramenta[];
   toque: boolean;
   aoFechar: () => void;
-  aoRever: (id: IdFerramenta) => void;
+  /** Sem ele (no mapa), os cards não têm "Rever apresentação": ela acontece dentro das fases. */
+  aoRever?: (id: IdFerramenta) => void;
 };
 
 /** Caixa de Ferramentas: gaveta à direita no desktop, folha de baixo no celular. */
@@ -130,7 +131,7 @@ export function CaixaFerramentas({ aberta, foco, vistas, toque, aoFechar, aoReve
                   conhecida={vistas.includes(ferramenta.id)}
                   toque={toque}
                   emFoco={foco === ferramenta.id}
-                  aoRever={() => aoRever(ferramenta.id)}
+                  aoRever={aoRever ? () => aoRever(ferramenta.id) : undefined}
                 />
               ))}
             </ul>

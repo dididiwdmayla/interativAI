@@ -60,6 +60,22 @@
   --cor-mascote-rosto: #3a1d4d;
   --cor-mascote-bochecha: #ff9ecb;
   --cor-mascote-base: #4f5fe8;
+
+  /* Mapa das ilhas */
+  --cor-mar: #bfe8f7;
+  --cor-mar-fundo: #93d3ee;
+  --cor-onda: #ffffff;
+  --cor-areia: #ffe4b8;
+  --cor-areia-sombra: #f0c98f;
+  --cor-grama: #a6e6b8;
+  --cor-grama-sombra: #72c790;
+  --cor-rota: #ffffff;
+  --cor-nevoa: #f6f0fb;
+  --cor-madeira: #b98458;
+  --cor-pedra: #f3ecf8;
+  --cor-pedra-sombra: #d9c9e6;
+  --cor-terminal-fundo: #1d3328;
+  --cor-terminal-texto: #7dffb0;
 }
 
 [data-theme="fliperama"] {
@@ -105,6 +121,21 @@
   --cor-mascote-rosto: #22e4f0;
   --cor-mascote-bochecha: #ff3dae;
   --cor-mascote-base: #6c4dff;
+
+  --cor-mar: #151242;
+  --cor-mar-fundo: #0d0b2c;
+  --cor-onda: #22e4f0;
+  --cor-areia: #3e3585;
+  --cor-areia-sombra: #2b245f;
+  --cor-grama: #1f6e5e;
+  --cor-grama-sombra: #154a40;
+  --cor-rota: #faf45a;
+  --cor-nevoa: #1a1640;
+  --cor-madeira: #9a7cff;
+  --cor-pedra: #2f2966;
+  --cor-pedra-sombra: #211c4c;
+  --cor-terminal-fundo: #05040f;
+  --cor-terminal-texto: #38f28b;
 }
 
 [data-theme="segredo"] {
@@ -150,4 +181,19 @@
   --cor-mascote-rosto: #3dff8f;
   --cor-mascote-bochecha: #ff7ad9;
   --cor-mascote-base: #1e5a43;
+
+  --cor-mar: #07302a;
+  --cor-mar-fundo: #042019;
+  --cor-onda: #3dff8f;
+  --cor-areia: #1f5c45;
+  --cor-areia-sombra: #174736;
+  --cor-grama: #2e8c61;
+  --cor-grama-sombra: #206847;
+  --cor-rota: #ffc94d;
+  --cor-nevoa: #0b2a20;
+  --cor-madeira: #b3861f;
+  --cor-pedra: #0f3a2b;
+  --cor-pedra-sombra: #0a2a1f;
+  --cor-terminal-fundo: #010a06;
+  --cor-terminal-texto: #3dff8f;
 }

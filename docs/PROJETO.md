@@ -84,6 +84,7 @@ src/
   tema/                 tokens.css (ÚNICO lugar com cores), temas.ts, script do tema
   lib/                  progresso (localStorage), armazém reativo, tema, som, DOM
   curriculo/            o currículo inteiro em dados (ilhas, zonas, unidades) e a consistência com o conteúdo
+  componentes/mapa/     o mapa: mundo, ilha (pontos e card), museu das Origens, arte SVG das ilhas
   conteudo/             conteúdo declarativo: tipos, conceitos, registro, checagens, índice
     ilhas/sites/elementos/unidade-N/   uma pasta por unidade (fases, unidade.ts, sites/)
   motor/                núcleo do painel, validadores, executor de ações, simulação, estado do motor
@@ -198,6 +199,41 @@ src/
   concluída) e estrelas nas concluídas. A conclusão tem "Próxima fase".
 - A palavra "trilha" fica reservada para a ferramenta; o "onde estou" da
   barra superior é o componente `OndeEstou`.
+
+### Mapa das ilhas
+
+- Regras em `src/lib/mapa.ts` (testadas em `testes/conteudo/mapa.test.ts`),
+  tudo derivado do currículo, do conteúdo e do progresso. Ilha sem unidade
+  pronta: "em construção"; Origens (sempre aberta) e Sites abertas; cada
+  ilha seguinte da rota abre quando a anterior está aberta e com todas as
+  unidades prontas concluídas (a opcional segue a última da rota); com
+  unidade pronta e sem essa condição: "bloqueada". Dentro da ilha, a zona
+  abre quando as anteriores têm tudo pronto concluído, e as unidades
+  prontas da zona vão em sequência. Unidade: planejada (sem conteúdo),
+  concluída (todas as fases), disponível ou bloqueada.
+- Mundo (`MundoMapa`): mar com ondas SVG, ilhas na ordem do currículo
+  ligadas por uma rota pontilhada com um barquinho, Frameworks afastada e
+  marcada "Opcional", arte própria de cada ilha em SVG
+  (`componentes/mapa/arte/`, só tokens) e o estado dela (brilho, andaimes
+  com o computadorzinho dormindo, névoa com cadeado). O computadorzinho
+  fica na ilha da última fase aberta. Dá para arrastar (mouse) e rolar
+  (dedo, rodinha, teclado): `AreaArrastavel`.
+- Ilha (`TelaIlha`, `/ilha/[id]`): zonas como regiões ao longo de um
+  caminho sinuoso (horizontal no desktop e deitado, vertical em pé), com
+  o ícone da aba do DevTools da zona e a placa "Em construção" nas zonas
+  com `requerMotor` (sem o texto técnico). Pontos de 52 px: concluída
+  (carinha feliz e estrelas), disponível (pulsando), bloqueada (cadeado),
+  planejada (andaime, "Em breve"). O card mostra título, meta, estrelas e
+  Jogar / Continuar / Jogar de novo (a próxima fase não concluída; "Jogar
+  de novo" recomeça as fases da unidade, sem perder estrelas). O
+  computadorzinho anda do ponto onde parou (`posicaoNoMapa`) até o atual;
+  unidade concluída desde a última visita acende com festa e desenha o
+  trecho até a próxima (`unidadesComemoradas`, uma vez só).
+- Museu das Origens (`/ilha/origens`): fachada, os antepassados do
+  computadorzinho em silhueta (cartão perfurado, terminal verde, primeiro
+  PC) e as 5 salas do currículo como portas fechadas "Em breve".
+- Tokens novos do mapa em `tokens.css` (mar, onda, areia, grama, rota,
+  névoa, madeira, pedra, terminal), nos três temas.
 
 ### Currículo
 

@@ -5,7 +5,7 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run testar:conteudo` passando e um commit.
 
 **Estado atual:** rodada 5 em andamento (fábrica corrigida, currículo em
-dados e mapa das ilhas). Etapas 1 a 3 concluídas.
+dados e mapa das ilhas). Etapas 1 a 4 concluídas.
 
 ## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
 
@@ -77,6 +77,26 @@ dados e mapa das ilhas). Etapas 1 a 3 concluídas.
   `nucleo.test.ts` (renomear, recusas, desfazer, links e falas) e
   `testes/renomear-links.mjs` (desktop e em pé), `ferramentas-novas.mjs`
   com 5 itens no menu e 7 na barra.
+
+- [x] **Etapa 4: mapa (mundo, ilha, museu e desbloqueios).** Regras em
+  `src/lib/mapa.ts` (estado da ilha, zona aberta, estado da unidade,
+  ação do card, estrelas, ilha e ponto atuais), com testes. Progresso
+  ganha `unidadesComemoradas`, `posicaoNoMapa` e `mapaDesbloqueado` (o
+  último abre tudo, inclusive as fases em `faseLiberada`). Mundo em
+  `/mapa` (provisório nesta etapa: o jogo continua em `/` até a Etapa 5),
+  ilha e museu em `/ilha/[id]` (só os ids do currículo, 404 no resto).
+  Arte SVG de cada ilha (museu com colunas, cartão perfurado e terminal;
+  prédios `< >` e blocos; engrenagens; peças que pulam, faíscas e botão;
+  antenas e cabos no mar; oficina com ferramentas; blocos montados),
+  estados (brilho, andaimes com computadorzinho dormindo, névoa e
+  cadeado), mar com ondas, rota com barquinho e o computadorzinho na ilha
+  atual. Ilha: zonas ao longo do caminho (horizontal ou vertical em pé),
+  ícone da aba por zona (`IconeZona`), placa "Em construção", pontos,
+  card com Jogar/Continuar/Jogar de novo, caminhada do computadorzinho e
+  comemoração ao concluir. Barra do mapa com total de estrelas,
+  Ferramentas (Caixa só de leitura: `aoRever` ficou opcional), tema e
+  som. Tudo respeita `prefers-reduced-motion`. Teste
+  `testes/mapa.mjs` nos três layouts.
 
 ## Rodada 4: primeiro teste da fábrica (Unidade 1)
 
