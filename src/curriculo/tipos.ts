@@ -21,7 +21,9 @@ export type IconeZona =
   | "aplicacao"
   | "terminal"
   | "git"
-  | "componentes";
+  | "componentes"
+  | "ia"
+  | "seguranca";
 
 export type UnidadeCurriculo = {
   /**
@@ -49,7 +51,7 @@ export type ZonaCurriculo = {
 };
 
 export type IlhaCurriculo = {
-  /** "origens", "sites", "logica", "paginas-vivas", "rede-servidor", "oficio", "frameworks". */
+  /** "origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio", "frameworks". */
   id: string;
   nome: string;
   /** Fora da rota principal (Frameworks). */

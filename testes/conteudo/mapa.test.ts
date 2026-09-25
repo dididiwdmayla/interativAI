@@ -57,6 +57,7 @@ describe("ilhas", () => {
       ["logica", "construcao"],
       ["paginas-vivas", "construcao"],
       ["rede-servidor", "construcao"],
+      ["ia", "construcao"],
       ["oficio", "construcao"],
       ["frameworks", "construcao"],
     ]);

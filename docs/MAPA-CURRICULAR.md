@@ -12,6 +12,15 @@ Onde está escrito **Requer motor**, o motor ainda não tem o que a zona (ou
 a unidade) precisa. Unidade assim não é produzida: pare e relate o que
 falta.
 
+## Filosofia
+
+Cortar o que não serve na prática para quem vai programar (por exemplo, a
+matemática pesada da engenharia), mas **manter** o que sustenta tudo:
+estruturas de dados, algoritmos e o funcionamento do computador,
+ensinados pela intuição, com exemplos e sem fórmula. E acrescentar o que
+o programador de hoje precisa no dia a dia: TypeScript, testes, Git em
+equipe, segurança e trabalhar com IA com critério.
+
 ## Meta geral
 
 Levar uma pessoa do zero até o nível de dev júnior web (front e back), de
@@ -37,7 +46,8 @@ Id no currículo: `origens`, zona `museu`.
 **Requer motor:** tipos de atividade linha do tempo, comparador de
 linguagens executável e diagrama de rede.
 
-Salas:
+Salas (a sala 6 entrou na rodada 9, depois das outras, para manter os
+ids):
 
 1. **Como o computador entende** (`origens-museu-u1`): bits, instruções,
    da linguagem de máquina às linguagens que a gente escreve.
@@ -48,6 +58,10 @@ Salas:
    carreiras.
 5. **Front, back e o caminho de um clique** (`origens-museu-u5`): visão
    geral.
+6. **Por baixo do capô** (`origens-museu-u6`): memória, processador,
+   sistema operacional, arquivos, binário e hexadecimal (ligado às cores
+   do CSS: `#ff8800` é hexadecimal) e a internet física (cabos,
+   servidores, pacotes).
 
 ---
 
@@ -202,21 +216,30 @@ projeto do jogador; tipo de fase projeto-ponte.
 
 ## Ilha 2: Lógica (JavaScript puro)
 
-Id no currículo: `logica`. Uma unidade planejada por zona
-(`logica-<zona>-u1`), a detalhar quando o motor existir.
+Id no currículo: `logica`. Unidades planejadas por zona
+(`logica-<zona>-u<n>`), a detalhar quando o motor existir.
 
 **Requer motor:** Console interativo, execução de JS isolada e aba Fontes
 com depurador.
 
-Zonas:
+Zonas (na ordem do mapa):
 
 1. Primeiros comandos (`primeiros-comandos`): console, valores,
    variáveis, tipos.
-2. Decisões (`decisoes`): comparações, booleanos, if/else.
-3. Repetição (`repeticao`): for, while.
-4. Funções (`funcoes`).
-5. Listas e objetos (`listas-e-objetos`).
-6. Depuração (`depuracao`): ler erros, breakpoints.
+2. Resolvendo problemas (`resolvendo-problemas`): decompor um problema
+   em passos pequenos (u1) e pseudocódigo (u2).
+3. Decisões (`decisoes`): comparações, booleanos, if/else.
+4. Repetição (`repeticao`): for, while.
+5. Funções (`funcoes`).
+6. Listas e objetos (`listas-e-objetos`).
+7. Depuração (`depuracao`): ler erros, breakpoints.
+8. Estruturas de dados (`estruturas-de-dados`): listas e dicionários
+   (u1), pilhas e filas (u2, com o desfazer como exemplo), árvores (u3:
+   o DOM é uma árvore, a mesma da aba Elementos).
+9. Algoritmos essenciais (`algoritmos-essenciais`): buscar (u1), ordenar
+   (u2), recursão (u3) e a noção de desempenho (u4, "Por que isso
+   trava?": por que um programa que voa com dez itens trava com um
+   milhão, sem fórmula).
 
 ---
 
@@ -239,35 +262,77 @@ Zonas:
 
 ## Ilha 4: Rede e Servidor
 
-Id no currículo: `rede-servidor`. Uma unidade planejada por zona.
+Id no currículo: `rede-servidor`. Unidades planejadas por zona.
 
 **Requer motor:** aba Rede, servidor simulado e diagrama de requisições.
 
-Zonas:
+Zonas (na ordem do mapa):
 
 1. O caminho de um clique (`caminho-de-um-clique`): HTTP, status e a aba
    Rede.
-2. APIs e JSON (`apis-e-json`): fetch.
+2. APIs e JSON (`apis-e-json`): fetch (u1) e APIs REST (u2: métodos e
+   endereços).
 3. Servidor (`servidor`): Node básico, simulado.
-4. Banco de dados (`banco-de-dados`): conceitos e CRUD.
-5. Front e back juntos (`front-e-back`): projeto.
+4. Banco de dados (`banco-de-dados`): conceitos e CRUD (u1), SQL e NoSQL
+   (u2).
+5. Login e autenticação (`login-e-autenticacao`): sessões e tokens.
+6. Segurança (`seguranca`): senhas e hash (u1), chaves e segredos (u2),
+   injeção e XSS (u3).
+7. Front e back juntos (`front-e-back`): projeto.
 
 ---
 
-## Ilha 5: Ofício
+## Ilha 5: IA
 
-Id no currículo: `oficio`. Uma unidade planejada por zona, e o projeto
-final na zona Deploy.
+Id no currículo: `ia`. Fica entre Rede e Servidor e Ofício: depois de
+saber como um site e um servidor funcionam, dá para julgar o que a IA
+escreve.
+
+**Requer motor: IA ao vivo.** Nas fases guiadas, o código roteirizado
+aparece no editor como se estivesse sendo digitado, de forma
+determinística, com um bug plantado fixo (sempre o mesmo, para a fase
+ser testável). Nas fases livres, o Gemini escreve ao vivo e o jogador
+aceita, rejeita ou corrige cada trecho.
 
 Zonas:
 
+1. Como um modelo funciona (`como-funciona`): como um modelo de
+   linguagem escolhe a próxima palavra, pela intuição, sem matemática.
+2. Especificação e prompt (`especificacao-e-prompt`): pedir do jeito
+   certo, com uma especificação clara.
+3. IA ao vivo (`ia-ao-vivo`): revisar código gerado (u1), achar o bug da
+   IA (u2) e quando não confiar (u3).
+4. Agentes (`agentes`): o que um agente faz sozinho e onde você continua
+   no comando.
+5. Custo e privacidade (`custo-e-privacidade`): quanto custa e nunca
+   colar chaves ou dados sensíveis.
+
+---
+
+## Ilha 6: Ofício
+
+Id no currículo: `oficio`. Unidades planejadas por zona, e o projeto
+final na zona Deploy.
+
+Zonas (na ordem do mapa):
+
 1. Terminal (`terminal`).
 2. Git e GitHub (`git-e-github`).
-3. Editor real e documentação (`editor-e-documentacao`).
-4. Deploy (`deploy`).
-5. IA com critério (`ia-com-criterio`).
+3. Git em equipe (`git-em-equipe`): branches (u1), pull request e
+   revisão de código (u2).
+4. Editor real e documentação (`editor-e-documentacao`).
+5. Ler código dos outros (`ler-codigo-dos-outros`).
+6. TypeScript (`typescript`).
+7. Testes automatizados (`testes-automatizados`).
+8. Variáveis de ambiente (`variaveis-de-ambiente`).
+9. IA com critério (`ia-com-criterio`): usar a IA no projeto de verdade,
+   aplicando o que a ilha IA ensinou.
+10. Deploy (`deploy`): publicar (u1) e o **projeto final** (u2).
+11. Portfólio e aprender sozinho (`portfolio`).
 
-Termina com o projeto final publicado.
+**Critério final do núcleo:** o projeto do Ofício (`oficio-deploy-u2`),
+um app completo, front e back, feito a partir de uma página em branco,
+sem roteiro, e publicado.
 
 **Requer motor (acréscimo do currículo em dados):** o anexo original não
 lista o que falta aqui, mas o motor atual só tem a aba Elementos. Cada

@@ -154,13 +154,13 @@ describe("tabela tela -> faixa", () => {
       logica: "logica",
       "paginas-vivas": "paginas-vivas",
       "rede-servidor": "rede-servidor",
+      ia: "ia",
       oficio: "oficio",
     };
     for (const [ilhaId, faixa] of Object.entries(esperado)) {
       expect(faixaTocavel({ tipo: "ilha", ilhaId }, MUSICAS)).toBe(faixa);
       expect(faixaTocavel({ tipo: "fase", ilhaId }, MUSICAS)).toBe(faixa);
     }
-    expect(faixaTocavel({ tipo: "ilha", ilhaId: "ia" }, MUSICAS)).toBe("ia");
   });
 
   it("o mapa do mundo resolve para mapa", () => {

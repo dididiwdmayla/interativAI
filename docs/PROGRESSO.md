@@ -4,8 +4,10 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 8 (áudio v2: música do mapa e efeitos gravados)
-concluída; antes dela, a rodada 7 (sistema de áudio) e a
+**Estado atual:** rodada 9 em andamento (painel Estilos, motor de
+cascata, modo documento, ROADMAP; ver a seção dela abaixo e o
+`docs/ROADMAP.md`). Antes: rodada 8 (áudio v2: música do mapa e efeitos
+gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
@@ -13,6 +15,38 @@ seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
 inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
 que também requer motor (aba Estilos) — parar e relatar antes de
 produzir, seguindo a seção 0 do guia.
+
+## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
+
+Status resumido em `docs/ROADMAP.md` (fonte única de status a partir
+desta rodada).
+
+- [x] **Etapa 1: ROADMAP e currículo.** `docs/ROADMAP.md` criado (visão,
+  fluxo de trabalho, status, decisões, estimativas) e a regra nova "todo
+  prompt termina atualizando o Status do ROADMAP" no `PROJETO.md`, no
+  guia (com item no checklist) e no `CLAUDE.md`. Currículo
+  (`docs/MAPA-CURRICULAR.md` e `src/curriculo/curriculo.ts`) com as
+  adições: filosofia no topo; sala 6 "Por baixo do capô"
+  (`origens-museu-u6`); Lógica com "Resolvendo problemas" (2 unidades),
+  "Estruturas de dados" (3) e "Algoritmos essenciais" (4, a última é a
+  noção de desempenho); Rede e Servidor com APIs REST
+  (`rede-servidor-apis-e-json-u2`), SQL e NoSQL
+  (`rede-servidor-banco-de-dados-u2`), "Login e autenticação" e
+  "Segurança" (3); ilha nova `ia` entre Rede e Servidor e Ofício, com 5
+  zonas e `requerMotor` "IA ao vivo" (roteirizado e determinístico nas
+  guiadas, Gemini ao vivo nas livres); Ofício com "Git em equipe", "Ler
+  código dos outros", "TypeScript", "Testes automatizados", "Variáveis
+  de ambiente" e "Portfólio e aprender sozinho", e o projeto final
+  (`oficio-deploy-u2`) descrito como o critério do núcleo. Nenhum id
+  antigo mudou (unidades novas entram no fim das zonas; zonas novas
+  podem entrar no meio, porque o id da unidade depende só da posição na
+  zona). Ícones de zona novos `ia` (constelação) e `seguranca` (escudo).
+  Arte `ArteIA` (nós ligados como constelação e um farolzinho com sinal,
+  só tokens, animação só sem `prefers-reduced-motion`), mundo com 1840
+  de largura e as ilhas reposicionadas; o museu mostra as 6 salas.
+  Testes: `curriculo.test.ts` (ordem das ilhas, IA no lugar certo, ids
+  antigos preservados), `mapa.test.ts`, `registro.test.ts` (faixa `ia`,
+  que já existia no manifesto, agora tem ilha) e `testes/mapa.mjs`.
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

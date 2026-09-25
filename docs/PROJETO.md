@@ -1,7 +1,9 @@
 # InterativAI: Ilha Sites
 
-Resumo do projeto para quem chega numa sessão nova. Leia este arquivo e o
-`docs/PROGRESSO.md` antes de mexer em qualquer coisa.
+Resumo do projeto para quem chega numa sessão nova. Leia este arquivo, o
+`docs/ROADMAP.md` (status: feito, em andamento, próximo) e o
+`docs/PROGRESSO.md` (o detalhe de cada rodada) antes de mexer em qualquer
+coisa.
 
 ## Visão
 
@@ -15,7 +17,7 @@ Estrutura (o mapa, rodada 5):
 - Mapa estilo Mario World com ilhas, na ordem do currículo
   (`docs/MAPA-CURRICULAR.md`, em dados em `src/curriculo/`): Origens (o
   museu, sempre aberto), Sites, Lógica, Páginas vivas, Rede e Servidor,
-  Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
+  IA, Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
 - Dentro da ilha, zonas (na Ilha Sites: Elementos, Estilos, Layout,
   Responsivo e Publicar), cada uma com unidades em sequência. Todas as
   unidades planejadas aparecem no mapa, "Em breve".
@@ -63,6 +65,10 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
    `docs/GUIA-DE-CONTEUDO.md`. Toda ferramenta nova entra no registro de
    ferramentas, com apresentação, card, `data-ferramenta` e variantes de
    mouse e toque.
+10. **Todo prompt termina atualizando a seção Status do
+    `docs/ROADMAP.md`** (o que foi feito, o que ficou em andamento, o
+    próximo passo). O `ROADMAP.md` é a fonte única de status; o
+    `PROGRESSO.md` guarda o detalhe das etapas.
 
 ## Stack
 
@@ -255,7 +261,7 @@ src/
   trecho até a próxima (`unidadesComemoradas`, uma vez só).
 - Museu das Origens (`/ilha/origens`): fachada, os antepassados do
   computadorzinho em silhueta (cartão perfurado, terminal verde, primeiro
-  PC) e as 5 salas do currículo como portas fechadas "Em breve".
+  PC) e as 6 salas do currículo como portas fechadas "Em breve".
 - Tokens novos do mapa em `tokens.css` (mar, onda, areia, grama, rota,
   névoa, madeira, pedra, terminal), nos três temas.
 

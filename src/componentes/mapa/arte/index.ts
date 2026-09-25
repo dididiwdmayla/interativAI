@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { ArteFrameworks } from "./ArteFrameworks";
+import { ArteIA } from "./ArteIA";
 import { ArteLogica } from "./ArteLogica";
 import { ArteOficio } from "./ArteOficio";
 import { ArteOrigens } from "./ArteOrigens";
@@ -14,6 +15,7 @@ export const ARTE_DAS_ILHAS: Record<string, ComponentType> = {
   logica: ArteLogica,
   "paginas-vivas": ArtePaginasVivas,
   "rede-servidor": ArteRede,
+  ia: ArteIA,
   oficio: ArteOficio,
   frameworks: ArteFrameworks,
 };

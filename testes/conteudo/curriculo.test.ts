@@ -13,9 +13,41 @@ const [U1] = UNIDADES;
 
 describe("currículo em dados", () => {
   it("ilhas na ordem do mapa, Origens sempre aberta e Frameworks opcional", () => {
-    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "oficio"]);
+    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio"]);
     expect(ILHAS_OPCIONAIS.map((ilha) => ilha.id)).toEqual(["frameworks"]);
     expect(CURRICULO.find((ilha) => ilha.id === "origens")?.sempreAberta).toBe(true);
+  });
+
+  it("a ilha IA fica entre Rede e Servidor e Ofício, com a IA ao vivo como motor", () => {
+    const ids = CURRICULO.map((ilha) => ilha.id);
+    expect(ids.indexOf("ia")).toBe(ids.indexOf("rede-servidor") + 1);
+    expect(ids.indexOf("oficio")).toBe(ids.indexOf("ia") + 1);
+    const ia = CURRICULO.find((ilha) => ilha.id === "ia");
+    expect(ia?.zonas.map((zona) => zona.id)).toEqual([
+      "como-funciona",
+      "especificacao-e-prompt",
+      "ia-ao-vivo",
+      "agentes",
+      "custo-e-privacidade",
+    ]);
+    for (const zona of ia?.zonas ?? []) expect(zona.requerMotor).toContain("IA ao vivo");
+  });
+
+  it("as unidades antigas mantêm os ids depois das adições do currículo", () => {
+    for (const id of [
+      "origens-museu-u5",
+      "logica-depuracao-u1",
+      "rede-servidor-apis-e-json-u1",
+      "rede-servidor-front-e-back-u1",
+      "oficio-deploy-u2",
+      "oficio-ia-com-criterio-u1",
+      "frameworks-react-e-next-u2",
+    ]) {
+      expect(localNoCurriculo(id), id).toBeDefined();
+    }
+    expect(localNoCurriculo("origens-museu-u6")?.unidade.titulo).toBe("Por baixo do capô");
+    expect(localNoCurriculo("logica-algoritmos-essenciais-u4")?.zona.nome).toBe("Algoritmos essenciais");
+    expect(localNoCurriculo("rede-servidor-seguranca-u3")?.zona.nome).toBe("Segurança");
   });
 
   it("status vem do conteúdo registrado, não é guardado à mão", () => {

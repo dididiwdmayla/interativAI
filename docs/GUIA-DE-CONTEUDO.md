@@ -24,9 +24,14 @@ Arquivos que você vai usar:
 | `/lab/fases` | abrir qualquer fase, ver os validadores ao vivo |
 | `/lab/mapa` | desbloquear tudo no mapa, resetar o progresso e a Lista de fases |
 | `npm run publicar:conteudo` | congela os ids da unidade nova em `src/conteudo/publicados.json` |
+| `docs/ROADMAP.md` | o status do projeto; atualize a seção Status no fim do trabalho |
 
 Regras do projeto que valem aqui também (ver `docs/PROJETO.md`): zero
 emojis, PT-BR, cores só nos sites-alvo, nada de função dentro de fase.
+
+**Ao terminar qualquer trabalho (unidade, correção, rodada):** atualize a
+seção Status do `docs/ROADMAP.md` (o que foi feito, o que ficou em
+andamento e o próximo passo). Ele é a fonte única de status do projeto.
 
 ---
 
@@ -680,3 +685,4 @@ próximo aparece "Em breve".
 - [ ] `npm run testar:conteudo`, `npm run lint` e `npm run build` verdes.
 - [ ] Jogado no `/lab/fases` e de verdade (desktop e celular).
 - [ ] `docs/PROGRESSO.md` atualizado.
+- [ ] Seção Status do `docs/ROADMAP.md` atualizada.
