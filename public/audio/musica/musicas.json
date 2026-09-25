@@ -1,0 +1,78 @@
+{
+  "descricao": "Loops de música por ilha. Cada arquivo é um loop completo: tocar do início até duracaoSegundos e voltar ao início, sem crossfade extra (a emenda já está embutida). Use Web Audio com loop=true e loopEnd=duracaoSegundos, porque os containers reportam duração com alguns ms de preenchimento. webm = Opus 64 kbps (preferencial); m4a = AAC 96 kbps (fallback via canPlayType). Todas normalizadas em -18 LUFS.",
+  "pendentes": [
+    "mapa"
+  ],
+  "faixas": {
+    "origens": {
+      "titulo": "Origens (Museu)",
+      "arquivos": {
+        "webm": "/audio/musica/origens.webm",
+        "m4a": "/audio/musica/origens.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 3686400,
+      "duracaoSegundos": 76.8
+    },
+    "sites": {
+      "titulo": "Sites",
+      "arquivos": {
+        "webm": "/audio/musica/sites.webm",
+        "m4a": "/audio/musica/sites.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 3445098,
+      "duracaoSegundos": 71.772875
+    },
+    "logica": {
+      "titulo": "Lógica",
+      "arquivos": {
+        "webm": "/audio/musica/logica.webm",
+        "m4a": "/audio/musica/logica.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 3636523,
+      "duracaoSegundos": 75.760896
+    },
+    "paginas-vivas": {
+      "titulo": "Páginas vivas",
+      "arquivos": {
+        "webm": "/audio/musica/paginas-vivas.webm",
+        "m4a": "/audio/musica/paginas-vivas.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 4741329,
+      "duracaoSegundos": 98.777687
+    },
+    "rede-servidor": {
+      "titulo": "Rede e Servidor",
+      "arquivos": {
+        "webm": "/audio/musica/rede-servidor.webm",
+        "m4a": "/audio/musica/rede-servidor.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 2880854,
+      "duracaoSegundos": 60.017792
+    },
+    "oficio": {
+      "titulo": "Ofício",
+      "arquivos": {
+        "webm": "/audio/musica/oficio.webm",
+        "m4a": "/audio/musica/oficio.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 3686122,
+      "duracaoSegundos": 76.794208
+    },
+    "ia": {
+      "titulo": "IA",
+      "arquivos": {
+        "webm": "/audio/musica/ia.webm",
+        "m4a": "/audio/musica/ia.m4a"
+      },
+      "sampleRate": 48000,
+      "amostras": 3975071,
+      "duracaoSegundos": 82.813979
+    }
+  }
+}
