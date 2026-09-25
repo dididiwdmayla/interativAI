@@ -227,7 +227,10 @@ async function clicarLinhaCodigo(texto) {
   await esperar(200);
   const linha = pagina.locator(".cm-line", { hasText: texto }).first();
   await linha.waitFor({ timeout: 8000 });
-  await tocar(linha);
+  // Perto do começo da linha: linhas compridas (como o data URI de uma
+  // imagem) passam da largura da tela, e o centro delas pode ficar fora
+  // da área visível, principalmente no painel estreito da paisagem.
+  await tocar(linha, { position: { x: 4, y: 4 } });
 }
 
 async function trilha(rotulo) {
