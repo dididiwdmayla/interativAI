@@ -11,6 +11,24 @@
       "sites-elementos-u2-f2",
       "sites-elementos-u2-f3",
       "sites-elementos-u2-f4"
+    ],
+    "sites-elementos-u3": [
+      "sites-elementos-u3-f1",
+      "sites-elementos-u3-f2",
+      "sites-elementos-u3-f3",
+      "sites-elementos-u3-f4"
+    ],
+    "sites-elementos-u4": [
+      "sites-elementos-u4-f1",
+      "sites-elementos-u4-f2",
+      "sites-elementos-u4-f3",
+      "sites-elementos-u4-f4"
+    ],
+    "sites-elementos-u5": [
+      "sites-elementos-u5-f1",
+      "sites-elementos-u5-f2",
+      "sites-elementos-u5-f3",
+      "sites-elementos-u5-f4"
     ]
   },
   "fases": {
@@ -66,6 +84,91 @@
         "apagar-lateral",
         "duplicar-produto",
         "selecionar-vitrine"
+      ]
+    },
+    "sites-elementos-u3-f1": {
+      "objetivos": [
+        "corrigir-titulo-principal",
+        "prever-subtitulo",
+        "acrescentar-paragrafo",
+        "hierarquia-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f2": {
+      "objetivos": [
+        "aviso-forte",
+        "curiosidade-em",
+        "enfase-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f3": {
+      "objetivos": [
+        "passos-numerados",
+        "prever-materiais",
+        "lista-sozinho"
+      ]
+    },
+    "sites-elementos-u3-f4": {
+      "partes": [
+        "titulo-principal",
+        "subtitulos",
+        "aviso-forte",
+        "passos-numerados"
+      ]
+    },
+    "sites-elementos-u4-f1": {
+      "objetivos": [
+        "consertar-link-menu",
+        "prever-aba-nova",
+        "links-sozinho"
+      ]
+    },
+    "sites-elementos-u4-f2": {
+      "objetivos": [
+        "prever-quem-le-alt",
+        "alt-sozinho"
+      ]
+    },
+    "sites-elementos-u4-f3": {
+      "objetivos": [
+        "prever-id-duplicado",
+        "duplicar-integrante"
+      ]
+    },
+    "sites-elementos-u4-f4": {
+      "partes": [
+        "link-menu",
+        "aba-nova",
+        "alt-foto",
+        "class-musicos"
+      ]
+    },
+    "sites-elementos-u5-f1": {
+      "objetivos": [
+        "prever-div-nova",
+        "topo-vira-header",
+        "rodape-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f2": {
+      "objetivos": [
+        "servicos-vira-section",
+        "prever-article",
+        "secoes-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f3": {
+      "objetivos": [
+        "preco-vira-span",
+        "span-sozinho"
+      ]
+    },
+    "sites-elementos-u5-f4": {
+      "partes": [
+        "cabecalho-rodape",
+        "secao-servicos",
+        "cards-artigo",
+        "precos-span"
       ]
     }
   }

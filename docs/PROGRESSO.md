@@ -4,10 +4,55 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 5 concluída (fábrica corrigida, currículo em
-dados, renomear tag e links na prévia, e o mapa das ilhas integrado ao
-jogo). A próxima unidade é a U3 da zona Elementos, "Títulos e textos",
-seguindo `docs/GUIA-DE-CONTEUDO.md` (seção 0).
+**Estado atual:** rodada 6 concluída — Unidades 3, 4 e 5 da zona
+Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
+seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
+("Página do zero") segue planejada, por exigir motor (modo documento
+inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
+que também requer motor (aba Estilos) — parar e relatar antes de
+produzir, seguindo a seção 0 do guia.
+
+## Rodada 6: Unidades 3, 4 e 5 da zona Elementos
+
+- [x] **Unidade 3, "Títulos e textos"** (`sites-elementos-u3`). Fases 1-3
+  no Blog da Horta Comunitária: hierarquia de títulos (h1-h6) e
+  parágrafo, com a ferramenta renomear-tag apresentada pela primeira vez
+  fora da U3 original; ênfase forte e leve (strong vs b, em vs i),
+  atacando a confusão "b e strong são iguais" com previsão; listas
+  numeradas (ol vs ul), revisando trilha e duplicar elemento. Desafio na
+  Receita da Vovó (site novo), 4 partes. 5 conceitos novos no catálogo
+  (`titulos-hierarquia`, `paragrafo`, `enfase-forte`, `enfase-leve`,
+  `lista-numerada`).
+- [x] **Unidade 4, "Links, imagens, id e class"** (`sites-elementos-u4`).
+  Fases 1-3 no Coral Vozes da Vila: editar atributo (conceito novo, nunca
+  tinha sido nomeado apesar da mecânica existir desde a U1), href e link
+  âncora, target="_blank"; alt de imagem, atacando "alt é legenda" com
+  previsão; id único vs class repetível, atacando "id e class são a
+  mesma coisa" com previsão sobre id duplicado, revisando duplicar
+  elemento. Desafio na banda Trovão de Lata (site novo), 4 partes.
+  Atrito de motor real pego antes do commit: a árvore só edita o valor
+  de um atributo que já existe, nunca cria um novo — atributos novos
+  (target, alt, class quando ainda não existe) precisam ser escritos
+  pelo código; conteúdo ajustado para orientar certo (ver
+  `docs/ATRITOS-FABRICA.md`, Rodada 2).
+- [x] **Unidade 5, "Caixas e seções"** (`sites-elementos-u5`). Fases 1-3
+  na Oficina Roda Livre: div genérica e semântica do HTML (header,
+  footer), atacando "a div faz algo visual" com previsão; section vs
+  article, atacando "tanto faz" com previsão; span (revisando ênfase
+  forte da U3: o preço não é "importante de verdade", é só estilo).
+  Desafio no Pet Shop Focinho Feliz (site só de div), 4 partes.
+- [x] **Testes e docs.** `testar:conteudo` verde nas três unidades (377
+  testes no total, todas de primeira exceto um limite de caracteres na
+  U3 e um na U4). `npm run publicar:conteudo` rodado uma vez por unidade,
+  cada uma com seu commit. Bateria Playwright (`testes/unidades.mjs`)
+  estendida com a jornada das três unidades, nos três layouts (desktop,
+  retrato, paisagem), a partir do mapa. Ajudantes novos:
+  `renomearTag`, `editarValorAtributo`, `clicarLinhaCodigo` (corrigido
+  pra lidar com virtualização do editor, quebra de linha e a régua de
+  números) e `acrescentarAtributoPeloCodigo`. `curriculo.test.ts` e
+  `mapa.test.ts` atualizados a cada unidade nova (status "pronta",
+  desbloqueio de ilha e zona, ponto do computadorzinho). `build` e
+  `lint` verdes o tempo todo. `docs/ATRITOS-FABRICA.md` com a Rodada 2.
 
 ## Rodada 5: fábrica corrigida, currículo e mapa das ilhas
 
@@ -488,10 +533,11 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
-- Próximas unidades da zona Elementos (U3, U4, U5), na ordem do
-  `docs/MAPA-CURRICULAR.md`, copiando a pasta da Unidade 2 (formato
-  padrão). A U6 e as zonas seguintes pedem motor antes (ver
-  `requerMotor` em `src/curriculo/curriculo.ts`).
+- A zona Elementos está completa (U1 a U5). A U6 ("Página do zero") e a
+  zona Estilos (próxima da rota) pedem motor antes de produzir conteúdo
+  (ver `requerMotor` em `src/curriculo/curriculo.ts`): modo documento
+  inteiro (head editável) para a U6, e a aba Estilos inteira para a zona
+  Estilos.
 - Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.

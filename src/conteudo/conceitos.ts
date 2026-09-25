@@ -77,6 +77,76 @@ const CATALOGO = {
     nome: "Elementos irmãos",
     resumo: "Peças que moram dentro do mesmo pai, uma do lado da outra.",
   },
+
+  // Unidade 3: títulos e textos
+  "titulos-hierarquia": {
+    nome: "Hierarquia de títulos",
+    resumo: "Os títulos vão de h1 (o mais importante) a h6: o número mostra o nível, não o tamanho da letra.",
+  },
+  paragrafo: {
+    nome: "Parágrafo",
+    resumo: "A tag p marca um bloco de texto corrido, a peça mais comum de uma página.",
+  },
+  "enfase-forte": {
+    nome: "Ênfase forte",
+    resumo: "O strong diz que aquele trecho é importante de verdade; o b só deixa em negrito, sem avisar ninguém.",
+  },
+  "enfase-leve": {
+    nome: "Ênfase leve",
+    resumo: "O em marca um tom diferente na frase; o i só deixa em itálico, sem dizer que é especial.",
+  },
+  "lista-numerada": {
+    nome: "Lista numerada",
+    resumo: "A tag ol numera os itens porque a ordem deles importa; a ul não numera porque a ordem não importa.",
+  },
+
+  // Unidade 4: links, imagens, id e class
+  "editar-atributo": {
+    nome: "Editar atributo",
+    resumo: "Trocar o valor de um atributo (como href, alt ou class) com dois cliques na árvore, só para você ver.",
+  },
+  "link-href": {
+    nome: "Link e href",
+    resumo: "A tag a cria um link; o href diz para onde ele leva, um endereço ou um lugar da própria página.",
+  },
+  "link-ancora": {
+    nome: "Link âncora",
+    resumo: "Um href que começa com # não sai da página: ele rola até o elemento com aquele id.",
+  },
+  "link-aba-nova": {
+    nome: "Abrir em aba nova",
+    resumo: "O atributo target=\"_blank\" faz o link abrir numa aba nova, sem fechar a página atual.",
+  },
+  "imagem-alt": {
+    nome: "Imagem e alt",
+    resumo: "O alt descreve a imagem em palavras: quem não consegue ver a imagem ouve ou lê essa descrição.",
+  },
+  "id-unico": {
+    nome: "Id é único",
+    resumo: "Um id identifica UMA peça só na página inteira; duas peças com o mesmo id confundem o navegador.",
+  },
+  "class-repetivel": {
+    nome: "Class é repetível",
+    resumo: "Uma class pode se repetir em várias peças parecidas, para tratar todas elas juntas.",
+  },
+
+  // Unidade 5: caixas e seções
+  "div-generica": {
+    nome: "Div genérica",
+    resumo: "A div é uma caixa sem significado nem estilo próprio: ela só agrupa, e o visual depende do CSS.",
+  },
+  "semantica-html": {
+    nome: "Semântica do HTML",
+    resumo: "Usar a tag certa (como header ou footer) ajuda leitor de tela, busca e quem lê o código depois, mesmo sem mudar o visual.",
+  },
+  "section-vs-article": {
+    nome: "Section ou article",
+    resumo: "section agrupa conteúdo por tema; article é um conteúdo que se basta sozinho e poderia ser reaproveitado em outro lugar.",
+  },
+  "span-generico": {
+    nome: "Span genérico",
+    resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
+  },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2] = UNIDADES;
+const [U1, U2, U3, U4, U5] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -66,8 +66,8 @@ describe("ilhas", () => {
     const unidades = [...UNIDADES, LOGICA_FALSA];
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2), unidades })).toBe("disponivel");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -79,14 +79,14 @@ describe("ilhas", () => {
 });
 
 describe("zonas e unidades", () => {
-  it("do zero: U1 disponível, U2 bloqueada, o resto planejado", () => {
+  it("do zero: U1 disponível, U2-U5 bloqueadas (já prontas), a U6 planejada (requer motor)", () => {
     const fonte = { progresso: PROGRESSO_PADRAO };
     expect(ELEMENTOS.unidades.map((unidade) => estadoDaUnidade(SITES, ELEMENTOS, unidade, fonte))).toEqual([
       "disponivel",
       "bloqueada",
-      "planejada",
-      "planejada",
-      "planejada",
+      "bloqueada",
+      "bloqueada",
+      "bloqueada",
       "planejada",
     ]);
     expect(zonaAberta(SITES, ESTILOS, fonte)).toBe(false);
@@ -97,7 +97,8 @@ describe("zonas e unidades", () => {
     expect(estadoDaUnidade(SITES, ELEMENTOS, item("sites-elementos-u1"), depoisU1)).toBe("concluida");
     expect(estadoDaUnidade(SITES, ELEMENTOS, item("sites-elementos-u2"), depoisU1)).toBe("disponivel");
     expect(zonaAberta(SITES, ESTILOS, depoisU1)).toBe(false);
-    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2) })).toBe(true);
+    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4) })).toBe(false);
+    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5) })).toBe(true);
   });
 
   it("botão do card: Jogar, Continuar e Jogar de novo, abrindo a próxima fase não concluída", () => {
@@ -114,7 +115,9 @@ describe("zonas e unidades", () => {
     expect(pontoAtual(SITES, { progresso: naU2 }).id).toBe("sites-elementos-u2");
     // Acabou a U1 e a fase atual ainda é dela: o ponto segue para a U2.
     expect(pontoAtual(SITES, { progresso: { ...concluiu(U1), faseAtual: U1.fases[2] } }).id).toBe("sites-elementos-u2");
-    expect(pontoAtual(SITES, { progresso: concluiu(U1, U2) }).id).toBe("sites-elementos-u2");
+    expect(pontoAtual(SITES, { progresso: concluiu(U1, U2) }).id).toBe("sites-elementos-u3");
+    expect(pontoAtual(SITES, { progresso: concluiu(U1, U2, U3) }).id).toBe("sites-elementos-u4");
+    expect(pontoAtual(SITES, { progresso: concluiu(U1, U2, U3, U4) }).id).toBe("sites-elementos-u5");
   });
 
   it("total de estrelas soma todas as fases", () => {
