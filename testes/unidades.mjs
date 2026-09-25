@@ -169,6 +169,24 @@ async function abrirListaFases() {
   await pagina.getByRole("dialog", { name: "Lista de fases" }).waitFor();
 }
 
+const checklist = () => pagina.locator("[data-checklist]").first();
+/** Partes marcadas no checklist (no celular em pé ele abre na barra; deitado, fica no balão). */
+async function partesFeitas() {
+  const barra = pagina.locator("button[aria-expanded]").filter({ hasText: /Checklist|Desafio/ }).first();
+  if (MODO === "retrato") {
+    await fecharBalao();
+    await barra.tap();
+    await esperar(250);
+  }
+  if (MODO === "paisagem") await abrirBalao();
+  const feitas = await pagina.locator('[data-parte][data-feita="true"]').count();
+  if (MODO === "retrato") {
+    await barra.tap();
+    await esperar(200);
+  }
+  return feitas;
+}
+
 async function metaDaUnidade(nome) {
   const meta = pagina.locator("[data-meta]");
   await meta.waitFor({ timeout: 8000 });
@@ -181,6 +199,9 @@ async function metaDaUnidade(nome) {
 }
 
 // ------------------------------------------------------------ Unidade 1
+// A meta (antes/depois) cobre a tela: passa por ela antes de mais nada.
+await metaDaUnidade("U1 começo");
+
 // Lista de fases no começo: só a primeira aberta.
 await abrirListaFases();
 conferir(await pagina.locator('[data-fase="sites-elementos-u2-f1"]').isDisabled(), "lista de fases: Unidade 2 com cadeado no começo");
@@ -242,6 +263,64 @@ await pagina.keyboard.press("Enter");
 await pagina.keyboard.type("<li>Sonho");
 await proximoObjetivo("U1 objetivo 4");
 await conclusaoEProxima("U1");
+
+// ------------------------------------------------------------ U1 fase 2 (sozinho)
+// Mesmas 4 habilidades da Fase 1, sem ajuda completa, na página de encomendas.
+await conversar(3);
+await mostrarPainel("Árvore");
+await tocar(no("4")); // h2 "Sabores de hoje"
+await proximoObjetivo("U1F2 objetivo 1 (árvore, sozinho)");
+await inspecionar(".sabores li");
+await proximoObjetivo("U1F2 objetivo 2 (inspecionar, sozinho)");
+await editarTexto("5.0", "Torta de limão");
+await proximoObjetivo("U1F2 objetivo 3 (editar texto, sozinho)");
+await mostrarPainel("Código");
+await tocar(pagina.locator(".cm-line", { hasText: "Cajuzinho" }).first());
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("<li>Sonho");
+await proximoObjetivo("U1F2 objetivo 4 (código, sozinho)");
+await conclusaoEProxima("U1F2");
+
+// ------------------------------------------------------------ U1 fase 3 (desafio)
+await metaDaUnidade("Desafio U1");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio U1: checklist no lugar dos objetivos");
+
+await mostrarPainel("Árvore");
+await tocar(no("1")); // #aviso
+conferir((await partesFeitas()) === 1, "desafio U1: selecionar o aviso pela árvore marca a parte");
+
+await inspecionar(".botao");
+conferir((await partesFeitas()) === 2, "desafio U1: inspecionar o botão marca a parte");
+
+await editarTexto("6.0", "Wrap de frango");
+conferir((await partesFeitas()) === 3, "desafio U1: trocar o prato marca a parte");
+
+// Regra da Etapa 1 da fábrica: parte de estado (texto) desmarca ao desfazer;
+// parte de seleção (árvore, setinha) continua marcada.
+await tocar(pagina.getByRole("button", { name: /^Desfazer a última mudança/ }));
+conferir((await partesFeitas()) === 2, "desafio U1: desfazer desmarca a parte de texto (ao vivo)");
+await editarTexto("6.0", "Wrap de frango");
+conferir((await partesFeitas()) === 3, "desafio U1: refazer a troca marca a parte de novo");
+
+await mostrarPainel("Código");
+await tocar(pagina.locator(".cm-line", { hasText: "Batata rústica" }).first());
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("<li>Torta");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-u1", erro);
+}
+conferir((await partesFeitas()) === 4, "desafio U1: as 4 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U1: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U1: 3 estrelas");
+await conclusaoEProxima("U1F3");
 
 // ------------------------------------------------------------ U2 fase 1
 await metaDaUnidade("U2 começo");
@@ -337,23 +416,6 @@ await conclusaoEProxima("U2F3");
 // ------------------------------------------------------------ Desafio
 await metaDaUnidade("Desafio");
 await conversar(3);
-const checklist = () => pagina.locator("[data-checklist]").first();
-/** Partes marcadas no checklist (no celular em pé ele abre na barra; deitado, fica no balão). */
-async function partesFeitas() {
-  const barra = pagina.locator("button[aria-expanded]").filter({ hasText: /Checklist|Desafio/ }).first();
-  if (MODO === "retrato") {
-    await fecharBalao();
-    await barra.tap();
-    await esperar(250);
-  }
-  if (MODO === "paisagem") await abrirBalao();
-  const feitas = await pagina.locator('[data-parte][data-feita="true"]').count();
-  if (MODO === "retrato") {
-    await barra.tap();
-    await esperar(200);
-  }
-  return feitas;
-}
 if (!movel) conferir(await checklist().isVisible(), "desafio: checklist no lugar dos objetivos");
 await acaoNoNo("2", "apagar"); // pop-up de oferta
 conferir((await partesFeitas()) === 1, "desafio: a parte se marca sozinha");
@@ -398,7 +460,7 @@ await pagina.keyboard.press("Escape");
 await esperar(400);
 await abrirListaFases();
 const concluidas = await pagina.getByRole("dialog", { name: "Lista de fases" }).getByRole("img", { name: "Concluída" }).count();
-conferir(concluidas === 5, `lista de fases: 5 fases concluídas (${concluidas})`);
+conferir(concluidas === 7, `lista de fases: 7 fases concluídas (${concluidas})`);
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();
