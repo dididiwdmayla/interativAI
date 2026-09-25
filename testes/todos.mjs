@@ -19,6 +19,7 @@ const TESTES = [
   ["mapa.mjs", "paisagem"],
   ["retomar.mjs"],
   ["migracao.mjs"],
+  ["audio.mjs"],
 ];
 
 let falhas = 0;

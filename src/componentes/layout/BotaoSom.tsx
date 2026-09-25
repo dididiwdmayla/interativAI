@@ -66,7 +66,7 @@ export function BotaoSom() {
       <div
         id={idPainel}
         hidden={!aberto}
-        className="absolute right-0 top-full z-50 mt-2 w-72 rounded-2xl border-2 border-borda bg-superficie p-3 text-texto shadow-[0_6px_0_var(--cor-sombra)]"
+        className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border-2 border-borda bg-superficie p-3 text-texto shadow-[0_6px_0_var(--cor-sombra)]"
       >
         {aberto && <AjustesSom />}
       </div>

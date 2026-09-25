@@ -45,6 +45,9 @@ function ruidoBranco(ctx: BaseAudioContext): AudioBuffer {
 /** Envelope: sobe em `ataque` e cai exponencialmente até o fim. */
 function envelope(ganho: GainNode, inicio: number, duracao: number, pico: number, ataque: number): void {
   const subida = Math.min(Math.max(ataque, RAMPA_MINIMA), Math.max(RAMPA_MINIMA, duracao / 2));
+  // O GainNode nasce com ganho 1: sem isto, a primeira amostra do som (antes
+  // da automação valer) passa inteira e vira um clique.
+  ganho.gain.value = 0;
   ganho.gain.setValueAtTime(SILENCIO, inicio);
   ganho.gain.exponentialRampToValueAtTime(Math.max(pico, SILENCIO * 2), inicio + subida);
   ganho.gain.exponentialRampToValueAtTime(SILENCIO, inicio + Math.max(duracao, subida + RAMPA_MINIMA));

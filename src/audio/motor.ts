@@ -44,8 +44,13 @@ export const AJUSTES_AUDIO_PADRAO: AjustesAudio = { mudo: false, musica: 0.5, ef
 export const CROSSFADE_MUSICA = 1.5;
 /** Quanto a música abaixa enquanto o computadorzinho fala (-6 dB). */
 const GANHO_DUCKING = 0.5;
-/** Ajuste de cada barramento sobre o volume do jogador (efeitos e voz são sons curtos e baixos). */
-const REFERENCIA = { musica: 1, efeitos: 2, voz: 2 } as const;
+/**
+ * Ajuste de cada barramento sobre o volume do jogador, medido contra as
+ * músicas (-18 LUFS): nos padrões (música 50%, efeitos e voz 70%), a voz
+ * fica uns 3 dB acima da música abaixada pelo ducking, e os efeitos de
+ * interação um pouco abaixo da música.
+ */
+const REFERENCIA = { musica: 1, efeitos: 4, voz: 7 } as const;
 /** Arquivos de efeito guardados decodificados (os mais recentes). */
 const CACHE_EFEITOS = 8;
 
@@ -465,6 +470,7 @@ function tocarBuffer(buffer: AudioBuffer): void {
   const fonte = contexto.createBufferSource();
   const ganho = contexto.createGain();
   fonte.buffer = buffer;
+  ganho.gain.value = 0;
   ganho.gain.setValueAtTime(0, agora);
   ganho.gain.linearRampToValueAtTime(0.5, agora + RAMPA_MINIMA);
   ganho.gain.setValueAtTime(0.5, agora + Math.max(RAMPA_MINIMA, buffer.duration - RAMPA_MINIMA));

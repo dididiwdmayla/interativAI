@@ -99,7 +99,7 @@ export function AjustesSom() {
             // Ao religar, o clique confirma que o som voltou.
             if (mudo) setTimeout(() => tocarEfeito("clique"), 0);
           }}
-          className={`min-h-9 flex-1 rounded-full border-2 px-3 text-sm font-black transition-colors pointer-coarse:min-h-11 ${
+          className={`min-h-9 flex-1 whitespace-nowrap rounded-full border-2 px-3 text-sm font-black transition-colors pointer-coarse:min-h-11 ${
             mudo
               ? "border-primaria bg-primaria text-sobre-primaria"
               : "border-borda bg-superficie text-texto hover:border-primaria hover:text-primaria"
@@ -112,7 +112,7 @@ export function AjustesSom() {
           data-testar-voz
           disabled={mudo || volumeVoz <= 0}
           onClick={() => falar(FRASE_TESTE_VOZ, "feliz")}
-          className="min-h-9 flex-1 rounded-full border-2 border-borda bg-superficie px-3 text-sm font-black text-texto transition-colors hover:border-primaria hover:text-primaria disabled:cursor-not-allowed disabled:opacity-50 pointer-coarse:min-h-11"
+          className="min-h-9 flex-1 whitespace-nowrap rounded-full border-2 border-borda bg-superficie px-3 text-sm font-black text-texto transition-colors hover:border-primaria hover:text-primaria disabled:cursor-not-allowed disabled:opacity-50 pointer-coarse:min-h-11"
         >
           Testar voz
         </button>
