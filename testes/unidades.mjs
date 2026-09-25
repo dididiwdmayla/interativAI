@@ -140,18 +140,26 @@ async function editarTexto(seletor, texto) {
 async function editarValorAtributo(seletor, novoValor) {
   const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
-  await esperar(150);
+  await esperar(200);
   const alvo = pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para editar']`).first();
-  await alvo.scrollIntoViewIfNeeded();
-  if (toque) {
-    await alvo.tap();
-    await esperar(180);
-    await alvo.tap();
-  } else {
-    await alvo.dblclick();
-  }
   const campo = pagina.locator("[role=tree] input").first();
-  await campo.waitFor({ timeout: 8000 });
+  for (let tentativa = 0; tentativa < 3; tentativa++) {
+    await alvo.scrollIntoViewIfNeeded();
+    if (toque) {
+      await alvo.tap();
+      await esperar(200);
+      await alvo.tap();
+    } else {
+      await alvo.dblclick();
+    }
+    try {
+      await campo.waitFor({ timeout: 4000 });
+      break;
+    } catch (erro) {
+      if (tentativa === 2) throw erro;
+      await esperar(300);
+    }
+  }
   await campo.fill(novoValor);
   await campo.press("Enter");
   await esperar(250);
