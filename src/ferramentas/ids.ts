@@ -18,6 +18,8 @@ export const IDS_FERRAMENTAS = [
   "duplicar",
   // Unidade 3 em diante
   "renomear-tag",
+  // Zona Estilos
+  "editor-css",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

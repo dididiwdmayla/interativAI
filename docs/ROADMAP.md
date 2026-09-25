@@ -53,13 +53,20 @@ núcleo comum.
     TypeScript, Testes automatizados, Variáveis de ambiente, Portfólio).
     Filosofia no topo do `MAPA-CURRICULAR.md`. Arte da ilha IA
     (constelação e farolzinho) no mundo, "em construção".
+  - CSS editável (`siteAlvo.css`) e motor de cascata próprio
+    (`src/motor/css/`): regras que casam, especificidade, ordem,
+    `!important`, inline, herança, atalhos, riscadas e valor vencedor,
+    rodando igual no navegador e no jsdom; quando não sabe, não risca.
+    Editor com abas HTML e CSS; validadores `valorEfetivo`, `declaracao`,
+    `regraExiste`, `riscada`; ações de CSS; Bancada do motor no
+    `/lab/fases`.
 
 ### Em andamento
 
-- Rodada 9, etapas 2 a 7: CSS editável e motor de cascata, painel
-  Estilos e Calculado dentro de Elementos, modo documento, adicionar
-  atributo pela árvore, mobile dos painéis novos, liberações no
-  currículo e a unidade-modelo E1 ("A aba Estilos").
+- Rodada 9, etapas 3 a 7: painel Estilos e Calculado dentro de
+  Elementos, modo documento, adicionar atributo pela árvore, mobile dos
+  painéis novos, liberações no currículo e a unidade-modelo E1 ("A aba
+  Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.

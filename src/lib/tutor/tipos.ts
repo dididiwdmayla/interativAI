@@ -9,6 +9,8 @@ export type EntradaTutor = {
   enunciado: string;
   degrauAtual: DegrauAjuda;
   htmlAtual: string;
+  /** CSS da folha editável (fases com CSS); vazio nas outras. */
+  cssAtual?: string;
   pergunta: string;
   historico: MensagemTutor[];
 };
@@ -17,6 +19,7 @@ export type SaidaTutor = { texto: string; expressao: Expressao };
 
 export const LIMITES_TUTOR = {
   html: 6000,
+  css: 4000,
   pergunta: 300,
   mensagemHistorico: 600,
   historico: 6,

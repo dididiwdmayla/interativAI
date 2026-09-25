@@ -2,12 +2,16 @@
 
 import { type ReactNode, type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { ehElemento } from "@/lib/dom";
-import { montarDocumentoSiteAlvo } from "@/lib/documentoSiteAlvo";
+import { escreverCssNoDocumento, montarDocumentoSiteAlvo } from "@/lib/documentoSiteAlvo";
 import { linkDoAlvo } from "@/lib/linksPrevia";
 
 export type ApiPreview = {
   /** Recarrega o iframe com um novo body (caminho A). */
   recarregar: (body: string) => void;
+  /** Troca a folha editável na hora, sem recarregar (fases com CSS). */
+  definirCss: (css: string) => void;
+  /** A fase tem folha editável. */
+  temCss: () => boolean;
   obterDocumento: () => Document | null;
   obterIframe: () => HTMLIFrameElement | null;
 };
@@ -15,6 +19,8 @@ export type ApiPreview = {
 type Props = {
   head: string;
   bodyInicial: string;
+  /** A folha editável inicial (null: a fase não tem CSS). */
+  cssInicial?: string | null;
   titulo: string;
   aoCarregar: (documento: Document) => void;
   /** Clique num link da página: a navegação já foi segurada. */
@@ -28,9 +34,10 @@ type Props = {
  * O site-alvo roda num iframe com srcdoc e sandbox sem scripts. Como tem
  * allow-same-origin, o jogo consegue ler e alterar o contentDocument.
  */
-export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, aoClicarLink, ref, children }: Props) {
+export function PreviewSiteAlvo({ head, bodyInicial, cssInicial = null, titulo, aoCarregar, aoClicarLink, ref, children }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
   const ultimoBody = useRef(bodyInicial);
+  const ultimoCss = useRef(cssInicial);
   const headRef = useRef(head);
   const aoCarregarAtual = useRef(aoCarregar);
   const aoClicarLinkAtual = useRef(aoClicarLink);
@@ -47,7 +54,7 @@ export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, aoClica
   useEffect(() => {
     const elemento = iframe.current;
     if (!elemento) return;
-    elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, ultimoBody.current);
+    elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, ultimoBody.current, ultimoCss.current);
   }, []);
 
   useImperativeHandle(
@@ -56,7 +63,20 @@ export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, aoClica
       recarregar(body) {
         ultimoBody.current = body;
         const elemento = iframe.current;
-        if (elemento) elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, body);
+        if (elemento) elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, body, ultimoCss.current);
+      },
+      definirCss(css) {
+        if (ultimoCss.current === null) return;
+        ultimoCss.current = css;
+        try {
+          const documento = iframe.current?.contentDocument;
+          if (documento) escreverCssNoDocumento(documento, css);
+        } catch {
+          // Sem acesso ao documento: a próxima recarga já leva o CSS novo.
+        }
+      },
+      temCss() {
+        return ultimoCss.current !== null;
       },
       obterDocumento() {
         try {
@@ -86,7 +106,7 @@ export function PreviewSiteAlvo({ head, bodyInicial, titulo, aoCarregar, aoClica
     if (documento && endereco === "about:blank") return;
     // Se um link levou o iframe para fora do site-alvo, volta para ele.
     if (!documento || endereco !== "about:srcdoc") {
-      elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, ultimoBody.current);
+      elemento.srcdoc = montarDocumentoSiteAlvo(headRef.current, ultimoBody.current, ultimoCss.current);
       return;
     }
     // A prévia nunca navega: link e formulário não saem do site-alvo (a página

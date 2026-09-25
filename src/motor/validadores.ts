@@ -7,6 +7,9 @@ import { VALIDADORES_CUSTOM } from "@/conteudo/validadoresCustom";
 import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { estaEscondido } from "@/lib/esconder";
+import { calcularCascata, folhasDoDocumento, normalizarSeletor, valorEfetivo } from "./css/cascata";
+import { ehAtalho } from "./css/propriedades";
+import { abrirAtalho, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
 
 /** O que um validador pode olhar. */
@@ -100,6 +103,16 @@ export function descreverValidador(validador: Validador): string {
       return `evento ${validador.evento}${validador.href !== undefined ? ` com href "${validador.href}"` : ""} pelo menos ${validador.minimo ?? 1} vez(es)`;
     case "tag":
       return `${validador.seletor} é <${validador.nome}>`;
+    case "valorEfetivo":
+      return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"`;
+    case "declaracao":
+      return `a regra ${validador.seletorRegra} tem ${validador.propriedade}${validador.valor !== undefined ? `: ${validador.valor}` : ""}${
+        validador.ativa === undefined ? "" : validador.ativa ? " (ligada)" : " (desligada)"
+      }`;
+    case "regraExiste":
+      return `existe a regra ${validador.seletorRegra}`;
+    case "riscada":
+      return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -195,6 +208,58 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const tags = consultar(documento, validador.seletor).map((elemento) => elemento.tagName.toLowerCase());
       return { passou: tags.includes(validador.nome.toLowerCase()), descricao, detalhe: `tags: ${lista(tags)}` };
     }
+    case "valorEfetivo":
+      return avaliarValorEfetivo(validador, contexto, descricao);
+    case "declaracao": {
+      const alvo = normalizarSeletor(validador.seletorRegra);
+      const regras = folhasDoDocumento(documento)
+        .filter((folha) => folha.origem !== "navegador")
+        .flatMap((folha) => folha.analisada.regras)
+        .filter((regra) => normalizarSeletor(regra.seletor) === alvo);
+      const declaracoes = regras.flatMap((regra) => regra.declaracoes).filter((item) => item.propriedade === nomeDaPropriedade(validador.propriedade));
+      const passou = declaracoes.some(
+        (item) =>
+          (validador.ativa === undefined || item.ativa === validador.ativa) &&
+          (validador.valor === undefined || valoresDaPropriedadeIguais(item.propriedade, item.valor, validador.valor)),
+      );
+      const achadas = declaracoes.map((item) => `${item.ativa ? "" : "(desligada) "}${item.propriedade}: ${item.valor}`);
+      return {
+        passou,
+        descricao,
+        detalhe: regras.length === 0 ? "a regra não existe" : `declarações: ${lista(achadas)}`,
+      };
+    }
+    case "regraExiste": {
+      const alvo = normalizarSeletor(validador.seletorRegra);
+      const seletores = folhasDoDocumento(documento)
+        .filter((folha) => folha.origem !== "navegador")
+        .flatMap((folha) => folha.analisada.regras.map((regra) => regra.seletor));
+      return {
+        passou: seletores.some((seletor) => normalizarSeletor(seletor) === alvo),
+        descricao,
+        detalhe: `regras: ${lista(seletores)}`,
+      };
+    }
+    case "riscada": {
+      const alvo = normalizarSeletor(validador.seletorRegra);
+      const propriedade = nomeDaPropriedade(validador.propriedade);
+      const situacoes: string[] = [];
+      const passou = consultar(documento, validador.seletor).some((elemento) => {
+        const cascata = calcularCascata(elemento);
+        const blocos = [...cascata.proprios, ...cascata.herdados.flatMap((grupo) => grupo.blocos)];
+        return blocos.some((bloco) => {
+          if (bloco.folha?.origem === "navegador") return false;
+          const seletor = bloco.tipo === "inline" ? "element.style" : normalizarSeletor(bloco.regra?.seletor ?? "");
+          if (seletor !== alvo) return false;
+          return bloco.declaracoes.some((item) => {
+            if (item.declaracao.propriedade !== propriedade) return false;
+            situacoes.push(item.situacao);
+            return item.situacao === "perdeu";
+          });
+        });
+      });
+      return { passou, descricao, detalhe: situacoes.length === 0 ? "a declaração não vale nesse elemento" : `situação: ${lista(situacoes)}` };
+    }
     case "todos": {
       const filhos = validador.validadores.map((filho) => avaliarDetalhado(filho, contexto));
       return { passou: filhos.every((filho) => filho.passou), descricao, filhos };
@@ -219,6 +284,45 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou, descricao };
     }
   }
+}
+
+function nomeDaPropriedade(propriedade: string): string {
+  const nome = propriedade.trim();
+  return nome.startsWith("--") ? nome : nome.toLowerCase();
+}
+
+/** valorEfetivo: basta um elemento do seletor ter o valor (cada longa, se for atalho). */
+function avaliarValorEfetivo(
+  validador: Extract<Validador, { tipo: "valorEfetivo" }>,
+  contexto: ContextoValidacao,
+  descricao: string,
+): ResultadoValidador {
+  const propriedade = nomeDaPropriedade(validador.propriedade);
+  const esperado: Record<string, string> | null = ehAtalho(propriedade)
+    ? abrirAtalho(propriedade, validador.valor).longas
+    : { [propriedade]: validador.valor };
+  if (!esperado) {
+    return { passou: false, descricao, detalhe: `o motor não sabe separar o valor esperado "${validador.valor}" de ${propriedade}` };
+  }
+  const encontrados: string[] = [];
+  const elementos = consultar(contexto.documento, validador.seletor);
+  const passou = elementos.some((elemento) => {
+    const efetivos = valorEfetivo(elemento, propriedade);
+    return Object.entries(esperado).every(([longa, valor]) => {
+      const efetivo = efetivos[longa];
+      if (!efetivo || efetivo.tipo === "incerto") {
+        encontrados.push(`${longa}: incerto (${efetivo?.motivo ?? "sem valor"})`);
+        return false;
+      }
+      encontrados.push(`${longa}: ${efetivo.valor}`);
+      return valoresDaPropriedadeIguais(longa, efetivo.valor, valor);
+    });
+  });
+  return {
+    passou,
+    descricao,
+    detalhe: elementos.length === 0 ? "o seletor não achou nenhum elemento" : `achou: ${lista([...new Set(encontrados)])}`,
+  };
 }
 
 export function avaliarValidador(validador: Validador, contexto: ContextoValidacao): boolean {

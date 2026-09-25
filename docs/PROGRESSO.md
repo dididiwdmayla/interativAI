@@ -47,6 +47,33 @@ desta rodada).
   Testes: `curriculo.test.ts` (ordem das ilhas, IA no lugar certo, ids
   antigos preservados), `mapa.test.ts`, `registro.test.ts` (faixa `ia`,
   que já existia no manifesto, agora tem ilha) e `testes/mapa.mjs`.
+- [x] **Etapa 2: CSS editável, motor de cascata, editor com abas e
+  declarativo novo.** `siteAlvo.css` (opcional; fases sem ele iguais) num
+  `<style data-folha-jogo>` depois do head; editar troca o `textContent`
+  no iframe na hora, sem recarregar (`PreviewSiteAlvo.definirCss`), e a
+  recarga do HTML leva o CSS mais novo. Motor próprio em `src/motor/css/`
+  (analisador com posições e declarações comentadas como desligadas,
+  especificidade do Selectors 4, folha do navegador resumida, atalhos e
+  longas, validade em três estados, cascata com riscadas por propriedade
+  longa, herança e `valorEfetivo` com inherit/initial/unset/var(),
+  edições no texto sem bagunçar a formatação). Regra de ouro: quando não
+  sabe, não risca (valor desconhecido, atalho que não sabe abrir, @media
+  sem matchMedia, lógica com física, folha com @layer). Nenhuma
+  biblioteca: a especificidade é nossa, com testes. Núcleo com operações
+  de CSS e foto do desfazer com HTML e CSS juntos. Validadores
+  `valorEfetivo`, `declaracao`, `regraExiste`, `riscada`; ações
+  `definirPropriedade`, `alternarDeclaracao`, `adicionarRegra`,
+  `editarCss`; linha de ajuda `{ alvo: "css" }`; eventos `editouCss`,
+  `editouPropriedade`, `alternouDeclaracao`, `adicionouRegra`; checagens
+  `css-da-fase` (CSS sem `siteAlvo.css`, seletorRegra inválido) e
+  `valorEfetivo` numa propriedade que o motor não conhece. Editor com abas
+  HTML e CSS (`@codemirror/lang-css` 6.3.1), cursor numa regra acende
+  todas as peças dela. Ferramenta `editor-css` no registro (card e
+  apresentação). Progresso com `cssAtual` e `cssInicioObjetivo`; meta
+  antes/depois e tutor com o CSS. Bancada do motor
+  (`src/conteudo/laboratorio/`, `/lab/fases?fase=lab-motor-u1-f1`), fora
+  do currículo. Testes: `cascata.test.ts` (56), `css.test.ts` (13, com
+  sabotagens), `testes/css.mjs` (Playwright, na bateria).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

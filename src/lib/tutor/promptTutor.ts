@@ -83,7 +83,7 @@ HTML atual do body do site-alvo:
 <<<
 ${entrada.htmlAtual}
 >>>
-
+${entrada.cssAtual ? `CSS atual da folha do site-alvo (estilo.css):\n<<<\n${entrada.cssAtual}\n>>>\n` : ""}
 PERGUNTA DO ALUNO
 ${entrada.pergunta}`;
 }

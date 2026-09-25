@@ -51,6 +51,8 @@ export type EstadoMotor = {
   listaRever: boolean;
   /** HTML de quando o objetivo atual começou (só se ele tem momento roteirizado). */
   htmlInicioObjetivo: string | null;
+  /** O CSS de quando o objetivo atual começou (par do htmlInicioObjetivo). */
+  cssInicioObjetivo: string | null;
 };
 
 function limitar(valor: number, minimo: number, maximo: number): number {
@@ -127,6 +129,7 @@ export function criarEstadoInicial(
     comemoracoesSozinho: 0,
     listaRever: false,
     htmlInicioObjetivo: null,
+    cssInicioObjetivo: null,
   };
 
   if (modo !== "jogo") {
@@ -183,6 +186,7 @@ export function criarEstadoInicial(
     estrelas,
     previsao,
     htmlInicioObjetivo: objetivo.eventoAoComecar ? salvo.htmlInicioObjetivo : null,
+    cssInicioObjetivo: objetivo.eventoAoComecar ? salvo.cssInicioObjetivo : null,
     fala: pendenteDePrevisao
       ? falaDoObjetivo(fase, concluidos, toque)
       : { texto: `Que bom te ver de novo! Continuando: ${enunciadoDe(objetivo, toque)}`, expressao: "feliz" },

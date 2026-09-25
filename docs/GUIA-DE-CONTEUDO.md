@@ -225,6 +225,10 @@ os conjuntos de textos.
 | `{ tipo: "selecionado", seletor, via? }` | o selecionado agora casa (texto selecionado vale pelo elemento dono); `via`: `"arvore"`, `"inspecionar"`, `"trilha"` ou `"editor"` |
 | `{ tipo: "evento", evento, minimo?, href? }` | o evento aconteceu `minimo` vezes (padrão 1) desde que o objetivo começou; com `evento: "clicouLink"`, `href` só conta cliques em links com esse href (ex.: `"#rodape"`) |
 | `{ tipo: "tag", seletor, nome }` | algum elemento do seletor tem essa tag (minúsculas). Renomear mantém os atributos: `{ tipo: "tag", seletor: "#titulo", nome: "h1" }` continua achando a peça depois da troca |
+| `{ tipo: "valorEfetivo", seletor, propriedade, valor }` | (CSS) o valor que VENCE a cascata em algum elemento do seletor (declarado, herdado ou inicial), comparado normalizado; atalho confere cada propriedade longa; incerto não passa |
+| `{ tipo: "declaracao", seletorRegra, propriedade, valor?, ativa? }` | (CSS) a regra tem a declaração (com o valor, se vier; `ativa: true` ligada, `false` desligada, sem `ativa` qualquer uma) |
+| `{ tipo: "regraExiste", seletorRegra }` | (CSS) existe uma regra com esse seletor nas folhas do site |
+| `{ tipo: "riscada", seletor, propriedade, seletorRegra }` | (CSS) em algum elemento do seletor, a declaração dessa regra perde para outra (riscada no painel); `"element.style"` é o inline |
 | `{ tipo: "todos", validadores }` | todos passam |
 | `{ tipo: "algum", validadores }` | algum passa |
 | `{ tipo: "nao", validador }` | o de dentro não passa |
@@ -233,7 +237,9 @@ os conjuntos de textos.
 Eventos (`evento`): `selecionou`, `inspecionou`, `trilha`, `editouTexto`,
 `editouAtributo`, `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
 `duplicou`, `desfez`, `refez`, `respondeuPrevisao`, `renomeouTag` (trocou o
-nome da tag) e `clicouLink` (clicou num link da prévia, com o `href`). As ações dos momentos
+nome da tag), `clicouLink` (clicou num link da prévia, com o `href`),
+`editouCss` (digitou no editor CSS), `editouPropriedade`,
+`alternouDeclaracao` e `adicionouRegra` (painel Estilos). As ações dos momentos
 roteirizados (o computadorzinho mexendo) **não contam** como eventos do
 jogador.
 
@@ -271,6 +277,10 @@ soluções testam o caminho real.
 | `{ tipo: "desfazer" }` | desfaz a última mudança do painel |
 | `{ tipo: "inserirHTML", seletor, posicao, html }` | o que o jogador escreveria no editor: `antes`, `depois`, `inicio` ou `fim` do elemento |
 | `{ tipo: "responderPrevisao", opcao }` | responde o card de previsão (índice a partir de 0) |
+| `{ tipo: "definirPropriedade", seletorRegra, propriedade, valor }` | (CSS) a edição do painel Estilos: troca o valor se a regra já tem a propriedade ligada, senão acrescenta |
+| `{ tipo: "alternarDeclaracao", seletorRegra, propriedade }` | (CSS) liga ou desliga a declaração (a checkbox; no texto vira comentário, como no Chrome) |
+| `{ tipo: "adicionarRegra", seletorRegra, declaracoes? }` | (CSS) cria uma regra nova no fim da folha |
+| `{ tipo: "editarCss", posicao, texto }` | (CSS) o que o jogador escreveria no editor CSS: `inicio` ou `fim` da folha |
 
 Seletores de ação usam o **primeiro** elemento que casa. `"$0"` é o
 selecionado (como no Console do F12) e `"$0 h3"` procura dentro dele.
@@ -418,7 +428,9 @@ provável do jogador.
    - `{ alvo: "editor", seletor, fala }` pisca as linhas do código de todos
      os elementos do seletor;
    - `{ alvo: "ferramenta", ferramenta, fala }` pisca o botão ou a área de
-     uma ferramenta (setinha, trilha, desfazer...).
+     uma ferramenta (setinha, trilha, desfazer...);
+   - `{ alvo: "css", seletorRegra, propriedade?, fala }` abre a aba CSS e
+     pisca as linhas da regra (ou só a da declaração).
 4. **Solução (degrau 4, só guiado): O QUÊ e POR QUÊ.** Custa 1 estrela. A
    fala conta o que foi feito e por que funciona ("Dupliquei o card e
    troquei o título da cópia: a cópia nasce logo depois da original").
@@ -491,7 +503,11 @@ A ferramenta de cada ação (para a checagem de `usaFerramentas`):
 trilha = `trilha`, pelo editor = `sincronia`; `definirTexto` e
 `definirAtributo` = `editar-duplo-clique`; `inserirHTML` = `editor`;
 `esconder`, `apagar`, `duplicar`, `desfazer` = a ferramenta de mesmo nome;
-`renomearTag` = `renomear-tag`; `clicarLink` = `previa`.
+`renomearTag` = `renomear-tag`; `clicarLink` = `previa`; `editarCss` =
+`editor-css`. As ações de CSS só funcionam numa fase com `siteAlvo.css`
+(a folha editável). Enquanto o painel Estilos não chega (rodada 9,
+etapa 3), `definirPropriedade`, `alternarDeclaracao` e `adicionarRegra`
+também contam como `editor-css`.
 
 **Links na prévia.** O jogador pode clicar nos links do site-alvo: nada
 navega. Âncora rola a prévia; os demais fazem o computadorzinho falar
@@ -509,7 +525,8 @@ invente ferramenta num arquivo de fase.
 ## 8. Sites-alvo
 
 Cada site mora em `sites/` da unidade e exporta um `SiteAlvo`
-(`url`, `titulo`, `head`, `body`). É "o site de outra pessoa": pode (e
+(`url`, `titulo`, `head`, `body` e, nas fases de CSS, `css`: a folha
+editável, que aparece na aba CSS do editor como `estilo.css`). É "o site de outra pessoa": pode (e
 deve) ter cores próprias no CSS do `head`; é a única exceção à regra das
 cores do jogo.
 

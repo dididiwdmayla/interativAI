@@ -14,6 +14,8 @@ type Opcoes = {
   editorRef: RefObject<ApiEditor | null>;
   obterDocumento: () => Document | null;
   editarDocumento: (mutar: (documento: Document) => boolean) => boolean;
+  /** Troca o CSS da folha editável (tela, editor CSS e estado juntos). */
+  editarCss: (css: string) => boolean;
   aoEvento: (evento: EventoFase) => void;
 };
 
@@ -43,7 +45,7 @@ function alvoDoNo(documento: Document | null, no: Node | null): AlvoCodigo | nul
  * acende o nó na árvore, o trecho no editor e a caixa no preview. O hover
  * na árvore só troca a caixa do preview, sem mudar a seleção.
  */
-export function usePainelElementos({ editorRef, obterDocumento, editarDocumento, aoEvento }: Opcoes) {
+export function usePainelElementos({ editorRef, obterDocumento, editarDocumento, editarCss, aoEvento }: Opcoes) {
   const [caminhoSelecionado, setCaminhoSelecionado] = useState<number[] | null>(null);
   const [recolhidos, setRecolhidos] = useState<ReadonlySet<string>>(() => new Set());
   const [realce, setRealce] = useState<Realce | null>(null);
@@ -52,7 +54,12 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const [historico, setHistorico] = useState({ podeDesfazer: false, podeRefazer: false });
   const noRealcado = useRef<Node | null>(null);
   const inspecionandoAtual = useRef(false);
-  const [nucleo] = useState(() => criarNucleoPainel({ obterDocumento, mutarDocumento: editarDocumento }));
+  const [nucleo] = useState(() =>
+    criarNucleoPainel({ obterDocumento, mutarDocumento: editarDocumento, mutarCss: editarCss }),
+  );
+  /** Várias peças acesas ao mesmo tempo (as que uma regra de CSS pega). */
+  const elementosExtras = useRef<Element[]>([]);
+  const [realcesExtras, setRealcesExtras] = useState<Realce[]>([]);
 
   useEffect(() => {
     inspecionandoAtual.current = inspecionando;
@@ -72,6 +79,21 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
       remedirRealce();
     },
     [remedirRealce],
+  );
+
+  const remedirExtras = useCallback(() => {
+    setRealcesExtras(
+      elementosExtras.current.map((elemento) => medirNo(elemento)).filter((realce): realce is Realce => realce !== null),
+    );
+  }, []);
+
+  /** Acende várias peças de uma vez (lista vazia apaga). */
+  const realcarVarios = useCallback(
+    (elementos: readonly Element[]) => {
+      elementosExtras.current = [...elementos];
+      remedirExtras();
+    },
+    [remedirExtras],
   );
 
   /** Acende no editor o trecho do selecionado. */
@@ -106,12 +128,13 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
       aoMudar: () => {
         destacarNoEditor(false);
         remedirRealce();
+        remedirExtras();
       },
       aoMudarHistorico: () => {
         setHistorico({ podeDesfazer: nucleo.podeDesfazer(), podeRefazer: nucleo.podeRefazer() });
       },
     });
-  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirRealce]);
+  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirExtras, remedirRealce]);
 
   /**
    * Seleciona um nó. É a função que a árvore, a setinha, a trilha, o
@@ -251,16 +274,21 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const aoRecarregarDocumento = useCallback(
     (documento: Document) => {
       realcar(null);
+      realcarVarios([]);
       destacarNoEditor(false);
       documento.defaultView?.addEventListener("scroll", remedirRealce, { passive: true });
+      documento.defaultView?.addEventListener("scroll", remedirExtras, { passive: true });
     },
-    [destacarNoEditor, realcar, remedirRealce],
+    [destacarNoEditor, realcar, realcarVarios, remedirExtras, remedirRealce],
   );
 
   return {
     caminhoSelecionado,
     recolhidos,
     realce,
+    realcesExtras,
+    realcarVarios,
+    remedirExtras,
     inspecionando,
     destaque,
     historico,
@@ -288,6 +316,15 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     desfazer: nucleo.desfazer,
     refazer: nucleo.refazer,
     antesDeEditarCodigo: nucleo.antesDeEditarCodigo,
+    lerCss: nucleo.lerCss,
+    definirPropriedade: nucleo.definirPropriedade,
+    editarDeclaracao: nucleo.editarDeclaracao,
+    alternarDeclaracao: nucleo.alternarDeclaracao,
+    alternarPropriedade: nucleo.alternarPropriedade,
+    adicionarDeclaracao: nucleo.adicionarDeclaracao,
+    adicionarRegra: nucleo.adicionarRegra,
+    escreverCss: nucleo.escreverCss,
+    editarEstiloInline: nucleo.editarEstiloInline,
     aoRecarregarDocumento,
   };
 }

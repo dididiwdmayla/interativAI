@@ -30,7 +30,7 @@ import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
 import { TrilhaElementos } from "@/componentes/painel/arvore/TrilhaElementos";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
 import { BotoesHistorico } from "@/componentes/painel/BotoesHistorico";
-import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
+import { type AbaEditor, CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
 import { PainelDividido } from "@/componentes/painel/PainelDividido";
@@ -47,6 +47,7 @@ import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
 import { caminhoDoNo } from "@/lib/dom";
+import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
@@ -57,6 +58,9 @@ import type { EventoFase } from "@/motor/eventos";
 import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
+import { analisarCss } from "@/motor/css/analisarCss";
+import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
+import { NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
 import { AcoesConversa } from "./AcoesConversa";
 import {
   atalhoHistorico,
@@ -112,10 +116,24 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   desfez: "desfazer",
   refez: "refazer",
   renomeouTag: "renomear-tag",
+  editouPropriedade: "editar",
+  alternouDeclaracao: "esconder",
+  adicionouRegra: "duplicar",
 };
 
 /** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
 const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
+
+/** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
+function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | null {
+  if (fase.siteAlvo.css === undefined) return null;
+  if (!salvo) return fase.siteAlvo.css;
+  const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
+  if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.cssInicioObjetivo !== null) {
+    return salvo.cssInicioObjetivo;
+  }
+  return salvo.cssAtual ?? fase.siteAlvo.css;
+}
 
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
 function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
@@ -143,6 +161,9 @@ export function JogoFase({
   const revisao = modo === "revisao";
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
   const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
+  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
+  const temCss = cssInicial !== null;
+  const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
@@ -176,19 +197,26 @@ export function JogoFase({
 
   const {
     editorRef,
+    editorCssRef,
     previewRef,
     arvore,
     htmlAtual,
+    cssAtual,
+    versaoCssCalma,
     aoEditarCodigo,
+    aoEditarCss,
+    editarCss,
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,
-  } = useSiteAlvo(bodyInicial);
+  } = useSiteAlvo(bodyInicial, cssInicial);
 
   const {
     caminhoSelecionado,
     recolhidos,
     realce,
+    realcesExtras,
+    realcarVarios,
     inspecionando,
     destaque,
     destacarNaArvore,
@@ -215,11 +243,17 @@ export function JogoFase({
     desfazer,
     refazer,
     antesDeEditarCodigo,
+    lerCss,
+    definirPropriedade,
+    alternarPropriedade,
+    adicionarRegra,
+    escreverCss,
     aoRecarregarDocumento,
   } = usePainelElementos({
     editorRef,
     obterDocumento,
     editarDocumento,
+    editarCss,
     aoEvento: barramento.emitir,
   });
 
@@ -273,8 +307,18 @@ export function JogoFase({
       clicarLink: clicarLinkNaTela,
       inserirHtml,
       desfazer,
+      definirPropriedade,
+      alternarPropriedade,
+      adicionarRegra,
+      escreverCss,
+      lerCss,
     }),
     [
+      definirPropriedade,
+      alternarPropriedade,
+      adicionarRegra,
+      escreverCss,
+      lerCss,
       obterDocumento,
       noSelecionado,
       selecionar,
@@ -296,6 +340,33 @@ export function JogoFase({
     return atual && no ? { no, via: viaDaOrigem(atual.origem) } : null;
   }, [noSelecionado, selecao]);
 
+  /** Mostra o editor CSS (a aba CSS; no celular, o Código). */
+  const mostrarEditorCss = useCallback(() => {
+    setAbaEditor("css");
+    setSegmento("codigo");
+  }, []);
+
+  /** Degrau 3 no CSS: abre a aba CSS e pisca as linhas da regra (ou da declaração). */
+  const destacarNoCss = useCallback(
+    (seletorRegra: string, propriedade?: string) => {
+      const texto = lerCss();
+      if (texto === null) return;
+      const achada = acharRegra(analisarCss(texto), seletorRegra);
+      if (!achada) return;
+      const { regra } = achada;
+      const indice = propriedade ? acharDeclaracao(regra, propriedade) : -1;
+      const declaracao = indice >= 0 ? regra.declaracoes[indice] : null;
+      const primeira = declaracao ? declaracao.linha : regra.linha;
+      const ultima = declaracao ? declaracao.linha : texto.slice(0, regra.fim).split("\n").length;
+      mostrarEditorCss();
+      requestAnimationFrame(() =>
+        editorCssRef.current?.destacarLinhas(Array.from({ length: ultima - primeira + 1 }, (_, deslocamento) => primeira + deslocamento)),
+      );
+    },
+    [editorCssRef, lerCss, mostrarEditorCss],
+  );
+  const limparDestaqueCss = useCallback(() => editorCssRef.current?.destacarLinhas([]), [editorCssRef]);
+
   const motor = useMotorFase({
     fase,
     modo,
@@ -303,11 +374,14 @@ export function JogoFase({
     salvo,
     barramento,
     htmlAtual,
+    cssAtual,
     editorRef,
     obterDocumento,
     obterSelecao,
     painel,
     destacarNaArvore,
+    destacarNoCss,
+    limparDestaqueCss,
     toque,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
@@ -349,7 +423,7 @@ export function JogoFase({
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
     if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
-    if (ferramenta.id === "editor" || ferramenta.id === "sincronia") trocarSegmento("codigo");
+    if (ferramenta.id === "editor" || ferramenta.id === "sincronia" || ferramenta.id === "editor-css") trocarSegmento("codigo");
   };
 
   // O que o jogador faz no painel também conta como "usou a ferramenta".
@@ -380,6 +454,8 @@ export function JogoFase({
           sinalizarUso("desfazer");
         } else if (evento.tipo === "renomeouTag") {
           sinalizarUso("renomear-tag");
+        } else if (evento.tipo === "editouCss") {
+          sinalizarUso("editor-css");
         }
       }),
     [barramento],
@@ -430,6 +506,7 @@ export function JogoFase({
         : null,
     degrau: estado.degrau,
     htmlAtual,
+    cssAtual,
     falar,
     interceptar: (pergunta) => responderSegredo(pergunta, falar),
   });
@@ -501,14 +578,52 @@ export function JogoFase({
 
   const aoEditarNoEditor = useCallback(
     (texto: string) => {
-      antesDeEditarCodigo();
+      antesDeEditarCodigo("html");
       aoEditarCodigo(texto);
       barramento.emitir({ tipo: "editouCodigo" });
     },
     [antesDeEditarCodigo, aoEditarCodigo, barramento],
   );
 
+  /** Tecla no editor CSS: foto para o Desfazer do painel, prévia na hora e o evento. */
+  const aoEditarNoEditorCss = useCallback(
+    (texto: string) => {
+      antesDeEditarCodigo("css");
+      aoEditarCss(texto);
+      barramento.emitir({ tipo: "editouCss" });
+    },
+    [antesDeEditarCodigo, aoEditarCss, barramento],
+  );
+
+  /** Cursor no editor CSS: acende na prévia todas as peças que a regra do cursor pega. */
+  const aoMoverCursorCss = useCallback(
+    (posicao: number) => {
+      sinalizarUso("editor-css");
+      const texto = lerCss();
+      const documento = obterDocumento();
+      if (texto === null || !documento) return;
+      const regra = analisarCss(texto).regras.find((item) => posicao >= item.inicio && posicao <= item.fim);
+      realcarVarios(regra ? elementosDaRegra(documento, regra.seletor) : []);
+    },
+    [lerCss, obterDocumento, realcarVarios],
+  );
+
+  const trocarAbaEditor = (aba: AbaEditor) => {
+    tocarEfeito("clique");
+    setAbaEditor(aba);
+    if (aba === "html") realcarVarios([]);
+  };
+
   const { verificar, aoDocumentoPronto } = motor;
+
+  // CSS mudou (editor, painel, desfazer): confere os objetivos um pouco depois.
+  const verificarAtual = useRef(verificar);
+  useEffect(() => {
+    verificarAtual.current = verificar;
+  }, [verificar]);
+  useEffect(() => {
+    if (versaoCssCalma > 0) verificarAtual.current();
+  }, [versaoCssCalma]);
   const aoCarregar = useCallback(
     (documento: Document) => {
       aoCarregarDocumento(documento);
@@ -847,7 +962,7 @@ export function JogoFase({
                 }
                 baixo={
                   <AlvoFerramenta
-                    ids={["editor"]}
+                    ids={temCss ? ["editor", "editor-css"] : ["editor"]}
                     marcador="editor"
                     aoAbrirCard={abrirCard}
                     classeMarcador="right-2 top-2"
@@ -856,8 +971,9 @@ export function JogoFase({
                     <CabecalhoEditor
                       quebrarLinhas={quebrarLinhas}
                       aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
+                      abas={temCss ? { ativa: abaEditor, aoTrocar: trocarAbaEditor, nomeCss: NOME_FOLHA_DO_JOGO } : undefined}
                     />
-                    <div className="min-h-0 flex-1">
+                    <div className={`min-h-0 flex-1 ${abaEditor === "html" ? "" : "hidden"}`}>
                       <EditorCodigo
                         ref={editorRef}
                         textoInicial={bodyInicial}
@@ -868,6 +984,20 @@ export function JogoFase({
                         rotulo="Editor do código HTML do corpo da página"
                       />
                     </div>
+                    {cssInicial !== null && (
+                      <div className={`min-h-0 flex-1 ${abaEditor === "css" ? "" : "hidden"}`} data-editor-css>
+                        <EditorCodigo
+                          ref={editorCssRef}
+                          linguagem="css"
+                          textoInicial={cssInicial}
+                          aoMudar={aoEditarNoEditorCss}
+                          quebrarLinhas={quebrarLinhas}
+                          aoMoverCursorPosicao={aoMoverCursorCss}
+                          aoFocar={aoFocarEditor}
+                          rotulo={`Editor do CSS da página (${NOME_FOLHA_DO_JOGO})`}
+                        />
+                      </div>
+                    )}
                   </AlvoFerramenta>
                 }
               />
@@ -906,11 +1036,12 @@ export function JogoFase({
                 ref={previewRef}
                 head={fase.siteAlvo.head}
                 bodyInicial={bodyInicial}
+                cssInicial={cssInicial}
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
               >
-                <SobreposicaoInspecao realce={realce} />
+                <SobreposicaoInspecao realce={realce} extras={realcesExtras} />
                 <CamadaInspecao
                   ativa={inspecionando}
                   toque={toque}

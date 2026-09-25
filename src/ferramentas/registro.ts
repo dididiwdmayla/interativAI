@@ -5,6 +5,7 @@ import { IconeCodigo } from "@/componentes/icones/IconeCodigo";
 import { IconeDesfazer } from "@/componentes/icones/IconeDesfazer";
 import { IconeDuplicar } from "@/componentes/icones/IconeDuplicar";
 import { IconeEditarDuplo } from "@/componentes/icones/IconeEditarDuplo";
+import { IconeEditorCss } from "@/componentes/icones/IconeEditorCss";
 import { IconeEsconder } from "@/componentes/icones/IconeEsconder";
 import { IconeInspecionar } from "@/componentes/icones/IconeInspecionar";
 import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
@@ -358,6 +359,29 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     uso: "sinal",
     liberarNoExperimente: [MENU_DO_NO],
     demo: DemoRenomearTag,
+  },
+  // O Chrome não tem uma aba "CSS" no editor: as folhas de estilo abrem na
+  // aba Sources (Fontes). Aqui a folha do site mora ao lado do HTML, e o
+  // link "estilo.css:12" do painel Estilos leva à linha certa.
+  "editor-css": {
+    id: "editor-css",
+    nome: "Código CSS",
+    Icone: IconeEditorCss,
+    alvo: seletorFerramenta("editor-css"),
+    oQueFaz: "Mostra a folha de estilo do site: as regras que dão cor, tamanho e fonte para as peças.",
+    praQueServe:
+      "O HTML diz o que cada peça é; o CSS diz como ela aparece. Mudou uma cor aqui? A tela muda na hora.",
+    comoUsarAqui: {
+      mouse: "Clique na aba CSS em cima do código. Com o cursor dentro de uma regra, a tela acende as peças que ela pega.",
+      toque: "Toque na aba CSS em cima do código. Com o cursor dentro de uma regra, a tela acende as peças que ela pega.",
+    },
+    noF12DeVerdade:
+      "as folhas de estilo ficam na aba Sources (Fontes). No painel Styles, o nome do arquivo com a linha (estilo.css:12) abre a folha no lugar certo.",
+    experimente: {
+      mouse: "Abra a aba CSS e clique dentro de uma regra.",
+      toque: "Abra a aba CSS e toque dentro de uma regra.",
+    },
+    uso: "sinal",
   },
 };
 

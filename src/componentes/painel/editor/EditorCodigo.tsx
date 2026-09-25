@@ -2,6 +2,7 @@
 
 import { autocompletion, closeBrackets, completionKeymap } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { css as linguagemCss } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import { bracketMatching, indentOnInput } from "@codemirror/language";
 import { Annotation, Compartment, EditorState } from "@codemirror/state";
@@ -36,15 +37,21 @@ export type ApiEditor = {
   /** Linhas (a partir de 1) que o trecho do elemento ocupa; vazio se não achar. */
   linhasDoAlvo: (alvo: AlvoCodigo) => number[];
   obterTexto: () => string;
+  /** Põe o cursor numa posição do texto e rola até ela (o link "estilo.css:12"). */
+  irParaPosicao: (posicao: number, opcoes?: { focar?: boolean }) => void;
 };
 
 type Props = {
   textoInicial: string;
+  /** "html" (padrão) ou "css" (a aba CSS). */
+  linguagem?: "html" | "css";
   aoMudar: (texto: string) => void;
   quebrarLinhas: boolean;
   rotulo: string;
-  /** Cursor posto pelo jogador (clique, toque, setas), já com espera de 150 ms. */
+  /** HTML: cursor posto pelo jogador (clique, toque, setas), já com espera de 150 ms. */
   aoMoverCursor?: (alvo: AlvoCodigo | null) => void;
+  /** CSS: a posição do cursor posto pelo jogador, com a mesma espera. */
+  aoMoverCursorPosicao?: (posicao: number) => void;
   /** O editor ganhou foco (o teclado virtual vai abrir no celular). */
   aoFocar?: () => void;
   ref?: Ref<ApiEditor>;
@@ -55,11 +62,23 @@ const ESPERA_CURSOR_MS = 150;
 /** Marca transações que vieram de fora do editor, para não voltar em loop. */
 const origemExterna = Annotation.define<boolean>();
 
-export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoMoverCursor, aoFocar, ref }: Props) {
+export function EditorCodigo({
+  textoInicial,
+  linguagem = "html",
+  aoMudar,
+  quebrarLinhas,
+  rotulo,
+  aoMoverCursor,
+  aoMoverCursorPosicao,
+  aoFocar,
+  ref,
+}: Props) {
   const hospedeiro = useRef<HTMLDivElement>(null);
   const visao = useRef<EditorView | null>(null);
   const aoMudarAtual = useRef(aoMudar);
   const aoMoverCursorAtual = useRef(aoMoverCursor);
+  const aoMoverCursorPosicaoAtual = useRef(aoMoverCursorPosicao);
+  const linguagemRef = useRef(linguagem);
   const aoFocarAtual = useRef(aoFocar);
   const esperaCursor = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textoInicialRef = useRef(textoInicial);
@@ -73,7 +92,8 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
 
   useEffect(() => {
     aoMoverCursorAtual.current = aoMoverCursor;
-  }, [aoMoverCursor]);
+    aoMoverCursorPosicaoAtual.current = aoMoverCursorPosicao;
+  }, [aoMoverCursor, aoMoverCursorPosicao]);
 
   useEffect(() => {
     aoFocarAtual.current = aoFocar;
@@ -96,7 +116,7 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
           bracketMatching(),
           closeBrackets(),
           autocompletion(),
-          html(),
+          linguagemRef.current === "css" ? linguagemCss() : html(),
           keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap, indentWithTab]),
           temaEditor,
           destaqueLinhas,
@@ -125,7 +145,8 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
                 const view = visao.current;
                 if (!view) return;
                 const posicao = view.state.selection.main.head;
-                aoMoverCursorAtual.current?.(alvoNaPosicao(view.state, posicao));
+                if (linguagemRef.current === "css") aoMoverCursorPosicaoAtual.current?.(posicao);
+                else aoMoverCursorAtual.current?.(alvoNaPosicao(view.state, posicao));
               }, ESPERA_CURSOR_MS);
             }
           }),
@@ -198,6 +219,17 @@ export function EditorCodigo({ textoInicial, aoMudar, quebrarLinhas, rotulo, aoM
       },
       obterTexto() {
         return visao.current?.state.doc.toString() ?? "";
+      },
+      irParaPosicao(posicao, opcoes) {
+        const view = visao.current;
+        if (!view) return;
+        const alvo = Math.max(0, Math.min(posicao, view.state.doc.length));
+        view.dispatch({
+          selection: { anchor: alvo },
+          effects: EditorView.scrollIntoView(alvo, { y: "center" }),
+          annotations: origemExterna.of(true),
+        });
+        if (opcoes?.focar) view.focus();
       },
     }),
     [],

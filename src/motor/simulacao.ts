@@ -6,15 +6,16 @@
  * /lab/fases (no navegador) e para gerar o "depois" da meta do desafio.
  */
 import type { Acao, Fase, FaseDesafio, Previsao, Validador } from "@/conteudo/tipos";
-import { criarDocumentoSolto } from "@/lib/documentoSiteAlvo";
+import { criarDocumentoSolto, lerCssDoDocumento } from "@/lib/documentoSiteAlvo";
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
 export function criarSimulacao(fase: Fase) {
-  const documento = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body);
-  const inicial = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body);
+  const css = fase.siteAlvo.css ?? null;
+  const documento = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+  const inicial = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
   let eventos: EventoFase[] = [];
   let previsaoAtual: Previsao | null = null;
   let respostaPrevisao: number | null = null;
@@ -38,6 +39,11 @@ export function criarSimulacao(fase: Fase) {
     clicarLink: nucleo.clicarLink,
     inserirHtml: nucleo.inserirHtml,
     desfazer: nucleo.desfazer,
+    definirPropriedade: nucleo.definirPropriedade,
+    alternarPropriedade: nucleo.alternarPropriedade,
+    adicionarRegra: nucleo.adicionarRegra,
+    escreverCss: nucleo.escreverCss,
+    lerCss: nucleo.lerCss,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -71,16 +77,18 @@ export function criarSimulacao(fase: Fase) {
     /** Executa ações pelo painel. Lança ErroAcao dizendo qual quebrou. */
     executar: (acoes: readonly Acao[]) => executarAcoes(acoes, painel),
     htmlAtual: () => documento.body.innerHTML,
+    cssAtual: () => lerCssDoDocumento(documento),
   };
 }
 
 export type Simulacao = ReturnType<typeof criarSimulacao>;
 
 /**
- * O body do desafio depois de aplicar as soluções de todas as partes: é o
- * "depois" da meta. Parte que falhar é pulada (os testes acusam).
+ * O body (e o CSS, se a fase tem) do desafio depois de aplicar as soluções
+ * de todas as partes: é o "depois" da meta. Parte que falhar é pulada (os
+ * testes acusam).
  */
-export function estadoFinalDoDesafio(fase: FaseDesafio): string {
+export function estadoFinalDoDesafio(fase: FaseDesafio): { body: string; css: string | null } {
   const simulacao = criarSimulacao(fase);
   for (const parte of fase.partes) {
     try {
@@ -89,5 +97,5 @@ export function estadoFinalDoDesafio(fase: FaseDesafio): string {
       // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
     }
   }
-  return simulacao.htmlAtual();
+  return { body: simulacao.htmlAtual(), css: simulacao.cssAtual() };
 }

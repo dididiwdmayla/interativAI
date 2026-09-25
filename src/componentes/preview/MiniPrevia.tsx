@@ -6,6 +6,8 @@ import { montarDocumentoSiteAlvo } from "@/lib/documentoSiteAlvo";
 type Props = {
   head: string;
   body: string;
+  /** A folha editável do site, se a fase tem. */
+  css?: string | null;
   /** Legenda embaixo (ex.: "Antes", "Depois"). */
   legenda: string;
   /** Título acessível do iframe. */
@@ -20,7 +22,7 @@ const ALTURA_VIRTUAL = 540;
  * Um site-alvo em miniatura, só para ver (sem clique, sem foco). Mesmo
  * sandbox da prévia principal: sem scripts.
  */
-export function MiniPrevia({ head, body, legenda, rotulo }: Props) {
+export function MiniPrevia({ head, body, css = null, legenda, rotulo }: Props) {
   const caixa = useRef<HTMLDivElement>(null);
   const [escala, setEscala] = useState(0.25);
 
@@ -41,7 +43,7 @@ export function MiniPrevia({ head, body, legenda, rotulo }: Props) {
       >
         <iframe
           title={rotulo}
-          srcDoc={montarDocumentoSiteAlvo(head, body)}
+          srcDoc={montarDocumentoSiteAlvo(head, body, css)}
           sandbox="allow-same-origin"
           tabIndex={-1}
           aria-hidden="true"

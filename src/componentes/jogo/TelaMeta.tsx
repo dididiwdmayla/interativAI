@@ -24,7 +24,7 @@ type Props = {
  */
 export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Props) {
   const depois = useMemo(() => estadoFinalDoDesafio(desafio), [desafio]);
-  const { head, body, titulo } = desafio.siteAlvo;
+  const { head, body, titulo, css } = desafio.siteAlvo;
 
   return (
     <Modal aberto={aberta} titulo={noDesafio ? "Hora do desafio" : "Meta da unidade"} aoFechar={aoComecar} className="max-w-2xl">
@@ -43,8 +43,8 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
         </div>
       </div>
       <div className="mt-4 flex gap-3">
-        <MiniPrevia head={head} body={body} legenda="Antes" rotulo={`${titulo}, antes`} />
-        <MiniPrevia head={head} body={depois} legenda="Depois" rotulo={`${titulo}, depois`} />
+        <MiniPrevia head={head} body={body} css={css ?? null} legenda="Antes" rotulo={`${titulo}, antes`} />
+        <MiniPrevia head={head} body={depois.body} css={depois.css} legenda="Depois" rotulo={`${titulo}, depois`} />
       </div>
       {!noDesafio && (
         <p className="mt-3 text-sm text-texto-suave">

@@ -12,7 +12,11 @@ por fase (ids, conceitos, ferramentas apresentadas, limites de texto,
 emojis, previsões, soluções que cumprem cada objetivo na hora certa...),
 mais o índice de conceitos, o núcleo do painel, a migração do progresso,
 o congelamento dos ids publicados (`src/conteudo/publicados.json`) e
-sabotagens de propósito que confirmam as mensagens das checagens
+o motor de cascata (`cascata.test.ts`: especificidade, ordem, `!important`,
+inline, herança, atalhos, "não sei, não risca" e as edições no texto da
+folha), o CSS no formato declarativo (`css.test.ts`: ações e validadores
+de CSS, desfazer com HTML e CSS juntos, checagens de fase de CSS e a
+Bancada de estilos), sabotagens de propósito que confirmam as mensagens das checagens
 (`checagens.test.ts`: desafio cuja parte seguinte desfaz a anterior, id
 publicado alterado, fase só de sozinho com conceito, `revisarEm` sem
 guiado...).
@@ -61,6 +65,7 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `unidades.mjs [desktop\|retrato\|paisagem]` | as Unidades 1 e 2 inteiras começando pelo mapa (mundo -> ilha Sites -> card -> Jogar), com meta com antes/depois, previsões (certa e errada), esbarrão e desfazer, sozinho ("Fez sozinho!"), desafio com checklist (parte de seleção trava, parte de estado desmarca ao desfazer), Rever, revisão e volta, estrelas, Próxima fase dentro da unidade e "Voltar pra ilha" depois do desafio (ponto aceso, próximo aberto, U3 planejada, Sites 2 de 2 no mundo) |
 | `renomear-links.mjs` | renomear tag pela árvore (dois cliques, Enter, Espaço, Esc, nome inválido, desfazer/refazer, menu do nó, barra e dois toques no celular), a apresentação e o card da ferramenta nova, e links na prévia (href="#", externo com aba nova, botão do meio, quebrado, sem href, âncora que rola) no desktop e em pé |
 | `mapa.mjs [desktop\|retrato\|paisagem]` | o mundo (estados das ilhas, Opcional, computadorzinho, rola no celular), ilha em construção (placas, tudo planejado, sem texto técnico), voltar do navegador, a ilha Sites (pontos de 44 px, caminho horizontal ou vertical, cards, Jogar abre a fase), o museu das Origens, a comemoração ao concluir a U1 (ponto aceso, caminho desenhado, registrada uma vez só, 9 estrelas), deep links (recarregar mantém fase e ilha), voltar e avançar do navegador (fase -> ilha -> mundo), o botão Mapa da fase, fase trancada pelo endereço e o `/lab/mapa` (desbloquear tudo, Lista de fases, resetar) |
+| `css.mjs` | CSS editável na Bancada de estilos (`/lab/fases?fase=lab-motor-u1-f1`): abas HTML e CSS do editor, digitar no CSS muda a prévia sem recarregar (marca na janela do iframe), cursor numa regra acende todas as peças dela, desfazer e refazer do painel voltam o CSS no editor e na prévia, soluções de CSS pelo lab (alternarDeclaracao, editarCss) e o CSS sobrevivendo à recarga pelo HTML |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
 | `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada, entrando pelo mapa (computadorzinho em Sites, U1 com "Continuar", sem a meta de novo) |
 | `audio.mjs` | ajustes de som (padrões, mudar pelo mouse e pelo teclado, silenciar, salvos depois de recarregar), navegação mapa -> ilha -> fase -> ilha -> mapa -> museu com o AudioContext real (faixa certa em cada tela, `mapa` no mundo, sem reiniciar entre ilha e fase, silêncio em Frameworks, boot do arquivo no primeiro gesto, momentos grandes tocando os arquivos, console limpo), efeitos em 404 caindo no sintetizado e os controles no toque, em pé |

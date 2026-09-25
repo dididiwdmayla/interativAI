@@ -1,16 +1,48 @@
 "use client";
 
+export type AbaEditor = "html" | "css";
+
 type Props = {
   quebrarLinhas: boolean;
   aoAlternarQuebra: () => void;
+  /** Fases com CSS: as abas HTML e CSS. Sem elas, só o título do código do body. */
+  abas?: { ativa: AbaEditor; aoTrocar: (aba: AbaEditor) => void; nomeCss: string };
 };
 
-export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra }: Props) {
+const ROTULO_ABA: Record<AbaEditor, string> = { html: "HTML", css: "CSS" };
+
+export function CabecalhoEditor({ quebrarLinhas, aoAlternarQuebra, abas }: Props) {
   return (
     <div className="flex shrink-0 items-center gap-2 border-b-2 border-borda bg-painel px-3 py-1.5 pointer-fine:pr-9">
-      <span className="text-xs font-black uppercase tracking-wide text-texto-suave">
-        Código do <span className="font-codigo normal-case text-codigo-tag">&lt;body&gt;</span>
-      </span>
+      {abas ? (
+        <div role="tablist" aria-label="Arquivos do site" className="flex items-center gap-1">
+          {(["html", "css"] as const).map((aba) => {
+            const ativa = abas.ativa === aba;
+            return (
+              <button
+                key={aba}
+                type="button"
+                role="tab"
+                aria-selected={ativa}
+                data-aba-editor={aba}
+                onClick={() => abas.aoTrocar(aba)}
+                className={`rounded-lg px-2.5 py-0.5 text-xs font-black uppercase tracking-wide transition-colors pointer-coarse:min-h-11 pointer-coarse:px-4 ${
+                  ativa ? "bg-primaria text-sobre-primaria" : "text-texto-suave hover:bg-hover"
+                }`}
+              >
+                {ROTULO_ABA[aba]}
+              </button>
+            );
+          })}
+          <span className="ml-1 truncate font-codigo text-xs text-texto-suave">
+            {abas.ativa === "css" ? abas.nomeCss : <span className="text-codigo-tag">&lt;body&gt;</span>}
+          </span>
+        </div>
+      ) : (
+        <span className="text-xs font-black uppercase tracking-wide text-texto-suave">
+          Código do <span className="font-codigo normal-case text-codigo-tag">&lt;body&gt;</span>
+        </span>
+      )}
       <button
         type="button"
         role="switch"

@@ -34,6 +34,8 @@ type Opcoes = {
   salvo: EstadoFaseSalvo | undefined;
   barramento: Barramento;
   htmlAtual: string;
+  /** Texto da folha editável (null: a fase não tem CSS). */
+  cssAtual: string | null;
   editorRef: RefObject<ApiEditor | null>;
   obterDocumento: () => Document | null;
   /** Nó selecionado agora e por onde foi escolhido. */
@@ -41,6 +43,10 @@ type Opcoes = {
   /** As mesmas funções que a interface usa: soluções e roteiros passam por elas. */
   painel: Omit<PainelDasAcoes, "responderPrevisao">;
   destacarNaArvore: (destaque: DestaqueArvore | null) => void;
+  /** Degrau 3 no CSS: abre a aba CSS e pisca a regra (ou só a declaração). */
+  destacarNoCss: (seletorRegra: string, propriedade?: string) => void;
+  /** Apaga os destaques do editor CSS. */
+  limparDestaqueCss: () => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
 };
@@ -65,18 +71,23 @@ export function useMotorFase({
   salvo,
   barramento,
   htmlAtual,
+  cssAtual,
   editorRef,
   obterDocumento,
   obterSelecao,
   painel,
   destacarNaArvore,
+  destacarNoCss,
+  limparDestaqueCss,
   toque,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
   );
   const [pulsarFerramenta, setPulsarFerramenta] = useState<IdFerramenta | null>(null);
-  const [documentoInicial] = useState(() => criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body));
+  const [documentoInicial] = useState(() =>
+    criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, fase.siteAlvo.css ?? null),
+  );
   const eventosObjetivo = useRef<EventoFase[]>([]);
   /** Soluções e roteiros sendo aplicados: a validação espera. */
   const aplicando = useRef(false);
@@ -121,8 +132,9 @@ export function useMotorFase({
   const limparAjudasVisuais = useCallback(() => {
     destacarNaArvore(null);
     editorRef.current?.destacarLinhas([]);
+    limparDestaqueCss();
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, editorRef]);
+  }, [destacarNaArvore, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
@@ -147,10 +159,12 @@ export function useMotorFase({
             [fase.id]: {
               objetivoAtual: atual.concluidos,
               htmlAtual,
+              cssAtual,
               estrelas: atual.estrelas,
               introducaoVista: atual.etapa === "objetivos" || atual.etapa === "concluida",
               metaVista: atual.etapa !== "meta",
               htmlInicioObjetivo: atual.htmlInicioObjetivo,
+              cssInicioObjetivo: atual.cssInicioObjetivo,
               previsaoRespondida: atual.previsao,
               partesFeitas: atual.partesFeitas,
               reveres: atual.reveres,
@@ -174,7 +188,7 @@ export function useMotorFase({
         };
       });
     },
-    [fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
+    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
   );
 
   useEffect(() => {
@@ -247,10 +261,11 @@ export function useMotorFase({
         previsao: null,
         fala: falaMantida ?? falaDoObjetivo(pratica, indice, toque),
         htmlInicioObjetivo: alvo.eventoAoComecar ? htmlAtual : null,
+        cssInicioObjetivo: alvo.eventoAoComecar ? cssAtual : null,
       }));
       if (alvo.eventoAoComecar) rodarEvento(alvo.eventoAoComecar, () => {});
     },
-    [htmlAtual, pratica, rodarEvento, toque],
+    [cssAtual, htmlAtual, pratica, rodarEvento, toque],
   );
 
   /**
@@ -456,6 +471,8 @@ export function useMotorFase({
         return alvo ? editor.linhasDoAlvo(alvo) : [];
       });
       editor.destacarLinhas(linhas);
+    } else if (linha.alvo === "css") {
+      destacarNoCss(linha.seletorRegra, linha.propriedade);
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }

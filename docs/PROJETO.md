@@ -159,6 +159,60 @@ src/
   externa, sem mudança de texto) disparam a seleção, com 150 ms de espera.
   Seleção vinda do editor não mexe no cursor nem rola o editor: sem laço.
 
+### CSS editável e motor de cascata (rodada 9)
+
+- `siteAlvo.css` (opcional) é a folha EDITÁVEL do site-alvo: vai num
+  `<style data-folha-jogo>` depois do head fixo e vira a segunda fonte de
+  verdade, ao lado do body. Fases sem `css` funcionam como antes.
+- Editar o CSS (editor, painel Estilos, ações, desfazer) troca o
+  `textContent` desse `<style>` no iframe na hora, sem recarregar: a
+  prévia muda instantaneamente e a seleção continua. A recarga do HTML
+  (caminho A) leva o CSS mais novo junto (`PreviewSiteAlvo`,
+  `definirCss`).
+- Motor de cascata próprio em `src/motor/css/` (sem layout, só
+  `element.matches` e o texto das folhas: roda igual no navegador e no
+  jsdom, que não calcula cascata com confiança):
+  - `analisarCss.ts`: regras, declarações com posições e linhas,
+    declarações comentadas como DESLIGADAS (a checkbox do Chrome
+    comenta, devtools-frontend `CSSProperty.setDisabled`), @media e
+    @supports como condições; @layer, @import, aninhamento e @container
+    deixam a folha "incerta";
+  - `especificidade.ts`: Selectors 4 (`:is`/`:not`/`:has` pelo argumento
+    mais específico, `:where` zero, `:nth-child(... of S)`), com testes;
+  - `folhaDoNavegador.ts`: um pedaço da folha do navegador (h1 em
+    negrito, margens de p e títulos, links), com margens físicas no
+    lugar das lógicas (mesma coisa numa página LTR) para o motor poder
+    riscá-las;
+  - `propriedades.ts` e `valores.ts`: herdadas, atalhos e as longas de
+    cada um (margin, padding, border e lados, background, font, gap,
+    flex, inset e outros), grupos lógicos, valores iniciais, cores em
+    qualquer formato, validade em três estados (válido, inválido,
+    desconhecido) e a comparação normalizada;
+  - `cascata.ts`: blocos que casam (inline, regras, navegador), ordem
+    (importância e origem, inline, especificidade, ordem), vencedor por
+    propriedade longa, riscadas, herança por ancestral e `valorEfetivo`
+    (com `inherit`, `initial`, `unset` e `var()`);
+  - `editarCss.ts`: edições no texto sem bagunçar a formatação (trocar
+    valor e nome, ligar e desligar com comentário, acrescentar
+    declaração e regra, o seletor da regra nova igual ao
+    `simpleSelector` do Chrome).
+- **Regra de ouro: quando não sabe, não risca.** Valor desconhecido no
+  topo, atalho que o motor não sabe abrir, @media sem como avaliar
+  (jsdom), lógica misturada com física ou folha com @layer: nada
+  daquela propriedade fica riscado e `valorEfetivo` diz "incerto".
+- O núcleo do painel ganhou as operações de CSS (`definirPropriedade`,
+  `editarDeclaracao`, `alternarDeclaracao`, `adicionarDeclaracao`,
+  `adicionarRegra`, `escreverCss`, `editarEstiloInline`), e cada foto do
+  desfazer guarda HTML e CSS juntos. Eventos novos: `editouCss`,
+  `editouPropriedade`, `alternouDeclaracao`, `adicionouRegra`.
+- Editor com abas "HTML" e "CSS" (CodeMirror com `@codemirror/lang-css`),
+  as duas montadas; a aba CSS só aparece em fase com `css`. Cursor dentro
+  de uma regra acende na prévia todas as peças que ela pega.
+- Progresso: `cssAtual` e `cssInicioObjetivo` por fase (padrão null).
+- Bancada do motor: `src/conteudo/laboratorio/` tem fases fora do
+  currículo que só abrem no `/lab/fases` (`?fase=<id>` abre direto), para
+  testar a interface de CSS e mostrar o motor para quem escreve fases.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é

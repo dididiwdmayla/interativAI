@@ -27,7 +27,18 @@ export type EventoFase =
   /** Trocou o nome da tag (h2 virou h4). `tag` é a nova; `de`, a antiga. O caminho não muda. */
   | { tipo: "renomeouTag"; tag: string; de: string; caminho: number[] }
   /** Clicou num link da prévia (a navegação é segurada; ver src/lib/linksPrevia.ts). */
-  | { tipo: "clicouLink"; href: string; destino: DestinoLink; caminho: number[] };
+  | { tipo: "clicouLink"; href: string; destino: DestinoLink; caminho: number[] }
+  /** Digitou no editor CSS (ou uma ação editarCss escreveu na folha). */
+  | { tipo: "editouCss" }
+  /**
+   * Mudou o nome ou o valor de uma declaração (ou acrescentou uma) pelo
+   * painel Estilos. `seletor` é o da regra ("element.style" no inline).
+   */
+  | { tipo: "editouPropriedade"; seletor: string; propriedade: string; valor: string }
+  /** Ligou ou desligou uma declaração pela checkbox do painel Estilos. */
+  | { tipo: "alternouDeclaracao"; seletor: string; propriedade: string; ativa: boolean }
+  /** Criou uma regra nova pelo painel Estilos. */
+  | { tipo: "adicionouRegra"; seletor: string };
 
 /**
  * Para onde um link levaria:
@@ -57,4 +68,8 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "respondeuPrevisao",
   "renomeouTag",
   "clicouLink",
+  "editouCss",
+  "editouPropriedade",
+  "alternouDeclaracao",
+  "adicionouRegra",
 ];

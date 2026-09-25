@@ -17,6 +17,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
 import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
+import { propriedadeConhecida } from "@/motor/css/valores";
 import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { ehIdConceito, type IdConceito } from "./conceitos";
@@ -193,7 +194,47 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "desfazer";
     case "responderPrevisao":
       return null;
+    case "definirPropriedade":
+    case "alternarDeclaracao":
+    case "adicionarRegra":
+    case "editarCss":
+      return "editor-css";
   }
+}
+
+const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada"]);
+const ACOES_DE_CSS: ReadonlySet<Acao["tipo"]> = new Set(["definirPropriedade", "alternarDeclaracao", "adicionarRegra", "editarCss"]);
+
+/** Onde a fase usa CSS (validadores, ações e linhas de ajuda), com um rótulo. */
+function usosDeCss(fase: Fase): string[] {
+  const usos: string[] = [];
+  for (const { onde, validador } of validadoresDe(fase)) {
+    for (const item of achatarValidador(validador)) if (VALIDADORES_DE_CSS.has(item.tipo)) usos.push(`${onde}: validador ${item.tipo}`);
+  }
+  for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+    for (const acao of acoes) if (ACOES_DE_CSS.has(acao.tipo)) usos.push(`${onde}: ação ${acao.tipo}`);
+  }
+  objetivosDe(fase).forEach((objetivo, indice) => {
+    if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "css") usos.push(`${nomeObjetivo(objetivo, indice)}: linha no CSS`);
+  });
+  return usos;
+}
+
+/** Seletores de regra (seletorRegra) de validadores, ações e linhas. */
+function seletoresDeRegraDe(fase: Fase): { onde: string; seletor: string }[] {
+  const lista: { onde: string; seletor: string }[] = [];
+  for (const { onde, validador } of validadoresDe(fase)) {
+    for (const item of achatarValidador(validador)) if ("seletorRegra" in item) lista.push({ onde, seletor: item.seletorRegra });
+  }
+  for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+    for (const acao of acoes) if ("seletorRegra" in acao) lista.push({ onde, seletor: acao.seletorRegra });
+  }
+  objetivosDe(fase).forEach((objetivo, indice) => {
+    if (objetivo.modo === "guiado" && objetivo.ajudas.linha.alvo === "css") {
+      lista.push({ onde: `${nomeObjetivo(objetivo, indice)} ajudas.linha`, seletor: objetivo.ajudas.linha.seletorRegra });
+    }
+  });
+  return lista;
 }
 
 /** Ferramentas apresentadas pela fase (dela e dos objetivos). */
@@ -574,6 +615,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if (item.tipo === "tag" && !nomeDeTagValido(item.nome)) {
             problemas.push(`${onde}: "${item.nome}" não é um nome de tag válido (minúsculas, como "h4" ou "section")`);
           }
+          if (item.tipo === "valorEfetivo" && !propriedadeConhecida(item.propriedade.trim().toLowerCase())) {
+            problemas.push(
+              `${onde}: o motor de cascata não conhece os valores de "${item.propriedade}" e nunca teria certeza do valor final; ` +
+                "use uma propriedade da tabela do guia ou o validador declaracao",
+            );
+          }
           return problemas;
         }),
       ),
@@ -605,6 +652,22 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       }
       if (fase.tipo === "desafio" && apresentadasPor(fase).length > 0) {
         problemas.push("o desafio não apresenta ferramentas: tudo o que ele usa já foi ensinado");
+      }
+      return problemas;
+    },
+  },
+  {
+    id: "css-da-fase",
+    nome: "fase que mexe em CSS tem siteAlvo.css, e os seletores de regra são válidos",
+    checar: (fase) => {
+      const usos = usosDeCss(fase);
+      const problemas: string[] = [];
+      if (usos.length > 0 && fase.siteAlvo.css === undefined) {
+        problemas.push(`a fase usa CSS (${usos.slice(0, 3).join("; ")}), mas o site-alvo não tem css (a folha editável)`);
+      }
+      for (const { onde, seletor } of seletoresDeRegraDe(fase)) {
+        if (seletor.trim() === "element.style") continue;
+        if (seletor.trim().length === 0 || /[{}]/.test(seletor)) problemas.push(`${onde}: seletorRegra "${seletor}" não serve`);
       }
       return problemas;
     },
@@ -780,7 +843,11 @@ const REGRAS_DE_SIMULACAO: readonly RegraFase[] = [
         const limpo = deAcao ? seletor.trim().replace(/^\$0\b/, "").trim() : seletor;
         if (deAcao && limpo.length === 0) return [];
         return seletorValido(limpo) ? [] : [`${onde}: o seletor "${seletor}" não é CSS válido`];
-      }),
+      }).concat(
+        seletoresDeRegraDe(fase)
+          .filter(({ seletor }) => seletor.trim() !== "element.style" && !seletorValido(seletor))
+          .map(({ onde, seletor }) => `${onde}: o seletorRegra "${seletor}" não é CSS válido`),
+      ),
   },
   {
     id: "estado-inicial",

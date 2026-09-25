@@ -81,6 +81,37 @@ export type Validador =
    * depois de h2 virar h4.
    */
   | { tipo: "tag"; seletor: string; nome: string }
+  /*
+   * Validadores de CSS: usam o motor de cascata do jogo (src/motor/css),
+   * o mesmo que o painel Estilos mostra. Ver "Como escrever fases de CSS"
+   * no guia.
+   */
+  /**
+   * O valor que VENCE a cascata para a propriedade, em algum elemento do
+   * seletor: a declaração vencedora, a herdada do ancestral ou a inicial.
+   * Compara normalizado: cores em qualquer formato (red = #f00 =
+   * rgb(255, 0, 0)), números (16.0px = 16px, 0px = 0), espaços e aspas de
+   * fonte. Compara o valor DECLARADO, não os pixels calculados (2em
+   * continua 2em). Atalho (margin) confere cada propriedade longa. Se o
+   * motor não tem certeza, não passa (e o detalhe diz por quê).
+   */
+  | { tipo: "valorEfetivo"; seletor: string; propriedade: string; valor: string }
+  /**
+   * A regra `seletorRegra` (nas folhas do site) tem a declaração da
+   * propriedade. `valor` confere o valor (normalizado); `ativa: true` pede
+   * ligada, `ativa: false` pede desligada (a checkbox); sem `ativa`, vale
+   * de qualquer jeito.
+   */
+  | { tipo: "declaracao"; seletorRegra: string; propriedade: string; valor?: string; ativa?: boolean }
+  /** Existe uma regra com esse seletor nas folhas do site (espaços não importam). */
+  | { tipo: "regraExiste"; seletorRegra: string }
+  /**
+   * Em algum elemento do seletor, a declaração da propriedade que mora na
+   * regra `seletorRegra` PERDE para outra (fica riscada no painel).
+   * `seletorRegra: "element.style"` fala do estilo inline. Desligada não
+   * conta: aqui é perder a briga.
+   */
+  | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -127,7 +158,18 @@ export type Acao =
   /** Escreve HTML novo perto de um elemento (o que o jogador faria no editor de código). */
   | { tipo: "inserirHTML"; seletor: string; posicao: PosicaoInsercao; html: string }
   /** Responde o card de previsão (índice a partir de 0). */
-  | { tipo: "responderPrevisao"; opcao: number };
+  | { tipo: "responderPrevisao"; opcao: number }
+  /**
+   * Define uma propriedade numa regra, como a edição do painel Estilos: se
+   * a regra já tem a propriedade ligada, troca o valor; se não, acrescenta.
+   */
+  | { tipo: "definirPropriedade"; seletorRegra: string; propriedade: string; valor: string }
+  /** Liga ou desliga (a checkbox) a declaração da propriedade na regra. */
+  | { tipo: "alternarDeclaracao"; seletorRegra: string; propriedade: string }
+  /** Cria uma regra nova no fim da folha (o botão de regra nova do painel Estilos). */
+  | { tipo: "adicionarRegra"; seletorRegra: string; declaracoes?: { propriedade: string; valor: string }[] }
+  /** Escreve CSS no começo ou no fim da folha (o que o jogador digitaria no editor CSS). */
+  | { tipo: "editarCss"; posicao: "inicio" | "fim"; texto: string };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -140,7 +182,9 @@ export type AjudaLinha =
   /** Pisca no editor as linhas de todos os elementos do seletor. */
   | { alvo: "editor"; seletor: string; fala: string }
   /** Pisca o botão ou a área de uma ferramenta (a setinha, a trilha...). */
-  | { alvo: "ferramenta"; ferramenta: IdFerramenta; fala: string };
+  | { alvo: "ferramenta"; ferramenta: IdFerramenta; fala: string }
+  /** Pisca no editor CSS as linhas da regra (e, com `propriedade`, só a declaração). */
+  | { alvo: "css"; seletorRegra: string; propriedade?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -234,7 +278,17 @@ export type SiteAlvo = {
   head: string;
   /** <body> inicial: é o que aparece na árvore e no editor. */
   body: string;
+  /**
+   * Opcional: a folha de estilo EDITÁVEL do site (a aba CSS do editor e o
+   * painel Estilos mexem nela; no painel ela se chama "estilo.css"). Vai
+   * num <style data-folha-jogo> depois do head. Sem ela, a fase funciona
+   * como sempre (só o head fixo).
+   */
+  css?: string;
 };
+
+/** Sub-painéis da aba Elementos, como no Chrome (Styles e Computed). */
+export type PainelElementos = "estilos" | "calculado";
 
 /** Uma parte do desafio: a validação do desafio é a soma das partes. */
 export type ParteDesafio = {
@@ -271,6 +325,11 @@ type FaseBase = {
   /** Momentos roteirizados logo depois da introdução. */
   eventosIniciais?: EventoRoteirizado[];
   siteAlvo: SiteAlvo;
+  /**
+   * Sub-painéis liberados dentro de Elementos (o painel Estilos e o
+   * Calculado). Sem o campo, a fase não mostra nenhum.
+   */
+  paineisElementos?: PainelElementos[];
   conclusao: Fala[];
   /** Algo para o jogador fazer num site de verdade, pelo F12. */
   missaoDeCampo?: string;
