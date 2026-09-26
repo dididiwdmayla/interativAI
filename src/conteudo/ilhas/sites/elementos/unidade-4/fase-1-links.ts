@@ -129,7 +129,7 @@ export const FASE_U4_F1: FasePratica = {
 
   conclusao: [
     { texto: "Agora você conserta qualquer link: href é o endereço, # rola pra um id, target=\"_blank\" abre aba nova.", expressao: "comemorando" },
-    { texto: "No F12 de verdade, dois cliques trocam um atributo que já existe; um atributo novo se escreve na aba Estilos ou direto no HTML.", expressao: "feliz" },
+    { texto: "No F12 de verdade, dois cliques trocam um atributo existente; um novo nasce no 'Add attribute' da aba Elements, ou direto no HTML.", expressao: "feliz" },
   ],
 
   missaoDeCampo:

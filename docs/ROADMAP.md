@@ -95,11 +95,7 @@ núcleo comum.
 
 ### Pendente de decisão
 
-- A fala final da U4 Fase 1 (publicada, congelada) diz que um atributo
-  novo "se escreve na aba Estilos ou direto no HTML". No Chrome, atributo
-  novo é pelo "Add attribute" da aba Elements (o gesto que o jogo tem
-  agora). Não mexi: corrigir texto publicado pede uma decisão sobre
-  errata de conteúdo congelado.
+(nenhuma no momento)
 
 ### Próximo (em ordem)
 
