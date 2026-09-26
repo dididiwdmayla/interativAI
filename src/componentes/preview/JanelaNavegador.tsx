@@ -1,20 +1,45 @@
 import type { ReactNode } from "react";
+import { IconeGlobo } from "@/componentes/icones/IconeGlobo";
 import { IconeRecarregar } from "@/componentes/icones/IconeRecarregar";
 import { IconeSeta } from "@/componentes/icones/IconeSeta";
 
 type Props = {
   url: string;
+  /**
+   * Modo documento: a aba do navegador aparece em cima, com o <title> da
+   * página ao vivo (sem title, o Chrome mostra o endereço). Sem o campo,
+   * não há aba (as fases que só mexem no body).
+   */
+  tituloAba?: string | null;
+  /** Um aviso por cima da página (a simulação dos acentos quebrados). */
+  aviso?: ReactNode;
   children: ReactNode;
   /** No celular: barra mais baixa, sem as setas de navegação. */
   compacta?: boolean;
 };
 
 /** Moldura de navegador falsa em volta do site-alvo. */
-export function JanelaNavegador({ url, children, compacta = false }: Props) {
+export function JanelaNavegador({ url, tituloAba, aviso, children, compacta = false }: Props) {
+  const temAba = tituloAba !== undefined;
+  const textoAba = tituloAba && tituloAba.trim().length > 0 ? tituloAba.trim() : url;
   return (
     <div className={`flex h-full min-h-0 flex-col overflow-hidden ${
         compacta ? "rounded-xl shadow-[0_4px_0_var(--cor-sombra)]" : "rounded-2xl shadow-[0_8px_0_var(--cor-sombra)]"
       } border-2 border-borda bg-superficie`}>
+      {temAba && (
+        <div className={`flex shrink-0 items-end bg-fundo pointer-fine:pr-10 ${compacta ? "px-2 pt-1" : "px-3 pt-1.5"}`}>
+          <div
+            data-aba-navegador
+            title={textoAba}
+            className="flex min-w-0 max-w-60 items-center gap-1.5 rounded-t-lg border-2 border-b-0 border-borda bg-painel px-3 py-1 text-xs font-bold text-texto"
+          >
+            <IconeGlobo tamanho={12} className="shrink-0 text-texto-suave" />
+            <span className="truncate" data-titulo-aba>
+              {textoAba}
+            </span>
+          </div>
+        </div>
+      )}
       <div
         className={`flex shrink-0 items-center border-b-2 border-borda bg-painel pointer-fine:pr-10 ${
           compacta ? "gap-2 px-2 py-1" : "gap-3 px-3 py-2"
@@ -44,7 +69,10 @@ export function JanelaNavegador({ url, children, compacta = false }: Props) {
           {url}
         </div>
       </div>
-      <div className="relative min-h-0 flex-1">{children}</div>
+      <div className="relative min-h-0 flex-1">
+        {children}
+        {aviso}
+      </div>
     </div>
   );
 }

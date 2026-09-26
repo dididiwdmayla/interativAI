@@ -13,9 +13,41 @@ const [U1] = UNIDADES;
 
 describe("currículo em dados", () => {
   it("ilhas na ordem do mapa, Origens sempre aberta e Frameworks opcional", () => {
-    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "oficio"]);
+    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio"]);
     expect(ILHAS_OPCIONAIS.map((ilha) => ilha.id)).toEqual(["frameworks"]);
     expect(CURRICULO.find((ilha) => ilha.id === "origens")?.sempreAberta).toBe(true);
+  });
+
+  it("a ilha IA fica entre Rede e Servidor e Ofício, com a IA ao vivo como motor", () => {
+    const ids = CURRICULO.map((ilha) => ilha.id);
+    expect(ids.indexOf("ia")).toBe(ids.indexOf("rede-servidor") + 1);
+    expect(ids.indexOf("oficio")).toBe(ids.indexOf("ia") + 1);
+    const ia = CURRICULO.find((ilha) => ilha.id === "ia");
+    expect(ia?.zonas.map((zona) => zona.id)).toEqual([
+      "como-funciona",
+      "especificacao-e-prompt",
+      "ia-ao-vivo",
+      "agentes",
+      "custo-e-privacidade",
+    ]);
+    for (const zona of ia?.zonas ?? []) expect(zona.requerMotor).toContain("IA ao vivo");
+  });
+
+  it("as unidades antigas mantêm os ids depois das adições do currículo", () => {
+    for (const id of [
+      "origens-museu-u5",
+      "logica-depuracao-u1",
+      "rede-servidor-apis-e-json-u1",
+      "rede-servidor-front-e-back-u1",
+      "oficio-deploy-u2",
+      "oficio-ia-com-criterio-u1",
+      "frameworks-react-e-next-u2",
+    ]) {
+      expect(localNoCurriculo(id), id).toBeDefined();
+    }
+    expect(localNoCurriculo("origens-museu-u6")?.unidade.titulo).toBe("Por baixo do capô");
+    expect(localNoCurriculo("logica-algoritmos-essenciais-u4")?.zona.nome).toBe("Algoritmos essenciais");
+    expect(localNoCurriculo("rede-servidor-seguranca-u3")?.zona.nome).toBe("Segurança");
   });
 
   it("status vem do conteúdo registrado, não é guardado à mão", () => {
@@ -28,18 +60,46 @@ describe("currículo em dados", () => {
     expect(statusDaUnidade("sites-elementos-u6", [...UNIDADES, { ...U1, id: "sites-elementos-u6" }])).toBe("pronta");
   });
 
-  it("U1 e U2 usam os ids do conteúdo, na zona Elementos da ilha Sites", () => {
+  it("as unidades de conteúdo usam os ids do currículo, na ilha e na zona que dizem", () => {
     for (const unidade of UNIDADES) {
       const local = localNoCurriculo(unidade.id);
-      expect(local?.ilha.id).toBe("sites");
-      expect(local?.zona.id).toBe("elementos");
+      expect(local?.ilha.id, unidade.id).toBe("sites");
+      expect(local?.zona.nome, unidade.id).toBe(unidade.zona);
+    }
+    expect(UNIDADES.map((unidade) => localNoCurriculo(unidade.id)?.zona.id)).toEqual([
+      "elementos",
+      "elementos",
+      "elementos",
+      "elementos",
+      "elementos",
+      "estilos",
+    ]);
+  });
+
+  it("liberações da rodada 9: U6, Estilos (E1 a E4) e Layout (L1 a L4) sem requerMotor", () => {
+    const liberadas = [
+      "sites-elementos-u6",
+      "sites-estilos-u1",
+      "sites-estilos-u2",
+      "sites-estilos-u3",
+      "sites-estilos-u4",
+      "sites-layout-u1",
+      "sites-layout-u2",
+      "sites-layout-u3",
+      "sites-layout-u4",
+    ];
+    for (const id of liberadas) {
+      const local = localNoCurriculo(id);
+      expect(local, id).not.toBeNull();
+      expect(local?.zona.requerMotor, id).toBeUndefined();
+      expect(local?.unidade.requerMotor, id).toBeUndefined();
     }
   });
 
-  it("a U6 (página do zero) requer motor mesmo numa zona pronta", () => {
-    const local = localNoCurriculo("sites-elementos-u6");
-    expect(local?.zona.requerMotor).toBeUndefined();
-    expect(local?.unidade.requerMotor).toContain("head editável");
+  it("E5, Responsivo e Publicar continuam pedindo motor", () => {
+    expect(localNoCurriculo("sites-estilos-u5")?.unidade.requerMotor).toContain("o próprio jogo como site-alvo");
+    expect(localNoCurriculo("sites-responsivo-u1")?.zona.requerMotor).toContain("modo dispositivo");
+    expect(localNoCurriculo("sites-publicar-u1")?.zona.requerMotor).toContain("auditoria");
   });
 });
 
@@ -72,15 +132,15 @@ describe("checagens do currículo (sabotagens)", () => {
   });
 
   it("unidade de conteúdo numa zona com requerMotor falha dizendo o que falta", () => {
-    const estilos: Unidade = { ...U1, id: "sites-estilos-u1", zona: "Estilos", titulo: "A aba Estilos" };
-    const problemas = conferirMotorDoConteudo(CURRICULO, [estilos]);
+    const responsivo: Unidade = { ...U1, id: "sites-responsivo-u1", zona: "Responsivo", titulo: "Modo dispositivo" };
+    const problemas = conferirMotorDoConteudo(CURRICULO, [responsivo]);
     expect(problemas).toHaveLength(1);
-    expect(problemas[0]).toContain('a zona "Estilos" ainda requer motor: aba Estilos');
+    expect(problemas[0]).toContain('a zona "Responsivo" ainda requer motor: modo dispositivo');
     expect(problemas[0]).toContain("relate o que falta");
   });
 
-  it("a U6 com conteúdo falha pelo requerMotor da própria unidade", () => {
-    const u6: Unidade = { ...U1, id: "sites-elementos-u6", numero: 6, titulo: "Página do zero" };
-    expect(conferirMotorDoConteudo(CURRICULO, [u6]).join("\n")).toContain("ela ainda requer motor: modo documento inteiro");
+  it("a E5 com conteúdo falha pelo requerMotor da própria unidade", () => {
+    const e5: Unidade = { ...U1, id: "sites-estilos-u5", zona: "Estilos", numero: 5, titulo: "Variáveis e temas" };
+    expect(conferirMotorDoConteudo(CURRICULO, [e5]).join("\n")).toContain("ela ainda requer motor: o próprio jogo como site-alvo");
   });
 });

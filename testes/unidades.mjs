@@ -1,8 +1,10 @@
-// Joga as Unidades 1 e 2 do começo ao fim, como um jogador, a partir do
-// mapa: mundo -> ilha Sites -> unidade -> fases -> volta para a ilha, que
-// comemora. No caminho: apresentações, meta com antes/depois, previsões, o
-// esbarrão do computadorzinho, objetivos sozinho, o desafio com checklist e
-// o Rever (revisão e volta).
+// Joga as Unidades 1 a 5 da zona Elementos e a E1 da zona Estilos do
+// começo ao fim, como um jogador, a partir do mapa: mundo -> ilha Sites ->
+// unidade -> fases -> volta para a ilha, que comemora. No caminho:
+// apresentações, meta com antes/depois, previsões, o esbarrão do
+// computadorzinho, objetivos sozinho, o desafio com checklist, o Rever
+// (revisão e volta) e, na E1, o painel Estilos (editar valor, caixinha,
+// setas, seletor de cor, + declaração e regra nova).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
 import { abrir, chaveDoSeletor, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
 
@@ -887,16 +889,233 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U5: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U5: 3 estrelas");
 
-// Volta para a ilha: a U5 acende; U6 exige motor e continua planejada.
+// Volta para a ilha: a U5 acende; a U6 segue planejada (sem conteúdo ainda) e a zona Estilos abre.
 await conclusaoEVoltarAIlha("U5");
 conferir((await estadoDoPonto("sites-elementos-u5")) === "concluida", "ilha: U5 concluída");
-conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (requer motor)");
+conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (o motor está pronto, falta o conteúdo)");
+conferir((await estadoDoPonto("sites-estilos-u1")) === "disponivel", "ilha: a E1 abriu (a zona Elementos acabou)");
+const salvoU5 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvoU5.fasesConcluidas.length === 19, `19 fases concluídas (${salvoU5.fasesConcluidas.length})`);
+
+// ------------------------------------------------------------ painel Estilos (E1)
+/** No celular em pé, o painel Estilos é um segmento; deitado e no desktop, fica ao lado da árvore. */
+async function mostrarEstilos() {
+  if (MODO !== "retrato") return;
+  await fecharBalao();
+  const aba = pagina.getByRole("tablist", { name: "Mostrar no painel" }).getByRole("tab", { name: "Estilos", exact: true });
+  if ((await aba.getAttribute("aria-selected")) !== "true") await aba.tap();
+  await esperar(150);
+}
+/** O bloco de uma regra do site no painel (a do site vem antes da do navegador). */
+const regraNoPainel = (seletorRegra) => pagina.locator(`[data-lista-estilos] > section[aria-label="Regra ${seletorRegra}"]`).first();
+const campoEstilo = (qual) => pagina.locator(`[data-campo-estilo=${qual}]`);
+
+/** Seleciona a peça pela árvore e mostra o painel Estilos. */
+async function selecionarParaEstilos(seletor) {
+  await fecharBalao();
+  await selecionarNo(pagina, seletor);
+  await mostrarEstilos();
+}
+/** Clica (ou toca) no valor de uma declaração, escreve outro e confirma. */
+async function trocarValorNoPainel(seletorRegra, propriedade, valor) {
+  await tocar(regraNoPainel(seletorRegra).locator(`[data-declaracao="${propriedade}"] [data-valor-propriedade]`).first());
+  await campoEstilo("valor").fill(valor);
+  await campoEstilo("valor").press("Enter");
+  await esperar(250);
+}
+/** Escreve nome e valor nos campos abertos (declaração nova ou regra nova). */
+async function escreverDeclaracao(propriedade, valor) {
+  await campoEstilo("nome").fill(propriedade);
+  await campoEstilo("nome").press("Tab");
+  await campoEstilo("valor").fill(valor);
+  await campoEstilo("valor").press("Enter");
+  await esperar(250);
+}
+/** "+ declaração" no fim da regra. */
+async function acrescentarNoPainel(seletorRegra, propriedade, valor) {
+  const regra = regraNoPainel(seletorRegra);
+  if (!toque) await regra.hover();
+  await tocar(regra.locator("[data-adicionar-declaracao]"));
+  await escreverDeclaracao(propriedade, valor);
+}
+/** A caixinha de uma declaração (desliga ou liga). */
+async function caixinhaNoPainel(seletorRegra, propriedade) {
+  const regra = regraNoPainel(seletorRegra);
+  if (!toque) await regra.hover();
+  await tocar(regra.locator(`[data-declaracao="${propriedade}"] [data-alternar-declaracao]`));
+  await esperar(250);
+}
+/** Uma seta para cima no campo de número: tecla no desktop, botão no toque. */
+async function setaParaCima() {
+  if (toque) await pagina.getByRole("button", { name: "Aumentar o número" }).tap();
+  else await campoEstilo("valor").press("ArrowUp");
+  await esperar(80);
+}
+const valorNaPagina = (seletor, propriedade) =>
+  pagina
+    .locator("section[data-previa] iframe")
+    .evaluate((el, [s, p]) => el.contentWindow.getComputedStyle(el.contentDocument.querySelector(s)).getPropertyValue(p), [seletor, propriedade]);
+
+await jogarUnidade("sites-estilos-u1", "Jogar");
+
+// ------------------------------------------------------------ E1 fase 1
+await metaDaUnidade("E1 começo");
+await conversar(3);
+await apresentacao("painel-estilos", async () => {
+  await mostrarEstilos();
+  await tocar(pagina.locator("[data-painel-estilos]"));
+});
+await selecionarNo(pagina, "h1");
+await mostrarEstilos();
+conferir((await regraNoPainel("h1").count()) === 1, "E1F1: com o h1 selecionado, o painel mostra a regra h1");
+await proximoObjetivo("E1F1 objetivo 1 (ver as regras do h1)");
+
+// Editar valor: a apresentação pede para usar de verdade, e o uso já resolve o objetivo.
+await apresentacao("editar-valor-css", async () => {
+  await mostrarEstilos();
+  await trocarValorNoPainel("h1", "color", "white");
+});
+conferir((await valorNaPagina("h1", "color")) === "rgb(255, 255, 255)", "E1F1: o nome ficou branco na prévia");
+await proximoObjetivo("E1F1 objetivo 2 (cor do h1)");
+
+// Previsão: desligar não apaga a peça. A caixinha é apresentada depois do palpite, já no footer.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await apresentacao("ligar-desligar-declaracao", async () => {
+  await mostrarEstilos();
+  await caixinhaNoPainel("footer", "background-color");
+});
+conferir((await valorNaPagina("footer", "background-color")) === "rgba(0, 0, 0, 0)", "E1F1: o rodapé perdeu o fundo, mas continua lá");
+await proximoObjetivo("E1F1 objetivo 3 (previsão e caixinha)");
+
+await selecionarParaEstilos(".preco");
+await trocarValorNoPainel(".preco", "color", "crimson");
+await proximoObjetivo("E1F1 objetivo 4 (sozinho, preços)");
+await conclusaoEProxima("E1F1");
+
+// ------------------------------------------------------------ E1 fase 2
+await conversar(2);
+// Setas: a apresentação mostra o h1 (a peça do objetivo) e pede uma seta de verdade.
+await apresentacao("setas-numericas", async () => {
+  await mostrarEstilos();
+  await tocar(regraNoPainel("h1").locator('[data-declaracao="font-size"] [data-valor-propriedade]').first());
+  await setaParaCima();
+});
+if (!(await campoEstilo("valor").isVisible().catch(() => false))) {
+  await mostrarEstilos();
+  await tocar(regraNoPainel("h1").locator('[data-declaracao="font-size"] [data-valor-propriedade]').first());
+}
+for (let i = 0; i < 12 && (await campoEstilo("valor").inputValue()) !== "36px"; i++) await setaParaCima();
+conferir((await campoEstilo("valor").inputValue()) === "36px", "E1F2: as setas levaram o font-size do h1 a 36px");
+await campoEstilo("valor").press("Enter");
+await esperar(250);
+await proximoObjetivo("E1F2 objetivo 1 (setas)");
+
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos(".descricao");
+await trocarValorNoPainel(".descricao", "font-size", "1rem");
+conferir((await valorNaPagina(".descricao", "font-size")) === "16px", "E1F2: 1rem deu os mesmos 16px");
+await proximoObjetivo("E1F2 objetivo 2 (previsão rem)");
+
+await selecionarParaEstilos("body");
+await trocarValorNoPainel("body", "font-family", "Georgia, serif");
+await proximoObjetivo("E1F2 objetivo 3 (fonte da página)");
+
+await selecionarParaEstilos("h2");
+await acrescentarNoPainel("h2", "text-align", "center");
+await proximoObjetivo("E1F2 objetivo 4 (+ declaração)");
+
+await selecionarParaEstilos("footer");
+await trocarValorNoPainel("footer", "font-size", "16px");
+await acrescentarNoPainel("footer", "text-align", "center");
+await proximoObjetivo("E1F2 objetivo 5 (sozinho, rodapé)");
+await conclusaoEProxima("E1F2");
+
+// ------------------------------------------------------------ E1 fase 3
+await conversar(2);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(0));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos("h2");
+await trocarValorNoPainel("h2", "color", "#ff0000");
+await proximoObjetivo("E1F3 objetivo 1 (previsão hexadecimal)");
+
+// Seletor de cor: a apresentação já mostra o header (a peça do objetivo).
+await apresentacao("seletor-de-cor", async () => {
+  await mostrarEstilos();
+  await regraNoPainel("header").locator("[data-seletor-cor]").first().fill("#2a6f97");
+});
+conferir((await valorNaPagina("header", "background-color")) === "rgb(42, 111, 151)", "E1F3: o seletor de cor pintou o cabeçalho");
+await proximoObjetivo("E1F3 objetivo 2 (seletor de cor)");
+
+// Regra nova: a apresentação já seleciona a promoção; o + cria p.promo e abre o nome.
+await apresentacao("nova-regra", async () => {
+  await mostrarEstilos();
+  await tocar(pagina.locator("[data-nova-regra]"));
+});
+if (await campoEstilo("nome").isVisible().catch(() => false)) await escreverDeclaracao("font-weight", "bold");
+else await acrescentarNoPainel("p.promo", "font-weight", "bold");
+conferir((await valorNaPagina(".promo", "font-weight")) === "700", "E1F3: a promoção ficou em negrito");
+await proximoObjetivo("E1F3 objetivo 3 (regra nova)");
+
+await selecionarParaEstilos(".horario");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("color", "#1d3557");
+await proximoObjetivo("E1F3 objetivo 4 (sozinho, regra nova)");
+await conclusaoEProxima("E1F3");
+
+// ------------------------------------------------------------ Desafio E1
+await metaDaUnidade("Desafio E1");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio E1: checklist no lugar dos objetivos");
+
+await selecionarParaEstilos(".topo");
+await trocarValorNoPainel(".topo", "background-color", "#6f4e37");
+conferir((await partesFeitas()) === 1, "desafio E1: o fundo do topo marca a parte");
+
+await selecionarParaEstilos("h1");
+await trocarValorNoPainel("h1", "font-size", "40px");
+conferir((await partesFeitas()) === 2, "desafio E1: o título grande marca a parte");
+
+await selecionarParaEstilos(".item");
+await caixinhaNoPainel(".item", "border-bottom");
+conferir((await partesFeitas()) === 3, "desafio E1: desligar a linha dos itens marca a parte");
+
+await selecionarParaEstilos("body");
+await trocarValorNoPainel("body", "font-family", "Georgia, serif");
+conferir((await partesFeitas()) === 4, "desafio E1: a fonte da página marca a parte");
+
+await selecionarParaEstilos(".especial");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("background-color", "#fff3cd");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-e1", erro);
+}
+conferir((await partesFeitas()) === 5, "desafio E1: as 5 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E1: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E1: 3 estrelas");
+
+// Volta para a ilha: a E1 acende; a E2 segue planejada.
+await conclusaoEVoltarAIlha("E1");
+conferir((await estadoDoPonto("sites-estilos-u1")) === "concluida", "ilha: E1 concluída");
+conferir((await estadoDoPonto("sites-estilos-u2")) === "planejada", "ilha: a E2 aparece como planejada");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
-conferir(salvo.fasesConcluidas.length === 19, `19 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as cinco unidades concluídas.
+conferir(salvo.fasesConcluidas.length === 23, `23 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as seis unidades concluídas.
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("5 de 5 unidades"), "mundo: Sites com 5 de 5 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("6 de 6 unidades"), "mundo: Sites com 6 de 6 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

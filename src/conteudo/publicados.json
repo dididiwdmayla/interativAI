@@ -29,6 +29,12 @@
       "sites-elementos-u5-f2",
       "sites-elementos-u5-f3",
       "sites-elementos-u5-f4"
+    ],
+    "sites-estilos-u1": [
+      "sites-estilos-u1-f1",
+      "sites-estilos-u1-f2",
+      "sites-estilos-u1-f3",
+      "sites-estilos-u1-f4"
     ]
   },
   "fases": {
@@ -169,6 +175,40 @@
         "secao-servicos",
         "cards-artigo",
         "precos-span"
+      ]
+    },
+    "sites-estilos-u1-f1": {
+      "objetivos": [
+        "ver-regras-do-titulo",
+        "cor-do-titulo",
+        "desligar-fundo-do-rodape",
+        "precos-legiveis"
+      ]
+    },
+    "sites-estilos-u1-f2": {
+      "objetivos": [
+        "titulo-maior",
+        "descricao-em-rem",
+        "fonte-da-pagina",
+        "titulo-no-centro",
+        "rodape-arrumado"
+      ]
+    },
+    "sites-estilos-u1-f3": {
+      "objetivos": [
+        "hexadecimal",
+        "fundo-do-cabecalho",
+        "promo-em-negrito",
+        "horario-azul"
+      ]
+    },
+    "sites-estilos-u1-f4": {
+      "partes": [
+        "topo-cafe",
+        "titulo-grande",
+        "sem-linha-vermelha",
+        "fonte-georgia",
+        "especial-destacado"
       ]
     }
   }

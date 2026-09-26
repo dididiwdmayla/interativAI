@@ -5,6 +5,7 @@ import { IconeFechar } from "@/componentes/icones/IconeFechar";
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
 import { FASES, UNIDADES } from "@/conteudo";
+import { FASES_LABORATORIO } from "@/conteudo/laboratorio/bancadaEstilos";
 import { ListaChecagens } from "./ListaChecagens";
 import { ListaValidadores } from "./ListaValidadores";
 import { TabelaIndice } from "./TabelaIndice";
@@ -74,6 +75,13 @@ export function PainelLab({ api, faseId, aoTrocarFase, aoResetar }: Props) {
                 })}
               </optgroup>
             ))}
+            <optgroup label="Bancada do motor (fora do currículo)">
+              {FASES_LABORATORIO.map((fase) => (
+                <option key={fase.id} value={fase.id}>
+                  {fase.id} ({fase.titulo})
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
         <div className="flex flex-wrap gap-2">

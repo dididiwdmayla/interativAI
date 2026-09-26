@@ -4,9 +4,10 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from "react"
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import { chavesAncestrais, elementoDoNo } from "@/lib/arvore";
-import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo } from "@/lib/caminhoElementos";
-import { caminhoDoNo } from "@/lib/dom";
+import { type AlvoCodigo, alvoDoElemento, elementoDoAlvo, raizDoCodigo } from "@/lib/caminhoElementos";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { medirNo, type Realce } from "@/lib/medirElemento";
+import { type CamadaCaixa, medirModeloCaixa, type RealceCaixa } from "@/lib/modeloCaixa";
 import type { EventoFase, OrigemSelecao } from "@/motor/eventos";
 import { criarNucleoPainel, type Selecao } from "@/motor/nucleoPainel";
 
@@ -14,6 +15,8 @@ type Opcoes = {
   editorRef: RefObject<ApiEditor | null>;
   obterDocumento: () => Document | null;
   editarDocumento: (mutar: (documento: Document) => boolean) => boolean;
+  /** Troca o CSS da folha editável (tela, editor CSS e estado juntos). */
+  editarCss: (css: string) => boolean;
   aoEvento: (evento: EventoFase) => void;
 };
 
@@ -28,7 +31,7 @@ function elementoNoPonto(documento: Document, x: number, y: number): Element | n
 function alvoDoNo(documento: Document | null, no: Node | null): AlvoCodigo | null {
   const elemento = elementoDoNo(no);
   if (!documento?.body || !elemento) return null;
-  return alvoDoElemento(documento.body, elemento);
+  return alvoDoElemento(raizDoCodigo(documento), elemento);
 }
 
 /**
@@ -43,7 +46,7 @@ function alvoDoNo(documento: Document | null, no: Node | null): AlvoCodigo | nul
  * acende o nó na árvore, o trecho no editor e a caixa no preview. O hover
  * na árvore só troca a caixa do preview, sem mudar a seleção.
  */
-export function usePainelElementos({ editorRef, obterDocumento, editarDocumento, aoEvento }: Opcoes) {
+export function usePainelElementos({ editorRef, obterDocumento, editarDocumento, editarCss, aoEvento }: Opcoes) {
   const [caminhoSelecionado, setCaminhoSelecionado] = useState<number[] | null>(null);
   const [recolhidos, setRecolhidos] = useState<ReadonlySet<string>>(() => new Set());
   const [realce, setRealce] = useState<Realce | null>(null);
@@ -52,7 +55,12 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const [historico, setHistorico] = useState({ podeDesfazer: false, podeRefazer: false });
   const noRealcado = useRef<Node | null>(null);
   const inspecionandoAtual = useRef(false);
-  const [nucleo] = useState(() => criarNucleoPainel({ obterDocumento, mutarDocumento: editarDocumento }));
+  const [nucleo] = useState(() =>
+    criarNucleoPainel({ obterDocumento, mutarDocumento: editarDocumento, mutarCss: editarCss }),
+  );
+  /** Várias peças acesas ao mesmo tempo (as que uma regra de CSS pega). */
+  const elementosExtras = useRef<Element[]>([]);
+  const [realcesExtras, setRealcesExtras] = useState<Realce[]>([]);
 
   useEffect(() => {
     inspecionandoAtual.current = inspecionando;
@@ -72,6 +80,41 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
       remedirRealce();
     },
     [remedirRealce],
+  );
+
+  const remedirExtras = useCallback(() => {
+    setRealcesExtras(
+      elementosExtras.current.map((elemento) => medirNo(elemento)).filter((realce): realce is Realce => realce !== null),
+    );
+  }, []);
+
+  /** Camada do modelo de caixa acesa na prévia (hover no diagrama da aba Calculado). */
+  const camadaAtual = useRef<CamadaCaixa | "todas" | null>(null);
+  const [realceCaixa, setRealceCaixa] = useState<RealceCaixa | null>(null);
+
+  const remedirCaixa = useCallback(() => {
+    const camada = camadaAtual.current;
+    const elemento = camada ? elementoDoNo(noSelecionado()) : null;
+    const modelo = elemento ? medirModeloCaixa(elemento) : null;
+    setRealceCaixa(camada && modelo ? { camada, modelo } : null);
+  }, [noSelecionado]);
+
+  /** Acende uma camada (ou todas) do selecionado na prévia; null apaga. */
+  const realcarCamada = useCallback(
+    (camada: CamadaCaixa | "todas" | null) => {
+      camadaAtual.current = camada;
+      remedirCaixa();
+    },
+    [remedirCaixa],
+  );
+
+  /** Acende várias peças de uma vez (lista vazia apaga). */
+  const realcarVarios = useCallback(
+    (elementos: readonly Element[]) => {
+      elementosExtras.current = [...elementos];
+      remedirExtras();
+    },
+    [remedirExtras],
   );
 
   /** Acende no editor o trecho do selecionado. */
@@ -102,16 +145,19 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
         // Seleção vinda do código não mexe no editor: o cursor já está lá.
         if (selecao?.origem !== "codigo") destacarNoEditor(selecao?.origem !== "sistema");
         remedirRealce();
+        remedirCaixa();
       },
       aoMudar: () => {
         destacarNoEditor(false);
         remedirRealce();
+        remedirExtras();
+        remedirCaixa();
       },
       aoMudarHistorico: () => {
         setHistorico({ podeDesfazer: nucleo.podeDesfazer(), podeRefazer: nucleo.podeRefazer() });
       },
     });
-  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirRealce]);
+  }, [aoEvento, destacarNoEditor, expandirAte, nucleo, remedirCaixa, remedirExtras, remedirRealce]);
 
   /**
    * Seleciona um nó. É a função que a árvore, a setinha, a trilha, o
@@ -133,8 +179,9 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const selecionarPeloCodigo = useCallback(
     (alvo: AlvoCodigo | null) => {
       const documento = obterDocumento();
-      const elemento = documento?.body && alvo ? elementoDoAlvo(documento.body, alvo) : null;
-      const caminho = documento?.body && elemento ? caminhoDoNo(documento.body, elemento) : null;
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      const elemento = documento && raiz && alvo ? elementoDoAlvo(raizDoCodigo(documento), alvo) : null;
+      const caminho = raiz && elemento ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
       if (!caminho) {
         editorRef.current?.destacarElemento(null);
         return;
@@ -187,8 +234,9 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const escolherElemento = useCallback(
     (elemento: Element) => {
       const documento = obterDocumento();
-      if (!documento?.body) return;
-      const caminho = elemento === documento.body ? [] : caminhoDoNo(documento.body, elemento);
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      if (!raiz) return;
+      const caminho = elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
       if (!caminho) return;
       selecionar(caminho, "inspecao");
     },
@@ -251,16 +299,25 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
   const aoRecarregarDocumento = useCallback(
     (documento: Document) => {
       realcar(null);
+      realcarVarios([]);
+      realcarCamada(null);
       destacarNoEditor(false);
       documento.defaultView?.addEventListener("scroll", remedirRealce, { passive: true });
+      documento.defaultView?.addEventListener("scroll", remedirExtras, { passive: true });
+      documento.defaultView?.addEventListener("scroll", remedirCaixa, { passive: true });
     },
-    [destacarNoEditor, realcar, remedirRealce],
+    [destacarNoEditor, realcar, realcarCamada, realcarVarios, remedirCaixa, remedirExtras, remedirRealce],
   );
 
   return {
     caminhoSelecionado,
     recolhidos,
     realce,
+    realcesExtras,
+    realcarVarios,
+    remedirExtras,
+    realceCaixa,
+    realcarCamada,
     inspecionando,
     destaque,
     historico,
@@ -279,6 +336,7 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     selecao: nucleo.selecao,
     editarTexto: nucleo.editarTexto,
     editarAtributo: nucleo.editarAtributo,
+    adicionarAtributos: nucleo.adicionarAtributos,
     alternarEsconder: nucleo.alternarEsconder,
     apagar: nucleo.apagar,
     duplicar: nucleo.duplicar,
@@ -288,6 +346,15 @@ export function usePainelElementos({ editorRef, obterDocumento, editarDocumento,
     desfazer: nucleo.desfazer,
     refazer: nucleo.refazer,
     antesDeEditarCodigo: nucleo.antesDeEditarCodigo,
+    lerCss: nucleo.lerCss,
+    definirPropriedade: nucleo.definirPropriedade,
+    editarDeclaracao: nucleo.editarDeclaracao,
+    alternarDeclaracao: nucleo.alternarDeclaracao,
+    alternarPropriedade: nucleo.alternarPropriedade,
+    adicionarDeclaracao: nucleo.adicionarDeclaracao,
+    adicionarRegra: nucleo.adicionarRegra,
+    escreverCss: nucleo.escreverCss,
+    editarEstiloInline: nucleo.editarEstiloInline,
     aoRecarregarDocumento,
   };
 }

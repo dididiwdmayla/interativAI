@@ -24,9 +24,14 @@ Arquivos que você vai usar:
 | `/lab/fases` | abrir qualquer fase, ver os validadores ao vivo |
 | `/lab/mapa` | desbloquear tudo no mapa, resetar o progresso e a Lista de fases |
 | `npm run publicar:conteudo` | congela os ids da unidade nova em `src/conteudo/publicados.json` |
+| `docs/ROADMAP.md` | o status do projeto; atualize a seção Status no fim do trabalho |
 
 Regras do projeto que valem aqui também (ver `docs/PROJETO.md`): zero
 emojis, PT-BR, cores só nos sites-alvo, nada de função dentro de fase.
+
+**Ao terminar qualquer trabalho (unidade, correção, rodada):** atualize a
+seção Status do `docs/ROADMAP.md` (o que foi feito, o que ficou em
+andamento e o próximo passo). Ele é a fonte única de status do projeto.
 
 ---
 
@@ -34,8 +39,8 @@ emojis, PT-BR, cores só nos sites-alvo, nada de função dentro de fase.
 
 1. **Siga o `docs/MAPA-CURRICULAR.md` na ordem.** A próxima unidade é a
    primeira do currículo que ainda não tem conteúdo (no mapa do jogo, o
-   primeiro ponto "Em breve"). Hoje: Ilha Sites, zona Elementos, U3
-   ("Títulos e textos").
+   primeiro ponto "Em breve"). Hoje: Ilha Sites, zona Elementos, U6
+   ("Página do zero", uma fase com `modoDocumento`, seção 3.2).
 2. **Use o id do currículo.** A unidade nova tem o id, o título, a ilha e
    a zona que estão em `src/curriculo/curriculo.ts` (ex.:
    `sites-elementos-u3`, "Títulos e textos", "Ilha Sites", "Elementos",
@@ -44,7 +49,7 @@ emojis, PT-BR, cores só nos sites-alvo, nada de função dentro de fase.
    registrada: ninguém marca status à mão.
 3. **Regra de parada: NUNCA produza uma unidade de zona com
    `requerMotor`** (nem uma unidade que tenha `requerMotor` própria, como
-   a U6). Pare e relate o que falta no motor (o texto do `requerMotor` diz
+   a E5). Pare e relate o que falta no motor (o texto do `requerMotor` diz
    o quê). Conteúdo não inventa ferramenta, aba nem tipo de fase: isso é
    trabalho de motor. Se mesmo assim uma unidade dessas for registrada, o
    `testar:conteudo` falha dizendo o que falta.
@@ -166,8 +171,8 @@ eles ainda não existem: não use.
 Campos comuns: `id` (`"sites-elementos-u3-f1"`, nunca mude depois de
 publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
 `prerequisitos`, `usaFerramentas`, `apresentar?`, `introducao`,
-`eventosIniciais?`, `siteAlvo`, `conclusao`, `missaoDeCampo?` (até 320),
-`falaFinal?`.
+`eventosIniciais?`, `siteAlvo`, `paineisElementos?`, `conclusao`,
+`missaoDeCampo?` (até 320), `falaFinal?`.
 
 - `conceitos`: o que a fase **ensina** (no desafio: o que ele **pratica**,
   e tudo precisa ter sido ensinado na unidade).
@@ -181,6 +186,25 @@ publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
   uma precisa ter sido apresentada nesta fase ou antes.
 - `falaFinal`: aparece depois da missão de campo. Sem ela, a última fala
   da conclusão se repete; então escreva uma.
+- `modoDocumento: true`: o jogador edita o documento INTEIRO (doctype,
+  html, head e body). O editor mostra tudo ("Código da página
+  index.html"), a árvore começa no `<!DOCTYPE html>` e no `<html>` (o head
+  é "0", o body é "1"; o `head` do site-alvo vira o head inicial,
+  editável), a aba do navegador falso mostra o `<title>` ao vivo e,
+  enquanto não houver `<meta charset="utf-8">`, a prévia SIMULA os
+  acentos quebrados ("CartÃ£o") com um aviso e uma fala do
+  computadorzinho. Os validadores olham o texto de verdade (a quebra é só
+  da tela), `existe` acha o que está no head (`head > meta[charset]`) e
+  `tituloDaAba` só vale nesse modo. Exemplo: a Bancada do documento
+  (`src/conteudo/laboratorio/bancadaDocumento.ts`). É o modo da U6.
+- `paineisElementos` (só em fase com `siteAlvo.css`): os sub-painéis da
+  aba Elementos que a fase mostra, `["estilos"]` ou
+  `["estilos", "calculado"]`, como o Chrome (Styles e Computed dentro de
+  Elements). Sem o campo, a aba Elementos fica como nas U1 a U5 (só
+  árvore). A checagem exige `"estilos"` quando a fase usa as ações ou as
+  ferramentas do painel, ou a linha `alvo: "estilos"`, e `"calculado"`
+  quando usa `painel-calculado` ou `modelo-de-caixa`. O Calculado é só
+  para ver (medidas de layout reais): nenhum validador olha pixels.
 
 ### 3.3 Objetivo (fase de prática)
 
@@ -220,15 +244,23 @@ os conjuntos de textos.
 | `{ tipo: "selecionado", seletor, via? }` | o selecionado agora casa (texto selecionado vale pelo elemento dono); `via`: `"arvore"`, `"inspecionar"`, `"trilha"` ou `"editor"` |
 | `{ tipo: "evento", evento, minimo?, href? }` | o evento aconteceu `minimo` vezes (padrão 1) desde que o objetivo começou; com `evento: "clicouLink"`, `href` só conta cliques em links com esse href (ex.: `"#rodape"`) |
 | `{ tipo: "tag", seletor, nome }` | algum elemento do seletor tem essa tag (minúsculas). Renomear mantém os atributos: `{ tipo: "tag", seletor: "#titulo", nome: "h1" }` continua achando a peça depois da troca |
+| `{ tipo: "tituloDaAba", valor? }` | (modo documento) o `<title>` da página, que a aba do navegador falso mostra: igual a `valor` ou, sem `valor`, qualquer título não vazio. Olha o texto que o jogador escreveu (a quebra dos acentos é só da prévia) |
+| `{ tipo: "valorEfetivo", seletor, propriedade, valor }` | (CSS) o valor que VENCE a cascata em algum elemento do seletor (declarado, herdado ou inicial), comparado normalizado; atalho confere cada propriedade longa; incerto não passa |
+| `{ tipo: "declaracao", seletorRegra, propriedade, valor?, ativa? }` | (CSS) a regra tem a declaração (com o valor, se vier; `ativa: true` ligada, `false` desligada, sem `ativa` qualquer uma) |
+| `{ tipo: "regraExiste", seletorRegra }` | (CSS) existe uma regra com esse seletor nas folhas do site |
+| `{ tipo: "riscada", seletor, propriedade, seletorRegra }` | (CSS) em algum elemento do seletor, a declaração dessa regra perde para outra (riscada no painel); `"element.style"` é o inline |
 | `{ tipo: "todos", validadores }` | todos passam |
 | `{ tipo: "algum", validadores }` | algum passa |
 | `{ tipo: "nao", validador }` | o de dentro não passa |
 | `{ tipo: "custom", id }` | quase nunca (seção 9) |
 
 Eventos (`evento`): `selecionou`, `inspecionou`, `trilha`, `editouTexto`,
-`editouAtributo`, `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
+`editouAtributo`, `adicionouAtributo` (criou um atributo que o elemento
+não tinha, pelo "Adicionar atributo"), `editouCodigo`, `escondeu`, `mostrou`, `apagou`,
 `duplicou`, `desfez`, `refez`, `respondeuPrevisao`, `renomeouTag` (trocou o
-nome da tag) e `clicouLink` (clicou num link da prévia, com o `href`). As ações dos momentos
+nome da tag), `clicouLink` (clicou num link da prévia, com o `href`),
+`editouCss` (digitou no editor CSS), `editouPropriedade`,
+`alternouDeclaracao` e `adicionouRegra` (painel Estilos). As ações dos momentos
 roteirizados (o computadorzinho mexendo) **não contam** como eventos do
 jogador.
 
@@ -258,6 +290,7 @@ soluções testam o caminho real.
 | `{ tipo: "selecionar", seletor, via? }` | seleciona (padrão: pela árvore). Com `via: "trilha"`, sobe até o ancestral mais próximo do selecionado que casa com o seletor, como a trilha de verdade (precisa ter algo selecionado dentro dele) |
 | `{ tipo: "definirTexto", seletor, valor }` | os dois cliques da árvore: seleciona o elemento e troca o texto (o elemento precisa ter só texto dentro) |
 | `{ tipo: "definirAtributo", seletor, nome, valor }` | troca o valor de um atributo pela árvore |
+| `{ tipo: "adicionarAtributo", seletor, nome, valor }` | cria um atributo pelo "Adicionar atributo" do menu do nó (ferramenta `adicionar-atributo`); se já existe, troca o valor. Gera `adicionouAtributo` |
 | `{ tipo: "esconder", seletor }` | seleciona e esconde (se já está escondido, não mexe) |
 | `{ tipo: "apagar", seletor }` | seleciona e apaga; a seleção vai para o próximo irmão ou para o pai |
 | `{ tipo: "duplicar", seletor }` | seleciona e duplica; **a cópia fica selecionada** |
@@ -266,6 +299,10 @@ soluções testam o caminho real.
 | `{ tipo: "desfazer" }` | desfaz a última mudança do painel |
 | `{ tipo: "inserirHTML", seletor, posicao, html }` | o que o jogador escreveria no editor: `antes`, `depois`, `inicio` ou `fim` do elemento |
 | `{ tipo: "responderPrevisao", opcao }` | responde o card de previsão (índice a partir de 0) |
+| `{ tipo: "definirPropriedade", seletorRegra, propriedade, valor }` | (CSS) a edição do painel Estilos: troca o valor se a regra já tem a propriedade ligada, senão acrescenta |
+| `{ tipo: "alternarDeclaracao", seletorRegra, propriedade }` | (CSS) liga ou desliga a declaração (a checkbox; no texto vira comentário, como no Chrome) |
+| `{ tipo: "adicionarRegra", seletorRegra, declaracoes? }` | (CSS) cria uma regra nova no fim da folha |
+| `{ tipo: "editarCss", posicao, texto }` | (CSS) o que o jogador escreveria no editor CSS: `inicio` ou `fim` da folha |
 
 Seletores de ação usam o **primeiro** elemento que casa. `"$0"` é o
 selecionado (como no Console do F12) e `"$0 h3"` procura dentro dele.
@@ -413,7 +450,14 @@ provável do jogador.
    - `{ alvo: "editor", seletor, fala }` pisca as linhas do código de todos
      os elementos do seletor;
    - `{ alvo: "ferramenta", ferramenta, fala }` pisca o botão ou a área de
-     uma ferramenta (setinha, trilha, desfazer...).
+     uma ferramenta (setinha, trilha, desfazer...);
+   - `{ alvo: "css", seletorRegra, propriedade?, fala }` abre a aba CSS e
+     pisca as linhas da regra (ou só a da declaração);
+   - `{ alvo: "estilos", seletorRegra, propriedade?, fala }` pisca o bloco
+     da regra no painel Estilos (ou só a declaração). Seleciona antes uma
+     peça que a regra pega, se a selecionada não for; no celular em pé,
+     troca para o segmento Estilos. Exige `painel-estilos` em
+     `usaFerramentas` e `"estilos"` em `paineisElementos`.
 4. **Solução (degrau 4, só guiado): O QUÊ e POR QUÊ.** Custa 1 estrela. A
    fala conta o que foi feito e por que funciona ("Dupliquei o card e
    troquei o título da cópia: a cópia nasce logo depois da original").
@@ -480,13 +524,28 @@ apresentadas:
 | `esconder`, `apagar`, `duplicar` | menu do nó (botão direito, toque longo, barra no celular) e atalhos H, Delete, Shift+Alt+seta | Unidade 2 |
 | `desfazer` | desfazer e refazer (Ctrl+Z, Ctrl+Shift+Z ou Ctrl+Y) | Unidade 2 |
 | `renomear-tag` | dois cliques (ou dois toques) no nome da tag; também no menu do nó e na barra do celular ("Renomear"). Enter ou Espaço confirmam, Esc desiste | a partir da Unidade 3 (ainda não apresentada: apresente no primeiro objetivo que renomeia) |
+| `adicionar-atributo` | "Adicionar atributo" no menu do nó (botão direito; toque longo no celular), como o Add attribute do Chrome: um espaço aparece dentro da tag e o jogador escreve o atributo inteiro (`target="_blank"`, ou mais de um). Enter confirma, Esc desiste. O item só aparece nas fases que têm a ferramenta em `usaFerramentas` | fases futuras (U6 em diante); as U1 a U5 publicadas seguem sem ele |
+| `editor-css` | a aba CSS do editor (a folha `estilo.css`) | Estilos |
+| `painel-estilos` | o painel Estilos dentro de Elementos: `element.style`, as regras da que vence para a que perde, a folha do navegador e "Herdado de", com as riscadas e o link `estilo.css:N` | Estilos, Unidade 1 |
+| `editar-valor-css` | clicar no nome ou no valor de uma declaração e digitar (Enter confirma, Esc desiste, Tab vai para o próximo campo); "+ declaração" no fim do bloco | Estilos, Unidade 1 |
+| `ligar-desligar-declaracao` | a caixinha de cada declaração (desligada vira comentário no CSS) | Estilos, Unidade 1 |
+| `setas-numericas` | setas no valor numérico: 1, Shift 10, Alt 0,1; no toque, botões de seta de 44 px | Estilos |
+| `seletor-de-cor` | o quadradinho de cor ao lado de um valor de cor (abre o seletor do sistema) | Estilos |
+| `nova-regra` | o botão "+" do painel Estilos: regra nova no fim da folha, com o seletor que o Chrome sugere (id, senão classes, senão a tag) | Estilos |
+| `painel-calculado` | a sub-aba Calculado (Computed): o valor final de cada propriedade, filtro, "Mostrar todas" e o rastro (as regras que deram valor, a que vence primeiro) | Estilos (precisa de `"calculado"` em `paineisElementos`) |
+| `modelo-de-caixa` | o diagrama de caixas no alto do Calculado: margin, border, padding e conteúdo com as medidas reais; passar o mouse (ou tocar) numa camada acende ela na prévia | Estilos (idem) |
 
 A ferramenta de cada ação (para a checagem de `usaFerramentas`):
 `selecionar` pela árvore = `arvore`, pela setinha = `inspecionar`, pela
 trilha = `trilha`, pelo editor = `sincronia`; `definirTexto` e
 `definirAtributo` = `editar-duplo-clique`; `inserirHTML` = `editor`;
 `esconder`, `apagar`, `duplicar`, `desfazer` = a ferramenta de mesmo nome;
-`renomearTag` = `renomear-tag`; `clicarLink` = `previa`.
+`renomearTag` = `renomear-tag`; `clicarLink` = `previa`; `editarCss` =
+`editor-css`; `definirPropriedade` = `editar-valor-css`;
+`alternarDeclaracao` = `ligar-desligar-declaracao`; `adicionarRegra` =
+`nova-regra`. As ações de CSS só funcionam numa fase com `siteAlvo.css`
+(a folha editável); as do painel pedem também `"estilos"` em
+`paineisElementos`.
 
 **Links na prévia.** O jogador pode clicar nos links do site-alvo: nada
 navega. Âncora rola a prévia; os demais fazem o computadorzinho falar
@@ -504,7 +563,8 @@ invente ferramenta num arquivo de fase.
 ## 8. Sites-alvo
 
 Cada site mora em `sites/` da unidade e exporta um `SiteAlvo`
-(`url`, `titulo`, `head`, `body`). É "o site de outra pessoa": pode (e
+(`url`, `titulo`, `head`, `body` e, nas fases de CSS, `css`: a folha
+editável, que aparece na aba CSS do editor como `estilo.css`). É "o site de outra pessoa": pode (e
 deve) ter cores próprias no CSS do `head`; é a única exceção à regra das
 cores do jogo.
 
@@ -609,7 +669,123 @@ próximo aparece "Em breve".
 
 ---
 
-## 12. Passo a passo para criar uma unidade
+## 12. Como escrever fases de CSS
+
+A zona Estilos (e a Layout) mexe na APARÊNCIA do site pela folha de
+estilo, sem tocar no HTML. Tudo aqui vale junto com as seções 3 a 11: o
+formato, a escada de ajuda, as previsões e as checagens são os mesmos. O
+modelo é a E1, "A aba Estilos" (`src/conteudo/ilhas/sites/estilos/unidade-1/`):
+cada arquivo de fase explica no topo as decisões (ordem, validadores,
+revisão espaçada, confusões atacadas), como a Unidade 2 faz para HTML.
+
+### 12.1 O site-alvo de CSS
+
+- Escreva a folha editável em `siteAlvo.css`. Ela aparece na aba CSS do
+  editor como `estilo.css` e no painel Estilos, e é a segunda fonte de
+  verdade (ao lado do body). O `head` continua fixo: deixe nele só o
+  `meta charset`, o `viewport` e o `title` (um `<style>` no head também
+  entra na cascata, mas aparece como "(index)" e não dá para editar).
+- Ligue os sub-painéis na fase: `paineisElementos: ["estilos"]` (e
+  `"calculado"` a partir da E3, Modelo de caixa).
+- **Nada de `@media` na folha editável.** O navegador avalia, mas o
+  `testar:conteudo` roda no jsdom, que não tem `matchMedia`: o motor não
+  sabe se a regra vale e deixa a propriedade "incerta" (os validadores
+  dela não passam). Faça a página funcionar em 390 px numa coluna só.
+- Também deixam o motor incerto: `@layer`, `@import`, CSS aninhado e
+  `@container` (nada fica riscado na página inteira).
+- Folha começando "sem graça de propósito" ajuda: nome apagado, preço
+  quase invisível, tudo à esquerda. O jogador vê o antes e o depois.
+
+### 12.2 Qual validador usar
+
+| Quero conferir... | Use |
+| --- | --- |
+| como a peça APARECE (a cor que ganhou, o tamanho que ganhou) | `valorEfetivo` |
+| que o jogador escreveu (ou desligou) uma declaração numa regra | `declaracao` (com `ativa: false` para "desligou") |
+| que ele criou uma regra | `regraExiste` (ou, melhor, `valorEfetivo` no elemento: aceita qualquer seletor que pegue a peça) |
+| que uma declaração perdeu a briga (E4, cascata) | `riscada` |
+
+- **Prefira `valorEfetivo`.** Ele confere o resultado, não o caminho: o
+  jogador pode editar pelo painel, digitar no editor CSS ou criar uma regra
+  mais específica, e tudo vale. Use `declaracao` quando o caminho é o
+  conteúdo (desligar pela caixinha, escrever naquela regra).
+- `valorEfetivo` compara o valor DECLARADO que ganhou, normalizado: cores
+  em qualquer formato (`red` = `#f00` = `rgb(255, 0, 0)`), números
+  (`16.0px` = `16px`, `0px` = `0`), espaços, aspas de fonte e `bold` =
+  `700` no `font-weight`. Ele NÃO converte unidades: `2em` não é `32px`.
+- Herança conta: `valorEfetivo` de `color` num `p` sem regra própria vem
+  do ancestral que declarou. E a folha do navegador também: um `h1` é
+  `bold` sem regra nenhuma do site.
+- Atalho no validador confere cada propriedade longa:
+  `{ propriedade: "margin", valor: "0 auto" }` pede `margin-top: 0`,
+  `margin-right: auto`...
+- `valorEfetivo` só em propriedade que o motor conhece (cores, medidas,
+  margens, bordas, fonte, texto, display, position, flex, grid...). A
+  checagem acusa as outras (`box-shadow`, `transition`...): para elas,
+  use `declaracao`.
+- Objetivo "troque por uma cor qualquer": `todos` com
+  `declaracao ... ativa: true` e `nao` do `valorEfetivo` antigo (e do
+  `transparent`), para um valor inválido não passar.
+
+### 12.3 Atalhos (shorthands)
+
+- `margin`, `padding`, `border` (e lados), `background`, `font`, `gap`,
+  `flex`, `inset`, `overflow`, `text-decoration` e `list-style` são
+  abertos nas propriedades longas. Um `margin-top` depois de um `margin`
+  derruba só a parte de cima; um `margin` depois de um `margin-top`
+  derruba o `margin-top` inteiro.
+- O painel risca um atalho só quando TODAS as partes dele perderam (como
+  o Chrome); a setinha ao lado mostra as partes riscadas.
+- Atalho que o motor não sabe separar (`background` com várias camadas ou
+  com `/`, `font` com nome de sistema, `border-radius` com `/`): a
+  propriedade vale, mas o valor das partes fica "incerto". Em fase, prefira
+  as longas (`background-color`, `font-size`).
+
+### 12.4 Como o motor decide o que fica riscado
+
+1. Pega as regras que casam com o elemento (`element.matches`), o estilo
+   inline e a folha do navegador. Pseudo-classes de estado (`:hover`,
+   `:focus`) não contam.
+2. Ordena por: importância e origem (`!important` do navegador, do site,
+   depois as normais do site e as do navegador), inline, especificidade
+   (a do seletor da lista que casa) e ordem na folha.
+3. Para cada propriedade longa, a primeira declaração válida vence; as
+   outras ficam riscadas. Valor inválido (`color: vermelho`) é riscado com
+   aviso e não conta.
+4. Herdadas: a própria vence a herdada; entre ancestrais, o mais perto
+   vence.
+5. **Quando não sabe, não risca**: valor que o motor não conhece no topo,
+   atalho que ele não separa, `@media`, lógica misturada com física
+   (`margin-inline-start` com `margin-left`), folha com `@layer`. Ele
+   prefere deixar de riscar a riscar errado, e o `valorEfetivo` diz
+   "incerto" (o detalhe no `/lab/fases` e no teste diz por quê).
+
+### 12.5 Ações e ferramentas
+
+| Ação | Ferramenta (usaFerramentas) |
+| --- | --- |
+| `definirPropriedade` | `editar-valor-css` |
+| `alternarDeclaracao` | `ligar-desligar-declaracao` |
+| `adicionarRegra` | `nova-regra` |
+| `editarCss` | `editor-css` |
+
+As setas (`setas-numericas`) e o seletor de cor (`seletor-de-cor`) não
+têm ação própria: a solução usa `definirPropriedade` com o valor final;
+apresente a ferramenta no objetivo que pede o gesto. Linhas de ajuda:
+`{ alvo: "estilos", seletorRegra, propriedade?, fala }` pisca a regra no
+painel Estilos; `{ alvo: "css", seletorRegra, propriedade?, fala }` pisca
+as linhas no editor CSS.
+
+### 12.6 A bancada
+
+`/lab/fases?fase=lab-motor-u1-f1` abre a Bancada de estilos (fora do
+currículo): uma página com atalhos, `!important`, inline, herança e uma
+declaração desligada, para ver o motor trabalhando antes de escrever a
+fase.
+
+---
+
+## 13. Passo a passo para criar uma unidade
 
 1. **Escolha a unidade** pela seção 0: a próxima do
    `docs/MAPA-CURRICULAR.md`, com o id do currículo. Zona (ou unidade) com
@@ -653,7 +829,7 @@ próximo aparece "Em breve".
 
 ---
 
-## 13. Checklist final antes do commit
+## 14. Checklist final antes do commit
 
 - [ ] Meta da unidade escrita ("No fim desta unidade, você...") e
       `desafioId` apontando para a última fase.
@@ -677,6 +853,11 @@ próximo aparece "Em breve".
       mostra onde; solução que explica o quê e por quê.
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
+- [ ] Fase de CSS (seção 12): `siteAlvo.css` sem `@media`,
+      `paineisElementos` ligado, `valorEfetivo` onde o resultado importa e
+      `declaracao` onde o caminho importa; nada "incerto" no
+      `/lab/fases`.
 - [ ] `npm run testar:conteudo`, `npm run lint` e `npm run build` verdes.
 - [ ] Jogado no `/lab/fases` e de verdade (desktop e celular).
 - [ ] `docs/PROGRESSO.md` atualizado.
+- [ ] Seção Status do `docs/ROADMAP.md` atualizada.

@@ -1,7 +1,9 @@
 # InterativAI: Ilha Sites
 
-Resumo do projeto para quem chega numa sessão nova. Leia este arquivo e o
-`docs/PROGRESSO.md` antes de mexer em qualquer coisa.
+Resumo do projeto para quem chega numa sessão nova. Leia este arquivo, o
+`docs/ROADMAP.md` (status: feito, em andamento, próximo) e o
+`docs/PROGRESSO.md` (o detalhe de cada rodada) antes de mexer em qualquer
+coisa.
 
 ## Visão
 
@@ -15,7 +17,7 @@ Estrutura (o mapa, rodada 5):
 - Mapa estilo Mario World com ilhas, na ordem do currículo
   (`docs/MAPA-CURRICULAR.md`, em dados em `src/curriculo/`): Origens (o
   museu, sempre aberto), Sites, Lógica, Páginas vivas, Rede e Servidor,
-  Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
+  IA, Ofício e a opcional Frameworks. A tela inicial (`/`) é o mundo.
 - Dentro da ilha, zonas (na Ilha Sites: Elementos, Estilos, Layout,
   Responsivo e Publicar), cada uma com unidades em sequência. Todas as
   unidades planejadas aparecem no mapa, "Em breve".
@@ -63,6 +65,10 @@ tarefa. Detalhes em `docs/GUIA-DE-CONTEUDO.md`.
    `docs/GUIA-DE-CONTEUDO.md`. Toda ferramenta nova entra no registro de
    ferramentas, com apresentação, card, `data-ferramenta` e variantes de
    mouse e toque.
+10. **Todo prompt termina atualizando a seção Status do
+    `docs/ROADMAP.md`** (o que foi feito, o que ficou em andamento, o
+    próximo passo). O `ROADMAP.md` é a fonte única de status; o
+    `PROGRESSO.md` guarda o detalhe das etapas.
 
 ## Stack
 
@@ -152,6 +158,163 @@ src/
 - Cursor no editor: só transações do jogador (sem a anotação de origem
   externa, sem mudança de texto) disparam a seleção, com 150 ms de espera.
   Seleção vinda do editor não mexe no cursor nem rola o editor: sem laço.
+
+### CSS editável e motor de cascata (rodada 9)
+
+- `siteAlvo.css` (opcional) é a folha EDITÁVEL do site-alvo: vai num
+  `<style data-folha-jogo>` depois do head fixo e vira a segunda fonte de
+  verdade, ao lado do body. Fases sem `css` funcionam como antes.
+- Editar o CSS (editor, painel Estilos, ações, desfazer) troca o
+  `textContent` desse `<style>` no iframe na hora, sem recarregar: a
+  prévia muda instantaneamente e a seleção continua. A recarga do HTML
+  (caminho A) leva o CSS mais novo junto (`PreviewSiteAlvo`,
+  `definirCss`).
+- Motor de cascata próprio em `src/motor/css/` (sem layout, só
+  `element.matches` e o texto das folhas: roda igual no navegador e no
+  jsdom, que não calcula cascata com confiança):
+  - `analisarCss.ts`: regras, declarações com posições e linhas,
+    declarações comentadas como DESLIGADAS (a checkbox do Chrome
+    comenta, devtools-frontend `CSSProperty.setDisabled`), @media e
+    @supports como condições; @layer, @import, aninhamento e @container
+    deixam a folha "incerta";
+  - `especificidade.ts`: Selectors 4 (`:is`/`:not`/`:has` pelo argumento
+    mais específico, `:where` zero, `:nth-child(... of S)`), com testes;
+  - `folhaDoNavegador.ts`: um pedaço da folha do navegador (h1 em
+    negrito, margens de p e títulos, links), com margens físicas no
+    lugar das lógicas (mesma coisa numa página LTR) para o motor poder
+    riscá-las;
+  - `propriedades.ts` e `valores.ts`: herdadas, atalhos e as longas de
+    cada um (margin, padding, border e lados, background, font, gap,
+    flex, inset e outros), grupos lógicos, valores iniciais, cores em
+    qualquer formato, validade em três estados (válido, inválido,
+    desconhecido) e a comparação normalizada;
+  - `cascata.ts`: blocos que casam (inline, regras, navegador), ordem
+    (importância e origem, inline, especificidade, ordem), vencedor por
+    propriedade longa, riscadas, herança por ancestral e `valorEfetivo`
+    (com `inherit`, `initial`, `unset` e `var()`);
+  - `editarCss.ts`: edições no texto sem bagunçar a formatação (trocar
+    valor e nome, ligar e desligar com comentário, acrescentar
+    declaração e regra, o seletor da regra nova igual ao
+    `simpleSelector` do Chrome).
+- **Regra de ouro: quando não sabe, não risca.** Valor desconhecido no
+  topo, atalho que o motor não sabe abrir, @media sem como avaliar
+  (jsdom), lógica misturada com física ou folha com @layer: nada
+  daquela propriedade fica riscado e `valorEfetivo` diz "incerto".
+- O núcleo do painel ganhou as operações de CSS (`definirPropriedade`,
+  `editarDeclaracao`, `alternarDeclaracao`, `adicionarDeclaracao`,
+  `adicionarRegra`, `escreverCss`, `editarEstiloInline`), e cada foto do
+  desfazer guarda HTML e CSS juntos. Eventos novos: `editouCss`,
+  `editouPropriedade`, `alternouDeclaracao`, `adicionouRegra`.
+- Editor com abas "HTML" e "CSS" (CodeMirror com `@codemirror/lang-css`),
+  as duas montadas; a aba CSS só aparece em fase com `css`. Cursor dentro
+  de uma regra acende na prévia todas as peças que ela pega.
+- Progresso: `cssAtual` e `cssInicioObjetivo` por fase (padrão null).
+- Bancada do motor: `src/conteudo/laboratorio/` tem fases fora do
+  currículo que só abrem no `/lab/fases` (`?fase=<id>` abre direto), para
+  testar a interface de CSS e mostrar o motor para quem escreve fases.
+
+### Painel Estilos dentro de Elementos (rodada 9, etapa 3)
+
+- Como no Chrome, Styles e Computed são sub-painéis de Elements: as abas
+  de cima ficam Elementos, Console, Fontes, Rede e Aplicação (a ordem do
+  Chrome; só Elementos funciona por enquanto) e a fase liga os
+  sub-painéis por `paineisElementos` (`["estilos"]` ou
+  `["estilos", "calculado"]`). Sem o campo, a aba Elementos fica como
+  nas U1 a U5.
+- `componentes/painel/estilos/`: `PainelEstilos` (sub-abas, filtro,
+  botão de regra nova), `BlocoEstilo` (um bloco: `element.style`, regra,
+  folha do navegador ou "Herdado de"), `LinhaDeclaracao` (caixinha,
+  nome, valor, amostra de cor, atalho que abre as longas), `CampoEstilo`
+  (o campo de edição) e `numeros.ts` (as setas). Tudo em cima do motor de
+  cascata: ordem, riscadas, herdadas e incertas saem de
+  `calcularCascata`.
+- Comportamento conferido no devtools-frontend: `element.style` sempre
+  em cima (mesmo vazio); regras da que vence para a que perde; folha do
+  navegador no fim com o nome "user agent stylesheet" traduzido; "Herdado
+  de" só com ancestrais que têm propriedade herdável; link da fonte
+  `estilo.css:N` (abre a aba CSS do editor na regra); clique no nome ou
+  no valor edita, Enter confirma (do nome vai para o valor), Esc desiste,
+  Tab e Shift+Tab andam entre campos, `:` no nome e `;` no valor pulam
+  para o próximo campo; setas somam 1, Shift 10, Alt 0,1; a caixinha
+  comenta a declaração no texto; o seletor de cor troca só a cor
+  (hexadecimal); "+ declaração" no fim do bloco; regra nova no fim da
+  folha com o seletor sugerido pelo Chrome (`#id`, senão `.classes`,
+  senão a tag); passar o mouse no seletor acende as peças na prévia.
+- Enquanto digita, a prévia mostra o valor provisório
+  (`previsualizarCss`, sem entrar no desfazer); Enter grava pelo núcleo
+  (uma foto do desfazer), Esc volta. Tudo sem recarregar o iframe.
+- Celular: em pé, o painel alterna "Árvore | Estilos | Código"; deitado,
+  árvore e Estilos lado a lado (`PainelLadoALado`). Alvos de 44 px e
+  botões de seta no campo de número.
+- Ferramentas novas com apresentação: `painel-estilos`,
+  `editar-valor-css`, `ligar-desligar-declaracao`, `setas-numericas`,
+  `seletor-de-cor`, `nova-regra`. Linha de ajuda `{ alvo: "estilos" }`.
+
+### Aba Calculado (rodada 9, etapa 4)
+
+- Sub-aba ao lado de Estilos (Computed do Chrome), ligada por
+  `paineisElementos: ["estilos", "calculado"]`. A sub-aba aberta mora no
+  jogo (`JogoFase`), para a apresentação e a linha de ajuda trocarem.
+- `PainelCalculado`: diagrama do modelo de caixa com as medidas REAIS do
+  iframe (`lib/modeloCaixa.ts`: `getComputedStyle` e
+  `getBoundingClientRect`), no formato do `MetricsSidebarPane` (zero é
+  "0", quebrado com 3 casas, camada "position" quando não é static com
+  "auto" como traço); lista das calculadas em ordem alfabética (-webkit-
+  e variáveis no fim), sem "Mostrar todas" só as que o próprio elemento
+  declara mais display, width e height (`ComputedStyleWidget`), filtro
+  por nome ou valor e o rastro de cada propriedade pelo motor de cascata
+  (a que vence primeiro, as outras riscadas, link `estilo.css:N`).
+- Passar o mouse numa camada do diagrama acende só ela na prévia (o anel
+  entre a caixa dela e a de dentro, como o Chrome pinta); no diagrama
+  todo, todas; no toque, tocar liga e desliga. As cores são as do
+  `Color.PageHighlight` do Chrome, nos tokens `--cor-caixa-*`
+  (`usePainelElementos.realcarCamada`, `SobreposicaoInspecao`).
+- É só para ver: os validadores continuam no motor de cascata (sem
+  layout, iguais no jsdom).
+- Ferramentas `painel-calculado` e `modelo-de-caixa`, com apresentação.
+
+### Modo documento e atributo novo (rodada 9, etapa 5)
+
+- Fase com `modoDocumento: true`: o texto do editor é o documento INTEIRO
+  (montado de `siteAlvo.head` e `siteAlvo.body` no começo:
+  `documentoInteiroInicial`) e vai direto para o srcdoc. A raiz da árvore
+  vira o `<html>` (`raizDaArvore` em `motor/chaveArvore.ts`, que também
+  serve os testes Playwright): o iframe leva `data-modo-documento`, os
+  documentos soltos são marcados (`marcarDocumentoInteiro`). O código
+  conta os caminhos a partir do documento (`raizDoCodigo`), então a
+  sincronia código, árvore e tela continua valendo com o head.
+- Depois do load, `prepararDocumentoInteiro` põe no head os estilos do
+  jogo (a regra do esconder e, se a fase tem CSS, a folha editável) com
+  `data-jogo-injetado`: eles valem na página mas não aparecem na árvore
+  nem no código (`serializarDocumentoInteiro`). A foto do desfazer, no
+  modo documento, é o `<html>` inteiro limpo, com os atributos dele
+  (`fotografarRaiz` e `restaurarRaiz` no núcleo).
+- Aba do navegador falso com o `<title>` ao vivo (sem título, o endereço,
+  como o Chrome); a árvore mostra a linha `<!DOCTYPE html>`; o cabeçalho
+  do editor diz "Código da página index.html".
+- **Charset: simulação honesta (decisão).** Não dá para reproduzir o
+  acento quebrado de verdade: srcdoc já é texto (não há bytes para
+  decodificar) e um blob: da mesma origem herda o UTF-8 da página do jogo
+  (HTML Living Standard, "determining the character encoding"). Então,
+  sem `<meta charset>`, `atualizarAcentos` troca os textos da página pelo
+  que um navegador mostraria lendo UTF-8 como Windows-1252 ("CartÃ£o"),
+  com um aviso na prévia ("simulação") e a fala do computadorzinho
+  explicando. O código e os validadores veem o texto certo
+  (`consertarAcentos`, `textoVerdadeiro`); pôr ou tirar o meta charset
+  (pelo código ou pela árvore) liga e desliga a simulação na hora.
+  Detalhe em `src/lib/codificacao.ts`.
+- Validador `tituloDaAba` (só no modo documento, a checagem acusa fora
+  dele).
+- "Adicionar atributo" (Add attribute do Chrome, conferido no
+  devtools-frontend: item do menu de contexto do nó, que abre um atributo
+  vazio no fim da tag; o texto escrito é lido como atributos): item do
+  menu do nó (botão direito, toque longo), campo dentro da tag que cresce
+  enquanto digita, Enter confirma e Esc desiste; mais de um atributo de
+  uma vez; uma foto do desfazer; evento `adicionouAtributo`; ação
+  `adicionarAtributo`; ferramenta `adicionar-atributo` com apresentação.
+  O item só aparece nas fases com a ferramenta: as U1 a U5 publicadas
+  continuam com o menu de sempre. (Dois cliques no nome da tag, no
+  Chrome, renomeiam a tag: é o `renomear-tag`.)
 
 ### Motor de fases
 
@@ -255,7 +418,7 @@ src/
   trecho até a próxima (`unidadesComemoradas`, uma vez só).
 - Museu das Origens (`/ilha/origens`): fachada, os antepassados do
   computadorzinho em silhueta (cartão perfurado, terminal verde, primeiro
-  PC) e as 5 salas do currículo como portas fechadas "Em breve".
+  PC) e as 6 salas do currículo como portas fechadas "Em breve".
 - Tokens novos do mapa em `tokens.css` (mar, onda, areia, grama, rota,
   névoa, madeira, pedra, terminal), nos três temas.
 
@@ -471,9 +634,8 @@ Detalhes em `docs/AUDIO.md`.
 
 ## Fora do escopo agora
 
-Conteúdo novo (a U3 em diante é trabalho da fábrica), aba Estilos, modo
-documento inteiro (head editável), atividades das Origens (linha do tempo,
-comparador de linguagens, diagrama de rede; o registro de tipos de fase já
-está pronto para elas), computadorzinho navegador (o índice
+Conteúdo novo (a U3 em diante é trabalho da fábrica), atividades das
+Origens (linha do tempo, comparador de linguagens, diagrama de rede; o
+registro de tipos de fase já está pronto para elas), computadorzinho navegador (o índice
 `montarIndice()` já existe), abas além de Elementos, site-alvo externo
 validado, login, banco de dados, Monaco.

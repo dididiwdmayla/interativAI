@@ -16,6 +16,8 @@ export type EstadoFaseSalvo = {
   objetivoAtual: number;
   /** HTML do body do site-alvo, para retomar de onde parou. */
   htmlAtual: string | null;
+  /** Texto da folha editável (fases com CSS), para retomar de onde parou. */
+  cssAtual: string | null;
   estrelas: number;
   introducaoVista: boolean;
   /** A meta (antes/depois) já foi mostrada. */
@@ -26,6 +28,8 @@ export type EstadoFaseSalvo = {
    * (assim o Desafazer continua funcionando depois de recarregar).
    */
   htmlInicioObjetivo: string | null;
+  /** O CSS de quando o objetivo atual começou (par do htmlInicioObjetivo). */
+  cssInicioObjetivo: string | null;
   /** Resposta do card de previsão do objetivo atual, se já respondeu. */
   previsaoRespondida: number | null;
   /** Desafio: partes já marcadas no checklist. */
@@ -96,10 +100,12 @@ export const PROGRESSO_PADRAO: Progresso = {
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
   objetivoAtual: 0,
   htmlAtual: null,
+  cssAtual: null,
   estrelas: 3,
   introducaoVista: false,
   metaVista: false,
   htmlInicioObjetivo: null,
+  cssInicioObjetivo: null,
   previsaoRespondida: null,
   partesFeitas: [],
   reveres: 0,
@@ -154,10 +160,12 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
   return {
     objetivoAtual: valor.objetivoAtual,
     htmlAtual: valor.htmlAtual,
+    cssAtual: ehTextoOuNulo(valor.cssAtual) ? valor.cssAtual : null,
     estrelas: valor.estrelas,
     introducaoVista: valor.introducaoVista,
     metaVista: ehBooleano(valor.metaVista) ? valor.metaVista : valor.introducaoVista,
     htmlInicioObjetivo: ehTextoOuNulo(valor.htmlInicioObjetivo) ? valor.htmlInicioObjetivo : null,
+    cssInicioObjetivo: ehTextoOuNulo(valor.cssInicioObjetivo) ? valor.cssInicioObjetivo : null,
     previsaoRespondida: ehNumero(valor.previsaoRespondida) ? valor.previsaoRespondida : null,
     partesFeitas: [...new Set(listaDeTextos(valor.partesFeitas))],
     reveres: ehNumero(valor.reveres) ? Math.max(0, Math.round(valor.reveres)) : 0,

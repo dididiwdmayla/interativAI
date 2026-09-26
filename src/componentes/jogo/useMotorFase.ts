@@ -6,9 +6,8 @@ import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
 import type { AjudaLinha, EventoRoteirizado, Fase, ViaSelecao } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso } from "@/lib/armazemProgresso";
-import { alvoDoElemento } from "@/lib/caminhoElementos";
-import { caminhoDoNo } from "@/lib/dom";
-import { criarDocumentoSolto } from "@/lib/documentoSiteAlvo";
+import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -23,6 +22,7 @@ import {
 } from "@/motor/estadoMotor";
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
+import { documentoSoltoDaFase } from "@/motor/simulacao";
 import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
 import { avaliarValidador, consultar, type ContextoValidacao, recalcularPartesFeitas } from "@/motor/validadores";
 
@@ -34,6 +34,8 @@ type Opcoes = {
   salvo: EstadoFaseSalvo | undefined;
   barramento: Barramento;
   htmlAtual: string;
+  /** Texto da folha editável (null: a fase não tem CSS). */
+  cssAtual: string | null;
   editorRef: RefObject<ApiEditor | null>;
   obterDocumento: () => Document | null;
   /** Nó selecionado agora e por onde foi escolhido. */
@@ -41,6 +43,12 @@ type Opcoes = {
   /** As mesmas funções que a interface usa: soluções e roteiros passam por elas. */
   painel: Omit<PainelDasAcoes, "responderPrevisao">;
   destacarNaArvore: (destaque: DestaqueArvore | null) => void;
+  /** Degrau 3 no CSS: abre a aba CSS e pisca a regra (ou só a declaração). */
+  destacarNoCss: (seletorRegra: string, propriedade?: string) => void;
+  /** Apaga os destaques do editor CSS. */
+  limparDestaqueCss: () => void;
+  /** Degrau 3 no painel Estilos: pisca a regra (ou só a declaração); null apaga. */
+  destacarNoEstilos: (destaque: { seletorRegra: string; propriedade?: string } | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
 };
@@ -65,18 +73,22 @@ export function useMotorFase({
   salvo,
   barramento,
   htmlAtual,
+  cssAtual,
   editorRef,
   obterDocumento,
   obterSelecao,
   painel,
   destacarNaArvore,
+  destacarNoCss,
+  limparDestaqueCss,
+  destacarNoEstilos,
   toque,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
   );
   const [pulsarFerramenta, setPulsarFerramenta] = useState<IdFerramenta | null>(null);
-  const [documentoInicial] = useState(() => criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body));
+  const [documentoInicial] = useState(() => documentoSoltoDaFase(fase));
   const eventosObjetivo = useRef<EventoFase[]>([]);
   /** Soluções e roteiros sendo aplicados: a validação espera. */
   const aplicando = useRef(false);
@@ -121,8 +133,10 @@ export function useMotorFase({
   const limparAjudasVisuais = useCallback(() => {
     destacarNaArvore(null);
     editorRef.current?.destacarLinhas([]);
+    limparDestaqueCss();
+    destacarNoEstilos(null);
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, editorRef]);
+  }, [destacarNaArvore, destacarNoEstilos, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
@@ -147,10 +161,12 @@ export function useMotorFase({
             [fase.id]: {
               objetivoAtual: atual.concluidos,
               htmlAtual,
+              cssAtual,
               estrelas: atual.estrelas,
               introducaoVista: atual.etapa === "objetivos" || atual.etapa === "concluida",
               metaVista: atual.etapa !== "meta",
               htmlInicioObjetivo: atual.htmlInicioObjetivo,
+              cssInicioObjetivo: atual.cssInicioObjetivo,
               previsaoRespondida: atual.previsao,
               partesFeitas: atual.partesFeitas,
               reveres: atual.reveres,
@@ -174,7 +190,7 @@ export function useMotorFase({
         };
       });
     },
-    [fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
+    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
   );
 
   useEffect(() => {
@@ -247,10 +263,11 @@ export function useMotorFase({
         previsao: null,
         fala: falaMantida ?? falaDoObjetivo(pratica, indice, toque),
         htmlInicioObjetivo: alvo.eventoAoComecar ? htmlAtual : null,
+        cssInicioObjetivo: alvo.eventoAoComecar ? cssAtual : null,
       }));
       if (alvo.eventoAoComecar) rodarEvento(alvo.eventoAoComecar, () => {});
     },
-    [htmlAtual, pratica, rodarEvento, toque],
+    [cssAtual, htmlAtual, pratica, rodarEvento, toque],
   );
 
   /**
@@ -446,16 +463,21 @@ export function useMotorFase({
     const documento = obterDocumento();
     if (linha.alvo === "arvore") {
       const elemento = documento ? consultar(documento, linha.seletor)[0] : undefined;
-      const caminho = documento && elemento ? caminhoDoNo(documento.body, elemento) : null;
+      const raiz = documento ? raizDaArvore(documento) : null;
+      const caminho = raiz && elemento ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
       if (caminho) destacarNaArvore({ caminho, parte: linha.parte ?? "no" });
     } else if (linha.alvo === "editor") {
       const editor = editorRef.current;
       if (!editor || !documento?.body) return;
       const linhas = consultar(documento, linha.seletor).flatMap((elemento) => {
-        const alvo = alvoDoElemento(documento.body, elemento);
+        const alvo = alvoDoElemento(raizDoCodigo(documento), elemento);
         return alvo ? editor.linhasDoAlvo(alvo) : [];
       });
       editor.destacarLinhas(linhas);
+    } else if (linha.alvo === "css") {
+      destacarNoCss(linha.seletorRegra, linha.propriedade);
+    } else if (linha.alvo === "estilos") {
+      destacarNoEstilos({ seletorRegra: linha.seletorRegra, propriedade: linha.propriedade });
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }

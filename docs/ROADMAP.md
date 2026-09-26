@@ -1,0 +1,147 @@
+# Roadmap
+
+Fonte única de status do projeto: o que foi feito, o que está em
+andamento e o que vem depois. **Todo prompt do Claude Code termina
+atualizando a seção Status deste arquivo.** O detalhe de cada rodada
+(etapas, decisões, testes) continua em `docs/PROGRESSO.md`.
+
+## Visão
+
+Plataforma/jogo pra ensinar programação de verdade, do zero até dev
+júnior e além, de forma super interativa: um DevTools (F12)
+simplificado, prévia ao vivo e o computadorzinho como tutor. Tudo que se
+aprende funciona no F12 de verdade. No futuro, trilhas paralelas
+(Automação industrial com eletrônica e elétrica, Jogos) compartilham o
+núcleo comum.
+
+## Fluxo de trabalho
+
+- Estrutura, motor, visual e criatividade: Claude Opus 5.5. Conteúdo em
+  massa: Claude Sonnet 5 (esforço médio).
+- Fluxo sequencial: uma sessão nova do Claude Code por prompt, a partir
+  da branch principal. Merge depois de conferir o relatório.
+- Todo prompt termina atualizando a seção Status deste arquivo.
+- Materiais de apoio opcionais (ideia em avaliação): textos teóricos
+  brutos em `docs/materiais/<ilha>.md`, produzidos fora (ex: DeepSeek) e
+  conferidos pelo Sonnet antes de usar.
+
+## Status
+
+### Feito
+
+- Motor: painel Elementos, prévia, sincronia árvore-código-tela,
+  ferramentas (árvore, inspecionar, editar, trilha, esconder, apagar,
+  desfazer/refazer, duplicar, renomear tag, links na prévia),
+  apresentações e Caixa de Ferramentas, escada de ajuda, modos
+  guiado/sozinho/previsão/desafio, tutor Gemini com retry e modelo
+  reserva, mobile (retrato e paisagem), 3 temas, sons sintetizados,
+  easter egg.
+- Fábrica: formato declarativo, `testar:conteudo`, congelamento
+  (`publicar:conteudo`), guia, template, atritos.
+- Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (vazio),
+  desbloqueios.
+- Conteúdo: Ilha Sites › Elementos, U1 a U5; Estilos, E1 ("A aba
+  Estilos", a unidade-modelo de CSS).
+- Rodada 9 (painel Estilos, modo documento, ROADMAP):
+  - `docs/ROADMAP.md` (este arquivo) e a regra de atualizar o Status no
+    fim de todo prompt (`PROJETO.md` e guia).
+  - Currículo com as adições do mapa: ilha IA entre Rede e Servidor e
+    Ofício (5 zonas, todas com "IA ao vivo" como motor), sala "Por baixo
+    do capô" nas Origens, zonas novas na Lógica (Resolvendo problemas,
+    Estruturas de dados, Algoritmos essenciais), na Rede e Servidor
+    (Login e autenticação, Segurança; APIs REST e SQL/NoSQL como
+    unidades novas) e no Ofício (Git em equipe, Ler código dos outros,
+    TypeScript, Testes automatizados, Variáveis de ambiente, Portfólio).
+    Filosofia no topo do `MAPA-CURRICULAR.md`. Arte da ilha IA
+    (constelação e farolzinho) no mundo, "em construção".
+  - CSS editável (`siteAlvo.css`) e motor de cascata próprio
+    (`src/motor/css/`): regras que casam, especificidade, ordem,
+    `!important`, inline, herança, atalhos, riscadas e valor vencedor,
+    rodando igual no navegador e no jsdom; quando não sabe, não risca.
+    Editor com abas HTML e CSS; validadores `valorEfetivo`, `declaracao`,
+    `regraExiste`, `riscada`; ações de CSS; Bancada do motor no
+    `/lab/fases`.
+  - Painel Estilos dentro de Elementos (como no Chrome): ordem das
+    regras, riscadas, "Herdado de", edição de nome e valor, setas,
+    caixinha, seletor de cor, "+ declaração", regra nova, link para o
+    editor CSS, celular em pé e deitado; 6 ferramentas novas com
+    apresentação. Abas de cima na ordem do Chrome (Fontes entrou,
+    Estilos saiu).
+  - Aba Calculado ao lado de Estilos: diagrama do modelo de caixa com
+    as medidas reais, camadas acesas na prévia com as cores do Chrome,
+    lista das calculadas com filtro, "Mostrar todas" e o rastro de cada
+    propriedade.
+  - Modo documento (destrava a U6): o documento inteiro no editor e na
+    árvore, a aba com o `<title>` ao vivo, simulação honesta dos acentos
+    sem meta charset, validador `tituloDaAba`. "Adicionar atributo" pelo
+    menu do nó (e toque longo), com a ferramenta `adicionar-atributo`:
+    fases futuras podem usar o gesto (as U1 a U5 publicadas não mudam; a
+    U4 continua como está).
+  - Celular deitado nos painéis novos, testes Playwright de paisagem,
+    guia com "Como escrever fases de CSS" e liberações no currículo: U6,
+    Estilos (E1 a E4) e Layout (L1 a L4) sem `requerMotor` (E5,
+    Responsivo e Publicar continuam pedindo motor).
+  - Unidade-modelo E1 "A aba Estilos" (publicada): 3 fases de prática na
+    Floricultura Pétala Azul (guiado e sozinho na mesma fase, uma
+    previsão por fase) e o desafio no Café Cantinho do Grão, com
+    `valorEfetivo` e `declaracao` na prática e as 6 ferramentas do painel
+    apresentadas uma a uma. Jornada Playwright pelo mapa nos 3 layouts.
+
+### Em andamento
+
+- Áudio: planejamento numa conversa separada (músicas no Suno Pro,
+  efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
+  Code.
+
+### Pendente de decisão
+
+- A fala final da U4 Fase 1 (publicada, congelada) diz que um atributo
+  novo "se escreve na aba Estilos ou direto no HTML". No Chrome, atributo
+  novo é pelo "Add attribute" da aba Elements (o gesto que o jogo tem
+  agora). Não mexi: corrigir texto publicado pede uma decisão sobre
+  errata de conteúdo congelado.
+
+### Próximo (em ordem)
+
+1. Sonnet: U6, E2 a E4 e L1 a L4 (motor pronto; modelos: a Unidade 2
+   para HTML, a E1 para CSS e a Bancada do documento para a U6).
+2. Opus: camada de trilhas acima das ilhas, temas (lente sobre o mapa:
+   Segurança, APIs, Dados, Desempenho, Acessibilidade, IA, com progresso
+   e insígnias), profissões (Front-end, Back-end, Segurança, Dados,
+   DevOps, como combinações de temas), glossário vivo (catálogo
+   pesquisável com onde cada termo é ensinado e praticado) e sistema de
+   áudio.
+3. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
+   espaçada.
+4. Motores das próximas ilhas (Opus), intercalados com conteúdo
+   (Sonnet): E5 (o jogo como site-alvo), Responsivo (modo dispositivo),
+   Publicar (auditoria, exportar, projeto-ponte), Origens (linha do
+   tempo, comparador de linguagens, diagrama), Lógica (Console, execução
+   de JS, depurador), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
+   Ofício.
+
+## Decisões aprovadas
+
+- A ordem das ilhas segue a progressão, por causa dos pré-requisitos.
+  Temas e profissões são lentes sobre o mapa, não uma reorganização.
+- Trilhas: o núcleo comum (Origens, Lógica, IA, Ofício) serve pra
+  todas; Web, Jogos e Automação têm ilhas próprias.
+- Áudio:
+  - um tema musical por ilha, mais o mapa e o museu;
+  - loops sem emenda audível, carregados só quando necessários, com
+    transição suave entre telas;
+  - volume de música separado do de efeitos;
+  - áudio só depois da primeira interação;
+  - sons sintetizados pras micro-interações e arquivos gerados pros
+    momentos grandes;
+  - Suno Pro (uso comercial ok; guias de terceiros reportam 20 downloads
+    por mês).
+- Critério final do núcleo: o projeto do Ofício, feito a partir de uma
+  página em branco, sem roteiro.
+
+## Estimativas (grosseiras)
+
+- Núcleo: umas 130 unidades, de 400 a 450 fases, mais de 100 horas com
+  os projetos.
+- Ilha Sites: 19 unidades, de 8 a 12 horas de jogo.
+- Gargalo: o motor de cada ilha (Opus) e o tempo de validação jogando.

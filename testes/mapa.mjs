@@ -25,7 +25,7 @@ async function tocar(localizador) {
   const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: ROTA_MUNDO, esperar: "[data-mapa=mundo]" });
   const ilha = (id) => pagina.locator(`[data-ilha="${id}"]`).first();
   conferir((await ilha("sites").getAttribute("data-estado")) === "disponivel", `${MODO}: Sites aberta`);
-  for (const id of ["origens", "logica", "paginas-vivas", "rede-servidor", "oficio", "frameworks"]) {
+  for (const id of ["origens", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio", "frameworks"]) {
     conferir((await ilha(id).getAttribute("data-estado")) === "construcao", `${MODO}: ${id} em construção (sem unidade pronta)`);
   }
   conferir((await ilha("frameworks").textContent()).includes("Opcional"), `${MODO}: Frameworks marcada como Opcional`);
@@ -118,9 +118,9 @@ async function tocar(localizador) {
   // Museu das Origens.
   await pagina.goto(`${URL_JOGO}/ilha/origens`);
   await pagina.locator("[data-mapa=museu]").waitFor();
-  conferir((await pagina.locator("[data-sala]").count()) === 5, `${MODO}: museu com as 5 salas`);
+  conferir((await pagina.locator("[data-sala]").count()) === 6, `${MODO}: museu com as 6 salas`);
   conferir((await pagina.locator("[data-antepassado]").count()) === 3, `${MODO}: os 3 antepassados na entrada`);
-  conferir((await pagina.getByText("Em breve").count()) >= 5, `${MODO}: as portas dizem Em breve`);
+  conferir((await pagina.getByText("Em breve").count()) >= 6, `${MODO}: as portas dizem Em breve`);
 
   conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();

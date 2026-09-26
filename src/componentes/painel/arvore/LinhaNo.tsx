@@ -27,6 +27,7 @@ type Props = {
   aoCancelarEdicao: () => void;
   aoConfirmarTexto: (alvo: NoArvore, texto: string) => void;
   aoConfirmarAtributo: (alvo: NoArvore, nome: string, valor: string) => void;
+  aoConfirmarNovoAtributo: (alvo: NoArvore, texto: string) => void;
   aoConfirmarTag: (alvo: NoArvore, novaTag: string) => void;
   aoDigitarTag: (rascunho: string) => void;
 };
@@ -53,6 +54,7 @@ export function LinhaNo({
   aoCancelarEdicao,
   aoConfirmarTexto,
   aoConfirmarAtributo,
+  aoConfirmarNovoAtributo,
   aoConfirmarTag,
   aoDigitarTag,
 }: Props) {
@@ -98,6 +100,7 @@ export function LinhaNo({
           edicao={edicao}
           aoIniciarAtributo={(nome) => aoIniciarEdicao({ chave: no.chave, alvo: "atributo", nome })}
           aoConfirmarAtributo={(nome, valor) => aoConfirmarAtributo(no, nome, valor)}
+          aoConfirmarNovoAtributo={(texto) => aoConfirmarNovoAtributo(no, texto)}
           aoIniciarTag={() => aoIniciarEdicao({ chave: no.chave, alvo: "tag" })}
           aoConfirmarTag={(novaTag) => aoConfirmarTag(no, novaTag)}
           aoDigitarTag={aoDigitarTag}

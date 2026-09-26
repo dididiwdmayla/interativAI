@@ -6,22 +6,46 @@
  * /lab/fases (no navegador) e para gerar o "depois" da meta do desafio.
  */
 import type { Acao, Fase, FaseDesafio, Previsao, Validador } from "@/conteudo/tipos";
-import { criarDocumentoSolto } from "@/lib/documentoSiteAlvo";
+import {
+  atualizarAcentos,
+  criarDocumentoInteiroSolto,
+  criarDocumentoSolto,
+  documentoInteiroInicial,
+  lerCssDoDocumento,
+  serializarDocumentoInteiro,
+} from "@/lib/documentoSiteAlvo";
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
+/**
+ * O documento inicial da fase, solto (fora da tela): o head fixo com o
+ * body ou, no modo documento, o documento inteiro já preparado como a
+ * prévia (estilos do jogo e simulação dos acentos).
+ */
+export function documentoSoltoDaFase(fase: Fase): Document {
+  const css = fase.siteAlvo.css ?? null;
+  return fase.modoDocumento
+    ? criarDocumentoInteiroSolto(documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body), css)
+    : criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+}
+
 export function criarSimulacao(fase: Fase) {
-  const documento = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body);
-  const inicial = criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body);
+  const documento = documentoSoltoDaFase(fase);
+  const inicial = documentoSoltoDaFase(fase);
   let eventos: EventoFase[] = [];
   let previsaoAtual: Previsao | null = null;
   let respostaPrevisao: number | null = null;
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
-    mutarDocumento: (mutar) => mutar(documento),
+    mutarDocumento: (mutar) => {
+      const mudou = mutar(documento);
+      // Como a prévia: o meta charset entrou ou saiu, os acentos acompanham.
+      if (mudou && fase.modoDocumento) atualizarAcentos(documento);
+      return mudou;
+    },
     aoEvento: (evento) => eventos.push(evento),
   });
 
@@ -31,6 +55,7 @@ export function criarSimulacao(fase: Fase) {
     selecionar: nucleo.selecionar,
     editarTexto: nucleo.editarTexto,
     editarAtributo: nucleo.editarAtributo,
+    adicionarAtributos: nucleo.adicionarAtributos,
     alternarEsconder: nucleo.alternarEsconder,
     apagar: nucleo.apagar,
     duplicar: nucleo.duplicar,
@@ -38,6 +63,11 @@ export function criarSimulacao(fase: Fase) {
     clicarLink: nucleo.clicarLink,
     inserirHtml: nucleo.inserirHtml,
     desfazer: nucleo.desfazer,
+    definirPropriedade: nucleo.definirPropriedade,
+    alternarPropriedade: nucleo.alternarPropriedade,
+    adicionarRegra: nucleo.adicionarRegra,
+    escreverCss: nucleo.escreverCss,
+    lerCss: nucleo.lerCss,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -70,17 +100,20 @@ export function criarSimulacao(fase: Fase) {
     avaliar: (validador: Validador): ResultadoValidador => avaliarDetalhado(validador, contexto()),
     /** Executa ações pelo painel. Lança ErroAcao dizendo qual quebrou. */
     executar: (acoes: readonly Acao[]) => executarAcoes(acoes, painel),
-    htmlAtual: () => documento.body.innerHTML,
+    /** O texto do editor: o body ou, no modo documento, o documento inteiro. */
+    htmlAtual: () => (fase.modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
+    cssAtual: () => lerCssDoDocumento(documento),
   };
 }
 
 export type Simulacao = ReturnType<typeof criarSimulacao>;
 
 /**
- * O body do desafio depois de aplicar as soluções de todas as partes: é o
- * "depois" da meta. Parte que falhar é pulada (os testes acusam).
+ * O body (e o CSS, se a fase tem) do desafio depois de aplicar as soluções
+ * de todas as partes: é o "depois" da meta. Parte que falhar é pulada (os
+ * testes acusam).
  */
-export function estadoFinalDoDesafio(fase: FaseDesafio): string {
+export function estadoFinalDoDesafio(fase: FaseDesafio): { body: string; css: string | null } {
   const simulacao = criarSimulacao(fase);
   for (const parte of fase.partes) {
     try {
@@ -89,5 +122,5 @@ export function estadoFinalDoDesafio(fase: FaseDesafio): string {
       // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
     }
   }
-  return simulacao.htmlAtual();
+  return { body: simulacao.htmlAtual(), css: simulacao.cssAtual() };
 }

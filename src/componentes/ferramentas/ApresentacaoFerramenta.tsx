@@ -50,6 +50,17 @@ function medir(elemento: HTMLElement | null): Caixa | null {
   return { x, y, largura: direita - x, altura: baixo - y };
 }
 
+/**
+ * Tira os buracos que já estão dentro de outro (o botão de regra nova
+ * dentro do painel Estilos liberado): com evenodd, um buraco dentro de
+ * outro voltaria a bloquear.
+ */
+function semBuracosDentro(caixas: readonly Caixa[]): Caixa[] {
+  const dentro = (a: Caixa, b: Caixa) =>
+    a.x >= b.x && a.y >= b.y && a.x + a.largura <= b.x + b.largura && a.y + a.altura <= b.y + b.altura;
+  return caixas.filter((caixa, indice) => !caixas.some((outra, outroIndice) => outroIndice !== indice && dentro(caixa, outra) && (!dentro(outra, caixa) || outroIndice < indice)));
+}
+
 function iguais(a: Caixa | null, b: Caixa | null): boolean {
   if (!a || !b) return a === b;
   return (
@@ -266,7 +277,7 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const posicao = posicionarCartao(areaDoCartao, tamanhoCartao.largura, tamanhoCartao.altura);
   const { Icone } = ferramenta;
 
-  const buracos = [caixa, ...extras].filter((item): item is Caixa => item !== null);
+  const buracos = semBuracosDentro([caixa, ...extras].filter((item): item is Caixa => item !== null));
   // Nas falas, a tela toda bloqueia e o toque avança. No "Experimente", o
   // bloqueio tem buracos (clip-path evenodd): só o alvo fica livre.
   const recorte =

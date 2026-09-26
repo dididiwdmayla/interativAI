@@ -4,6 +4,7 @@ import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState }
 import { achatarArvore, type NoArvore } from "@/lib/arvore";
 import { chaveDoCaminho } from "@/lib/dom";
 import { CLASSE_ESCONDER } from "@/lib/esconder";
+import { TAGS_SEM_RENOMEAR } from "@/motor/nucleoPainel";
 import { BarraAcoesNo } from "./BarraAcoesNo";
 import { LinhaFechamento } from "./LinhaFechamento";
 import { LinhaNo } from "./LinhaNo";
@@ -33,6 +34,13 @@ type Props = {
   podeRefazer: boolean;
   /** Avisado quando uma edição começa (dois cliques, Enter, F2 ou "Editar"). */
   aoComecarEdicao?: () => void;
+  /**
+   * "Adicionar atributo" no menu do nó (só nas fases com a ferramenta
+   * adicionar-atributo). Recebe o texto escrito, como target="_blank".
+   */
+  aoAdicionarAtributos?: (caminho: number[], texto: string) => void;
+  /** Modo documento: a linha do <!DOCTYPE> em cima do <html>, como no Chrome. */
+  doctype?: string | null;
 };
 
 type MenuAberto = { x: number; y: number; chave: string };
@@ -68,6 +76,8 @@ export function ArvoreElementos({
   podeDesfazer,
   podeRefazer,
   aoComecarEdicao,
+  aoAdicionarAtributos,
+  doctype = null,
 }: Props) {
   const recipiente = useRef<HTMLDivElement>(null);
   const [edicao, setEdicao] = useState<EdicaoArvore | null>(null);
@@ -109,7 +119,7 @@ export function ArvoreElementos({
   };
 
   /** Nó que pode ter a tag renomeada (o F12 não deixa no html, head e body). */
-  const podeRenomear = (no: NoArvore) => no.tipo === "elemento" && no.caminho.length > 0;
+  const podeRenomear = (no: NoArvore) => no.tipo === "elemento" && no.caminho.length > 0 && !TAGS_SEM_RENOMEAR.has(no.tag);
 
   /** Ações do nó para o menu e a barra. Mexer num nó seleciona ele antes, como no F12. */
   const acoesDo = (no: NoArvore): AcoesNo => {
@@ -148,6 +158,13 @@ export function ArvoreElementos({
         antes();
         comecarEdicao({ chave: no.chave, alvo: "tag" });
       },
+      podeAdicionarAtributo: elemento,
+      adicionarAtributo: aoAdicionarAtributos
+        ? () => {
+            antes();
+            comecarEdicao({ chave: no.chave, alvo: "novoAtributo" });
+          }
+        : undefined,
     };
   };
 
@@ -247,6 +264,11 @@ export function ArvoreElementos({
       }}
       className="h-full overflow-auto px-2 py-2 font-codigo text-[13px] leading-6 focus-visible:outline-offset-[-3px]"
     >
+      {doctype && (
+        <div data-doctype className="whitespace-nowrap text-texto-suave">
+          &lt;!DOCTYPE {doctype}&gt;
+        </div>
+      )}
       {linhas.map((linha) => {
         if (linha.tipo === "fechamento") {
           return (
@@ -307,6 +329,10 @@ export function ArvoreElementos({
             aoConfirmarAtributo={(alvo, nome, valor) => {
               terminarEdicao();
               aoEditarAtributo(alvo.caminho, nome, valor);
+            }}
+            aoConfirmarNovoAtributo={(alvo, texto) => {
+              terminarEdicao();
+              if (texto.trim().length > 0) aoAdicionarAtributos?.(alvo.caminho, texto);
             }}
             aoConfirmarTag={(alvo, novaTag) => {
               terminarEdicao();

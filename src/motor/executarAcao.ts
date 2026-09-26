@@ -8,7 +8,7 @@
  */
 import type { Acao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
-import { caminhoDoNo, ehTexto, filhosVisiveis } from "@/lib/dom";
+import { caminhoDoNo, ehTexto, filhosVisiveis, raizDaArvore } from "@/lib/dom";
 import { temClasseEsconder } from "@/lib/esconder";
 import type { OrigemSelecao } from "./eventos";
 import { origemDaVia } from "./nucleoPainel";
@@ -20,6 +20,7 @@ export type PainelDasAcoes = {
   selecionar: (caminho: number[], origem: OrigemSelecao) => void;
   editarTexto: (caminho: number[], texto: string) => boolean;
   editarAtributo: (caminho: number[], nome: string, valor: string) => boolean;
+  adicionarAtributos: (caminho: number[], atributos: readonly { nome: string; valor: string }[]) => boolean;
   alternarEsconder: (caminho: number[]) => boolean;
   apagar: (caminho: number[]) => boolean;
   duplicar: (caminho: number[]) => boolean;
@@ -29,6 +30,13 @@ export type PainelDasAcoes = {
   inserirHtml: (caminho: number[], posicao: Extract<Acao, { tipo: "inserirHTML" }>["posicao"], html: string) => boolean;
   desfazer: () => boolean;
   responderPrevisao: (opcao: number) => void;
+  /** CSS (painel Estilos e editor CSS). Só existem numa fase com `siteAlvo.css`. */
+  definirPropriedade: (seletorRegra: string, propriedade: string, valor: string) => boolean;
+  alternarPropriedade: (seletorRegra: string, propriedade: string) => boolean;
+  adicionarRegra: (seletor: string, declaracoes?: readonly { propriedade: string; valor: string }[]) => number | null;
+  escreverCss: (posicao: "inicio" | "fim", texto: string) => boolean;
+  /** O texto da folha editável agora (null: a fase não tem CSS). */
+  lerCss: () => string | null;
 };
 
 /** Ação que não deu para executar: a mensagem diz o que quebrou. */
@@ -48,6 +56,8 @@ export function descreverAcao(acao: Acao): string {
       return `definirTexto ${acao.seletor} = "${acao.valor}"`;
     case "definirAtributo":
       return `definirAtributo ${acao.seletor} ${acao.nome}="${acao.valor}"`;
+    case "adicionarAtributo":
+      return `adicionarAtributo ${acao.seletor} ${acao.nome}="${acao.valor}"`;
     case "esconder":
       return `esconder ${acao.seletor}`;
     case "apagar":
@@ -64,7 +74,22 @@ export function descreverAcao(acao: Acao): string {
       return `inserirHTML ${acao.posicao} de ${acao.seletor}`;
     case "responderPrevisao":
       return `responderPrevisao ${acao.opcao}`;
+    case "definirPropriedade":
+      return `definirPropriedade ${acao.seletorRegra} { ${acao.propriedade}: ${acao.valor} }`;
+    case "alternarDeclaracao":
+      return `alternarDeclaracao ${acao.seletorRegra} { ${acao.propriedade} }`;
+    case "adicionarRegra":
+      return `adicionarRegra ${acao.seletorRegra}`;
+    case "editarCss":
+      return `editarCss no ${acao.posicao}`;
   }
+}
+
+/** A fase precisa ter CSS editável para as ações de CSS. */
+function exigirCss(painel: PainelDasAcoes): string {
+  const css = painel.lerCss();
+  if (css === null) throw new ErroAcao("esta fase não tem CSS editável (siteAlvo.css)");
+  return css;
 }
 
 function documentoDo(painel: PainelDasAcoes): Document {
@@ -101,8 +126,9 @@ export function resolverElemento(painel: PainelDasAcoes, seletor: string): Eleme
 
 function caminhoDe(painel: PainelDasAcoes, elemento: Element, seletor: string): number[] {
   const documento = documentoDo(painel);
-  const caminho = elemento === documento.body ? [] : caminhoDoNo(documento.body, elemento);
-  if (!caminho) throw new ErroAcao(`o seletor "${seletor}" achou algo fora do body`);
+  const raiz = raizDaArvore(documento) ?? documento.body;
+  const caminho = elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
+  if (!caminho) throw new ErroAcao(`o seletor "${seletor}" achou algo fora do ${raiz.tagName.toLowerCase()}`);
   return caminho;
 }
 
@@ -164,6 +190,13 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       painel.editarAtributo(caminho, acao.nome, acao.valor);
       return;
     }
+    case "adicionarAtributo": {
+      const elemento = resolverElemento(painel, acao.seletor);
+      const caminho = caminhoDe(painel, elemento, acao.seletor);
+      selecionarPelaArvore(painel, caminho);
+      painel.adicionarAtributos(caminho, [{ nome: acao.nome, valor: acao.valor }]);
+      return;
+    }
     case "esconder": {
       const elemento = resolverElemento(painel, acao.seletor);
       const caminho = caminhoDe(painel, elemento, acao.seletor);
@@ -223,6 +256,34 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     }
     case "responderPrevisao": {
       painel.responderPrevisao(acao.opcao);
+      return;
+    }
+    case "definirPropriedade": {
+      exigirCss(painel);
+      if (!painel.definirPropriedade(acao.seletorRegra, acao.propriedade, acao.valor)) {
+        throw new ErroAcao(
+          `não deu para definir ${acao.propriedade} na regra "${acao.seletorRegra}" (a regra não existe, o nome não serve ou o valor já era esse)`,
+        );
+      }
+      return;
+    }
+    case "alternarDeclaracao": {
+      exigirCss(painel);
+      if (!painel.alternarPropriedade(acao.seletorRegra, acao.propriedade)) {
+        throw new ErroAcao(`a regra "${acao.seletorRegra}" não tem ${acao.propriedade} para ligar ou desligar`);
+      }
+      return;
+    }
+    case "adicionarRegra": {
+      exigirCss(painel);
+      if (painel.adicionarRegra(acao.seletorRegra, acao.declaracoes ?? []) === null) {
+        throw new ErroAcao(`não deu para criar a regra "${acao.seletorRegra}"`);
+      }
+      return;
+    }
+    case "editarCss": {
+      exigirCss(painel);
+      if (!painel.escreverCss(acao.posicao, acao.texto)) throw new ErroAcao("editarCss não mudou nada");
       return;
     }
   }

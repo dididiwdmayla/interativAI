@@ -18,6 +18,8 @@ type Opcoes = {
   objetivo: { id: string; enunciado: string } | null;
   degrau: DegrauAjuda;
   htmlAtual: string;
+  /** CSS da folha editável (null: a fase não tem). */
+  cssAtual?: string | null;
   falar: (fala: Fala) => void;
   /** Chance de responder sem ir ao servidor (easter egg). Devolve a fala, se tratou. */
   interceptar?: (pergunta: string) => Fala | null;
@@ -31,7 +33,7 @@ function falaDaFalha(tipo: TipoErroTutor): Fala {
 }
 
 /** Conversa com o computadorzinho pela rota /api/tutor. */
-export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, interceptar }: Opcoes) {
+export function useTutor({ faseId, objetivo, degrau, htmlAtual, cssAtual = null, falar, interceptar }: Opcoes) {
   const [pendente, setPendente] = useState<string | null>(null);
   const carregando = pendente !== null;
   const [ultima, setUltima] = useState<{ pergunta: string; fala: Fala } | null>(null);
@@ -62,6 +64,7 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, falar, intercept
         enunciado: objetivo?.enunciado ?? "Modo livre: a fase já foi concluída.",
         degrauAtual: degrau,
         htmlAtual: htmlAtual.slice(0, LIMITES_TUTOR.html),
+        ...(cssAtual !== null ? { cssAtual: cssAtual.slice(0, LIMITES_TUTOR.css) } : {}),
         pergunta,
         historico: historico.current,
       });

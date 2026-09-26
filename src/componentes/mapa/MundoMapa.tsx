@@ -24,18 +24,19 @@ import { caminhoSuave, type Ponto } from "./geometria";
 import { useTamanho } from "./useTamanho";
 
 /** Tamanho do desenho do mundo (as posições abaixo usam estas medidas). */
-const LARGURA = 1600;
+const LARGURA = 1840;
 const ALTURA = 820;
 
 /** Onde cada ilha fica no mundo, na ordem da rota. Frameworks fica afastada. */
 const POSICOES: Record<string, Ponto> = {
   origens: { x: 180, y: 480 },
-  sites: { x: 440, y: 280 },
-  logica: { x: 700, y: 530 },
-  "paginas-vivas": { x: 960, y: 280 },
-  "rede-servidor": { x: 1220, y: 530 },
-  oficio: { x: 1450, y: 280 },
-  frameworks: { x: 1480, y: 705 },
+  sites: { x: 430, y: 280 },
+  logica: { x: 680, y: 530 },
+  "paginas-vivas": { x: 930, y: 280 },
+  "rede-servidor": { x: 1180, y: 530 },
+  ia: { x: 1430, y: 280 },
+  oficio: { x: 1680, y: 530 },
+  frameworks: { x: 1450, y: 700 },
 };
 
 /** Ilha nova sem posição: vai para a direita, no mar aberto. */

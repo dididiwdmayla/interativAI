@@ -66,9 +66,9 @@ function construirNo(no: Node, caminho: number[]): NoArvore {
   };
 }
 
-/** Foto da árvore a partir do body do iframe. A raiz é o próprio <body>. */
-export function construirArvore(body: HTMLElement): NoArvore {
-  return construirNo(body, []);
+/** Foto da árvore a partir da raiz do iframe: o <body> ou, no modo documento, o <html>. */
+export function construirArvore(raiz: Element): NoArvore {
+  return construirNo(raiz, []);
 }
 
 /** Linhas visíveis. Tudo nasce expandido; `recolhidos` guarda o que o jogador fechou. */

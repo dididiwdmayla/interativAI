@@ -8,6 +8,7 @@ import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFe
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
+import { IconeAviso } from "@/componentes/icones/IconeAviso";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
 import { BarraSuperiorMovel } from "@/componentes/layout/BarraSuperiorMovel";
@@ -30,10 +31,14 @@ import { ArvoreElementos } from "@/componentes/painel/arvore/ArvoreElementos";
 import { TrilhaElementos } from "@/componentes/painel/arvore/TrilhaElementos";
 import { BotaoInspecionar } from "@/componentes/painel/BotaoInspecionar";
 import { BotoesHistorico } from "@/componentes/painel/BotoesHistorico";
-import { CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
+import { type AbaEditor, CabecalhoEditor } from "@/componentes/painel/editor/CabecalhoEditor";
 import { EditorCodigo } from "@/componentes/painel/editor/EditorCodigo";
 import { Painel } from "@/componentes/painel/Painel";
 import { PainelDividido } from "@/componentes/painel/PainelDividido";
+import { PainelLadoALado } from "@/componentes/painel/PainelLadoALado";
+import { PainelCalculado } from "@/componentes/painel/estilos/PainelCalculado";
+import { PainelEstilos } from "@/componentes/painel/estilos/PainelEstilos";
+import type { AcoesEstilos, DestaqueEstilos } from "@/componentes/painel/estilos/tipos";
 import { CamadaInspecao } from "@/componentes/preview/CamadaInspecao";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
 import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
@@ -41,12 +46,16 @@ import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
 import { faseDoId, type LocalDaFase, proximaFase } from "@/conteudo";
-import type { Fala, Fase } from "@/conteudo/tipos";
+import type { Fala, Fase, PainelElementos } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { FERRAMENTAS, type Ferramenta } from "@/ferramentas/registro";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemProgresso";
-import { caminhoDoNo } from "@/lib/dom";
+import { elementoDoNo } from "@/lib/arvore";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
+import { lerAtributosDigitados } from "@/lib/atributosDigitados";
+import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
+import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
@@ -57,11 +66,16 @@ import type { EventoFase } from "@/motor/eventos";
 import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
+import { analisarCss } from "@/motor/css/analisarCss";
+import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
+import { NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
 import { AcoesConversa } from "./AcoesConversa";
 import {
   atalhoHistorico,
   FALA_PENSANDO,
   FERRAMENTAS_DA_ARVORE,
+  FERRAMENTAS_DO_CALCULADO,
+  FERRAMENTAS_DOS_ESTILOS,
   focoTemDesfazerProprio,
   focoUsaEnter,
   RECADO_PAISAGEM,
@@ -105,6 +119,7 @@ type Props = {
 const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   editouTexto: "editar",
   editouAtributo: "editar",
+  adicionouAtributo: "editar",
   escondeu: "esconder",
   mostrou: "esconder",
   apagou: "apagar",
@@ -112,19 +127,49 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   desfez: "desfazer",
   refez: "refazer",
   renomeouTag: "renomear-tag",
+  editouPropriedade: "editar",
+  alternouDeclaracao: "esconder",
+  adicionouRegra: "duplicar",
 };
 
 /** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
 const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
 
+/** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
+function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | null {
+  if (fase.siteAlvo.css === undefined) return null;
+  if (!salvo) return fase.siteAlvo.css;
+  const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
+  if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.cssInicioObjetivo !== null) {
+    return salvo.cssInicioObjetivo;
+  }
+  return salvo.cssAtual ?? fase.siteAlvo.css;
+}
+
+/** O texto inicial do editor: o body ou, no modo documento, o documento inteiro. */
+function htmlInicialDaFase(fase: Fase): string {
+  return fase.modoDocumento ? documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body) : fase.siteAlvo.body;
+}
+
+/**
+ * O computadorzinho explica a simulação dos acentos (modo documento sem
+ * meta charset). A prévia usa srcdoc, que já é texto, então a quebra não
+ * aconteceria sozinha: ver src/lib/codificacao.ts.
+ */
+const FALA_ACENTOS: Fala = {
+  texto:
+    "Isto é uma simulação: sem <meta charset=\"utf-8\"> no head, um navegador de verdade pode ler os acentos errado e mostrar CartÃ£o no lugar de Cartão. Com essa linha no head, tudo volta ao normal.",
+  expressao: "curioso",
+};
+
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
 function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
-  if (!salvo) return fase.siteAlvo.body;
+  if (!salvo) return htmlInicialDaFase(fase);
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
     return salvo.htmlInicioObjetivo;
   }
-  return salvo.htmlAtual ?? fase.siteAlvo.body;
+  return salvo.htmlAtual ?? htmlInicialDaFase(fase);
 }
 
 export function JogoFase({
@@ -143,10 +188,18 @@ export function JogoFase({
   const revisao = modo === "revisao";
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
   const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
+  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
+  const temCss = cssInicial !== null;
+  const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
   const [aba, setAba] = useState<Aba>("elementos");
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
-  const [segmento, setSegmento] = useState<"arvore" | "codigo">("arvore");
+  const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
+  /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
+  const paineis = fase.paineisElementos ?? [];
+  const comEstilos = paineis.length > 0;
+  const [subAbaElementos, setSubAbaElementos] = useState<PainelElementos>("estilos");
+  const [destaqueEstilos, setDestaqueEstilos] = useState<DestaqueEstilos | null>(null);
   const [balaoAberto, setBalaoAberto] = useState(true);
   const [proporcaoArrastada, setProporcaoArrastada] = useState<number | null>(null);
   const [rascunhoTutor, setRascunhoTutor] = useState("");
@@ -155,6 +208,8 @@ export function JogoFase({
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
   const movel = layout !== "desktop";
+  /** Deitado não há segmento Estilos (ele fica ao lado da árvore): vale o da árvore. */
+  const segmentoVisivel = segmento === "estilos" && layout !== "retrato" ? "arvore" : segmento;
   const viewport = useViewportVisivel();
   const [caixa, setCaixa] = useState<{
     aberta: boolean;
@@ -176,19 +231,34 @@ export function JogoFase({
 
   const {
     editorRef,
+    editorCssRef,
     previewRef,
     arvore,
     htmlAtual,
+    cssAtual,
+    versaoDocumento,
+    versaoCss,
+    versaoCssCalma,
     aoEditarCodigo,
+    aoEditarCss,
+    editarCss,
+    previsualizarCss,
     aoCarregarDocumento,
     obterDocumento,
     editarDocumento,
-  } = useSiteAlvo(bodyInicial);
+    tituloAba,
+    simulandoAcentos,
+    doctype,
+  } = useSiteAlvo(bodyInicial, cssInicial, fase.modoDocumento === true);
 
   const {
     caminhoSelecionado,
     recolhidos,
     realce,
+    realcesExtras,
+    realcarVarios,
+    realceCaixa,
+    realcarCamada,
     inspecionando,
     destaque,
     destacarNaArvore,
@@ -206,6 +276,7 @@ export function JogoFase({
     historico,
     editarTexto,
     editarAtributo,
+    adicionarAtributos,
     alternarEsconder,
     apagar,
     duplicar,
@@ -215,11 +286,21 @@ export function JogoFase({
     desfazer,
     refazer,
     antesDeEditarCodigo,
+    lerCss,
+    definirPropriedade,
+    editarDeclaracao,
+    alternarDeclaracao,
+    alternarPropriedade,
+    adicionarDeclaracao,
+    adicionarRegra,
+    escreverCss,
+    editarEstiloInline,
     aoRecarregarDocumento,
   } = usePainelElementos({
     editorRef,
     obterDocumento,
     editarDocumento,
+    editarCss,
     aoEvento: barramento.emitir,
   });
 
@@ -251,8 +332,9 @@ export function JogoFase({
 
   const aoClicarLink = useCallback(
     (link: Element) => {
-      const body = obterDocumento()?.body;
-      const caminho = body ? caminhoDoNo(body, link) : null;
+      const documento = obterDocumento();
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      const caminho = raiz ? caminhoDoNo(raiz, link) : null;
       if (caminho) clicarLinkNaTela(caminho);
     },
     [clicarLinkNaTela, obterDocumento],
@@ -266,6 +348,7 @@ export function JogoFase({
       selecionar,
       editarTexto,
       editarAtributo,
+      adicionarAtributos,
       alternarEsconder,
       apagar,
       duplicar,
@@ -273,13 +356,24 @@ export function JogoFase({
       clicarLink: clicarLinkNaTela,
       inserirHtml,
       desfazer,
+      definirPropriedade,
+      alternarPropriedade,
+      adicionarRegra,
+      escreverCss,
+      lerCss,
     }),
     [
+      definirPropriedade,
+      alternarPropriedade,
+      adicionarRegra,
+      escreverCss,
+      lerCss,
       obterDocumento,
       noSelecionado,
       selecionar,
       editarTexto,
       editarAtributo,
+      adicionarAtributos,
       alternarEsconder,
       apagar,
       duplicar,
@@ -296,6 +390,56 @@ export function JogoFase({
     return atual && no ? { no, via: viaDaOrigem(atual.origem) } : null;
   }, [noSelecionado, selecao]);
 
+  /** Mostra o editor CSS (a aba CSS; no celular, o Código). */
+  const mostrarEditorCss = useCallback(() => {
+    setAbaEditor("css");
+    setSegmento("codigo");
+  }, []);
+
+  /** Degrau 3 no CSS: abre a aba CSS e pisca as linhas da regra (ou da declaração). */
+  const destacarNoCss = useCallback(
+    (seletorRegra: string, propriedade?: string) => {
+      const texto = lerCss();
+      if (texto === null) return;
+      const achada = acharRegra(analisarCss(texto), seletorRegra);
+      if (!achada) return;
+      const { regra } = achada;
+      const indice = propriedade ? acharDeclaracao(regra, propriedade) : -1;
+      const declaracao = indice >= 0 ? regra.declaracoes[indice] : null;
+      const primeira = declaracao ? declaracao.linha : regra.linha;
+      const ultima = declaracao ? declaracao.linha : texto.slice(0, regra.fim).split("\n").length;
+      mostrarEditorCss();
+      requestAnimationFrame(() =>
+        editorCssRef.current?.destacarLinhas(Array.from({ length: ultima - primeira + 1 }, (_, deslocamento) => primeira + deslocamento)),
+      );
+    },
+    [editorCssRef, lerCss, mostrarEditorCss],
+  );
+  const limparDestaqueCss = useCallback(() => editorCssRef.current?.destacarLinhas([]), [editorCssRef]);
+
+  /** Degrau 3 no painel Estilos: mostra o painel (no celular, o segmento Estilos) e pisca a regra. */
+  const destacarNoEstilos = useCallback(
+    (novo: DestaqueEstilos | null) => {
+      setDestaqueEstilos(novo);
+      if (novo) setSubAbaElementos("estilos");
+      if (novo && movel) setSegmento("estilos");
+    },
+    [movel],
+  );
+
+  /** O link "estilo.css:12" do painel: abre a folha no editor CSS, na regra. */
+  const irParaFonte = useCallback(
+    (posicao: number) => {
+      mostrarEditorCss();
+      requestAnimationFrame(() => {
+        editorCssRef.current?.irParaPosicao(posicao);
+        const texto = lerCss();
+        if (texto !== null) editorCssRef.current?.destacarLinhas([texto.slice(0, posicao).split("\n").length]);
+      });
+    },
+    [editorCssRef, lerCss, mostrarEditorCss],
+  );
+
   const motor = useMotorFase({
     fase,
     modo,
@@ -303,11 +447,15 @@ export function JogoFase({
     salvo,
     barramento,
     htmlAtual,
+    cssAtual,
     editorRef,
     obterDocumento,
     obterSelecao,
     painel,
     destacarNaArvore,
+    destacarNoCss,
+    limparDestaqueCss,
+    destacarNoEstilos,
     toque,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
@@ -320,6 +468,15 @@ export function JogoFase({
       (estado.etapa === "concluida" && !estado.conclusaoAberta);
     falarSobreLink.current = livre ? falar : () => {};
   }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
+
+  // Na primeira vez que a prévia quebra os acentos, o computadorzinho explica (quando não atrapalha).
+  const explicouAcentos = useRef(false);
+  useEffect(() => {
+    if (!simulandoAcentos || explicouAcentos.current) return;
+    if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
+    explicouAcentos.current = true;
+    falar(FALA_ACENTOS);
+  }, [simulandoAcentos, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
@@ -339,17 +496,49 @@ export function JogoFase({
   const abrirCard = useCallback((id: IdFerramenta | null) => setCaixa({ aberta: true, foco: id }), []);
 
   /** Mostra o trecho do selecionado quando o código aparece de novo. */
-  const trocarSegmento = (novo: "arvore" | "codigo") => {
+  const trocarSegmento = (novo: "arvore" | "estilos" | "codigo") => {
     setSegmento(novo);
+    if (novo !== "estilos") realcarCamada(null);
     if (novo === "codigo") requestAnimationFrame(() => destacarNoEditor(true));
+  };
+
+  /**
+   * A peça que o objetivo atual aponta, para as apresentações do painel: a
+   * que a linha de ajuda mostra (a regra no Estilos ou o nó na árvore).
+   * Null sem linha (objetivo sozinho) ou se nada casa.
+   */
+  const pecaDoObjetivo = (): number[] | null => {
+    const documento = obterDocumento();
+    const raiz = documento?.body ? raizDaArvore(documento) : null;
+    const linha = objetivo?.modo === "guiado" ? objetivo.ajudas.linha : null;
+    const seletor = linha?.alvo === "estilos" || linha?.alvo === "css" ? linha.seletorRegra : linha?.alvo === "arvore" ? linha.seletor : null;
+    if (!documento || !raiz || !seletor) return null;
+    const elemento = elementosDaRegra(documento, seletor)[0];
+    if (!elemento) return null;
+    return elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
+  };
+
+  /** Troca Estilos | Calculado; sair do Calculado apaga a camada acesa na prévia. */
+  const trocarSubAba = (nova: PainelElementos) => {
+    setSubAbaElementos(nova);
+    if (nova !== "calculado") realcarCamada(null);
   };
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    if (FERRAMENTAS_DO_CALCULADO.includes(ferramenta.id)) trocarSubAba("calculado");
+    else if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSubAba("estilos");
+    // Ferramenta do painel que só se experimenta usando (setas, cor, caixinha...): o painel
+    // mostra, em silêncio, a peça que o objetivo aponta (sem ela e sem seleção, o body).
+    if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id) && ferramenta.uso === "sinal") {
+      const caminho = pecaDoObjetivo() ?? (caminhoSelecionado ? null : []);
+      if (caminho) selecionar(caminho, "sistema");
+    }
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
     if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
-    if (ferramenta.id === "editor" || ferramenta.id === "sincronia") trocarSegmento("codigo");
+    if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSegmento("estilos");
+    if (ferramenta.id === "editor" || ferramenta.id === "sincronia" || ferramenta.id === "editor-css") trocarSegmento("codigo");
   };
 
   // O que o jogador faz no painel também conta como "usou a ferramenta".
@@ -380,6 +569,16 @@ export function JogoFase({
           sinalizarUso("desfazer");
         } else if (evento.tipo === "renomeouTag") {
           sinalizarUso("renomear-tag");
+        } else if (evento.tipo === "adicionouAtributo") {
+          sinalizarUso("adicionar-atributo");
+        } else if (evento.tipo === "editouCss") {
+          sinalizarUso("editor-css");
+        } else if (evento.tipo === "editouPropriedade") {
+          sinalizarUso("editar-valor-css");
+        } else if (evento.tipo === "alternouDeclaracao") {
+          sinalizarUso("ligar-desligar-declaracao");
+        } else if (evento.tipo === "adicionouRegra") {
+          sinalizarUso("nova-regra");
         }
       }),
     [barramento],
@@ -430,6 +629,7 @@ export function JogoFase({
         : null,
     degrau: estado.degrau,
     htmlAtual,
+    cssAtual,
     falar,
     interceptar: (pergunta) => responderSegredo(pergunta, falar),
   });
@@ -501,14 +701,52 @@ export function JogoFase({
 
   const aoEditarNoEditor = useCallback(
     (texto: string) => {
-      antesDeEditarCodigo();
+      antesDeEditarCodigo("html");
       aoEditarCodigo(texto);
       barramento.emitir({ tipo: "editouCodigo" });
     },
     [antesDeEditarCodigo, aoEditarCodigo, barramento],
   );
 
+  /** Tecla no editor CSS: foto para o Desfazer do painel, prévia na hora e o evento. */
+  const aoEditarNoEditorCss = useCallback(
+    (texto: string) => {
+      antesDeEditarCodigo("css");
+      aoEditarCss(texto);
+      barramento.emitir({ tipo: "editouCss" });
+    },
+    [antesDeEditarCodigo, aoEditarCss, barramento],
+  );
+
+  /** Cursor no editor CSS: acende na prévia todas as peças que a regra do cursor pega. */
+  const aoMoverCursorCss = useCallback(
+    (posicao: number) => {
+      sinalizarUso("editor-css");
+      const texto = lerCss();
+      const documento = obterDocumento();
+      if (texto === null || !documento) return;
+      const regra = analisarCss(texto).regras.find((item) => posicao >= item.inicio && posicao <= item.fim);
+      realcarVarios(regra ? elementosDaRegra(documento, regra.seletor) : []);
+    },
+    [lerCss, obterDocumento, realcarVarios],
+  );
+
+  const trocarAbaEditor = (aba: AbaEditor) => {
+    tocarEfeito("clique");
+    setAbaEditor(aba);
+    if (aba === "html") realcarVarios([]);
+  };
+
   const { verificar, aoDocumentoPronto } = motor;
+
+  // CSS mudou (editor, painel, desfazer): confere os objetivos um pouco depois.
+  const verificarAtual = useRef(verificar);
+  useEffect(() => {
+    verificarAtual.current = verificar;
+  }, [verificar]);
+  useEffect(() => {
+    if (versaoCssCalma > 0) verificarAtual.current();
+  }, [versaoCssCalma]);
   const aoCarregar = useCallback(
     (documento: Document) => {
       aoCarregarDocumento(documento);
@@ -517,6 +755,51 @@ export function JogoFase({
       aoDocumentoPronto();
     },
     [aoCarregarDocumento, aoRecarregarDocumento, verificar, aoDocumentoPronto],
+  );
+
+  /** O elemento selecionado (o dono, se a seleção é um texto): o painel Estilos mostra as regras dele. */
+  const elementoSelecionado = caminhoSelecionado ? elementoDoNo(noSelecionado()) : null;
+
+  /** Caminho de um elemento da página na árvore (a raiz é o body ou, no modo documento, o html). */
+  const caminhoDoElemento = useCallback(
+    (elemento: Element): number[] | null => {
+      const documento = obterDocumento();
+      const raiz = documento?.body ? raizDaArvore(documento) : null;
+      return raiz ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
+    },
+    [obterDocumento],
+  );
+
+  const acoesEstilos = useMemo<AcoesEstilos>(
+    () => ({
+      editarDeclaracao,
+      alternarDeclaracao,
+      adicionarDeclaracao,
+      adicionarRegra: (seletor) => adicionarRegra(seletor),
+      editarInline: (elemento, estilo, detalhe) => {
+        const caminho = caminhoDoElemento(elemento);
+        return caminho ? editarEstiloInline(caminho, estilo, detalhe) : false;
+      },
+      previsualizarCss,
+      irParaFonte,
+      realcar: realcarVarios,
+      selecionarElemento: (elemento) => {
+        const caminho = caminhoDoElemento(elemento);
+        if (caminho) selecionar(caminho, "arvore");
+      },
+    }),
+    [
+      adicionarDeclaracao,
+      adicionarRegra,
+      alternarDeclaracao,
+      caminhoDoElemento,
+      editarDeclaracao,
+      editarEstiloInline,
+      irParaFonte,
+      previsualizarCss,
+      realcarVarios,
+      selecionar,
+    ],
   );
 
   // Enter avança a conversa quando o foco não está num campo ou botão.
@@ -790,11 +1073,20 @@ export function JogoFase({
                 <div className="flex shrink-0 border-b-2 border-borda bg-painel px-2 py-1.5">
                   <SeletorSegmentado
                     rotulo="Mostrar no painel"
-                    opcoes={[
-                      { id: "arvore", rotulo: "Árvore" },
-                      { id: "codigo", rotulo: "Código" },
-                    ]}
-                    valor={segmento}
+                    opcoes={
+                      comEstilos && layout === "retrato"
+                        ? [
+                            { id: "arvore", rotulo: "Árvore" },
+                            { id: "estilos", rotulo: "Estilos" },
+                            { id: "codigo", rotulo: "Código" },
+                          ]
+                        : [
+                            // Deitado, o painel Estilos fica ao lado da árvore: um segmento só.
+                            { id: "arvore", rotulo: comEstilos ? "Árvore e Estilos" : "Árvore" },
+                            { id: "codigo", rotulo: "Código" },
+                          ]
+                    }
+                    valor={segmentoVisivel}
                     aoTrocar={trocarSegmento}
                     className="w-full"
                   />
@@ -802,52 +1094,108 @@ export function JogoFase({
               )}
               <PainelDividido
                 rotulo="Redimensionar árvore e editor"
-                proporcaoInicial={0.5}
-                mostrar={movel ? (segmento === "arvore" ? "cima" : "baixo") : "ambas"}
+                proporcaoInicial={comEstilos ? 0.58 : 0.5}
+                mostrar={movel ? (segmento === "codigo" ? "baixo" : "cima") : "ambas"}
                 cima={
-                  <div className="flex h-full min-h-0 flex-col">
-                    <AlvoFerramenta
-                      ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
-                      marcador="arvore"
-                      aoAbrirCard={abrirCard}
-                      classeMarcador="bottom-2 right-3"
-                      className="min-h-0 flex-1"
-                    >
-                      <ArvoreElementos
-                        raiz={arvore}
-                        recolhidos={recolhidos}
-                        caminhoSelecionado={caminhoSelecionado}
-                        destaque={destaque}
-                        toque={toque}
-                        aoSelecionar={selecionar}
-                        aoAlternar={alternarRecolhido}
-                        aoPassarMouse={aoPassarMouseArvore}
-                        aoEditarTexto={editarTexto}
-                        aoEditarAtributo={editarAtributo}
-                        aoEsconder={alternarEsconder}
-                        aoApagar={apagar}
-                        aoDuplicar={duplicar}
-                        aoRenomearTag={renomearTag}
-                        aoDesfazer={desfazer}
-                        aoRefazer={refazer}
-                        podeDesfazer={historico.podeDesfazer}
-                        podeRefazer={historico.podeRefazer}
-                        aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
-                      />
-                    </AlvoFerramenta>
-                    <AlvoFerramenta ids={["trilha"]} marcador="trilha" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
-                      <TrilhaElementos
-                        raiz={arvore}
-                        caminhoSelecionado={caminhoSelecionado}
-                        aoSelecionar={(caminho) => selecionar(caminho, "trilha")}
-                        recuoDireita={layout === "retrato"}
-                      />
-                    </AlvoFerramenta>
-                  </div>
+                  <PainelLadoALado
+                    rotulo="Redimensionar árvore e painel Estilos"
+                    mostrar={!comEstilos ? "esquerda" : layout === "retrato" ? (segmento === "estilos" ? "direita" : "esquerda") : "ambas"}
+                    esquerda={
+                      <div className="flex h-full min-h-0 flex-col">
+                        <AlvoFerramenta
+                          ids={["arvore", "esconder", "apagar", "duplicar", "renomear-tag"]}
+                          marcador="arvore"
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="bottom-2 right-3"
+                          className="min-h-0 flex-1"
+                        >
+                          <ArvoreElementos
+                            raiz={arvore}
+                            recolhidos={recolhidos}
+                            caminhoSelecionado={caminhoSelecionado}
+                            destaque={destaque}
+                            toque={toque}
+                            aoSelecionar={selecionar}
+                            aoAlternar={alternarRecolhido}
+                            aoPassarMouse={aoPassarMouseArvore}
+                            aoEditarTexto={editarTexto}
+                            aoEditarAtributo={editarAtributo}
+                            aoEsconder={alternarEsconder}
+                            aoApagar={apagar}
+                            aoDuplicar={duplicar}
+                            aoRenomearTag={renomearTag}
+                        aoAdicionarAtributos={
+                          fase.usaFerramentas.includes("adicionar-atributo")
+                            ? (caminho, texto) => adicionarAtributos(caminho, lerAtributosDigitados(texto))
+                            : undefined
+                        }
+                        doctype={doctype}
+                            aoDesfazer={desfazer}
+                            aoRefazer={refazer}
+                            podeDesfazer={historico.podeDesfazer}
+                            podeRefazer={historico.podeRefazer}
+                            aoComecarEdicao={() => sinalizarUso("editar-duplo-clique")}
+                          />
+                        </AlvoFerramenta>
+                        <AlvoFerramenta ids={["trilha"]} marcador="trilha" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
+                          <TrilhaElementos
+                            raiz={arvore}
+                            caminhoSelecionado={caminhoSelecionado}
+                            aoSelecionar={(caminho) => selecionar(caminho, "trilha")}
+                            recuoDireita={layout === "retrato"}
+                          />
+                        </AlvoFerramenta>
+                      </div>
+                    }
+                    direita={
+                      comEstilos ? (
+                        <AlvoFerramenta
+                          ids={[
+                            "painel-estilos",
+                            "editar-valor-css",
+                            "ligar-desligar-declaracao",
+                            "setas-numericas",
+                            "seletor-de-cor",
+                            ...(paineis.includes("calculado") ? (["painel-calculado", "modelo-de-caixa"] as const) : []),
+                          ]}
+                          marcador={subAbaElementos === "calculado" ? "painel-calculado" : "painel-estilos"}
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="right-2 top-1.5"
+                          className="h-full min-h-0"
+                        >
+                          <PainelEstilos
+                            elemento={elementoSelecionado}
+                            versao={versaoDocumento * 100000 + versaoCss}
+                            paineis={paineis}
+                            temFolha={temCss}
+                            toque={toque}
+                            destaque={destaqueEstilos}
+                            lerCss={lerCss}
+                            acoes={acoesEstilos}
+                            aba={subAbaElementos}
+                            aoTrocarAba={trocarSubAba}
+                            calculado={
+                              paineis.includes("calculado") ? (
+                                <PainelCalculado
+                                  elemento={elementoSelecionado}
+                                  versao={versaoDocumento * 100000 + versaoCss}
+                                  toque={toque}
+                                  camada={realceCaixa?.camada ?? null}
+                                  aoRealcarCamada={realcarCamada}
+                                  aoIrParaFonte={irParaFonte}
+                                />
+                              ) : undefined
+                            }
+                            aoAbrirCard={abrirCard}
+                          />
+                        </AlvoFerramenta>
+                      ) : null
+                    }
+                  />
                 }
                 baixo={
                   <AlvoFerramenta
-                    ids={["editor"]}
+                    ids={temCss ? ["editor", "editor-css"] : ["editor"]}
                     marcador="editor"
                     aoAbrirCard={abrirCard}
                     classeMarcador="right-2 top-2"
@@ -856,8 +1204,10 @@ export function JogoFase({
                     <CabecalhoEditor
                       quebrarLinhas={quebrarLinhas}
                       aoAlternarQuebra={() => setQuebrarLinhas((valor) => !valor)}
+                      abas={temCss ? { ativa: abaEditor, aoTrocar: trocarAbaEditor, nomeCss: NOME_FOLHA_DO_JOGO } : undefined}
+                      documentoInteiro={fase.modoDocumento === true}
                     />
-                    <div className="min-h-0 flex-1">
+                    <div className={`min-h-0 flex-1 ${abaEditor === "html" ? "" : "hidden"}`}>
                       <EditorCodigo
                         ref={editorRef}
                         textoInicial={bodyInicial}
@@ -865,9 +1215,23 @@ export function JogoFase({
                         quebrarLinhas={quebrarLinhas}
                         aoMoverCursor={aoMoverCursor}
                         aoFocar={aoFocarEditor}
-                        rotulo="Editor do código HTML do corpo da página"
+                        rotulo={fase.modoDocumento ? "Editor do código HTML da página inteira" : "Editor do código HTML do corpo da página"}
                       />
                     </div>
+                    {cssInicial !== null && (
+                      <div className={`min-h-0 flex-1 ${abaEditor === "css" ? "" : "hidden"}`} data-editor-css>
+                        <EditorCodigo
+                          ref={editorCssRef}
+                          linguagem="css"
+                          textoInicial={cssInicial}
+                          aoMudar={aoEditarNoEditorCss}
+                          quebrarLinhas={quebrarLinhas}
+                          aoMoverCursorPosicao={aoMoverCursorCss}
+                          aoFocar={aoFocarEditor}
+                          rotulo={`Editor do CSS da página (${NOME_FOLHA_DO_JOGO})`}
+                        />
+                      </div>
+                    )}
                   </AlvoFerramenta>
                 }
               />
@@ -901,16 +1265,35 @@ export function JogoFase({
             classeMarcador="right-3 top-3"
             className="flex min-h-0 flex-1 flex-col"
           >
-            <JanelaNavegador url={fase.siteAlvo.url} compacta={movel}>
+            <JanelaNavegador
+              url={fase.siteAlvo.url}
+              compacta={movel}
+              tituloAba={fase.modoDocumento ? tituloAba : undefined}
+              aviso={
+                simulandoAcentos ? (
+                  <button
+                    type="button"
+                    data-aviso-acentos
+                    onClick={() => falar(FALA_ACENTOS)}
+                    className="absolute bottom-2 left-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full border-2 border-alerta bg-superficie px-3 py-1 text-left text-xs font-bold text-texto shadow-[0_3px_0_var(--cor-sombra)] pointer-coarse:min-h-11"
+                  >
+                    <IconeAviso className="shrink-0 text-alerta" />
+                    Acentos quebrados: simulação (sem meta charset)
+                  </button>
+                ) : undefined
+              }
+            >
               <PreviewSiteAlvo
                 ref={previewRef}
                 head={fase.siteAlvo.head}
                 bodyInicial={bodyInicial}
+                modoDocumento={fase.modoDocumento === true}
+                cssInicial={cssInicial}
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
               >
-                <SobreposicaoInspecao realce={realce} />
+                <SobreposicaoInspecao realce={realce} extras={realcesExtras} caixa={realceCaixa} />
                 <CamadaInspecao
                   ativa={inspecionando}
                   toque={toque}

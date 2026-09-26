@@ -4,8 +4,12 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 8 (áudio v2: música do mapa e efeitos gravados)
-concluída; antes dela, a rodada 7 (sistema de áudio) e a
+**Estado atual:** rodada 9 em andamento (painel Estilos, motor de
+cascata, modo documento, ROADMAP; ver a seção dela abaixo e o
+`docs/ROADMAP.md`, que é a fonte do status). A U6, a zona Estilos (E1 a
+E4) e a zona Layout (L1 a L4) já não pedem motor, e a E1 ("A aba
+Estilos") está publicada como unidade-modelo de CSS. Antes: rodada 8 (áudio v2: música do mapa e efeitos
+gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
@@ -13,6 +17,159 @@ seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
 inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
 que também requer motor (aba Estilos) — parar e relatar antes de
 produzir, seguindo a seção 0 do guia.
+
+## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
+
+Status resumido em `docs/ROADMAP.md` (fonte única de status a partir
+desta rodada).
+
+- [x] **Etapa 1: ROADMAP e currículo.** `docs/ROADMAP.md` criado (visão,
+  fluxo de trabalho, status, decisões, estimativas) e a regra nova "todo
+  prompt termina atualizando o Status do ROADMAP" no `PROJETO.md`, no
+  guia (com item no checklist) e no `CLAUDE.md`. Currículo
+  (`docs/MAPA-CURRICULAR.md` e `src/curriculo/curriculo.ts`) com as
+  adições: filosofia no topo; sala 6 "Por baixo do capô"
+  (`origens-museu-u6`); Lógica com "Resolvendo problemas" (2 unidades),
+  "Estruturas de dados" (3) e "Algoritmos essenciais" (4, a última é a
+  noção de desempenho); Rede e Servidor com APIs REST
+  (`rede-servidor-apis-e-json-u2`), SQL e NoSQL
+  (`rede-servidor-banco-de-dados-u2`), "Login e autenticação" e
+  "Segurança" (3); ilha nova `ia` entre Rede e Servidor e Ofício, com 5
+  zonas e `requerMotor` "IA ao vivo" (roteirizado e determinístico nas
+  guiadas, Gemini ao vivo nas livres); Ofício com "Git em equipe", "Ler
+  código dos outros", "TypeScript", "Testes automatizados", "Variáveis
+  de ambiente" e "Portfólio e aprender sozinho", e o projeto final
+  (`oficio-deploy-u2`) descrito como o critério do núcleo. Nenhum id
+  antigo mudou (unidades novas entram no fim das zonas; zonas novas
+  podem entrar no meio, porque o id da unidade depende só da posição na
+  zona). Ícones de zona novos `ia` (constelação) e `seguranca` (escudo).
+  Arte `ArteIA` (nós ligados como constelação e um farolzinho com sinal,
+  só tokens, animação só sem `prefers-reduced-motion`), mundo com 1840
+  de largura e as ilhas reposicionadas; o museu mostra as 6 salas.
+  Testes: `curriculo.test.ts` (ordem das ilhas, IA no lugar certo, ids
+  antigos preservados), `mapa.test.ts`, `registro.test.ts` (faixa `ia`,
+  que já existia no manifesto, agora tem ilha) e `testes/mapa.mjs`.
+- [x] **Etapa 2: CSS editável, motor de cascata, editor com abas e
+  declarativo novo.** `siteAlvo.css` (opcional; fases sem ele iguais) num
+  `<style data-folha-jogo>` depois do head; editar troca o `textContent`
+  no iframe na hora, sem recarregar (`PreviewSiteAlvo.definirCss`), e a
+  recarga do HTML leva o CSS mais novo. Motor próprio em `src/motor/css/`
+  (analisador com posições e declarações comentadas como desligadas,
+  especificidade do Selectors 4, folha do navegador resumida, atalhos e
+  longas, validade em três estados, cascata com riscadas por propriedade
+  longa, herança e `valorEfetivo` com inherit/initial/unset/var(),
+  edições no texto sem bagunçar a formatação). Regra de ouro: quando não
+  sabe, não risca (valor desconhecido, atalho que não sabe abrir, @media
+  sem matchMedia, lógica com física, folha com @layer). Nenhuma
+  biblioteca: a especificidade é nossa, com testes. Núcleo com operações
+  de CSS e foto do desfazer com HTML e CSS juntos. Validadores
+  `valorEfetivo`, `declaracao`, `regraExiste`, `riscada`; ações
+  `definirPropriedade`, `alternarDeclaracao`, `adicionarRegra`,
+  `editarCss`; linha de ajuda `{ alvo: "css" }`; eventos `editouCss`,
+  `editouPropriedade`, `alternouDeclaracao`, `adicionouRegra`; checagens
+  `css-da-fase` (CSS sem `siteAlvo.css`, seletorRegra inválido) e
+  `valorEfetivo` numa propriedade que o motor não conhece. Editor com abas
+  HTML e CSS (`@codemirror/lang-css` 6.3.1), cursor numa regra acende
+  todas as peças dela. Ferramenta `editor-css` no registro (card e
+  apresentação). Progresso com `cssAtual` e `cssInicioObjetivo`; meta
+  antes/depois e tutor com o CSS. Bancada do motor
+  (`src/conteudo/laboratorio/`, `/lab/fases?fase=lab-motor-u1-f1`), fora
+  do currículo. Testes: `cascata.test.ts` (56), `css.test.ts` (13, com
+  sabotagens), `testes/css.mjs` (Playwright, na bateria).
+- [x] **Etapa 3: painel Estilos dentro de Elementos.** Abas de cima na
+  ordem do Chrome (Elementos, Console, Fontes, Rede, Aplicação; só
+  Elementos funciona) e Estilos como sub-painel de Elementos, ligado
+  pela fase em `paineisElementos`. Painel com `element.style` sempre em
+  cima, regras da que vence para a que perde, folha do navegador e
+  "Herdado de" (só ancestrais com herdável, botão que seleciona o
+  ancestral), riscadas e aviso de valor inválido, link `estilo.css:N`
+  que abre a aba CSS do editor na regra, filtro, atalhos que abrem as
+  longas. Edição como no Chrome (conferida no devtools-frontend): clique
+  no nome ou no valor, Enter, Esc, Tab e Shift+Tab, `:` e `;` pulando
+  de campo, setas (1, Shift 10, Alt 0,1), caixinha que comenta, amostra
+  de cor com o seletor do sistema, "+ declaração", regra nova com o
+  seletor que o Chrome sugere, hover no seletor acendendo as peças,
+  prévia provisória enquanto digita (sem entrar no desfazer), desfazer.
+  Celular: "Árvore | Estilos | Código" em pé, lado a lado deitado,
+  alvos de 44 px e botões de seta. Ferramentas novas com card e
+  apresentação: `painel-estilos`, `editar-valor-css`,
+  `ligar-desligar-declaracao`, `setas-numericas`, `seletor-de-cor`,
+  `nova-regra`; as ações do painel contam como elas. Linha de ajuda
+  `{ alvo: "estilos" }`; checagem pede `"estilos"` em
+  `paineisElementos` quando a fase usa o painel. Testes: `css.test.ts`
+  (15, com as sabotagens novas), `numeros.test.ts` (5) e
+  `testes/estilos.mjs` (Playwright, desktop, em pé e deitado, na
+  bateria).
+- [x] **Etapa 4: aba Calculado e diagrama de caixa.** Sub-aba Calculado
+  ao lado de Estilos (`paineisElementos: ["estilos", "calculado"]`),
+  conferida no devtools-frontend (`MetricsSidebarPane`,
+  `ComputedStyleWidget`, `Color.PageHighlight`): diagrama do modelo de
+  caixa com as medidas reais do iframe (zero é "0", 3 casas, camada
+  "position"), lista das calculadas (sem "Mostrar todas", só as
+  declaradas no elemento mais display, width e height; ordem do Chrome),
+  filtro e rastro de cada propriedade pelo motor de cascata. Passar o
+  mouse numa camada acende ela na prévia com as cores do Chrome (tokens
+  `--cor-caixa-*` nos três temas); no toque, tocar liga e desliga; trocar
+  de sub-aba ou de segmento apaga. Ferramentas `painel-calculado` e
+  `modelo-de-caixa` com card e apresentação (a apresentação abre a
+  sub-aba). Checagem: Calculado precisa de `"calculado"` (e de
+  `"estilos"`) em `paineisElementos`. Testes: `modeloCaixa.test.ts` (3) e
+  `testes/calculado.mjs` (Playwright, desktop e em pé, na bateria).
+- [x] **Etapa 5: modo documento e adicionar atributo.** `modoDocumento:
+  true` (fase): editor com o documento inteiro, árvore a partir do
+  `<!DOCTYPE>` e do `<html>` com head, title e meta (estilos do jogo
+  injetados e escondidos), aba do navegador falso com o `<title>` ao vivo,
+  cabeçalho "Código da página index.html", foto do desfazer com o `<html>`
+  inteiro. Charset: não dá para reproduzir de verdade num iframe (srcdoc é
+  texto; blob: herda o UTF-8 do pai), então a prévia SIMULA os acentos
+  quebrados sem meta charset (aviso "simulação" e fala do
+  computadorzinho); código e validadores veem o texto certo; o meta
+  charset liga e desliga a simulação na hora. Validador `tituloDaAba`
+  (checagem: só no modo documento). "Adicionar atributo" como o Add
+  attribute do Chrome (conferido no devtools-frontend): item do menu do
+  nó (botão direito, toque longo), campo dentro da tag, mais de um
+  atributo de uma vez, desfazer, evento `adicionouAtributo`, ação
+  `adicionarAtributo`, ferramenta `adicionar-atributo` com apresentação;
+  só nas fases que usam a ferramenta (U1 a U5 intactas). Bancada do
+  documento (`lab-motor-u1-f2`) no `/lab/fases`. Testes:
+  `documento.test.ts` (14), `codificacao.test.ts` (3) e
+  `testes/documento.mjs` (Playwright, desktop e em pé, na bateria).
+- [x] **Etapa 6: mobile, testes, guia e liberações.** Celular deitado: o
+  seletor do painel vira "Árvore e Estilos | Código" (o Estilos já fica
+  ao lado da árvore) e o cabeçalho do painel Estilos quebra a linha no
+  espaço estreito (filtro e regra nova descem juntos, 44 px). As
+  apresentações das ferramentas do painel que se experimentam usando
+  (editar valor, caixinha, setas, cor, regra nova) mostram, em silêncio,
+  a peça que o objetivo aponta (sem ela e sem seleção, o body): o painel
+  nunca fica vazio no "Experimente". Testes Playwright de paisagem em
+  `estilos.mjs`, `calculado.mjs` e `documento.mjs`. Guia: seção 12
+  "Como escrever fases de CSS" (site-alvo de CSS sem @media, qual
+  validador usar, atalhos, como o motor decide o que risca, ações e
+  ferramentas, a bancada) e item no checklist. Currículo: a U6, a zona
+  Estilos (E1 a E4) e a zona Layout (L1 a L4) sem `requerMotor`; a E5,
+  Responsivo e Publicar continuam pedindo motor (testes do currículo e
+  `MAPA-CURRICULAR.md` atualizados).
+- [x] **Etapa 7: unidade-modelo E1 "A aba Estilos".** Meta ("repagina um
+  site sozinho pela folha de estilo"), 3 fases de prática na Floricultura
+  Pétala Azul e o desafio no Café Cantinho do Grão, com os comentários
+  pedagógicos no topo de cada arquivo (como a Unidade 2). F1 "Regras e
+  declarações" (olhar, trocar a cor, previsão "desligar apaga a peça?",
+  sozinho numa class repetida), F2 "Tamanho, fonte e alinhamento"
+  (setas, previsão do rem, fonte herdada do body, + declaração, sozinho
+  com duas declarações), F3 "Cores e regras novas" (previsão do
+  hexadecimal, seletor de cor, regra nova, sozinho com regra nova e hex),
+  desafio com 5 partes, cada uma apontando para a fase guiada. Validadores
+  `valorEfetivo` (o resultado) e `declaracao` (o caminho, ao desligar), e
+  `todos` + `nao` para "qualquer cor nova" sem aceitar valor inválido. As
+  6 ferramentas do painel apresentadas uma a uma; 13 conceitos novos.
+  Publicada (`publicar:conteudo`). Motor: o recorte da apresentação não
+  bloqueia mais um alvo que fica dentro de outra área liberada (o "+" da
+  regra nova dentro do painel), e a folga de toque do nome e do valor
+  diminuiu (em paisagem, com a declaração quebrando a linha, a de baixo
+  cobria a de cima). Testes: `unidades.mjs` joga a E1 inteira pelo mapa
+  depois da U5, nos 3 layouts (U6 e E2 planejadas, Sites 6 de 6);
+  `curriculo.test.ts` e `mapa.test.ts` com a zona Estilos (a E1 abre ao
+  acabar a zona Elementos; a Lógica só depois da E1).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 
@@ -595,11 +752,10 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
-- A zona Elementos está completa (U1 a U5). A U6 ("Página do zero") e a
-  zona Estilos (próxima da rota) pedem motor antes de produzir conteúdo
-  (ver `requerMotor` em `src/curriculo/curriculo.ts`): modo documento
-  inteiro (head editável) para a U6, e a aba Estilos inteira para a zona
-  Estilos.
+- A zona Elementos está completa (U1 a U5). A U6 ("Página do zero"), a
+  zona Estilos (E1 a E4) e a zona Layout (L1 a L4) já têm motor (rodada
+  9): é trabalho da fábrica, seguindo o guia (seção 12 para CSS; a
+  Bancada do documento no `/lab/fases` como exemplo de `modoDocumento`).
 - Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.

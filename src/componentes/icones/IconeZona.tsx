@@ -110,6 +110,24 @@ const DESENHOS: Record<IdIconeZona, ReactNode> = {
       <path d="M6 6.3v7.4M14 9.8c0 3-8 2-8 3.9" />
     </>
   ),
+  // Constelação: nós ligados, como a arte da ilha IA.
+  ia: (
+    <>
+      <path d="M4.5 13.5L9 6.5l6.5 3-3 6z" strokeOpacity={0.6} />
+      <circle cx="4.5" cy="13.5" r="1.8" fill="currentColor" />
+      <circle cx="9" cy="6.5" r="1.8" fill="currentColor" />
+      <circle cx="15.5" cy="9.5" r="1.8" fill="currentColor" />
+      <circle cx="12.5" cy="15.5" r="1.8" fill="currentColor" />
+    </>
+  ),
+  // Escudo com cadeado.
+  seguranca: (
+    <>
+      <path d="M10 2.5l6 2.5v4.5c0 4-2.7 6.7-6 8-3.3-1.3-6-4-6-8V5z" fill="currentColor" fillOpacity={0.15} />
+      <rect x="7.5" y="9.5" width="5" height="4" rx="1" />
+      <path d="M8.5 9.5V8a1.5 1.5 0 0 1 3 0v1.5" />
+    </>
+  ),
   // Blocos montados.
   componentes: (
     <>

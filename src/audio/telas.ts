@@ -25,8 +25,7 @@ export const FAIXA_DO_MUSEU = "origens";
 /**
  * Faixa de cada ilha, pelo id do currículo (src/curriculo/curriculo.ts).
  * Vale para a ilha e para todas as zonas, unidades e fases dentro dela.
- * "ia" já tem música mas a ilha ainda não existe no currículo; "frameworks"
- * existe no currículo mas ainda não tem música (toca silêncio).
+ * "frameworks" existe no currículo mas ainda não tem música (toca silêncio).
  */
 export const FAIXA_DA_ILHA: Readonly<Record<string, string>> = {
   origens: "origens",

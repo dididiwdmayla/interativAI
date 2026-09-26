@@ -148,7 +148,7 @@ export function MuseuOrigens({ ilhaId }: Props) {
             <h2 id="salas-museu" className="text-lg font-black text-texto">
               As salas
             </h2>
-            <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {salas.map((sala, indice) => (
                 <li
                   key={sala.id}
