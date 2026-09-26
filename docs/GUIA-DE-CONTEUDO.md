@@ -673,7 +673,10 @@ próximo aparece "Em breve".
 
 A zona Estilos (e a Layout) mexe na APARÊNCIA do site pela folha de
 estilo, sem tocar no HTML. Tudo aqui vale junto com as seções 3 a 11: o
-formato, a escada de ajuda, as previsões e as checagens são os mesmos.
+formato, a escada de ajuda, as previsões e as checagens são os mesmos. O
+modelo é a E1, "A aba Estilos" (`src/conteudo/ilhas/sites/estilos/unidade-1/`):
+cada arquivo de fase explica no topo as decisões (ordem, validadores,
+revisão espaçada, confusões atacadas), como a Unidade 2 faz para HTML.
 
 ### 12.1 O site-alvo de CSS
 

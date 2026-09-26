@@ -40,7 +40,8 @@ núcleo comum.
   (`publicar:conteudo`), guia, template, atritos.
 - Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (vazio),
   desbloqueios.
-- Conteúdo: Ilha Sites › Elementos, U1 a U5.
+- Conteúdo: Ilha Sites › Elementos, U1 a U5; Estilos, E1 ("A aba
+  Estilos", a unidade-modelo de CSS).
 - Rodada 9 (painel Estilos, modo documento, ROADMAP):
   - `docs/ROADMAP.md` (este arquivo) e a regra de atualizar o Status no
     fim de todo prompt (`PROJETO.md` e guia).
@@ -80,17 +81,30 @@ núcleo comum.
     guia com "Como escrever fases de CSS" e liberações no currículo: U6,
     Estilos (E1 a E4) e Layout (L1 a L4) sem `requerMotor` (E5,
     Responsivo e Publicar continuam pedindo motor).
+  - Unidade-modelo E1 "A aba Estilos" (publicada): 3 fases de prática na
+    Floricultura Pétala Azul (guiado e sozinho na mesma fase, uma
+    previsão por fase) e o desafio no Café Cantinho do Grão, com
+    `valorEfetivo` e `declaracao` na prática e as 6 ferramentas do painel
+    apresentadas uma a uma. Jornada Playwright pelo mapa nos 3 layouts.
 
 ### Em andamento
 
-- Rodada 9, etapa 7: a unidade-modelo E1 ("A aba Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.
 
+### Pendente de decisão
+
+- A fala final da U4 Fase 1 (publicada, congelada) diz que um atributo
+  novo "se escreve na aba Estilos ou direto no HTML". No Chrome, atributo
+  novo é pelo "Add attribute" da aba Elements (o gesto que o jogo tem
+  agora). Não mexi: corrigir texto publicado pede uma decisão sobre
+  errata de conteúdo congelado.
+
 ### Próximo (em ordem)
 
-1. Sonnet: U6, E2 a E4 e L1 a L4, depois desta tarefa.
+1. Sonnet: U6, E2 a E4 e L1 a L4 (motor pronto; modelos: a Unidade 2
+   para HTML, a E1 para CSS e a Bancada do documento para a U6).
 2. Opus: camada de trilhas acima das ilhas, temas (lente sobre o mapa:
    Segurança, APIs, Dados, Desempenho, Acessibilidade, IA, com progresso
    e insígnias), profissões (Front-end, Back-end, Segurança, Dados,

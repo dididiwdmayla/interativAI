@@ -78,7 +78,7 @@ export function LinhaDeclaracao({
             aoComecar("nome");
           }
         }}
-        className={`text-codigo-atributo ${editavel ? "cursor-text rounded hover:bg-hover pointer-coarse:py-3" : ""}`}
+        className={`text-codigo-atributo ${editavel ? "cursor-text rounded hover:bg-hover pointer-coarse:py-1" : ""}`}
       >
         {declaracao.propriedade}
       </span>
@@ -108,7 +108,7 @@ export function LinhaDeclaracao({
             aoComecar("valor");
           }
         }}
-        className={`text-codigo-valor ${editavel ? "cursor-text rounded hover:bg-hover pointer-coarse:py-3" : ""}`}
+        className={`text-codigo-valor ${editavel ? "cursor-text rounded hover:bg-hover pointer-coarse:py-1" : ""}`}
       >
         {declaracao.valorBruto}
       </span>

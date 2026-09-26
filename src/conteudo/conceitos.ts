@@ -147,6 +147,60 @@ const CATALOGO = {
     nome: "Span genérico",
     resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
   },
+
+  // Zona Estilos, E1: a aba Estilos
+  "o-que-e-css": {
+    nome: "O que é CSS",
+    resumo: "A folha de estilo diz como as peças aparecem (cor, tamanho, fonte); o HTML diz o que elas são.",
+  },
+  "regra-e-declaracao": {
+    nome: "Regra e declaração",
+    resumo: "Uma regra junta um seletor e declarações; cada declaração é uma propriedade e um valor, como color: white.",
+  },
+  "cor-do-texto": {
+    nome: "Cor do texto",
+    resumo: "A propriedade color pinta as letras de uma peça.",
+  },
+  "cor-de-fundo": {
+    nome: "Cor de fundo",
+    resumo: "A propriedade background-color pinta o fundo da caixa de uma peça.",
+  },
+  "cor-por-nome": {
+    nome: "Cor por nome",
+    resumo: "O CSS conhece cores pelo nome em inglês, como white, crimson ou gold.",
+  },
+  "ligar-desligar-declaracao": {
+    nome: "Ligar e desligar declaração",
+    resumo: "A caixinha do painel Estilos desliga uma declaração sem apagar, para testar o que ela faz.",
+  },
+  "tamanho-da-letra": {
+    nome: "Tamanho da letra",
+    resumo: "A propriedade font-size muda o tamanho do texto, por exemplo em px, os pontinhos da tela.",
+  },
+  "unidade-rem": {
+    nome: "Unidade rem",
+    resumo: "1rem é o tamanho da letra da página inteira (16px, se ninguém mudou), então 2rem é o dobro disso.",
+  },
+  "familia-da-fonte": {
+    nome: "Família da fonte",
+    resumo: "A propriedade font-family escolhe o desenho das letras, com uma reserva no fim, como Georgia, serif.",
+  },
+  "alinhamento-do-texto": {
+    nome: "Alinhamento do texto",
+    resumo: "A propriedade text-align põe o texto à esquerda, no centro ou à direita da caixa dele.",
+  },
+  "peso-da-fonte": {
+    nome: "Peso da fonte",
+    resumo: "A propriedade font-weight deixa a letra mais grossa (bold) ou normal.",
+  },
+  "cor-hexadecimal": {
+    nome: "Cor em hexadecimal",
+    resumo: "Uma cor escrita como #RRGGBB: quanto de vermelho, verde e azul, de 00 (nada) a FF (tudo).",
+  },
+  "regra-nova": {
+    nome: "Regra nova",
+    resumo: "Quando nenhuma regra pega a peça, você cria uma com o seletor dela e escreve as declarações.",
+  },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;

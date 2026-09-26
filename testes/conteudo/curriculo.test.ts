@@ -60,12 +60,20 @@ describe("currículo em dados", () => {
     expect(statusDaUnidade("sites-elementos-u6", [...UNIDADES, { ...U1, id: "sites-elementos-u6" }])).toBe("pronta");
   });
 
-  it("U1 e U2 usam os ids do conteúdo, na zona Elementos da ilha Sites", () => {
+  it("as unidades de conteúdo usam os ids do currículo, na ilha e na zona que dizem", () => {
     for (const unidade of UNIDADES) {
       const local = localNoCurriculo(unidade.id);
-      expect(local?.ilha.id).toBe("sites");
-      expect(local?.zona.id).toBe("elementos");
+      expect(local?.ilha.id, unidade.id).toBe("sites");
+      expect(local?.zona.nome, unidade.id).toBe(unidade.zona);
     }
+    expect(UNIDADES.map((unidade) => localNoCurriculo(unidade.id)?.zona.id)).toEqual([
+      "elementos",
+      "elementos",
+      "elementos",
+      "elementos",
+      "elementos",
+      "estilos",
+    ]);
   });
 
   it("liberações da rodada 9: U6, Estilos (E1 a E4) e Layout (L1 a L4) sem requerMotor", () => {

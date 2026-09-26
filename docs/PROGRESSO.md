@@ -7,7 +7,8 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 **Estado atual:** rodada 9 em andamento (painel Estilos, motor de
 cascata, modo documento, ROADMAP; ver a seção dela abaixo e o
 `docs/ROADMAP.md`, que é a fonte do status). A U6, a zona Estilos (E1 a
-E4) e a zona Layout (L1 a L4) já não pedem motor. Antes: rodada 8 (áudio v2: música do mapa e efeitos
+E4) e a zona Layout (L1 a L4) já não pedem motor, e a E1 ("A aba
+Estilos") está publicada como unidade-modelo de CSS. Antes: rodada 8 (áudio v2: música do mapa e efeitos
 gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
@@ -148,6 +149,27 @@ desta rodada).
   Estilos (E1 a E4) e a zona Layout (L1 a L4) sem `requerMotor`; a E5,
   Responsivo e Publicar continuam pedindo motor (testes do currículo e
   `MAPA-CURRICULAR.md` atualizados).
+- [x] **Etapa 7: unidade-modelo E1 "A aba Estilos".** Meta ("repagina um
+  site sozinho pela folha de estilo"), 3 fases de prática na Floricultura
+  Pétala Azul e o desafio no Café Cantinho do Grão, com os comentários
+  pedagógicos no topo de cada arquivo (como a Unidade 2). F1 "Regras e
+  declarações" (olhar, trocar a cor, previsão "desligar apaga a peça?",
+  sozinho numa class repetida), F2 "Tamanho, fonte e alinhamento"
+  (setas, previsão do rem, fonte herdada do body, + declaração, sozinho
+  com duas declarações), F3 "Cores e regras novas" (previsão do
+  hexadecimal, seletor de cor, regra nova, sozinho com regra nova e hex),
+  desafio com 5 partes, cada uma apontando para a fase guiada. Validadores
+  `valorEfetivo` (o resultado) e `declaracao` (o caminho, ao desligar), e
+  `todos` + `nao` para "qualquer cor nova" sem aceitar valor inválido. As
+  6 ferramentas do painel apresentadas uma a uma; 13 conceitos novos.
+  Publicada (`publicar:conteudo`). Motor: o recorte da apresentação não
+  bloqueia mais um alvo que fica dentro de outra área liberada (o "+" da
+  regra nova dentro do painel), e a folga de toque do nome e do valor
+  diminuiu (em paisagem, com a declaração quebrando a linha, a de baixo
+  cobria a de cima). Testes: `unidades.mjs` joga a E1 inteira pelo mapa
+  depois da U5, nos 3 layouts (U6 e E2 planejadas, Sites 6 de 6);
+  `curriculo.test.ts` e `mapa.test.ts` com a zona Estilos (a E1 abre ao
+  acabar a zona Elementos; a Lógica só depois da E1).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5] = UNIDADES;
+const [U1, U2, U3, U4, U5, E1] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -68,7 +68,9 @@ describe("ilhas", () => {
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("disponivel");
+    // A E1 (zona Estilos) também está pronta: a Lógica só abre depois dela.
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, E1), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -100,6 +102,13 @@ describe("zonas e unidades", () => {
     expect(zonaAberta(SITES, ESTILOS, depoisU1)).toBe(false);
     expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4) })).toBe(false);
     expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5) })).toBe(true);
+  });
+
+  it("a E1 fica bloqueada até a zona Elementos acabar, e as outras de Estilos seguem planejadas", () => {
+    const estados = (progresso: Progresso) => ESTILOS.unidades.map((unidade) => estadoDaUnidade(SITES, ESTILOS, unidade, { progresso }));
+    expect(E1.id).toBe("sites-estilos-u1");
+    expect(estados(concluiu(U1, U2, U3, U4))).toEqual(["bloqueada", "planejada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["disponivel", "planejada", "planejada", "planejada", "planejada"]);
   });
 
   it("botão do card: Jogar, Continuar e Jogar de novo, abrindo a próxima fase não concluída", () => {
