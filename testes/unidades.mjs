@@ -1393,7 +1393,8 @@ await apresentacao("painel-calculado", async () => {
   await mostrarCalculado();
 });
 await apresentacao("modelo-de-caixa", async () => {
-  await pagina.locator('[data-camada="padding"] [data-lado="cima"]').first().hover();
+  // No toque não existe hover: o realce é por toque mesmo (onClick na camada).
+  await tocar(pagina.locator('[data-camada="padding"]').first());
 });
 await voltarParaEstilosSubAba();
 await selecionarParaEstilos(".bolo");
