@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, E1] = UNIDADES;
+const [U1, U2, U3, U4, U5, U6, E1] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -68,9 +68,11 @@ describe("ilhas", () => {
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
-    // A E1 (zona Estilos) também está pronta: a Lógica só abre depois dela.
+    // A U6 também está pronta: falta ela.
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, E1), unidades })).toBe("disponivel");
+    // A E1 (zona Estilos) também está pronta: a Lógica só abre depois dela.
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -82,7 +84,7 @@ describe("ilhas", () => {
 });
 
 describe("zonas e unidades", () => {
-  it("do zero: U1 disponível, U2-U5 bloqueadas (já prontas), a U6 planejada (requer motor)", () => {
+  it("do zero: U1 disponível, U2-U6 bloqueadas (já prontas)", () => {
     const fonte = { progresso: PROGRESSO_PADRAO };
     expect(ELEMENTOS.unidades.map((unidade) => estadoDaUnidade(SITES, ELEMENTOS, unidade, fonte))).toEqual([
       "disponivel",
@@ -90,7 +92,7 @@ describe("zonas e unidades", () => {
       "bloqueada",
       "bloqueada",
       "bloqueada",
-      "planejada",
+      "bloqueada",
     ]);
     expect(zonaAberta(SITES, ESTILOS, fonte)).toBe(false);
   });
@@ -101,14 +103,48 @@ describe("zonas e unidades", () => {
     expect(estadoDaUnidade(SITES, ELEMENTOS, item("sites-elementos-u2"), depoisU1)).toBe("disponivel");
     expect(zonaAberta(SITES, ESTILOS, depoisU1)).toBe(false);
     expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4) })).toBe(false);
-    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5) })).toBe(true);
+    // Falta a U6: a zona Estilos ainda não abre só com U1 a U5.
+    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5) })).toBe(false);
+    expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5, U6) })).toBe(true);
   });
 
-  it("a E1 fica bloqueada até a zona Elementos acabar, e as outras de Estilos seguem planejadas", () => {
+  it("a E1 fica bloqueada até a zona Elementos acabar (U1 a U6), e as outras de Estilos seguem planejadas", () => {
     const estados = (progresso: Progresso) => ESTILOS.unidades.map((unidade) => estadoDaUnidade(SITES, ESTILOS, unidade, { progresso }));
     expect(E1.id).toBe("sites-estilos-u1");
-    expect(estados(concluiu(U1, U2, U3, U4))).toEqual(["bloqueada", "planejada", "planejada", "planejada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["disponivel", "planejada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "planejada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "planejada", "planejada", "planejada", "planejada"]);
+  });
+
+  it("desbloqueio permanente: uma unidade nova numa zona anterior não tranca de novo a zona já aberta", () => {
+    // Quem já tinha aberto (ou concluído) a E1 antes de a U6 existir continua
+    // com a zona Estilos aberta, mesmo sem ter jogado a U6 (registrada depois).
+    const jaAbriuEstilosSemAU6: Progresso = { ...PROGRESSO_PADRAO, fasesConcluidas: [U1, U2, U3, U4, U5, E1].flatMap((u) => u.fases) };
+    expect(zonaAberta(SITES, ESTILOS, { progresso: jaAbriuEstilosSemAU6 })).toBe(true);
+    const itemE1 = ESTILOS.unidades.find((unidade) => unidade.id === E1.id);
+    if (!itemE1) throw new Error("sites-estilos-u1 não está no currículo");
+    expect(estadoDaUnidade(SITES, ESTILOS, itemE1, { progresso: jaAbriuEstilosSemAU6 })).not.toBe("bloqueada");
+
+    // Só começar (sem concluir) alguma fase da E1 já basta pra manter aberta.
+    const comecouEstilosSemAU6: Progresso = {
+      ...PROGRESSO_PADRAO,
+      fasesConcluidas: [U1, U2, U3, U4, U5].flatMap((u) => u.fases),
+      fasesEmAndamento: {
+        [E1.fases[0]]: {
+          objetivoAtual: 0,
+          htmlAtual: null,
+          cssAtual: null,
+          estrelas: 0,
+          introducaoVista: true,
+          metaVista: false,
+          htmlInicioObjetivo: null,
+          cssInicioObjetivo: null,
+          previsaoRespondida: null,
+          partesFeitas: [],
+          reveres: 0,
+        },
+      },
+    };
+    expect(zonaAberta(SITES, ESTILOS, { progresso: comecouEstilosSemAU6 })).toBe(true);
   });
 
   it("botão do card: Jogar, Continuar e Jogar de novo, abrindo a próxima fase não concluída", () => {

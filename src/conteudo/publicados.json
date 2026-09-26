@@ -30,6 +30,11 @@
       "sites-elementos-u5-f3",
       "sites-elementos-u5-f4"
     ],
+    "sites-elementos-u6": [
+      "sites-elementos-u6-f1",
+      "sites-elementos-u6-f2",
+      "sites-elementos-u6-f3"
+    ],
     "sites-estilos-u1": [
       "sites-estilos-u1-f1",
       "sites-estilos-u1-f2",
@@ -175,6 +180,29 @@
         "secao-servicos",
         "cards-artigo",
         "precos-span"
+      ]
+    },
+    "sites-elementos-u6-f1": {
+      "objetivos": [
+        "titulo-no-body",
+        "title-no-head",
+        "aviso-e-link"
+      ]
+    },
+    "sites-elementos-u6-f2": {
+      "objetivos": [
+        "meta-charset",
+        "link-aba-nova",
+        "meta-viewport"
+      ]
+    },
+    "sites-elementos-u6-f3": {
+      "partes": [
+        "titulo-da-aba",
+        "titulo-da-pagina",
+        "meta-charset-cartao",
+        "meta-viewport-cartao",
+        "bio-com-acento"
       ]
     },
     "sites-estilos-u1-f1": {

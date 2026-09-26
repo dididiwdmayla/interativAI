@@ -61,6 +61,30 @@ function temPronta(ilha: IlhaCurriculo, unidades: readonly Unidade[]): boolean {
   return ilha.zonas.some((zona) => zona.unidades.some((item) => conteudoDe(item.id, unidades) !== undefined));
 }
 
+/**
+ * Alguma unidade da lista já foi começada ou concluída: sinal de que o
+ * jogador já esteve ali. Usado para o desbloqueio PERMANENTE (ver
+ * `zonaComProgresso` e `ilhaComProgresso`): uma unidade nova, registrada
+ * numa zona (ou ilha) anterior depois que o jogador já passou por uma zona
+ * (ou ilha) seguinte, não pode trancar de novo o que ele já abriu.
+ */
+function algumaComProgresso(lista: readonly UnidadeCurriculo[], unidades: readonly Unidade[], progresso: Progresso): boolean {
+  return lista.some((item) => {
+    const conteudo = conteudoDe(item.id, unidades);
+    return conteudo !== undefined && (unidadeComecada(conteudo, progresso) || unidadeConcluida(conteudo, progresso));
+  });
+}
+
+/** A zona já foi aberta alguma vez (alguma unidade dela tem progresso): fica aberta para sempre. */
+function zonaComProgresso(zona: ZonaCurriculo, unidades: readonly Unidade[], progresso: Progresso): boolean {
+  return algumaComProgresso(zona.unidades, unidades, progresso);
+}
+
+/** A ilha já foi aberta alguma vez (alguma unidade de alguma zona tem progresso): fica aberta para sempre. */
+function ilhaComProgresso(ilha: IlhaCurriculo, unidades: readonly Unidade[], progresso: Progresso): boolean {
+  return ilha.zonas.some((zona) => zonaComProgresso(zona, unidades, progresso));
+}
+
 /** A ilha tem todas as unidades prontas concluídas. */
 export function ilhaCompleta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
   const unidades = fonte.unidades ?? UNIDADES;
@@ -75,6 +99,9 @@ export function ilhaCompleta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
 function ilhaAberta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
   const curriculo = fonte.curriculo ?? CURRICULO;
   if (ilha.sempreAberta || fonte.progresso.mapaDesbloqueado) return true;
+  // Desbloqueio permanente: já esteve aqui, continua aberta (uma unidade nova
+  // registrada numa ilha anterior não tranca de novo o que já foi aberto).
+  if (ilhaComProgresso(ilha, fonte.unidades ?? UNIDADES, fonte.progresso)) return true;
   const rota = curriculo.filter((item) => !item.opcional && !item.sempreAberta);
   const indice = rota.findIndex((item) => item.id === ilha.id);
   if (indice === 0) return true;
@@ -99,9 +126,12 @@ export function ilhaAnterior(ilha: IlhaCurriculo, curriculo: readonly IlhaCurric
 
 /** A zona está aberta: a ilha não está bloqueada e as zonas antes dela têm tudo pronto concluído. */
 export function zonaAberta(ilha: IlhaCurriculo, zona: ZonaCurriculo, fonte: FonteMapa): boolean {
-  if (estadoDaIlha(ilha, fonte) === "bloqueada") return false;
   if (fonte.progresso.mapaDesbloqueado) return true;
   const unidades = fonte.unidades ?? UNIDADES;
+  // Desbloqueio permanente: já esteve nesta zona, continua aberta, mesmo que
+  // uma unidade nova numa zona anterior (ou a ilha) mude o que falta.
+  if (zonaComProgresso(zona, unidades, fonte.progresso)) return true;
+  if (estadoDaIlha(ilha, fonte) === "bloqueada") return false;
   const indice = ilha.zonas.findIndex((item) => item.id === zona.id);
   return ilha.zonas.slice(0, Math.max(0, indice)).every((anterior) => prontasConcluidas(anterior.unidades, unidades, fonte.progresso));
 }

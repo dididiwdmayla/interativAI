@@ -56,8 +56,9 @@ describe("currículo em dados", () => {
     expect(statusDaUnidade("sites-elementos-u3")).toBe("pronta");
     expect(statusDaUnidade("sites-elementos-u4")).toBe("pronta");
     expect(statusDaUnidade("sites-elementos-u5")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u6")).toBe("planejada");
-    expect(statusDaUnidade("sites-elementos-u6", [...UNIDADES, { ...U1, id: "sites-elementos-u6" }])).toBe("pronta");
+    expect(statusDaUnidade("sites-elementos-u6")).toBe("pronta");
+    expect(statusDaUnidade("sites-estilos-u2")).toBe("planejada");
+    expect(statusDaUnidade("sites-estilos-u2", [...UNIDADES, { ...U1, id: "sites-estilos-u2" }])).toBe("pronta");
   });
 
   it("as unidades de conteúdo usam os ids do currículo, na ilha e na zona que dizem", () => {
@@ -67,6 +68,7 @@ describe("currículo em dados", () => {
       expect(local?.zona.nome, unidade.id).toBe(unidade.zona);
     }
     expect(UNIDADES.map((unidade) => localNoCurriculo(unidade.id)?.zona.id)).toEqual([
+      "elementos",
       "elementos",
       "elementos",
       "elementos",

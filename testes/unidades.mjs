@@ -1,10 +1,12 @@
-// Joga as Unidades 1 a 5 da zona Elementos e a E1 da zona Estilos do
+// Joga as Unidades 1 a 6 da zona Elementos e a E1 da zona Estilos do
 // começo ao fim, como um jogador, a partir do mapa: mundo -> ilha Sites ->
 // unidade -> fases -> volta para a ilha, que comemora. No caminho:
 // apresentações, meta com antes/depois, previsões, o esbarrão do
 // computadorzinho, objetivos sozinho, o desafio com checklist, o Rever
-// (revisão e volta) e, na E1, o painel Estilos (editar valor, caixinha,
-// setas, seletor de cor, + declaração e regra nova).
+// (revisão e volta), o modo documento da U6 (escrever a página inteira,
+// title na aba, meta charset com a simulação de acento, adicionar
+// atributo) e, na E1, o painel Estilos (editar valor, caixinha, setas,
+// seletor de cor, + declaração e regra nova).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
 import { abrir, chaveDoSeletor, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
 
@@ -191,6 +193,47 @@ async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   const novaLinha = texto.slice(0, posicao) + textoNovo + texto.slice(posicao);
   const conferida = await pagina.locator(".cm-line", { hasText: buscaTexto }).first().textContent();
   if (conferida !== novaLinha) throw new Error(`Falhou: linha ficou "${conferida}", esperava "${novaLinha}"`);
+}
+
+/**
+ * Modo documento (U6): escreve uma linha nova logo depois da linha que tem
+ * `buscaTexto` (a mesma rolagem de `clicarLinhaCodigo`, já que o documento
+ * inteiro pode ser mais comprido que a tela).
+ */
+async function digitarNoDocumento(buscaTexto, linhaNova) {
+  await clicarLinhaCodigo(buscaTexto);
+  await pagina.keyboard.press("End");
+  await pagina.keyboard.press("Enter");
+  await pagina.keyboard.type(linhaNova);
+  await esperar(600);
+}
+
+/**
+ * "Adicionar atributo" pelo menu do nó (botão direito no desktop, toque
+ * longo no celular), como o Add attribute do Chrome: abre um campo dentro
+ * da tag, onde `textoAtributo` é digitado inteiro (ex.: 'target="_blank"').
+ */
+async function adicionarAtributoPeloMenu(seletor, textoAtributo) {
+  const chave = await chaveDoSeletor(pagina, seletor);
+  await mostrarPainel("Árvore");
+  const linha = no(chave);
+  await linha.scrollIntoViewIfNeeded();
+  if (toque) {
+    const caixa = await linha.boundingBox();
+    const ponto = { clientX: caixa.x + 60, clientY: caixa.y + caixa.height / 2, pointerType: "touch", isPrimary: true, pointerId: 11 };
+    await linha.dispatchEvent("pointerdown", ponto);
+    await esperar(750);
+    await linha.dispatchEvent("pointerup", ponto);
+  } else {
+    await linha.click({ button: "right" });
+  }
+  const item = pagina.locator("[data-menu-no] [data-acao=adicionar-atributo]");
+  await item.waitFor({ timeout: 5000 });
+  await tocar(item);
+  const campo = pagina.locator("[data-atributo-novo] input");
+  await campo.fill(textoAtributo);
+  await campo.press("Enter");
+  await esperar(300);
 }
 
 /** Renomeia a tag do primeiro elemento do seletor: dois cliques (ou toques) no nome dela. */
@@ -889,13 +932,103 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U5: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U5: 3 estrelas");
 
-// Volta para a ilha: a U5 acende; a U6 segue planejada (sem conteúdo ainda) e a zona Estilos abre.
+// Volta para a ilha: a U5 acende; a U6 já é conteúdo, então a zona Estilos
+// espera ela também (só abre quando TODAS as prontas de Elementos acabam).
 await conclusaoEVoltarAIlha("U5");
 conferir((await estadoDoPonto("sites-elementos-u5")) === "concluida", "ilha: U5 concluída");
-conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (o motor está pronto, falta o conteúdo)");
-conferir((await estadoDoPonto("sites-estilos-u1")) === "disponivel", "ilha: a E1 abriu (a zona Elementos acabou)");
+conferir((await estadoDoPonto("sites-elementos-u6")) === "disponivel", "ilha: a U6 abriu");
+conferir((await estadoDoPonto("sites-estilos-u1")) === "bloqueada", "ilha: a E1 ainda espera a U6");
 const salvoU5 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
 conferir(salvoU5.fasesConcluidas.length === 19, `19 fases concluídas (${salvoU5.fasesConcluidas.length})`);
+
+await jogarUnidade("sites-elementos-u6", "Jogar");
+
+// ------------------------------------------------------------ U6 fase 1 (modo documento)
+await metaDaUnidade("U6 começo");
+await conversar(3);
+conferir((await pagina.getByText("index.html").count()) > 0, "modo documento: cabeçalho do editor fala da página inteira");
+await digitarNoDocumento("<body>", "<h1>Feira de Talentos</h1>");
+await proximoObjetivo("U6F1 objetivo 1 (h1 no body)");
+
+// Previsão: escrever no head não faz o texto aparecer na tela.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await digitarNoDocumento("<head>", "<title>Feira de Talentos</title>");
+conferir((await pagina.locator("[data-titulo-aba]").innerText()) === "Feira de Talentos", "a aba mudou com o title");
+await proximoObjetivo("U6F1 objetivo 2 (previsão do title)");
+
+// Sozinho: parágrafo com acento e link, numa tacada só.
+await abrirBalao();
+if (!movel) conferir((await pagina.locator("[aria-current=step]").textContent()).includes("Sozinho"), "sozinho: selo na faixa do objetivo");
+await clicarLinhaCodigo("<h1>Feira de Talentos</h1>");
+await pagina.keyboard.press("End");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("<p>Inscrições até sexta-feira!</p>");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type('<a href="https://exemplo.site/inscricao">Inscreva-se aqui</a>');
+await esperar(600);
+await pagina.locator("[data-fez-sozinho]").waitFor({ timeout: 5000 });
+conferir(true, "sozinho: comemoração Fez sozinho!");
+await proximoObjetivo("U6F1 objetivo 3 (sozinho, parágrafo e link)");
+await conclusaoEProxima("U6F1");
+
+// ------------------------------------------------------------ U6 fase 2
+await conversar(2);
+conferir((await iframe.locator("p").first().textContent()) !== "Inscrições até sexta-feira!", "os acentos chegam quebrados sem o meta charset (simulação)");
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await digitarNoDocumento("<head>", '<meta charset="utf-8">');
+await pagina.waitForFunction(() => document.querySelector("[data-titulo-aba]") && !document.querySelector("[data-aviso-acentos]"));
+conferir((await iframe.locator("p").first().textContent()) === "Inscrições até sexta-feira!", "o meta charset conserta os acentos na hora");
+await proximoObjetivo("U6F2 objetivo 1 (previsão do meta charset)");
+
+await apresentacao("adicionar-atributo", () => adicionarAtributoPeloMenu("a", 'target="_blank"'));
+await proximoObjetivo("U6F2 objetivo 2 (adicionar atributo, aba nova)");
+
+await digitarNoDocumento("<head>", '<meta name="viewport" content="width=device-width, initial-scale=1">');
+await proximoObjetivo("U6F2 objetivo 3 (sozinho, meta viewport)");
+await conclusaoEProxima("U6F2");
+
+// ------------------------------------------------------------ Desafio U6
+await metaDaUnidade("Desafio U6");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio U6: checklist no lugar dos objetivos");
+
+await digitarNoDocumento("<head>", "<title>Marcos Conserta Bikes</title>");
+conferir((await partesFeitas()) === 1, "desafio U6: title da aba marca a parte");
+
+await digitarNoDocumento("<body>", "<h1>Marcos Conserta Bikes</h1>");
+conferir((await partesFeitas()) === 2, "desafio U6: h1 no body marca a parte");
+
+await digitarNoDocumento("<head>", '<meta charset="utf-8">');
+conferir((await partesFeitas()) === 3, "desafio U6: meta charset marca a parte");
+
+await digitarNoDocumento("<head>", '<meta name="viewport" content="width=device-width, initial-scale=1">');
+conferir((await partesFeitas()) === 4, "desafio U6: meta viewport marca a parte");
+
+await digitarNoDocumento("<h1>Marcos Conserta Bikes</h1>", "<p>Conserto rápido de bicicletas, com revisão grátis!</p>");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-u6", erro);
+}
+conferir((await partesFeitas()) === 5, "desafio U6: as 5 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U6: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U6: 3 estrelas");
+
+// Volta para a ilha: a U6 acende e, agora sim, a zona Estilos abre.
+await conclusaoEVoltarAIlha("U6");
+conferir((await estadoDoPonto("sites-elementos-u6")) === "concluida", "ilha: U6 concluída");
+conferir((await estadoDoPonto("sites-estilos-u1")) === "disponivel", "ilha: a E1 abriu (a zona Elementos acabou, U1 a U6)");
+const salvoU6 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvoU6.fasesConcluidas.length === 22, `22 fases concluídas (${salvoU6.fasesConcluidas.length})`);
 
 // ------------------------------------------------------------ painel Estilos (E1)
 /** No celular em pé, o painel Estilos é um segmento; deitado e no desktop, fica ao lado da árvore. */
@@ -1111,11 +1244,11 @@ await conclusaoEVoltarAIlha("E1");
 conferir((await estadoDoPonto("sites-estilos-u1")) === "concluida", "ilha: E1 concluída");
 conferir((await estadoDoPonto("sites-estilos-u2")) === "planejada", "ilha: a E2 aparece como planejada");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
-conferir(salvo.fasesConcluidas.length === 23, `23 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as seis unidades concluídas.
+conferir(salvo.fasesConcluidas.length === 26, `26 fases concluídas (${salvo.fasesConcluidas.length})`);
+// No mundo, Sites mostra as sete unidades prontas concluídas (U1 a U6 e E1).
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("6 de 6 unidades"), "mundo: Sites com 6 de 6 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("7 de 7 unidades"), "mundo: Sites com 7 de 7 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

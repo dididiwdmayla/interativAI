@@ -148,6 +148,24 @@ const CATALOGO = {
     resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
   },
 
+  // Unidade 6: página do zero
+  "estrutura-do-documento": {
+    nome: "Estrutura do documento",
+    resumo: "Toda página começa com doctype, html, head e body: o esqueleto onde tudo o mais mora.",
+  },
+  "head-vs-body": {
+    nome: "Head e body",
+    resumo: "O head guarda informação sobre a página (título, codificação); o body guarda o que aparece na tela.",
+  },
+  title: {
+    nome: "Title",
+    resumo: "A tag title, dentro do head, dá o nome que aparece na aba do navegador, não na página.",
+  },
+  "meta-charset": {
+    nome: "Meta charset",
+    resumo: "A tag meta charset diz ao navegador como ler as letras da página; sem ela, acentos podem sair errados.",
+  },
+
   // Zona Estilos, E1: a aba Estilos
   "o-que-e-css": {
     nome: "O que é CSS",
