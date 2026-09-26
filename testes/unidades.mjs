@@ -1310,9 +1310,12 @@ await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos("#livro-mais-vendido");
 await tocar(pagina.locator("[data-nova-regra]"));
 await escreverDeclaracao("background-color", "#fff3cd");
+// Troca pra CSS ANTES de avançar: a apresentação do próximo objetivo
+// (editor-css) começa assim que ele fica ativo, e o recorte do spotlight é
+// calculado com o painel já no lugar certo (mesmo atrito da U6).
+await mostrarCss();
 await proximoObjetivo("E2F2 objetivo 1 (previsão do id)");
 
-await mostrarCss();
 await apresentacao("editor-css", () => escreverNoCss("main .autor { color: #2a6f97; }"));
 await mostrarEstilos();
 await proximoObjetivo("E2F2 objetivo 2 (seletor descendente)");
