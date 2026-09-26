@@ -1080,6 +1080,7 @@ async function selecionarParaEstilos(seletor) {
 }
 /** Clica (ou toca) no valor de uma declaração, escreve outro e confirma. */
 async function trocarValorNoPainel(seletorRegra, propriedade, valor) {
+  await fecharBalao();
   await tocar(regraNoPainel(seletorRegra).locator(`[data-declaracao="${propriedade}"] [data-valor-propriedade]`).first());
   await campoEstilo("valor").fill(valor);
   await campoEstilo("valor").press("Enter");
@@ -1095,6 +1096,7 @@ async function escreverDeclaracao(propriedade, valor) {
 }
 /** "+ declaração" no fim da regra. */
 async function acrescentarNoPainel(seletorRegra, propriedade, valor) {
+  await fecharBalao();
   const regra = regraNoPainel(seletorRegra);
   if (!toque) await regra.hover();
   await tocar(regra.locator("[data-adicionar-declaracao]"));
@@ -1102,6 +1104,7 @@ async function acrescentarNoPainel(seletorRegra, propriedade, valor) {
 }
 /** A caixinha de uma declaração (desliga ou liga). */
 async function caixinhaNoPainel(seletorRegra, propriedade) {
+  await fecharBalao();
   const regra = regraNoPainel(seletorRegra);
   if (!toque) await regra.hover();
   await tocar(regra.locator(`[data-declaracao="${propriedade}"] [data-alternar-declaracao]`));
