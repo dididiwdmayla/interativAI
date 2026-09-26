@@ -208,15 +208,21 @@ async function digitarNoDocumento(buscaTexto, linhaNova) {
   await esperar(600);
 }
 
-/**
- * Escreve uma regra nova no fim da aba CSS (o + do painel Estilos só
- * sugere o seletor da peça selecionada, então um seletor composto, tipo
- * "main .autor", se escreve direto na folha).
- */
-async function escreverNoCss(textoDaRegra) {
+/** Mostra a aba CSS do editor (troca pra "Código" no celular). Chamar ANTES de uma apresentação: o recorte do spotlight é calculado com o painel já no lugar certo. */
+async function mostrarCss() {
   await mostrarPainel("Código");
   const abaCss = pagina.getByRole("tab", { name: "CSS", exact: true });
   if ((await abaCss.count()) > 0 && (await abaCss.getAttribute("aria-selected")) !== "true") await tocar(abaCss);
+  await esperar(200);
+}
+
+/**
+ * Escreve uma regra nova no fim da aba CSS (o + do painel Estilos só
+ * sugere o seletor da peça selecionada, então um seletor composto, tipo
+ * "main .autor", se escreve direto na folha). Chame `mostrarCss()` antes.
+ */
+async function escreverNoCss(textoDaRegra) {
+  await mostrarCss();
   await tocar(pagina.locator("[data-editor-css] .cm-content"));
   await pagina.keyboard.press("Control+End");
   await pagina.keyboard.press("Enter");
@@ -1306,7 +1312,7 @@ await tocar(pagina.locator("[data-nova-regra]"));
 await escreverDeclaracao("background-color", "#fff3cd");
 await proximoObjetivo("E2F2 objetivo 1 (previsão do id)");
 
-await mostrarEstilos();
+await mostrarCss();
 await apresentacao("editor-css", () => escreverNoCss("main .autor { color: #2a6f97; }"));
 await mostrarEstilos();
 await proximoObjetivo("E2F2 objetivo 2 (seletor descendente)");
