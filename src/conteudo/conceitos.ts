@@ -219,6 +219,24 @@ const CATALOGO = {
     nome: "Regra nova",
     resumo: "Quando nenhuma regra pega a peça, você cria uma com o seletor dela e escreve as declarações.",
   },
+
+  // Zona Estilos, E2: Seletores
+  "seletor-de-tag": {
+    nome: "Seletor de tag",
+    resumo: "Um seletor com o nome de uma tag (como h3) pega TODAS as peças daquele tipo na página.",
+  },
+  "seletor-de-classe": {
+    nome: "Seletor de classe",
+    resumo: "Um seletor que começa com ponto (.autor) pega toda peça com aquela class, não importa onde ela more.",
+  },
+  "seletor-de-id": {
+    nome: "Seletor de id",
+    resumo: "Um seletor que começa com sustenido (#id) pega só UMA peça, porque um id não se repete na página.",
+  },
+  "seletor-descendente": {
+    nome: "Seletor descendente",
+    resumo: "Dois seletores com um espaço entre eles (main .preco) pegam só o segundo quando ele está dentro do primeiro.",
+  },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -209,6 +209,22 @@ async function digitarNoDocumento(buscaTexto, linhaNova) {
 }
 
 /**
+ * Escreve uma regra nova no fim da aba CSS (o + do painel Estilos só
+ * sugere o seletor da peça selecionada, então um seletor composto, tipo
+ * "main .autor", se escreve direto na folha).
+ */
+async function escreverNoCss(textoDaRegra) {
+  await mostrarPainel("Código");
+  const abaCss = pagina.getByRole("tab", { name: "CSS", exact: true });
+  if ((await abaCss.count()) > 0 && (await abaCss.getAttribute("aria-selected")) !== "true") await tocar(abaCss);
+  await tocar(pagina.locator("[data-editor-css] .cm-content"));
+  await pagina.keyboard.press("Control+End");
+  await pagina.keyboard.press("Enter");
+  await pagina.keyboard.type(textoDaRegra);
+  await esperar(500);
+}
+
+/**
  * "Adicionar atributo" pelo menu do nó (botão direito no desktop, toque
  * longo no celular), como o Add attribute do Chrome: abre um campo dentro
  * da tag, onde `textoAtributo` é digitado inteiro (ex.: 'target="_blank"').
@@ -1243,16 +1259,107 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E1: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E1: 3 estrelas");
 
-// Volta para a ilha: a E1 acende; a E2 segue planejada.
+// Volta para a ilha: a E1 acende e a E2 abre.
 await conclusaoEVoltarAIlha("E1");
 conferir((await estadoDoPonto("sites-estilos-u1")) === "concluida", "ilha: E1 concluída");
-conferir((await estadoDoPonto("sites-estilos-u2")) === "planejada", "ilha: a E2 aparece como planejada");
+conferir((await estadoDoPonto("sites-estilos-u2")) === "disponivel", "ilha: a E2 abriu");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
 conferir(salvo.fasesConcluidas.length === 26, `26 fases concluídas (${salvo.fasesConcluidas.length})`);
-// No mundo, Sites mostra as sete unidades prontas concluídas (U1 a U6 e E1).
+
+await jogarUnidade("sites-estilos-u2", "Jogar");
+
+// ------------------------------------------------------------ E2 fase 1
+await metaDaUnidade("E2 começo");
+await conversar(2);
+await selecionarParaEstilos("h3");
+await trocarValorNoPainel("h3", "font-size", "20px");
+// Destaque na prévia ao passar o mouse no seletor (a marca da unidade): h3 pega os 3 títulos.
+await mostrarEstilos();
+await regraNoPainel("h3").locator("[data-seletor-regra]").hover();
+await pagina.waitForFunction(() => document.querySelectorAll("[data-realce-regra]").length === 3);
+conferir(true, "hover no seletor h3 acende os 3 títulos na prévia");
+await pagina.mouse.move(5, 5);
+await proximoObjetivo("E2F1 objetivo 1 (seletor de tag)");
+
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos(".autor");
+await trocarValorNoPainel(".autor", "color", "#555555");
+conferir((await valorNaPagina(".chamada .autor", "color")) === "rgb(85, 85, 85)", "a citação do aviso mudou junto (mesma class)");
+await proximoObjetivo("E2F1 objetivo 2 (previsão da classe)");
+
+await selecionarParaEstilos(".preco");
+await trocarValorNoPainel(".preco", "color", "crimson");
+await proximoObjetivo("E2F1 objetivo 3 (sozinho, classe)");
+await conclusaoEProxima("E2F1");
+
+// ------------------------------------------------------------ E2 fase 2
+await conversar(2);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(0));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos("#livro-mais-vendido");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("background-color", "#fff3cd");
+await proximoObjetivo("E2F2 objetivo 1 (previsão do id)");
+
+await mostrarEstilos();
+await apresentacao("editor-css", () => escreverNoCss("main .autor { color: #2a6f97; }"));
+await mostrarEstilos();
+await proximoObjetivo("E2F2 objetivo 2 (seletor descendente)");
+
+await escreverNoCss("footer p { font-style: italic; }");
+await mostrarEstilos();
+await proximoObjetivo("E2F2 objetivo 3 (sozinho, descendente no rodapé)");
+await conclusaoEProxima("E2F2");
+
+// ------------------------------------------------------------ Desafio E2
+await metaDaUnidade("Desafio E2");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio E2: checklist no lugar dos objetivos");
+
+await selecionarParaEstilos(".promocao");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("background-color", "#fff3cd");
+conferir((await partesFeitas()) === 1, "desafio E2: o fundo das promoções marca a parte");
+
+await escreverNoCss("#oferta-relampago h3 { color: crimson; }");
+conferir((await partesFeitas()) === 2, "desafio E2: o título da oferta relâmpago marca a parte");
+
+await escreverNoCss("#ofertas .preco { font-size: 18px; }");
+conferir((await partesFeitas()) === 3, "desafio E2: os preços maiores marcam a parte");
+
+await selecionarParaEstilos("h3");
+await trocarValorNoPainel("h3", "text-transform", "uppercase");
+conferir((await partesFeitas()) === 4, "desafio E2: os títulos em caixa alta marcam a parte");
+
+await escreverNoCss(".chamada .preco { color: #888888; }");
+
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-e2", erro);
+}
+conferir((await partesFeitas()) === 5, "desafio E2: as 5 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E2: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E2: 3 estrelas");
+
+// Volta para a ilha: a E2 acende; a E3 segue planejada.
+await conclusaoEVoltarAIlha("E2");
+conferir((await estadoDoPonto("sites-estilos-u2")) === "concluida", "ilha: E2 concluída");
+conferir((await estadoDoPonto("sites-estilos-u3")) === "planejada", "ilha: a E3 aparece como planejada");
+const salvoE2 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvoE2.fasesConcluidas.length === 29, `29 fases concluídas (${salvoE2.fasesConcluidas.length})`);
+// No mundo, Sites mostra as oito unidades prontas concluídas (U1 a U6, E1 e E2).
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("7 de 7 unidades"), "mundo: Sites com 7 de 7 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("8 de 8 unidades"), "mundo: Sites com 8 de 8 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

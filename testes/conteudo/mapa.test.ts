@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, U6, E1] = UNIDADES;
+const [U1, U2, U3, U4, U5, U6, E1, E2] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -70,9 +70,10 @@ describe("ilhas", () => {
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
     // A U6 também está pronta: falta ela.
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("bloqueada");
-    // A E1 (zona Estilos) também está pronta: a Lógica só abre depois dela.
+    // A zona Estilos (E1 e E2, as duas prontas) também precisa acabar.
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("disponivel");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -111,8 +112,9 @@ describe("zonas e unidades", () => {
   it("a E1 fica bloqueada até a zona Elementos acabar (U1 a U6), e as outras de Estilos seguem planejadas", () => {
     const estados = (progresso: Progresso) => ESTILOS.unidades.map((unidade) => estadoDaUnidade(SITES, ESTILOS, unidade, { progresso }));
     expect(E1.id).toBe("sites-estilos-u1");
-    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "planejada", "planejada", "planejada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "planejada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "bloqueada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "bloqueada", "planejada", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1))).toEqual(["concluida", "disponivel", "planejada", "planejada", "planejada"]);
   });
 
   it("desbloqueio permanente: uma unidade nova numa zona anterior não tranca de novo a zona já aberta", () => {

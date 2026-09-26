@@ -40,6 +40,11 @@
       "sites-estilos-u1-f2",
       "sites-estilos-u1-f3",
       "sites-estilos-u1-f4"
+    ],
+    "sites-estilos-u2": [
+      "sites-estilos-u2-f1",
+      "sites-estilos-u2-f2",
+      "sites-estilos-u2-f3"
     ]
   },
   "fases": {
@@ -237,6 +242,29 @@
         "sem-linha-vermelha",
         "fonte-georgia",
         "especial-destacado"
+      ]
+    },
+    "sites-estilos-u2-f1": {
+      "objetivos": [
+        "titulos-maiores",
+        "cor-dos-autores",
+        "precos-visiveis"
+      ]
+    },
+    "sites-estilos-u2-f2": {
+      "objetivos": [
+        "destaque-mais-vendido",
+        "autores-so-dos-livros",
+        "rodape-diferente"
+      ]
+    },
+    "sites-estilos-u2-f3": {
+      "partes": [
+        "fundo-promocao",
+        "titulo-oferta-relampago",
+        "precos-maiores-nas-ofertas",
+        "titulos-maiusculos",
+        "aviso-solto-cinza"
       ]
     }
   }

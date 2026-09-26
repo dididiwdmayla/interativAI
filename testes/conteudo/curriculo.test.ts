@@ -57,8 +57,9 @@ describe("currículo em dados", () => {
     expect(statusDaUnidade("sites-elementos-u4")).toBe("pronta");
     expect(statusDaUnidade("sites-elementos-u5")).toBe("pronta");
     expect(statusDaUnidade("sites-elementos-u6")).toBe("pronta");
-    expect(statusDaUnidade("sites-estilos-u2")).toBe("planejada");
-    expect(statusDaUnidade("sites-estilos-u2", [...UNIDADES, { ...U1, id: "sites-estilos-u2" }])).toBe("pronta");
+    expect(statusDaUnidade("sites-estilos-u2")).toBe("pronta");
+    expect(statusDaUnidade("sites-estilos-u3")).toBe("planejada");
+    expect(statusDaUnidade("sites-estilos-u3", [...UNIDADES, { ...U1, id: "sites-estilos-u3" }])).toBe("pronta");
   });
 
   it("as unidades de conteúdo usam os ids do currículo, na ilha e na zona que dizem", () => {
@@ -74,6 +75,7 @@ describe("currículo em dados", () => {
       "elementos",
       "elementos",
       "elementos",
+      "estilos",
       "estilos",
     ]);
   });
