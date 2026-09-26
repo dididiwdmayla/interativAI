@@ -1386,7 +1386,9 @@ async function voltarParaEstilosSubAba() {
 // ------------------------------------------------------------ E3 fase 1
 await metaDaUnidade("E3 começo");
 await conversar(2);
-await selecionarParaEstilos(".bolo");
+// A apresentação já está de pé assim que o objetivo fica ativo (antes de
+// qualquer seleção): as duas primeiras (painel-calculado, modelo-de-caixa)
+// rodam sem peça nenhuma escolhida ainda.
 await apresentacao("painel-calculado", async () => {
   await mostrarCalculado();
 });
@@ -1394,6 +1396,7 @@ await apresentacao("modelo-de-caixa", async () => {
   await pagina.locator('[data-camada="padding"] [data-lado="cima"]').first().hover();
 });
 await voltarParaEstilosSubAba();
+await selecionarParaEstilos(".bolo");
 await acrescentarNoPainel(".bolo", "padding", "16px");
 await proximoObjetivo("E3F1 objetivo 1 (padding)");
 
