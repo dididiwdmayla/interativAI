@@ -323,7 +323,8 @@ export function PainelEstilos({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-superficie" data-painel-estilos>
-      <div className="flex shrink-0 items-center gap-1 border-b-2 border-borda bg-painel px-2 py-1 pointer-fine:pr-8">
+      {/* Estreito (celular deitado), o filtro e o botão de regra nova descem para uma segunda linha. */}
+      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b-2 border-borda bg-painel px-2 py-1 pointer-fine:pr-8">
         <div role="tablist" aria-label="Painéis de estilo" className="flex items-center gap-0.5">
           {abas.map((painel) => (
             <button
@@ -342,14 +343,14 @@ export function PainelEstilos({
           ))}
         </div>
         {aba !== "calculado" && (
-          <>
+          <div className="ml-auto flex min-w-0 items-center gap-1">
             <input
               type="search"
               value={filtro}
               onChange={(evento) => setFiltro(evento.target.value)}
               placeholder="Filtrar"
               aria-label="Filtrar as declarações"
-              className="ml-auto h-6 w-24 min-w-0 rounded-md border-2 border-borda bg-superficie px-1.5 text-xs text-texto pointer-coarse:h-11 pointer-coarse:w-28"
+              className="h-6 w-24 min-w-0 shrink rounded-md border-2 border-borda bg-superficie px-1.5 text-xs text-texto pointer-coarse:h-11 pointer-coarse:w-28"
             />
             <AlvoFerramenta ids={["nova-regra"]} marcador="nova-regra" aoAbrirCard={aoAbrirCard} classeMarcador="-right-2 -top-1.5" as="span" className="inline-flex">
               <button
@@ -364,7 +365,7 @@ export function PainelEstilos({
                 <IconeNovaRegra tamanho={18} />
               </button>
             </AlvoFerramenta>
-          </>
+          </div>
         )}
       </div>
       {aba === "calculado" && calculado !== undefined ? <div className="min-h-0 flex-1">{calculado}</div> : conteudoEstilos}

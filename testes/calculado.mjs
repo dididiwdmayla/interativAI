@@ -130,3 +130,21 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   conferir(errosRelevantes(erros).length === 0, `console limpo no celular ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
 }
+
+// Celular deitado: o Calculado ao lado da árvore, com o diagrama inteiro.
+{
+  const { navegador, pagina, erros } = await abrir({ largura: 844, altura: 390, toque: true, rota: "/lab/fases?fase=lab-motor-u1-f1", esperar: "iframe" });
+  const recolher = pagina.getByRole("button", { name: "Recolher o lab" });
+  if (await recolher.isVisible().catch(() => false)) await recolher.tap();
+  await selecionarNo(pagina, ".prato");
+  await pagina.locator('[data-sub-aba="calculado"]').tap();
+  await pagina.locator("[data-painel-calculado]").waitFor();
+  const arvore = await pagina.locator("[role=tree]").first().boundingBox();
+  const diagrama = await pagina.locator("[data-modelo-caixa]").boundingBox();
+  conferir(arvore && diagrama && diagrama.x >= arvore.x + arvore.width - 2, "paisagem: o Calculado fica ao lado da árvore");
+  await lado(pagina, "padding", "esquerda").tap();
+  await pagina.waitForTimeout(150);
+  conferir((await camadasAcesas(pagina)) === "padding", "e tocar numa camada acende ela na prévia");
+  conferir(errosRelevantes(erros).length === 0, `console limpo deitado ${JSON.stringify(errosRelevantes(erros))}`);
+  await navegador.close();
+}

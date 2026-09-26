@@ -204,6 +204,20 @@ await navegador.close();
   const arvore = await pagina.locator("[role=tree]").first().boundingBox();
   const estilos = await pagina.locator("[data-painel-estilos]").boundingBox();
   conferir(arvore && estilos && estilos.x >= arvore.x + arvore.width - 2, "paisagem: a árvore e o painel Estilos ficam lado a lado");
+  const segmentos = await pagina.getByRole("tablist", { name: "Mostrar no painel" }).getByRole("tab").allInnerTexts();
+  conferir(segmentos.join("|") === "Árvore e Estilos|Código", `e o seletor do painel não repete Estilos (${segmentos.join(", ")})`);
+  const botao = await pagina.locator("[data-nova-regra]").boundingBox();
+  conferir(botao && botao.x + botao.width <= estilos.x + estilos.width + 1 && botao.height >= 44, "o botão de regra nova cabe no painel estreito (desce de linha), com 44px");
+  await pagina.locator("[data-nova-regra]").tap();
+  await pagina.locator("[data-campo-estilo=nome]").fill("color");
+  await pagina.locator("[data-campo-estilo=nome]").press("Tab");
+  await pagina.locator("[data-campo-estilo=valor]").fill("purple");
+  await pagina.locator("[data-campo-estilo=valor]").press("Enter");
+  await pagina.waitForTimeout(250);
+  conferir(
+    (await pagina.locator("section[data-previa] iframe").evaluate((el) => el.contentWindow.getComputedStyle(el.contentDocument.querySelector("h1")).color)) === "rgb(128, 0, 128)",
+    "deitado, a regra nova pelo toque vale na prévia",
+  );
   conferir(errosRelevantes(erros).length === 0, `console limpo na paisagem ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
 }

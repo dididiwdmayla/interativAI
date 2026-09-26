@@ -39,8 +39,8 @@ andamento e o próximo passo). Ele é a fonte única de status do projeto.
 
 1. **Siga o `docs/MAPA-CURRICULAR.md` na ordem.** A próxima unidade é a
    primeira do currículo que ainda não tem conteúdo (no mapa do jogo, o
-   primeiro ponto "Em breve"). Hoje: Ilha Sites, zona Elementos, U3
-   ("Títulos e textos").
+   primeiro ponto "Em breve"). Hoje: Ilha Sites, zona Elementos, U6
+   ("Página do zero", uma fase com `modoDocumento`, seção 3.2).
 2. **Use o id do currículo.** A unidade nova tem o id, o título, a ilha e
    a zona que estão em `src/curriculo/curriculo.ts` (ex.:
    `sites-elementos-u3`, "Títulos e textos", "Ilha Sites", "Elementos",
@@ -49,7 +49,7 @@ andamento e o próximo passo). Ele é a fonte única de status do projeto.
    registrada: ninguém marca status à mão.
 3. **Regra de parada: NUNCA produza uma unidade de zona com
    `requerMotor`** (nem uma unidade que tenha `requerMotor` própria, como
-   a U6). Pare e relate o que falta no motor (o texto do `requerMotor` diz
+   a E5). Pare e relate o que falta no motor (o texto do `requerMotor` diz
    o quê). Conteúdo não inventa ferramenta, aba nem tipo de fase: isso é
    trabalho de motor. Se mesmo assim uma unidade dessas for registrada, o
    `testar:conteudo` falha dizendo o que falta.
@@ -669,7 +669,120 @@ próximo aparece "Em breve".
 
 ---
 
-## 12. Passo a passo para criar uma unidade
+## 12. Como escrever fases de CSS
+
+A zona Estilos (e a Layout) mexe na APARÊNCIA do site pela folha de
+estilo, sem tocar no HTML. Tudo aqui vale junto com as seções 3 a 11: o
+formato, a escada de ajuda, as previsões e as checagens são os mesmos.
+
+### 12.1 O site-alvo de CSS
+
+- Escreva a folha editável em `siteAlvo.css`. Ela aparece na aba CSS do
+  editor como `estilo.css` e no painel Estilos, e é a segunda fonte de
+  verdade (ao lado do body). O `head` continua fixo: deixe nele só o
+  `meta charset`, o `viewport` e o `title` (um `<style>` no head também
+  entra na cascata, mas aparece como "(index)" e não dá para editar).
+- Ligue os sub-painéis na fase: `paineisElementos: ["estilos"]` (e
+  `"calculado"` a partir da E3, Modelo de caixa).
+- **Nada de `@media` na folha editável.** O navegador avalia, mas o
+  `testar:conteudo` roda no jsdom, que não tem `matchMedia`: o motor não
+  sabe se a regra vale e deixa a propriedade "incerta" (os validadores
+  dela não passam). Faça a página funcionar em 390 px numa coluna só.
+- Também deixam o motor incerto: `@layer`, `@import`, CSS aninhado e
+  `@container` (nada fica riscado na página inteira).
+- Folha começando "sem graça de propósito" ajuda: nome apagado, preço
+  quase invisível, tudo à esquerda. O jogador vê o antes e o depois.
+
+### 12.2 Qual validador usar
+
+| Quero conferir... | Use |
+| --- | --- |
+| como a peça APARECE (a cor que ganhou, o tamanho que ganhou) | `valorEfetivo` |
+| que o jogador escreveu (ou desligou) uma declaração numa regra | `declaracao` (com `ativa: false` para "desligou") |
+| que ele criou uma regra | `regraExiste` (ou, melhor, `valorEfetivo` no elemento: aceita qualquer seletor que pegue a peça) |
+| que uma declaração perdeu a briga (E4, cascata) | `riscada` |
+
+- **Prefira `valorEfetivo`.** Ele confere o resultado, não o caminho: o
+  jogador pode editar pelo painel, digitar no editor CSS ou criar uma regra
+  mais específica, e tudo vale. Use `declaracao` quando o caminho é o
+  conteúdo (desligar pela caixinha, escrever naquela regra).
+- `valorEfetivo` compara o valor DECLARADO que ganhou, normalizado: cores
+  em qualquer formato (`red` = `#f00` = `rgb(255, 0, 0)`), números
+  (`16.0px` = `16px`, `0px` = `0`), espaços, aspas de fonte e `bold` =
+  `700` no `font-weight`. Ele NÃO converte unidades: `2em` não é `32px`.
+- Herança conta: `valorEfetivo` de `color` num `p` sem regra própria vem
+  do ancestral que declarou. E a folha do navegador também: um `h1` é
+  `bold` sem regra nenhuma do site.
+- Atalho no validador confere cada propriedade longa:
+  `{ propriedade: "margin", valor: "0 auto" }` pede `margin-top: 0`,
+  `margin-right: auto`...
+- `valorEfetivo` só em propriedade que o motor conhece (cores, medidas,
+  margens, bordas, fonte, texto, display, position, flex, grid...). A
+  checagem acusa as outras (`box-shadow`, `transition`...): para elas,
+  use `declaracao`.
+- Objetivo "troque por uma cor qualquer": `todos` com
+  `declaracao ... ativa: true` e `nao` do `valorEfetivo` antigo (e do
+  `transparent`), para um valor inválido não passar.
+
+### 12.3 Atalhos (shorthands)
+
+- `margin`, `padding`, `border` (e lados), `background`, `font`, `gap`,
+  `flex`, `inset`, `overflow`, `text-decoration` e `list-style` são
+  abertos nas propriedades longas. Um `margin-top` depois de um `margin`
+  derruba só a parte de cima; um `margin` depois de um `margin-top`
+  derruba o `margin-top` inteiro.
+- O painel risca um atalho só quando TODAS as partes dele perderam (como
+  o Chrome); a setinha ao lado mostra as partes riscadas.
+- Atalho que o motor não sabe separar (`background` com várias camadas ou
+  com `/`, `font` com nome de sistema, `border-radius` com `/`): a
+  propriedade vale, mas o valor das partes fica "incerto". Em fase, prefira
+  as longas (`background-color`, `font-size`).
+
+### 12.4 Como o motor decide o que fica riscado
+
+1. Pega as regras que casam com o elemento (`element.matches`), o estilo
+   inline e a folha do navegador. Pseudo-classes de estado (`:hover`,
+   `:focus`) não contam.
+2. Ordena por: importância e origem (`!important` do navegador, do site,
+   depois as normais do site e as do navegador), inline, especificidade
+   (a do seletor da lista que casa) e ordem na folha.
+3. Para cada propriedade longa, a primeira declaração válida vence; as
+   outras ficam riscadas. Valor inválido (`color: vermelho`) é riscado com
+   aviso e não conta.
+4. Herdadas: a própria vence a herdada; entre ancestrais, o mais perto
+   vence.
+5. **Quando não sabe, não risca**: valor que o motor não conhece no topo,
+   atalho que ele não separa, `@media`, lógica misturada com física
+   (`margin-inline-start` com `margin-left`), folha com `@layer`. Ele
+   prefere deixar de riscar a riscar errado, e o `valorEfetivo` diz
+   "incerto" (o detalhe no `/lab/fases` e no teste diz por quê).
+
+### 12.5 Ações e ferramentas
+
+| Ação | Ferramenta (usaFerramentas) |
+| --- | --- |
+| `definirPropriedade` | `editar-valor-css` |
+| `alternarDeclaracao` | `ligar-desligar-declaracao` |
+| `adicionarRegra` | `nova-regra` |
+| `editarCss` | `editor-css` |
+
+As setas (`setas-numericas`) e o seletor de cor (`seletor-de-cor`) não
+têm ação própria: a solução usa `definirPropriedade` com o valor final;
+apresente a ferramenta no objetivo que pede o gesto. Linhas de ajuda:
+`{ alvo: "estilos", seletorRegra, propriedade?, fala }` pisca a regra no
+painel Estilos; `{ alvo: "css", seletorRegra, propriedade?, fala }` pisca
+as linhas no editor CSS.
+
+### 12.6 A bancada
+
+`/lab/fases?fase=lab-motor-u1-f1` abre a Bancada de estilos (fora do
+currículo): uma página com atalhos, `!important`, inline, herança e uma
+declaração desligada, para ver o motor trabalhando antes de escrever a
+fase.
+
+---
+
+## 13. Passo a passo para criar uma unidade
 
 1. **Escolha a unidade** pela seção 0: a próxima do
    `docs/MAPA-CURRICULAR.md`, com o id do currículo. Zona (ou unidade) com
@@ -713,7 +826,7 @@ próximo aparece "Em breve".
 
 ---
 
-## 13. Checklist final antes do commit
+## 14. Checklist final antes do commit
 
 - [ ] Meta da unidade escrita ("No fim desta unidade, você...") e
       `desafioId` apontando para a última fase.
@@ -737,6 +850,10 @@ próximo aparece "Em breve".
       mostra onde; solução que explica o quê e por quê.
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
+- [ ] Fase de CSS (seção 12): `siteAlvo.css` sem `@media`,
+      `paineisElementos` ligado, `valorEfetivo` onde o resultado importa e
+      `declaracao` onde o caminho importa; nada "incerto" no
+      `/lab/fases`.
 - [ ] `npm run testar:conteudo`, `npm run lint` e `npm run build` verdes.
 - [ ] Jogado no `/lab/fases` e de verdade (desktop e celular).
 - [ ] `docs/PROGRESSO.md` atualizado.

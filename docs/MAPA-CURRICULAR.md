@@ -123,8 +123,10 @@ Motor pronto (depois da rodada 5), exceto a U6.
 
 #### U6. Página do zero — `sites-elementos-u6`
 
-- **Requer motor:** modo documento inteiro (head editável) e o título da
-  aba do navegador falso refletindo o `<title>`.
+- **Motor pronto (rodada 9):** fase com `modoDocumento` (documento
+  inteiro no editor e na árvore, aba com o `<title>` ao vivo, validador
+  `tituloDaAba`, simulação dos acentos sem meta charset). Exemplo: a
+  Bancada do documento no `/lab/fases`.
 - **Meta:** escrever uma página completa do zero: doctype, html, head
   (title, meta charset, meta viewport) e body.
 - **Conceitos:** estrutura do documento; head vs body; title; meta charset
@@ -133,10 +135,11 @@ Motor pronto (depois da rodada 5), exceto a U6.
 
 ### Zona Estilos (`estilos`)
 
-**Requer motor:** aba Estilos (regras aplicadas ao elemento selecionado,
-editar valores ao vivo, checkbox pra ligar e desligar propriedade,
-adicionar propriedade, regras riscadas, diagrama de caixa) e editor com
-abas HTML e CSS.
+**Motor pronto (rodada 9) para E1 a E4:** painel Estilos dentro de
+Elementos (regras do elemento selecionado, editar valores ao vivo,
+caixinha para ligar e desligar, adicionar declaração e regra, riscadas),
+aba Calculado com o diagrama de caixa, editor com abas HTML e CSS e os
+validadores de CSS (guia, seção 12). A E5 continua pedindo motor.
 
 #### E1. A aba Estilos — `sites-estilos-u1`
 
@@ -174,8 +177,8 @@ abas HTML e CSS.
 
 ### Zona Layout (`layout`)
 
-**Requer motor:** aba Estilos pronta; editor visual de flex e grid como no
-Chrome é desejável.
+**Motor pronto (rodada 9):** o mesmo da zona Estilos. Um editor visual de
+flex e grid como o do Chrome seria bom, mas não é obrigatório.
 
 - **L1. Display** (`sites-layout-u1`): block, inline, inline-block, none
   (revisa: none vs esconder mantendo espaço). Desafio: menu horizontal.

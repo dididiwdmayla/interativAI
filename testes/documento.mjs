@@ -126,3 +126,14 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   conferir(errosRelevantes(erros).length === 0, `console limpo no celular ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
 }
+
+// Celular deitado: a aba com o título e o menu do nó com o atributo novo.
+{
+  const { navegador, pagina, erros } = await abrir({ largura: 844, altura: 390, toque: true, rota: ROTA, esperar: "[data-aba-navegador]" });
+  const recolher = pagina.getByRole("button", { name: "Recolher o lab" });
+  if (await recolher.isVisible().catch(() => false)) await recolher.tap();
+  conferir((await pagina.locator("[data-titulo-aba]").innerText()) === "Meu cartÃ£o", "deitado, a aba mostra o título (quebrado, sem meta charset)");
+  conferir(await pagina.locator("[data-doctype]").isVisible(), "e a árvore começa no doctype");
+  conferir(errosRelevantes(erros).length === 0, `console limpo deitado ${JSON.stringify(errosRelevantes(erros))}`);
+  await navegador.close();
+}

@@ -68,10 +68,30 @@ describe("currículo em dados", () => {
     }
   });
 
-  it("a U6 (página do zero) requer motor mesmo numa zona pronta", () => {
-    const local = localNoCurriculo("sites-elementos-u6");
-    expect(local?.zona.requerMotor).toBeUndefined();
-    expect(local?.unidade.requerMotor).toContain("head editável");
+  it("liberações da rodada 9: U6, Estilos (E1 a E4) e Layout (L1 a L4) sem requerMotor", () => {
+    const liberadas = [
+      "sites-elementos-u6",
+      "sites-estilos-u1",
+      "sites-estilos-u2",
+      "sites-estilos-u3",
+      "sites-estilos-u4",
+      "sites-layout-u1",
+      "sites-layout-u2",
+      "sites-layout-u3",
+      "sites-layout-u4",
+    ];
+    for (const id of liberadas) {
+      const local = localNoCurriculo(id);
+      expect(local, id).not.toBeNull();
+      expect(local?.zona.requerMotor, id).toBeUndefined();
+      expect(local?.unidade.requerMotor, id).toBeUndefined();
+    }
+  });
+
+  it("E5, Responsivo e Publicar continuam pedindo motor", () => {
+    expect(localNoCurriculo("sites-estilos-u5")?.unidade.requerMotor).toContain("o próprio jogo como site-alvo");
+    expect(localNoCurriculo("sites-responsivo-u1")?.zona.requerMotor).toContain("modo dispositivo");
+    expect(localNoCurriculo("sites-publicar-u1")?.zona.requerMotor).toContain("auditoria");
   });
 });
 
@@ -104,15 +124,15 @@ describe("checagens do currículo (sabotagens)", () => {
   });
 
   it("unidade de conteúdo numa zona com requerMotor falha dizendo o que falta", () => {
-    const estilos: Unidade = { ...U1, id: "sites-estilos-u1", zona: "Estilos", titulo: "A aba Estilos" };
-    const problemas = conferirMotorDoConteudo(CURRICULO, [estilos]);
+    const responsivo: Unidade = { ...U1, id: "sites-responsivo-u1", zona: "Responsivo", titulo: "Modo dispositivo" };
+    const problemas = conferirMotorDoConteudo(CURRICULO, [responsivo]);
     expect(problemas).toHaveLength(1);
-    expect(problemas[0]).toContain('a zona "Estilos" ainda requer motor: aba Estilos');
+    expect(problemas[0]).toContain('a zona "Responsivo" ainda requer motor: modo dispositivo');
     expect(problemas[0]).toContain("relate o que falta");
   });
 
-  it("a U6 com conteúdo falha pelo requerMotor da própria unidade", () => {
-    const u6: Unidade = { ...U1, id: "sites-elementos-u6", numero: 6, titulo: "Página do zero" };
-    expect(conferirMotorDoConteudo(CURRICULO, [u6]).join("\n")).toContain("ela ainda requer motor: modo documento inteiro");
+  it("a E5 com conteúdo falha pelo requerMotor da própria unidade", () => {
+    const e5: Unidade = { ...U1, id: "sites-estilos-u5", zona: "Estilos", numero: 5, titulo: "Variáveis e temas" };
+    expect(conferirMotorDoConteudo(CURRICULO, [e5]).join("\n")).toContain("ela ainda requer motor: o próprio jogo como site-alvo");
   });
 });

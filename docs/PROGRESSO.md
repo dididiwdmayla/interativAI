@@ -6,7 +6,8 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 
 **Estado atual:** rodada 9 em andamento (painel Estilos, motor de
 cascata, modo documento, ROADMAP; ver a seção dela abaixo e o
-`docs/ROADMAP.md`). Antes: rodada 8 (áudio v2: música do mapa e efeitos
+`docs/ROADMAP.md`, que é a fonte do status). A U6, a zona Estilos (E1 a
+E4) e a zona Layout (L1 a L4) já não pedem motor. Antes: rodada 8 (áudio v2: música do mapa e efeitos
 gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
@@ -132,6 +133,21 @@ desta rodada).
   documento (`lab-motor-u1-f2`) no `/lab/fases`. Testes:
   `documento.test.ts` (14), `codificacao.test.ts` (3) e
   `testes/documento.mjs` (Playwright, desktop e em pé, na bateria).
+- [x] **Etapa 6: mobile, testes, guia e liberações.** Celular deitado: o
+  seletor do painel vira "Árvore e Estilos | Código" (o Estilos já fica
+  ao lado da árvore) e o cabeçalho do painel Estilos quebra a linha no
+  espaço estreito (filtro e regra nova descem juntos, 44 px). As
+  apresentações das ferramentas do painel que se experimentam usando
+  (editar valor, caixinha, setas, cor, regra nova) mostram, em silêncio,
+  a peça que o objetivo aponta (sem ela e sem seleção, o body): o painel
+  nunca fica vazio no "Experimente". Testes Playwright de paisagem em
+  `estilos.mjs`, `calculado.mjs` e `documento.mjs`. Guia: seção 12
+  "Como escrever fases de CSS" (site-alvo de CSS sem @media, qual
+  validador usar, atalhos, como o motor decide o que risca, ações e
+  ferramentas, a bancada) e item no checklist. Currículo: a U6, a zona
+  Estilos (E1 a E4) e a zona Layout (L1 a L4) sem `requerMotor`; a E5,
+  Responsivo e Publicar continuam pedindo motor (testes do currículo e
+  `MAPA-CURRICULAR.md` atualizados).
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 
@@ -714,11 +730,10 @@ Etapas 14 a 19 correspondem às etapas 1 a 6 da tarefa "Fábrica de conteúdo".
 
 ## Próximos passos sugeridos
 
-- A zona Elementos está completa (U1 a U5). A U6 ("Página do zero") e a
-  zona Estilos (próxima da rota) pedem motor antes de produzir conteúdo
-  (ver `requerMotor` em `src/curriculo/curriculo.ts`): modo documento
-  inteiro (head editável) para a U6, e a aba Estilos inteira para a zona
-  Estilos.
+- A zona Elementos está completa (U1 a U5). A U6 ("Página do zero"), a
+  zona Estilos (E1 a E4) e a zona Layout (L1 a L4) já têm motor (rodada
+  9): é trabalho da fábrica, seguindo o guia (seção 12 para CSS; a
+  Bancada do documento no `/lab/fases` como exemplo de `modoDocumento`).
 - Computadorzinho navegador em cima de `montarIndice()`.
 - Testar num celular de verdade (Android e iPhone), principalmente o teclado
   virtual no iOS, que ainda não tem `interactive-widget`.

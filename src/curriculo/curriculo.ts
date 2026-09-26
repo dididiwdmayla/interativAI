@@ -99,7 +99,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             id: "sites-elementos-u6",
             titulo: "Página do zero",
             meta: "Escrever uma página completa do zero: doctype, html, head (title, meta charset, meta viewport) e body.",
-            requerMotor: "modo documento inteiro (head editável) e o título da aba do navegador falso refletindo o <title>",
           },
         ],
       },
@@ -107,8 +106,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "estilos",
         nome: "Estilos",
         icone: "estilos",
-        requerMotor:
-          "aba Estilos (regras do elemento selecionado, editar valores ao vivo, ligar e desligar propriedade, adicionar propriedade, regras riscadas, diagrama de caixa) e editor com abas HTML e CSS",
         unidades: [
           {
             id: "sites-estilos-u1",
@@ -142,7 +139,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "layout",
         nome: "Layout",
         icone: "layout",
-        requerMotor: "aba Estilos pronta (editor visual de flex e grid como no Chrome é desejável)",
         unidades: [
           {
             id: "sites-layout-u1",

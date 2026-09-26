@@ -887,10 +887,10 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio U5: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio U5: 3 estrelas");
 
-// Volta para a ilha: a U5 acende; U6 exige motor e continua planejada.
+// Volta para a ilha: a U5 acende; a U6 segue planejada (o motor está pronto, falta o conteúdo).
 await conclusaoEVoltarAIlha("U5");
 conferir((await estadoDoPonto("sites-elementos-u5")) === "concluida", "ilha: U5 concluída");
-conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (requer motor)");
+conferir((await estadoDoPonto("sites-elementos-u6")) === "planejada", "ilha: a U6 aparece como planejada (o motor está pronto, falta o conteúdo)");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
 conferir(salvo.fasesConcluidas.length === 19, `19 fases concluídas (${salvo.fasesConcluidas.length})`);
 // No mundo, Sites mostra as cinco unidades concluídas.

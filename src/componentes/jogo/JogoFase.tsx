@@ -208,6 +208,8 @@ export function JogoFase({
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
   const movel = layout !== "desktop";
+  /** Deitado não há segmento Estilos (ele fica ao lado da árvore): vale o da árvore. */
+  const segmentoVisivel = segmento === "estilos" && layout !== "retrato" ? "arvore" : segmento;
   const viewport = useViewportVisivel();
   const [caixa, setCaixa] = useState<{
     aberta: boolean;
@@ -500,6 +502,22 @@ export function JogoFase({
     if (novo === "codigo") requestAnimationFrame(() => destacarNoEditor(true));
   };
 
+  /**
+   * A peça que o objetivo atual aponta, para as apresentações do painel: a
+   * que a linha de ajuda mostra (a regra no Estilos ou o nó na árvore).
+   * Null sem linha (objetivo sozinho) ou se nada casa.
+   */
+  const pecaDoObjetivo = (): number[] | null => {
+    const documento = obterDocumento();
+    const raiz = documento?.body ? raizDaArvore(documento) : null;
+    const linha = objetivo?.modo === "guiado" ? objetivo.ajudas.linha : null;
+    const seletor = linha?.alvo === "estilos" || linha?.alvo === "css" ? linha.seletorRegra : linha?.alvo === "arvore" ? linha.seletor : null;
+    if (!documento || !raiz || !seletor) return null;
+    const elemento = elementosDaRegra(documento, seletor)[0];
+    if (!elemento) return null;
+    return elemento === raiz ? [] : caminhoDoNo(raiz, elemento);
+  };
+
   /** Troca Estilos | Calculado; sair do Calculado apaga a camada acesa na prévia. */
   const trocarSubAba = (nova: PainelElementos) => {
     setSubAbaElementos(nova);
@@ -510,6 +528,12 @@ export function JogoFase({
   const prepararAlvo = (ferramenta: Ferramenta) => {
     if (FERRAMENTAS_DO_CALCULADO.includes(ferramenta.id)) trocarSubAba("calculado");
     else if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSubAba("estilos");
+    // Ferramenta do painel que só se experimenta usando (setas, cor, caixinha...): o painel
+    // mostra, em silêncio, a peça que o objetivo aponta (sem ela e sem seleção, o body).
+    if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id) && ferramenta.uso === "sinal") {
+      const caminho = pecaDoObjetivo() ?? (caminhoSelecionado ? null : []);
+      if (caminho) selecionar(caminho, "sistema");
+    }
     if (!movel) return;
     setBalaoAberto(ferramenta.id === "me-ajuda" || ferramenta.id === "tutor");
     if (FERRAMENTAS_DA_ARVORE.includes(ferramenta.id)) trocarSegmento("arvore");
@@ -1050,18 +1074,19 @@ export function JogoFase({
                   <SeletorSegmentado
                     rotulo="Mostrar no painel"
                     opcoes={
-                      comEstilos
+                      comEstilos && layout === "retrato"
                         ? [
                             { id: "arvore", rotulo: "Árvore" },
                             { id: "estilos", rotulo: "Estilos" },
                             { id: "codigo", rotulo: "Código" },
                           ]
                         : [
-                            { id: "arvore", rotulo: "Árvore" },
+                            // Deitado, o painel Estilos fica ao lado da árvore: um segmento só.
+                            { id: "arvore", rotulo: comEstilos ? "Árvore e Estilos" : "Árvore" },
                             { id: "codigo", rotulo: "Código" },
                           ]
                     }
-                    valor={segmento}
+                    valor={segmentoVisivel}
                     aoTrocar={trocarSegmento}
                     className="w-full"
                   />

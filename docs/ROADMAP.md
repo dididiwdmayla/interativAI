@@ -76,11 +76,14 @@ núcleo comum.
     menu do nó (e toque longo), com a ferramenta `adicionar-atributo`:
     fases futuras podem usar o gesto (as U1 a U5 publicadas não mudam; a
     U4 continua como está).
+  - Celular deitado nos painéis novos, testes Playwright de paisagem,
+    guia com "Como escrever fases de CSS" e liberações no currículo: U6,
+    Estilos (E1 a E4) e Layout (L1 a L4) sem `requerMotor` (E5,
+    Responsivo e Publicar continuam pedindo motor).
 
 ### Em andamento
 
-- Rodada 9, etapas 6 e 7: mobile dos painéis novos, guia de CSS,
-  liberações no currículo e a unidade-modelo E1 ("A aba Estilos").
+- Rodada 9, etapa 7: a unidade-modelo E1 ("A aba Estilos").
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.
