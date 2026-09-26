@@ -1287,6 +1287,7 @@ await selecionarParaEstilos("h3");
 await trocarValorNoPainel("h3", "font-size", "20px");
 // Destaque na prévia ao passar o mouse no seletor (a marca da unidade): h3 pega os 3 títulos.
 await mostrarEstilos();
+await fecharBalao();
 await regraNoPainel("h3").locator("[data-seletor-regra]").hover();
 await pagina.waitForFunction(() => document.querySelectorAll("[data-realce-regra]").length === 3);
 conferir(true, "hover no seletor h3 acende os 3 títulos na prévia");
