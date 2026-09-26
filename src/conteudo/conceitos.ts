@@ -237,6 +237,28 @@ const CATALOGO = {
     nome: "Seletor descendente",
     resumo: "Dois seletores com um espaço entre eles (main .preco) pegam só o segundo quando ele está dentro do primeiro.",
   },
+
+  // Zona Estilos, E3: Modelo de caixa
+  "modelo-de-caixa": {
+    nome: "Modelo de caixa",
+    resumo: "Toda peça é uma caixa com quatro camadas: conteúdo, padding, border e margin, de dentro pra fora.",
+  },
+  "padding-css": {
+    nome: "Padding",
+    resumo: "O padding é o espaço DENTRO da caixa, entre o conteúdo e a borda: empurra o conteúdo pra dentro.",
+  },
+  "border-css": {
+    nome: "Border",
+    resumo: "A border é a linha ao redor do padding: tem espessura, estilo (como solid) e cor.",
+  },
+  "margin-css": {
+    nome: "Margin",
+    resumo: "O margin é o espaço FORA da caixa: empurra as peças vizinhas pra longe, sem mudar o tamanho dela.",
+  },
+  "box-sizing": {
+    nome: "Box-sizing",
+    resumo: "Com border-box, o padding e a border entram DENTRO da largura definida, em vez de somar a ela.",
+  },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;

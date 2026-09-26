@@ -45,6 +45,11 @@
       "sites-estilos-u2-f1",
       "sites-estilos-u2-f2",
       "sites-estilos-u2-f3"
+    ],
+    "sites-estilos-u3": [
+      "sites-estilos-u3-f1",
+      "sites-estilos-u3-f2",
+      "sites-estilos-u3-f3"
     ]
   },
   "fases": {
@@ -265,6 +270,28 @@
         "precos-maiores-nas-ofertas",
         "titulos-maiusculos",
         "aviso-solto-cinza"
+      ]
+    },
+    "sites-estilos-u3-f1": {
+      "objetivos": [
+        "respiro-no-bolo",
+        "moldura-no-bolo",
+        "respiro-no-aviso"
+      ]
+    },
+    "sites-estilos-u3-f2": {
+      "objetivos": [
+        "espaco-entre-bolos",
+        "espaco-antes-do-whatsapp",
+        "whatsapp-nao-estoura"
+      ]
+    },
+    "sites-estilos-u3-f3": {
+      "partes": [
+        "respiro-nos-planos",
+        "moldura-nos-planos",
+        "espaco-entre-planos",
+        "banner-nao-estoura"
       ]
     }
   }

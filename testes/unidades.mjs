@@ -1362,16 +1362,109 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E2: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E2: 3 estrelas");
 
-// Volta para a ilha: a E2 acende; a E3 segue planejada.
+// Volta para a ilha: a E2 acende e a E3 abre.
 await conclusaoEVoltarAIlha("E2");
 conferir((await estadoDoPonto("sites-estilos-u2")) === "concluida", "ilha: E2 concluída");
-conferir((await estadoDoPonto("sites-estilos-u3")) === "planejada", "ilha: a E3 aparece como planejada");
+conferir((await estadoDoPonto("sites-estilos-u3")) === "disponivel", "ilha: a E3 abriu");
 const salvoE2 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
 conferir(salvoE2.fasesConcluidas.length === 29, `29 fases concluídas (${salvoE2.fasesConcluidas.length})`);
-// No mundo, Sites mostra as oito unidades prontas concluídas (U1 a U6, E1 e E2).
+
+await jogarUnidade("sites-estilos-u3", "Jogar");
+
+// ------------------------------------------------------------ painel Calculado (E3)
+async function mostrarCalculado() {
+  await fecharBalao();
+  await tocar(pagina.locator('[data-sub-aba="calculado"]'));
+  await esperar(200);
+}
+async function voltarParaEstilosSubAba() {
+  await fecharBalao();
+  await tocar(pagina.locator('[data-sub-aba="estilos"]'));
+  await esperar(200);
+}
+
+// ------------------------------------------------------------ E3 fase 1
+await metaDaUnidade("E3 começo");
+await conversar(2);
+await selecionarParaEstilos(".bolo");
+await apresentacao("painel-calculado", async () => {
+  await mostrarCalculado();
+});
+await apresentacao("modelo-de-caixa", async () => {
+  await pagina.locator('[data-camada="padding"] [data-lado="cima"]').first().hover();
+});
+await voltarParaEstilosSubAba();
+await acrescentarNoPainel(".bolo", "padding", "16px");
+await proximoObjetivo("E3F1 objetivo 1 (padding)");
+
+await acrescentarNoPainel(".bolo", "border", "2px solid #f2a65a");
+await proximoObjetivo("E3F1 objetivo 2 (border)");
+
+await selecionarParaEstilos(".aviso");
+await acrescentarNoPainel(".aviso", "padding", "12px");
+await proximoObjetivo("E3F1 objetivo 3 (sozinho, padding no aviso)");
+await conclusaoEProxima("E3F1");
+
+// ------------------------------------------------------------ E3 fase 2
+await conversar(1);
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(0));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos(".bolo");
+await acrescentarNoPainel(".bolo", "margin-bottom", "16px");
+await proximoObjetivo("E3F2 objetivo 1 (previsão padding x margin)");
+
+await selecionarParaEstilos(".aviso");
+await acrescentarNoPainel(".aviso", "margin-bottom", "16px");
+await proximoObjetivo("E3F2 objetivo 2 (sozinho, margin no aviso)");
+
+await selecionarParaEstilos(".chamada-whatsapp");
+await acrescentarNoPainel(".chamada-whatsapp", "box-sizing", "border-box");
+await proximoObjetivo("E3F2 objetivo 3 (box-sizing)");
+await conclusaoEProxima("E3F2");
+
+// ------------------------------------------------------------ Desafio E3
+await metaDaUnidade("Desafio E3");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio E3: checklist no lugar dos objetivos");
+
+await selecionarParaEstilos(".plano");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("padding", "16px");
+conferir((await partesFeitas()) === 1, "desafio E3: o padding dos planos marca a parte");
+
+await acrescentarNoPainel(".plano", "border", "2px solid #2a6f97");
+conferir((await partesFeitas()) === 2, "desafio E3: a moldura dos planos marca a parte");
+
+await acrescentarNoPainel(".plano", "margin-bottom", "16px");
+conferir((await partesFeitas()) === 3, "desafio E3: o espaço entre os planos marca a parte");
+
+await selecionarParaEstilos(".banner-promocao");
+await tocar(pagina.locator("[data-nova-regra]"));
+await escreverDeclaracao("box-sizing", "border-box");
+try {
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-e3", erro);
+}
+conferir((await partesFeitas()) === 4, "desafio E3: as 4 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E3: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E3: 3 estrelas");
+
+// Volta para a ilha: a E3 acende; a E4 segue planejada.
+await conclusaoEVoltarAIlha("E3");
+conferir((await estadoDoPonto("sites-estilos-u3")) === "concluida", "ilha: E3 concluída");
+conferir((await estadoDoPonto("sites-estilos-u4")) === "planejada", "ilha: a E4 aparece como planejada");
+const salvoE3 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvoE3.fasesConcluidas.length === 32, `32 fases concluídas (${salvoE3.fasesConcluidas.length})`);
+// No mundo, Sites mostra as nove unidades prontas concluídas (U1 a U6, E1 a E3).
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("8 de 8 unidades"), "mundo: Sites com 8 de 8 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("9 de 9 unidades"), "mundo: Sites com 9 de 9 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();
