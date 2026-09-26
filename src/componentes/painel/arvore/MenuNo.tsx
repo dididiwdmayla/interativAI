@@ -69,7 +69,7 @@ export function MenuNo({ x, y, rotulo, acoes, mostrarAtalhos, aoFechar }: Props)
     {
       id: "duplicar",
       nome: "Duplicar",
-      atalho: "Shift+Alt+↓",
+      atalho: "Shift+Alt+↓︎",
       Icone: IconeDuplicar,
       ativo: acoes.podeDuplicar,
       fazer: acoes.duplicar,
