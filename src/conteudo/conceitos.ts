@@ -259,6 +259,28 @@ const CATALOGO = {
     nome: "Box-sizing",
     resumo: "Com border-box, o padding e a border entram DENTRO da largura definida, em vez de somar a ela.",
   },
+
+  // Zona Estilos, E4: Por que minha regra não pega?
+  "cascata-css": {
+    nome: "Cascata",
+    resumo: "Várias regras podem mirar a mesma peça ao mesmo tempo; a cascata decide qual declaração vence.",
+  },
+  "ordem-das-regras": {
+    nome: "Ordem das regras",
+    resumo: "Quando duas regras têm a MESMA especificidade, a que vem depois no arquivo vence.",
+  },
+  "especificidade-css": {
+    nome: "Especificidade",
+    resumo: "Um seletor com id vence um com classe, que vence um só de tag — não importa a ordem no arquivo.",
+  },
+  "heranca-css": {
+    nome: "Herança",
+    resumo: "Sem regra própria, uma peça herda as propriedades herdáveis (como color) do ancestral mais perto.",
+  },
+  "importante-css": {
+    nome: "!important",
+    resumo: "!important faz uma declaração vencer quase tudo; editar a própria declaração é o jeito de mudar seu valor, mas é melhor evitar usá-lo.",
+  },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;

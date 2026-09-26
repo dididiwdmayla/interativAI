@@ -11,6 +11,7 @@ import { FASES_UNIDADE_6, UNIDADE_6 } from "./ilhas/sites/elementos/unidade-6/un
 import { FASES_UNIDADE_E1, UNIDADE_E1 } from "./ilhas/sites/estilos/unidade-1/unidade";
 import { FASES_UNIDADE_E2, UNIDADE_E2 } from "./ilhas/sites/estilos/unidade-2/unidade";
 import { FASES_UNIDADE_E3, UNIDADE_E3 } from "./ilhas/sites/estilos/unidade-3/unidade";
+import { FASES_UNIDADE_E4, UNIDADE_E4 } from "./ilhas/sites/estilos/unidade-4/unidade";
 import type { Fase, Unidade } from "./tipos";
 
 export const UNIDADES: readonly Unidade[] = [
@@ -23,6 +24,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_E1,
   UNIDADE_E2,
   UNIDADE_E3,
+  UNIDADE_E4,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -36,6 +38,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_E1,
   ...FASES_UNIDADE_E2,
   ...FASES_UNIDADE_E3,
+  ...FASES_UNIDADE_E4,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

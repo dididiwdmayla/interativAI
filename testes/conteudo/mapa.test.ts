@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, U6, E1, E2, E3] = UNIDADES;
+const [U1, U2, U3, U4, U5, U6, E1, E2, E3, E4] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -70,11 +70,12 @@ describe("ilhas", () => {
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
     // A U6 também está pronta: falta ela.
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("bloqueada");
-    // A zona Estilos (E1 a E3, as três prontas) também precisa acabar.
+    // A zona Estilos (E1 a E4, as quatro prontas) também precisa acabar.
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6), unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3), unidades })).toBe("disponivel");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -110,13 +111,14 @@ describe("zonas e unidades", () => {
     expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5, U6) })).toBe(true);
   });
 
-  it("a E1 fica bloqueada até a zona Elementos acabar (U1 a U6), e as outras de Estilos seguem planejadas", () => {
+  it("a E1 fica bloqueada até a zona Elementos acabar (U1 a U6), e a E5 segue planejada", () => {
     const estados = (progresso: Progresso) => ESTILOS.unidades.map((unidade) => estadoDaUnidade(SITES, ESTILOS, unidade, { progresso }));
     expect(E1.id).toBe("sites-estilos-u1");
-    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "bloqueada", "bloqueada", "planejada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "bloqueada", "bloqueada", "planejada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1))).toEqual(["concluida", "disponivel", "bloqueada", "planejada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1, E2))).toEqual(["concluida", "concluida", "disponivel", "planejada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "bloqueada", "bloqueada", "bloqueada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "bloqueada", "bloqueada", "bloqueada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1))).toEqual(["concluida", "disponivel", "bloqueada", "bloqueada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1, E2))).toEqual(["concluida", "concluida", "disponivel", "bloqueada", "planejada"]);
+    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3))).toEqual(["concluida", "concluida", "concluida", "disponivel", "planejada"]);
   });
 
   it("desbloqueio permanente: uma unidade nova numa zona anterior não tranca de novo a zona já aberta", () => {
