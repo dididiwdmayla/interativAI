@@ -51,6 +51,36 @@ export type RegraFase = {
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const EMOJI = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{20E3}]/u;
 
+/**
+ * Faixas Unicode de símbolos tipográficos que celulares (Android e iOS)
+ * costumam trocar por emoji colorido, mesmo sem serem "emoji" no sentido do
+ * Unicode (por isso o EMOJI acima, baseado em Extended_Pictographic, não os
+ * pega): setas, símbolos técnicos, formas geométricas, símbolos diversos,
+ * dingbats e símbolos/setas diversos. Um símbolo dessas faixas só passa se
+ * vier seguido do seletor de apresentação de texto U+FE0E, que impede a
+ * troca por emoji (ex.: "↓︎").
+ */
+const FAIXAS_SIMBOLOS_DE_RISCO: readonly (readonly [number, number])[] = [
+  [0x2190, 0x21ff], // setas
+  [0x2300, 0x23ff], // símbolos técnicos
+  [0x25a0, 0x25ff], // formas geométricas
+  [0x2600, 0x26ff], // símbolos diversos
+  [0x2700, 0x27bf], // dingbats
+  [0x2b00, 0x2bff], // símbolos e setas diversos
+];
+const SELETOR_TEXTO = "︎";
+
+/** Um símbolo de risco (ou emoji) sem o seletor de apresentação de texto logo depois. */
+function temSimboloSemSeletorDeTexto(texto: string): boolean {
+  const caracteres = Array.from(texto);
+  return caracteres.some((caractere, indice) => {
+    const codigo = caractere.codePointAt(0) ?? 0;
+    const ehSimboloDeRisco = FAIXAS_SIMBOLOS_DE_RISCO.some(([inicio, fim]) => codigo >= inicio && codigo <= fim);
+    if (!ehSimboloDeRisco && !EMOJI.test(caractere)) return false;
+    return caracteres[indice + 1] !== SELETOR_TEXTO;
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Utilitários                                                        */
 /* ------------------------------------------------------------------ */
@@ -361,7 +391,9 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
           problemas.push(`a meta da unidade "${unidade.id}" tem ${unidade.meta.enunciado.length} caracteres (máximo ${LIMITES.meta})`);
         }
         for (const { caminho, texto } of textos(unidade)) {
-          if (EMOJI.test(texto)) problemas.push(`emoji na unidade "${unidade.id}", em ${caminho}`);
+          if (temSimboloSemSeletorDeTexto(texto)) {
+            problemas.push(`emoji (ou símbolo que vira emoji no celular) na unidade "${unidade.id}", em ${caminho}`);
+          }
         }
       }
       return problemas;
@@ -523,7 +555,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
   },
   {
     id: "textos",
-    nome: "textos dentro dos limites, sem emoji e com a versão de toque",
+    nome: "textos dentro dos limites, sem emoji (nem símbolo que vira emoji no celular) e com a versão de toque",
     checar: (fase) => {
       const problemas: string[] = [];
       if (fase.titulo.length > LIMITES.titulo) {
@@ -556,7 +588,9 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         problemas.push(`missão de campo com ${fase.missaoDeCampo.length} caracteres (máximo ${LIMITES.missaoDeCampo})`);
       }
       for (const { caminho, texto } of textos(fase)) {
-        if (EMOJI.test(texto)) problemas.push(`emoji em ${caminho}`);
+        if (temSimboloSemSeletorDeTexto(texto)) {
+          problemas.push(`emoji (ou símbolo que vira emoji no celular, sem U+FE0E) em ${caminho}`);
+        }
       }
       return problemas;
     },

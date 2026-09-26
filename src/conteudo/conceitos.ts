@@ -148,6 +148,24 @@ const CATALOGO = {
     resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
   },
 
+  // Unidade 6: página do zero
+  "estrutura-do-documento": {
+    nome: "Estrutura do documento",
+    resumo: "Toda página começa com doctype, html, head e body: o esqueleto onde tudo o mais mora.",
+  },
+  "head-vs-body": {
+    nome: "Head e body",
+    resumo: "O head guarda informação sobre a página (título, codificação); o body guarda o que aparece na tela.",
+  },
+  title: {
+    nome: "Title",
+    resumo: "A tag title, dentro do head, dá o nome que aparece na aba do navegador, não na página.",
+  },
+  "meta-charset": {
+    nome: "Meta charset",
+    resumo: "A tag meta charset diz ao navegador como ler as letras da página; sem ela, acentos podem sair errados.",
+  },
+
   // Zona Estilos, E1: a aba Estilos
   "o-que-e-css": {
     nome: "O que é CSS",
@@ -200,6 +218,68 @@ const CATALOGO = {
   "regra-nova": {
     nome: "Regra nova",
     resumo: "Quando nenhuma regra pega a peça, você cria uma com o seletor dela e escreve as declarações.",
+  },
+
+  // Zona Estilos, E2: Seletores
+  "seletor-de-tag": {
+    nome: "Seletor de tag",
+    resumo: "Um seletor com o nome de uma tag (como h3) pega TODAS as peças daquele tipo na página.",
+  },
+  "seletor-de-classe": {
+    nome: "Seletor de classe",
+    resumo: "Um seletor que começa com ponto (.autor) pega toda peça com aquela class, não importa onde ela more.",
+  },
+  "seletor-de-id": {
+    nome: "Seletor de id",
+    resumo: "Um seletor que começa com sustenido (#id) pega só UMA peça, porque um id não se repete na página.",
+  },
+  "seletor-descendente": {
+    nome: "Seletor descendente",
+    resumo: "Dois seletores com um espaço entre eles (main .preco) pegam só o segundo quando ele está dentro do primeiro.",
+  },
+
+  // Zona Estilos, E3: Modelo de caixa
+  "modelo-de-caixa": {
+    nome: "Modelo de caixa",
+    resumo: "Toda peça é uma caixa com quatro camadas: conteúdo, padding, border e margin, de dentro pra fora.",
+  },
+  "padding-css": {
+    nome: "Padding",
+    resumo: "O padding é o espaço DENTRO da caixa, entre o conteúdo e a borda: empurra o conteúdo pra dentro.",
+  },
+  "border-css": {
+    nome: "Border",
+    resumo: "A border é a linha ao redor do padding: tem espessura, estilo (como solid) e cor.",
+  },
+  "margin-css": {
+    nome: "Margin",
+    resumo: "O margin é o espaço FORA da caixa: empurra as peças vizinhas pra longe, sem mudar o tamanho dela.",
+  },
+  "box-sizing": {
+    nome: "Box-sizing",
+    resumo: "Com border-box, o padding e a border entram DENTRO da largura definida, em vez de somar a ela.",
+  },
+
+  // Zona Estilos, E4: Por que minha regra não pega?
+  "cascata-css": {
+    nome: "Cascata",
+    resumo: "Várias regras podem mirar a mesma peça ao mesmo tempo; a cascata decide qual declaração vence.",
+  },
+  "ordem-das-regras": {
+    nome: "Ordem das regras",
+    resumo: "Quando duas regras têm a MESMA especificidade, a que vem depois no arquivo vence.",
+  },
+  "especificidade-css": {
+    nome: "Especificidade",
+    resumo: "Um seletor com id vence um com classe, que vence um só de tag — não importa a ordem no arquivo.",
+  },
+  "heranca-css": {
+    nome: "Herança",
+    resumo: "Sem regra própria, uma peça herda as propriedades herdáveis (como color) do ancestral mais perto.",
+  },
+  "importante-css": {
+    nome: "!important",
+    resumo: "!important faz uma declaração vencer quase tudo; editar a própria declaração é o jeito de mudar seu valor, mas é melhor evitar usá-lo.",
   },
 } as const satisfies Record<string, { nome: string; resumo: string }>;
 

@@ -4,19 +4,16 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 9 em andamento (painel Estilos, motor de
-cascata, modo documento, ROADMAP; ver a seção dela abaixo e o
-`docs/ROADMAP.md`, que é a fonte do status). A U6, a zona Estilos (E1 a
-E4) e a zona Layout (L1 a L4) já não pedem motor, e a E1 ("A aba
-Estilos") está publicada como unidade-modelo de CSS. Antes: rodada 8 (áudio v2: música do mapa e efeitos
+**Estado atual:** rodada 9 concluída (painel Estilos, motor de cascata,
+modo documento, ROADMAP e, nas etapas finais, U6 e a zona Estilos
+inteira; ver a seção dela abaixo e o `docs/ROADMAP.md`, que é a fonte do
+status). A Ilha Sites tem as zonas Elementos (U1 a U6) e Estilos (E1 a
+E4) completas; só faltam E5 (requer motor), Responsivo e Publicar.
+Antes: rodada 8 (áudio v2: música do mapa e efeitos
 gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
-seções). A zona Elementos está completa: U1 a U5 prontas, só a U6
-("Página do zero") segue planejada, por exigir motor (modo documento
-inteiro). Próximo passo: zona Estilos (`docs/MAPA-CURRICULAR.md`),
-que também requer motor (aba Estilos) — parar e relatar antes de
-produzir, seguindo a seção 0 do guia.
+seções). Próximo passo: a zona Layout (L1 a L4), com o motor já pronto.
 
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
@@ -170,6 +167,71 @@ desta rodada).
   depois da U5, nos 3 layouts (U6 e E2 planejadas, Sites 6 de 6);
   `curriculo.test.ts` e `mapa.test.ts` com a zona Estilos (a E1 abre ao
   acabar a zona Elementos; a Lógica só depois da E1).
+- [x] **Etapa 8: símbolo que vira emoji no celular.** Varredura do
+  repositório atrás de símbolos Unicode que o iOS/Android renderizam
+  como emoji colorido fora de contexto (setas 2190-21FF, símbolos
+  técnicos 2300-23FF, formas geométricas 25A0-25FF, símbolos diversos
+  2600-26FF, dingbats 2700-27BF, setas suplementares 2B00-2BFF, mais os
+  blocos de emoji), com o texto-selector U+FE0E como saída pra quando o
+  símbolo é mesmo necessário. `temSimboloSemSeletorDeTexto`
+  (`src/conteudo/checagens.ts`) combina essas faixas com o regex de
+  emoji já existente, checando o U+FE0E logo depois do símbolo; entra
+  nas checagens "meta-e-desafio" e "textos" do `testar:conteudo`, no
+  lugar do `EMOJI.test()` cru. Achado e corrigido: a seta `↓` no atalho
+  do menu do nó (`MenuNo.tsx`) virava emoji colorido no celular; agora é
+  `↓︎` (com U+FE0E). Guia (seção 6) e sabotagem em
+  `checagens.test.ts` (falha sem U+FE0E, passa com ele).
+- [x] **Etapa 9: fala errada da U4 corrigida.** A U4 já publicada dizia,
+  ao ensinar a acrescentar um atributo pela árvore, que "esse atributo
+  novo se escreve na aba Estilos" — factualmente errado (atributos são
+  HTML, não CSS; a aba Estilos edita `element.style` e regras CSS, nunca
+  atributos). Só o texto da fala mudou (`sites-elementos-u4-f1`, dentro
+  do limite de 160 caracteres do publicado); id, ordem e objetivos
+  intactos. Pendência removida do `docs/ROADMAP.md`.
+- [x] **Etapa 10: Unidade 6 "Página do zero".** Zona Elementos completa.
+  Duas fases guiadas no modo documento (esqueleto HTML do zero — head,
+  title, meta charset e viewport — no cartaz da Feira de Talentos; a
+  simulação de acentos quebrados até o meta charset entrar) e desafio no
+  Site do Marcos Conserta Bikes (title, h1, meta charset e meta
+  viewport, 5 partes). Conceitos novos: `estrutura-do-documento`,
+  `head-vs-body`, `title`, `meta-charset`. Testes: `unidades.mjs` joga a
+  U6 inteira depois da U5, nos 3 layouts.
+- [x] **Etapa 11: Unidade E2 "Seletores".** F1 seletor de tag e de
+  classe (Livraria Página Virada); F2 seletor de id e descendente
+  (Mercadinho Preço Bom), com o editor CSS apresentado pela primeira vez
+  porque o botão "+ regra nova" só sugere seletores simples (tag, id ou
+  classes do próprio elemento — nunca um seletor composto como
+  `main .autor`, limitação do `seletorSimples()` em
+  `src/motor/css/editarCss.ts`). Desafio em site novo. Conceitos:
+  `seletor-de-tag`, `seletor-de-classe`, `seletor-de-id`,
+  `seletor-descendente`.
+- [x] **Etapa 12: Unidade E3 "Modelo de caixa".** F1 padding e border,
+  F2 margin e box-sizing (Confeitaria Doce Encanto), com a aba Calculado
+  e o diagrama do modelo de caixa apresentados juntos. Desafio na
+  Barbearia Corte Certo. Conceitos: `modelo-de-caixa`, `padding-css`,
+  `border-css`, `margin-css`, `box-sizing`.
+- [x] **Etapa 13: Unidade E4 "Por que minha regra não pega?" — zona
+  Estilos completa.** F1 ordem e especificidade (a loja Corda & Nota,
+  com `#topo` mais específico vencendo `h1` mesmo escrito antes no
+  arquivo — ataca de propósito a confusão "a última regra sempre
+  vence"); F2 herança e `!important` (a mesma loja: `.descricao` herda a
+  cor do `article` pai sem regra própria; consertar um `!important`
+  editando a PRÓPRIA declaração, nunca criando outro). Desafio na
+  Academia Corpo Ativo, três regras que não pegam (especificidade,
+  especificidade de novo, `!important`), cada parte apontando
+  (`revisarEm`) pra fase guiada certa. Conceitos: `cascata-css`,
+  `ordem-das-regras`, `especificidade-css`, `heranca-css`,
+  `importante-css`. Motor: descoberto e corrigido um bug real de
+  desbloqueio (publicar a U6, numa zona anterior à Estilos, trancava de
+  novo a zona Estilos pra quem já tinha aberto ela antes) — ver
+  `docs/ATRITOS-FABRICA.md`, Rodada 3. Testes: `unidades.mjs` estende a
+  jornada até a E4 e o "10 de 10 unidades" no mundo; `curriculo.test.ts`
+  e `mapa.test.ts` atualizados a cada unidade nova; teste novo de
+  desbloqueio permanente. Bateria completa (`testar:conteudo`, build,
+  lint) verde nos 3 layouts em desktop e retrato; em paisagem, a
+  jornada completa esbarrou numa flakiness pré-existente do celular
+  (não causada por esta rodada, já documentada nas rodadas anteriores) —
+  detalhe completo em `docs/ATRITOS-FABRICA.md`, Rodada 3.
 
 ## Rodada 8: áudio v2 (música do mapa e efeitos gravados)
 

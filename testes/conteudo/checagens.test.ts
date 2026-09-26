@@ -110,6 +110,30 @@ describe("simulação do desafio usa o checklist do motor", () => {
   });
 });
 
+describe("símbolo que vira emoji no celular", () => {
+  it("um símbolo de uma das faixas de risco, sem U+FE0E, falha", () => {
+    const sabotada: FasePratica = {
+      ...FASE_U1_F2,
+      objetivos: FASE_U1_F2.objetivos.map((objetivo, indice) =>
+        indice === 0 ? { ...objetivo, falaAoConcluir: { ...objetivo.falaAoConcluir, texto: "Boa! ↓ Continue assim." } } : objetivo,
+      ),
+    };
+    const problemas = regraDeFase("textos").checar(sabotada, comFase(sabotada));
+    expect(problemas.join("\n")).toContain("emoji (ou símbolo que vira emoji no celular, sem U+FE0E)");
+  });
+
+  it("o mesmo símbolo seguido de U+FE0E passa", () => {
+    const corrigida: FasePratica = {
+      ...FASE_U1_F2,
+      objetivos: FASE_U1_F2.objetivos.map((objetivo, indice) =>
+        indice === 0 ? { ...objetivo, falaAoConcluir: { ...objetivo.falaAoConcluir, texto: "Boa! ↓︎ Continue assim." } } : objetivo,
+      ),
+    };
+    const problemas = regraDeFase("textos").checar(corrigida, comFase(corrigida));
+    expect(problemas.join("\n")).not.toContain("emoji");
+  });
+});
+
 describe("fase só de sozinho", () => {
   it("todos os objetivos sozinho com conceitos preenchidos falha", () => {
     const errada: FasePratica = { ...FASE_U1_F2, conceitos: ["tag"], pratica: FASE_U1_F2.pratica };

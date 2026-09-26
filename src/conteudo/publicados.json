@@ -30,11 +30,31 @@
       "sites-elementos-u5-f3",
       "sites-elementos-u5-f4"
     ],
+    "sites-elementos-u6": [
+      "sites-elementos-u6-f1",
+      "sites-elementos-u6-f2",
+      "sites-elementos-u6-f3"
+    ],
     "sites-estilos-u1": [
       "sites-estilos-u1-f1",
       "sites-estilos-u1-f2",
       "sites-estilos-u1-f3",
       "sites-estilos-u1-f4"
+    ],
+    "sites-estilos-u2": [
+      "sites-estilos-u2-f1",
+      "sites-estilos-u2-f2",
+      "sites-estilos-u2-f3"
+    ],
+    "sites-estilos-u3": [
+      "sites-estilos-u3-f1",
+      "sites-estilos-u3-f2",
+      "sites-estilos-u3-f3"
+    ],
+    "sites-estilos-u4": [
+      "sites-estilos-u4-f1",
+      "sites-estilos-u4-f2",
+      "sites-estilos-u4-f3"
     ]
   },
   "fases": {
@@ -177,6 +197,29 @@
         "precos-span"
       ]
     },
+    "sites-elementos-u6-f1": {
+      "objetivos": [
+        "titulo-no-body",
+        "title-no-head",
+        "aviso-e-link"
+      ]
+    },
+    "sites-elementos-u6-f2": {
+      "objetivos": [
+        "meta-charset",
+        "link-aba-nova",
+        "meta-viewport"
+      ]
+    },
+    "sites-elementos-u6-f3": {
+      "partes": [
+        "titulo-da-aba",
+        "titulo-da-pagina",
+        "meta-charset-cartao",
+        "meta-viewport-cartao",
+        "bio-com-acento"
+      ]
+    },
     "sites-estilos-u1-f1": {
       "objetivos": [
         "ver-regras-do-titulo",
@@ -209,6 +252,72 @@
         "sem-linha-vermelha",
         "fonte-georgia",
         "especial-destacado"
+      ]
+    },
+    "sites-estilos-u2-f1": {
+      "objetivos": [
+        "titulos-maiores",
+        "cor-dos-autores",
+        "precos-visiveis"
+      ]
+    },
+    "sites-estilos-u2-f2": {
+      "objetivos": [
+        "destaque-mais-vendido",
+        "autores-so-dos-livros",
+        "rodape-diferente"
+      ]
+    },
+    "sites-estilos-u2-f3": {
+      "partes": [
+        "fundo-promocao",
+        "titulo-oferta-relampago",
+        "precos-maiores-nas-ofertas",
+        "titulos-maiusculos",
+        "aviso-solto-cinza"
+      ]
+    },
+    "sites-estilos-u3-f1": {
+      "objetivos": [
+        "respiro-no-bolo",
+        "moldura-no-bolo",
+        "respiro-no-aviso"
+      ]
+    },
+    "sites-estilos-u3-f2": {
+      "objetivos": [
+        "espaco-entre-bolos",
+        "espaco-antes-do-whatsapp",
+        "whatsapp-nao-estoura"
+      ]
+    },
+    "sites-estilos-u3-f3": {
+      "partes": [
+        "respiro-nos-planos",
+        "moldura-nos-planos",
+        "espaco-entre-planos",
+        "banner-nao-estoura"
+      ]
+    },
+    "sites-estilos-u4-f1": {
+      "objetivos": [
+        "quem-vence-o-h1",
+        "consertar-o-topo",
+        "consertar-o-titulo-da-secao"
+      ]
+    },
+    "sites-estilos-u4-f2": {
+      "objetivos": [
+        "de-onde-vem-a-cor",
+        "vencer-o-important-do-preco",
+        "vencer-o-important-do-cabecalho"
+      ]
+    },
+    "sites-estilos-u4-f3": {
+      "partes": [
+        "titulo-da-marca-laranja",
+        "titulo-dos-planos-vermelho",
+        "valor-do-plano-destacado"
       ]
     }
   }

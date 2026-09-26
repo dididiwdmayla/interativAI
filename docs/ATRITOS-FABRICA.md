@@ -298,3 +298,138 @@ nova) avisando que a árvore só edita atributo já existente, e que
 - Ao escrever uma fase que ensina "acrescentar um atributo", já nascer
   pensando no código como o caminho (não na árvore), poupando a
   reescrita que aconteceu na U4.
+
+## Rodada 3: U6, zona Estilos completa (E2 a E4) e dois ajustes de conteúdo
+
+Produção das quatro últimas unidades planejadas da Ilha Sites — U6
+"Página do zero" (Elementos, modo documento), E2 "Seletores", E3
+"Modelo de caixa" e E4 "Por que minha regra não pega?" (Estilos) —, mais
+dois ajustes: uma checagem nova de símbolos que viram emoji colorido no
+celular (`testar:conteudo`) e a correção de uma fala factualmente errada
+na U4 já publicada. Cada unidade seguiu o ciclo padrão (fases,
+`testar:conteudo`, `/lab/fases`, Playwright nos 3 layouts, mais
+`publicar:conteudo`, build, lint e commit para as de conteúdo).
+
+### Atrito de motor real, pego antes de publicar (o mais importante desta rodada)
+
+Publicar a U6 (a primeira unidade nova de uma zona ANTERIOR à Estilos
+desde que a E1 existe) expôs uma regra que faltava no mapa
+(`src/lib/mapa.ts`): `zonaAberta`/`ilhaAberta` decidiam só pelo conteúdo
+registrado HOJE, sem saber que um jogador podia ter aberto (ou até
+concluído) a zona Estilos ONTEM, quando a zona Elementos só tinha 5
+unidades prontas. Publicar a U6 fazia a zona Elementos "crescer" de 5
+para 6 unidades prontas, e quem só tinha as 5 antigas concluídas via a
+zona Estilos, já aberta, TRANCAR de novo — um retrocesso visível pra
+quem já estava jogando.
+
+Não tinha como o `testar:conteudo` pegar isso: é uma checagem de
+comportamento ao longo do TEMPO (progresso salvo antes vs. currículo
+depois), não uma checagem do conteúdo num instante só. Só apareceu
+porque a Etapa 3 pedia explicitamente conferir esse cenário depois da
+U6. Corrigido com um "desbloqueio permanente": `algumaComProgresso`/
+`zonaComProgresso`/`ilhaComProgresso` (`src/lib/mapa.ts`) checam primeiro
+se a zona ou ilha já tem qualquer fase concluída OU em andamento no
+progresso salvo — se sim, ela conta como aberta, não importa o que o
+currículo diga agora. Teste novo em `mapa.test.ts` ("desbloqueio
+permanente: uma unidade nova numa zona anterior não tranca de novo a
+zona já aberta"), com os dois casos (já concluiu uma fase da zona;
+só começou uma, sem concluir).
+
+**O que ajudaria:** uma nota no guia (seção 0 ou uma seção de "publicar
+conteúdo") avisando que publicar uma unidade numa zona ANTERIOR à
+fronteira atual do jogo é um evento especial: sempre conferir se algum
+desbloqueio existente pode retroceder, não só se o conteúdo novo
+funciona.
+
+### O padrão recorrente: apresentação já de pé antes do código do teste continuar
+
+Confirma e generaliza o que a Rodada 2 já tinha achado num caso (o
+duplo clique num atributo que não existe): a apresentação da ferramenta
+do PRÓXIMO objetivo aparece assim que ele fica ativo — **antes** de
+`proximoObjetivo()` sequer devolver o controle pro código do teste.
+Isso apareceu de novo em três ferramentas diferentes desta rodada:
+`adicionar-atributo` (U6, no celular, o menu do nó precisa do segmento
+"Árvore" já selecionado), `editor-css` (E2, o recorte do spotlight é
+calculado com o painel já na aba CSS) e `painel-calculado` (E3, a
+aba Calculado precisa estar à vista). A solução é sempre a mesma: trocar
+de aba/segmento/sub-aba ANTES de chamar `proximoObjetivo()` no objetivo
+ANTERIOR, nunca depois — não existe uma janela "objetivo ainda não
+começou" pra preparar a interface com calma.
+
+**O que ajudaria:** documentar essa regra geral no
+`testes/README.md` (não só o caso específico da Rodada 2), como uma
+categoria própria: "toda apresentação de ferramenta nova corre uma
+corrida com o código do teste; prepare a interface antes do
+`proximoObjetivo()`, não depois".
+
+### Três bugs de teste (não de conteúdo nem de motor) achados rodando em toque
+
+A bateria Playwright em retrato e paisagem (não coberta por completo nas
+rodadas anteriores para E2/E3, e nova para E4) expôs três bugs no
+PRÓPRIO script `testes/unidades.mjs`, todos do mesmo tipo: uma
+interação que funciona no desktop mas não em toque, porque o
+componente reage a um evento diferente (ou porque um overlay do celular
+fica na frente):
+
+1. **`.hover()` não existe em toque.** A apresentação de
+   `modelo-de-caixa` (E3F1) usava `.hover()` numa camada do diagrama pra
+   "experimentar" a ferramenta; em toque, `onMouseOver` fica desligado
+   de propósito no componente (`PainelCalculado.tsx`) e só o `onClick`
+   realça a camada, então a apresentação nunca fechava em retrato/
+   paisagem. Trocado por um toque (`tocar()`) na própria camada, que
+   funciona igual em toque e no clique do desktop.
+2. **O balão da conversa não fecha sozinho entre uma ação e a
+   próxima.** `trocarValorNoPainel`, `acrescentarNoPainel` e
+   `caixinhaNoPainel` nunca chamavam `fecharBalao()`, ao contrário de
+   `selecionarParaEstilos`. Enquanto o objetivo seguinte troca de peça
+   selecionada (chamando `selecionarParaEstilos` de novo), isso passava
+   despercebido; quando reaproveita a MESMA peça (caso do E3F1 objetivo
+   2, "border", que segue direto no `.bolo` já selecionado), o balão
+   ainda aberto do "Próximo objetivo" anterior intercepta o toque.
+3. **O balão reabre sozinho por reação do computadorzinho.** Mesmo
+   fechando o balão no começo de `trocarValorNoPainel`, a reação
+   automática à mudança reabre ele; o `mostrarEstilos()` só fecha o
+   balão em modo retrato (`if (MODO !== "retrato") return`), não em
+   paisagem, então o `.hover()` seguinte no seletor `h3` (E2F1) esbarra
+   de novo no backdrop do balão, só em paisagem.
+
+Os três já eram bugs latentes no teste desde as rodadas anteriores; só
+apareceram agora porque essa foi a primeira vez que a bateria completa
+em retrato E paisagem chegou até esses pontos exatos. Corrigidos
+fechando o balão nos três ajudantes do painel e antes do `.hover()`
+avulso, e usando toque em vez de hover na apresentação do modelo de
+caixa.
+
+**O que ajudaria:** um ajudante único (`agirNoPainel(fn)`) que sempre
+fecha o balão antes de qualquer interação com o painel Estilos, em vez
+de espalhar `fecharBalao()` em cada função — evitaria descobrir isso
+função por função, ponto de falha por ponto de falha.
+
+### Atrito não corrigido: flakiness pré-existente do celular na U4
+
+Documentado nas rodadas anteriores e confirmado de novo aqui:
+`editarValorAtributo` (U4, zona Elementos) trava intermitentemente em
+retrato e paisagem, num ponto DIFERENTE a cada execução — às vezes na
+própria U4, às vezes um pouco depois (na árvore da E2, por exemplo,
+provavelmente o mesmo tipo de corrida, não um bug novo). A bateria
+completa em paisagem não fechou por causa disso, mesmo depois de duas
+tentativas. Como não é causado por nenhuma mudança desta rodada
+(acontece em conteúdo publicado há rodadas) e o pedido explícito era
+"não improvisar, produzir o possível e relatar o que falta" em vez de
+inventar um jeito de contornar um problema de motor, ficou como está:
+
+- **Desktop:** bateria completa (U1 a U6, E1 a E4) verde, 3 execuções,
+  console limpo.
+- **Retrato:** bateria completa verde, 2 execuções seguidas depois dos
+  três fixes de teste acima.
+- **Paisagem:** trava por causa da flakiness pré-existente antes de
+  terminar (duas tentativas, pontos de falha diferentes); nunca chegou
+  a expor um problema NOVO desta rodada — parou sempre em código de
+  unidades anteriores (U4, E2), não em U6/E2/E3/E4 propriamente.
+
+**O que ajudaria:** o item já registrado nas rodadas anteriores
+continua de pé — promover `editarValorAtributo` pro `testes/util.mjs`
+com mais tentativas e alguma espera adicional depois de cada toque
+longo, e investigar se a régua de números ou a virtualização do
+CodeMirror mudou de layout num viewport de paisagem (mais largo e mais
+baixo que retrato) o bastante pra deslocar onde o duplo clique cai.

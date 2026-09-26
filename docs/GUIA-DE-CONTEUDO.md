@@ -500,6 +500,16 @@ faz perguntas.
 
 - Nenhum emoji em lugar nenhum (nem nos sites-alvo). Cuidado com `©` e
   `™`, que contam como emoji para a checagem.
+- **Nenhum símbolo tipográfico das faixas que o celular troca por emoji
+  colorido**, mesmo sem serem "emoji" de verdade: setas (2190–21FF),
+  símbolos técnicos (2300–23FF), formas geométricas (25A0–25FF), símbolos
+  diversos (2600–26FF), dingbats (2700–27BF) e símbolos/setas diversos
+  (2B00–2BFF) — exemplos: `✓ ✔ ★ ☆ ⚠ ▶ ◀ ↩ ⏎ ✕ ✖ ♥ ☀ ☕ ⚙`. Troque por SVG
+  (interface) ou por CSS/texto (sites-alvo). Se o caractere for mesmo
+  necessário, acrescente logo depois o seletor de apresentação de texto
+  U+FE0E (ex.: `"↓︎"`), que impede a troca por emoji. A checagem
+  `textos` (e `meta-e-desafio`) do `testar:conteudo` falha se algum desses
+  símbolos aparecer sem o U+FE0E logo depois.
 - `enunciado.toque` sempre preenchido.
 - Não comece o enunciado sozinho com "Sozinho:": o selo já aparece.
 - Toda ferramenta usada precisa ter sido apresentada antes (ou no próprio
