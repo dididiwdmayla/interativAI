@@ -223,7 +223,10 @@ async function mostrarCss() {
  */
 async function escreverNoCss(textoDaRegra) {
   await mostrarCss();
-  await tocar(pagina.locator("[data-editor-css] .cm-content"));
+  // O .cm-content do CodeMirror tem a altura do documento inteiro (não só a
+  // parte visível): clicar no centro (padrão) pode cair fora da tela e fora
+  // do recorte da apresentação. Clica perto do topo, sempre visível.
+  await tocar(pagina.locator("[data-editor-css] .cm-content"), { position: { x: 10, y: 10 } });
   await pagina.keyboard.press("Control+End");
   await pagina.keyboard.press("Enter");
   await pagina.keyboard.type(textoDaRegra);
