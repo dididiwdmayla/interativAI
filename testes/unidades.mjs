@@ -986,6 +986,9 @@ await pagina.waitForFunction(() => document.querySelector("[data-titulo-aba]") &
 conferir((await iframe.locator("p").first().textContent()) === "Inscrições até sexta-feira!", "o meta charset conserta os acentos na hora");
 await proximoObjetivo("U6F2 objetivo 1 (previsão do meta charset)");
 
+// Troca para a Árvore ANTES da apresentação: o véu do spotlight não libera a
+// aba de segmento, só a área da ferramenta (o menu do nó).
+await mostrarPainel("Árvore");
 await apresentacao("adicionar-atributo", () => adicionarAtributoPeloMenu("a", 'target="_blank"'));
 await proximoObjetivo("U6F2 objetivo 2 (adicionar atributo, aba nova)");
 
