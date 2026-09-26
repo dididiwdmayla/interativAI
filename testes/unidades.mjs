@@ -1458,16 +1458,89 @@ await pagina.locator("[data-conclusao]").waitFor();
 conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E3: conclusão");
 conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E3: 3 estrelas");
 
-// Volta para a ilha: a E3 acende; a E4 segue planejada.
+// Volta para a ilha: a E3 acende e a E4 abre.
 await conclusaoEVoltarAIlha("E3");
 conferir((await estadoDoPonto("sites-estilos-u3")) === "concluida", "ilha: E3 concluída");
-conferir((await estadoDoPonto("sites-estilos-u4")) === "planejada", "ilha: a E4 aparece como planejada");
+conferir((await estadoDoPonto("sites-estilos-u4")) === "disponivel", "ilha: a E4 abriu");
 const salvoE3 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
 conferir(salvoE3.fasesConcluidas.length === 32, `32 fases concluídas (${salvoE3.fasesConcluidas.length})`);
-// No mundo, Sites mostra as nove unidades prontas concluídas (U1 a U6, E1 a E3).
+
+await jogarUnidade("sites-estilos-u4", "Jogar");
+
+// ------------------------------------------------------------ E4 fase 1
+await metaDaUnidade("E4 começo");
+await conversar(2);
+// Previsão: #topo (mais específico) vence h1, mesmo vindo antes no arquivo.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos("h1");
+await proximoObjetivo("E4F1 objetivo 1 (previsão de especificidade, #topo vence)");
+
+await trocarValorNoPainel("#topo", "color", "blue");
+await proximoObjetivo("E4F1 objetivo 2 (editar quem vence, #topo)");
+
+await selecionarParaEstilos("h2");
+await trocarValorNoPainel(".titulo-secao", "color", "#3d348b");
+await proximoObjetivo("E4F1 objetivo 3 (sozinho, .titulo-secao vence main h2)");
+await conclusaoEProxima("E4F1");
+
+// ------------------------------------------------------------ E4 fase 2
+await conversar(1);
+// Previsão: sem regra própria, .descricao herda o roxo do article.instrumento.
+await abrirBalao();
+await pagina.locator("[data-previsao]").waitFor();
+await tocar(pagina.locator("[data-previsao] button").nth(1));
+await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
+await selecionarParaEstilos(".descricao");
+await proximoObjetivo("E4F2 objetivo 1 (previsão de herança)");
+
+await selecionarParaEstilos(".preco");
+await trocarValorNoPainel(".preco", "color", "teal");
+await proximoObjetivo("E4F2 objetivo 2 (editar a própria declaração !important, preço)");
+
+await selecionarParaEstilos("header");
+await trocarValorNoPainel("header", "background-color", "#3d348b");
+await proximoObjetivo("E4F2 objetivo 3 (sozinho, !important do cabeçalho)");
+await conclusaoEProxima("E4F2");
+
+// ------------------------------------------------------------ Desafio E4
+await metaDaUnidade("Desafio E4");
+await conversar(3);
+if (!movel) conferir(await checklist().isVisible(), "desafio E4: checklist no lugar dos objetivos");
+
+await selecionarParaEstilos("h1");
+await trocarValorNoPainel("#marca", "color", "orange");
+conferir((await partesFeitas()) === 1, "desafio E4: a marca laranja marca a parte");
+
+await selecionarParaEstilos("h2");
+await trocarValorNoPainel(".titulo-plano", "color", "crimson");
+conferir((await partesFeitas()) === 2, "desafio E4: o título dos planos vermelho marca a parte");
+
+await selecionarParaEstilos(".valor");
+try {
+  await trocarValorNoPainel(".valor", "color", "#1b998b");
+  await abrirBalao();
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 6000 });
+} catch (erro) {
+  await falhar("desafio-e4", erro);
+}
+conferir((await partesFeitas()) === 3, "desafio E4: as 3 partes marcadas");
+await botaoConversa("Ver resultado");
+await pagina.locator("[data-conclusao]").waitFor();
+conferir((await pagina.getByText("Desafio vencido!").count()) > 0, "desafio E4: conclusão");
+conferir((await pagina.getByRole("dialog").locator("[aria-label='3 de 3 estrelas']").count()) === 1, "desafio E4: 3 estrelas");
+
+// Volta para a ilha: a E4 acende, zona Estilos completa (E5 ainda pede motor).
+await conclusaoEVoltarAIlha("E4");
+conferir((await estadoDoPonto("sites-estilos-u4")) === "concluida", "ilha: E4 concluída");
+const salvoE4 = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")));
+conferir(salvoE4.fasesConcluidas.length === 35, `35 fases concluídas (${salvoE4.fasesConcluidas.length})`);
+// No mundo, Sites mostra as dez unidades prontas concluídas (U1 a U6, E1 a E4).
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("9 de 9 unidades"), "mundo: Sites com 9 de 9 unidades");
+conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("10 de 10 unidades"), "mundo: Sites com 10 de 10 unidades");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

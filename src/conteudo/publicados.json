@@ -50,6 +50,11 @@
       "sites-estilos-u3-f1",
       "sites-estilos-u3-f2",
       "sites-estilos-u3-f3"
+    ],
+    "sites-estilos-u4": [
+      "sites-estilos-u4-f1",
+      "sites-estilos-u4-f2",
+      "sites-estilos-u4-f3"
     ]
   },
   "fases": {
@@ -292,6 +297,27 @@
         "moldura-nos-planos",
         "espaco-entre-planos",
         "banner-nao-estoura"
+      ]
+    },
+    "sites-estilos-u4-f1": {
+      "objetivos": [
+        "quem-vence-o-h1",
+        "consertar-o-topo",
+        "consertar-o-titulo-da-secao"
+      ]
+    },
+    "sites-estilos-u4-f2": {
+      "objetivos": [
+        "de-onde-vem-a-cor",
+        "vencer-o-important-do-preco",
+        "vencer-o-important-do-cabecalho"
+      ]
+    },
+    "sites-estilos-u4-f3": {
+      "partes": [
+        "titulo-da-marca-laranja",
+        "titulo-dos-planos-vermelho",
+        "valor-do-plano-destacado"
       ]
     }
   }
