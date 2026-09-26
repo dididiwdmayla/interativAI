@@ -1345,7 +1345,7 @@ await escreverNoCss("#ofertas .preco { font-size: 18px; }");
 conferir((await partesFeitas()) === 3, "desafio E2: os preços maiores marcam a parte");
 
 await selecionarParaEstilos("h3");
-await trocarValorNoPainel("h3", "text-transform", "uppercase");
+await acrescentarNoPainel("h3", "text-transform", "uppercase");
 conferir((await partesFeitas()) === 4, "desafio E2: os títulos em caixa alta marcam a parte");
 
 await escreverNoCss(".chamada .preco { color: #888888; }");
