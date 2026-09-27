@@ -533,5 +533,8 @@ velho do mapa também foi corrigido: ele esperava a U6 "planejada", e ela
 foi publicada na Rodada 3 (agora confere a L1).
 
 **Critério:** `npm run bateria:repetir` (5 rodadas seguidas da bateria
-inteira, nos três layouts, no build de produção). Resultado registrado no
-`docs/PROGRESSO.md` (rodada 10).
+inteira, nos três layouts, no build de produção). Resultado: `npm run bateria:repetir` no build de produção: **5 rodadas seguidas
+verdes** (24 execuções por rodada, três layouts, console limpo em todas;
+cerca de 45 min por rodada). Antes delas, duas tentativas pararam em
+falhas novas, que viraram os itens 7 e 8 do relatório de atritos
+("Rodada 3, resolvido") e foram corrigidas antes de recomeçar do zero.

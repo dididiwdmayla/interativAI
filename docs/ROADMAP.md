@@ -114,7 +114,10 @@ núcleo comum.
     `data-apresentacao-estado`, `data-objetivo-atual`, `data-balao`,
     `data-modal-assentado`...), pendências (`src/lib/pendencias.ts`),
     ajudantes por estado, sem `waitForTimeout` de muleta,
-    `npm run bateria:repetir` (5 rodadas) e `PARALELO=n`.
+    `npm run bateria:repetir` (5 rodadas) e `PARALELO=n`. Resultado: 5
+    rodadas seguidas verdes nos três layouts, no build de produção, com
+    console limpo (antes, um toque só abria a edição na árvore, por um
+    `dblclick` do navegador; corrigido).
   - Camada de trilhas: Web (ativa), Jogos e Automação industrial (em
     construção, ilhas só nomeadas), núcleo comum, tela `/trilhas`, mundo e
     desbloqueio por trilha, progresso compartilhado, "Como integrar uma

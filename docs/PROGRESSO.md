@@ -140,6 +140,11 @@ Status resumido em `docs/ROADMAP.md`.
   `testes/README.md` com o `explorar.mjs`, o áudio sem arquivos e as
   unidades atuais; ROADMAP com Feito, Próximo e a decisão do
   `InterativAIPLUS`.
+  Resultado final: `npm run bateria:repetir` no build de produção: **5 rodadas seguidas
+  verdes** (24 execuções por rodada, três layouts, console limpo em todas;
+  cerca de 45 min por rodada). Antes delas, duas tentativas pararam em
+  falhas novas, que viraram os itens 7 e 8 do relatório de atritos
+  ("Rodada 3, resolvido") e foram corrigidas antes de recomeçar do zero.
 
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
