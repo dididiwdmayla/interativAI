@@ -14,3 +14,12 @@ export function rotaDaFase(faseId: string): string {
 
 /** Só para testes: desbloquear tudo, resetar o mapa e a Lista de fases. */
 export const ROTA_LAB_MAPA = "/lab/mapa";
+
+/** As trilhas (Web, Jogos, Automação industrial): escolher qual aparece no mundo. */
+export const ROTA_TRILHAS = "/trilhas";
+
+/** As profissões: o que faz cada tipo de programador, e a lente de cada uma no mapa. */
+export const ROTA_PROFISSOES = "/profissoes";
+
+/** O glossário vivo: todo conceito, onde se aprende e onde se pratica. */
+export const ROTA_GLOSSARIO = "/glossario";

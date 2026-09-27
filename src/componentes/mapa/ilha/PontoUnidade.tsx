@@ -18,6 +18,8 @@ type Props = {
   y: number;
   /** Acabou de ser concluída: acende com festa. */
   acendendo: boolean;
+  /** Lente de tema acesa: a unidade é do tema (acesa) ou não (apagada). Null sem lente. */
+  lente?: "acesa" | "apagada" | null;
   aoAbrir: () => void;
 };
 
@@ -42,7 +44,7 @@ function Andaime() {
  * disponível (pulsando), bloqueada (cadeado) ou planejada (andaime e
  * "Em breve"). O botão tem pelo menos 52 px.
  */
-export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, aoAbrir }: Props) {
+export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, lente = null, aoAbrir }: Props) {
   const animar = useAnimarMapa();
   const { item } = ponto;
   const fundo = {
@@ -59,8 +61,11 @@ export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, aoAbrir
   }[lado];
 
   return (
-    <div className="absolute" style={{ left: x, top: y }}>
+    <div className={`absolute transition-opacity ${lente === "apagada" ? "opacity-35" : ""}`} style={{ left: x, top: y }}>
       <div className="relative -translate-x-1/2 -translate-y-1/2">
+        {lente === "acesa" && (
+          <span aria-hidden="true" className="absolute -inset-2 rounded-full border-4 border-destaque shadow-[0_0_0_3px_var(--cor-superficie)]" />
+        )}
         {estado === "disponivel" && (
           <motion.span
             aria-hidden="true"
@@ -82,7 +87,8 @@ export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, aoAbrir
           type="button"
           data-unidade={item.id}
           data-estado={estado}
-          aria-label={`${item.titulo}: ${ROTULO[estado]}`}
+          data-lente={lente ?? undefined}
+          aria-label={`${item.titulo}: ${ROTULO[estado]}${lente === "acesa" ? " (no tema)" : ""}`}
           onClick={aoAbrir}
           onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
           initial={acendendo && animar ? { scale: 0.6 } : false}

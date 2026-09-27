@@ -6,7 +6,7 @@
 // o atributo novo pelo menu do nó (botão direito no desktop, toque longo
 // no celular), com desfazer.
 // Uso: node testes/documento.mjs
-import { abrir, conferir, errosRelevantes, linhaDaArvore, mostrarArvore, selecionarNo, chaveDoSeletor } from "./util.mjs";
+import { abrir, chaveDoSeletor, conferir, errosRelevantes, esperarPronto, linhaDaArvore, mostrarArvore, selecionarNo } from "./util.mjs";
 
 const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
 
@@ -35,7 +35,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   conferir((await tituloDaAba()) === "Meu cartÃ£o", `a aba mostra o title, quebrado sem meta charset (${await tituloDaAba()})`);
   conferir((await naPagina((el) => el.contentDocument.querySelector("h1").textContent)) === "CartÃ£o de visita", "a prévia quebra os acentos");
   await pagina.locator("[data-aviso-acentos]").click();
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   conferir((await pagina.locator("body").innerText()).includes("Isto é uma simulação"), "o aviso faz o computadorzinho explicar que é uma simulação");
   conferir(!(await textoDoEditor()).includes("Ã"), "o código continua com os acentos certos");
 
@@ -45,7 +45,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   const campo = pagina.locator("[role=tree] input").first();
   await campo.fill("Cartão da Ana");
   await campo.press("Enter");
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir((await tituloDaAba()) === "Cartão da Ana", "trocar o texto do title pela árvore muda a aba ao vivo");
   conferir((await textoDoEditor()).includes("<title>Cartão da Ana</title>"), "e o código");
 
@@ -59,7 +59,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   });
   conferir((await naPagina((el) => el.contentDocument.querySelector("h1").textContent)) === "Cartão de visita", "com o meta charset, os acentos voltam");
   conferir((await tituloDaAba()) === "Cartão da Ana", "e a aba também");
-  await pagina.waitForTimeout(400);
+  await esperarPronto(pagina);
 
   // Adicionar atributo: botão direito no link.
   await selecionarNo(pagina, "a");
@@ -72,14 +72,14 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   conferir(await novo.isVisible(), "um espaço para o atributo aparece dentro da tag, como no Chrome");
   await novo.fill('target="_blank" rel="noopener"');
   await novo.press("Enter");
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir((await naPagina((el) => el.contentDocument.querySelector("a").getAttribute("target"))) === "_blank", "o link ganha target=_blank");
   conferir((await naPagina((el) => el.contentDocument.querySelector("a").getAttribute("rel"))) === "noopener", "dá para escrever mais de um de uma vez");
   conferir((await linhaDaArvore(pagina, chaveLink).innerText()).includes('target="_blank"'), "a árvore mostra o atributo novo");
   conferir((await textoDoEditor()).includes('target="_blank"'), "e o código também");
 
   await pagina.getByRole("button", { name: /^Desfazer/ }).first().click();
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir((await naPagina((el) => el.contentDocument.querySelector("a").hasAttribute("target"))) === false, "desfazer tira os atributos novos");
 
   // Esc desiste.
@@ -87,7 +87,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   await pagina.locator("[data-menu-no] [data-acao=adicionar-atributo]").click();
   await pagina.locator("[data-atributo-novo] input").fill("title=oi");
   await pagina.locator("[data-atributo-novo] input").press("Escape");
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   conferir((await naPagina((el) => el.contentDocument.querySelector("a").hasAttribute("title"))) === false, "Esc desiste do atributo novo");
 
   conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
@@ -110,7 +110,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   await linha.dispatchEvent("pointerdown", ponto);
   await pagina.waitForTimeout(750);
   await linha.dispatchEvent("pointerup", ponto);
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   const item = pagina.locator("[data-menu-no] [data-acao=adicionar-atributo]");
   conferir((await item.count()) === 1, "toque longo no nó abre o menu com Adicionar atributo");
   const alvo = await item.boundingBox();
@@ -118,7 +118,7 @@ const ROTA = "/lab/fases?fase=lab-motor-u1-f2";
   await item.tap();
   await pagina.locator("[data-atributo-novo] input").fill('target="_blank"');
   await pagina.locator("[data-atributo-novo] input").press("Enter");
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir(
     (await pagina.locator("section[data-previa] iframe").evaluate((el) => el.contentDocument.querySelector("a").getAttribute("target"))) === "_blank",
     "o link ganha o atributo no celular",

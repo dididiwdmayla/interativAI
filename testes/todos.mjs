@@ -1,6 +1,7 @@
 // Roda os testes de navegador que não dependem de configuração do tutor.
 // Precisa do jogo no ar (npm run dev ou npm start) em URL_JOGO (padrão :3000).
-import { execFileSync } from "node:child_process";
+// PARALELO=n roda n arquivos ao mesmo tempo (padrão 1, um atrás do outro).
+import { spawn } from "node:child_process";
 
 const TESTES = [
   ["sincronia.mjs"],
@@ -21,19 +22,43 @@ const TESTES = [
   ["mapa.mjs", "desktop"],
   ["mapa.mjs", "retrato"],
   ["mapa.mjs", "paisagem"],
+  ["explorar.mjs", "desktop"],
+  ["explorar.mjs", "retrato"],
+  ["explorar.mjs", "paisagem"],
   ["retomar.mjs"],
   ["migracao.mjs"],
   ["audio.mjs"],
 ];
 
-let falhas = 0;
-for (const [arquivo, ...argumentos] of TESTES) {
-  console.log(`\n# ${arquivo} ${argumentos.join(" ")}`);
-  try {
-    execFileSync(process.execPath, [new URL(arquivo, import.meta.url).pathname, ...argumentos], { stdio: "inherit" });
-  } catch {
-    falhas++;
-  }
+const PARALELO = Math.max(1, Number(process.env.PARALELO ?? 1));
+
+/** Roda um arquivo; em paralelo, a saída de cada um sai inteira no fim, sem misturar. */
+function rodar([arquivo, ...argumentos]) {
+  return new Promise((resolver) => {
+    const titulo = `\n# ${arquivo} ${argumentos.join(" ")}`;
+    if (PARALELO === 1) console.log(titulo);
+    const filho = spawn(process.execPath, [new URL(arquivo, import.meta.url).pathname, ...argumentos], {
+      stdio: PARALELO === 1 ? "inherit" : "pipe",
+    });
+    let saida = "";
+    filho.stdout?.on("data", (pedaco) => (saida += pedaco));
+    filho.stderr?.on("data", (pedaco) => (saida += pedaco));
+    filho.on("close", (codigo) => {
+      if (PARALELO > 1) console.log(`${titulo}\n${saida.trimEnd()}`);
+      resolver(codigo === 0);
+    });
+  });
 }
-console.log(falhas === 0 ? "\nTudo certo." : `\n${falhas} teste(s) falharam.`);
-process.exit(falhas === 0 ? 0 : 1);
+
+const falhas = [];
+const fila = [...TESTES];
+await Promise.all(
+  Array.from({ length: PARALELO }, async () => {
+    while (fila.length > 0) {
+      const teste = fila.shift();
+      if (!(await rodar(teste))) falhas.push(teste.join(" "));
+    }
+  }),
+);
+console.log(falhas.length === 0 ? "\nTudo certo." : `\n${falhas.length} teste(s) falharam: ${falhas.join("; ")}`);
+process.exit(falhas.length === 0 ? 0 : 1);

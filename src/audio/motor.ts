@@ -41,8 +41,8 @@ export type AjustesAudio = {
 
 export const AJUSTES_AUDIO_PADRAO: AjustesAudio = { mudo: false, musica: 0.5, efeitos: 0.7, voz: 0.7 };
 
-/** Crossfade entre faixas de telas diferentes. */
-export const CROSSFADE_MUSICA = 1.5;
+/** Crossfade entre faixas de telas diferentes (uns 800 ms: troca suave, sem arrastar). */
+export const CROSSFADE_MUSICA = 0.8;
 /** Quanto a música abaixa enquanto o computadorzinho fala (-6 dB). */
 const GANHO_DUCKING = 0.5;
 /**
@@ -95,6 +95,12 @@ let decodificadorOffline: BaseAudioContext | null = null;
 
 // Música.
 let telaAtual: TelaDoJogo | null = null;
+/**
+ * Pré-carga da próxima tela provável (do mundo, a ilha atual; da ilha, o
+ * mundo): só os bytes do arquivo, sem decodificar (a faixa decodificada
+ * ocupa uns 30 MB; o arquivo, bem menos). Uma de cada vez.
+ */
+let preCarga: { faixa: string; bytes: Promise<ArrayBuffer | null> } | null = null;
 let faixaDesejada: string | null = null;
 let tocando: FaixaTocando | null = null;
 const saindo = new Set<FaixaTocando>();
@@ -241,11 +247,16 @@ export function liberarAudio(): void {
  */
 export function prepararAudio({ boot }: { boot: boolean }): void {
   if (!temJanela()) return;
-  void obterManifestoMusicas();
-  void carregarManifestoEfeitos().then(() => {
+  const musicas = obterManifestoMusicas();
+  const efeitos = carregarManifestoEfeitos().then(async () => {
     if (!boot || liberado) return;
     const fonte = fonteDoEfeito("boot", manifestoEfeitos, formatoDoNavegador());
-    if (fonte.tipo === "arquivo") void carregarEfeito(fonte.url);
+    if (fonte.tipo === "arquivo") await carregarEfeito(fonte.url);
+  });
+  // Para os testes de navegador: os manifestos chegaram e o boot já foi
+  // tentado (decodificado ou não). Estado, em vez de esperar a rede calar.
+  void Promise.allSettled([musicas, efeitos]).then(() => {
+    document.documentElement.dataset.audioPreparado = "sim";
   });
 }
 
@@ -295,6 +306,42 @@ async function obterManifestoMusicas(): Promise<ManifestoMusicas> {
 export function definirTelaMusical(tela: TelaDoJogo): void {
   telaAtual = tela;
   if (liberado) void resolverMusica();
+}
+
+/**
+ * A próxima tela provável: baixa (sem decodificar) a faixa dela, para a
+ * troca começar sem espera. Só depois do primeiro gesto e com a música
+ * audível; faixa igual à atual, pendente ou sem arquivo: nada.
+ */
+export function preCarregarTelaMusical(tela: TelaDoJogo): void {
+  if (!liberado || !musicaAudivel()) return;
+  void obterManifestoMusicas().then((manifesto) => {
+    const faixa = faixaTocavel(tela, manifesto);
+    if (!faixa || faixa === tocando?.faixa || preCarga?.faixa === faixa || buffersMusica.has(faixa)) return;
+    const dados = manifesto.faixas[faixa];
+    const url = dados ? arquivoNoFormato(dados.arquivos, formatoDoNavegador()) : null;
+    if (!url) return;
+    // Para os testes de navegador: a faixa que ficou baixada para a próxima tela.
+    document.documentElement.dataset.faixaPreCarregada = faixa;
+    preCarga = {
+      faixa,
+      bytes: fetch(url)
+        .then((resposta) => (resposta.ok ? resposta.arrayBuffer() : null))
+        .catch(() => null),
+    };
+  });
+}
+
+/** Os bytes da faixa: da pré-carga, se foi ela a baixada; senão, da rede. */
+async function bytesDaFaixa(faixa: string, url: string): Promise<ArrayBuffer | null> {
+  if (preCarga?.faixa === faixa) {
+    const { bytes } = preCarga;
+    preCarga = null;
+    const prontos = await bytes;
+    if (prontos) return prontos;
+  }
+  const resposta = await fetch(url);
+  return resposta.ok ? resposta.arrayBuffer() : null;
 }
 
 async function resolverMusica(): Promise<void> {
@@ -355,10 +402,8 @@ async function carregarFaixa(faixa: string, pedido: number): Promise<AudioBuffer
   const url = dados ? arquivoNoFormato(dados.arquivos, formatoDoNavegador()) : null;
   if (!url || !contexto) return null;
   try {
-    const resposta = await fetch(url);
-    if (!resposta.ok || pedido !== pedidoMusica) return null;
-    const bytes = await resposta.arrayBuffer();
-    if (pedido !== pedidoMusica || !contexto) return null;
+    const bytes = await bytesDaFaixa(faixa, url);
+    if (!bytes || pedido !== pedidoMusica || !contexto) return null;
     const buffer = await decodificar(contexto, bytes);
     if (pedido !== pedidoMusica) return null;
     buffersMusica.set(faixa, buffer);

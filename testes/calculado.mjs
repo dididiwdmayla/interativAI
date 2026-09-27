@@ -5,7 +5,7 @@
 // "Mostrar todas", o filtro, o rastro de cada propriedade (a regra que
 // vence e as riscadas) e o diagrama acompanhando uma edição no Estilos.
 // Uso: node testes/calculado.mjs
-import { abrir, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto, selecionarNo } from "./util.mjs";
 
 const lado = (pagina, camada, qual) =>
   pagina.locator(qual === "cima" ? `[data-camada="${camada}"] > span > [data-lado="cima"]` : `[data-camada="${camada}"] > [data-lado="${qual}"]`).first();
@@ -37,20 +37,20 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   // Camadas na prévia.
   conferir((await camadasAcesas(pagina)) === "", "nada aceso antes do mouse");
   await lado(pagina, "padding", "esquerda").hover();
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "padding", "mouse no padding acende só o padding na prévia");
   await lado(pagina, "margin", "baixo").hover();
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "margin", "no margin, só o margin");
   await pagina.locator('[data-camada="content"]').hover();
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "content", "no conteúdo, só o conteúdo");
   const caixaDiagrama = await pagina.locator("[data-modelo-caixa]").boundingBox();
   await pagina.mouse.move(caixaDiagrama.x + 3, caixaDiagrama.y + caixaDiagrama.height / 2);
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "margin,border,padding,content", "na borda do diagrama, todas as camadas");
   await pagina.mouse.move(5, 5);
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "", "tirar o mouse apaga");
 
   // Lista: sem "Mostrar todas", só o que o elemento declara (mais display, width e height).
@@ -84,7 +84,7 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   conferir((await linhas.first().innerText()).includes("#do-dia .preco"), "a que vence primeiro (a do !important)");
   conferir((await pagina.locator('[data-rastro="color"] [data-rastro-riscado]').count()) === 2, "e as outras duas riscadas");
   await pagina.locator('[data-rastro="color"] button').first().click();
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   conferir(await pagina.locator("[data-editor-css]").isVisible(), "o link do rastro abre o editor CSS na regra");
 
   // O diagrama acompanha uma edição no Estilos.
@@ -94,11 +94,11 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   await pagina.locator("[data-campo-estilo=valor]").fill("20px");
   await pagina.locator("[data-campo-estilo=valor]").press("Enter");
   await pagina.locator('[data-sub-aba="calculado"]').click();
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   conferir((await lado(pagina, "padding", "cima").innerText()) === "20", "trocar o padding no Estilos muda o diagrama (20)");
   await lado(pagina, "padding", "cima").hover();
   await pagina.locator('[data-sub-aba="estilos"]').click();
-  await pagina.waitForTimeout(100);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "", "voltar para Estilos apaga a camada acesa");
 
   conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
@@ -117,15 +117,15 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   const aba = await pagina.locator('[data-sub-aba="calculado"]').boundingBox();
   conferir(aba.height >= 44, "a sub-aba Calculado tem 44px de altura no toque");
   await lado(pagina, "padding", "esquerda").tap();
-  await pagina.waitForTimeout(150);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "padding", "tocar no padding acende o padding");
   await lado(pagina, "padding", "esquerda").tap();
-  await pagina.waitForTimeout(150);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "", "tocar de novo apaga");
   await lado(pagina, "border", "esquerda").tap();
-  await pagina.waitForTimeout(150);
+  await esperarPronto(pagina);
   await pagina.getByRole("tab", { name: "Árvore", exact: true }).tap();
-  await pagina.waitForTimeout(150);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "", "trocar para a Árvore apaga a camada");
   conferir(errosRelevantes(erros).length === 0, `console limpo no celular ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
@@ -143,7 +143,7 @@ const camadasAcesas = (pagina) => pagina.locator("[data-realce-camada]").evaluat
   const diagrama = await pagina.locator("[data-modelo-caixa]").boundingBox();
   conferir(arvore && diagrama && diagrama.x >= arvore.x + arvore.width - 2, "paisagem: o Calculado fica ao lado da árvore");
   await lado(pagina, "padding", "esquerda").tap();
-  await pagina.waitForTimeout(150);
+  await esperarPronto(pagina);
   conferir((await camadasAcesas(pagina)) === "padding", "e tocar numa camada acende ela na prévia");
   conferir(errosRelevantes(erros).length === 0, `console limpo deitado ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();

@@ -5,7 +5,7 @@
 // alternarDeclaracao, adicionarRegra) passa pelas mesmas funções e
 // conclui cada objetivo.
 // Uso: node testes/css.mjs
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto } from "./util.mjs";
 
 const ROTA = "/lab/fases?fase=lab-motor-u1-f1";
 
@@ -91,7 +91,7 @@ await pagina.waitForFunction(() => {
 // O CodeMirror só desenha as linhas perto da rolagem: vai ao fim antes de ler.
 await pagina.locator("[data-editor-css] .cm-content").click();
 await pagina.keyboard.press("Control+End");
-await pagina.waitForTimeout(200);
+await esperarPronto(pagina);
 conferir((await textoDoEditorCss()).includes(".rodape p {"), "editarCss escreve a regra nova no fim do editor");
 
 // A aba HTML continua funcionando e o CSS sobrevive a uma recarga do HTML.

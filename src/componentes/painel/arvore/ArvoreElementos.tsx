@@ -4,6 +4,7 @@ import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState }
 import { achatarArvore, type NoArvore } from "@/lib/arvore";
 import { chaveDoCaminho } from "@/lib/dom";
 import { CLASSE_ESCONDER } from "@/lib/esconder";
+import { agendarRastreado } from "@/lib/pendencias";
 import { TAGS_SEM_RENOMEAR } from "@/motor/nucleoPainel";
 import { BarraAcoesNo } from "./BarraAcoesNo";
 import { LinhaFechamento } from "./LinhaFechamento";
@@ -55,6 +56,9 @@ function rotuloDo(no: NoArvore): string {
   return `<${no.tag}>`;
 }
 
+/** Mais que a janela do duplo toque (350 ms, TextoEditavel). */
+const ESPERA_ROLAR_ITEM_MS = 400;
+
 /** Árvore de Elementos no estilo do F12, construída do body do iframe. */
 export function ArvoreElementos({
   raiz,
@@ -94,8 +98,17 @@ export function ArvoreElementos({
 
   useEffect(() => {
     if (chaveSelecionada === null) return;
-    const linha = recipiente.current?.querySelector(`[data-chave="${chaveSelecionada}"]`);
+    // Primeiro só a linha do nó; o item inteiro (que no celular inclui a barra
+    // de ações logo embaixo) entra na vista depois da janela do duplo toque.
+    // Rolar tudo na hora movia a linha debaixo do dedo entre os dois toques,
+    // e o segundo caía em outro lugar.
+    const item = recipiente.current?.querySelector(`[data-chave="${chaveSelecionada}"]`);
+    const linha = item?.querySelector(":scope > div") ?? item;
     linha?.scrollIntoView({ block: "nearest" });
+    const inteiro = agendarRastreado(() => {
+      if (item?.isConnected) item.scrollIntoView({ block: "nearest" });
+    }, ESPERA_ROLAR_ITEM_MS);
+    return () => inteiro.cancelar();
   }, [chaveSelecionada, raiz]);
 
   useEffect(() => {

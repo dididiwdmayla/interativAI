@@ -4,7 +4,9 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 9 concluída (painel Estilos, motor de cascata,
+**Estado atual:** rodada 10 concluída (estabilidade da bateria, trilhas,
+temas, profissões, glossário e áudio; ver a seção dela e o
+`docs/ROADMAP.md`). Antes: rodada 9 concluída (painel Estilos, motor de cascata,
 modo documento, ROADMAP e, nas etapas finais, U6 e a zona Estilos
 inteira; ver a seção dela abaixo e o `docs/ROADMAP.md`, que é a fonte do
 status). A Ilha Sites tem as zonas Elementos (U1 a U6) e Estilos (E1 a
@@ -14,6 +16,135 @@ gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). Próximo passo: a zona Layout (L1 a L4), com o motor já pronto.
+
+## Rodada 10: estabilidade, trilhas, temas, profissões, glossário e áudio
+
+Status resumido em `docs/ROADMAP.md`.
+
+- [x] **Etapa 1: estabilidade da bateria.** Causa raiz da instabilidade do
+  celular (detalhe em `docs/ATRITOS-FABRICA.md`, "Rodada 3, resolvido"):
+  a árvore rolava o item selecionado inteiro (linha mais a barra de ações)
+  e tirava a linha debaixo do dedo no meio do duplo toque (agora rola a
+  linha na hora e o item inteiro 400 ms depois, fora da janela do duplo
+  toque); o fundo do balão saindo de cena segurava toques (`FundoBalao`);
+  falas vindas de temporizadores reabriam o balão entre um passo e outro;
+  deitado, o balão fechava sozinho no meio de uma leitura; e, em
+  paisagem com o painel Estilos, o teste procurava a aba "Árvore", que ali
+  se chama "Árvore e Estilos" (a falha da E2, determinística). Motor: todo
+  temporizador que muda a tela sozinho virou pendência
+  (`src/lib/pendencias.ts`: roteiros, validação, espera do editor, do CSS
+  e do cursor, recarga da prévia, animação do balão, troca de texto da
+  fala, comemoração da apresentação, rolagem da árvore); estados explícitos na raiz da fase
+  (`data-pronto`, `data-apresentacao-estado`, `data-objetivo-atual`,
+  `data-etapa`, `data-roteiro`), `data-balao` no avatar e
+  `data-passo-apresentacao` na apresentação. Testes: ajudantes por estado
+  em `testes/util.mjs` (`esperarPronto`, `abrirBalao`, `fecharBalao`,
+  `passarApresentacao`, `doisQuadros`), os `waitForTimeout` que eram
+  muleta saíram de todos os testes de fase, duplo toque direto na tela, o
+  `mostrarPainel` acusa troca de segmento com apresentação de pé, `mapa.mjs`
+  corrigido (a U6 foi publicada; agora confere a L1 planejada),
+  `todos.mjs` lista quais falharam e `npm run bateria:repetir`
+  (`testes/repetir.mjs`, 5 rodadas). Guia (seção 11) e `testes/README.md`
+  com a regra "espere estados, nunca tempos".
+
+- [x] **Etapa 2: camada de trilhas.** `Trilha` em `src/curriculo/trilhas.ts`
+  (Web ativa; Jogos e Automação industrial em construção, com as ilhas
+  próprias só nomeadas em `ILHAS_FUTURAS`), `NUCLEO_COMUM` (Origens,
+  Lógica, IA, Ofício) em todas. O mundo desenha as ilhas da trilha
+  escolhida na ordem dela (`progresso.trilha`, padrão `web`), e o
+  desbloqueio segue a rota da trilha (`ilhaAnterior(ilha, fonte)`); o
+  progresso é da ilha, então vale em todas. Tela `/trilhas` com card por
+  trilha (descrição, ilhas, progresso contando as planejadas, estado,
+  Escolher), link na barra do mapa (no celular, no menu), ilha só nomeada
+  com a tela "ainda é só um terreno" e arte `ArteFutura`. Checagem
+  `trilhas` no `testar:conteudo` (`conferirTrilhas`) e
+  `testes/conteudo/trilhas.test.ts` (dados, sabotagens, rota por trilha,
+  progresso compartilhado). `PROJETO.md` com "Trilhas" e "Como integrar
+  uma trilha nova" (o tipo de fase `bancada-eletrica` como exemplo);
+  `MAPA-CURRICULAR.md` com as trilhas e o `InterativAIPLUS`. Estabilidade:
+  a bateria desta etapa achou mais uma corrida (a meta medida no meio da
+  animação de entrada); o `Modal` agora marca `data-modal-assentado`.
+
+- [x] **Etapa 3: temas, lente e insígnias.** Catálogo de 11 temas
+  (`src/curriculo/temas.ts`; o ponto de partida mais Fundamentos, decisão
+  no `PROJETO.md`) com ícone SVG por tema (`IconeTema`). Os 62 conceitos
+  classificados (`temas` no catálogo) e as 78 unidades do currículo com
+  `temas` declarados; nas prontas, os temas vêm dos conceitos ensinados e
+  praticados (`temasDerivados`), e a checagem `temas` confere que os
+  declarados estão contidos neles. Lente no mapa (`BarraLentes`,
+  `progresso.lente`): acende as unidades do tema em todas as ilhas da
+  trilha (no mundo, contagem por ilha e as sem nenhuma apagadas; na ilha,
+  anel ou ponto apagado, planejadas inclusive) e mostra "Tema: X de Y
+  unidades" contando as planejadas. Card da unidade com os temas.
+  Insígnias SVG com anel e marcos de 25, 50, 75 e 100% (`Insignia`),
+  painel "Insígnias" na barra do mapa e comemoração curta a cada marco
+  novo (`ComemoracaoInsignia`, som `insignia`, `progresso.marcosInsignias`).
+  Testes: `testes/conteudo/temas.test.ts`. Guia com a seção 9.1 "Temas e
+  conceitos".
+
+- [x] **Etapa 4: profissões e lente.** `src/curriculo/profissoes.ts`:
+  Front-end, Back-end, Full-stack, Segurança, Dados e DevOps, cada uma com
+  "O que faz" e "Um dia de trabalho" para leigo (honestos, com o lado
+  chato) e temas com peso de 1 a 3. Progresso no caminho = média do
+  progresso dos temas na trilha, ponderada pelos pesos, contando as
+  planejadas (`progressoDaProfissao`). Tela `/profissoes` (card com o que
+  faz, um dia, temas com o peso em pontinhos, barra do caminho) e "Acender
+  no mapa", que vira lente igual à de tema (`lente: { tipo: "profissao" }`;
+  a barra mostra "DevOps: 12% do caminho"). Checagem `profissoes` no
+  `testar:conteudo` e `testes/conteudo/profissoes.test.ts`.
+
+- [x] **Etapa 5: glossário vivo.** Rota `/glossario` com botão
+  "Glossário" na barra do mapa e dentro da fase (barra do desktop e menu
+  do celular; fora do lab e da revisão), e "Voltar" de volta para onde
+  estava. `src/lib/glossario.ts` em cima do `montarIndice()`: um verbete
+  por conceito (nome, resumo, temas, "Onde aprender" e "Onde praticar"),
+  busca pelo nome e pelo resumo sem acento e sem maiúscula. Fase liberada
+  abre direto; trancada leva ao ponto da unidade no mapa
+  (`/ilha/<ilha>#<unidade>`, a ilha abre o card) com "Você chega lá na Ilha
+  X"; `/glossario#<conceito>` abre no verbete. Testes em
+  `testes/conteudo/glossario.test.ts`. O opcional (sublinhar termos nas
+  falas do computadorzinho) ficou de fora: nomes curtos e comuns como
+  "Elemento" e "Tag" aparecem em quase toda fala e o sublinhado ia poluir
+  a leitura.
+
+- [x] **Etapa 6: sistema de áudio.** O sistema da rodada 7/8 já fazia
+  quase tudo (música por tela carregada sob demanda e só depois do
+  primeiro gesto, loop sem emenda, pausa com a aba escondida, volumes
+  separados e salvos, mudo, efeitos grandes em arquivo com reserva
+  sintetizada). Esta etapa completou: `src/audio/manifesto.ts` (o que o
+  jogo espera: música por ilha, mapa e museu; efeitos grandes
+  `unidade-concluida`, `esbarrao`, `insignia`, `entrar-mapa`), pré-carga
+  da próxima tela provável (só os bytes, `preCarregarTelaMusical`),
+  crossfade de 0,8 s entre telas (era 1,5 s), o `insignia` ligado às
+  insígnias e a seção "Preparando os arquivos" no `docs/AUDIO.md` (nomes,
+  formato WebM/Opus com M4A/AAC de reserva, -18 LUFS na música e -16 nos
+  efeitos, como cortar uma faixa do Suno em loop no fim do compasso).
+  Arquivos presentes em `public/audio`: 8 músicas (mapa, origens, sites,
+  logica, paginas-vivas, rede-servidor, ia, oficio) e 11 efeitos (boot,
+  dormir, acordar, esbarrao, fase-concluida, unidade-concluida,
+  desbloqueio, insignia, entrar-mapa, viagem-ilha, abrir-museu), cada um
+  em `.webm` e `.m4a`. Testes: `registro.test.ts` (manifesto esperado,
+  sem manifesto tudo silencioso ou sintetizado) e `audio.mjs` (sem
+  arquivo nenhum, com manifestos vazios e ausentes: silêncio, sintetizado,
+  nenhum pedido de arquivo, console limpo; pré-carga).
+
+- [x] **Etapa 7: guia, ROADMAP, PROGRESSO e testes novos.**
+  `testes/explorar.mjs` nos três layouts (trilhas, lentes de tema e de
+  profissão no mundo e na ilha com planejadas, card com temas, painel e
+  comemoração de insígnia, glossário com busca, links para a fase e para
+  o ponto no mapa, botão dentro da fase e Voltar), na bateria
+  (`todos.mjs`). Ajudante `tocarNo` (toca a linha da árvore e confere que
+  ela ficou selecionada; se não, o erro diz o que aconteceu e guarda uma
+  foto). O duplo toque no nome da tag (`renomear-links.mjs`) também vai
+  direto na tela. Guia: checklist com temas e testes por estado;
+  `testes/README.md` com o `explorar.mjs`, o áudio sem arquivos e as
+  unidades atuais; ROADMAP com Feito, Próximo e a decisão do
+  `InterativAIPLUS`.
+  Resultado final: `npm run bateria:repetir` no build de produção: **5 rodadas seguidas
+  verdes** (24 execuções por rodada, três layouts, console limpo em todas;
+  cerca de 45 min por rodada). Antes delas, duas tentativas pararam em
+  falhas novas, que viraram os itens 7 e 8 do relatório de atritos
+  ("Rodada 3, resolvido") e foram corrigidas antes de recomeçar do zero.
 
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 

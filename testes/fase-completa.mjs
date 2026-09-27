@@ -1,6 +1,6 @@
 // Joga a Fase 1 do zero passando por todas as apresentações, na ordem.
 // Uso: node testes/fase-completa.mjs [desktop|retrato|paisagem]
-import { abrir, conferir, errosRelevantes, pularMeta, selecionarNo } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto, passarApresentacao, pularMeta, selecionarNo } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -20,21 +20,11 @@ async function tocar(localizador, opcoes) {
 
 /** Espera a apresentação, lê as 3 falas e faz a ação do "Experimente". */
 async function apresentacao(id, experimentar) {
-  const camada = pagina.locator(`[data-apresentacao="${id}"]`);
-  await camada.waitFor({ timeout: 8000 });
   vistas.push(id);
-  for (let i = 0; i < 3; i++) {
-    await tocar(pagina.getByRole("button", { name: /Continuar|Quero tentar/ }).first());
-    await pagina.waitForTimeout(120);
-  }
-  await pagina.waitForTimeout(350);
-  await experimentar();
-  try {
-    await camada.waitFor({ state: "detached", timeout: 6000 });
-  } catch (erro) {
-    await pagina.screenshot({ path: `testes-falha-${MODO}-${id}.png` });
+  await passarApresentacao(pagina, id, experimentar, async (nome, erro) => {
+    await pagina.screenshot({ path: `testes-falha-${MODO}-${nome}.png` });
     throw erro;
-  }
+  });
   conferir(true, `apresentação ${id} fechou depois do uso`);
 }
 
@@ -44,7 +34,7 @@ async function continuarConversa() {
     const botao = pagina.getByRole("button", { name: /^(Continuar|Vamos lá!|Próximo objetivo)$/ }).first();
     if (!(await botao.isVisible().catch(() => false))) return;
     await tocar(botao);
-    await pagina.waitForTimeout(200);
+    await esperarPronto(pagina);
   }
 }
 
@@ -56,6 +46,7 @@ async function mostrarPainel(segmento) {
     const visivel = await aba.isVisible().catch(() => false);
     if (visivel && (await aba.getAttribute("aria-selected")) !== "true") await tocar(aba);
   }
+  await esperarPronto(pagina);
 }
 
 const arvore = (chave) => pagina.locator(`[role=treeitem][data-chave="${chave}"]`).first();
@@ -80,7 +71,7 @@ await apresentacao("tutor", async () => {
   await campo.fill("o que é uma tag?");
   await campo.press("Enter");
 });
-await pagina.waitForTimeout(600);
+await esperarPronto(pagina);
 
 // Objetivo 1
 await apresentacao("arvore", async () => {
@@ -97,7 +88,7 @@ await continuarConversa();
 // Objetivo 2: o "Experimente" do inspecionar já cumpre o objetivo.
 await apresentacao("inspecionar", async () => {
   await tocar(pagina.getByRole("button", { name: /Modo inspecionar/ }).first());
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   const botao = iframe.locator("button");
   const caixa = await botao.boundingBox();
   if (toque) await pagina.touchscreen.tap(caixa.x + caixa.width / 2, caixa.y + caixa.height / 2);
@@ -145,8 +136,8 @@ conferir(JSON.stringify(vistas) === JSON.stringify(ORDEM), `apresentações na o
 
 // Recarregar não repete as vistas.
 await pagina.reload();
-await pagina.waitForSelector("iframe");
-await pagina.waitForTimeout(1500);
+await pagina.waitForSelector("[data-jogo-fase]");
+await esperarPronto(pagina);
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "recarregar não repete apresentações");
 conferir((await pagina.locator("[data-meta]").count()) === 0, "recarregar não mostra a meta de novo");
 

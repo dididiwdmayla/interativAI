@@ -37,6 +37,21 @@ Cada unidade abaixo traz: meta (X), conceitos, micro-passos sugeridos,
 desafio, revisa, confusões de leigo a atacar, e o que falta no motor,
 quando falta.
 
+## Trilhas
+
+As ilhas deste documento formam a trilha **Web** (a ativa). O núcleo
+comum (Origens, Lógica, IA e Ofício) serve para todas as trilhas; as
+outras duas estão em construção, com as ilhas próprias só nomeadas (em
+dados: `TRILHAS` em `src/curriculo/trilhas.ts` e `ILHAS_FUTURAS` em
+`src/curriculo/curriculo.ts`):
+
+- **Jogos**: Origens, Lógica, Primeiro jogo, Gráficos e animação, Física
+  e colisão, IA, Ofício.
+- **Automação industrial**: Origens, Eletrônica, Comandos elétricos,
+  Mecânica, Lógica, CLP e Ladder, IA, Ofício. Vai receber o protótipo
+  `InterativAIPLUS`, portado depois que a camada de trilhas e a fábrica
+  estiverem estáveis.
+
 ---
 
 ## Ilha 0: Origens (museu, sempre aberta)

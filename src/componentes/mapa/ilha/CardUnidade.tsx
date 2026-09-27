@@ -6,6 +6,8 @@ import { Modal } from "@/componentes/ui/Modal";
 import type { Unidade } from "@/conteudo/tipos";
 import type { UnidadeCurriculo, ZonaCurriculo } from "@/curriculo/tipos";
 import type { AcaoUnidade, EstadoUnidadeMapa } from "@/lib/mapa";
+import { temasDaUnidade } from "@/lib/temas";
+import { temaComIcone } from "@/componentes/temas/temas";
 
 type Props = {
   aberto: boolean;
@@ -33,6 +35,17 @@ export function CardUnidade({ aberto, zona, item, conteudo, estado, estrelas, ac
         </p>
         <p className="text-xl font-black text-primaria">{item.titulo}</p>
         <p className="mt-1 text-[15px] font-bold leading-snug text-texto">{item.meta}</p>
+        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Temas da unidade">
+          {temasDaUnidade(item).map((id) => {
+            const tema = temaComIcone(id);
+            return (
+              <li key={id} className="flex items-center gap-1 rounded-full bg-painel px-2 py-0.5 text-xs font-bold text-texto-suave" data-tema-da-unidade={id}>
+                <tema.Icone tamanho={13} />
+                {tema.nome}
+              </li>
+            );
+          })}
+        </ul>
         {conteudo && (
           <div className="mt-3 flex items-center gap-2">
             <EstrelasFase quantidade={estrelas} tamanho={22} />

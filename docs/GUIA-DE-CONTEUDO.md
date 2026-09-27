@@ -629,6 +629,24 @@ objetivo está pedindo coisa demais: divida.
 
 ---
 
+### 9.1 Temas e conceitos
+
+- **Todo conceito novo precisa de temas** (`temas` no catálogo, pelo
+  menos um, dos ids de `src/curriculo/temas.ts`). Pergunte: "quem procura
+  esse assunto no mapa, procura por qual tema?". Um conceito de CSS é
+  Interfaces; se ele muda quem consegue usar a página (alt, títulos, rem),
+  também é Acessibilidade; um gesto do F12 é Ferramentas do ofício.
+- **Toda unidade nova do currículo declara temas** (`temas` em
+  `src/curriculo/curriculo.ts`), mesmo planejada: é o que acende ela na
+  lente do mapa. Quando a unidade fica pronta, os temas passam a vir dos
+  conceitos das fases dela; os declarados precisam estar contidos nesses
+  (o `testar:conteudo` acusa: "declara o tema X, mas nenhum conceito que
+  ela ensina ou pratica tem esse tema"). Se acusar, ou falta o tema num
+  conceito, ou o tema declarado não é assunto da unidade.
+- Tema novo só com motivo (um assunto que atravessa ilhas e não cabe em
+  nenhum): entra no catálogo com ícone (`IconeTema`) e, se fizer sentido,
+  nas profissões.
+
 ## 10. Conteúdo publicado é congelado
 
 **Nunca mude ids publicados; isso apaga o progresso de quem já jogou.** O
@@ -662,7 +680,36 @@ Ao estender um deles para a sua unidade, use os ajudantes de
 - `selecionarNo(page, seletor)`: seleciona pela árvore o primeiro elemento
   do site-alvo que casa com o seletor CSS (clique ou toque);
 - `chaveDoSeletor(page, seletor)`: o `data-chave` da linha da árvore
-  desse elemento, para as outras ações (menu do nó, editar texto).
+  desse elemento, para as outras ações (menu do nó, editar texto);
+- `esperarPronto(page)`: espera a fase ficar estável (ver abaixo). Use
+  depois de toda ação, no lugar de `waitForTimeout`;
+- `abrirBalao(page)` e `fecharBalao(page)`: no celular, abrem e fecham a
+  conversa esperando a animação acabar (no desktop não fazem nada);
+- `passarApresentacao(page, id, experimentar)`: uma apresentação de
+  ferramenta inteira (3 falas, o "Experimente", confere que fechou).
+
+**Espere estados, nunca tempos.** A fase expõe o estado no elemento
+`[data-jogo-fase]`: `data-pronto="sim"` quando nada vai mudar a tela
+sozinho (nenhum roteiro, temporizador, recarga da prévia, animação do
+balão ou tutor pensando), `data-apresentacao-estado="ativa|inativa"`,
+`data-objetivo-atual="<id>"`, `data-etapa` e `data-roteiro`; o avatar do
+celular tem `data-balao="aberto|fechado|abrindo|fechando"`; a camada da
+apresentação tem `data-passo-apresentacao="fala|experimente|comemorando"`.
+`waitForTimeout` só vale para gesto que depende de duração (o toque
+longo de 750 ms). Timer novo no motor que muda a tela sozinho entra como
+pendência (`agendarRastreado` ou `comecarPendencia`, `src/lib/pendencias.ts`),
+senão o `data-pronto` mente.
+
+**Prepare a interface antes do `proximoObjetivo()`.** A apresentação do
+objetivo seguinte aparece assim que ele fica ativo, e o véu só libera a
+ferramenta. Trocar de segmento (Árvore, Código, Estilos), de aba do
+editor ou de sub-aba (Calculado) vai ANTES do clique em "Próximo
+objetivo"; o `mostrarPainel` da jornada acusa se alguém tentar trocar
+com uma apresentação de pé.
+
+**Gestos com tempo vão direto na tela.** O duplo toque da árvore precisa
+dos dois toques em menos de 350 ms: use `page.touchscreen.tap` duas vezes
+seguidas (as checagens de ação de dois `locator.tap()` podem passar disso).
 
 O `data-chave` é o caminho de índices do `<body>` até o nó ("body", "0",
 "0.1"...), contando só o que aparece na árvore: elementos, comentários e
@@ -861,6 +908,10 @@ fase.
       ao F12 de verdade por fase (atalhos conferidos na doc do Chrome).
 - [ ] Pergunta socrática que não entrega; dica com o conceito; linha que
       mostra onde; solução que explica o quê e por quê.
+- [ ] Todo conceito novo com `temas`; os `temas` da unidade no currículo
+      contidos nos que os conceitos dela dão (seção 9.1).
+- [ ] Testes de navegador esperando estados (`esperarPronto`,
+      `abrirBalao`, `fecharBalao`), nunca `waitForTimeout` (seção 11).
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
 - [ ] Fase de CSS (seção 12): `siteAlvo.css` sem `@media`,

@@ -1,9 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useVozDoMascote } from "@/audio/ganchos";
+import { comecarPendencia } from "@/lib/pendencias";
 import type { Fala } from "@/motor/tipos";
+
+/** Teto da troca de texto: sem o fim da animação (aba escondida), não fica pendente para sempre. */
+const TETO_TROCA_MS = 1000;
 
 type Props = {
   fala: Fala;
@@ -24,6 +28,23 @@ type Props = {
 export function BalaoFala({ fala, pergunta, children, rabo = "esquerda", voz = true }: Props) {
   const presente = useIsPresent();
   useVozDoMascote(fala.texto, fala.expressao, voz && presente);
+  // A troca de texto (sai o antigo, entra o novo) conta como pendência: a
+  // fase só fica "pronta" (data-pronto) com o texto novo já na tela.
+  const troca = useRef<{ texto: string; encerrar: () => void } | null>(null);
+  const primeira = useRef(true);
+  useEffect(() => {
+    if (primeira.current) {
+      primeira.current = false;
+      return;
+    }
+    const encerrar = comecarPendencia();
+    troca.current = { texto: fala.texto, encerrar };
+    const teto = setTimeout(encerrar, TETO_TROCA_MS);
+    return () => {
+      clearTimeout(teto);
+      encerrar();
+    };
+  }, [fala.texto]);
   return (
     <div className="relative flex min-h-[5.5rem] flex-1 shrink-0 flex-col justify-between gap-2 rounded-2xl border-2 border-borda bg-painel px-4 py-3">
       <span
@@ -45,6 +66,9 @@ export function BalaoFala({ fala, pergunta, children, rabo = "esquerda", voz = t
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18 }}
+            onAnimationComplete={() => {
+              if (troca.current?.texto === fala.texto) troca.current.encerrar();
+            }}
             className="text-[15px] font-bold leading-snug text-texto"
           >
             {fala.texto}

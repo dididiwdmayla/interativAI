@@ -69,7 +69,16 @@ export type Progresso = {
   mapaDesbloqueado: boolean;
   /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
   proporcaoPrevia: number;
+  /** Trilha escolhida (src/curriculo/trilhas.ts); id desconhecido vale a padrão. */
+  trilha: string;
+  /** A lente acesa no mapa (um tema ou uma profissão), ou nenhuma. */
+  lente: LenteMapa | null;
+  /** Insígnias: o último marco (25, 50, 75, 100) já comemorado de cada tema. */
+  marcosInsignias: Record<string, number>;
 };
+
+/** Lente sobre o mapa: acende as unidades de um tema, ou dos temas de uma profissão. */
+export type LenteMapa = { tipo: "tema" | "profissao"; id: string };
 
 export const PROPORCAO_PREVIA = { minima: 0.25, padrao: 0.4, maxima: 0.6 } as const;
 
@@ -95,6 +104,9 @@ export const PROGRESSO_PADRAO: Progresso = {
   posicaoNoMapa: {},
   mapaDesbloqueado: false,
   proporcaoPrevia: PROPORCAO_PREVIA.padrao,
+  trilha: "web",
+  lente: null,
+  marcosInsignias: {},
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -172,6 +184,12 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
   };
 }
 
+function lerLente(valor: unknown): LenteMapa | null {
+  if (!ehObjeto(valor)) return null;
+  if ((valor.tipo !== "tema" && valor.tipo !== "profissao") || typeof valor.id !== "string") return null;
+  return { tipo: valor.tipo, id: valor.id };
+}
+
 /** Converte qualquer coisa vinda do localStorage num Progresso v2 válido. */
 export function normalizarProgresso(bruto: unknown): Progresso {
   if (!ehObjeto(bruto)) return PROGRESSO_PADRAO;
@@ -208,6 +226,9 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
       ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
       : PROPORCAO_PREVIA.padrao,
+    trilha: typeof bruto.trilha === "string" && bruto.trilha.length > 0 ? bruto.trilha : PROGRESSO_PADRAO.trilha,
+    lente: lerLente(bruto.lente),
+    marcosInsignias: lerRegistro(bruto.marcosInsignias, (item) => (ehNumero(item) ? Math.max(0, Math.min(100, item)) : null)),
   };
 }
 

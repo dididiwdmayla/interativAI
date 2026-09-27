@@ -11,8 +11,12 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
-import { CURRICULO } from "@/curriculo/curriculo";
-import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo } from "@/curriculo/conferir";
+import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
+import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
+import { conferirTemas } from "@/lib/temas";
+import { PROFISSOES } from "@/curriculo/profissoes";
+import { conferirProfissoes } from "@/lib/profissoes";
+import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo, conferirTrilhas } from "@/curriculo/conferir";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
@@ -20,7 +24,7 @@ import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
 import { propriedadeConhecida } from "@/motor/css/valores";
 import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
-import { ehIdConceito, type IdConceito } from "./conceitos";
+import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
 import type { Acao, Fase, FaseDesafio, FasePratica, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
@@ -468,6 +472,21 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "curriculo-motor",
     nome: "nenhuma unidade de conteúdo mora em zona (ou unidade) que requer motor",
     checar: ({ unidades }) => conferirMotorDoConteudo(CURRICULO, unidades),
+  },
+  {
+    id: "trilhas",
+    nome: "toda trilha cita ilhas que existem e toda ilha com conteúdo está em alguma trilha",
+    checar: ({ unidades }) => conferirTrilhas(TRILHAS, CURRICULO, ILHAS_FUTURAS, unidades, NUCLEO_COMUM, TRILHA_PADRAO),
+  },
+  {
+    id: "temas",
+    nome: "todo conceito tem tema, todo tema citado existe e os temas das unidades prontas batem com os conceitos",
+    checar: ({ unidades, fases }) => conferirTemas(CONCEITOS, CURRICULO, unidades, fases),
+  },
+  {
+    id: "profissoes",
+    nome: "toda profissão usa temas que existem, com pesos de 1 a 3",
+    checar: () => conferirProfissoes(PROFISSOES),
   },
   {
     id: "publicados-congelados",

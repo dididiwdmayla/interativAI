@@ -103,11 +103,47 @@ núcleo comum.
     unidade numa zona anterior não tranca de novo uma zona que um jogador
     já tinha aberto (ou começado) antes dela existir.
 
+- **Rodada 10 (estabilidade, trilhas, temas, profissões, glossário e
+  áudio)**:
+  - Estabilidade da bateria: causa raiz da instabilidade do celular
+    corrigida no motor (a árvore tirava a linha debaixo do dedo no meio do
+    duplo toque; balão saindo de cena segurava toques; falas de
+    temporizador reabriam o balão; janela medida no meio da animação;
+    rolagem suave da prévia sem espera) e no teste (aba "Árvore e
+    Estilos" em paisagem); estados explícitos (`data-pronto`,
+    `data-apresentacao-estado`, `data-objetivo-atual`, `data-balao`,
+    `data-modal-assentado`...), pendências (`src/lib/pendencias.ts`),
+    ajudantes por estado, sem `waitForTimeout` de muleta,
+    `npm run bateria:repetir` (5 rodadas) e `PARALELO=n`. Resultado: 5
+    rodadas seguidas verdes nos três layouts, no build de produção, com
+    console limpo (antes, um toque só abria a edição na árvore, por um
+    `dblclick` do navegador; corrigido).
+  - Camada de trilhas: Web (ativa), Jogos e Automação industrial (em
+    construção, ilhas só nomeadas), núcleo comum, tela `/trilhas`, mundo e
+    desbloqueio por trilha, progresso compartilhado, "Como integrar uma
+    trilha nova" no `PROJETO.md`.
+  - Temas: 11 temas com ícone, 62 conceitos e 78 unidades classificados,
+    lente no mundo e na ilha (planejadas inclusive) com "Tema: X de Y
+    unidades", insígnias com marcos de 25/50/75/100%, painel e
+    comemoração.
+  - Profissões: Front-end, Back-end, Full-stack, Segurança, Dados e
+    DevOps, tela `/profissoes` com progresso ponderado e lente.
+  - Glossário vivo: `/glossario` com busca sem acento, onde aprender e
+    onde praticar, links para a fase ou para o ponto no mapa, botão no
+    mapa e na fase.
+  - Áudio: manifesto do que o jogo espera, pré-carga da próxima tela,
+    troca de 0,8 s, `insignia` ligado, `docs/AUDIO.md` com o preparo dos
+    arquivos (Suno em loop, formatos, LUFS). Os arquivos já estão todos em
+    `public/audio` (8 músicas e 11 efeitos); sem eles, tudo funciona em
+    silêncio (testado).
+  - Decisão: o protótipo `InterativAIPLUS` vira a futura trilha Automação
+    industrial, portada depois que a camada de trilhas e a fábrica
+    estiverem estáveis.
+
 ### Em andamento
 
-- Áudio: planejamento numa conversa separada (músicas no Suno Pro,
-  efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
-  Code.
+(nada em andamento: a rodada 10 terminou; o áudio não espera arquivos,
+ver "Feito")
 
 ### Pendente de decisão
 
@@ -116,21 +152,19 @@ núcleo comum.
 ### Próximo (em ordem)
 
 1. Sonnet: L1 a L4, a zona Layout (motor pronto; modelo: a E1/E2 para o
-   formato de fase de CSS).
-2. Opus: camada de trilhas acima das ilhas, temas (lente sobre o mapa:
-   Segurança, APIs, Dados, Desempenho, Acessibilidade, IA, com progresso
-   e insígnias), profissões (Front-end, Back-end, Segurança, Dados,
-   DevOps, como combinações de temas), glossário vivo (catálogo
-   pesquisável com onde cada termo é ensinado e praticado) e sistema de
-   áudio.
-3. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
+   formato de fase de CSS). Toda unidade e conceito novo com temas (guia,
+   seção 9.1).
+2. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
    espaçada.
-4. Motores das próximas ilhas (Opus), intercalados com conteúdo
+3. Motores das próximas ilhas (Opus), intercalados com conteúdo
    (Sonnet): E5 (o jogo como site-alvo), Responsivo (modo dispositivo),
    Publicar (auditoria, exportar, projeto-ponte), Origens (linha do
    tempo, comparador de linguagens, diagrama), Lógica (Console, execução
    de JS, depurador), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
    Ofício.
+4. Depois que a camada de trilhas e a fábrica estiverem estáveis: portar o
+   protótipo `InterativAIPLUS` como a trilha Automação industrial (ver
+   "Como integrar uma trilha nova" no `PROJETO.md`).
 
 ## Decisões aprovadas
 
@@ -150,6 +184,11 @@ núcleo comum.
     por mês).
 - Critério final do núcleo: o projeto do Ofício, feito a partir de uma
   página em branco, sem roteiro.
+- `InterativAIPLUS` (protótipo em repositório separado): será a trilha
+  Automação industrial, portada depois que a camada de trilhas e a
+  fábrica estiverem estáveis (rodada 10).
+- Temas: 11 (o ponto de partida mais Fundamentos, para as Origens);
+  unidade planejada declara temas, pronta os tira dos conceitos.
 
 ## Estimativas (grosseiras)
 

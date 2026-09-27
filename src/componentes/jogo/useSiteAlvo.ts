@@ -7,6 +7,7 @@ import { construirArvore, type NoArvore } from "@/lib/arvore";
 import { acentosQuebrados, atualizarAcentos, serializarDocumentoInteiro } from "@/lib/documentoSiteAlvo";
 import { raizDaArvore } from "@/lib/dom";
 import { formatarHtml } from "@/lib/formatarHtml";
+import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 
 const ESPERA_EDITOR_MS = 300;
 /** Espera depois da última tecla no CSS para conferir os objetivos. */
@@ -38,8 +39,8 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modo
   const editorRef = useRef<ApiEditor>(null);
   const editorCssRef = useRef<ApiEditor>(null);
   const previewRef = useRef<ApiPreview>(null);
-  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const temporizadorCss = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const temporizador = useRef<TemporizadorRastreado | null>(null);
+  const temporizadorCss = useRef<TemporizadorRastreado | null>(null);
   const [htmlAtual, setHtmlAtual] = useState(bodyInicial);
   const [cssAtual, setCssAtual] = useState<string | null>(cssInicial);
   const [versaoDocumento, setVersaoDocumento] = useState(0);
@@ -73,7 +74,7 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modo
 
   const cancelarEspera = useCallback(() => {
     if (temporizador.current !== null) {
-      clearTimeout(temporizador.current);
+      temporizador.current.cancelar();
       temporizador.current = null;
     }
   }, []);
@@ -81,7 +82,7 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modo
   useEffect(
     () => () => {
       cancelarEspera();
-      if (temporizadorCss.current !== null) clearTimeout(temporizadorCss.current);
+      temporizadorCss.current?.cancelar();
     },
     [cancelarEspera],
   );
@@ -91,7 +92,7 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modo
     (texto: string) => {
       setHtmlAtual(texto);
       cancelarEspera();
-      temporizador.current = setTimeout(() => {
+      temporizador.current = agendarRastreado(() => {
         temporizador.current = null;
         previewRef.current?.recarregar(texto);
       }, ESPERA_EDITOR_MS);
@@ -104,8 +105,8 @@ export function useSiteAlvo(bodyInicial: string, cssInicial: string | null, modo
     setCssAtual(texto);
     previewRef.current?.definirCss(texto);
     setVersaoCss((versao) => versao + 1);
-    if (temporizadorCss.current !== null) clearTimeout(temporizadorCss.current);
-    temporizadorCss.current = setTimeout(() => {
+    temporizadorCss.current?.cancelar();
+    temporizadorCss.current = agendarRastreado(() => {
       temporizadorCss.current = null;
       setVersaoCssCalma((versao) => versao + 1);
     }, ESPERA_CSS_MS);

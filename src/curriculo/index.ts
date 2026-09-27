@@ -5,9 +5,21 @@
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
 import { CURRICULO } from "./curriculo";
+import { TODAS_AS_ILHAS } from "./trilhas";
 import type { IlhaCurriculo, StatusUnidade, UnidadeCurriculo, ZonaCurriculo } from "./tipos";
 
-export { CURRICULO } from "./curriculo";
+export { CURRICULO, ILHAS_FUTURAS } from "./curriculo";
+export {
+  ilhasDaTrilha,
+  NUCLEO_COMUM,
+  TODAS_AS_ILHAS,
+  TRILHA_PADRAO,
+  TRILHAS,
+  trilhaDoId,
+  trilhasDaIlha,
+  type IdIlha,
+  type Trilha,
+} from "./trilhas";
 export type { IconeZona, IlhaCurriculo, StatusUnidade, UnidadeCurriculo, ZonaCurriculo } from "./tipos";
 
 /** Ilhas da rota principal, na ordem (sem a opcional). */
@@ -16,8 +28,9 @@ export const ILHAS_DA_ROTA: readonly IlhaCurriculo[] = CURRICULO.filter((ilha) =
 /** Ilhas opcionais (Frameworks), fora da rota. */
 export const ILHAS_OPCIONAIS: readonly IlhaCurriculo[] = CURRICULO.filter((ilha) => ilha.opcional);
 
+/** A ilha do id, do currículo ou das trilhas em construção. */
 export function ilhaDoId(id: string): IlhaCurriculo | undefined {
-  return CURRICULO.find((ilha) => ilha.id === id);
+  return TODAS_AS_ILHAS.find((ilha) => ilha.id === id);
 }
 
 export type LocalNoCurriculo = {

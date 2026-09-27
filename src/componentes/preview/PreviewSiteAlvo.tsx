@@ -5,6 +5,10 @@ import { ehElemento } from "@/lib/dom";
 import { ATRIBUTO_MODO_DOCUMENTO } from "@/lib/dom";
 import { escreverCssNoDocumento, montarDocumentoSiteAlvo, prepararDocumentoInteiro } from "@/lib/documentoSiteAlvo";
 import { linkDoAlvo } from "@/lib/linksPrevia";
+import { comecarPendencia } from "@/lib/pendencias";
+
+/** Teto da pendência de carga: se o load nunca vier, a fase não fica "ocupada" para sempre. */
+const TETO_CARGA_MS = 5000;
 
 export type ApiPreview = {
   /** Recarrega o iframe com um novo body (caminho A); no modo documento, com o documento inteiro. */
@@ -58,6 +62,29 @@ export function PreviewSiteAlvo({
   const aoCarregarAtual = useRef(aoCarregar);
   const aoClicarLinkAtual = useRef(aoClicarLink);
   const modoDocumentoRef = useRef(modoDocumento);
+  /** A prévia está carregando um srcdoc novo (conta como pendência da fase). */
+  const carga = useRef<{ encerrar: () => void; teto: ReturnType<typeof setTimeout> } | null>(null);
+
+  const encerrarCarga = useCallback(() => {
+    if (!carga.current) return;
+    clearTimeout(carga.current.teto);
+    carga.current.encerrar();
+    carga.current = null;
+  }, []);
+
+  /** Troca o srcdoc, marcando a carga como pendente até o load. */
+  const definirSrcdoc = useCallback(
+    (elemento: HTMLIFrameElement, texto: string) => {
+      if (!carga.current) {
+        const encerrar = comecarPendencia();
+        carga.current = { encerrar, teto: setTimeout(encerrarCarga, TETO_CARGA_MS) };
+      }
+      elemento.srcdoc = texto;
+    },
+    [encerrarCarga],
+  );
+
+  useEffect(() => encerrarCarga, [encerrarCarga]);
 
   /** O srcdoc: no modo documento, o texto do jogador como está; senão, o head fixo com o body. */
   const montar = useCallback(
@@ -77,8 +104,8 @@ export function PreviewSiteAlvo({
   useEffect(() => {
     const elemento = iframe.current;
     if (!elemento) return;
-    elemento.srcdoc = montar(ultimoBody.current);
-  }, [montar]);
+    definirSrcdoc(elemento, montar(ultimoBody.current));
+  }, [montar, definirSrcdoc]);
 
   useImperativeHandle(
     ref,
@@ -86,7 +113,7 @@ export function PreviewSiteAlvo({
       recarregar(body) {
         ultimoBody.current = body;
         const elemento = iframe.current;
-        if (elemento) elemento.srcdoc = montar(body);
+        if (elemento) definirSrcdoc(elemento, montar(body));
       },
       definirCss(css) {
         if (ultimoCss.current === null) return;
@@ -121,7 +148,7 @@ export function PreviewSiteAlvo({
         return iframe.current;
       },
     }),
-    [montar],
+    [montar, definirSrcdoc],
   );
 
   const aoTerminarCarga = () => {
@@ -138,7 +165,7 @@ export function PreviewSiteAlvo({
     if (documento && endereco === "about:blank") return;
     // Se um link levou o iframe para fora do site-alvo, volta para ele.
     if (!documento || endereco !== "about:srcdoc") {
-      elemento.srcdoc = montar(ultimoBody.current);
+      definirSrcdoc(elemento, montar(ultimoBody.current));
       return;
     }
     // Modo documento: os estilos do jogo entram agora (o texto é do jogador).
@@ -169,6 +196,7 @@ export function PreviewSiteAlvo({
     );
     documento.addEventListener("submit", (evento) => evento.preventDefault(), true);
     aoCarregarAtual.current(documento);
+    encerrarCarga();
   };
 
   return (

@@ -79,7 +79,9 @@ const esperarEfeito = async (pagina, id) => {
     "navegação: nada toca antes do primeiro gesto",
   );
   // O arquivo do boot é baixado e decodificado antes do gesto, para já estar pronto nele.
-  await pagina.waitForLoadState("networkidle");
+  // Os manifestos chegaram e o boot já foi tentado (estado, não "rede calada",
+  // que as pré-buscas de página do Next deixam instável).
+  await pagina.locator('html[data-audio-preparado="sim"]').waitFor({ state: "attached", timeout: 15000 });
   await pagina.locator("[data-total-estrelas]").click();
   const boot = await ultimoEfeito(pagina);
   conferir(boot === "boot:arquivo", `navegação: o boot toca do arquivo, já no primeiro gesto (${boot})`);
@@ -155,7 +157,9 @@ const esperarEfeito = async (pagina, id) => {
   await contexto.route(/\/audio\/efeitos\/[^/]+\.(webm|m4a)$/, (rota) => rota.fulfill({ status: 404, body: "" }));
   await pagina.reload();
   await pagina.locator("[data-mapa=mundo]").waitFor();
-  await pagina.waitForLoadState("networkidle");
+  // Os manifestos chegaram e o boot já foi tentado (estado, não "rede calada",
+  // que as pré-buscas de página do Next deixam instável).
+  await pagina.locator('html[data-audio-preparado="sim"]').waitFor({ state: "attached", timeout: 15000 });
   await pagina.locator("[data-total-estrelas]").click();
   const boot = await ultimoEfeito(pagina);
   conferir(boot === "boot:sintetizado", `sem arquivo: o boot toca a versão sintetizada (${boot})`);
@@ -227,5 +231,58 @@ const esperarEfeito = async (pagina, id) => {
   conferir(Number(await voz.inputValue()) === valor, "retrato: a fase mostra os mesmos ajustes no menu");
 
   conferir(errosRelevantes(erros).length === 0, `retrato: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
+  await navegador.close();
+}
+
+// ---------------------------------------------------------------- sem arquivo nenhum
+// Como um deploy sem public/audio preenchido: os manifestos vêm vazios (e,
+// na segunda volta, nem existem). Tudo funciona em silêncio: nenhuma
+// faixa, os momentos grandes sintetizados, nenhum pedido de arquivo e o
+// console limpo.
+for (const caso of ["manifestos vazios", "sem manifestos"]) {
+  const { navegador, contexto, pagina, erros } = await abrir({ progresso: null, rota: "/", esperar: "[data-mapa=mundo]" });
+  const pedidos = [];
+  await contexto.route(/\/audio\//, (rota) => {
+    const url = rota.request().url();
+    pedidos.push(url);
+    if (caso === "sem manifestos" || !url.endsWith(".json")) return rota.fulfill({ status: 404, body: "" });
+    const vazio = url.endsWith("musicas.json") ? { pendentes: [], faixas: {} } : { efeitos: {} };
+    return rota.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(vazio) });
+  });
+  await pagina.reload();
+  await pagina.locator("[data-mapa=mundo]").waitFor();
+  await pagina.locator("[data-total-estrelas]").click();
+  conferir((await esperarEfeito(pagina, "boot")) === "sintetizado", `${caso}: o boot toca sintetizado`);
+  await pagina.locator('[data-ilha="sites"]').first().click();
+  conferir((await esperarEfeito(pagina, "viagem-ilha")) === "sintetizado", `${caso}: a viagem toca sintetizado`);
+  await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
+  await pagina.waitForTimeout(1500);
+  conferir((await faixaTocando(pagina)) === null, `${caso}: nenhuma música, sem erro`);
+  await pagina.goBack();
+  await pagina.locator("[data-mapa=mundo]").waitFor();
+  await pagina.waitForTimeout(1000);
+  conferir((await faixaTocando(pagina)) === null, `${caso}: o mapa também fica em silêncio`);
+  const arquivos = pedidos.filter((url) => !url.endsWith(".json"));
+  conferir(arquivos.length === 0, `${caso}: nenhum arquivo de áudio pedido (${arquivos.length})`);
+  // Sem manifesto, o único aviso é o 404 dele mesmo, que o navegador escreve sozinho.
+  const outros = errosRelevantes(erros).filter((texto) => caso === "manifestos vazios" || !/Failed to load resource/.test(texto));
+  conferir(outros.length === 0, `${caso}: console limpo ${JSON.stringify(outros)}`);
+  await navegador.close();
+}
+
+// ---------------------------------------------------------------- pré-carga da próxima tela
+{
+  const { navegador, pagina, erros } = await abrir({ progresso: null, rota: "/", esperar: "[data-mapa=mundo]" });
+  await pagina.locator("[data-total-estrelas]").click();
+  await esperarFaixa(pagina, "mapa");
+  // Do mundo, a próxima provável é a ilha do computadorzinho (Sites): os bytes dela já vêm baixados.
+  await pagina.waitForFunction(() => document.documentElement.dataset.faixaPreCarregada === "sites", null, { timeout: 10000 });
+  conferir(true, "pré-carga: no mundo, a faixa de Sites fica baixada");
+  await pagina.locator('[data-ilha="sites"]').first().click();
+  await esperarFaixa(pagina, "sites");
+  conferir(true, "pré-carga: a troca para a ilha usa a faixa baixada");
+  await pagina.waitForFunction(() => document.documentElement.dataset.faixaPreCarregada === "mapa", null, { timeout: 10000 });
+  conferir(true, "pré-carga: na ilha, a do mapa fica baixada");
+  conferir(errosRelevantes(erros).length === 0, `pré-carga: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();
 }

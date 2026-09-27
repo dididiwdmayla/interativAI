@@ -1,7 +1,7 @@
 // Ferramentas da Unidade 2 em qualquer fase: trilha, esconder, apagar,
 // desfazer/refazer, duplicar, menu do nó (botão direito e toque longo) e a
 // barra de ações do celular. Também confere as apresentações pela Caixa.
-import { abrir, conferir, errosRelevantes, progressoComFase } from "./util.mjs";
+import { abrir, acaoDaBarra, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, progressoComFase, tocarNo } from "./util.mjs";
 
 const VISTAS = ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique", "editor", "sincronia"];
 const PROGRESSO = progressoComFase("sites-elementos-u1-f1", { objetivoAtual: 0 }, { apresentacoesVistas: VISTAS });
@@ -15,7 +15,7 @@ const classeDo = (pagina, seletor) =>
 {
   const { navegador, pagina, erros } = await abrir({ progresso: PROGRESSO });
   const iframe = pagina.frameLocator("iframe").first();
-  await pagina.waitForTimeout(900);
+  await esperarPronto(pagina);
 
   // Botão direito no h1 > Esconder.
   await linha(pagina, "1").click({ button: "right" });
@@ -87,9 +87,8 @@ const classeDo = (pagina, seletor) =>
 {
   const { navegador, pagina, erros } = await abrir({ largura: 390, altura: 844, toque: true, progresso: PROGRESSO });
   const iframe = pagina.frameLocator("iframe").first();
-  await pagina.waitForTimeout(900);
-  const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
-  if (await fechar.isVisible().catch(() => false)) await fechar.tap();
+  await esperarPronto(pagina);
+  await fecharBalao(pagina);
 
   await linha(pagina, "0").tap();
   const barra = pagina.locator("[data-barra-acoes]");
@@ -115,7 +114,7 @@ const classeDo = (pagina, seletor) =>
   await linha(pagina, "4").dispatchEvent("pointerdown", ponto);
   await pagina.waitForTimeout(750);
   await linha(pagina, "4").dispatchEvent("pointerup", ponto);
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   conferir((await pagina.locator("[data-menu-no]").count()) === 1, "toque longo no nó abre o menu do nó");
   conferir((await pagina.getByRole("dialog", { name: "Caixa de Ferramentas" }).count()) === 0, "e não abre o card da árvore");
   await pagina.locator("[data-menu-no] [data-acao=esconder]").tap();
@@ -143,20 +142,18 @@ for (const modo of ["desktop", "retrato"]) {
     ...(toque ? { largura: 390, altura: 844, toque: true } : {}),
     progresso: progressoComFase("sites-elementos-u1-f1", { objetivoAtual: 0 }, { apresentacoesVistas: TODAS }),
   });
-  await pagina.waitForTimeout(900);
+  await esperarPronto(pagina);
   const tocar = (localizador) => (toque ? localizador.tap() : localizador.click());
   const abrirCaixa = async () => {
     if (toque) {
-      const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
-      if (await fechar.isVisible().catch(() => false)) await fechar.tap();
+      await fecharBalao(pagina);
       await pagina.getByRole("button", { name: "Mais opções" }).tap();
     }
     await tocar(pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }));
   };
   const menuOuBarra = async (chave, acao) => {
     if (toque) {
-      await linha(pagina, chave).tap();
-      await pagina.locator(`[data-barra-acoes] [data-acao=${acao}]`).tap();
+      await acaoDaBarra(pagina, chave, acao);
     } else {
       await linha(pagina, chave).click({ button: "right" });
       await pagina.locator(`[data-menu-no] [data-acao=${acao}]`).click();
@@ -164,7 +161,7 @@ for (const modo of ["desktop", "retrato"]) {
   };
   const experimentar = {
     trilha: async () => {
-      await tocar(linha(pagina, "5.0"));
+      await tocarNo(pagina, "5.0");
       await tocar(pagina.getByRole("navigation", { name: /Trilha de elementos/ }).getByRole("button", { name: "ul.produtos" }));
     },
     esconder: () => menuOuBarra("2", "esconder"),
@@ -175,20 +172,10 @@ for (const modo of ["desktop", "retrato"]) {
   for (const id of ["trilha", "esconder", "apagar", "desfazer", "duplicar"]) {
     await abrirCaixa();
     await tocar(pagina.locator(`[data-card="${id}"]`).getByRole("button", { name: "Rever apresentação" }));
-    const camada = pagina.locator(`[data-apresentacao="${id}"]`);
-    await camada.waitFor({ timeout: 5000 });
-    for (let i = 0; i < 3; i++) {
-      await tocar(pagina.getByRole("button", { name: /Continuar|Quero tentar/ }).first());
-      await pagina.waitForTimeout(120);
-    }
-    await pagina.waitForTimeout(350);
-    await experimentar[id]();
-    try {
-      await camada.waitFor({ state: "detached", timeout: 5000 });
-    } catch (erro) {
-      await pagina.screenshot({ path: `testes-falha-novas-${modo}-${id}.png` });
+    await passarApresentacao(pagina, id, experimentar[id], async (nome, erro) => {
+      await pagina.screenshot({ path: `testes-falha-novas-${modo}-${nome}.png` });
       throw erro;
-    }
+    });
     conferir(true, `${modo}: apresentação ${id} fecha quando a ferramenta é usada de verdade`);
   }
   conferir(errosRelevantes(erros).length === 0, `${modo}: console limpo nas apresentações ${JSON.stringify(errosRelevantes(erros))}`);

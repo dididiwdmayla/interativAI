@@ -12,7 +12,7 @@ import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { UNIDADES } from "@/conteudo";
-import { ilhaDoId } from "@/curriculo";
+import { ilhaDoId, trilhasDaIlha } from "@/curriculo";
 import type { IlhaCurriculo, UnidadeCurriculo } from "@/curriculo/tipos";
 import { atualizarProgresso, useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import {
@@ -25,6 +25,7 @@ import {
   unidadeConcluida,
   zonaAberta,
 } from "@/lib/mapa";
+import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import { ROTA_MUNDO, rotaDaFase } from "@/lib/rotas";
 import { Oceano } from "../arte/Oceano";
 import { useAnimarMapa } from "../arte/useAnimarMapa";
@@ -75,21 +76,71 @@ export function TelaIlha({ ilhaId }: { ilhaId: string }) {
   const ilha = ilhaDoId(ilhaId);
   useMusicaDaTela({ tipo: "ilha", ilhaId });
   if (!carregado || !ilha) return <TelaCarregando />;
+  if (ilha.zonas.length === 0) return <IlhaSoNomeada ilha={ilha} />;
   return <IlhaCarregada ilha={ilha} />;
+}
+
+/** Ilha de uma trilha em construção: só o nome, sem zonas ainda. */
+function IlhaSoNomeada({ ilha }: { ilha: IlhaCurriculo }) {
+  const trilhas = trilhasDaIlha(ilha.id);
+  return (
+    <div className="flex h-dvh flex-col bg-mar" data-mapa="ilha" data-ilha={ilha.id}>
+      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />
+      <div className="grid flex-1 place-items-center p-6 text-center">
+        <div className="max-w-sm rounded-3xl border-2 border-borda bg-superficie p-6" data-ilha-em-construcao>
+          <Mascote expressao="dormindo" tamanho={96} className="mx-auto" />
+          <div className="mt-2 flex justify-center">
+            <PlacaConstrucao />
+          </div>
+          <p className="mt-2 text-lg font-black text-texto">A ilha {ilha.nome} ainda é só um terreno.</p>
+          <p className="mt-1 text-sm font-bold text-texto-suave">
+            Ela faz parte da trilha {trilhas.map((trilha) => trilha.nome).join(" e ")}, que está em construção. Enquanto isso, as
+            ilhas do núcleo comum (Origens, Lógica, IA e Ofício) já contam pra ela.
+          </p>
+          <Link href={ROTA_MUNDO} className="mt-4 inline-block font-black text-primaria underline">
+            Voltar ao mundo
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const progresso = useProgresso();
   const router = useRouter();
+  // Da ilha, o provável é voltar ao mundo.
+  useMusicaDaTela(null, { tipo: "mundo" });
   const layout = useLayoutJogo();
   const vertical = layout === "retrato";
   const animar = useAnimarMapa();
   const moldura = useRef<HTMLDivElement>(null);
   const area = useRef<ApiAreaArrastavel>(null);
   const { largura: larguraTela, altura: alturaTela } = useTamanho(moldura);
-  const [aberto, setAberto] = useState<string | null>(null);
+  // Endereço com o ponto (/ilha/sites#sites-estilos-u2, vindo do glossário): abre o card dele.
+  const [idDoEndereco] = useState(() => {
+    const id = typeof window === "undefined" ? "" : decodeURIComponent(window.location.hash.slice(1));
+    return ilha.zonas.some((zona) => zona.unidades.some((item) => item.id === id)) ? id : null;
+  });
+  const [aberto, setAberto] = useState<string | null>(idDoEndereco);
+  // Na navegação do próprio jogo (link do glossário), o endereço pode mudar
+  // depois da primeira pintura: confere de novo no quadro seguinte e a cada
+  // troca de hash.
+  useEffect(() => {
+    const abrirDoEndereco = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (ilha.zonas.some((zona) => zona.unidades.some((item) => item.id === id))) setAberto(id);
+    };
+    const quadro = requestAnimationFrame(abrirDoEndereco);
+    window.addEventListener("hashchange", abrirDoEndereco);
+    return () => {
+      cancelAnimationFrame(quadro);
+      window.removeEventListener("hashchange", abrirDoEndereco);
+    };
+  }, [ilha]);
   const fonte = { progresso };
   const estadoIlha = estadoDaIlha(ilha, fonte);
+  const lente = resolverLente(progresso.lente);
 
   const desenho = useMemo(() => desenharIlha(ilha, vertical, larguraTela), [ilha, vertical, larguraTela]);
   // Deitado ou no desktop, o caminho cabe na altura (sem encolher os pontos).
@@ -151,12 +202,14 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
       : desenho.pontos.slice(indiceAtual, indiceInicial + 1).reverse();
   const duracaoCaminhada = animar ? Math.min(1.8, 0.4 * Math.max(0, passos.length - 1)) : 0;
 
-  // Começa olhando o ponto atual.
+  const pontoDoEndereco = desenho.pontos.find((ponto) => ponto.item.id === idDoEndereco) ?? null;
+
+  // Começa olhando o ponto atual (ou o do endereço).
   const centralizado = useRef(false);
   useEffect(() => {
     if (larguraTela === 0 || centralizado.current) return;
     centralizado.current = true;
-    const ponto = desenho.pontos[indiceAtual];
+    const ponto = pontoDoEndereco ?? desenho.pontos[indiceAtual];
     if (ponto) area.current?.centralizar(px(ponto.x), px(ponto.y));
   });
 
@@ -194,7 +247,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   };
 
   if (estadoIlha === "bloqueada") {
-    const anterior = ilhaAnterior(ilha);
+    const anterior = ilhaAnterior(ilha, fonte);
     return (
       <div className="flex h-dvh flex-col bg-mar">
         <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />
@@ -217,7 +270,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="ilha" data-ilha={ilha.id} data-layout={layout}>
-      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />
+      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo={`Mapa da ilha ${ilha.nome}. Arraste ou role para ver o caminho inteiro.`}>
           <div className="relative" style={{ width: larguraDesenho, height: alturaDesenho }}>
@@ -320,6 +373,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                   x={px(ponto.x)}
                   y={px(ponto.y)}
                   acendendo={comemoracao?.acendendo === ponto.item.id}
+                  lente={lente ? (unidadeNaLente(ponto.item, lente) ? "acesa" : "apagada") : null}
                   aoAbrir={() => {
                     tocarEfeito("clique");
                     setAberto(ponto.item.id);

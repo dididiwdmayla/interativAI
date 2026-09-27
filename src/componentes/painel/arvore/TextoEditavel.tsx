@@ -39,6 +39,8 @@ export function TextoEditavel({
 }: Props) {
   const finalizado = useRef(false);
   const ultimoToque = useRef(0);
+  /** Tipo do último ponteiro que apertou aqui (o dblclick do toque é ignorado; ver abaixo). */
+  const ultimoPonteiro = useRef("mouse");
 
   if (editando) {
     const aoTeclar = (evento: KeyboardEvent<HTMLInputElement>) => {
@@ -89,7 +91,14 @@ export function TextoEditavel({
       className={`cursor-text rounded-sm hover:bg-hover hover:underline hover:decoration-dotted ${className}`}
       onDoubleClick={(evento) => {
         evento.stopPropagation();
+        // No toque, o duplo toque é o do onPointerUp (dois toques NESTE texto).
+        // O navegador também gera dblclick para dois toques rápidos em lugares
+        // diferentes (um botão e logo depois esta linha): isso não é edição.
+        if (ultimoPonteiro.current === "touch") return;
         aoIniciar();
+      }}
+      onPointerDown={(evento) => {
+        ultimoPonteiro.current = evento.pointerType;
       }}
       onPointerUp={(evento) => {
         // Duplo toque, caso o navegador não gere dblclick no toque.

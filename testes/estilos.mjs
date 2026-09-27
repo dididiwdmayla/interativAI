@@ -9,7 +9,7 @@
 // prévia sem recarregar. No celular: "Árvore | Estilos | Código" em
 // retrato, lado a lado deitado, alvos de 44px e botões de seta.
 // Uso: node testes/estilos.mjs
-import { abrir, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto, selecionarNo } from "./util.mjs";
 
 const { navegador, pagina, erros } = await abrir({ rota: "/lab/fases?fase=lab-motor-u1-f1", esperar: "[data-painel-estilos]" });
 await pagina.getByRole("button", { name: "Recolher o lab" }).click();
@@ -72,7 +72,7 @@ await pagina.waitForFunction(() => {
 });
 conferir(true, "enquanto digita, a prévia mostra o valor novo");
 await campo.press("Escape");
-await pagina.waitForTimeout(200);
+await esperarPronto(pagina);
 conferir((await estiloDe("h1", "font-size")) === "40px" && (await cssNaTela()).includes("font-size: 40px"), "Esc desiste e volta os 40px");
 
 // Setas: 1, Shift 10, Alt 0,1.
@@ -84,7 +84,7 @@ conferir((await campo.inputValue()) === "51px", "Shift + seta: soma 10");
 await campo.press("Alt+ArrowDown");
 conferir((await campo.inputValue()) === "50.9px", "Alt + seta: tira 0,1");
 await campo.press("Enter");
-await pagina.waitForTimeout(200);
+await esperarPronto(pagina);
 conferir((await estiloDe("h1", "font-size")) === "50.9px", "o valor das setas vale na prévia");
 
 // Tab: do nome vai para o valor; do valor, para a próxima declaração.
@@ -102,7 +102,7 @@ await pagina.locator("[data-campo-estilo=nome]").fill("letter-spacing");
 await pagina.locator("[data-campo-estilo=nome]").press("Tab");
 await pagina.locator("[data-campo-estilo=valor]").fill("2px");
 await pagina.locator("[data-campo-estilo=valor]").press("Enter");
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir((await estiloDe("h1", "letter-spacing")) === "2px", "+ declaração acrescenta letter-spacing: 2px no h1");
 conferir((await cssNaTela()).includes("  letter-spacing: 2px;\n}"), "com o recuo da regra, no CSS");
 
@@ -111,18 +111,18 @@ await selecionarNo(pagina, ".slogan");
 const caixinha = declaracao(".slogan", "font-style").locator("[data-alternar-declaracao]");
 await blocoDoSeletor(".slogan").hover();
 await caixinha.click();
-await pagina.waitForTimeout(200);
+await esperarPronto(pagina);
 conferir((await cssNaTela()).includes("/* font-style: italic; */"), "desmarcar a caixinha comenta a declaração no CSS");
 conferir((await declaracao(".slogan", "font-style").getAttribute("data-situacao")) === "desligada", "e ela aparece desligada (riscada)");
 conferir((await estiloDe(".slogan", "font-style")) === "normal", "a prévia perde o itálico");
 await caixinha.click();
-await pagina.waitForTimeout(200);
+await esperarPronto(pagina);
 conferir((await estiloDe(".slogan", "font-style")) === "italic", "marcar de novo volta o itálico");
 
 // Amostra de cor: o seletor de cor troca o valor.
 await selecionarNo(pagina, "header");
 await blocoDoSeletor("header").locator("[data-seletor-cor]").first().fill("#123456");
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir((await cssNaTela()).includes("background: #123456;"), "o seletor de cor escreve a cor nova (hexadecimal) no CSS");
 conferir((await estiloDe("header", "background-color")) === "rgb(18, 52, 86)", "e a prévia pinta o cabeçalho");
 
@@ -133,7 +133,7 @@ await pagina.locator("[data-campo-estilo=nome]").fill("color");
 await pagina.locator("[data-campo-estilo=nome]").press("Tab");
 await pagina.locator("[data-campo-estilo=valor]").fill("teal");
 await pagina.locator("[data-campo-estilo=valor]").press("Enter");
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir((await cssNaTela()).includes("p {\n  color: teal;\n}"), "a regra nova usa o seletor que o Chrome sugere (p) e já recebe a declaração");
 conferir((await estiloDe(".rodape p", "color")) === "rgb(0, 128, 128)", "e vale na prévia");
 
@@ -142,22 +142,22 @@ await selecionarNo(pagina, "#do-dia .preco");
 await declaracao("element.style", "font-size").locator("[data-valor-propriedade]").click();
 await pagina.locator("[data-campo-estilo=valor]").fill("24px");
 await pagina.locator("[data-campo-estilo=valor]").press("Enter");
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir((await iframe.evaluate((el) => el.contentDocument.querySelector("#do-dia .preco").getAttribute("style"))) === "font-size: 24px", "editar o element.style troca o atributo style");
 
 // Link da fonte abre o editor CSS na linha.
 await selecionarNo(pagina, "h1");
 await blocoDoSeletor("h1").locator("[data-fonte-regra]").click();
-await pagina.waitForTimeout(300);
+await esperarPronto(pagina);
 conferir(await pagina.locator("[data-editor-css]").isVisible(), "o link estilo.css:N abre a aba CSS do editor");
 conferir((await pagina.locator("[data-editor-css] .cm-activeLine").innerText()).startsWith("h1 {"), "com o cursor na regra do h1");
 
 // Desfazer volta a última mudança (a regra nova do rodapé? não: o inline, que foi o último).
 await pagina.getByRole("button", { name: /^Desfazer/ }).first().click();
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir((await iframe.evaluate((el) => el.contentDocument.querySelector("#do-dia .preco").getAttribute("style"))) === "font-size: 20px", "desfazer volta o style inline");
 await pagina.getByRole("button", { name: /^Desfazer/ }).first().click();
-await pagina.waitForTimeout(250);
+await esperarPronto(pagina);
 conferir(!(await cssNaTela()).includes("color: teal"), "outro desfazer tira a regra nova");
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
@@ -172,7 +172,7 @@ await navegador.close();
   conferir(segmentos.join("|") === "Árvore|Estilos|Código", `retrato: o painel alterna Árvore, Estilos e Código (${segmentos.join(", ")})`);
   await selecionarNo(pagina, "h1");
   await pagina.getByRole("tab", { name: "Estilos", exact: true }).tap();
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   conferir(await pagina.locator("[data-painel-estilos]").isVisible(), "tocar em Estilos mostra o painel");
   conferir(!(await pagina.locator("[role=tree]").first().isVisible()), "no lugar da árvore");
   const regraH1 = pagina.locator('[data-lista-estilos] > section[aria-label="Regra h1"]').first();
@@ -186,7 +186,7 @@ await navegador.close();
   await pagina.getByRole("button", { name: "Aumentar o número" }).tap();
   conferir((await pagina.locator("[data-campo-estilo=valor]").inputValue()) === "33px", "o botão de cima soma 1 (32px vira 33px)");
   await pagina.locator("[data-campo-estilo=valor]").press("Enter");
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir(
     (await pagina.locator("section[data-previa] iframe").evaluate((el) => el.contentWindow.getComputedStyle(el.contentDocument.querySelector("h1")).fontSize)) === "33px",
     "e vale na prévia",
@@ -213,7 +213,7 @@ await navegador.close();
   await pagina.locator("[data-campo-estilo=nome]").press("Tab");
   await pagina.locator("[data-campo-estilo=valor]").fill("purple");
   await pagina.locator("[data-campo-estilo=valor]").press("Enter");
-  await pagina.waitForTimeout(250);
+  await esperarPronto(pagina);
   conferir(
     (await pagina.locator("section[data-previa] iframe").evaluate((el) => el.contentWindow.getComputedStyle(el.contentDocument.querySelector("h1")).color)) === "rgb(128, 0, 128)",
     "deitado, a regra nova pelo toque vale na prévia",

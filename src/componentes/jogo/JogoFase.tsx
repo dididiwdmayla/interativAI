@@ -7,7 +7,9 @@ import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
 import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
+import { BotaoGlossario } from "@/componentes/explorar/BotaoGlossario";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
+import { comecarPendencia, usePendencias } from "@/lib/pendencias";
 import { IconeAviso } from "@/componentes/icones/IconeAviso";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
@@ -217,6 +219,7 @@ export function JogoFase({
   }>({ aberta: false, foco: null });
   const progresso = useProgresso();
   const toque = useToque();
+  const pendencias = usePendencias();
 
   // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
   // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
@@ -318,6 +321,13 @@ export function JogoFase({
       if (!resultado) return null;
       const janela = obterDocumento()?.defaultView;
       const comportamento: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      const rolando = janela && ((resultado.destino === "ancora" && resultado.alvo) || resultado.href === "#");
+      if (janela && rolando && comportamento === "smooth") {
+        // A rolagem suave da prévia conta como pendência até terminar (teto de 1,2 s).
+        const encerrar = comecarPendencia();
+        janela.addEventListener("scrollend", encerrar, { once: true });
+        setTimeout(encerrar, 1200);
+      }
       if (janela && resultado.destino === "ancora" && resultado.alvo) {
         janela.scrollTo({ top: resultado.alvo.getBoundingClientRect().top + janela.scrollY, behavior: comportamento });
       } else if (janela && resultado.href === "#") {
@@ -957,10 +967,26 @@ export function JogoFase({
     paisagem: "w-1/2",
   }[layout];
 
+  // Estados explícitos para os testes de navegador (testes/util.mjs, esperarPronto):
+  // pronta = nada vai mudar a tela sozinho (sem roteiro, timer, recarga, animação do balão ou tutor pensando).
+  const pronta = pendencias === 0 && estado.roteiro === null && !tutor.carregando;
+  const objetivoAtualId =
+    estado.etapa !== "objetivos"
+      ? ""
+      : fase.tipo === "pratica"
+        ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
+        : "desafio";
+
   return (
     <div
       className="flex h-dvh flex-col overflow-hidden"
       data-layout={layout}
+      data-jogo-fase={fase.id}
+      data-etapa={estado.etapa}
+      data-objetivo-atual={objetivoAtualId}
+      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
+      data-pronto={pronta ? "sim" : "nao"}
+      data-roteiro={estado.roteiro ?? "nenhum"}
       style={movel && viewport.altura ? { height: viewport.altura } : undefined}
     >
       {movel ? (
@@ -973,6 +999,7 @@ export function JogoFase({
           menu={
             <>
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !revisao && <BotaoGlossario noMenu />}
               <SeletorTema />
               <div data-manter-menu className="border-t-2 border-borda pt-2">
                 <AjustesSom />
@@ -991,6 +1018,7 @@ export function JogoFase({
               {botaoVoltar}
               {botaoMapa}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !revisao && <BotaoGlossario />}
               {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
           }

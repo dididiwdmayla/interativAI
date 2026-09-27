@@ -2,7 +2,7 @@
 // dentro da prévia (a prévia não navega; âncora rola, o computadorzinho
 // avisa para onde o link levaria). Desktop e celular em pé, com a
 // apresentação da ferramenta nova pela Caixa.
-import { abrir, chaveDoSeletor, conferir, errosRelevantes, linhaDaArvore, mostrarArvore, progressoComFase } from "./util.mjs";
+import { abrir, abrirBalao, chaveDoSeletor, conferir, errosRelevantes, esperarPronto, fecharBalao, linhaDaArvore, mostrarArvore, progressoComFase } from "./util.mjs";
 
 const VISTAS_U1 = ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique", "editor", "sincronia"];
 const VISTAS_U2 = [...VISTAS_U1, "trilha", "esconder", "apagar", "desfazer", "duplicar"];
@@ -18,7 +18,7 @@ const campoDaTag = (pagina) => pagina.locator("[role=tree] input[aria-label^='No
     progresso: progressoComFase("sites-elementos-u1-f1", { objetivoAtual: 0 }, { apresentacoesVistas: VISTAS_U2 }),
   });
   const iframe = pagina.frameLocator("section[data-previa] iframe");
-  await pagina.waitForTimeout(900);
+  await esperarPronto(pagina);
 
   // Dois cliques no nome da tag do h1: o campo abre com o nome selecionado e o fechamento acompanha.
   const chaveH1 = await chaveDoSeletor(pagina, "h1");
@@ -29,7 +29,7 @@ const campoDaTag = (pagina) => pagina.locator("[role=tree] input[aria-label^='No
   const linhaH1 = pagina.locator(`[role=treeitem][data-chave="${chaveH1}"]`);
   conferir((await linhaH1.textContent()).includes("</h2>"), "o fechamento acompanha o nome digitado");
   await campo.press("Enter");
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   conferir((await iframe.locator("h1").count()) === 0, "o h1 sumiu");
   conferir((await iframe.locator("h2").first().textContent()) === "Pão quentinho toda manhã", "virou h2 com o mesmo texto");
   conferir((await pagina.locator(".cm-content").textContent()).includes("<h2>Pão quentinho toda manhã</h2>"), "o código mostra a tag nova");
@@ -46,7 +46,7 @@ const campoDaTag = (pagina) => pagina.locator("[role=tree] input[aria-label^='No
   const chaveP = await chaveDoSeletor(pagina, "p.descricao");
   await nomeDaTag(pagina, chaveP).dblclick();
   await campoDaTag(pagina).pressSequentially("div ");
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   conferir((await tagDe(pagina, ".descricao")) === "div", "Espaço confirma: p vira div com a mesma classe");
 
   // Nome inválido não muda nada.
@@ -85,16 +85,16 @@ const campoDaTag = (pagina) => pagina.locator("[role=tree] input[aria-label^='No
   });
   await pagina.reload();
   await pagina.waitForSelector("section[data-previa] iframe");
-  await pagina.waitForTimeout(900);
+  await esperarPronto(pagina);
   await pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }).click();
   await card.getByRole("button", { name: "Rever apresentação" }).click();
   const camada = pagina.locator('[data-apresentacao="renomear-tag"]');
   await camada.waitFor({ timeout: 5000 });
   for (let i = 0; i < 3; i++) {
     await pagina.getByRole("button", { name: /Continuar|Quero tentar/ }).first().click();
-    await pagina.waitForTimeout(120);
+    await esperarPronto(pagina);
   }
-  await pagina.waitForTimeout(350);
+  await esperarPronto(pagina);
   await nomeDaTag(pagina, await chaveDoSeletor(pagina, "header")).dblclick();
   await campoDaTag(pagina).fill("div");
   await campoDaTag(pagina).press("Enter");
@@ -121,28 +121,19 @@ for (const modo of ["desktop", "retrato"]) {
     ),
   });
   const iframe = pagina.frameLocator("section[data-previa] iframe");
-  await pagina.waitForTimeout(1200);
+  await esperarPronto(pagina);
   const tocar = (localizador) => (toque ? localizador.tap() : localizador.click());
   const balao = async () => {
-    if (toque) {
-      const abrirConversa = pagina.getByRole("button", { name: /Abrir a conversa/ });
-      if (await abrirConversa.isVisible().catch(() => false)) await abrirConversa.tap();
-      await pagina.waitForTimeout(250);
-    }
+    await abrirBalao(pagina);
     return pagina.locator("body");
   };
-  const fechar = async () => {
-    if (!toque) return;
-    const botao = pagina.getByRole("button", { name: /Fechar a conversa/ });
-    if (await botao.isVisible().catch(() => false)) await botao.tap();
-    await pagina.waitForTimeout(250);
-  };
+  const fechar = () => fecharBalao(pagina);
   const clicarNoLink = async (seletor) => {
     await fechar();
     const link = iframe.locator(seletor).first();
     await link.scrollIntoViewIfNeeded();
     await tocar(link);
-    await pagina.waitForTimeout(700);
+    await esperarPronto(pagina);
   };
   const mudarLink = (seletor, href, alvo) =>
     pagina.evaluate(
@@ -172,7 +163,7 @@ for (const modo of ["desktop", "retrato"]) {
   conferir((await naPagina()) === "about:srcdoc" && (await iframe.locator("#noticias").count()) === 1, `${modo}: link externo não navega`);
   if (!toque) {
     await iframe.locator("#noticia-praca .leia-mais").click({ button: "middle" });
-    await pagina.waitForTimeout(400);
+    await esperarPronto(pagina);
     conferir((await naPagina()) === "about:srcdoc", "botão do meio também não sai do lugar");
   }
 
@@ -205,10 +196,14 @@ for (const modo of ["desktop", "retrato"]) {
     await campoDaTag(pagina).fill("h2");
     await campoDaTag(pagina).press("Enter");
     conferir((await tagDe(pagina, "#noticia-praca > :first-child")) === "h2", "celular: Renomear pela barra do nó");
-    // Dois toques no nome da tag.
-    await nomeDaTag(pagina, chave).tap();
-    await pagina.waitForTimeout(80);
-    await nomeDaTag(pagina, chave).tap();
+    // Dois toques no nome da tag: direto na tela, um atrás do outro (a janela
+    // do duplo toque é de 350 ms; esperar a fase assentar no meio passaria dela).
+    await esperarPronto(pagina);
+    const caixaTag = await nomeDaTag(pagina, chave).boundingBox();
+    const xTag = caixaTag.x + caixaTag.width / 2;
+    const yTag = caixaTag.y + caixaTag.height / 2;
+    await pagina.touchscreen.tap(xTag, yTag);
+    await pagina.touchscreen.tap(xTag, yTag);
     await campoDaTag(pagina).waitFor({ timeout: 3000 });
     await campoDaTag(pagina).fill("h3");
     await campoDaTag(pagina).press("Enter");

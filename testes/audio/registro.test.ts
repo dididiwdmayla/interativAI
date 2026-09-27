@@ -14,6 +14,7 @@ import {
   URL_MANIFESTO_EFEITOS,
   URL_MANIFESTO_MUSICAS,
 } from "@/audio/manifestos";
+import { EFEITOS_ESPERADOS, MUSICAS_ESPERADAS } from "@/audio/manifesto";
 import { RECEITAS } from "@/audio/receitas";
 import { FAIXA_DA_ILHA, faixaDaTela, faixaTocavel } from "@/audio/telas";
 import { CURRICULO } from "@/curriculo";
@@ -281,5 +282,45 @@ describe("ajustes de som no progresso", () => {
   it("preserva o mudo salvo e limita os volumes entre 0 e 1", () => {
     const lido = normalizarProgresso({ som: false, volumeMusica: 3, volumeEfeitos: -1, volumeVoz: "alto" });
     expect(lido).toMatchObject({ som: false, volumeMusica: 1, volumeEfeitos: 0, volumeVoz: 0.7 });
+  });
+});
+
+describe("manifesto do que o jogo espera (src/audio/manifesto.ts)", () => {
+  it("uma música por ilha com faixa, mais o mapa e o museu, sem repetir", () => {
+    const ids = MUSICAS_ESPERADAS.map((item) => item.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toEqual(expect.arrayContaining(["mapa", "origens", ...Object.values(FAIXA_DA_ILHA)]));
+  });
+
+  it("os efeitos grandes do prompt existem no registro e têm reserva sintetizada", () => {
+    expect(EFEITOS_ESPERADOS.map((item) => item.id)).toEqual(["unidade-concluida", "esbarrao", "insignia", "entrar-mapa"]);
+    for (const { id } of EFEITOS_ESPERADOS) {
+      expect(IDS_EFEITOS).toContain(id);
+      expect(EFEITOS_GRANDES).toContain(id);
+      expect(RECEITAS[id]).toBeTypeOf("function");
+    }
+  });
+
+  it("o que está em public/audio bate com o esperado (o que falta toca silêncio ou sintetizado)", () => {
+    for (const musica of MUSICAS_ESPERADAS) {
+      const entrada = MUSICAS.faixas[musica.id];
+      if (!entrada) {
+        expect(MUSICAS.pendentes.includes(musica.id) || !entrada).toBe(true);
+        continue;
+      }
+      expect(entrada.arquivos).toEqual(musica.arquivos);
+    }
+    for (const efeito of EFEITOS_ESPERADOS) {
+      const entrada = EFEITOS.efeitos[efeito.id];
+      if (entrada) expect(entrada.arquivos).toEqual(efeito.arquivos);
+    }
+  });
+
+  it("sem manifesto nenhum, toda tela toca silêncio e todo efeito, o sintetizado", () => {
+    const vazio = lerManifestoMusicas(null);
+    expect(faixaTocavel({ tipo: "mundo" }, vazio)).toBeNull();
+    expect(faixaTocavel({ tipo: "ilha", ilhaId: "sites" }, vazio)).toBeNull();
+    const semEfeitos = lerManifestoEfeitos(null);
+    for (const { id } of EFEITOS_ESPERADOS) expect(fonteDoEfeito(id, semEfeitos, "webm")).toEqual({ tipo: "sintetizado" });
   });
 });
