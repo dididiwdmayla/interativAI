@@ -20,3 +20,6 @@ export const ROTA_TRILHAS = "/trilhas";
 
 /** As profissões: o que faz cada tipo de programador, e a lente de cada uma no mapa. */
 export const ROTA_PROFISSOES = "/profissoes";
+
+/** O glossário vivo: todo conceito, onde se aprende e onde se pratica. */
+export const ROTA_GLOSSARIO = "/glossario";

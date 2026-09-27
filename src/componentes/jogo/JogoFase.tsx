@@ -7,6 +7,7 @@ import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
 import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFerramenta";
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
+import { BotaoGlossario } from "@/componentes/explorar/BotaoGlossario";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
 import { usePendencias } from "@/lib/pendencias";
 import { IconeAviso } from "@/componentes/icones/IconeAviso";
@@ -991,6 +992,7 @@ export function JogoFase({
           menu={
             <>
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !revisao && <BotaoGlossario noMenu />}
               <SeletorTema />
               <div data-manter-menu className="border-t-2 border-borda pt-2">
                 <AjustesSom />
@@ -1009,6 +1011,7 @@ export function JogoFase({
               {botaoVoltar}
               {botaoMapa}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !revisao && <BotaoGlossario />}
               {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
           }

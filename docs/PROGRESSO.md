@@ -92,6 +92,20 @@ Status resumido em `docs/ROADMAP.md`.
   a barra mostra "DevOps: 12% do caminho"). Checagem `profissoes` no
   `testar:conteudo` e `testes/conteudo/profissoes.test.ts`.
 
+- [x] **Etapa 5: glossário vivo.** Rota `/glossario` com botão
+  "Glossário" na barra do mapa e dentro da fase (barra do desktop e menu
+  do celular; fora do lab e da revisão), e "Voltar" de volta para onde
+  estava. `src/lib/glossario.ts` em cima do `montarIndice()`: um verbete
+  por conceito (nome, resumo, temas, "Onde aprender" e "Onde praticar"),
+  busca pelo nome e pelo resumo sem acento e sem maiúscula. Fase liberada
+  abre direto; trancada leva ao ponto da unidade no mapa
+  (`/ilha/<ilha>#<unidade>`, a ilha abre o card) com "Você chega lá na Ilha
+  X"; `/glossario#<conceito>` abre no verbete. Testes em
+  `testes/conteudo/glossario.test.ts`. O opcional (sublinhar termos nas
+  falas do computadorzinho) ficou de fora: nomes curtos e comuns como
+  "Elemento" e "Tag" aparecem em quase toda fala e o sublinhado ia poluir
+  a leitura.
+
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
 Status resumido em `docs/ROADMAP.md` (fonte única de status a partir

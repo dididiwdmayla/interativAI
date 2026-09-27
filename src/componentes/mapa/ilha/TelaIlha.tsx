@@ -115,7 +115,12 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const moldura = useRef<HTMLDivElement>(null);
   const area = useRef<ApiAreaArrastavel>(null);
   const { largura: larguraTela, altura: alturaTela } = useTamanho(moldura);
-  const [aberto, setAberto] = useState<string | null>(null);
+  // Endereço com o ponto (/ilha/sites#sites-estilos-u2, vindo do glossário): abre o card dele.
+  const [idDoEndereco] = useState(() => {
+    const id = typeof window === "undefined" ? "" : decodeURIComponent(window.location.hash.slice(1));
+    return ilha.zonas.some((zona) => zona.unidades.some((item) => item.id === id)) ? id : null;
+  });
+  const [aberto, setAberto] = useState<string | null>(idDoEndereco);
   const fonte = { progresso };
   const estadoIlha = estadoDaIlha(ilha, fonte);
   const lente = resolverLente(progresso.lente);
@@ -180,12 +185,14 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
       : desenho.pontos.slice(indiceAtual, indiceInicial + 1).reverse();
   const duracaoCaminhada = animar ? Math.min(1.8, 0.4 * Math.max(0, passos.length - 1)) : 0;
 
-  // Começa olhando o ponto atual.
+  const pontoDoEndereco = desenho.pontos.find((ponto) => ponto.item.id === idDoEndereco) ?? null;
+
+  // Começa olhando o ponto atual (ou o do endereço).
   const centralizado = useRef(false);
   useEffect(() => {
     if (larguraTela === 0 || centralizado.current) return;
     centralizado.current = true;
-    const ponto = desenho.pontos[indiceAtual];
+    const ponto = pontoDoEndereco ?? desenho.pontos[indiceAtual];
     if (ponto) area.current?.centralizar(px(ponto.x), px(ponto.y));
   });
 

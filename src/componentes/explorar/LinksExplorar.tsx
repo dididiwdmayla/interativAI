@@ -7,6 +7,7 @@ import { IconeInsignia } from "@/componentes/icones/IconeInsignia";
 import { IconeProfissoes } from "@/componentes/icones/IconeProfissoes";
 import { IconeTrilhas } from "@/componentes/icones/IconeTrilhas";
 import { PainelInsignias } from "@/componentes/temas/PainelInsignias";
+import { BotaoGlossario } from "./BotaoGlossario";
 import { useProgresso } from "@/lib/armazemProgresso";
 import { trilhaDaFonte } from "@/lib/mapa";
 import { ROTA_PROFISSOES, ROTA_TRILHAS } from "@/lib/rotas";
@@ -16,7 +17,7 @@ type Props = {
   noMenu?: boolean;
 };
 
-/** Os caminhos para explorar o jogo por outros ângulos, na barra do mapa: trilhas, profissões e insígnias. */
+/** Os caminhos para explorar o jogo por outros ângulos, na barra do mapa: trilhas, profissões, glossário e insígnias. */
 export function LinksExplorar({ noMenu = false }: Props) {
   const progresso = useProgresso();
   const trilha = trilhaDaFonte({ progresso });
@@ -34,6 +35,7 @@ export function LinksExplorar({ noMenu = false }: Props) {
         <IconeProfissoes />
         <span className={noMenu ? "" : "hidden lg:inline"}>Profissões</span>
       </Link>
+      <BotaoGlossario noMenu={noMenu} />
       <button
         type="button"
         className={classe}

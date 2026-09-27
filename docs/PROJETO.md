@@ -547,6 +547,22 @@ camada de trilhas e a fábrica estiverem estáveis.
   qualquer tema dela, no mundo e na ilha; a barra de temas mostra "DevOps:
   12% do caminho" e o X apaga.
 
+### Glossário vivo
+
+- Rota `/glossario` (`componentes/explorar/TelaGlossario`), com o botão
+  "Glossário" na barra do mapa e dentro da fase (barra do desktop e menu
+  do celular; fora do lab e da revisão). O progresso da fase fica salvo, e
+  "Voltar" traz de volta.
+- `src/lib/glossario.ts`, em cima do `montarIndice()`: um verbete por
+  conceito do catálogo (nome, resumo de leigo, temas), "Onde aprender" (as
+  fases que ensinam) e "Onde praticar" (as que praticam e revisam, sem
+  repetir as de aprender). Busca pelo nome e pelo resumo, sem acento e sem
+  maiúscula (`normalizarBusca`).
+- Links: fase liberada (`faseLiberada`) abre direto; trancada leva ao
+  ponto da unidade no mapa, `/ilha/<ilha>#<unidade>` (a ilha abre o card
+  dela), com o texto "Você chega lá na Ilha X". `/glossario#<conceito>`
+  abre no verbete.
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,
