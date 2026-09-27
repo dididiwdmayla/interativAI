@@ -106,6 +106,27 @@ Status resumido em `docs/ROADMAP.md`.
   "Elemento" e "Tag" aparecem em quase toda fala e o sublinhado ia poluir
   a leitura.
 
+- [x] **Etapa 6: sistema de áudio.** O sistema da rodada 7/8 já fazia
+  quase tudo (música por tela carregada sob demanda e só depois do
+  primeiro gesto, loop sem emenda, pausa com a aba escondida, volumes
+  separados e salvos, mudo, efeitos grandes em arquivo com reserva
+  sintetizada). Esta etapa completou: `src/audio/manifesto.ts` (o que o
+  jogo espera: música por ilha, mapa e museu; efeitos grandes
+  `unidade-concluida`, `esbarrao`, `insignia`, `entrar-mapa`), pré-carga
+  da próxima tela provável (só os bytes, `preCarregarTelaMusical`),
+  crossfade de 0,8 s entre telas (era 1,5 s), o `insignia` ligado às
+  insígnias e a seção "Preparando os arquivos" no `docs/AUDIO.md` (nomes,
+  formato WebM/Opus com M4A/AAC de reserva, -18 LUFS na música e -16 nos
+  efeitos, como cortar uma faixa do Suno em loop no fim do compasso).
+  Arquivos presentes em `public/audio`: 8 músicas (mapa, origens, sites,
+  logica, paginas-vivas, rede-servidor, ia, oficio) e 11 efeitos (boot,
+  dormir, acordar, esbarrao, fase-concluida, unidade-concluida,
+  desbloqueio, insignia, entrar-mapa, viagem-ilha, abrir-museu), cada um
+  em `.webm` e `.m4a`. Testes: `registro.test.ts` (manifesto esperado,
+  sem manifesto tudo silencioso ou sintetizado) e `audio.mjs` (sem
+  arquivo nenhum, com manifestos vazios e ausentes: silêncio, sintetizado,
+  nenhum pedido de arquivo, console limpo; pré-carga).
+
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
 Status resumido em `docs/ROADMAP.md` (fonte única de status a partir

@@ -109,6 +109,8 @@ function IlhaSoNomeada({ ilha }: { ilha: IlhaCurriculo }) {
 function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const progresso = useProgresso();
   const router = useRouter();
+  // Da ilha, o provável é voltar ao mundo.
+  useMusicaDaTela(null, { tipo: "mundo" });
   const layout = useLayoutJogo();
   const vertical = layout === "retrato";
   const animar = useAnimarMapa();
@@ -121,6 +123,21 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
     return ilha.zonas.some((zona) => zona.unidades.some((item) => item.id === id)) ? id : null;
   });
   const [aberto, setAberto] = useState<string | null>(idDoEndereco);
+  // Na navegação do próprio jogo (link do glossário), o endereço pode mudar
+  // depois da primeira pintura: confere de novo no quadro seguinte e a cada
+  // troca de hash.
+  useEffect(() => {
+    const abrirDoEndereco = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (ilha.zonas.some((zona) => zona.unidades.some((item) => item.id === id))) setAberto(id);
+    };
+    const quadro = requestAnimationFrame(abrirDoEndereco);
+    window.addEventListener("hashchange", abrirDoEndereco);
+    return () => {
+      cancelAnimationFrame(quadro);
+      window.removeEventListener("hashchange", abrirDoEndereco);
+    };
+  }, [ilha]);
   const fonte = { progresso };
   const estadoIlha = estadoDaIlha(ilha, fonte);
   const lente = resolverLente(progresso.lente);

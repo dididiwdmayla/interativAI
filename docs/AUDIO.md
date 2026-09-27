@@ -15,6 +15,7 @@ computadorzinho e os efeitos sonoros. Web Audio puro, sem bibliotecas.
 | `src/audio/receitas.ts` | A versão sintetizada de cada efeito |
 | `src/audio/sintese.ts` | Peças de síntese (tom, ruído filtrado, FM) com rampas |
 | `src/audio/manifestos.ts` | Leitura dos manifestos e escolha de formato (webm ou m4a) |
+| `src/audio/manifesto.ts` | O que o jogo espera ter: id -> arquivos (músicas por tela e efeitos dos momentos grandes), a lista da seção "Preparando os arquivos" |
 | `src/audio/aleatorio.ts` | Hash e sorteio determinístico (a voz soa sempre igual) |
 | `src/audio/ganchos.ts` | Camada fina para React: `useMusicaDaTela`, `useVozDoMascote` |
 | `src/componentes/ui/AudioDoJogo.tsx` | Liga o motor à página (gestos, boot, volumes salvos) |
@@ -82,12 +83,19 @@ voz (eventos) -> ganho da fala (interromper) -> passa-baixa 4,5 kHz -> voz -----
   manifesto (nunca a duração do arquivo, que vem com alguns ms a mais).
   Cada arquivo já é um loop completo com a emenda embutida: sem crossfade
   na volta.
+- **Pré-carga da próxima tela provável**: `useMusicaDaTela(tela, proxima)`
+  baixa, 2,5 s depois de a tela entrar, só os bytes da faixa da próxima
+  tela provável (do mundo, a ilha onde o computadorzinho está; da ilha, o
+  mundo), sem decodificar (`preCarregarTelaMusical`). Só depois do
+  primeiro gesto e com a música audível; uma pré-carga por vez. A página
+  marca `<html data-faixa-pre-carregada="...">`.
 - **Memória**: cada faixa decodificada ocupa uns 30 MB. O motor guarda no
   máximo a atual e a que está entrando; quando a nova começa, as outras
   saem do cache (a que está saindo só vive no nó até terminar o fade), e
   se uma terceira troca chega no meio de um crossfade, a mais antiga sai
   na hora.
-- **Transição**: crossfade de 1,5 s (`CROSSFADE_MUSICA`). Mesma faixa entre
+- **Transição**: crossfade de 0,8 s (`CROSSFADE_MUSICA`; era 1,5 s até a
+  rodada 10, que pediu uns 800 ms). Mesma faixa entre
   telas da mesma ilha (ilha, fase, volta para a ilha): continua tocando,
   sem reiniciar.
 - Faixa pendente, sem entrada no manifesto, arquivo faltando ou que o
@@ -133,6 +141,95 @@ mapa, substitua `mapa.webm` e `mapa.m4a` e atualize `amostras` e
 `duracaoSegundos` da entrada `mapa` (passos 1 e 2, sem código).
 `npm run testar:audio` confere que todo arquivo citado existe, que todo
 `.webm` tem o `.m4a` e que não sobra arquivo sem entrada.
+
+## Preparando os arquivos (músicas no Suno, efeitos no ChatGPT)
+
+Guia para quem prepara os arquivos. Sem arquivo nenhum o jogo funciona em
+silêncio, sem erro: a música da tela fica quieta e cada efeito toca a
+versão sintetizada. Cada arquivo que chega entra sozinho (arquivo + entrada
+no json, sem código).
+
+### Nomes esperados (`src/audio/manifesto.ts`)
+
+Cada som vai em dois formatos, com o mesmo nome: `<id>.webm` e `<id>.m4a`.
+
+| Pasta | Id | Onde toca |
+| --- | --- | --- |
+| `public/audio/musica/` | `mapa` | Mapa do mundo |
+| `public/audio/musica/` | `origens` | Museu e ilha das Origens |
+| `public/audio/musica/` | `sites` | Ilha Sites e as fases dela |
+| `public/audio/musica/` | `logica` | Ilha Lógica |
+| `public/audio/musica/` | `paginas-vivas` | Ilha Páginas vivas |
+| `public/audio/musica/` | `rede-servidor` | Ilha Rede e Servidor |
+| `public/audio/musica/` | `ia` | Ilha IA |
+| `public/audio/musica/` | `oficio` | Ilha Ofício |
+| `public/audio/efeitos/` | `unidade-concluida` | Conclusão de unidade (o "conclusao-unidade" do pedido) |
+| `public/audio/efeitos/` | `esbarrao` | O computadorzinho esbarrando no painel |
+| `public/audio/efeitos/` | `insignia` | Insígnia de tema atingindo um marco |
+| `public/audio/efeitos/` | `entrar-mapa` | Voltar ao mapa do mundo (o "abrir-mapa" do pedido) |
+
+Os outros momentos grandes que já têm arquivo (`boot`, `fase-concluida`,
+`desbloqueio`, `viagem-ilha`, `abrir-museu`, `dormir`, `acordar`) seguem o
+mesmo padrão. Frameworks e as ilhas das trilhas em construção ainda não
+têm música (silêncio); uma ilha nova entra em `FAIXA_DA_ILHA`.
+
+**Situação em set/2026:** todos os arquivos da tabela já estão em
+`public/audio` (8 músicas e 11 efeitos, cada um em `.webm` e `.m4a`).
+
+### Formato
+
+- **`.webm` com Opus** (preferido, arquivos menores; música a uns 64 kbps,
+  estéreo, 48 kHz) e **`.m4a` com AAC** (reserva, uns 96 kbps). O jogo
+  pergunta ao navegador (`canPlayType('audio/webm; codecs="opus"')`) e usa o
+  `.m4a` quando o WebM não serve. Chrome, Edge e Firefox tocam WebM com
+  Opus há muito tempo; no Safari, o suporte a WebM/Opus só veio por volta da
+  versão 18.4 (2025) e o `canPlayType` ainda pode responder diferente do que
+  o `decodeAudioData` aceita, por isso o `.m4a` continua obrigatório.
+- MP3 também toca em todo navegador, mas não emenda loop sem falha (o
+  codificador põe silêncio no começo e no fim do arquivo): não use para
+  música. Ogg/Opus funciona nos navegadores atuais, mas não traz vantagem
+  sobre o WebM aqui.
+- Efeitos: mono, sem silêncio no começo, fade curto no fim.
+
+### Volume alvo (normalização)
+
+- Músicas em **-18 LUFS** integrado (pico real abaixo de -1 dBTP).
+- Efeitos em **-16 LUFS** (2 dB acima da música).
+- O jogo mistura por cima disso (`REFERENCIA` e `GANHO_ARQUIVO_EFEITO` em
+  `motor.ts`); a música começa em 50% no controle, que na curva quadrática
+  do volume é um ganho de 0,25 (uns -32 dB de RMS na saída): baixa por
+  padrão, como pedido. Qualquer editor com medidor de LUFS serve (Audacity:
+  Efeito > Volume e compressão > Normalização de loudness).
+
+### Como cortar uma faixa do Suno em loop
+
+1. Baixe a faixa em WAV (a melhor qualidade que o Suno der) e anote o BPM
+   e o compasso (quase sempre 4/4).
+2. Calcule a duração de um compasso: `60 / BPM × 4` segundos (a 120 BPM,
+   2 s). O loop precisa ter um número inteiro de compassos, de preferência
+   8, 16 ou 32.
+3. Escolha um trecho que "volte" bem: comece no primeiro tempo de um
+   compasso logo depois da introdução e termine no fim de um compasso (o
+   ponto exatamente antes do primeiro tempo do compasso seguinte). Evite
+   cortar no meio de uma nota longa ou de um prato soando.
+4. No editor, corte nos dois pontos com o zoom máximo, no cruzamento com o
+   zero da onda. Para a emenda não estalar, embuta ela no próprio arquivo:
+   copie o som que vinha logo depois do fim do loop (uns 50 a 100 ms) e
+   misture por cima do começo, com fade-in nesse pedaço e fade-out no
+   final do loop. Ouça o loop em repetição no editor.
+5. Normalize em -18 LUFS e exporte em WAV; converta para os dois formatos
+   (por exemplo, com ffmpeg:
+   `ffmpeg -i mapa.wav -c:a libopus -b:a 64k mapa.webm` e
+   `ffmpeg -i mapa.wav -c:a aac -b:a 96k mapa.m4a`).
+6. Anote a duração exata do loop em amostras (o WAV antes de converter;
+   a 48 kHz, `amostras = segundos × 48000`) e ponha `sampleRate`,
+   `amostras` e `duracaoSegundos` no `musicas.json`. O jogo usa esse
+   número como fim do loop, nunca a duração do arquivo convertido (os
+   containers acrescentam alguns ms).
+
+O jogo toca a faixa com `AudioBufferSourceNode` em `loop`, que emenda na
+amostra exata: por isso a emenda suave vai no arquivo (passo 4), e não há
+crossfade extra no ponto do loop.
 
 ## Efeitos sonoros
 
@@ -232,7 +329,7 @@ e ser chamado de algum lugar.
 | `viagem-ilha` | arquivo | Clicar numa ilha aberta no mapa do mundo |
 | `abrir-museu` | arquivo | Entrar no Museu das Origens (rangido de porta antiga) |
 | `dormir`, `acordar` | arquivo | **Sem ligação**: o jogo ainda não tem sistema de ociosidade (arquivo instalado, pronto para quando tiver) |
-| `insignia` | arquivo | **Sem ligação**: o jogo ainda não tem insígnias (arquivo instalado, pronto para quando tiver) |
+| `insignia` | arquivo | Insígnia de tema atingindo um marco (25, 50, 75 ou 100%), na comemoração do mapa (rodada 10) |
 
 As ferramentas tocam pelo evento do painel, então valem também para as
 soluções do "Me ajuda" e para os momentos roteirizados (o computadorzinho

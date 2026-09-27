@@ -499,6 +499,10 @@ conteúdo:
    `data-modal-assentado="sim"` no fim da animação, e o teste mede depois
    disso.
 
+6. **E, na etapa 6, a rolagem suave da prévia.** Clicar num link âncora
+   (ou `href="#"`) rola a prévia com `behavior: "smooth"`, e o teste lia
+   `scrollY` logo depois: às vezes 0. Correção: a rolagem suave conta como
+   pendência até o `scrollend` (teto de 1,2 s).
 Os `waitForTimeout` que eram muleta saíram (ficaram só os de gesto com
 duração, como o toque longo de 750 ms, e os de animação e som nos testes
 de mapa e áudio); os ajudantes (`esperarPronto`, `abrirBalao`,

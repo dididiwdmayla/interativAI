@@ -120,6 +120,8 @@ function MundoCarregado() {
   const escala =
     larguraTela > 0 ? Math.min(1.35, Math.max(0.55, alturaTela / ALTURA, larguraTela / LARGURA)) : 1;
   const atual = ilhaAtual(fonte);
+  // Do mundo, o provável é ir para a ilha onde o computadorzinho está.
+  useMusicaDaTela(null, { tipo: "ilha", ilhaId: atual.id });
   const rota = ilhasDoMundo.filter((ilha) => !ilha.opcional);
   const indiceAtual = rota.indexOf(atual);
   const posicaoAtual = posicaoDa(atual);
