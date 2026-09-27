@@ -530,6 +530,23 @@ camada de trilhas e a fábrica estiverem estáveis.
   (a festa da unidade concluída vem antes), com o som `insignia`, e salva
   em `progresso.marcosInsignias`.
 
+### Profissões
+
+- `src/curriculo/profissoes.ts`: Front-end, Back-end, Full-stack,
+  Segurança, Dados e DevOps, cada uma com `oQueFaz` e `umDiaDeTrabalho`
+  para leigo (honestos: sem glamour, com o lado chato, sem jargão sem
+  explicação) e os temas com peso de 1 a 3. Checagem `profissoes` no
+  `testar:conteudo` (temas que existem, sem repetir, pesos válidos).
+- Progresso (`progressoDaProfissao`, `src/lib/profissoes.ts`): média do
+  progresso de cada tema na trilha, ponderada pelos pesos, contando as
+  unidades planejadas (tema sem unidade na trilha fica fora da média).
+- Tela `/profissoes` (`componentes/explorar/TelaProfissoes`): um card por
+  profissão com o que faz, um dia de trabalho, os temas (o peso em
+  pontinhos) e a barra do caminho. "Acender no mapa" liga a lente da
+  profissão (`lente: { tipo: "profissao" }`), que acende as unidades de
+  qualquer tema dela, no mundo e na ilha; a barra de temas mostra "DevOps:
+  12% do caminho" e o X apaga.
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,

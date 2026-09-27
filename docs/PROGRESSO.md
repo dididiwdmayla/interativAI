@@ -81,6 +81,17 @@ Status resumido em `docs/ROADMAP.md`.
   Testes: `testes/conteudo/temas.test.ts`. Guia com a seção 9.1 "Temas e
   conceitos".
 
+- [x] **Etapa 4: profissões e lente.** `src/curriculo/profissoes.ts`:
+  Front-end, Back-end, Full-stack, Segurança, Dados e DevOps, cada uma com
+  "O que faz" e "Um dia de trabalho" para leigo (honestos, com o lado
+  chato) e temas com peso de 1 a 3. Progresso no caminho = média do
+  progresso dos temas na trilha, ponderada pelos pesos, contando as
+  planejadas (`progressoDaProfissao`). Tela `/profissoes` (card com o que
+  faz, um dia, temas com o peso em pontinhos, barra do caminho) e "Acender
+  no mapa", que vira lente igual à de tema (`lente: { tipo: "profissao" }`;
+  a barra mostra "DevOps: 12% do caminho"). Checagem `profissoes` no
+  `testar:conteudo` e `testes/conteudo/profissoes.test.ts`.
+
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
 Status resumido em `docs/ROADMAP.md` (fonte única de status a partir

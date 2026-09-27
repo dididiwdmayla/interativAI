@@ -5,6 +5,7 @@ import { IconeFechar } from "@/componentes/icones/IconeFechar";
 import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
 import { atualizarProgresso, useProgresso } from "@/lib/armazemProgresso";
 import { progressoDaLente, resolverLente } from "@/lib/lentes";
+import { progressoDaProfissao } from "@/lib/profissoes";
 import { trilhaDaFonte } from "@/lib/mapa";
 import type { LenteMapa } from "@/lib/progresso";
 import { TEMAS_COM_ICONE } from "./temas";
@@ -18,13 +19,23 @@ function trocarLente(lente: LenteMapa | null) {
  * A barra de temas do mapa (mundo e ilha): escolher um tema acende as
  * unidades dele em todas as ilhas e mostra o progresso, contando as
  * planejadas ("Segurança: 3 de 14 unidades"). Tocar de novo apaga a lente.
+ * Uma lente de profissão (escolhida na tela Profissões) aparece aqui com o
+ * progresso do caminho dela.
  */
 export function BarraLentes() {
   const progresso = useProgresso();
   const layout = useLayoutJogo();
   const lente = resolverLente(progresso.lente);
-  const conta = lente ? progressoDaLente(lente, trilhaDaFonte({ progresso }), progresso) : null;
+  const trilha = trilhaDaFonte({ progresso });
+  const conta = lente ? progressoDaLente(lente, trilha, progresso) : null;
   const unidades = conta && conta.total === 1 ? "unidade" : "unidades";
+  // Profissão: o progresso é a média ponderada dos temas dela (a tela Profissões explica).
+  const resumo =
+    lente && conta
+      ? lente.profissao
+        ? `${lente.nome}: ${Math.round(progressoDaProfissao(lente.profissao, trilha, progresso) * 100)}% do caminho`
+        : `${lente.nome}: ${conta.concluidas} de ${conta.total} ${unidades}`
+      : null;
 
   return (
     <div
@@ -39,9 +50,7 @@ export function BarraLentes() {
           className="flex shrink-0 items-center gap-1.5 rounded-full bg-destaque py-1 pl-3 pr-1 text-xs font-black text-sobre-destaque"
           data-progresso-lente={`${conta.concluidas}/${conta.total}`}
         >
-          <span className="whitespace-nowrap">
-            {lente.nome}: {conta.concluidas} de {conta.total} {unidades}
-          </span>
+          <span className="whitespace-nowrap">{resumo}</span>
           <button
             type="button"
             onClick={() => trocarLente(null)}

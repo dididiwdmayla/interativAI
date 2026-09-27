@@ -14,6 +14,8 @@
 import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
 import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
+import { PROFISSOES } from "@/curriculo/profissoes";
+import { conferirProfissoes } from "@/lib/profissoes";
 import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo, conferirTrilhas } from "@/curriculo/conferir";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
@@ -480,6 +482,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "temas",
     nome: "todo conceito tem tema, todo tema citado existe e os temas das unidades prontas batem com os conceitos",
     checar: ({ unidades, fases }) => conferirTemas(CONCEITOS, CURRICULO, unidades, fases),
+  },
+  {
+    id: "profissoes",
+    nome: "toda profissão usa temas que existem, com pesos de 1 a 3",
+    checar: () => conferirProfissoes(PROFISSOES),
   },
   {
     id: "publicados-congelados",
