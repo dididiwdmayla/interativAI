@@ -1,7 +1,7 @@
 // Ferramentas da Unidade 2 em qualquer fase: trilha, esconder, apagar,
 // desfazer/refazer, duplicar, menu do nó (botão direito e toque longo) e a
 // barra de ações do celular. Também confere as apresentações pela Caixa.
-import { abrir, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, progressoComFase } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, progressoComFase, tocarNo } from "./util.mjs";
 
 const VISTAS = ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique", "editor", "sincronia"];
 const PROGRESSO = progressoComFase("sites-elementos-u1-f1", { objetivoAtual: 0 }, { apresentacoesVistas: VISTAS });
@@ -153,7 +153,7 @@ for (const modo of ["desktop", "retrato"]) {
   };
   const menuOuBarra = async (chave, acao) => {
     if (toque) {
-      await linha(pagina, chave).tap();
+      await tocarNo(pagina, chave);
       await pagina.locator(`[data-barra-acoes] [data-acao=${acao}]`).tap();
     } else {
       await linha(pagina, chave).click({ button: "right" });
@@ -162,7 +162,7 @@ for (const modo of ["desktop", "retrato"]) {
   };
   const experimentar = {
     trilha: async () => {
-      await tocar(linha(pagina, "5.0"));
+      await tocarNo(pagina, "5.0");
       await tocar(pagina.getByRole("navigation", { name: /Trilha de elementos/ }).getByRole("button", { name: "ul.produtos" }));
     },
     esconder: () => menuOuBarra("2", "esconder"),

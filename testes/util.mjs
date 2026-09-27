@@ -218,18 +218,34 @@ export function linhaDaArvore(pagina, chave) {
 }
 
 /**
+ * Toca (ou clica) na linha de uma chave da árvore e espera ela ficar
+ * selecionada. Se não ficar, o erro diz o que aconteceu no lugar (outra
+ * linha selecionada, menu do nó aberto) e guarda uma foto da tela.
+ */
+export async function tocarNo(pagina, chave) {
+  const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  const linha = linhaDaArvore(pagina, chave);
+  if (toque) await linha.tap();
+  else await linha.click();
+  try {
+    await pagina.locator(`[role=treeitem][data-chave="${chave}"][aria-selected="true"]`).waitFor({ timeout: 5000 });
+  } catch (erro) {
+    const selecionada = await pagina.locator("[role=treeitem][aria-selected=true]").first().getAttribute("data-chave").catch(() => null);
+    const menu = await pagina.locator("[data-menu-no]").count();
+    await pagina.screenshot({ path: `testes-falha-no-${chave}.png` }).catch(() => {});
+    throw new Error(`Falhou: o toque na linha "${chave}" não a selecionou (selecionada: ${selecionada}, menu do nó aberto: ${menu > 0}). ${erro}`);
+  }
+}
+
+/**
  * Seleciona pela árvore o primeiro elemento que casa com o seletor CSS
  * (clique no desktop, toque no celular). Devolve a chave usada.
  */
 export async function selecionarNo(pagina, seletor) {
   const chave = await chaveDoSeletor(pagina, seletor);
   const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
-  if (toque) {
-    await mostrarArvore(pagina);
-    await linhaDaArvore(pagina, chave).tap();
-  } else {
-    await linhaDaArvore(pagina, chave).click();
-  }
+  if (toque) await mostrarArvore(pagina);
+  await tocarNo(pagina, chave);
   await esperarPronto(pagina);
   return chave;
 }

@@ -196,10 +196,14 @@ for (const modo of ["desktop", "retrato"]) {
     await campoDaTag(pagina).fill("h2");
     await campoDaTag(pagina).press("Enter");
     conferir((await tagDe(pagina, "#noticia-praca > :first-child")) === "h2", "celular: Renomear pela barra do nó");
-    // Dois toques no nome da tag.
-    await nomeDaTag(pagina, chave).tap();
+    // Dois toques no nome da tag: direto na tela, um atrás do outro (a janela
+    // do duplo toque é de 350 ms; esperar a fase assentar no meio passaria dela).
     await esperarPronto(pagina);
-    await nomeDaTag(pagina, chave).tap();
+    const caixaTag = await nomeDaTag(pagina, chave).boundingBox();
+    const xTag = caixaTag.x + caixaTag.width / 2;
+    const yTag = caixaTag.y + caixaTag.height / 2;
+    await pagina.touchscreen.tap(xTag, yTag);
+    await pagina.touchscreen.tap(xTag, yTag);
     await campoDaTag(pagina).waitFor({ timeout: 3000 });
     await campoDaTag(pagina).fill("h3");
     await campoDaTag(pagina).press("Enter");

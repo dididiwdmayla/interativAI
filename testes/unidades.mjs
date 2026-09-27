@@ -19,6 +19,7 @@ import {
   fecharBalao as fecharBalaoDaPagina,
   passarApresentacao,
   selecionarNo,
+  tocarNo,
 } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -112,7 +113,7 @@ async function acaoNoNo(seletor, acao) {
   const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
   if (toque) {
-    await no(chave).tap();
+    await tocarNo(pagina, chave);
     await pagina.locator(`[data-barra-acoes] [data-acao=${acao}]`).tap();
   } else {
     await no(chave).click({ button: "right" });

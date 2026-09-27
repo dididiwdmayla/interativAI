@@ -4,8 +4,9 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 10 em andamento (ver a seção dela). Antes:
-rodada 9 concluída (painel Estilos, motor de cascata,
+**Estado atual:** rodada 10 concluída (estabilidade da bateria, trilhas,
+temas, profissões, glossário e áudio; ver a seção dela e o
+`docs/ROADMAP.md`). Antes: rodada 9 concluída (painel Estilos, motor de cascata,
 modo documento, ROADMAP e, nas etapas finais, U6 e a zona Estilos
 inteira; ver a seção dela abaixo e o `docs/ROADMAP.md`, que é a fonte do
 status). A Ilha Sites tem as zonas Elementos (U1 a U6) e Estilos (E1 a
@@ -126,6 +127,19 @@ Status resumido em `docs/ROADMAP.md`.
   sem manifesto tudo silencioso ou sintetizado) e `audio.mjs` (sem
   arquivo nenhum, com manifestos vazios e ausentes: silêncio, sintetizado,
   nenhum pedido de arquivo, console limpo; pré-carga).
+
+- [x] **Etapa 7: guia, ROADMAP, PROGRESSO e testes novos.**
+  `testes/explorar.mjs` nos três layouts (trilhas, lentes de tema e de
+  profissão no mundo e na ilha com planejadas, card com temas, painel e
+  comemoração de insígnia, glossário com busca, links para a fase e para
+  o ponto no mapa, botão dentro da fase e Voltar), na bateria
+  (`todos.mjs`). Ajudante `tocarNo` (toca a linha da árvore e confere que
+  ela ficou selecionada; se não, o erro diz o que aconteceu e guarda uma
+  foto). O duplo toque no nome da tag (`renomear-links.mjs`) também vai
+  direto na tela. Guia: checklist com temas e testes por estado;
+  `testes/README.md` com o `explorar.mjs`, o áudio sem arquivos e as
+  unidades atuais; ROADMAP com Feito, Próximo e a decisão do
+  `InterativAIPLUS`.
 
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 

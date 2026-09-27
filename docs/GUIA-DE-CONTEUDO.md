@@ -908,6 +908,10 @@ fase.
       ao F12 de verdade por fase (atalhos conferidos na doc do Chrome).
 - [ ] Pergunta socrática que não entrega; dica com o conceito; linha que
       mostra onde; solução que explica o quê e por quê.
+- [ ] Todo conceito novo com `temas`; os `temas` da unidade no currículo
+      contidos nos que os conceitos dela dão (seção 9.1).
+- [ ] Testes de navegador esperando estados (`esperarPronto`,
+      `abrirBalao`, `fecharBalao`), nunca `waitForTimeout` (seção 11).
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
 - [ ] Fase de CSS (seção 12): `siteAlvo.css` sem `@media`,

@@ -776,7 +776,9 @@ Detalhes em `docs/AUDIO.md`.
   mapa (mundo, ilha, museu, deep links, voltar do navegador, /lab/mapa), a
   Fase 1 e as Unidades 1 e 2 inteiras começando pelo mapa em desktop,
   retrato (390×844, toque) e paisagem (844×390, toque),
-  retomar no meio de um momento roteirizado, celular (prévia ao editar,
+  trilhas, lentes de tema e de profissão, insígnias e glossário
+  (`explorar.mjs`, nos três layouts), retomar no meio de um momento
+  roteirizado, celular (prévia ao editar,
   teclado simulado, alça, giro, spotlight) e tutor (sobrecarga, reserva,
   sem chave).
 
