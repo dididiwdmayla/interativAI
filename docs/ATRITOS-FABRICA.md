@@ -511,6 +511,20 @@ conteúdo:
    `<html data-audio-preparado="sim">` quando os manifestos chegaram e o
    boot já foi tentado, e o teste espera esse estado.
 
+8. **E, na rodada 2 da segunda tentativa: um toque só abria a edição.**
+   Com a apresentação de pé, o jogador toca "Quero tentar" e logo depois
+   a linha da árvore; se os dois toques caem em menos de uns 300 ms, o
+   navegador gera um `dblclick` (duplo toque) no segundo lugar, e o
+   `TextoEditavel` embaixo do dedo (o valor do atributo) abria o campo de
+   edição, sem a barra de ações. Reproduzido: 6 falhas em 12 tentativas
+   com três navegadores em paralelo. Correção no motor: no toque, o
+   `TextoEditavel` ignora o `dblclick` do navegador e fica só com o duplo
+   toque dele (dois toques NO MESMO texto, `onPointerUp`); depois disso,
+   0 falhas em 15. Ajudantes novos para achar isso mais rápido da
+   próxima vez: `tocarNo` e `acaoDaBarra` dizem, quando falham, o que
+   ficou no lugar (outra linha, campo de edição, menu do nó) e guardam
+   uma foto.
+
 Os `waitForTimeout` que eram muleta saíram (ficaram só os de gesto com
 duração, como o toque longo de 750 ms, e os de animação e som nos testes
 de mapa e áudio); os ajudantes (`esperarPronto`, `abrirBalao`,

@@ -10,6 +10,7 @@
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
 import {
   abaDaArvore,
+  acaoDaBarra,
   abrir,
   abrirBalao as abrirBalaoDaPagina,
   chaveDoSeletor,
@@ -19,7 +20,6 @@ import {
   fecharBalao as fecharBalaoDaPagina,
   passarApresentacao,
   selecionarNo,
-  tocarNo,
 } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -113,8 +113,7 @@ async function acaoNoNo(seletor, acao) {
   const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
   if (toque) {
-    await tocarNo(pagina, chave);
-    await pagina.locator(`[data-barra-acoes] [data-acao=${acao}]`).tap();
+    await acaoDaBarra(pagina, chave, acao);
   } else {
     await no(chave).click({ button: "right" });
     await pagina.locator(`[data-menu-no] [data-acao=${acao}]`).click();

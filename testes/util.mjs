@@ -238,6 +238,30 @@ export async function tocarNo(pagina, chave) {
 }
 
 /**
+ * No celular: toca a linha da chave e a ação da barra do nó selecionado
+ * (Editar, Renomear, Esconder, Apagar, Duplicar...). Se a barra não
+ * aparecer, o erro diz por quê (campo de edição aberto, menu do nó) e
+ * guarda uma foto.
+ */
+export async function acaoDaBarra(pagina, chave, acao) {
+  await tocarNo(pagina, chave);
+  const botao = pagina.locator(`[data-barra-acoes] [data-acao=${acao}]`);
+  try {
+    await botao.waitFor({ timeout: 5000 });
+  } catch (erro) {
+    const edicao = await pagina.locator("[role=tree] input").count();
+    const menu = await pagina.locator("[data-menu-no]").count();
+    const barras = await pagina.locator("[data-barra-acoes]").count();
+    const selecionada = await pagina.locator("[role=treeitem][aria-selected=true]").first().getAttribute("data-chave").catch(() => null);
+    await pagina.screenshot({ path: `testes-falha-barra-${chave}-${acao}.png` }).catch(() => {});
+    throw new Error(
+      `Falhou: a barra do nó "${chave}" não mostrou "${acao}" (selecionada: ${selecionada}, barras: ${barras}, campo de edição aberto: ${edicao > 0}, menu do nó: ${menu > 0}). ${erro}`,
+    );
+  }
+  await botao.tap();
+}
+
+/**
  * Seleciona pela árvore o primeiro elemento que casa com o seletor CSS
  * (clique no desktop, toque no celular). Devolve a chave usada.
  */
