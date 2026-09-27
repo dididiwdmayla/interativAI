@@ -346,6 +346,124 @@ const CATALOGO = {
     resumo: "!important faz uma declaração vencer quase tudo; editar a própria declaração é o jeito de mudar seu valor, mas é melhor evitar usá-lo.",
     temas: ["interfaces"],
   },
+
+  // Zona Layout, L1: Display
+  "display-css": {
+    nome: "Display",
+    resumo: "O display de uma peça decide o formato da caixa dela: block, inline, inline-block ou none.",
+    temas: ["interfaces"],
+  },
+  "display-block": {
+    nome: "Display block",
+    resumo: "block faz a caixa ocupar a linha toda (a largura do pai) e empurra o que vem depois para baixo.",
+    temas: ["interfaces"],
+  },
+  "display-inline": {
+    nome: "Display inline",
+    resumo: "inline é o padrão de peças como span e a: fica ao lado do texto e ignora width e height.",
+    temas: ["interfaces"],
+  },
+  "display-inline-block": {
+    nome: "Display inline-block",
+    resumo: "inline-block fica lado a lado como inline, mas respeita width, height e padding como block.",
+    temas: ["interfaces"],
+  },
+  "display-none": {
+    nome: "Display none",
+    resumo: "display: none tira a peça do fluxo da página: ela some e o espaço dela fecha, como se nunca tivesse existido.",
+    temas: ["interfaces"],
+  },
+
+  // Zona Layout, L2: Flexbox
+  flexbox: {
+    nome: "Flexbox",
+    resumo: "Com display: flex, os filhos de uma caixa entram numa fila e ganham comandos de alinhamento.",
+    temas: ["interfaces"],
+  },
+  "flex-direction": {
+    nome: "Flex-direction",
+    resumo: "flex-direction escolhe o sentido da fila: row (em linha) ou column (em coluna).",
+    temas: ["interfaces"],
+  },
+  "justify-content": {
+    nome: "Justify-content",
+    resumo: "justify-content espalha os filhos ao longo da fila: no começo, no fim, no centro ou com espaço entre eles.",
+    temas: ["interfaces"],
+  },
+  "align-items": {
+    nome: "Align-items",
+    resumo: "align-items alinha os filhos no sentido cruzado da fila: topo, base, centro ou esticado.",
+    temas: ["interfaces"],
+  },
+  "gap-css": {
+    nome: "Gap",
+    resumo: "gap cria um espaço fixo entre os filhos de um flex ou de um grid, sem precisar de margin em cada um.",
+    temas: ["interfaces"],
+  },
+  "flex-wrap": {
+    nome: "Flex-wrap",
+    resumo: "flex-wrap deixa os filhos quebrarem para a linha de baixo quando não cabem todos na fila.",
+    temas: ["interfaces"],
+  },
+
+  // Zona Layout, L3: Grid
+  "css-grid": {
+    nome: "CSS Grid",
+    resumo: "Com display: grid, uma caixa vira uma grade de linhas e colunas, e os filhos se encaixam nela.",
+    temas: ["interfaces"],
+  },
+  "grid-template-columns": {
+    nome: "Grid-template-columns",
+    resumo: "grid-template-columns diz quantas colunas o grid tem e a largura de cada uma.",
+    temas: ["interfaces"],
+  },
+  "fr-do-grid": {
+    nome: "Unidade fr",
+    resumo: "fr divide o espaço que sobra em frações; 1fr 2fr dá o dobro do espaço para a segunda coluna.",
+    temas: ["interfaces"],
+  },
+  "grid-template-rows": {
+    nome: "Grid-template-rows",
+    resumo: "grid-template-rows diz quantas linhas o grid tem e a altura de cada uma, como as colunas mas na vertical.",
+    temas: ["interfaces"],
+  },
+  "grid-template-areas": {
+    nome: "Grid-template-areas",
+    resumo: "grid-template-areas desenha o layout com nomes, como um mapa de caixas, e cada filho ocupa uma área.",
+    temas: ["interfaces"],
+  },
+
+  // Zona Layout, L4: Posição e camadas
+  "position-css": {
+    nome: "Position",
+    resumo: "position muda como uma peça se posiciona na página: static (o padrão), relative, absolute, fixed ou sticky.",
+    temas: ["interfaces"],
+  },
+  "position-relative": {
+    nome: "Position relative",
+    resumo: "relative desliza a peça a partir do lugar onde ela estaria, sem tirar o espaço dela do fluxo.",
+    temas: ["interfaces"],
+  },
+  "position-absolute": {
+    nome: "Position absolute",
+    resumo: "absolute tira a peça do fluxo e a posiciona a partir do ancestral mais próximo com position diferente de static.",
+    temas: ["interfaces"],
+  },
+  "position-fixed": {
+    nome: "Position fixed",
+    resumo: "fixed gruda a peça na janela: ela fica no lugar mesmo quando a página rola.",
+    temas: ["interfaces"],
+  },
+  "position-sticky": {
+    nome: "Position sticky",
+    resumo: "sticky se comporta como normal até a rolagem chegar num limite, e então gruda como fixed.",
+    temas: ["interfaces"],
+  },
+  "z-index-css": {
+    nome: "Z-index",
+    resumo: "z-index decide qual peça fica por cima quando duas se sobrepõem: o número maior vence.",
+    temas: ["interfaces"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

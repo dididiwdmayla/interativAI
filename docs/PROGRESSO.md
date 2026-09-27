@@ -4,18 +4,64 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 10 concluída (estabilidade da bateria, trilhas,
-temas, profissões, glossário e áudio; ver a seção dela e o
-`docs/ROADMAP.md`). Antes: rodada 9 concluída (painel Estilos, motor de cascata,
+**Estado atual:** rodada 11 concluída (zona Layout completa: L1 a L4; ver
+a seção dela e o `docs/ROADMAP.md`). Antes: rodada 10 concluída
+(estabilidade da bateria, trilhas, temas, profissões, glossário e áudio).
+Antes: rodada 9 concluída (painel Estilos, motor de cascata,
 modo documento, ROADMAP e, nas etapas finais, U6 e a zona Estilos
 inteira; ver a seção dela abaixo e o `docs/ROADMAP.md`, que é a fonte do
-status). A Ilha Sites tem as zonas Elementos (U1 a U6) e Estilos (E1 a
-E4) completas; só faltam E5 (requer motor), Responsivo e Publicar.
-Antes: rodada 8 (áudio v2: música do mapa e efeitos
+status). A Ilha Sites tem as zonas Elementos (U1 a U6), Estilos (E1 a E4)
+e Layout (L1 a L4) completas; só faltam E5 (requer motor), Responsivo e
+Publicar. Antes: rodada 8 (áudio v2: música do mapa e efeitos
 gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
-seções). Próximo passo: a zona Layout (L1 a L4), com o motor já pronto.
+seções). Próximo passo: a Revisão do dia (ponto fixo no mapa com desafios
+curtos por revisão espaçada).
+
+## Rodada 11: zona Layout completa (L1 a L4)
+
+Produção das quatro unidades da zona Layout (motor pronto desde a rodada
+9; nenhuma ferramenta, aba nem tipo de fase novo foi preciso — tudo usa o
+painel Estilos que a zona Estilos já apresentou). Detalhe dos atritos
+encontrados: `docs/ATRITOS-FABRICA.md`, "Rodada 4".
+
+- [x] **L1, "Display"** (`sites-layout-u1`): block, inline, inline-block e
+  none, na Papelaria Ponto de Luz (micro-passos) e no desafio na Oficina
+  Conserta Tudo. A Fase 3 revisa DIRETO `display: none` contra a
+  ferramenta Esconder da U2 (`visibility: hidden`, mantém o espaço), a
+  confusão de leigo pedida nesta rodada.
+- [x] **L2, "Flexbox"** (`sites-layout-u2`): display: flex, flex-direction,
+  justify-content, align-items, gap e flex-wrap, na Livraria Página
+  Virada e no desafio no Brechó Segunda Chance.
+- [x] **L3, "Grid"** (`sites-layout-u3`): display: grid, colunas e linhas
+  com a unidade fr, gap (revisão do flexbox) e grid-template-areas, na
+  Revista Retalhos e no desafio na Revista Ventania. Os filhos com
+  `grid-area` já vêm prontos na folha inicial: o jogador só desenha o
+  mapa no container, atacando a confusão "cada filho precisa ganhar algo
+  novo" (não precisa).
+- [x] **L4, "Posição e camadas"** (`sites-layout-u4`): relative (desliza
+  sem sair do fluxo), absolute (ancorado no pai relative mais próximo),
+  fixed, sticky e z-index, na Loja Retrô Vinil e no desafio na
+  Confeitaria Doce Instante.
+- [x] **Conceitos novos** (`src/conteudo/conceitos.ts`, tema `interfaces`
+  em todos): 5 de display, 6 de flexbox, 4 de grid, 6 de posição — todos
+  com `temas` desde a criação (seção 9.1 do guia).
+- [x] **Ferramenta de teste isolada por zona:** `testes/layout.mjs`
+  (jornada própria da Layout, com o progresso das 35 fases de Elementos e
+  Estilos já semeado, para não repetir o que `unidades.mjs` já cobre) e o
+  parâmetro `UNIDADE=<id>`, que semeia também as unidades da Layout
+  anteriores à pedida — permite rodar só a jornada de uma unidade nova
+  (`UNIDADE=sites-layout-u2 node testes/layout.mjs`), sem jogar as
+  anteriores. Registrada em `testes/todos.mjs` e no `testes/README.md`.
+- [x] Testes velhos atualizados para as unidades novas: `curriculo.test.ts`
+  (zonas das `UNIDADES`, status pronta/planejada), `mapa.test.ts` (cadeia
+  de desbloqueio da Lógica, agora esperando L1 a L4 concluídas) e o
+  contador "Sites com X de Y unidades" em `unidades.mjs`.
+- [x] `npm run testar:conteudo`, `npm run lint`, `npm run build` e
+  `PARALELO=2 npm run bateria` (uma rodada completa, três layouts) verdes,
+  console limpo. `npm run publicar:conteudo` rodado (a L1 na hora, L2 a
+  L4 juntas no fim da zona).
 
 ## Rodada 10: estabilidade, trilhas, temas, profissões, glossário e áudio
 
