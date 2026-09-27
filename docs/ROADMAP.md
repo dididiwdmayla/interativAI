@@ -41,7 +41,8 @@ núcleo comum.
 - Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (vazio),
   desbloqueios.
 - Conteúdo: Ilha Sites › Elementos completa (U1 a U6); Estilos completa
-  (E1 a E4). Só faltam E5 (requer motor), Responsivo e Publicar.
+  (E1 a E4); Layout completa (L1 a L4). Só faltam E5 (requer motor),
+  Responsivo e Publicar.
 - Rodada 9 (painel Estilos, modo documento, ROADMAP):
   - `docs/ROADMAP.md` (este arquivo) e a regra de atualizar o Status no
     fim de todo prompt (`PROJETO.md` e guia).
@@ -139,11 +140,38 @@ núcleo comum.
   - Decisão: o protótipo `InterativAIPLUS` vira a futura trilha Automação
     industrial, portada depois que a camada de trilhas e a fábrica
     estiverem estáveis.
+- **Rodada 11 (zona Layout completa, L1 a L4):**
+  - **L1 "Display"** (`sites-layout-u1`): block, inline, inline-block e
+    none, com a Fase 3 revisando DIRETO `display: none` contra a
+    ferramenta Esconder da U2 (a confusão de leigo pedida na rodada).
+    Micro-passos na Papelaria Ponto de Luz, desafio na Oficina Conserta
+    Tudo.
+  - **L2 "Flexbox"** (`sites-layout-u2`): display: flex, flex-direction,
+    justify-content, align-items, gap e flex-wrap. Micro-passos na
+    Livraria Página Virada, desafio no Brechó Segunda Chance.
+  - **L3 "Grid"** (`sites-layout-u3`): display: grid, colunas e linhas com
+    a unidade fr, gap (revisão do flexbox) e grid-template-areas (os
+    filhos já vêm com `grid-area` pronto, atacando a confusão "cada filho
+    precisa ganhar algo novo"). Micro-passos na Revista Retalhos, desafio
+    na Revista Ventania.
+  - **L4 "Posição e camadas"** (`sites-layout-u4`, última da zona):
+    relative, absolute (ancorado no pai relative), fixed, sticky e
+    z-index. Micro-passos na Loja Retrô Vinil, desafio na Confeitaria
+    Doce Instante.
+  - 21 conceitos novos no catálogo, todos com `temas` (interfaces) desde
+    a criação. Nenhuma ferramenta, aba nem tipo de fase novo: a zona toda
+    usa o painel Estilos que a Estilos já apresentou.
+  - `testes/layout.mjs`: jornada Playwright própria da zona Layout, com o
+    progresso das 35 fases de Elementos e Estilos já semeado (não repete
+    o que `unidades.mjs` cobre), e o parâmetro `UNIDADE=<id>` (semeia
+    também as unidades da Layout anteriores à pedida), para rodar só a
+    jornada de uma unidade nova. Registrada em `testes/todos.mjs`.
+  - Atritos e o porquê de cada decisão de conteúdo:
+    `docs/ATRITOS-FABRICA.md`, "Rodada 4".
 
 ### Em andamento
 
-(nada em andamento: a rodada 10 terminou; o áudio não espera arquivos,
-ver "Feito")
+(nada em andamento: a rodada 11 terminou)
 
 ### Pendente de decisão
 
@@ -151,18 +179,15 @@ ver "Feito")
 
 ### Próximo (em ordem)
 
-1. Sonnet: L1 a L4, a zona Layout (motor pronto; modelo: a E1/E2 para o
-   formato de fase de CSS). Toda unidade e conceito novo com temas (guia,
-   seção 9.1).
-2. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
+1. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
    espaçada.
-3. Motores das próximas ilhas (Opus), intercalados com conteúdo
+2. Motores das próximas ilhas (Opus), intercalados com conteúdo
    (Sonnet): E5 (o jogo como site-alvo), Responsivo (modo dispositivo),
    Publicar (auditoria, exportar, projeto-ponte), Origens (linha do
    tempo, comparador de linguagens, diagrama), Lógica (Console, execução
    de JS, depurador), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
    Ofício.
-4. Depois que a camada de trilhas e a fábrica estiverem estáveis: portar o
+3. Depois que a camada de trilhas e a fábrica estiverem estáveis: portar o
    protótipo `InterativAIPLUS` como a trilha Automação industrial (ver
    "Como integrar uma trilha nova" no `PROJETO.md`).
 

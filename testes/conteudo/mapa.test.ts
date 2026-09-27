@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, U6, E1, E2, E3, E4] = UNIDADES;
+const [U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3, L4] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -75,7 +75,12 @@ describe("ilhas", () => {
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2), unidades })).toBe("bloqueada");
     expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4), unidades })).toBe("disponivel");
+    // A zona Layout (L1 a L4, completa) também precisa acabar.
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3), unidades })).toBe("bloqueada");
+    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3, L4), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {

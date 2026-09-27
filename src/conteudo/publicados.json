@@ -55,6 +55,30 @@
       "sites-estilos-u4-f1",
       "sites-estilos-u4-f2",
       "sites-estilos-u4-f3"
+    ],
+    "sites-layout-u1": [
+      "sites-layout-u1-f1",
+      "sites-layout-u1-f2",
+      "sites-layout-u1-f3",
+      "sites-layout-u1-f4"
+    ],
+    "sites-layout-u2": [
+      "sites-layout-u2-f1",
+      "sites-layout-u2-f2",
+      "sites-layout-u2-f3",
+      "sites-layout-u2-f4"
+    ],
+    "sites-layout-u3": [
+      "sites-layout-u3-f1",
+      "sites-layout-u3-f2",
+      "sites-layout-u3-f3",
+      "sites-layout-u3-f4"
+    ],
+    "sites-layout-u4": [
+      "sites-layout-u4-f1",
+      "sites-layout-u4-f2",
+      "sites-layout-u4-f3",
+      "sites-layout-u4-f4"
     ]
   },
   "fases": {
@@ -318,6 +342,121 @@
         "titulo-da-marca-laranja",
         "titulo-dos-planos-vermelho",
         "valor-do-plano-destacado"
+      ]
+    },
+    "sites-layout-u1-f1": {
+      "objetivos": [
+        "ver-display-da-etiqueta",
+        "etiqueta-vira-block",
+        "chegou-vira-block"
+      ]
+    },
+    "sites-layout-u1-f2": {
+      "objetivos": [
+        "preco-vira-inline-block",
+        "menu-horizontal"
+      ]
+    },
+    "sites-layout-u1-f3": {
+      "objetivos": [
+        "aviso-frete-none",
+        "aviso-manutencao-none"
+      ]
+    },
+    "sites-layout-u1-f4": {
+      "partes": [
+        "garantia-em-linha-propria",
+        "menu-servicos-horizontal",
+        "promocao-vencida-sumir"
+      ]
+    },
+    "sites-layout-u2-f1": {
+      "objetivos": [
+        "nav-vira-flex",
+        "flex-direction-column",
+        "redes-vira-flex"
+      ]
+    },
+    "sites-layout-u2-f2": {
+      "objetivos": [
+        "cards-vira-flex",
+        "justify-content-espalha",
+        "align-items-centraliza"
+      ]
+    },
+    "sites-layout-u2-f3": {
+      "objetivos": [
+        "gap-entre-cards",
+        "flex-wrap-cards",
+        "gap-no-menu"
+      ]
+    },
+    "sites-layout-u2-f4": {
+      "partes": [
+        "menu-flex",
+        "produtos-espalhados",
+        "produtos-centralizados",
+        "produtos-com-gap",
+        "produtos-quebram"
+      ]
+    },
+    "sites-layout-u3-f1": {
+      "objetivos": [
+        "destaques-vira-grid",
+        "destaques-tres-colunas",
+        "galeria-vira-grid"
+      ]
+    },
+    "sites-layout-u3-f2": {
+      "objetivos": [
+        "galeria-linhas-fixas",
+        "galeria-com-gap",
+        "destaques-com-gap"
+      ]
+    },
+    "sites-layout-u3-f3": {
+      "objetivos": [
+        "capa-vira-grid",
+        "capa-areas",
+        "creditos-areas"
+      ]
+    },
+    "sites-layout-u3-f4": {
+      "partes": [
+        "reportagens-grid",
+        "mapas-linhas-fixas",
+        "mapas-com-gap",
+        "abertura-com-areas"
+      ]
+    },
+    "sites-layout-u4-f1": {
+      "objetivos": [
+        "aviso-vira-relative",
+        "aviso-desliza",
+        "preco-desliza"
+      ]
+    },
+    "sites-layout-u4-f2": {
+      "objetivos": [
+        "card-vira-ancora",
+        "selo-vira-absolute",
+        "selo-topo-vira-absolute"
+      ]
+    },
+    "sites-layout-u4-f3": {
+      "objetivos": [
+        "botao-vira-fixed",
+        "cabecalho-vira-sticky",
+        "selo-por-cima-da-fita"
+      ]
+    },
+    "sites-layout-u4-f4": {
+      "partes": [
+        "card-vira-ancora-bolo",
+        "selo-sobre-o-card",
+        "selo-por-cima-da-fita-bolo",
+        "cabecalho-acompanha-rolagem",
+        "botao-flutuante"
       ]
     }
   }
