@@ -632,3 +632,30 @@ Consistente com a compilação sob demanda do Turbopack em dev na primeira
 visita a uma rota (não reproduzido em builds seguintes): não gerou
 correção de conteúdo nem de motor, só o registro aqui para não confundir
 quem vir um 404 isolado numa rodada futura.
+
+### 6. Um clique perto do canto pode cair na setinha de expandir, no toque
+
+A primeira versão de `selecionarNoRobusto` (o ajudante de seleção pela
+árvore do `layout.mjs`) clicava perto do canto esquerdo da linha (posição
+fixa) para não cair fora dela quando um atributo comprido quebra a linha
+em várias, um problema real visto em paisagem. Só que em retrato e
+paisagem (toque), a área de toque da setinha de expandir/recolher de um
+nó colapsado é maior que a marca visível (alvo de 44 px), e esse mesmo
+canto passou a cair nela para uma linha sem atributo comprido (o
+`<header id="cabecalho">`, colapsado): o clique expandia o nó em vez de
+selecioná-lo, e a seleção nunca mudava. Corrigido com duas tentativas: o
+canto primeiro, o centro da linha depois (como o `tocarNo` de
+`testes/util.mjs`) se a primeira não selecionar — cobre os dois casos sem
+precisar calcular a posição da setinha.
+
+### 7. `mapa.mjs` esperava a Layout "planejada"
+
+Como nas rodadas passadas (U6 e E1), publicar a primeira unidade de uma
+zona nova quebra um teste hardcoded que checava essa zona como
+"planejada": `mapa.mjs` esperava `sites-layout-u1` com `data-estado`
+"planejada" e o card dela dizendo "Em breve". Corrigido para checar
+`sites-layout-u1` como "bloqueada" (ela é pronta agora, só espera as
+unidades anteriores da Ilha Sites) e a próxima zona sem conteúdo nenhum
+(`sites-responsivo-u1`) como a "planejada" de verdade. Padrão a repetir:
+sempre que uma zona ganha a primeira unidade, `mapa.mjs` precisa apontar
+para a zona planejada seguinte.
