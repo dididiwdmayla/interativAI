@@ -622,6 +622,13 @@ Detalhes em `docs/AUDIO.md`.
 - **Áudio** (`npm run testar:audio`, também dentro do `testar:conteudo`,
   `testes/audio/`): voz de modem, registro de efeitos, tabela tela ->
   faixa, manifestos e escolha de formato.
+- **Estados explícitos para os testes de navegador** (rodada 10): a raiz da
+  fase (`[data-jogo-fase]`) expõe `data-pronto` (sim quando nada vai mudar
+  a tela sozinho), `data-apresentacao-estado`, `data-objetivo-atual`,
+  `data-etapa` e `data-roteiro`; o avatar do celular, `data-balao`. Todo
+  temporizador do motor que muda a tela sozinho é uma pendência
+  (`src/lib/pendencias.ts`); os ajudantes de `testes/util.mjs` esperam
+  estados, nunca tempos. `npm run bateria:repetir` roda a bateria 5 vezes.
 - **Navegador** (Playwright em `testes/`, ver `testes/README.md`), contra o
   jogo no ar: sincronia, apresentações e Caixa, ferramentas novas (desktop,
   celular, toque longo, apresentações), renomear tag e links na prévia, o

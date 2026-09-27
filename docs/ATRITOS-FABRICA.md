@@ -433,3 +433,72 @@ com mais tentativas e alguma espera adicional depois de cada toque
 longo, e investigar se a régua de números ou a virtualização do
 CodeMirror mudou de layout num viewport de paisagem (mais largo e mais
 baixo que retrato) o bastante pra deslocar onde o duplo clique cai.
+
+## Rodada 3, resolvido: a instabilidade da bateria no celular
+
+Rodada 10 (Opus). A instabilidade do celular (U4 numa rodada, E2 na
+outra) e o padrão de timing da Rodada 3 tinham três causas, todas de
+ordem entre balão, apresentação, objetivo e seleção, e nenhuma de
+conteúdo:
+
+1. **A árvore rolava a linha debaixo do dedo no meio do duplo toque.**
+   O primeiro toque seleciona o nó, e no celular o item selecionado ganha
+   a barra de ações logo embaixo. A árvore rolava o item INTEIRO (linha
+   mais barra) para dentro da vista (`scrollIntoView` no
+   `ArvoreElementos`), e em paisagem, com pouca altura, isso subia a linha
+   uns 30 px: o segundo toque do duplo toque (janela de 350 ms no
+   `TextoEditavel`) caía em outra coisa, e o campo de edição não abria. A
+   espera fixa de 200 ms entre os toques do `editarValorAtributo` da U4
+   deixava a rolagem terminar ou não, conforme a máquina: daí a falha
+   "num ponto diferente a cada execução". Correção no motor: a seleção
+   rola primeiro só a linha do nó, e o item com a barra entra na vista
+   400 ms depois, passada a janela do duplo toque (uma pessoa de verdade
+   também errava o segundo toque). No teste, os dois toques vão direto na
+   tela (`page.touchscreen.tap` duas vezes seguidas), como um dedo.
+2. **O balão mudava de estado sem avisar.** Três jeitos: (a) o fundo do
+   balão, na animação de saída, ainda segurava toques (o `fecharBalao`
+   esperava 250 ms fixos); (b) uma fala nova, vinda de um temporizador
+   (validação que espera o site acalmar, roteiro agendado, espera do
+   editor ou do CSS), reabria o balão entre o `fecharBalao` e o toque
+   seguinte; (c) deitado, o balão fecha sozinho depois do tempo de
+   leitura, contado desde que abriu, e fechava no meio de um
+   `partesFeitas()` ou de um toque. A falha da E2 em paisagem desta
+   rodada (linha da árvore "não visível" no `selecionarParaEstilos` depois
+   de um `escreverNoCss`) era (b)+(c). Correção no motor: o fundo que sai
+   de cena não segura toque (`FundoBalao`, `useIsPresent`); o avatar expõe
+   `data-balao="aberto|fechado|abrindo|fechando"`; todo temporizador que
+   muda a tela sozinho virou **pendência** (`src/lib/pendencias.ts`:
+   `agendarRastreado`, `comecarPendencia`), junto com a recarga da prévia,
+   a animação do balão e a troca de texto da fala (o texto novo entra
+   uns 190 ms depois, com a animação de saída do antigo); a fase expõe `data-pronto="sim"` só sem
+   pendência, sem roteiro e sem tutor pensando. Correção nos testes:
+   `abrirBalao`/`fecharBalao` esperam o estado, e deitado um balão aberto
+   há tempo é fechado e aberto de novo (tempo de leitura inteiro pela
+   frente).
+3. **A apresentação do objetivo seguinte fica de pé antes do
+   `proximoObjetivo()` voltar.** Não é bug: o objetivo já está ativo
+   durante a apresentação (o "Experimente" pode cumpri-lo). A regra
+   ("prepare a interface antes do `proximoObjetivo()`") agora está no
+   guia e no `testes/README.md`, e o `mostrarPainel` da jornada acusa com
+   mensagem clara quando alguém tenta trocar de segmento com uma
+   apresentação de pé (`data-apresentacao-estado="ativa"`).
+
+4. **Em paisagem, numa fase com o painel Estilos, o segmento da árvore se
+   chama "Árvore e Estilos"** (os dois ficam lado a lado). O `mostrarArvore`
+   procurava a aba "Árvore" exata, não achava, e não trocava de volta
+   depois de um passo no editor CSS: a árvore continuava escondida e o
+   toque seguinte esperava 30 s por uma linha "não visível". Era a falha
+   da E2 em paisagem (a mesma da Rodada 3 e da linha de base desta
+   rodada), determinística, e não uma corrida. Correção: `abaDaArvore`
+   (`testes/util.mjs`) aceita os dois nomes.
+
+Os `waitForTimeout` que eram muleta saíram (ficaram só os de gesto com
+duração, como o toque longo de 750 ms, e os de animação e som nos testes
+de mapa e áudio); os ajudantes (`esperarPronto`, `abrirBalao`,
+`fecharBalao`, `passarApresentacao`) estão em `testes/util.mjs`. Um teste
+velho do mapa também foi corrigido: ele esperava a U6 "planejada", e ela
+foi publicada na Rodada 3 (agora confere a L1).
+
+**Critério:** `npm run bateria:repetir` (5 rodadas seguidas da bateria
+inteira, nos três layouts, no build de produção). Resultado registrado no
+`docs/PROGRESSO.md` (rodada 10).

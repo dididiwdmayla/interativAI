@@ -9,6 +9,7 @@ import { atualizarProgresso } from "@/lib/armazemProgresso";
 import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
+import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
   criarEstadoInicial,
@@ -92,7 +93,7 @@ export function useMotorFase({
   const eventosObjetivo = useRef<EventoFase[]>([]);
   /** Soluções e roteiros sendo aplicados: a validação espera. */
   const aplicando = useRef(false);
-  const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const temporizadores = useRef<TemporizadorRastreado[]>([]);
 
   const pratica = fase.tipo === "pratica" ? fase : null;
   const desafio = fase.tipo === "desafio" ? fase : null;
@@ -101,10 +102,10 @@ export function useMotorFase({
   const previsaoPendente = objetivo?.tipo === "previsao" && estado.previsao === null;
   const degrauMaximo: DegrauAjuda = objetivo?.modo === "sozinho" ? 2 : 4;
 
-  useEffect(() => () => temporizadores.current.forEach(clearTimeout), []);
+  useEffect(() => () => temporizadores.current.forEach((temporizador) => temporizador.cancelar()), []);
 
   const agendar = useCallback((fazer: () => void, espera: number) => {
-    temporizadores.current.push(setTimeout(fazer, espera));
+    temporizadores.current.push(agendarRastreado(fazer, espera));
   }, []);
 
   /** Card de previsão: guarda a resposta, mostra se acertou e passa para a ação. */
@@ -396,8 +397,8 @@ export function useMotorFase({
   // Quando algo começa (objetivo, resposta da previsão, fim do roteiro), confere se já está feito.
   useEffect(() => {
     if (estado.etapa !== "objetivos" || estado.pausa !== null || estado.roteiro !== null) return;
-    const temporizador = setTimeout(() => verificarAtual.current(), ESPERA_VERIFICAR_MS);
-    return () => clearTimeout(temporizador);
+    const temporizador = agendarRastreado(() => verificarAtual.current(), ESPERA_VERIFICAR_MS);
+    return () => temporizador.cancelar();
   }, [estado.etapa, estado.objetivoAtual, estado.pausa, estado.roteiro, estado.previsao]);
 
   /* ---------------------------------------------------------------- */

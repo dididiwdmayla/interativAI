@@ -4,7 +4,8 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 9 concluída (painel Estilos, motor de cascata,
+**Estado atual:** rodada 10 em andamento (ver a seção dela). Antes:
+rodada 9 concluída (painel Estilos, motor de cascata,
 modo documento, ROADMAP e, nas etapas finais, U6 e a zona Estilos
 inteira; ver a seção dela abaixo e o `docs/ROADMAP.md`, que é a fonte do
 status). A Ilha Sites tem as zonas Elementos (U1 a U6) e Estilos (E1 a
@@ -14,6 +15,36 @@ gravados) concluída; antes dela, a rodada 7 (sistema de áudio) e a
 rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). Próximo passo: a zona Layout (L1 a L4), com o motor já pronto.
+
+## Rodada 10: estabilidade, trilhas, temas, profissões, glossário e áudio
+
+Status resumido em `docs/ROADMAP.md`.
+
+- [x] **Etapa 1: estabilidade da bateria.** Causa raiz da instabilidade do
+  celular (detalhe em `docs/ATRITOS-FABRICA.md`, "Rodada 3, resolvido"):
+  a árvore rolava o item selecionado inteiro (linha mais a barra de ações)
+  e tirava a linha debaixo do dedo no meio do duplo toque (agora rola a
+  linha na hora e o item inteiro 400 ms depois, fora da janela do duplo
+  toque); o fundo do balão saindo de cena segurava toques (`FundoBalao`);
+  falas vindas de temporizadores reabriam o balão entre um passo e outro;
+  deitado, o balão fechava sozinho no meio de uma leitura; e, em
+  paisagem com o painel Estilos, o teste procurava a aba "Árvore", que ali
+  se chama "Árvore e Estilos" (a falha da E2, determinística). Motor: todo
+  temporizador que muda a tela sozinho virou pendência
+  (`src/lib/pendencias.ts`: roteiros, validação, espera do editor, do CSS
+  e do cursor, recarga da prévia, animação do balão, troca de texto da
+  fala, comemoração da apresentação, rolagem da árvore); estados explícitos na raiz da fase
+  (`data-pronto`, `data-apresentacao-estado`, `data-objetivo-atual`,
+  `data-etapa`, `data-roteiro`), `data-balao` no avatar e
+  `data-passo-apresentacao` na apresentação. Testes: ajudantes por estado
+  em `testes/util.mjs` (`esperarPronto`, `abrirBalao`, `fecharBalao`,
+  `passarApresentacao`, `doisQuadros`), os `waitForTimeout` que eram
+  muleta saíram de todos os testes de fase, duplo toque direto na tela, o
+  `mostrarPainel` acusa troca de segmento com apresentação de pé, `mapa.mjs`
+  corrigido (a U6 foi publicada; agora confere a L1 planejada),
+  `todos.mjs` lista quais falharam e `npm run bateria:repetir`
+  (`testes/repetir.mjs`, 5 rodadas). Guia (seção 11) e `testes/README.md`
+  com a regra "espere estados, nunca tempos".
 
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 

@@ -105,6 +105,10 @@ núcleo comum.
 
 ### Em andamento
 
+- Rodada 10 (Opus): estabilidade da bateria (etapa 1 feita: causa raiz
+  corrigida, estados explícitos, `npm run bateria:repetir`), depois
+  trilhas, temas, profissões, glossário e áudio. Detalhe em
+  `docs/PROGRESSO.md`.
 - Áudio: planejamento numa conversa separada (músicas no Suno Pro,
   efeitos no ChatGPT). A integração no jogo virá por um prompt do Claude
   Code.

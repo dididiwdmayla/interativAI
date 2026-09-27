@@ -1,5 +1,5 @@
 // Caixa de Ferramentas, "Rever apresentação", "Pular" e o "?" das ferramentas.
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto } from "./util.mjs";
 
 const BASE = {
   versao: 1,
@@ -24,7 +24,7 @@ for (const id of ["previa", "me-ajuda", "tutor", "arvore"]) {
   await pagina.locator(`[data-apresentacao="${id}"]`).waitFor();
   await pagina.keyboard.press("Escape");
 }
-await pagina.waitForTimeout(400);
+await esperarPronto(pagina);
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "Esc pula também");
 const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2")).apresentacoesVistas);
 conferir(salvo.length === 5, `puladas ficam salvas (${salvo.join(", ")})`);
@@ -43,7 +43,7 @@ await caixa.locator('[data-card="arvore"]').getByRole("button", { name: "Rever a
 await pagina.locator('[data-apresentacao="arvore"]').waitFor();
 conferir(true, "Rever abre a apresentação de novo");
 await pagina.getByRole("button", { name: "Pular" }).click();
-await pagina.waitForTimeout(300);
+await esperarPronto(pagina);
 
 // "?" abre o card certo.
 await pagina.locator('[data-ferramenta~="arvore"]').first().hover();

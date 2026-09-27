@@ -1,6 +1,6 @@
 // Progresso antigo (chave v1, com a Fase 1 no meio) migra sem perder nada:
 // HTML, objetivo, estrelas, missão, tema e apresentações vistas.
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto } from "./util.mjs";
 
 const VISTAS = ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique", "editor", "sincronia"];
 const HTML = `<header class="topo">Padaria</header>
@@ -33,7 +33,7 @@ const continuar = pagina.getByRole("dialog").getByRole("button", { name: "Contin
 conferir((await continuar.count()) === 1, "ilha: a U1 aparece em andamento (Continuar)");
 await continuar.click();
 await pagina.waitForSelector("section[data-previa] iframe");
-await pagina.waitForTimeout(1200);
+await esperarPronto(pagina);
 conferir(new URL(pagina.url()).pathname === "/fase/sites-elementos-u1-f1", "abre a fase migrada");
 conferir((await pagina.locator("[data-meta]").count()) === 0, "quem já tinha progresso não vê a meta de novo");
 const iframe = pagina.frameLocator("section[data-previa] iframe");

@@ -76,6 +76,15 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 
 Todos falham se aparecer erro ou aviso no console do navegador.
 
+```bash
+npm run bateria           # a bateria inteira (testes/todos.mjs), uma vez
+npm run bateria:repetir   # 5 rodadas seguidas (RODADAS=n muda), com resumo
+PARALELO=2 npm run bateria  # dois arquivos ao mesmo tempo (mais rápido; a saída de cada um sai inteira no fim)
+```
+
+Critério de estabilidade: `bateria:repetir` com 5 rodadas seguidas verdes
+no build de produção (`npm run build && npm start`).
+
 ## Ajudantes (`testes/util.mjs`)
 
 | Ajudante | O que faz |
@@ -86,7 +95,38 @@ Todos falham se aparecer erro ou aviso no console do navegador.
 | `selecionarNo(page, seletor)` | seleciona pela árvore o primeiro elemento do site-alvo que casa com o seletor CSS (clique ou toque; no celular fecha o balão e mostra a Árvore) |
 | `chaveDoSeletor(page, seletor)` | só calcula o `data-chave` da linha da árvore desse elemento |
 | `linhaDaArvore(page, chave)` | a linha clicável da árvore de uma chave |
+| `esperarPronto(page)` | espera `[data-jogo-fase][data-pronto="sim"]` (fora de uma fase, só dois quadros); use depois de toda ação |
+| `abrirBalao(page)`, `fecharBalao(page)` | no celular, abrem e fecham a conversa e esperam `data-balao` assentar; deitado, um balão aberto há tempo é reaberto (ele fecha sozinho depois do tempo de leitura) |
+| `passarApresentacao(page, id, experimentar)` | espera a apresentação, passa as 3 falas, espera o "Experimente", faz a ação e confere que fechou |
+| `doisQuadros(page)` | dois `requestAnimationFrame`: o React aplica o que o último gesto mudou |
 | `conferir`, `errosRelevantes` | asserção com mensagem e filtro do console |
+
+### Estados explícitos (espere estados, nunca tempos)
+
+A fase expõe o estado no elemento `[data-jogo-fase="<id da fase>"]`:
+
+| Atributo | Valores |
+| --- | --- |
+| `data-pronto` | `sim` quando nada vai mudar a tela sozinho: nenhum roteiro, nenhuma pendência (`src/lib/pendencias.ts`: roteiros agendados, a validação que espera, a espera do editor e do CSS, o cursor do editor, a prévia recarregando, a animação do balão, a troca de texto da fala, a comemoração da apresentação, a rolagem da árvore até o item selecionado) e o tutor sem pergunta no ar; senão `nao` |
+| `data-apresentacao-estado` | `ativa` ou `inativa` |
+| `data-objetivo-atual` | o id do objetivo, `desafio` no desafio, vazio fora dos objetivos |
+| `data-etapa` | `meta`, `introducao`, `objetivos` ou `concluida` |
+| `data-roteiro` | `esbarrao`, `roteiro` ou `nenhum` |
+
+No celular, o avatar do computadorzinho tem `data-balao` (`aberto`,
+`fechado`, `abrindo`, `fechando`); a camada da apresentação tem
+`data-passo-apresentacao` (`fala`, `experimente`, `comemorando`).
+
+`waitForTimeout` fica só para gesto que depende de duração (toque longo
+de 750 ms) e para os testes de áudio e de mapa, que medem animação e som.
+Duas regras que a instabilidade das rodadas passadas ensinou:
+
+- **prepare a interface antes do `proximoObjetivo()`**: a apresentação do
+  objetivo seguinte fica de pé assim que ele começa, e o véu só libera a
+  ferramenta (o `mostrarPainel` da jornada acusa a tentativa);
+- **gesto com tempo vai direto na tela**: o duplo toque precisa dos dois
+  toques em menos de 350 ms, então `page.touchscreen.tap` duas vezes
+  seguidas, não dois `locator.tap()`.
 
 ### O `data-chave` da árvore
 

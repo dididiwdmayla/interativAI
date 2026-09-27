@@ -8,7 +8,18 @@
 // atributo) e, na E1, o painel Estilos (editar valor, caixinha, setas,
 // seletor de cor, + declaração e regra nova).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
-import { abrir, chaveDoSeletor, conferir, errosRelevantes, selecionarNo } from "./util.mjs";
+import {
+  abaDaArvore,
+  abrir,
+  abrirBalao as abrirBalaoDaPagina,
+  chaveDoSeletor,
+  conferir,
+  errosRelevantes,
+  esperarPronto,
+  fecharBalao as fecharBalaoDaPagina,
+  passarApresentacao,
+  selecionarNo,
+} from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -22,7 +33,10 @@ const movel = MODO !== "desktop";
 const iframe = pagina.frameLocator("iframe[title^='Site']").first();
 
 // ------------------------------------------------------------ ajudantes
-const esperar = (ms) => pagina.waitForTimeout(ms);
+/** Espera a tela assentar: nada mais vai mudar sozinho (data-pronto da fase). */
+const assentar = () => esperarPronto(pagina);
+/** Tempo de verdade, só para gestos que dependem de duração (toque longo). */
+const segurar = (ms) => pagina.waitForTimeout(ms);
 
 async function tocar(localizador, opcoes) {
   if (toque) await localizador.tap(opcoes);
@@ -36,24 +50,26 @@ async function falhar(nome, erro) {
 
 /** No celular, a conversa mora num balão que abre e fecha. */
 async function abrirBalao() {
-  if (!movel) return;
-  const abrirConversa = pagina.getByRole("button", { name: /Abrir a conversa/ });
-  if (await abrirConversa.isVisible().catch(() => false)) await abrirConversa.tap();
-  await esperar(250);
+  if (!movel) return assentar();
+  await abrirBalaoDaPagina(pagina);
 }
 async function fecharBalao() {
-  if (!movel) return;
-  const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
-  if (await fechar.isVisible().catch(() => false)) await fechar.tap();
-  await esperar(250);
+  if (!movel) return assentar();
+  await fecharBalaoDaPagina(pagina);
 }
 
 async function mostrarPainel(segmento) {
   if (!movel) return;
   await fecharBalao();
-  const aba = pagina.getByRole("tab", { name: segmento, exact: true });
-  if ((await aba.getAttribute("aria-selected")) !== "true") await aba.tap();
-  await esperar(150);
+  const aba = segmento === "Árvore" ? abaDaArvore(pagina) : pagina.getByRole("tab", { name: segmento, exact: true });
+  if ((await aba.getAttribute("aria-selected")) !== "true") {
+    // O véu de uma apresentação só libera a ferramenta: trocar de segmento
+    // precisa acontecer ANTES do proximoObjetivo() que traz a apresentação.
+    const apresentando = await pagina.locator('[data-jogo-fase][data-apresentacao-estado="ativa"]').count();
+    if (apresentando > 0) throw new Error(`Falhou: trocar para "${segmento}" com uma apresentação de pé; troque antes do proximoObjetivo()`);
+    await aba.tap();
+  }
+  await assentar();
 }
 
 /** Botões da conversa (Continuar, Vamos lá!, Próximo objetivo...). */
@@ -62,7 +78,7 @@ async function botaoConversa(nome) {
   const botao = pagina.getByRole("button", { name: nome }).first();
   await botao.waitFor({ timeout: 8000 });
   await tocar(botao);
-  await esperar(250);
+  await assentar();
 }
 
 async function conversar(vezes) {
@@ -82,23 +98,7 @@ async function proximoObjetivo(nome) {
 
 /** Fala as 3 falas de uma apresentação e faz o "Experimente". */
 async function apresentacao(id, experimentar) {
-  const camada = pagina.locator(`[data-apresentacao="${id}"]`);
-  try {
-    await camada.waitFor({ timeout: 8000 });
-  } catch (erro) {
-    await falhar(`apresentacao-${id}`, erro);
-  }
-  for (let i = 0; i < 3; i++) {
-    await tocar(pagina.getByRole("button", { name: /Continuar|Quero tentar/ }).first());
-    await esperar(120);
-  }
-  await esperar(350);
-  await experimentar();
-  try {
-    await camada.waitFor({ state: "detached", timeout: 6000 });
-  } catch (erro) {
-    await falhar(`experimente-${id}`, erro);
-  }
+  await passarApresentacao(pagina, id, experimentar, falhar);
   conferir(true, `apresentação ${id} fechou depois do uso`);
 }
 
@@ -118,7 +118,7 @@ async function acaoNoNo(seletor, acao) {
     await no(chave).click({ button: "right" });
     await pagina.locator(`[data-menu-no] [data-acao=${acao}]`).click();
   }
-  await esperar(200);
+  await assentar();
 }
 
 /** Troca o texto do primeiro elemento do seletor pela árvore. */
@@ -134,39 +134,38 @@ async function editarTexto(seletor, texto) {
   const campo = pagina.locator("[role=tree] input").first();
   await campo.fill(texto);
   await campo.press("Enter");
-  await esperar(200);
+  await assentar();
 }
 
 /**
  * Troca o valor do PRIMEIRO atributo do primeiro elemento do seletor (a
- * árvore só edita atributo que já existe): dois cliques nele.
+ * árvore só edita atributo que já existe): dois cliques nele. No toque, o
+ * duplo toque precisa dos dois toques em menos de 350 ms (TextoEditavel):
+ * as checagens de ação do Playwright entre um `tap()` e outro às vezes
+ * passavam disso (a causa da instabilidade da U4 em retrato e paisagem).
+ * Por isso os dois toques vão direto na tela, um atrás do outro, como um
+ * dedo de verdade.
  */
 async function editarValorAtributo(seletor, novoValor) {
   const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
-  await esperar(200);
   const alvo = pagina.locator(`[role=treeitem][data-chave="${chave}"] [title='Dois cliques para editar']`).first();
   const campo = pagina.locator("[role=tree] input").first();
-  for (let tentativa = 0; tentativa < 3; tentativa++) {
-    await alvo.scrollIntoViewIfNeeded();
-    if (toque) {
-      await alvo.tap();
-      await esperar(200);
-      await alvo.tap();
-    } else {
-      await alvo.dblclick();
-    }
-    try {
-      await campo.waitFor({ timeout: 4000 });
-      break;
-    } catch (erro) {
-      if (tentativa === 2) throw erro;
-      await esperar(300);
-    }
+  await alvo.scrollIntoViewIfNeeded();
+  await assentar();
+  if (toque) {
+    const caixa = await alvo.boundingBox();
+    const x = caixa.x + caixa.width / 2;
+    const y = caixa.y + caixa.height / 2;
+    await pagina.touchscreen.tap(x, y);
+    await pagina.touchscreen.tap(x, y);
+  } else {
+    await alvo.dblclick();
   }
+  await campo.waitFor({ timeout: 5000 });
   await campo.fill(novoValor);
   await campo.press("Enter");
-  await esperar(250);
+  await assentar();
 }
 
 /**
@@ -189,7 +188,7 @@ async function acrescentarAtributoPeloCodigo(buscaTexto, apos, textoNovo) {
   for (let i = 0; i < posicao; i++) await pagina.keyboard.press("ArrowRight");
   await pagina.keyboard.type(textoNovo);
   // O caminho do editor tem debounce de 300 ms antes de revalidar.
-  await esperar(450);
+  await assentar();
   const novaLinha = texto.slice(0, posicao) + textoNovo + texto.slice(posicao);
   const conferida = await pagina.locator(".cm-line", { hasText: buscaTexto }).first().textContent();
   if (conferida !== novaLinha) throw new Error(`Falhou: linha ficou "${conferida}", esperava "${novaLinha}"`);
@@ -205,7 +204,7 @@ async function digitarNoDocumento(buscaTexto, linhaNova) {
   await pagina.keyboard.press("End");
   await pagina.keyboard.press("Enter");
   await pagina.keyboard.type(linhaNova);
-  await esperar(600);
+  await assentar();
 }
 
 /** Mostra a aba CSS do editor (troca pra "Código" no celular). Chamar ANTES de uma apresentação: o recorte do spotlight é calculado com o painel já no lugar certo. */
@@ -213,7 +212,7 @@ async function mostrarCss() {
   await mostrarPainel("Código");
   const abaCss = pagina.getByRole("tab", { name: "CSS", exact: true });
   if ((await abaCss.count()) > 0 && (await abaCss.getAttribute("aria-selected")) !== "true") await tocar(abaCss);
-  await esperar(200);
+  await assentar();
 }
 
 /**
@@ -230,7 +229,7 @@ async function escreverNoCss(textoDaRegra) {
   await pagina.keyboard.press("Control+End");
   await pagina.keyboard.press("Enter");
   await pagina.keyboard.type(textoDaRegra);
-  await esperar(500);
+  await assentar();
 }
 
 /**
@@ -247,7 +246,7 @@ async function adicionarAtributoPeloMenu(seletor, textoAtributo) {
     const caixa = await linha.boundingBox();
     const ponto = { clientX: caixa.x + 60, clientY: caixa.y + caixa.height / 2, pointerType: "touch", isPrimary: true, pointerId: 11 };
     await linha.dispatchEvent("pointerdown", ponto);
-    await esperar(750);
+    await segurar(750);
     await linha.dispatchEvent("pointerup", ponto);
   } else {
     await linha.click({ button: "right" });
@@ -258,14 +257,14 @@ async function adicionarAtributoPeloMenu(seletor, textoAtributo) {
   const campo = pagina.locator("[data-atributo-novo] input");
   await campo.fill(textoAtributo);
   await campo.press("Enter");
-  await esperar(300);
+  await assentar();
 }
 
 /** Renomeia a tag do primeiro elemento do seletor: dois cliques (ou toques) no nome dela. */
 async function renomearTag(seletor, novaTag) {
   const chave = await chaveDoSeletor(pagina, seletor);
   await mostrarPainel("Árvore");
-  await esperar(200);
+  await assentar();
   const campo = campoDaTag();
   if (toque) {
     // No celular, a barra de ações do nó selecionado é mais estável do que o duplo toque em sequência.
@@ -277,7 +276,7 @@ async function renomearTag(seletor, novaTag) {
   await campo.waitFor({ timeout: 8000 });
   await campo.fill(novaTag);
   await campo.press("Enter");
-  await esperar(300);
+  await assentar();
 }
 
 /** Clica numa linha do código, rolando o editor até o fim primeiro (CodeMirror só renderiza linhas visíveis). */
@@ -288,7 +287,7 @@ async function clicarLinhaCodigo(texto) {
   const quebra = pagina.getByRole("switch", { name: /Quebrar linhas/ });
   if ((await quebra.count()) > 0 && (await quebra.getAttribute("aria-checked")) === "true") {
     await tocar(quebra);
-    await esperar(150);
+    await assentar();
   }
   // O CodeMirror só mantém no DOM as linhas perto da rolagem atual: desce
   // aos poucos até a linha procurada aparecer, em vez de pular direto pro
@@ -298,17 +297,17 @@ async function clicarLinhaCodigo(texto) {
   await scroller.evaluate((el) => {
     el.scrollTop = 0;
   });
-  await esperar(150);
+  await assentar();
   for (let tentativa = 0; tentativa < 40; tentativa++) {
     if ((await linha.count()) > 0) break;
     await scroller.evaluate((el) => {
       el.scrollTop += el.clientHeight * 0.8;
     });
-    await esperar(70);
+    await assentar();
   }
   await linha.waitFor({ timeout: 8000 });
   await linha.scrollIntoViewIfNeeded();
-  await esperar(100);
+  await assentar();
   // Perto do começo da linha, mas depois da régua de números (linhas
   // compridas, como o data URI de uma imagem, passam da largura da tela).
   // Tenta alguns deslocamentos: a régua muda de largura com a
@@ -329,20 +328,20 @@ async function clicarLinhaCodigo(texto) {
 async function trilha(rotulo) {
   await mostrarPainel("Árvore");
   await tocar(pagina.getByRole("navigation", { name: /Trilha de elementos/ }).getByRole("button", { name: rotulo, exact: true }));
-  await esperar(200);
+  await assentar();
 }
 
 async function inspecionar(seletor) {
   await fecharBalao();
   await iframe.locator(seletor).first().scrollIntoViewIfNeeded();
   await tocar(pagina.getByRole("button", { name: /Modo inspecionar/ }).first());
-  await esperar(300);
+  await assentar();
   const caixa = await iframe.locator(seletor).first().boundingBox();
   const x = caixa.x + Math.min(20, caixa.width / 2);
   const y = caixa.y + caixa.height / 2;
   if (toque) await pagina.touchscreen.tap(x, y);
   else await pagina.mouse.click(x, y);
-  await esperar(300);
+  await assentar();
 }
 
 async function conclusaoEProxima(nome) {
@@ -352,11 +351,13 @@ async function conclusaoEProxima(nome) {
     const continuar = pagina.getByRole("dialog").getByRole("button", { name: "Continuar", exact: true });
     if (!(await continuar.isVisible().catch(() => false))) break;
     await tocar(continuar);
-    await esperar(200);
+    await assentar();
   }
   conferir(await pagina.getByText("Missão de campo").isVisible(), `${nome}: missão de campo na conclusão`);
+  const faseAntes = await pagina.locator("[data-jogo-fase]").getAttribute("data-jogo-fase");
   await tocar(pagina.getByRole("button", { name: "Próxima fase" }));
-  await esperar(900);
+  await pagina.locator(`[data-jogo-fase]:not([data-jogo-fase="${faseAntes}"])`).waitFor({ timeout: 10000 });
+  await assentar();
 }
 
 const checklist = () => pagina.locator("[data-checklist]").first();
@@ -366,13 +367,13 @@ async function partesFeitas() {
   if (MODO === "retrato") {
     await fecharBalao();
     await barra.tap();
-    await esperar(250);
+    await assentar();
   }
   if (MODO === "paisagem") await abrirBalao();
   const feitas = await pagina.locator('[data-parte][data-feita="true"]').count();
   if (MODO === "retrato") {
     await barra.tap();
-    await esperar(200);
+    await assentar();
   }
   return feitas;
 }
@@ -385,7 +386,7 @@ async function metaDaUnidade(nome) {
   const [antes, depois] = await Promise.all([previas.nth(0).boundingBox(), previas.nth(1).boundingBox()]);
   conferir(Math.abs(antes.y - depois.y) < 2 && depois.x > antes.x, `${nome}: as duas prévias ficam lado a lado`);
   await tocar(pagina.getByRole("button", { name: /Bora!|Começar o desafio/ }));
-  await esperar(300);
+  await assentar();
 }
 
 // ------------------------------------------------------------ mapa
@@ -401,7 +402,7 @@ async function jogarUnidade(unidadeId, rotulo) {
   await botao.waitFor();
   await tocar(botao);
   await pagina.waitForSelector("section[data-previa] iframe");
-  await esperar(400);
+  await assentar();
 }
 
 /** Fim da última fase da unidade: missão de campo e "Voltar pra ilha", que comemora. */
@@ -412,7 +413,7 @@ async function conclusaoEVoltarAIlha(nome) {
     const continuar = pagina.getByRole("dialog").getByRole("button", { name: "Continuar", exact: true });
     if (!(await continuar.isVisible().catch(() => false))) break;
     await tocar(continuar);
-    await esperar(200);
+    await assentar();
   }
   conferir((await pagina.getByRole("button", { name: "Próxima fase" }).count()) === 0, `${nome}: depois do desafio não tem Próxima fase`);
   await tocar(pagina.getByRole("button", { name: "Voltar pra ilha" }));
@@ -446,7 +447,7 @@ await apresentacao("tutor", async () => {
   await campo.fill("o que é uma tag?");
   await campo.press("Enter");
 });
-await esperar(600);
+await assentar();
 
 await apresentacao("arvore", async () => {
   await mostrarPainel("Árvore");
@@ -652,11 +653,11 @@ await abrirBalao();
 await tocar(pagina.getByRole("button", { name: /^Rever/ }));
 await pagina.locator("[data-lista-rever]").waitFor();
 await tocar(pagina.locator("[data-lista-rever] li").filter({ hasText: "Esconder o banner" }).getByRole("button", { name: "Rever este passo" }));
-await esperar(1200);
+await assentar();
 conferir((await pagina.getByText("Revisão", { exact: true }).count()) > 0, "revisão: chip sem estrelas");
 conferir((await iframe.locator("#noticias").count()) === 1, "revisão: abriu o Jornal da Vila (fase 2)");
 await tocar(pagina.getByRole("button", { name: "Voltar ao desafio" }).first());
-await esperar(1400);
+await assentar();
 conferir((await iframe.locator("#vitrine").count()) === 1, "voltou ao desafio");
 conferir((await iframe.locator("#popup-oferta").count()) === 0, "o desafio ficou salvo do jeito que estava");
 conferir((await partesFeitas()) === 1, "o checklist continua com a parte feita");
@@ -993,7 +994,7 @@ await pagina.keyboard.press("Enter");
 await pagina.keyboard.type("<p>Inscrições até sexta-feira!</p>");
 await pagina.keyboard.press("Enter");
 await pagina.keyboard.type('<a href="https://exemplo.site/inscricao">Inscreva-se aqui</a>');
-await esperar(600);
+await assentar();
 await pagina.locator("[data-fez-sozinho]").waitFor({ timeout: 5000 });
 conferir(true, "sozinho: comemoração Fez sozinho!");
 await proximoObjetivo("U6F1 objetivo 3 (sozinho, parágrafo e link)");
@@ -1066,7 +1067,7 @@ async function mostrarEstilos() {
   await fecharBalao();
   const aba = pagina.getByRole("tablist", { name: "Mostrar no painel" }).getByRole("tab", { name: "Estilos", exact: true });
   if ((await aba.getAttribute("aria-selected")) !== "true") await aba.tap();
-  await esperar(150);
+  await assentar();
 }
 /** O bloco de uma regra do site no painel (a do site vem antes da do navegador). */
 const regraNoPainel = (seletorRegra) => pagina.locator(`[data-lista-estilos] > section[aria-label="Regra ${seletorRegra}"]`).first();
@@ -1084,7 +1085,7 @@ async function trocarValorNoPainel(seletorRegra, propriedade, valor) {
   await tocar(regraNoPainel(seletorRegra).locator(`[data-declaracao="${propriedade}"] [data-valor-propriedade]`).first());
   await campoEstilo("valor").fill(valor);
   await campoEstilo("valor").press("Enter");
-  await esperar(250);
+  await assentar();
 }
 /** Escreve nome e valor nos campos abertos (declaração nova ou regra nova). */
 async function escreverDeclaracao(propriedade, valor) {
@@ -1092,7 +1093,7 @@ async function escreverDeclaracao(propriedade, valor) {
   await campoEstilo("nome").press("Tab");
   await campoEstilo("valor").fill(valor);
   await campoEstilo("valor").press("Enter");
-  await esperar(250);
+  await assentar();
 }
 /** "+ declaração" no fim da regra. */
 async function acrescentarNoPainel(seletorRegra, propriedade, valor) {
@@ -1108,13 +1109,13 @@ async function caixinhaNoPainel(seletorRegra, propriedade) {
   const regra = regraNoPainel(seletorRegra);
   if (!toque) await regra.hover();
   await tocar(regra.locator(`[data-declaracao="${propriedade}"] [data-alternar-declaracao]`));
-  await esperar(250);
+  await assentar();
 }
 /** Uma seta para cima no campo de número: tecla no desktop, botão no toque. */
 async function setaParaCima() {
   if (toque) await pagina.getByRole("button", { name: "Aumentar o número" }).tap();
   else await campoEstilo("valor").press("ArrowUp");
-  await esperar(80);
+  await assentar();
 }
 const valorNaPagina = (seletor, propriedade) =>
   pagina
@@ -1175,7 +1176,7 @@ if (!(await campoEstilo("valor").isVisible().catch(() => false))) {
 for (let i = 0; i < 12 && (await campoEstilo("valor").inputValue()) !== "36px"; i++) await setaParaCima();
 conferir((await campoEstilo("valor").inputValue()) === "36px", "E1F2: as setas levaram o font-size do h1 a 36px");
 await campoEstilo("valor").press("Enter");
-await esperar(250);
+await assentar();
 await proximoObjetivo("E1F2 objetivo 1 (setas)");
 
 await abrirBalao();
@@ -1379,12 +1380,12 @@ await jogarUnidade("sites-estilos-u3", "Jogar");
 async function mostrarCalculado() {
   await fecharBalao();
   await tocar(pagina.locator('[data-sub-aba="calculado"]'));
-  await esperar(200);
+  await assentar();
 }
 async function voltarParaEstilosSubAba() {
   await fecharBalao();
   await tocar(pagina.locator('[data-sub-aba="estilos"]'));
-  await esperar(200);
+  await assentar();
 }
 
 // ------------------------------------------------------------ E3 fase 1

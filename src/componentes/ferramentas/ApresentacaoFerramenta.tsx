@@ -9,6 +9,7 @@ import { Mascote } from "@/componentes/mascote/Mascote";
 import { Botao } from "@/componentes/ui/Botao";
 import type { Ferramenta } from "@/ferramentas/registro";
 import { assinarUso } from "@/ferramentas/uso";
+import { agendarRastreado } from "@/lib/pendencias";
 import type { Expressao } from "@/motor/expressao";
 
 type Props = {
@@ -203,7 +204,7 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
     jaComemorou.current = true;
     setComemorando(true);
     tocarEfeito("acerto");
-    setTimeout(() => aoConcluirAtual.current(), ESPERA_COMEMORAR_MS);
+    agendarRastreado(() => aoConcluirAtual.current(), ESPERA_COMEMORAR_MS);
   }, []);
 
   // Enter avança as falas; Esc pula. Capturado antes dos atalhos do jogo.
@@ -288,7 +289,11 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
       : undefined;
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-[60]" data-apresentacao={ferramenta.id}>
+    <div
+      className="pointer-events-none fixed inset-0 z-[60]"
+      data-apresentacao={ferramenta.id}
+      data-passo-apresentacao={comemorando ? "comemorando" : experimentando ? "experimente" : "fala"}
+    >
       <svg className="pointer-events-none fixed inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <mask id={idMascara}>

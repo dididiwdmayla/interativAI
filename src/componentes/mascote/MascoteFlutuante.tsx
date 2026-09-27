@@ -1,7 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion, useDragControls } from "framer-motion";
-import { type ReactNode, useEffect, useRef } from "react";
+import { AnimatePresence, motion, useDragControls, useIsPresent } from "framer-motion";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { comecarPendencia } from "@/lib/pendencias";
 import type { Expressao } from "@/motor/expressao";
 import { Mascote } from "./Mascote";
 import { Tropeco } from "./Tropeco";
@@ -27,6 +28,23 @@ type Props = {
   children: ReactNode;
 };
 
+/** Fundo que fecha o balão ao tocar fora. Saindo de cena, já não segura toque nenhum. */
+function FundoBalao({ aoFechar }: { aoFechar: () => void }) {
+  const presente = useIsPresent();
+  return (
+    <motion.div
+      className={`fixed inset-0 z-40 ${presente ? "" : "pointer-events-none"}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onPointerDown={aoFechar}
+      aria-hidden="true"
+    />
+  );
+}
+
+type EstadoBalao = "aberto" | "fechado" | "abrindo" | "fechando";
+
 /**
  * No celular, o computadorzinho vira um avatar no canto inferior direito.
  * Um toque abre o balão por cima do painel; toque fora ou arrastar para
@@ -47,6 +65,26 @@ export function MascoteFlutuante({
   const tamanho = mini ? 44 : 56;
   const balao = useRef<HTMLElement>(null);
   const aoAlternarAtual = useRef(aoAlternar);
+  /** Estado visível do balão, com as animações (data-balao, para os testes). */
+  const [estadoBalao, setEstadoBalao] = useState<EstadoBalao>(aberto ? "abrindo" : "fechado");
+  const [abertoConhecido, setAbertoConhecido] = useState(aberto);
+  if (abertoConhecido !== aberto) {
+    setAbertoConhecido(aberto);
+    setEstadoBalao(aberto ? "abrindo" : "fechando");
+  }
+  const animando = estadoBalao === "abrindo" || estadoBalao === "fechando";
+
+  // A animação do balão conta como pendência: a fase só fica "pronta" depois dela.
+  useEffect(() => {
+    if (!animando) return;
+    const encerrar = comecarPendencia();
+    // Teto: sem o fim da animação (movimento reduzido, aba escondida), não fica pendente para sempre.
+    const teto = setTimeout(() => setEstadoBalao((atual) => (atual === "abrindo" ? "aberto" : atual === "fechando" ? "fechado" : atual)), 1500);
+    return () => {
+      clearTimeout(teto);
+      encerrar();
+    };
+  }, [animando]);
 
   useEffect(() => {
     aoAlternarAtual.current = aoAlternar;
@@ -65,18 +103,8 @@ export function MascoteFlutuante({
 
   return (
     <>
-      <AnimatePresence>
-        {aberto && (
-          <motion.div
-            key="fundo"
-            className="fixed inset-0 z-40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onPointerDown={() => aoAlternar(false)}
-            aria-hidden="true"
-          />
-        )}
+      <AnimatePresence onExitComplete={() => setEstadoBalao((atual) => (atual === "fechando" ? "fechado" : atual))}>
+        {aberto && <FundoBalao key="fundo" aoFechar={() => aoAlternar(false)} />}
         {aberto && (
           <motion.section
             key="balao"
@@ -93,6 +121,7 @@ export function MascoteFlutuante({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            onAnimationComplete={() => setEstadoBalao((atual) => (atual === "abrindo" ? "aberto" : atual))}
             drag="y"
             dragListener={false}
             dragControls={arrasto}
@@ -132,6 +161,7 @@ export function MascoteFlutuante({
         type="button"
         onClick={() => aoAlternar(!aberto)}
         aria-expanded={aberto}
+        data-balao={estadoBalao}
         aria-label={aberto ? "Fechar a conversa com o computadorzinho" : "Abrir a conversa com o computadorzinho"}
         className="fixed bottom-3 right-3 z-40 grid place-items-center rounded-full border-2 border-borda bg-superficie shadow-[0_4px_0_var(--cor-sombra)]"
         style={{ width: tamanho, height: tamanho }}

@@ -1,6 +1,6 @@
 // Celular: prévia visível ao editar, teclado virtual simulado, giro sem perder nada
 // e spotlight posicionado nos dois modos.
-import { abrir, conferir, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, fecharBalao } from "./util.mjs";
 
 const TODAS = ["painel", "previa", "me-ajuda", "tutor", "arvore", "inspecionar", "editar-duplo-clique"];
 const PROGRESSO = {
@@ -24,7 +24,7 @@ const visivel = async (localizador) => {
   return Boolean(caixa && caixa.height > 40 && caixa.y >= 0 && caixa.y + caixa.height <= tela.height + 1);
 };
 
-await pagina.getByRole("button", { name: /Fechar a conversa/ }).tap();
+await fecharBalao(pagina);
 await pagina.getByRole("tab", { name: "Código", exact: true }).tap();
 await pagina.locator(".cm-line", { hasText: "Bolo de cenoura" }).tap();
 await pagina.keyboard.press("End");
@@ -62,6 +62,7 @@ conferir(Math.abs(proporcao - 0.6) < 0.001, `alça respeita o máximo de 60% e s
 await pagina.getByRole("tab", { name: "Árvore", exact: true }).tap();
 await pagina.locator('[role=treeitem][data-chave="1"]').tap();
 await pagina.getByRole("button", { name: /Abrir a conversa/ }).tap();
+await pagina.locator('[data-balao="aberto"]').waitFor();
 await pagina.getByPlaceholder("Pergunte ao computadorzinho...").fill("uma dúvida");
 const estadoAtual = async () => ({
   layout: await pagina.locator("[data-layout]").getAttribute("data-layout"),
@@ -94,8 +95,7 @@ for (const [largura, altura, nome] of [
   await pagina.setViewportSize({ width: largura, height: altura });
   await pagina.waitForTimeout(400);
   for (const id of ["arvore", "inspecionar", "tutor"]) {
-    const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
-    if (await fechar.isVisible().catch(() => false)) await fechar.tap();
+    await fecharBalao(pagina);
     await pagina.getByRole("button", { name: "Mais opções" }).tap();
     await pagina.getByRole("button", { name: "Abrir a Caixa de Ferramentas" }).tap();
     const caixa = pagina.getByRole("dialog", { name: "Caixa de Ferramentas" });

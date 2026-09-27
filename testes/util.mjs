@@ -110,17 +110,105 @@ export async function chaveDoSeletor(pagina, seletor) {
   return chave;
 }
 
+// ------------------------------------------------------------ estados explícitos
+// O jogo expõe o estado no elemento raiz da fase ([data-jogo-fase]):
+//   data-pronto="sim|nao"            nada vai mudar a tela sozinho (sem roteiro,
+//                                   timer, recarga da prévia, animação do balão
+//                                   ou tutor pensando)
+//   data-apresentacao-estado="ativa|inativa"
+//   data-objetivo-atual="<id>"      ("desafio" no desafio, vazio fora dos objetivos)
+//   data-etapa="meta|introducao|objetivos|concluida"
+// e, no celular, o avatar do computadorzinho tem
+//   data-balao="aberto|fechado|abrindo|fechando".
+// Os ajudantes abaixo esperam esses estados, nunca um tempo fixo.
+
+/** Dois quadros: o React aplica o que o último gesto mudou antes de conferir o estado. */
+export async function doisQuadros(pagina) {
+  await pagina
+    .evaluate(() => new Promise((resolver) => requestAnimationFrame(() => requestAnimationFrame(() => resolver(null)))))
+    .catch(() => {});
+}
+
+/** Espera a fase ficar pronta (fora de uma fase, só os dois quadros). */
+export async function esperarPronto(pagina, tempo = 20000) {
+  for (let tentativa = 0; tentativa < 3; tentativa++) {
+    await doisQuadros(pagina);
+    try {
+      await pagina.waitForFunction(
+        () => {
+          const raiz = document.querySelector("[data-jogo-fase]");
+          return !raiz || raiz.getAttribute("data-pronto") === "sim";
+        },
+        null,
+        { timeout: tempo, polling: "raf" },
+      );
+      return;
+    } catch (erro) {
+      // Navegou no meio da espera: confere de novo na página nova.
+      if (!/context was destroyed|navigation/i.test(String(erro))) throw erro;
+    }
+  }
+}
+
+/** O estado do balão no celular (null no desktop, onde a conversa é fixa). */
+export async function estadoDoBalao(pagina) {
+  const avatar = pagina.locator("[data-balao]");
+  if ((await avatar.count()) === 0) return null;
+  return avatar.first().getAttribute("data-balao");
+}
+
+async function tocarOuClicar(pagina, localizador) {
+  const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  if (toque) await localizador.tap();
+  else await localizador.click();
+}
+
+/**
+ * No celular, abre o balão da conversa e espera ele assentar. Deitado, o
+ * balão fecha sozinho depois do tempo de leitura (contado desde que abriu):
+ * um balão aberto há um tempo é fechado e aberto de novo, para o teste ter
+ * o tempo de leitura inteiro pela frente.
+ */
+export async function abrirBalao(pagina) {
+  await esperarPronto(pagina);
+  const estado = await estadoDoBalao(pagina);
+  if (estado === null) return;
+  if (estado === "aberto") {
+    const deitado = (await pagina.locator('[data-jogo-fase][data-layout="paisagem"]').count()) > 0;
+    if (!deitado) return;
+    await fecharBalao(pagina);
+    return abrirBalao(pagina);
+  }
+  if (estado === "fechado") await tocarOuClicar(pagina, pagina.locator("[data-balao]").first());
+  await pagina.locator('[data-balao="aberto"]').waitFor({ timeout: 8000 });
+  await esperarPronto(pagina);
+}
+
+/** No celular, fecha o balão da conversa e espera a animação de saída acabar. */
+export async function fecharBalao(pagina) {
+  await esperarPronto(pagina);
+  const estado = await estadoDoBalao(pagina);
+  if (estado === null || estado === "fechado") return;
+  if (estado === "aberto") await tocarOuClicar(pagina, pagina.locator("[data-balao]").first());
+  await pagina.locator('[data-balao="fechado"]').waitFor({ timeout: 8000 });
+  await esperarPronto(pagina);
+}
+
+/**
+ * O segmento da árvore no celular: "Árvore" ou, deitado numa fase com o
+ * painel Estilos (árvore e Estilos lado a lado), "Árvore e Estilos".
+ */
+export function abaDaArvore(pagina) {
+  return pagina.getByRole("tab", { name: /^Árvore( e Estilos)?$/ });
+}
+
 /** No celular, garante a Árvore à vista (fecha o balão e escolhe o segmento). */
 export async function mostrarArvore(pagina) {
-  const fechar = pagina.getByRole("button", { name: /Fechar a conversa/ });
-  if (await fechar.isVisible().catch(() => false)) {
-    await fechar.tap();
-    await pagina.waitForTimeout(250);
-  }
-  const aba = pagina.getByRole("tab", { name: "Árvore", exact: true });
+  await fecharBalao(pagina);
+  const aba = abaDaArvore(pagina);
   if ((await aba.count()) > 0 && (await aba.getAttribute("aria-selected")) !== "true") {
     await aba.tap();
-    await pagina.waitForTimeout(150);
+    await esperarPronto(pagina);
   }
 }
 
@@ -142,7 +230,7 @@ export async function selecionarNo(pagina, seletor) {
   } else {
     await linhaDaArvore(pagina, chave).click();
   }
-  await pagina.waitForTimeout(200);
+  await esperarPronto(pagina);
   return chave;
 }
 
@@ -162,7 +250,7 @@ export async function pularMeta(pagina, espera = 3000) {
   if (toque) await botao.tap();
   else await botao.click();
   await meta.waitFor({ state: "detached", timeout: 5000 }).catch(() => {});
-  await pagina.waitForTimeout(300);
+  await esperarPronto(pagina);
   return true;
 }
 
@@ -183,4 +271,35 @@ export function errosRelevantes(erros) {
       !/Download the React DevTools|\[HMR\]|\[Fast Refresh\]/.test(texto) &&
       !/^Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed/.test(texto),
   );
+}
+
+/**
+ * Uma apresentação de ferramenta inteira: espera ela aparecer, passa as 3
+ * falas, espera o passo "Experimente" e faz a ação; confere que ela fecha.
+ * `aoFalhar(nome, erro)` tira a foto da tela, se o teste quiser.
+ */
+export async function passarApresentacao(pagina, id, experimentar, aoFalhar = async (_nome, erro) => { throw erro; }) {
+  const camada = pagina.locator(`[data-apresentacao="${id}"]`);
+  try {
+    await camada.waitFor({ timeout: 10000 });
+  } catch (erro) {
+    await aoFalhar(`apresentacao-${id}`, erro);
+  }
+  const toque = await pagina.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  for (let i = 0; i < 3; i++) {
+    const continuar = pagina.getByRole("button", { name: /Continuar|Quero tentar/ }).first();
+    if (toque) await continuar.tap();
+    else await continuar.click();
+    await doisQuadros(pagina);
+    if ((await camada.getAttribute("data-passo-apresentacao").catch(() => null)) !== "fala") break;
+  }
+  await pagina.locator(`[data-apresentacao="${id}"][data-passo-apresentacao="experimente"]`).waitFor({ timeout: 5000 });
+  await esperarPronto(pagina);
+  await experimentar();
+  try {
+    await camada.waitFor({ state: "detached", timeout: 8000 });
+  } catch (erro) {
+    await aoFalhar(`experimente-${id}`, erro);
+  }
+  await esperarPronto(pagina);
 }

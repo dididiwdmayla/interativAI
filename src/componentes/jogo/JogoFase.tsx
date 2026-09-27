@@ -8,6 +8,7 @@ import { ApresentacaoFerramenta } from "@/componentes/ferramentas/ApresentacaoFe
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { useApresentacoes } from "@/componentes/ferramentas/useApresentacoes";
+import { usePendencias } from "@/lib/pendencias";
 import { IconeAviso } from "@/componentes/icones/IconeAviso";
 import type { ApiLab, ItemLab } from "@/componentes/lab/tipos";
 import { BarraSuperior } from "@/componentes/layout/BarraSuperior";
@@ -217,6 +218,7 @@ export function JogoFase({
   }>({ aberta: false, foco: null });
   const progresso = useProgresso();
   const toque = useToque();
+  const pendencias = usePendencias();
 
   // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
   // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
@@ -957,10 +959,26 @@ export function JogoFase({
     paisagem: "w-1/2",
   }[layout];
 
+  // Estados explícitos para os testes de navegador (testes/util.mjs, esperarPronto):
+  // pronta = nada vai mudar a tela sozinho (sem roteiro, timer, recarga, animação do balão ou tutor pensando).
+  const pronta = pendencias === 0 && estado.roteiro === null && !tutor.carregando;
+  const objetivoAtualId =
+    estado.etapa !== "objetivos"
+      ? ""
+      : fase.tipo === "pratica"
+        ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
+        : "desafio";
+
   return (
     <div
       className="flex h-dvh flex-col overflow-hidden"
       data-layout={layout}
+      data-jogo-fase={fase.id}
+      data-etapa={estado.etapa}
+      data-objetivo-atual={objetivoAtualId}
+      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
+      data-pronto={pronta ? "sim" : "nao"}
+      data-roteiro={estado.roteiro ?? "nenhum"}
       style={movel && viewport.altura ? { height: viewport.altura } : undefined}
     >
       {movel ? (

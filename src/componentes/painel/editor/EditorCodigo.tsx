@@ -17,6 +17,7 @@ import {
 import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { tocarTecla } from "@/audio/motor";
 import type { AlvoCodigo } from "@/lib/caminhoElementos";
+import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import { definirLinhasDestacadas, destaqueLinhas } from "./destaqueLinhas";
 import { definirTrechoSelecionado, destaqueTrecho } from "./destaqueTrecho";
 import { alvoNaPosicao, trechoDoAlvo } from "./mapaElementos";
@@ -80,7 +81,7 @@ export function EditorCodigo({
   const aoMoverCursorPosicaoAtual = useRef(aoMoverCursorPosicao);
   const linguagemRef = useRef(linguagem);
   const aoFocarAtual = useRef(aoFocar);
-  const esperaCursor = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const esperaCursor = useRef<TemporizadorRastreado | null>(null);
   const textoInicialRef = useRef(textoInicial);
   const quebrarInicialRef = useRef(quebrarLinhas);
   const rotuloRef = useRef(rotulo);
@@ -139,8 +140,8 @@ export function EditorCodigo({
             // Só cursor posto pelo jogador vira seleção; mudanças vindas de fora
             // (árvore, solução) não voltam, então não há laço.
             if (atualizacao.selectionSet && !atualizacao.docChanged && !deFora) {
-              if (esperaCursor.current !== null) clearTimeout(esperaCursor.current);
-              esperaCursor.current = setTimeout(() => {
+              esperaCursor.current?.cancelar();
+              esperaCursor.current = agendarRastreado(() => {
                 esperaCursor.current = null;
                 const view = visao.current;
                 if (!view) return;
@@ -155,7 +156,7 @@ export function EditorCodigo({
     });
     visao.current = view;
     return () => {
-      if (esperaCursor.current !== null) clearTimeout(esperaCursor.current);
+      esperaCursor.current?.cancelar();
       view.destroy();
       visao.current = null;
     };
