@@ -503,6 +503,14 @@ conteúdo:
    (ou `href="#"`) rola a prévia com `behavior: "smooth"`, e o teste lia
    `scrollY` logo depois: às vezes 0. Correção: a rolagem suave conta como
    pendência até o `scrollend` (teto de 1,2 s).
+7. **E, na rodada 2 do `bateria:repetir` final, o `networkidle` do
+   áudio.** O `audio.mjs` esperava "a rede calar" (`networkidle`) antes do
+   primeiro gesto, para o boot já estar baixado; as pré-buscas de página
+   do Next (os links novos da barra do mapa) às vezes mantinham a rede
+   ocupada por mais de 30 s. Correção: o motor de áudio marca
+   `<html data-audio-preparado="sim">` quando os manifestos chegaram e o
+   boot já foi tentado, e o teste espera esse estado.
+
 Os `waitForTimeout` que eram muleta saíram (ficaram só os de gesto com
 duração, como o toque longo de 750 ms, e os de animação e som nos testes
 de mapa e áudio); os ajudantes (`esperarPronto`, `abrirBalao`,

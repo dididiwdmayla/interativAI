@@ -253,6 +253,10 @@ decodificado, toca o sintetizado em vez de esperar. O efeito em arquivo
 termina em `duracaoSegundos` do manifesto (os containers reportam alguns
 ms a mais), com rampa de 5 ms na entrada e na saída.
 
+Quando os manifestos chegaram e o boot já foi tentado (antes do primeiro
+gesto), a página marca `<html data-audio-preparado="sim">` (os testes
+esperam por isso, não pela rede calar).
+
 A página marca o último efeito em
 `<html data-ultimo-efeito="..." data-ultimo-efeito-fonte="arquivo|sintetizado">`
 (usado pelos testes de navegador).

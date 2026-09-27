@@ -79,7 +79,9 @@ const esperarEfeito = async (pagina, id) => {
     "navegação: nada toca antes do primeiro gesto",
   );
   // O arquivo do boot é baixado e decodificado antes do gesto, para já estar pronto nele.
-  await pagina.waitForLoadState("networkidle");
+  // Os manifestos chegaram e o boot já foi tentado (estado, não "rede calada",
+  // que as pré-buscas de página do Next deixam instável).
+  await pagina.locator('html[data-audio-preparado="sim"]').waitFor({ state: "attached", timeout: 15000 });
   await pagina.locator("[data-total-estrelas]").click();
   const boot = await ultimoEfeito(pagina);
   conferir(boot === "boot:arquivo", `navegação: o boot toca do arquivo, já no primeiro gesto (${boot})`);
@@ -155,7 +157,9 @@ const esperarEfeito = async (pagina, id) => {
   await contexto.route(/\/audio\/efeitos\/[^/]+\.(webm|m4a)$/, (rota) => rota.fulfill({ status: 404, body: "" }));
   await pagina.reload();
   await pagina.locator("[data-mapa=mundo]").waitFor();
-  await pagina.waitForLoadState("networkidle");
+  // Os manifestos chegaram e o boot já foi tentado (estado, não "rede calada",
+  // que as pré-buscas de página do Next deixam instável).
+  await pagina.locator('html[data-audio-preparado="sim"]').waitFor({ state: "attached", timeout: 15000 });
   await pagina.locator("[data-total-estrelas]").click();
   const boot = await ultimoEfeito(pagina);
   conferir(boot === "boot:sintetizado", `sem arquivo: o boot toca a versão sintetizada (${boot})`);

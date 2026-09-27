@@ -247,11 +247,16 @@ export function liberarAudio(): void {
  */
 export function prepararAudio({ boot }: { boot: boolean }): void {
   if (!temJanela()) return;
-  void obterManifestoMusicas();
-  void carregarManifestoEfeitos().then(() => {
+  const musicas = obterManifestoMusicas();
+  const efeitos = carregarManifestoEfeitos().then(async () => {
     if (!boot || liberado) return;
     const fonte = fonteDoEfeito("boot", manifestoEfeitos, formatoDoNavegador());
-    if (fonte.tipo === "arquivo") void carregarEfeito(fonte.url);
+    if (fonte.tipo === "arquivo") await carregarEfeito(fonte.url);
+  });
+  // Para os testes de navegador: os manifestos chegaram e o boot já foi
+  // tentado (decodificado ou não). Estado, em vez de esperar a rede calar.
+  void Promise.allSettled([musicas, efeitos]).then(() => {
+    document.documentElement.dataset.audioPreparado = "sim";
   });
 }
 
