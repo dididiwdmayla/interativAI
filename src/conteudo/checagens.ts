@@ -11,8 +11,9 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
-import { CURRICULO } from "@/curriculo/curriculo";
-import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo } from "@/curriculo/conferir";
+import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
+import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
+import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo, conferirTrilhas } from "@/curriculo/conferir";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
@@ -468,6 +469,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "curriculo-motor",
     nome: "nenhuma unidade de conteúdo mora em zona (ou unidade) que requer motor",
     checar: ({ unidades }) => conferirMotorDoConteudo(CURRICULO, unidades),
+  },
+  {
+    id: "trilhas",
+    nome: "toda trilha cita ilhas que existem e toda ilha com conteúdo está em alguma trilha",
+    checar: ({ unidades }) => conferirTrilhas(TRILHAS, CURRICULO, ILHAS_FUTURAS, unidades, NUCLEO_COMUM, TRILHA_PADRAO),
   },
   {
     id: "publicados-congelados",

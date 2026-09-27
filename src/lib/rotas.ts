@@ -14,3 +14,6 @@ export function rotaDaFase(faseId: string): string {
 
 /** Só para testes: desbloquear tudo, resetar o mapa e a Lista de fases. */
 export const ROTA_LAB_MAPA = "/lab/mapa";
+
+/** As trilhas (Web, Jogos, Automação industrial): escolher qual aparece no mundo. */
+export const ROTA_TRILHAS = "/trilhas";

@@ -115,7 +115,10 @@ A fase expõe o estado no elemento `[data-jogo-fase="<id da fase>"]`:
 
 No celular, o avatar do computadorzinho tem `data-balao` (`aberto`,
 `fechado`, `abrindo`, `fechando`); a camada da apresentação tem
-`data-passo-apresentacao` (`fala`, `experimente`, `comemorando`).
+`data-passo-apresentacao` (`fala`, `experimente`, `comemorando`); toda
+janela (`Modal`: meta, card da unidade, conclusão...) tem
+`data-modal-assentado="sim"` depois da animação de entrada (meça e toque
+só depois).
 
 `waitForTimeout` fica só para gesto que depende de duração (toque longo
 de 750 ms) e para os testes de áudio e de mapa, que medem animação e som.

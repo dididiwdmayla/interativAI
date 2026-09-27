@@ -807,3 +807,20 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
     ],
   },
 ];
+
+/**
+ * Ilhas próprias das trilhas em construção (Jogos e Automação industrial,
+ * ver src/curriculo/trilhas.ts): só nomeadas, sem zonas nem conteúdo. No
+ * mundo, aparecem "em construção" quando a trilha delas é a escolhida. A
+ * Automação industrial vai receber o protótipo InterativAIPLUS, portado
+ * depois que a camada de trilhas e a fábrica estiverem estáveis.
+ */
+export const ILHAS_FUTURAS: readonly IlhaCurriculo[] = [
+  { id: "jogos-primeiro-jogo", nome: "Primeiro jogo", zonas: [] },
+  { id: "jogos-graficos", nome: "Gráficos e animação", zonas: [] },
+  { id: "jogos-fisica", nome: "Física e colisão", zonas: [] },
+  { id: "eletronica", nome: "Eletrônica", zonas: [] },
+  { id: "comandos-eletricos", nome: "Comandos elétricos", zonas: [] },
+  { id: "mecanica", nome: "Mecânica", zonas: [] },
+  { id: "clp-e-ladder", nome: "CLP e Ladder", zonas: [] },
+];

@@ -46,6 +46,24 @@ Status resumido em `docs/ROADMAP.md`.
   (`testes/repetir.mjs`, 5 rodadas). Guia (seção 11) e `testes/README.md`
   com a regra "espere estados, nunca tempos".
 
+- [x] **Etapa 2: camada de trilhas.** `Trilha` em `src/curriculo/trilhas.ts`
+  (Web ativa; Jogos e Automação industrial em construção, com as ilhas
+  próprias só nomeadas em `ILHAS_FUTURAS`), `NUCLEO_COMUM` (Origens,
+  Lógica, IA, Ofício) em todas. O mundo desenha as ilhas da trilha
+  escolhida na ordem dela (`progresso.trilha`, padrão `web`), e o
+  desbloqueio segue a rota da trilha (`ilhaAnterior(ilha, fonte)`); o
+  progresso é da ilha, então vale em todas. Tela `/trilhas` com card por
+  trilha (descrição, ilhas, progresso contando as planejadas, estado,
+  Escolher), link na barra do mapa (no celular, no menu), ilha só nomeada
+  com a tela "ainda é só um terreno" e arte `ArteFutura`. Checagem
+  `trilhas` no `testar:conteudo` (`conferirTrilhas`) e
+  `testes/conteudo/trilhas.test.ts` (dados, sabotagens, rota por trilha,
+  progresso compartilhado). `PROJETO.md` com "Trilhas" e "Como integrar
+  uma trilha nova" (o tipo de fase `bancada-eletrica` como exemplo);
+  `MAPA-CURRICULAR.md` com as trilhas e o `InterativAIPLUS`. Estabilidade:
+  a bateria desta etapa achou mais uma corrida (a meta medida no meio da
+  animação de entrada); o `Modal` agora marca `data-modal-assentado`.
+
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
 Status resumido em `docs/ROADMAP.md` (fonte única de status a partir

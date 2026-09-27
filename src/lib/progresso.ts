@@ -69,6 +69,8 @@ export type Progresso = {
   mapaDesbloqueado: boolean;
   /** Fração da altura para a prévia no celular em pé (0,25 a 0,6). */
   proporcaoPrevia: number;
+  /** Trilha escolhida (src/curriculo/trilhas.ts); id desconhecido vale a padrão. */
+  trilha: string;
 };
 
 export const PROPORCAO_PREVIA = { minima: 0.25, padrao: 0.4, maxima: 0.6 } as const;
@@ -95,6 +97,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   posicaoNoMapa: {},
   mapaDesbloqueado: false,
   proporcaoPrevia: PROPORCAO_PREVIA.padrao,
+  trilha: "web",
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -208,6 +211,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     proporcaoPrevia: ehNumero(bruto.proporcaoPrevia)
       ? Math.min(PROPORCAO_PREVIA.maxima, Math.max(PROPORCAO_PREVIA.minima, bruto.proporcaoPrevia))
       : PROPORCAO_PREVIA.padrao,
+    trilha: typeof bruto.trilha === "string" && bruto.trilha.length > 0 ? bruto.trilha : PROGRESSO_PADRAO.trilha,
   };
 }
 

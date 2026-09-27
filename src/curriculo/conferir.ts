@@ -5,6 +5,7 @@
  */
 import type { Unidade } from "@/conteudo/tipos";
 import { localNoCurriculo, motorQueFalta } from "./index";
+import type { Trilha } from "./trilhas";
 import type { IlhaCurriculo } from "./tipos";
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -97,6 +98,52 @@ export function conferirMotorDoConteudo(curriculo: readonly IlhaCurriculo[], uni
           `ainda requer motor: ${falta}. Não produza essa unidade: relate o que falta.`,
       );
     }
+  }
+  return problemas;
+}
+
+/**
+ * Trilhas (src/curriculo/trilhas.ts): ids únicos; toda trilha referencia
+ * ilhas que existem (no currículo ou nas ilhas futuras), sem repetir, e
+ * passa pelo núcleo comum; a padrão existe e está ativa; toda ilha com
+ * conteúdo pertence a pelo menos uma trilha; ilhas futuras não têm zonas
+ * nem ids que batem com o currículo.
+ */
+export function conferirTrilhas(
+  trilhas: readonly Trilha[],
+  curriculo: readonly IlhaCurriculo[],
+  futuras: readonly IlhaCurriculo[],
+  unidades: readonly Unidade[],
+  nucleo: readonly string[],
+  padrao: string,
+): string[] {
+  const problemas: string[] = [];
+  const todas = [...curriculo, ...futuras];
+  problemas.push(...repetidos(trilhas.map((trilha) => trilha.id)).map((id) => `trilha com id repetido: "${id}"`));
+  problemas.push(...repetidos(todas.map((ilha) => ilha.id)).map((id) => `ilha futura com o mesmo id de outra ilha: "${id}"`));
+  const trilhaPadrao = trilhas.find((trilha) => trilha.id === padrao);
+  if (!trilhaPadrao) problemas.push(`a trilha padrão "${padrao}" não existe`);
+  else if (trilhaPadrao.status !== "ativa") problemas.push(`a trilha padrão "${padrao}" precisa estar ativa`);
+  for (const trilha of trilhas) {
+    if (!KEBAB.test(trilha.id)) problemas.push(`id de trilha "${trilha.id}" não está em kebab-case`);
+    if (trilha.descricao.trim().length === 0) problemas.push(`a trilha "${trilha.id}" não tem descrição`);
+    problemas.push(...repetidos(trilha.ilhas).map((id) => `a trilha "${trilha.id}" repete a ilha "${id}"`));
+    for (const id of trilha.ilhas) {
+      if (!todas.some((ilha) => ilha.id === id)) problemas.push(`a trilha "${trilha.id}" cita a ilha "${id}", que não existe no currículo`);
+    }
+    for (const id of nucleo) {
+      if (!trilha.ilhas.includes(id)) problemas.push(`a trilha "${trilha.id}" não passa pela ilha "${id}" do núcleo comum`);
+    }
+  }
+  for (const ilha of curriculo) {
+    const temConteudo = ilha.zonas.some((zona) => zona.unidades.some((item) => unidades.some((unidade) => unidade.id === item.id)));
+    if (temConteudo && !trilhas.some((trilha) => trilha.ilhas.includes(ilha.id))) {
+      problemas.push(`a ilha "${ilha.id}" tem conteúdo, mas não pertence a nenhuma trilha`);
+    }
+  }
+  for (const ilha of futuras) {
+    if (ilha.zonas.length > 0) problemas.push(`a ilha futura "${ilha.id}" tem zonas: mova ela para o CURRICULO`);
+    if (!KEBAB.test(ilha.id)) problemas.push(`id de ilha "${ilha.id}" não está em kebab-case`);
   }
   return problemas;
 }

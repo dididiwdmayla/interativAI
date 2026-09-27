@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type ReactNode, useEffect, useId, useRef } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Props = {
@@ -14,9 +14,19 @@ type Props = {
 
 const FOCAVEIS = 'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-/** Janela sobreposta com foco no primeiro botão, Esc para fechar e foco preso dentro. */
+/**
+ * Janela sobreposta com foco no primeiro botão, Esc para fechar e foco preso
+ * dentro. Depois da animação de entrada, a janela ganha
+ * `data-modal-assentado="sim"` (os testes medem e tocam só depois disso).
+ */
 export function Modal({ aberto, titulo, aoFechar, children, className = "" }: Props) {
   const idTitulo = useId();
+  const [assentado, setAssentado] = useState(false);
+  const [abertoConhecido, setAbertoConhecido] = useState(aberto);
+  if (abertoConhecido !== aberto) {
+    setAbertoConhecido(aberto);
+    setAssentado(false);
+  }
   const caixa = useRef<HTMLDivElement>(null);
   const focoAnterior = useRef<Element | null>(null);
 
@@ -57,6 +67,10 @@ export function Modal({ aberto, titulo, aoFechar, children, className = "" }: Pr
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 10, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 24 }}
+            data-modal-assentado={assentado ? "sim" : "nao"}
+            onAnimationComplete={() => {
+              if (aberto) setAssentado(true);
+            }}
             onKeyDown={(evento) => {
               if (evento.key === "Escape") {
                 evento.stopPropagation();

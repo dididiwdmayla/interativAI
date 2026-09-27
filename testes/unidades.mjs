@@ -381,6 +381,8 @@ async function partesFeitas() {
 async function metaDaUnidade(nome) {
   const meta = pagina.locator("[data-meta]");
   await meta.waitFor({ timeout: 8000 });
+  // Mede só depois da animação de entrada da janela (a mola mexe as duas prévias).
+  await pagina.locator('[role=dialog][data-modal-assentado="sim"]').waitFor({ timeout: 8000 });
   const previas = pagina.getByRole("dialog").locator("iframe");
   conferir((await previas.count()) === 2, `${nome}: meta com antes e depois lado a lado`);
   const [antes, depois] = await Promise.all([previas.nth(0).boundingBox(), previas.nth(1).boundingBox()]);

@@ -12,7 +12,7 @@ import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { UNIDADES } from "@/conteudo";
-import { ilhaDoId } from "@/curriculo";
+import { ilhaDoId, trilhasDaIlha } from "@/curriculo";
 import type { IlhaCurriculo, UnidadeCurriculo } from "@/curriculo/tipos";
 import { atualizarProgresso, useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import {
@@ -75,7 +75,34 @@ export function TelaIlha({ ilhaId }: { ilhaId: string }) {
   const ilha = ilhaDoId(ilhaId);
   useMusicaDaTela({ tipo: "ilha", ilhaId });
   if (!carregado || !ilha) return <TelaCarregando />;
+  if (ilha.zonas.length === 0) return <IlhaSoNomeada ilha={ilha} />;
   return <IlhaCarregada ilha={ilha} />;
+}
+
+/** Ilha de uma trilha em construção: só o nome, sem zonas ainda. */
+function IlhaSoNomeada({ ilha }: { ilha: IlhaCurriculo }) {
+  const trilhas = trilhasDaIlha(ilha.id);
+  return (
+    <div className="flex h-dvh flex-col bg-mar" data-mapa="ilha" data-ilha={ilha.id}>
+      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />
+      <div className="grid flex-1 place-items-center p-6 text-center">
+        <div className="max-w-sm rounded-3xl border-2 border-borda bg-superficie p-6" data-ilha-em-construcao>
+          <Mascote expressao="dormindo" tamanho={96} className="mx-auto" />
+          <div className="mt-2 flex justify-center">
+            <PlacaConstrucao />
+          </div>
+          <p className="mt-2 text-lg font-black text-texto">A ilha {ilha.nome} ainda é só um terreno.</p>
+          <p className="mt-1 text-sm font-bold text-texto-suave">
+            Ela faz parte da trilha {trilhas.map((trilha) => trilha.nome).join(" e ")}, que está em construção. Enquanto isso, as
+            ilhas do núcleo comum (Origens, Lógica, IA e Ofício) já contam pra ela.
+          </p>
+          <Link href={ROTA_MUNDO} className="mt-4 inline-block font-black text-primaria underline">
+            Voltar ao mundo
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
@@ -194,7 +221,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   };
 
   if (estadoIlha === "bloqueada") {
-    const anterior = ilhaAnterior(ilha);
+    const anterior = ilhaAnterior(ilha, fonte);
     return (
       <div className="flex h-dvh flex-col bg-mar">
         <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />

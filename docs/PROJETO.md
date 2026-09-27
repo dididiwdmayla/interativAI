@@ -422,6 +422,83 @@ src/
 - Tokens novos do mapa em `tokens.css` (mar, onda, areia, grama, rota,
   névoa, madeira, pedra, terminal), nos três temas.
 
+### Trilhas (camada acima das ilhas)
+
+- `src/curriculo/trilhas.ts`: `Trilha` (`id`, `nome`, `descricao` para
+  leigo, `ilhas` na ordem do mapa, `status` `ativa` ou `em-construcao`).
+  Hoje: **Web** (ativa: Origens, Sites, Lógica, Páginas vivas, Rede e
+  Servidor, IA, Ofício e a opcional Frameworks), **Jogos** e **Automação
+  industrial** (em construção). `NUCLEO_COMUM` (Origens, Lógica, IA e
+  Ofício) está em todas.
+- As ilhas próprias das trilhas em construção moram em `ILHAS_FUTURAS`
+  (`src/curriculo/curriculo.ts`): só nome, sem zonas. `TODAS_AS_ILHAS`
+  junta as duas listas (rotas `/ilha/<id>` e `ilhaDoId`); uma ilha só
+  nomeada abre uma tela "ainda é só um terreno".
+- O progresso é da ilha (fases concluídas), então concluir a Lógica numa
+  trilha conta nas outras. A trilha escolhida fica em `progresso.trilha`
+  (padrão `web`; id desconhecido cai na padrão, `trilhaDoId`).
+- O mapa segue a trilha: `MundoMapa` desenha só as ilhas dela, na ordem
+  dela (a Web mantém as posições de sempre; as outras vão em zigue-zague),
+  e `src/lib/mapa.ts` conta a rota do desbloqueio pela trilha
+  (`ilhaAnterior(ilha, fonte)`, `trilhaDaFonte`). Uma ilha aberta pelo
+  endereço fora da trilha escolhida usa a rota da primeira trilha que passa
+  por ela.
+- Tela `/trilhas` (`componentes/explorar/TelaTrilhas`): um card por
+  trilha com descrição, ilhas (núcleo em cinza), progresso contando as
+  unidades planejadas e o estado; "Escolher" salva e volta ao mundo. O link
+  fica na barra do mapa (no celular, no menu).
+- Checagem `trilhas` no `testar:conteudo` (`conferirTrilhas`): toda
+  trilha cita ilhas que existem, sem repetir, e passa pelo núcleo; a
+  padrão existe e está ativa; toda ilha com conteúdo pertence a alguma
+  trilha; ilha futura não tem zonas.
+
+### Como integrar uma trilha nova
+
+Uma trilha nova reaproveita tudo o que não é específico da Web: mascote e
+voz, tutor, escada de ajuda, modos guiado/sozinho/previsão/desafio,
+apresentações de ferramentas e Caixa, mapa (mundo, ilha, pontos, cards),
+progresso, fábrica (formato declarativo, checagens, congelamento, guia) e
+áudio. O que ela precisa trazer:
+
+1. **Dados da trilha**: a entrada em `TRILHAS` e as ilhas próprias. Enquanto
+   não houver conteúdo, as ilhas ficam em `ILHAS_FUTURAS`; quando a primeira
+   zona for planejada de verdade, a ilha passa para o `CURRICULO`, com zonas
+   e unidades (ids `<ilha>-<zona>-u<n>`), e o `docs/MAPA-CURRICULAR.md`
+   ganha a seção dela. A ordem das ilhas na trilha é a ordem de
+   desbloqueio.
+2. **Motor próprio, se a bancada não for um DevTools**: um tipo de fase novo
+   no registro de tipos (o mesmo lugar em que as atividades das Origens vão
+   entrar). Para a Automação industrial, por exemplo, um tipo
+   `"bancada-eletrica"` com:
+   - um **modelo** próprio no lugar do HTML do site-alvo (componentes,
+     fios, bornes, estados de contatos e bobinas, o programa Ladder), que
+     seja a fonte única de verdade, como o body é hoje;
+   - **ações** (ligar um fio, apertar um botão, energizar, trocar um
+     contato) executadas por um núcleo equivalente ao `nucleoPainel.ts`,
+     com desfazer e eventos no barramento;
+   - **validadores** próprios (circuito fecha, motor liga com a sequência
+     certa, selo funciona, parada de emergência corta tudo), interpretados
+     como os de hoje: dados, nunca funções na fase;
+   - a **simulação headless** do modelo, para o `testar:conteudo` provar
+     que as soluções cumprem cada objetivo, como a `simulacao.ts` faz com
+     o DOM;
+   - ferramentas novas no registro, cada uma com apresentação, card,
+     `data-ferramenta` e variantes de mouse e toque.
+3. **O que não muda**: `Fase`, `Objetivo`, `Unidade`, a escada de ajuda, as
+   falas, a meta, o checklist do desafio, `revisarEm` e `revisa`, o
+   congelamento dos ids publicados. O `JogoFase` troca só a bancada (painel
+   e prévia) pelo componente do tipo de fase; mascote, conversa, barra de
+   objetivos e apresentações continuam.
+4. **Temas e conceitos**: os conceitos da trilha entram no catálogo com
+   temas; se nenhum tema existente servir (por exemplo, "Elétrica"), o tema
+   novo entra no catálogo com ícone e as profissões que fizerem sentido.
+5. **Áudio**: uma faixa por ilha nova em `FAIXA_DA_ILHA` e no
+   `musicas.json` (sem faixa, a ilha toca silêncio, sem erro).
+
+O protótipo `InterativAIPLUS` (repositório separado) é a base da futura
+trilha Automação industrial e será portado por esse caminho depois que a
+camada de trilhas e a fábrica estiverem estáveis.
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,

@@ -492,6 +492,13 @@ conteúdo:
    rodada), determinística, e não uma corrida. Correção: `abaDaArvore`
    (`testes/util.mjs`) aceita os dois nomes.
 
+5. **Achada depois, na etapa 2: a janela da meta ainda estava entrando.**
+   O `metaDaUnidade` media as duas prévias (antes e depois) logo que a
+   janela aparecia, no meio da mola da animação de entrada, e às vezes as
+   duas saíam em alturas diferentes. Correção: o `Modal` marca
+   `data-modal-assentado="sim"` no fim da animação, e o teste mede depois
+   disso.
+
 Os `waitForTimeout` que eram muleta saíram (ficaram só os de gesto com
 duração, como o toque longo de 750 ms, e os de animação e som nos testes
 de mapa e áudio); os ajudantes (`esperarPronto`, `abrirBalao`,

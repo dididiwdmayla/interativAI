@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
+import { LinksExplorar } from "@/componentes/explorar/LinksExplorar";
 import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { IconeEstrela } from "@/componentes/icones/IconeEstrela";
@@ -74,6 +75,7 @@ export function BarraMapa({ caminho, voltar }: Props) {
         <TotalEstrelas compacto={compacto} />
         {compacto ? (
           <MenuMovel>
+            <LinksExplorar noMenu />
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
             <SeletorTema />
             <div data-manter-menu className="border-t-2 border-borda pt-2">
@@ -82,6 +84,7 @@ export function BarraMapa({ caminho, voltar }: Props) {
           </MenuMovel>
         ) : (
           <>
+            <LinksExplorar />
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
             <SeletorTema />
             <BotaoSom />

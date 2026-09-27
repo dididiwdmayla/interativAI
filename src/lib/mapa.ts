@@ -8,6 +8,9 @@
  * - Origens (sempreAberta) e Sites: abertas;
  * - cada ilha seguinte da rota abre quando a anterior está aberta e tem
  *   todas as unidades prontas concluídas; a opcional segue a última da rota.
+ *   A rota é a da trilha escolhida (src/curriculo/trilhas.ts): a mesma ilha
+ *   pode vir depois de outra em cada trilha. O progresso é da ilha, então o
+ *   que foi concluído numa trilha vale nas outras.
  *
  * Unidades, dentro da ilha:
  * - sem conteúdo: "planejada";
@@ -19,7 +22,7 @@
  */
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, localNoCurriculo } from "@/curriculo";
+import { CURRICULO, ilhasDaTrilha, localNoCurriculo, type Trilha, trilhaDoId, trilhasDaIlha } from "@/curriculo";
 import type { IlhaCurriculo, UnidadeCurriculo, ZonaCurriculo } from "@/curriculo/tipos";
 import type { Progresso } from "./progresso";
 
@@ -30,8 +33,28 @@ export type EstadoUnidadeMapa = "concluida" | "disponivel" | "bloqueada" | "plan
 export type FonteMapa = {
   progresso: Progresso;
   unidades?: readonly Unidade[];
+  /** Currículo de teste: a rota passa a ser a ordem dele (sem trilha). */
   curriculo?: readonly IlhaCurriculo[];
+  /** Padrão: a trilha escolhida no progresso. */
+  trilha?: Trilha;
 };
+
+/** A trilha que vale para a fonte: a dada, senão a escolhida no progresso. */
+export function trilhaDaFonte(fonte: FonteMapa): Trilha {
+  return fonte.trilha ?? trilhaDoId(fonte.progresso.trilha);
+}
+
+/**
+ * A rota (sem a opcional e sem a sempre aberta) em que a ilha é contada: a
+ * da trilha escolhida, se a ilha está nela; senão, a da primeira trilha
+ * que passa por ela (alguém abriu o endereço de uma ilha de outra trilha).
+ */
+function rotaDaIlha(ilha: IlhaCurriculo, fonte: FonteMapa): IlhaCurriculo[] {
+  if (fonte.curriculo) return fonte.curriculo.filter((item) => !item.opcional && !item.sempreAberta);
+  const escolhida = trilhaDaFonte(fonte);
+  const trilha = escolhida.ilhas.includes(ilha.id) ? escolhida : (trilhasDaIlha(ilha.id)[0] ?? escolhida);
+  return ilhasDaTrilha(trilha).filter((item) => !item.opcional && !item.sempreAberta);
+}
 
 function conteudoDe(id: string, unidades: readonly Unidade[]): Unidade | undefined {
   return unidades.find((unidade) => unidade.id === id);
@@ -97,17 +120,12 @@ export function ilhaCompleta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
 
 /** A ilha está aberta pela regra de desbloqueio (sem olhar se tem conteúdo). */
 function ilhaAberta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
-  const curriculo = fonte.curriculo ?? CURRICULO;
   if (ilha.sempreAberta || fonte.progresso.mapaDesbloqueado) return true;
   // Desbloqueio permanente: já esteve aqui, continua aberta (uma unidade nova
   // registrada numa ilha anterior não tranca de novo o que já foi aberto).
   if (ilhaComProgresso(ilha, fonte.unidades ?? UNIDADES, fonte.progresso)) return true;
-  const rota = curriculo.filter((item) => !item.opcional && !item.sempreAberta);
-  const indice = rota.findIndex((item) => item.id === ilha.id);
-  if (indice === 0) return true;
-  // A opcional (fora da rota) segue a última ilha da rota.
-  const anterior = indice > 0 ? rota[indice - 1] : rota[rota.length - 1];
-  if (!anterior || anterior.id === ilha.id) return true;
+  const anterior = ilhaAnterior(ilha, fonte);
+  if (!anterior) return true;
   return ilhaAberta(anterior, fonte) && ilhaCompleta(anterior, fonte);
 }
 
@@ -116,12 +134,16 @@ export function estadoDaIlha(ilha: IlhaCurriculo, fonte: FonteMapa): EstadoIlha 
   return ilhaAberta(ilha, fonte) ? "disponivel" : "bloqueada";
 }
 
-/** A ilha anterior na rota (para a dica "Termine a ilha X"). */
-export function ilhaAnterior(ilha: IlhaCurriculo, curriculo: readonly IlhaCurriculo[] = CURRICULO): IlhaCurriculo | null {
-  const rota = curriculo.filter((item) => !item.opcional && !item.sempreAberta);
+/**
+ * A ilha anterior na rota da trilha (para a regra de desbloqueio e a dica
+ * "Termine a ilha X"). A opcional (fora da rota) segue a última da rota.
+ */
+export function ilhaAnterior(ilha: IlhaCurriculo, fonte: FonteMapa): IlhaCurriculo | null {
+  const rota = rotaDaIlha(ilha, fonte);
   const indice = rota.findIndex((item) => item.id === ilha.id);
   if (indice === 0) return null;
-  return indice > 0 ? rota[indice - 1] : (rota[rota.length - 1] ?? null);
+  const anterior = indice > 0 ? rota[indice - 1] : (rota[rota.length - 1] ?? null);
+  return anterior && anterior.id !== ilha.id ? anterior : null;
 }
 
 /** A zona está aberta: a ilha não está bloqueada e as zonas antes dela têm tudo pronto concluído. */
@@ -181,14 +203,17 @@ function unidadeDaFase(faseId: string, unidades: readonly Unidade[]): Unidade | 
   return unidades.find((unidade) => unidade.fases.includes(faseId));
 }
 
-/** A ilha onde o jogador está: a da última fase aberta, ou Sites. */
+/** A ilha onde o jogador está: a da última fase aberta (se for da trilha), ou a primeira da rota da trilha. */
 export function ilhaAtual(fonte: FonteMapa): IlhaCurriculo {
   const curriculo = fonte.curriculo ?? CURRICULO;
   const unidades = fonte.unidades ?? UNIDADES;
   const faseAtual = fonte.progresso.faseAtual;
   const unidade = faseAtual ? unidadeDaFase(faseAtual, unidades) : undefined;
   const local = unidade ? localNoCurriculo(unidade.id, curriculo) : undefined;
-  return local?.ilha ?? curriculo.find((ilha) => ilha.id === "sites") ?? curriculo[0];
+  if (fonte.curriculo) return local?.ilha ?? curriculo.find((ilha) => ilha.id === "sites") ?? curriculo[0];
+  const ilhas = ilhasDaTrilha(trilhaDaFonte(fonte));
+  if (local && ilhas.some((ilha) => ilha.id === local.ilha.id)) return local.ilha;
+  return ilhas.find((ilha) => !ilha.sempreAberta && !ilha.opcional) ?? ilhas[0] ?? curriculo[0];
 }
 
 /**
@@ -211,4 +236,35 @@ export function pontoAtual(ilha: IlhaCurriculo, fonte: FonteMapa): UnidadeCurric
   if (disponivel) return disponivel.item;
   const concluidas = todos.filter(({ zona, item }) => estadoDaUnidade(ilha, zona, item, fonte) === "concluida");
   return (concluidas[concluidas.length - 1] ?? todos[0]).item;
+}
+
+export type ProgressoDeUnidades = {
+  /** Unidades concluídas (todas as fases). */
+  concluidas: number;
+  /** Unidades com conteúdo. */
+  prontas: number;
+  /** Todas, contando as planejadas: o percurso inteiro. */
+  total: number;
+};
+
+/** Quantas das unidades do currículo (prontas e planejadas) já foram concluídas. */
+export function progressoDeUnidades(
+  itens: readonly UnidadeCurriculo[],
+  progresso: Progresso,
+  unidades: readonly Unidade[] = UNIDADES,
+): ProgressoDeUnidades {
+  let concluidas = 0;
+  let prontas = 0;
+  for (const item of itens) {
+    const conteudo = conteudoDe(item.id, unidades);
+    if (!conteudo) continue;
+    prontas++;
+    if (unidadeConcluida(conteudo, progresso)) concluidas++;
+  }
+  return { concluidas, prontas, total: itens.length };
+}
+
+/** As unidades de uma trilha, na ordem do mapa (as ilhas futuras não têm nenhuma ainda). */
+export function unidadesDaTrilha(trilha: Trilha): UnidadeCurriculo[] {
+  return ilhasDaTrilha(trilha).flatMap((ilha) => ilha.zonas.flatMap((zona) => zona.unidades));
 }
