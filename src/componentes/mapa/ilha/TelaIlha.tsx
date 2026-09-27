@@ -25,6 +25,7 @@ import {
   unidadeConcluida,
   zonaAberta,
 } from "@/lib/mapa";
+import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import { ROTA_MUNDO, rotaDaFase } from "@/lib/rotas";
 import { Oceano } from "../arte/Oceano";
 import { useAnimarMapa } from "../arte/useAnimarMapa";
@@ -117,6 +118,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const [aberto, setAberto] = useState<string | null>(null);
   const fonte = { progresso };
   const estadoIlha = estadoDaIlha(ilha, fonte);
+  const lente = resolverLente(progresso.lente);
 
   const desenho = useMemo(() => desenharIlha(ilha, vertical, larguraTela), [ilha, vertical, larguraTela]);
   // Deitado ou no desktop, o caminho cabe na altura (sem encolher os pontos).
@@ -244,7 +246,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="ilha" data-ilha={ilha.id} data-layout={layout}>
-      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} />
+      <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo={`Mapa da ilha ${ilha.nome}. Arraste ou role para ver o caminho inteiro.`}>
           <div className="relative" style={{ width: larguraDesenho, height: alturaDesenho }}>
@@ -347,6 +349,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                   x={px(ponto.x)}
                   y={px(ponto.y)}
                   acendendo={comemoracao?.acendendo === ponto.item.id}
+                  lente={lente ? (unidadeNaLente(ponto.item, lente) ? "acesa" : "apagada") : null}
                   aoAbrir={() => {
                     tocarEfeito("clique");
                     setAberto(ponto.item.id);

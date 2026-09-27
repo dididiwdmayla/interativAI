@@ -64,6 +64,23 @@ Status resumido em `docs/ROADMAP.md`.
   a bateria desta etapa achou mais uma corrida (a meta medida no meio da
   animação de entrada); o `Modal` agora marca `data-modal-assentado`.
 
+- [x] **Etapa 3: temas, lente e insígnias.** Catálogo de 11 temas
+  (`src/curriculo/temas.ts`; o ponto de partida mais Fundamentos, decisão
+  no `PROJETO.md`) com ícone SVG por tema (`IconeTema`). Os 62 conceitos
+  classificados (`temas` no catálogo) e as 78 unidades do currículo com
+  `temas` declarados; nas prontas, os temas vêm dos conceitos ensinados e
+  praticados (`temasDerivados`), e a checagem `temas` confere que os
+  declarados estão contidos neles. Lente no mapa (`BarraLentes`,
+  `progresso.lente`): acende as unidades do tema em todas as ilhas da
+  trilha (no mundo, contagem por ilha e as sem nenhuma apagadas; na ilha,
+  anel ou ponto apagado, planejadas inclusive) e mostra "Tema: X de Y
+  unidades" contando as planejadas. Card da unidade com os temas.
+  Insígnias SVG com anel e marcos de 25, 50, 75 e 100% (`Insignia`),
+  painel "Insígnias" na barra do mapa e comemoração curta a cada marco
+  novo (`ComemoracaoInsignia`, som `insignia`, `progresso.marcosInsignias`).
+  Testes: `testes/conteudo/temas.test.ts`. Guia com a seção 9.1 "Temas e
+  conceitos".
+
 ## Rodada 9: painel Estilos, motor de cascata, modo documento e ROADMAP
 
 Status resumido em `docs/ROADMAP.md` (fonte única de status a partir

@@ -10,282 +10,347 @@
  * - id em kebab-case, sem acento, curto e estável (nunca renomeie um id
  *   que já está em uso: progresso e índice dependem dele);
  * - nome curto, como o jogador falaria;
- * - resumo em UMA frase de leigo, sem jargão sem explicação.
+ * - resumo em UMA frase de leigo, sem jargão sem explicação;
+ * - temas: pelo menos um (src/curriculo/temas.ts). Eles acendem o conceito
+ *   na lente de temas do mapa e no glossário.
  */
+import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
   // Unidade 1: o site é seu
   elemento: {
     nome: "Elemento",
     resumo: "Cada pecinha que monta uma página, como um título, um parágrafo ou um botão.",
+    temas: ["interfaces"],
   },
   tag: {
     nome: "Tag",
     resumo: "A etiqueta entre os sinais de menor e maior que diz que tipo de peça é aquela, como h1 ou button.",
+    temas: ["interfaces"],
   },
   "selecionar-pela-arvore": {
     nome: "Selecionar pela árvore",
     resumo: "Clicar num item da árvore do F12 para escolher uma peça e ver ela acender na tela.",
+    temas: ["ferramentas"],
   },
   "modo-inspecionar": {
     nome: "Modo inspecionar",
     resumo: "A setinha do F12: você aponta algo na tela e o painel mostra qual peça é.",
+    temas: ["ferramentas"],
   },
   "editar-texto": {
     nome: "Editar texto",
     resumo: "Trocar o texto de uma peça com dois cliques na árvore, só para você ver.",
+    temas: ["ferramentas"],
   },
   "codigo-html": {
     nome: "Código HTML",
     resumo: "A página escrita na língua que o navegador entende, cheia de tags.",
+    temas: ["interfaces"],
   },
   "lista-e-itens": {
     nome: "Lista e itens",
     resumo: "Uma lista (ul) guarda itens (li), um para cada coisa da lista.",
+    temas: ["interfaces"],
   },
 
   // Unidade 2: faxina no site
   "elemento-pai": {
     nome: "Elemento pai",
     resumo: "A peça que guarda outra dentro dela, como uma caixa guarda um brinquedo.",
+    temas: ["interfaces"],
   },
   "elemento-filho": {
     nome: "Elemento filho",
     resumo: "A peça que mora dentro de outra; ela vai junto para onde o pai for.",
+    temas: ["interfaces"],
   },
   aninhamento: {
     nome: "Aninhamento",
     resumo: "Peças dentro de peças, em andares, como bonecas russas uma dentro da outra.",
+    temas: ["interfaces"],
   },
   "esconder-elemento": {
     nome: "Esconder elemento",
     resumo: "Deixar uma peça invisível sem tirar ela da página: o lugar dela continua reservado.",
+    temas: ["interfaces", "ferramentas"],
   },
   "remover-do-documento": {
     nome: "Remover do documento",
     resumo: "Apagar a peça de vez: ela sai da página e o que vem depois sobe para ocupar o lugar.",
+    temas: ["interfaces", "ferramentas"],
   },
   desfazer: {
     nome: "Desfazer e refazer",
     resumo: "Voltar um passo atrás quando algo deu errado, e ir para a frente de novo se mudar de ideia.",
+    temas: ["ferramentas"],
   },
   "duplicar-elemento": {
     nome: "Duplicar elemento",
     resumo: "Fazer uma cópia exata de uma peça, com tudo o que tem dentro, logo depois dela.",
+    temas: ["ferramentas"],
   },
   "elementos-irmaos": {
     nome: "Elementos irmãos",
     resumo: "Peças que moram dentro do mesmo pai, uma do lado da outra.",
+    temas: ["interfaces"],
   },
 
   // Unidade 3: títulos e textos
   "titulos-hierarquia": {
     nome: "Hierarquia de títulos",
     resumo: "Os títulos vão de h1 (o mais importante) a h6: o número mostra o nível, não o tamanho da letra.",
+    temas: ["interfaces", "acessibilidade"],
   },
   paragrafo: {
     nome: "Parágrafo",
     resumo: "A tag p marca um bloco de texto corrido, a peça mais comum de uma página.",
+    temas: ["interfaces"],
   },
   "enfase-forte": {
     nome: "Ênfase forte",
     resumo: "O strong diz que aquele trecho é importante de verdade; o b só deixa em negrito, sem avisar ninguém.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "enfase-leve": {
     nome: "Ênfase leve",
     resumo: "O em marca um tom diferente na frase; o i só deixa em itálico, sem dizer que é especial.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "lista-numerada": {
     nome: "Lista numerada",
     resumo: "A tag ol numera os itens porque a ordem deles importa; a ul não numera porque a ordem não importa.",
+    temas: ["interfaces"],
   },
 
   // Unidade 4: links, imagens, id e class
   "editar-atributo": {
     nome: "Editar atributo",
     resumo: "Trocar o valor de um atributo (como href, alt ou class) com dois cliques na árvore, só para você ver.",
+    temas: ["ferramentas"],
   },
   "link-href": {
     nome: "Link e href",
     resumo: "A tag a cria um link; o href diz para onde ele leva, um endereço ou um lugar da própria página.",
+    temas: ["interfaces"],
   },
   "link-ancora": {
     nome: "Link âncora",
     resumo: "Um href que começa com # não sai da página: ele rola até o elemento com aquele id.",
+    temas: ["interfaces"],
   },
   "link-aba-nova": {
     nome: "Abrir em aba nova",
     resumo: "O atributo target=\"_blank\" faz o link abrir numa aba nova, sem fechar a página atual.",
+    temas: ["interfaces"],
   },
   "imagem-alt": {
     nome: "Imagem e alt",
     resumo: "O alt descreve a imagem em palavras: quem não consegue ver a imagem ouve ou lê essa descrição.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "id-unico": {
     nome: "Id é único",
     resumo: "Um id identifica UMA peça só na página inteira; duas peças com o mesmo id confundem o navegador.",
+    temas: ["interfaces"],
   },
   "class-repetivel": {
     nome: "Class é repetível",
     resumo: "Uma class pode se repetir em várias peças parecidas, para tratar todas elas juntas.",
+    temas: ["interfaces"],
   },
 
   // Unidade 5: caixas e seções
   "div-generica": {
     nome: "Div genérica",
     resumo: "A div é uma caixa sem significado nem estilo próprio: ela só agrupa, e o visual depende do CSS.",
+    temas: ["interfaces"],
   },
   "semantica-html": {
     nome: "Semântica do HTML",
     resumo: "Usar a tag certa (como header ou footer) ajuda leitor de tela, busca e quem lê o código depois, mesmo sem mudar o visual.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "section-vs-article": {
     nome: "Section ou article",
     resumo: "section agrupa conteúdo por tema; article é um conteúdo que se basta sozinho e poderia ser reaproveitado em outro lugar.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "span-generico": {
     nome: "Span genérico",
     resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
+    temas: ["interfaces"],
   },
 
   // Unidade 6: página do zero
   "estrutura-do-documento": {
     nome: "Estrutura do documento",
     resumo: "Toda página começa com doctype, html, head e body: o esqueleto onde tudo o mais mora.",
+    temas: ["interfaces"],
   },
   "head-vs-body": {
     nome: "Head e body",
     resumo: "O head guarda informação sobre a página (título, codificação); o body guarda o que aparece na tela.",
+    temas: ["interfaces"],
   },
   title: {
     nome: "Title",
     resumo: "A tag title, dentro do head, dá o nome que aparece na aba do navegador, não na página.",
+    temas: ["interfaces"],
   },
   "meta-charset": {
     nome: "Meta charset",
     resumo: "A tag meta charset diz ao navegador como ler as letras da página; sem ela, acentos podem sair errados.",
+    temas: ["interfaces"],
   },
 
   // Zona Estilos, E1: a aba Estilos
   "o-que-e-css": {
     nome: "O que é CSS",
     resumo: "A folha de estilo diz como as peças aparecem (cor, tamanho, fonte); o HTML diz o que elas são.",
+    temas: ["interfaces"],
   },
   "regra-e-declaracao": {
     nome: "Regra e declaração",
     resumo: "Uma regra junta um seletor e declarações; cada declaração é uma propriedade e um valor, como color: white.",
+    temas: ["interfaces"],
   },
   "cor-do-texto": {
     nome: "Cor do texto",
     resumo: "A propriedade color pinta as letras de uma peça.",
+    temas: ["interfaces"],
   },
   "cor-de-fundo": {
     nome: "Cor de fundo",
     resumo: "A propriedade background-color pinta o fundo da caixa de uma peça.",
+    temas: ["interfaces"],
   },
   "cor-por-nome": {
     nome: "Cor por nome",
     resumo: "O CSS conhece cores pelo nome em inglês, como white, crimson ou gold.",
+    temas: ["interfaces"],
   },
   "ligar-desligar-declaracao": {
     nome: "Ligar e desligar declaração",
     resumo: "A caixinha do painel Estilos desliga uma declaração sem apagar, para testar o que ela faz.",
+    temas: ["interfaces", "ferramentas"],
   },
   "tamanho-da-letra": {
     nome: "Tamanho da letra",
     resumo: "A propriedade font-size muda o tamanho do texto, por exemplo em px, os pontinhos da tela.",
+    temas: ["interfaces"],
   },
   "unidade-rem": {
     nome: "Unidade rem",
     resumo: "1rem é o tamanho da letra da página inteira (16px, se ninguém mudou), então 2rem é o dobro disso.",
+    temas: ["interfaces", "acessibilidade"],
   },
   "familia-da-fonte": {
     nome: "Família da fonte",
     resumo: "A propriedade font-family escolhe o desenho das letras, com uma reserva no fim, como Georgia, serif.",
+    temas: ["interfaces"],
   },
   "alinhamento-do-texto": {
     nome: "Alinhamento do texto",
     resumo: "A propriedade text-align põe o texto à esquerda, no centro ou à direita da caixa dele.",
+    temas: ["interfaces"],
   },
   "peso-da-fonte": {
     nome: "Peso da fonte",
     resumo: "A propriedade font-weight deixa a letra mais grossa (bold) ou normal.",
+    temas: ["interfaces"],
   },
   "cor-hexadecimal": {
     nome: "Cor em hexadecimal",
     resumo: "Uma cor escrita como #RRGGBB: quanto de vermelho, verde e azul, de 00 (nada) a FF (tudo).",
+    temas: ["interfaces"],
   },
   "regra-nova": {
     nome: "Regra nova",
     resumo: "Quando nenhuma regra pega a peça, você cria uma com o seletor dela e escreve as declarações.",
+    temas: ["interfaces", "ferramentas"],
   },
 
   // Zona Estilos, E2: Seletores
   "seletor-de-tag": {
     nome: "Seletor de tag",
     resumo: "Um seletor com o nome de uma tag (como h3) pega TODAS as peças daquele tipo na página.",
+    temas: ["interfaces"],
   },
   "seletor-de-classe": {
     nome: "Seletor de classe",
     resumo: "Um seletor que começa com ponto (.autor) pega toda peça com aquela class, não importa onde ela more.",
+    temas: ["interfaces"],
   },
   "seletor-de-id": {
     nome: "Seletor de id",
     resumo: "Um seletor que começa com sustenido (#id) pega só UMA peça, porque um id não se repete na página.",
+    temas: ["interfaces"],
   },
   "seletor-descendente": {
     nome: "Seletor descendente",
     resumo: "Dois seletores com um espaço entre eles (main .preco) pegam só o segundo quando ele está dentro do primeiro.",
+    temas: ["interfaces"],
   },
 
   // Zona Estilos, E3: Modelo de caixa
   "modelo-de-caixa": {
     nome: "Modelo de caixa",
     resumo: "Toda peça é uma caixa com quatro camadas: conteúdo, padding, border e margin, de dentro pra fora.",
+    temas: ["interfaces"],
   },
   "padding-css": {
     nome: "Padding",
     resumo: "O padding é o espaço DENTRO da caixa, entre o conteúdo e a borda: empurra o conteúdo pra dentro.",
+    temas: ["interfaces"],
   },
   "border-css": {
     nome: "Border",
     resumo: "A border é a linha ao redor do padding: tem espessura, estilo (como solid) e cor.",
+    temas: ["interfaces"],
   },
   "margin-css": {
     nome: "Margin",
     resumo: "O margin é o espaço FORA da caixa: empurra as peças vizinhas pra longe, sem mudar o tamanho dela.",
+    temas: ["interfaces"],
   },
   "box-sizing": {
     nome: "Box-sizing",
     resumo: "Com border-box, o padding e a border entram DENTRO da largura definida, em vez de somar a ela.",
+    temas: ["interfaces"],
   },
 
   // Zona Estilos, E4: Por que minha regra não pega?
   "cascata-css": {
     nome: "Cascata",
     resumo: "Várias regras podem mirar a mesma peça ao mesmo tempo; a cascata decide qual declaração vence.",
+    temas: ["interfaces"],
   },
   "ordem-das-regras": {
     nome: "Ordem das regras",
     resumo: "Quando duas regras têm a MESMA especificidade, a que vem depois no arquivo vence.",
+    temas: ["interfaces"],
   },
   "especificidade-css": {
     nome: "Especificidade",
     resumo: "Um seletor com id vence um com classe, que vence um só de tag — não importa a ordem no arquivo.",
+    temas: ["interfaces"],
   },
   "heranca-css": {
     nome: "Herança",
     resumo: "Sem regra própria, uma peça herda as propriedades herdáveis (como color) do ancestral mais perto.",
+    temas: ["interfaces"],
   },
   "importante-css": {
     nome: "!important",
     resumo: "!important faz uma declaração vencer quase tudo; editar a própria declaração é o jeito de mudar seu valor, mas é melhor evitar usá-lo.",
+    temas: ["interfaces"],
   },
-} as const satisfies Record<string, { nome: string; resumo: string }>;
+} as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
 
-export type Conceito = { id: IdConceito; nome: string; resumo: string };
+export type Conceito = { id: IdConceito; nome: string; resumo: string; temas: readonly IdTema[] };
 
 export const IDS_CONCEITOS = Object.keys(CATALOGO) as IdConceito[];
 

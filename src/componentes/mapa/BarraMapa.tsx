@@ -13,6 +13,8 @@ import { MenuMovel } from "@/componentes/layout/MenuMovel";
 import { OndeEstou } from "@/componentes/layout/OndeEstou";
 import { SeletorTema } from "@/componentes/layout/SeletorTema";
 import { Mascote } from "@/componentes/mascote/Mascote";
+import { BarraLentes } from "@/componentes/temas/BarraLentes";
+import { ComemoracaoInsignia } from "@/componentes/temas/ComemoracaoInsignia";
 import { useProgresso } from "@/lib/armazemProgresso";
 import { totalDeEstrelas } from "@/lib/mapa";
 import { ROTA_MUNDO } from "@/lib/rotas";
@@ -23,6 +25,8 @@ type Props = {
   caminho: readonly string[];
   /** Botão fixo à esquerda (ex.: voltar ao mundo). */
   voltar?: ReactNode;
+  /** Mostra a barra de temas (lentes) embaixo: no mundo e na ilha. */
+  lentes?: boolean;
 };
 
 /** Total de estrelas do jogo, com a estrela desenhada. */
@@ -47,7 +51,7 @@ function TotalEstrelas({ compacto }: { compacto: boolean }) {
  * Ferramentas (a Caixa, só para ler os cards), tema e som. No celular,
  * Ferramentas, tema e som moram no menu.
  */
-export function BarraMapa({ caminho, voltar }: Props) {
+export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
   const layout = useLayoutJogo();
   const toque = useToque();
   const progresso = useProgresso();
@@ -91,6 +95,8 @@ export function BarraMapa({ caminho, voltar }: Props) {
           </>
         )}
       </header>
+      {lentes && <BarraLentes />}
+      <ComemoracaoInsignia />
       <CaixaFerramentas
         aberta={caixaAberta}
         foco={null}

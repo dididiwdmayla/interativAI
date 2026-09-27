@@ -499,6 +499,37 @@ O protótipo `InterativAIPLUS` (repositório separado) é a base da futura
 trilha Automação industrial e será portado por esse caminho depois que a
 camada de trilhas e a fábrica estiverem estáveis.
 
+### Temas (lente sobre o mapa) e insígnias
+
+- Catálogo em `src/curriculo/temas.ts` (dados) e
+  `src/componentes/temas/temas.tsx` (`Tema` com o `Icone`): Fundamentos,
+  Interfaces, Acessibilidade, Lógica, Dados, APIs, Servidores, Segurança,
+  Desempenho, IA e Ferramentas do ofício. **Decisão**: o ponto de partida
+  tinha 10 temas; entrou Fundamentos (como o computador funciona, história
+  e carreiras), porque as Origens e a sala "Por baixo do capô" não cabiam
+  em nenhum dos outros sem forçar, e uma unidade sem tema nunca acenderia
+  na lente.
+- Cada `Conceito` tem `temas` (pelo menos um). Cada unidade do currículo
+  declara `temas` (as planejadas também, para acenderem). Na unidade
+  pronta, os temas de verdade são os dos conceitos que as fases ensinam
+  (`conceitos`) e praticam (`pratica`; no desafio, `conceitos`), sem o
+  `revisa` (`temasDerivados`, `src/lib/temas.ts`); os declarados precisam
+  estar contidos neles. Checagem `temas` no `testar:conteudo`.
+- Lente (`src/lib/lentes.ts`, `progresso.lente`): a barra de temas
+  (`BarraLentes`, embaixo da barra do mapa, no mundo e na ilha) acende as
+  unidades do tema em todas as ilhas da trilha e apaga as outras. No
+  mundo, cada ilha mostra quantas unidades do tema tem (as sem nenhuma
+  ficam apagadas); na ilha, o ponto ganha um anel ou fica apagado
+  (`data-lente="acesa|apagada"`). O progresso conta as planejadas:
+  "Segurança: 0 de 7 unidades", porque a ideia é mostrar o percurso
+  inteiro. O card da unidade mostra os temas dela.
+- Insígnias (`Insignia`, `PainelInsignias`): uma medalha SVG por tema, com
+  o anel do progresso e marcos em 25, 50, 75 e 100%. O painel abre pelo
+  botão "Insígnias" da barra do mapa. `ComemoracaoInsignia` (na barra do
+  mapa) comemora uma vez cada marco novo, 2,2 s depois de entrar no mapa
+  (a festa da unidade concluída vem antes), com o som `insignia`, e salva
+  em `progresso.marcosInsignias`.
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,

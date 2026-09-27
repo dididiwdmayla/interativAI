@@ -629,6 +629,24 @@ objetivo está pedindo coisa demais: divida.
 
 ---
 
+### 9.1 Temas e conceitos
+
+- **Todo conceito novo precisa de temas** (`temas` no catálogo, pelo
+  menos um, dos ids de `src/curriculo/temas.ts`). Pergunte: "quem procura
+  esse assunto no mapa, procura por qual tema?". Um conceito de CSS é
+  Interfaces; se ele muda quem consegue usar a página (alt, títulos, rem),
+  também é Acessibilidade; um gesto do F12 é Ferramentas do ofício.
+- **Toda unidade nova do currículo declara temas** (`temas` em
+  `src/curriculo/curriculo.ts`), mesmo planejada: é o que acende ela na
+  lente do mapa. Quando a unidade fica pronta, os temas passam a vir dos
+  conceitos das fases dela; os declarados precisam estar contidos nesses
+  (o `testar:conteudo` acusa: "declara o tema X, mas nenhum conceito que
+  ela ensina ou pratica tem esse tema"). Se acusar, ou falta o tema num
+  conceito, ou o tema declarado não é assunto da unidade.
+- Tema novo só com motivo (um assunto que atravessa ilhas e não cabe em
+  nenhum): entra no catálogo com ícone (`IconeTema`) e, se fizer sentido,
+  nas profissões.
+
 ## 10. Conteúdo publicado é congelado
 
 **Nunca mude ids publicados; isso apaga o progresso de quem já jogou.** O

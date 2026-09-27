@@ -9,7 +9,8 @@ import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { UNIDADES } from "@/conteudo";
-import { ilhasDaTrilha, type Trilha, unidadesProntasDaIlha } from "@/curriculo";
+import { ilhasDaTrilha, type Trilha, unidadesDaIlha, unidadesProntasDaIlha } from "@/curriculo";
+import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import { useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import { estadoDaIlha, type EstadoIlha, ilhaAnterior, ilhaAtual, trilhaDaFonte, unidadeConcluida } from "@/lib/mapa";
@@ -109,6 +110,10 @@ function MundoCarregado() {
 
   const fonte = { progresso };
   const trilha = trilhaDaFonte(fonte);
+  const lente = resolverLente(progresso.lente);
+  /** Quantas unidades da ilha a lente acende (null sem lente). */
+  const contaNaLente = (ilha: IlhaCurriculo): number | null =>
+    lente ? unidadesDaIlha(ilha).filter((item) => unidadeNaLente(item, lente)).length : null;
   const ilhasDoMundo = ilhasDaTrilha(trilha);
   const { largura: LARGURA, posicao: posicaoDa } = desenhoDoMundo(trilha, ilhasDoMundo);
   // O mundo cobre a tela e rola o resto (no celular, arrasta de lado).
@@ -145,7 +150,7 @@ function MundoCarregado() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="mundo" data-trilha={trilha.id}>
-      <BarraMapa caminho={["Mundo"]} />
+      <BarraMapa caminho={["Mundo"]} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo="Mapa do mundo. Arraste ou role para ver todas as ilhas.">
           <div className="relative" style={{ width: LARGURA * escala, height: ALTURA * escala }}>
@@ -188,7 +193,7 @@ function MundoCarregado() {
                 const estado = estadoDaIlha(ilha, fonte);
                 const Arte = ARTE_DAS_ILHAS[ilha.id] ?? ArteFutura;
                 return (
-                  <g key={ilha.id} transform={`translate(${x} ${y})`} data-ilha-arte={ilha.id}>
+                  <g key={ilha.id} transform={`translate(${x} ${y})`} data-ilha-arte={ilha.id} opacity={contaNaLente(ilha) === 0 ? 0.35 : 1}>
                     {estado === "disponivel" && <BrilhoIlha />}
                     <Arte />
                     {estado === "construcao" && <AndaimesIlha />}
@@ -208,7 +213,12 @@ function MundoCarregado() {
               }).length;
               const detalhe =
                 estado === "disponivel" ? `${concluidas} de ${prontas.length} ${prontas.length === 1 ? "unidade" : "unidades"}` : ROTULO_ESTADO[estado];
-              const rotulo = `Ilha ${ilha.nome}${ilha.opcional ? " (opcional)" : ""}: ${detalhe}`;
+              // Com uma lente acesa, cada ilha diz quantas unidades do tema ela tem; as sem nenhuma apagam.
+              const naLente = contaNaLente(ilha);
+              const rotulo = `Ilha ${ilha.nome}${ilha.opcional ? " (opcional)" : ""}: ${detalhe}${
+                naLente === null ? "" : `. ${naLente} ${naLente === 1 ? "unidade" : "unidades"} de ${lente?.nome}`
+              }`;
+              const apagada = naLente === 0;
               const estilo = {
                 left: (x - 115) * escala,
                 top: (y - 100) * escala,
@@ -224,6 +234,11 @@ function MundoCarregado() {
                     {ilha.opcional && (
                       <span className="rounded-full bg-secundaria px-2 py-0.5 text-[11px] font-black uppercase text-sobre-secundaria">
                         Opcional
+                      </span>
+                    )}
+                    {naLente !== null && naLente > 0 && (
+                      <span className="rounded-full bg-primaria px-2 py-0.5 text-[11px] font-black text-sobre-primaria" data-lente-conta={naLente}>
+                        {naLente} {naLente === 1 ? "unidade" : "unidades"}
                       </span>
                     )}
                     <span
@@ -245,9 +260,10 @@ function MundoCarregado() {
                     type="button"
                     data-ilha={ilha.id}
                     data-estado={estado}
+                    data-lente={naLente === null ? undefined : apagada ? "apagada" : "acesa"}
                     aria-label={`${rotulo}. Termine a ilha ${anterior?.nome ?? "anterior"} para abrir.`}
                     onClick={() => setAviso(`A ilha ${ilha.nome} abre quando você terminar a ilha ${anterior?.nome ?? "anterior"}.`)}
-                    className="absolute rounded-[40%] focus-visible:outline-offset-4"
+                    className={`absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
                     style={estilo}
                   >
                     {etiqueta}
@@ -262,8 +278,9 @@ function MundoCarregado() {
                   onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
                   data-ilha={ilha.id}
                   data-estado={estado}
+                  data-lente={naLente === null ? undefined : apagada ? "apagada" : "acesa"}
                   aria-label={rotulo}
-                  className="absolute rounded-[40%] focus-visible:outline-offset-4"
+                  className={`absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
                   style={estilo}
                 >
                   {etiqueta}

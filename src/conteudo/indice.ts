@@ -31,7 +31,7 @@ export function montarIndice(fases: readonly Fase[] = FASES): EntradaIndice[] {
   const entrada = (id: IdConceito): EntradaIndice => {
     let atual = porConceito.get(id);
     if (!atual) {
-      const conceito = CONCEITOS.find((item) => item.id === id) ?? { id, nome: id, resumo: "" };
+      const conceito = CONCEITOS.find((item) => item.id === id) ?? { id, nome: id, resumo: "", temas: [] };
       atual = { conceito, ensinam: [], praticam: [], revisam: [], pedem: [] };
       porConceito.set(id, atual);
     }

@@ -6,6 +6,7 @@
  * Status não é guardado: uma unidade é "pronta" quando existe conteúdo
  * registrado com o mesmo id (src/conteudo/index.ts); senão, "planejada".
  */
+import type { IdTema } from "./temas";
 
 /** Ícone da zona no mapa: a aba do DevTools (ou a ferramenta) relacionada. */
 export type IconeZona =
@@ -34,6 +35,12 @@ export type UnidadeCurriculo = {
   titulo: string;
   /** O X em uma frase. */
   meta: string;
+  /**
+   * Temas da unidade (src/curriculo/temas.ts), para a lente do mapa. Na
+   * unidade pronta, os temas de verdade vêm dos conceitos das fases, e os
+   * daqui precisam estar contidos neles; na planejada, são estes.
+   */
+  temas?: readonly IdTema[];
   /**
    * Raro: o que falta no motor só para ESTA unidade, numa zona que já tem
    * motor (ex.: a U6 da zona Elementos). Ausente = segue a zona.
