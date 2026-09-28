@@ -279,6 +279,31 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
     `testes/publicar.mjs` (a P2 jogada pelo mapa nos três layouts, o .zip
     baixado e aberto, a ilha acendendo, Meus projetos), na bateria.
 
+- [x] **Etapa 7: mobile e paisagem, guia, liberações e bateria.**
+  - Mobile e paisagem dos recursos novos cobertos pelas jornadas nos três
+    layouts (`dispositivo`, `lighthouse`, `tema`, `variaveis`,
+    `publicar`): botões de 44 px no toque, a barra de dispositivo numa
+    linha, o Levar pro mundo só com o ícone na barra compacta, as janelas
+    (Levar pro mundo, guia) e Meus projetos sem rolagem de lado.
+  - Barra do mapa: com o link Meus projetos, os rótulos dos links
+    (Trilha, Profissões, Glossário, Insígnias, Meus projetos) passaram a
+    aparecer só a partir de 1440 px; abaixo, só os ícones (com o nome no
+    `aria-label`). Antes, de 1024 a 1439 px, as telas com "Voltar"
+    (glossário, Meu tema, Meus projetos) rolavam de lado.
+  - Guia de conteúdo: a regra "nada de `@media` na folha editável" caiu;
+    seções novas 12.7 (variáveis CSS), 12.8 (`@media` e `larguraTela`),
+    15 (E5 e o site do jogo), 16 (modo dispositivo), 17 (Lighthouse) e 18
+    (projeto-ponte e publicação), com os validadores, eventos e ações
+    novos nas tabelas 3.4 e 3.5.
+  - Currículo: E5 e a zona Responsivo sem `requerMotor` (a zona Publicar
+    já tinha saído na etapa 6), então E5, R1, R2 e P1 aparecem como
+    planejadas, esperando o conteúdo.
+  - ROADMAP: tudo desta rodada em Feito; Próximo na ordem pedida (Sonnet:
+    E5, R1, R2 e P1; Opus: Revisão do dia; Opus: motor da Lógica com o
+    circuito-logico).
+  - Bateria completa (`PARALELO=2 npm run bateria`) verde nos três
+    layouts, com build de produção e console limpo.
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

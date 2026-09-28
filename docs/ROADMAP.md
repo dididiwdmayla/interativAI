@@ -169,35 +169,38 @@ núcleo comum.
   - Atritos e o porquê de cada decisão de conteúdo:
     `docs/ATRITOS-FABRICA.md`, "Rodada 4".
 
+- **Rodada 12: motores que fecham a Ilha Sites** (detalhe em
+  `docs/PROGRESSO.md`, uma etapa por commit):
+  - Testes que leem o currículo (o esperado derivado do currículo e do
+    conteúdo registrado, sem "Layout planejada" escrito à mão) e os
+    portões lógicos registrados (`logica-decisoes-u2`, a sala "Por baixo
+    do capô" e o motor planejado `circuito-logico`).
+  - Motor de cascata com variáveis CSS (herança, reserva, encadeadas,
+    ciclo) e `@media` avaliada contra uma tela informada (igual no
+    navegador e no jsdom); painel Estilos com o valor do `var()`, o link
+    até a declaração e o cabeçalho `@media`; `larguraTela` nos
+    validadores.
+  - E5 com o próprio jogo como site-alvo (tokens reais), "Salvar como Meu
+    tema" com aviso de contraste, o Meu tema no seletor e no jogo inteiro,
+    a oficina `/meu-tema`; `variavelCss` e `temaSalvo`.
+  - Modo dispositivo (botão e Ctrl+Shift+M, modelos, girar, largura livre,
+    zoom, iframe com a largura de verdade, simulação dos 980 px sem meta
+    viewport); validador `dispositivo`.
+  - Painel Lighthouse (14 verificações no motor, notas no anel, problema
+    levando à peça com explicação); `notaAuditoria` e `semProblema`.
+  - Tipo de fase projeto-ponte, Levar pro mundo (.zip com index.html e
+    style.css), guia de publicação em dados com o link validado, Meus
+    projetos, a ilha que acende inteira e a P2 "Do jogo pro mundo"
+    publicada como unidade-modelo.
+  - Guia de conteúdo com as seções novas (12.7 variáveis, 12.8 `@media` e
+    `larguraTela`, 15 E5, 16 modo dispositivo, 17 Lighthouse, 18
+    projeto-ponte e publicação). Currículo: E5, a zona Responsivo (R1 e
+    R2) e a P1 liberadas (sem `requerMotor`), esperando o conteúdo.
+  - Bateria completa verde nos três layouts, console limpo.
+
 ### Em andamento
 
-- **Rodada 12 (motores que fecham a Ilha Sites)**, etapa por etapa (detalhe
-  em `docs/PROGRESSO.md`):
-  - [x] Etapa 1: testes que leem o currículo (nada de "Layout planejada"
-    escrito à mão: `testes/curriculo.mjs` e os testes de conteúdo derivam
-    o esperado do currículo e do conteúdo registrado) e o registro dos
-    portões lógicos (`logica-decisoes-u2`, sala "Por baixo do capô" e o
-    motor planejado `circuito-logico` em `src/curriculo/motores.ts`).
-  - [x] Etapa 2: variáveis CSS (herança, reserva, encadeadas, ciclo) e
-    `@media` avaliada contra a largura da tela no motor, no painel
-    Estilos (link do `var()`, valor resolvido, cabeçalho `@media`) e nos
-    validadores (`larguraTela`).
-  - [x] Etapa 3: E5 com o próprio jogo como site-alvo (maquete com os
-    tokens reais), "Salvar como Meu tema" com aviso de contraste, o Meu
-    tema no seletor e no jogo inteiro, a oficina `/meu-tema` (editar e
-    apagar), `temaSalvo` e `variavelCss`.
-  - [x] Etapa 4: modo dispositivo (botão e Ctrl+Shift+M, modelos, girar,
-    largura livre pelas alças, zoom, iframe com a largura de verdade,
-    simulação honesta dos 980 px sem meta viewport, validador
-    `dispositivo`).
-  - [x] Etapa 5: painel Lighthouse (aba nova, 14 verificações sobre o
-    motor, notas pesadas no anel, problema levando à peça com explicação,
-    `notaAuditoria` e `semProblema`).
-  - [x] Etapa 6: projeto-ponte (checklist de requisitos, tutor que só
-    pergunta, projeto salvo), Levar pro mundo (.zip com index.html e
-    style.css pelo fflate), guia de publicação em dados com o link
-    validado, Meus projetos, a ilha que acende e a P2 publicada.
-  - [ ] Etapa 7: mobile, guia, liberações e bateria completa.
+(nada no momento)
 
 ### Pendente de decisão
 
@@ -205,18 +208,20 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Revisão do dia: ponto fixo no mapa com desafios curtos por revisão
-   espaçada.
-2. Motores das próximas ilhas (Opus), intercalados com conteúdo
-   (Sonnet): E5 (o jogo como site-alvo), Responsivo (modo dispositivo),
-   Publicar (auditoria, exportar, projeto-ponte), Origens (linha do
-   tempo, comparador de linguagens, diagrama), Lógica (Console, execução
-   de JS, depurador) junto com o motor `circuito-logico` (portões
-   lógicos, `src/curriculo/motores.ts`), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
-   Ofício.
-3. Depois que a camada de trilhas e a fábrica estiverem estáveis: portar o
-   protótipo `InterativAIPLUS` como a trilha Automação industrial (ver
-   "Como integrar uma trilha nova" no `PROJETO.md`).
+1. Sonnet: E5, R1, R2 e P1 num prompt só (os motores estão prontos; o
+   guia de conteúdo tem as seções 12.7, 12.8 e 15 a 18). Ao escrever R1 e
+   P1, tirar "modo-dispositivo" e "lighthouse" do `apresentar` da P2-f1 e
+   passar os dois conceitos dela para `revisa` (nota no topo de
+   `fase-1-arquivos.ts`).
+2. Opus: Revisão do dia (ponto fixo no mapa com desafios curtos por
+   revisão espaçada).
+3. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
+   `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
+4. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
+   de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
+   Ofício), intercalados com conteúdo, e a trilha Automação industrial a
+   partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha
+   nova" no `PROJETO.md`).
 
 ## Decisões aprovadas
 

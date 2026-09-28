@@ -150,7 +150,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             id: "sites-estilos-u5",
             titulo: "Variáveis e temas",
             meta: "Criar um tema novo pro próprio jogo com variáveis CSS, salvo como Meu tema.",
-            requerMotor: "o próprio jogo como site-alvo (tokens do tema editáveis na aba Estilos)",
             temas: ["interfaces"],
           },
         ],
@@ -190,7 +189,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "responsivo",
         nome: "Responsivo",
         icone: "responsivo",
-        requerMotor: "modo dispositivo na prévia (tamanhos de tela e girar)",
         unidades: [
           {
             id: "sites-responsivo-u1",

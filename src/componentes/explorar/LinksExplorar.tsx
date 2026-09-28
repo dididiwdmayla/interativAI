@@ -30,11 +30,11 @@ export function LinksExplorar({ noMenu = false }: Props) {
     <>
       <Link href={ROTA_TRILHAS} onClick={() => tocarEfeito("clique")} className={classe} aria-label={`Trilhas (atual: ${trilha.nome})`}>
         <IconeTrilhas />
-        <span className={noMenu ? "" : "hidden lg:inline"}>Trilha {trilha.nome}</span>
+        <span className={noMenu ? "" : "hidden min-[1440px]:inline"}>Trilha {trilha.nome}</span>
       </Link>
       <Link href={ROTA_PROFISSOES} onClick={() => tocarEfeito("clique")} className={classe} aria-label="Profissões">
         <IconeProfissoes />
-        <span className={noMenu ? "" : "hidden lg:inline"}>Profissões</span>
+        <span className={noMenu ? "" : "hidden min-[1440px]:inline"}>Profissões</span>
       </Link>
       <BotaoGlossario noMenu={noMenu} />
       <button
@@ -47,11 +47,11 @@ export function LinksExplorar({ noMenu = false }: Props) {
         }}
       >
         <IconeInsignia />
-        <span className={noMenu ? "" : "hidden lg:inline"}>Insígnias</span>
+        <span className={noMenu ? "" : "hidden min-[1440px]:inline"}>Insígnias</span>
       </button>
       <Link href={ROTA_PROJETOS} onClick={() => tocarEfeito("clique")} className={classe} aria-label="Meus projetos" data-link-projetos>
         <IconeProjetos />
-        <span className={noMenu ? "" : "hidden lg:inline"}>Meus projetos</span>
+        <span className={noMenu ? "" : "hidden min-[1440px]:inline"}>Meus projetos</span>
       </Link>
       <PainelInsignias aberto={insignias} aoFechar={() => setInsignias(false)} />
     </>

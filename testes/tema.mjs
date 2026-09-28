@@ -5,13 +5,14 @@
 // salvar mesmo assim), o Meu tema salvo valendo no jogo inteiro (e depois
 // de recarregar, sem piscar), no seletor de tema, na oficina /meu-tema
 // (editar e apagar) e o link do card na Caixa de Ferramentas.
-// Uso: node testes/tema.mjs [desktop|retrato]
+// Uso: node testes/tema.mjs [desktop|retrato|paisagem]
 import { abrir, conferir, errosRelevantes, esperarPronto, fecharBalao, selecionarNo, URL_JOGO } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
   desktop: { largura: 1440, altura: 900, toque: false },
   retrato: { largura: 390, altura: 844, toque: true },
+  paisagem: { largura: 844, altura: 390, toque: true },
 };
 const toque = TAMANHOS[MODO].toque;
 

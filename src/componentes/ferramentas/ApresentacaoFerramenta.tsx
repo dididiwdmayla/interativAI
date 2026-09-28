@@ -278,6 +278,10 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const posicao = posicionarCartao(areaDoCartao, tamanhoCartao.largura, tamanhoCartao.altura);
   const { Icone } = ferramenta;
 
+  // O alvo (e as áreas extras do "Experimente") já foram medidos: os buracos do véu existem.
+  // As extras só são medidas no quadro seguinte à troca de passo; antes disso, um toque cai no véu.
+  const alvoLivre = experimentando && extras.length === (ferramenta.liberarNoExperimente ?? []).length;
+
   const buracos = semBuracosDentro([caixa, ...extras].filter((item): item is Caixa => item !== null));
   // Nas falas, a tela toda bloqueia e o toque avança. No "Experimente", o
   // bloqueio tem buracos (clip-path evenodd): só o alvo fica livre.
@@ -293,6 +297,7 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
       className="pointer-events-none fixed inset-0 z-[60]"
       data-apresentacao={ferramenta.id}
       data-passo-apresentacao={comemorando ? "comemorando" : experimentando ? "experimente" : "fala"}
+      data-alvo-livre={alvoLivre ? "sim" : "nao"}
     >
       <svg className="pointer-events-none fixed inset-0 h-full w-full" aria-hidden="true">
         <defs>

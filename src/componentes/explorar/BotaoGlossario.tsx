@@ -18,7 +18,7 @@ export function BotaoGlossario({ noMenu = false }: Props) {
   return (
     <Link href={ROTA_GLOSSARIO} onClick={() => tocarEfeito("clique")} className={classe} aria-label="Glossário" data-botao-glossario>
       <IconeGlossario />
-      <span className={noMenu ? "" : "hidden lg:inline"}>Glossário</span>
+      <span className={noMenu ? "" : "hidden min-[1440px]:inline"}>Glossário</span>
     </Link>
   );
 }

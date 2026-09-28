@@ -4,13 +4,14 @@
 // clique no nome leva até a declaração; a regra da @media tem o cabeçalho
 // "@media (...)" acima do seletor e só aparece quando a prévia é estreita,
 // concordando com o matchMedia e com o getComputedStyle do próprio iframe.
-// Uso: node testes/variaveis.mjs [desktop|retrato]
+// Uso: node testes/variaveis.mjs [desktop|retrato|paisagem]
 import { abrir, conferir, errosRelevantes, esperarPronto, selecionarNo } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
   desktop: { largura: 1440, altura: 900, toque: false },
   retrato: { largura: 390, altura: 844, toque: true },
+  paisagem: { largura: 844, altura: 390, toque: true },
 };
 const toque = TAMANHOS[MODO].toque;
 
