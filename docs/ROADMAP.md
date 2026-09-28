@@ -171,7 +171,20 @@ núcleo comum.
 
 ### Em andamento
 
-(nada em andamento: a rodada 11 terminou)
+- **Rodada 12 (motores que fecham a Ilha Sites)**, etapa por etapa (detalhe
+  em `docs/PROGRESSO.md`):
+  - [x] Etapa 1: testes que leem o currículo (nada de "Layout planejada"
+    escrito à mão: `testes/curriculo.mjs` e os testes de conteúdo derivam
+    o esperado do currículo e do conteúdo registrado) e o registro dos
+    portões lógicos (`logica-decisoes-u2`, sala "Por baixo do capô" e o
+    motor planejado `circuito-logico` em `src/curriculo/motores.ts`).
+  - [ ] Etapa 2: variáveis CSS e `@media` no motor e no painel.
+  - [ ] Etapa 3: E5 com o próprio jogo como site-alvo e o Meu tema.
+  - [ ] Etapa 4: modo dispositivo.
+  - [ ] Etapa 5: painel Lighthouse.
+  - [ ] Etapa 6: projeto-ponte, exportação, guia de publicação, Meus
+    projetos e a P2.
+  - [ ] Etapa 7: mobile, guia, liberações e bateria completa.
 
 ### Pendente de decisão
 
@@ -185,7 +198,8 @@ núcleo comum.
    (Sonnet): E5 (o jogo como site-alvo), Responsivo (modo dispositivo),
    Publicar (auditoria, exportar, projeto-ponte), Origens (linha do
    tempo, comparador de linguagens, diagrama), Lógica (Console, execução
-   de JS, depurador), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
+   de JS, depurador) junto com o motor `circuito-logico` (portões
+   lógicos, `src/curriculo/motores.ts`), Páginas vivas, Rede e Servidor, IA (IA ao vivo),
    Ofício.
 3. Depois que a camada de trilhas e a fábrica estiverem estáveis: portar o
    protótipo `InterativAIPLUS` como a trilha Automação industrial (ver

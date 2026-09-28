@@ -4,6 +4,7 @@
 // fase liberada e para o ponto no mapa, botão dentro da fase).
 // Uso: node testes/explorar.mjs [desktop|retrato|paisagem]
 import { readFileSync } from "node:fs";
+import { planejadaComTema } from "./curriculo.mjs";
 import { abrir, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -57,7 +58,10 @@ await tocar(ilha("sites"));
 await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
 conferir((await ponto("sites-elementos-u3").getAttribute("data-lente")) === "acesa", `${MODO}: na ilha, a U3 (Acessibilidade) acende`);
 conferir((await ponto("sites-elementos-u1").getAttribute("data-lente")) === "apagada", `${MODO}: e a U1 apaga`);
-conferir((await ponto("sites-publicar-u1").getAttribute("data-lente")) === "acesa", `${MODO}: a planejada Acessibilidade e Lighthouse acende`);
+const planejadaAcessivel = planejadaComTema("acessibilidade", ["sites"]);
+if (planejadaAcessivel) {
+  conferir((await ponto(planejadaAcessivel.unidade.id).getAttribute("data-lente")) === "acesa", `${MODO}: a planejada ${planejadaAcessivel.unidade.id} acende`);
+}
 await tocar(pagina.getByRole("button", { name: /Apagar a lente/ }));
 await pagina.locator("[data-progresso-lente]").waitFor({ state: "detached" });
 conferir((await ponto("sites-elementos-u1").getAttribute("data-lente")) === null, `${MODO}: o X apaga a lente`);

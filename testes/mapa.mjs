@@ -2,6 +2,7 @@
 // ilha (pontos, card, Jogar), museu das Origens, comemoração ao concluir
 // uma unidade e os três layouts.
 // Uso: node testes/mapa.mjs [desktop|retrato|paisagem]
+import { CURRICULO, planejadasDaIlha, prontasDaIlha, unidadesDaIlha } from "./curriculo.mjs";
 import { abrir, conferir, errosRelevantes, progressoComFase, pularMeta, URL_JOGO } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -25,7 +26,8 @@ async function tocar(localizador) {
   const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: ROTA_MUNDO, esperar: "[data-mapa=mundo]" });
   const ilha = (id) => pagina.locator(`[data-ilha="${id}"]`).first();
   conferir((await ilha("sites").getAttribute("data-estado")) === "disponivel", `${MODO}: Sites aberta`);
-  for (const id of ["origens", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio", "frameworks"]) {
+  // Toda ilha sem unidade pronta aparece em construção (derivado do conteúdo publicado).
+  for (const { id } of CURRICULO.filter((item) => item.id !== "sites" && prontasDaIlha(item.id).length === 0)) {
     conferir((await ilha(id).getAttribute("data-estado")) === "construcao", `${MODO}: ${id} em construção (sem unidade pronta)`);
   }
   conferir((await ilha("frameworks").textContent()).includes("Opcional"), `${MODO}: Frameworks marcada como Opcional`);
@@ -35,28 +37,46 @@ async function tocar(localizador) {
   const medidas = await area.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth, sh: el.scrollHeight, ch: el.clientHeight }));
   if (MODO !== "desktop") conferir(medidas.sw > medidas.cw, `${MODO}: o mundo rola de lado (${medidas.sw} > ${medidas.cw})`);
 
-  // Ilha em construção: dá para entrar e ver o percurso planejado.
-  await tocar(ilha("logica"));
-  await pagina.locator("[data-mapa=ilha][data-ilha=logica]").waitFor();
-  conferir((await pagina.getByText("Em construção").count()) >= 6, `${MODO}: as zonas da Lógica têm a placa Em construção`);
+  // Ilha em construção: dá para entrar e ver o percurso planejado. A
+  // primeira da rota sem nenhuma unidade pronta (hoje, a Lógica).
+  const emConstrucao = CURRICULO.find((item) => !item.sempreAberta && !item.opcional && prontasDaIlha(item.id).length === 0);
+  await tocar(ilha(emConstrucao.id));
+  await pagina.locator(`[data-mapa=ilha][data-ilha=${emConstrucao.id}]`).waitFor();
+  const zonasComMotor = emConstrucao.zonas.filter((zona) => zona.requerMotor);
   conferir(
-    (await pagina.locator("[data-unidade][data-estado=planejada]").count()) === (await pagina.locator("[data-unidade]").count()),
-    `${MODO}: na Lógica, todas as unidades aparecem como planejadas`,
+    (await pagina.getByText("Em construção").count()) >= zonasComMotor.length,
+    `${MODO}: as ${zonasComMotor.length} zonas de ${emConstrucao.id} que esperam motor têm a placa Em construção`,
   );
-  conferir((await pagina.getByText("Console interativo").count()) === 0, `${MODO}: o texto técnico do motor não aparece`);
+  conferir(
+    (await pagina.locator("[data-unidade][data-estado=planejada]").count()) === unidadesDaIlha(emConstrucao.id).length,
+    `${MODO}: em ${emConstrucao.id}, todas as unidades aparecem como planejadas`,
+  );
+  const textoDoMotor = zonasComMotor[0].requerMotor.slice(0, 18);
+  conferir((await pagina.getByText(textoDoMotor).count()) === 0, `${MODO}: o texto técnico do motor não aparece ("${textoDoMotor}")`);
+  const primeiraPlanejada = unidadesDaIlha(emConstrucao.id)[0];
+  await tocar(pagina.locator(`[data-unidade="${primeiraPlanejada.id}"]`));
+  await pagina.locator("[data-card-unidade]").waitFor();
+  conferir((await pagina.locator("[data-card-unidade]").textContent()).includes("Em breve"), `${MODO}: card da planejada ${primeiraPlanejada.id} diz Em breve`);
+  await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
   await pagina.goBack();
   await pagina.locator("[data-mapa=mundo]").waitFor();
   conferir(true, `${MODO}: o voltar do navegador volta ao mundo`);
 
-  // Sites: U1 disponível, as outras prontas bloqueadas (esperando a anterior), Responsivo planejada.
+  // Sites: a primeira pronta disponível, as outras prontas bloqueadas
+  // (esperando a anterior) e as sem conteúdo planejadas. Tudo derivado do
+  // currículo e do conteúdo publicado (testes/curriculo.mjs).
   await tocar(ilha("sites"));
   await pagina.locator("[data-mapa=ilha][data-ilha=sites]").waitFor();
   const ponto = (id) => pagina.locator(`[data-unidade="${id}"]`);
-  conferir((await ponto("sites-elementos-u1").getAttribute("data-estado")) === "disponivel", `${MODO}: U1 disponível`);
-  conferir((await ponto("sites-elementos-u2").getAttribute("data-estado")) === "bloqueada", `${MODO}: U2 bloqueada`);
-  conferir((await ponto("sites-elementos-u3").getAttribute("data-estado")) === "bloqueada", `${MODO}: U3 bloqueada`);
-  conferir((await ponto("sites-layout-u1").getAttribute("data-estado")) === "bloqueada", `${MODO}: L1 bloqueada (a Layout já está pronta)`);
-  conferir((await ponto("sites-responsivo-u1").getAttribute("data-estado")) === "planejada", `${MODO}: R1 planejada`);
+  const [primeira, ...outrasProntas] = prontasDaIlha("sites");
+  conferir((await ponto(primeira.id).getAttribute("data-estado")) === "disponivel", `${MODO}: ${primeira.id} disponível`);
+  for (const unidade of outrasProntas) {
+    conferir((await ponto(unidade.id).getAttribute("data-estado")) === "bloqueada", `${MODO}: ${unidade.id} bloqueada (pronta, esperando a anterior)`);
+  }
+  const planejadaSites = planejadasDaIlha("sites")[0];
+  for (const unidade of planejadasDaIlha("sites")) {
+    conferir((await ponto(unidade.id).getAttribute("data-estado")) === "planejada", `${MODO}: ${unidade.id} planejada`);
+  }
   const tamanhoPonto = await ponto("sites-elementos-u1").boundingBox();
   conferir(tamanhoPonto.width >= 44 && tamanhoPonto.height >= 44, `${MODO}: pontos com pelo menos 44 px`);
   if (MODO === "retrato") {
@@ -72,10 +92,14 @@ async function tocar(localizador) {
   await card.waitFor();
   conferir((await card.textContent()).includes("Termine a unidade O site é seu para abrir"), `${MODO}: card da U2 diz o que falta`);
   await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
-  await tocar(ponto("sites-responsivo-u1"));
-  await card.waitFor();
-  conferir((await card.textContent()).includes("Em breve"), `${MODO}: card da planejada diz Em breve`);
-  await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
+  if (planejadaSites) {
+    await tocar(ponto(planejadaSites.id));
+    await card.waitFor();
+    conferir((await card.textContent()).includes("Em breve"), `${MODO}: card da planejada (${planejadaSites.id}) diz Em breve`);
+    await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
+  } else {
+    console.log(`${MODO}: Sites não tem unidade planejada (o card "Em breve" foi conferido na ilha em construção)`);
+  }
 
   await tocar(ponto("sites-elementos-u1"));
   await card.waitFor();
@@ -119,9 +143,10 @@ async function tocar(localizador) {
   // Museu das Origens.
   await pagina.goto(`${URL_JOGO}/ilha/origens`);
   await pagina.locator("[data-mapa=museu]").waitFor();
-  conferir((await pagina.locator("[data-sala]").count()) === 6, `${MODO}: museu com as 6 salas`);
+  const salas = unidadesDaIlha("origens").length;
+  conferir((await pagina.locator("[data-sala]").count()) === salas, `${MODO}: museu com as ${salas} salas`);
   conferir((await pagina.locator("[data-antepassado]").count()) === 3, `${MODO}: os 3 antepassados na entrada`);
-  conferir((await pagina.getByText("Em breve").count()) >= 6, `${MODO}: as portas dizem Em breve`);
+  conferir((await pagina.getByText("Em breve").count()) >= salas, `${MODO}: as portas dizem Em breve`);
 
   conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();

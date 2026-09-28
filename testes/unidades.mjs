@@ -8,6 +8,7 @@
 // atributo) e, na E1, o painel Estilos (editar valor, caixinha, setas,
 // seletor de cor, + declaração e regra nova).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
+import { prontasDaIlha } from "./curriculo.mjs";
 import {
   abaDaArvore,
   acaoDaBarra,
@@ -1548,8 +1549,14 @@ conferir(salvoE4.fasesConcluidas.length === 35, `35 fases concluídas (${salvoE4
 // No mundo, Sites mostra as dez unidades prontas concluídas (U1 a U6, E1 a E4).
 await tocar(pagina.getByRole("link", { name: "Mundo" }).first());
 await pagina.locator("[data-mapa=mundo]").waitFor();
-// A zona Layout (L1 a L4) está completa (mas não é jogada aqui: ver testes/layout.mjs), então o total de unidades prontas subiu para 14.
-conferir((await pagina.locator("[data-ilha=sites]").textContent()).includes("10 de 14 unidades"), "mundo: Sites com 10 de 14 unidades");
+// O total de prontas vem do conteúdo publicado (testes/curriculo.mjs): as
+// zonas depois da Estilos não são jogadas aqui (ver testes/layout.mjs e os
+// testes das zonas seguintes).
+const totalSites = prontasDaIlha("sites").length;
+conferir(
+  (await pagina.locator("[data-ilha=sites]").textContent()).includes(`10 de ${totalSites} unidades`),
+  `mundo: Sites com 10 de ${totalSites} unidades`,
+);
 
 conferir(errosRelevantes(erros).length === 0, `console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

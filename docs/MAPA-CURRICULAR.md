@@ -76,7 +76,12 @@ ids):
 6. **Por baixo do capô** (`origens-museu-u6`): memória, processador,
    sistema operacional, arquivos, binário e hexadecimal (ligado às cores
    do CSS: `#ff8800` é hexadecimal) e a internet física (cabos,
-   servidores, pacotes).
+   servidores, pacotes). Aqui também moram os **quebra-cabeças maiores
+   com portões lógicos** (ideia aprovada na rodada 12): somar dois números
+   só com portões E, OU e NÃO e montar uma memória simples com
+   realimentação (a saída voltando para a entrada, o mesmo princípio do
+   selo da contatora dos comandos elétricos). **Requer motor:** o tipo de
+   fase `circuito-logico` (ver "Motores planejados", abaixo).
 
 ---
 
@@ -246,7 +251,13 @@ Zonas (na ordem do mapa):
    variáveis, tipos.
 2. Resolvendo problemas (`resolvendo-problemas`): decompor um problema
    em passos pequenos (u1) e pseudocódigo (u2).
-3. Decisões (`decisoes`): comparações, booleanos, if/else.
+3. Decisões (`decisoes`): comparações, booleanos, if/else (u1) e
+   **portões lógicos** (u2, `logica-decisoes-u2`, ideia aprovada na rodada
+   12): antes de escrever `if` com `&&`, `||` e `!`, o jogador monta
+   portões lógicos (E, OU, NÃO) arrastando e ligando peças para fazer uma
+   saída acontecer. Exemplo: "a porta da padaria só abre se tiver cliente
+   E a loja estiver aberta". Depois, o mesmo circuito aparece como código.
+   **Requer motor:** `circuito-logico`, além do motor da Lógica.
 4. Repetição (`repeticao`): for, while.
 5. Funções (`funcoes`).
 6. Listas e objetos (`listas-e-objetos`).
@@ -258,6 +269,22 @@ Zonas (na ordem do mapa):
    (u2), recursão (u3) e a noção de desempenho (u4, "Por que isso
    trava?": por que um programa que voa com dez itens trava com um
    milhão, sem fórmula).
+
+### Motores planejados
+
+Tipos de fase aprovados que ainda não existem. A ficha em dados fica em
+`src/curriculo/motores.ts` (`MOTORES_PLANEJADOS`), e a checagem
+`motores-planejados` do `testar:conteudo` confere que toda unidade citada
+existe e continua travada por um `requerMotor` que nomeia o tipo.
+
+- **`circuito-logico`** (Circuito lógico): arrastar portões E, OU e NÃO
+  numa bancada, ligar fios, alternar as entradas (chaves), ver as saídas
+  acenderem (lâmpada, porta que abre), a tabela verdade preenchida ao vivo
+  e o botão "ver como código" (o mesmo circuito com `&&`, `||` e `!`);
+  realimentação para a memória simples. Usado em
+  `logica-decisoes-u2` (Portões lógicos), `origens-museu-u6` (Por baixo
+  do capô: somador e memória) e na futura trilha Automação industrial
+  (Comandos elétricos e CLP e Ladder). Entra junto com o motor da Lógica.
 
 ---
 

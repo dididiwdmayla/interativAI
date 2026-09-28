@@ -16,7 +16,14 @@ import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
 import { PROFISSOES } from "@/curriculo/profissoes";
 import { conferirProfissoes } from "@/lib/profissoes";
-import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo, conferirTrilhas } from "@/curriculo/conferir";
+import {
+  conferirConteudoNoCurriculo,
+  conferirIdsDoCurriculo,
+  conferirMotorDoConteudo,
+  conferirMotoresPlanejados,
+  conferirTrilhas,
+} from "@/curriculo/conferir";
+import { MOTORES_PLANEJADOS } from "@/curriculo/motores";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
@@ -477,6 +484,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "trilhas",
     nome: "toda trilha cita ilhas que existem e toda ilha com conteúdo está em alguma trilha",
     checar: ({ unidades }) => conferirTrilhas(TRILHAS, CURRICULO, ILHAS_FUTURAS, unidades, NUCLEO_COMUM, TRILHA_PADRAO),
+  },
+  {
+    id: "motores-planejados",
+    nome: "todo motor planejado cita unidades que existem e continuam travadas pelo requerMotor",
+    checar: () => conferirMotoresPlanejados(MOTORES_PLANEJADOS, CURRICULO, ILHAS_FUTURAS, TRILHAS),
   },
   {
     id: "temas",

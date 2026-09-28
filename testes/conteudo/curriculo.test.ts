@@ -5,8 +5,14 @@
 import { describe, expect, it } from "vitest";
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ILHAS_DA_ROTA, ILHAS_OPCIONAIS, localNoCurriculo, statusDaUnidade } from "@/curriculo";
-import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo } from "@/curriculo/conferir";
+import { CURRICULO, ILHAS_DA_ROTA, ILHAS_FUTURAS, ILHAS_OPCIONAIS, localNoCurriculo, statusDaUnidade, TRILHAS } from "@/curriculo";
+import {
+  conferirConteudoNoCurriculo,
+  conferirIdsDoCurriculo,
+  conferirMotorDoConteudo,
+  conferirMotoresPlanejados,
+} from "@/curriculo/conferir";
+import { MOTORES_PLANEJADOS } from "@/curriculo/motores";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 
 const [U1] = UNIDADES;
@@ -51,68 +57,53 @@ describe("currículo em dados", () => {
   });
 
   it("status vem do conteúdo registrado, não é guardado à mão", () => {
-    expect(statusDaUnidade("sites-elementos-u1")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u2")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u3")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u4")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u5")).toBe("pronta");
-    expect(statusDaUnidade("sites-elementos-u6")).toBe("pronta");
-    expect(statusDaUnidade("sites-estilos-u2")).toBe("pronta");
-    expect(statusDaUnidade("sites-estilos-u3")).toBe("pronta");
-    expect(statusDaUnidade("sites-estilos-u4")).toBe("pronta");
-    expect(statusDaUnidade("sites-layout-u1")).toBe("pronta");
-    expect(statusDaUnidade("sites-responsivo-u1")).toBe("planejada");
-    expect(statusDaUnidade("sites-responsivo-u1", [...UNIDADES, { ...U1, id: "sites-responsivo-u1" }])).toBe("pronta");
+    // Derivado: o teste não sabe (nem precisa saber) quais zonas estão prontas hoje.
+    const registradas = new Set(UNIDADES.map((unidade) => unidade.id));
+    for (const item of CURRICULO.flatMap((ilha) => ilha.zonas.flatMap((zona) => zona.unidades))) {
+      expect(statusDaUnidade(item.id), item.id).toBe(registradas.has(item.id) ? "pronta" : "planejada");
+    }
+    const planejada = CURRICULO.flatMap((ilha) => ilha.zonas.flatMap((zona) => zona.unidades)).find((item) => !registradas.has(item.id));
+    if (!planejada) throw new Error("o currículo inteiro está pronto?");
+    expect(statusDaUnidade(planejada.id, [...UNIDADES, { ...U1, id: planejada.id }])).toBe("pronta");
   });
 
   it("as unidades de conteúdo usam os ids do currículo, na ilha e na zona que dizem", () => {
     for (const unidade of UNIDADES) {
       const local = localNoCurriculo(unidade.id);
-      expect(local?.ilha.id, unidade.id).toBe("sites");
+      expect(local, unidade.id).toBeDefined();
+      expect(`Ilha ${local?.ilha.nome}`, unidade.id).toBe(unidade.ilha);
       expect(local?.zona.nome, unidade.id).toBe(unidade.zona);
-    }
-    expect(UNIDADES.map((unidade) => localNoCurriculo(unidade.id)?.zona.id)).toEqual([
-      "elementos",
-      "elementos",
-      "elementos",
-      "elementos",
-      "elementos",
-      "elementos",
-      "estilos",
-      "estilos",
-      "estilos",
-      "estilos",
-      "layout",
-      "layout",
-      "layout",
-      "layout",
-    ]);
-  });
-
-  it("liberações da rodada 9: U6, Estilos (E1 a E4) e Layout (L1 a L4) sem requerMotor", () => {
-    const liberadas = [
-      "sites-elementos-u6",
-      "sites-estilos-u1",
-      "sites-estilos-u2",
-      "sites-estilos-u3",
-      "sites-estilos-u4",
-      "sites-layout-u1",
-      "sites-layout-u2",
-      "sites-layout-u3",
-      "sites-layout-u4",
-    ];
-    for (const id of liberadas) {
-      const local = localNoCurriculo(id);
-      expect(local, id).not.toBeNull();
-      expect(local?.zona.requerMotor, id).toBeUndefined();
-      expect(local?.unidade.requerMotor, id).toBeUndefined();
+      expect(unidade.id.startsWith(`${local?.ilha.id}-${local?.zona.id}-u`), unidade.id).toBe(true);
     }
   });
 
-  it("E5, Responsivo e Publicar continuam pedindo motor", () => {
-    expect(localNoCurriculo("sites-estilos-u5")?.unidade.requerMotor).toContain("o próprio jogo como site-alvo");
-    expect(localNoCurriculo("sites-responsivo-u1")?.zona.requerMotor).toContain("modo dispositivo");
-    expect(localNoCurriculo("sites-publicar-u1")?.zona.requerMotor).toContain("auditoria");
+  it("toda unidade pronta mora em zona (e é unidade) sem requerMotor", () => {
+    for (const unidade of UNIDADES) {
+      const local = localNoCurriculo(unidade.id);
+      expect(local?.zona.requerMotor, unidade.id).toBeUndefined();
+      expect(local?.unidade.requerMotor, unidade.id).toBeUndefined();
+    }
+  });
+
+  it("toda zona com requerMotor só tem unidades planejadas", () => {
+    for (const zona of CURRICULO.flatMap((ilha) => ilha.zonas)) {
+      if (!zona.requerMotor) continue;
+      for (const item of zona.unidades) expect(statusDaUnidade(item.id), item.id).toBe("planejada");
+    }
+  });
+
+  it("portões lógicos: a Decisões e a sala Por baixo do capô esperam o motor circuito-logico", () => {
+    const [circuito] = MOTORES_PLANEJADOS;
+    expect(circuito.id).toBe("circuito-logico");
+    expect(circuito.usadoEm.map((uso) => uso.unidadeId)).toEqual(["logica-decisoes-u2", "origens-museu-u6"]);
+    for (const uso of circuito.usadoEm) {
+      const local = localNoCurriculo(uso.unidadeId);
+      expect(local?.unidade.requerMotor, uso.unidadeId).toContain("circuito-logico");
+    }
+    // Antes de escrever if com &&, || e !: a u2 vem logo depois da u1 (comparações e if/else).
+    expect(localNoCurriculo("logica-decisoes-u2")?.indice).toBe(1);
+    expect(circuito.trilhas).toContain("automacao");
+    expect(conferirMotoresPlanejados(MOTORES_PLANEJADOS, CURRICULO, ILHAS_FUTURAS, TRILHAS)).toEqual([]);
   });
 });
 
@@ -145,15 +136,38 @@ describe("checagens do currículo (sabotagens)", () => {
   });
 
   it("unidade de conteúdo numa zona com requerMotor falha dizendo o que falta", () => {
-    const responsivo: Unidade = { ...U1, id: "sites-responsivo-u1", zona: "Responsivo", titulo: "Modo dispositivo" };
-    const problemas = conferirMotorDoConteudo(CURRICULO, [responsivo]);
+    const [origens, sites, ...resto] = CURRICULO;
+    const trancada = { ...sites, zonas: sites.zonas.map((zona, indice) => (indice === 0 ? { ...zona, requerMotor: "um motor de mentirinha" } : zona)) };
+    const problemas = conferirMotorDoConteudo([origens, trancada, ...resto], [U1]);
     expect(problemas).toHaveLength(1);
-    expect(problemas[0]).toContain('a zona "Responsivo" ainda requer motor: modo dispositivo');
+    expect(problemas[0]).toContain(`a zona "${sites.zonas[0].nome}" ainda requer motor: um motor de mentirinha`);
     expect(problemas[0]).toContain("relate o que falta");
   });
 
-  it("a E5 com conteúdo falha pelo requerMotor da própria unidade", () => {
-    const e5: Unidade = { ...U1, id: "sites-estilos-u5", zona: "Estilos", numero: 5, titulo: "Variáveis e temas" };
-    expect(conferirMotorDoConteudo(CURRICULO, [e5]).join("\n")).toContain("ela ainda requer motor: o próprio jogo como site-alvo");
+  it("unidade com requerMotor próprio falha pelo motor da unidade", () => {
+    const [origens, sites, ...resto] = CURRICULO;
+    const zonas = sites.zonas.map((zona, indice) =>
+      indice === 0
+        ? { ...zona, unidades: zona.unidades.map((item) => (item.id === U1.id ? { ...item, requerMotor: "o motor da unidade" } : item)) }
+        : zona,
+    );
+    expect(conferirMotorDoConteudo([origens, { ...sites, zonas }, ...resto], [U1]).join("\n")).toContain(
+      "ela ainda requer motor: o motor da unidade",
+    );
+  });
+
+  it("motor planejado citando unidade sem requerMotor, trilha ou ilha que não existe falha", () => {
+    const quebrado = {
+      ...MOTORES_PLANEJADOS[0],
+      usadoEm: [{ unidadeId: U1.id, como: "x" }, { unidadeId: "sites-inventada-u9", como: "x" }],
+      trilhas: ["culinaria"],
+      ilhasFuturas: ["atlantida"],
+    };
+    const problemas = conferirMotoresPlanejados([quebrado, quebrado], CURRICULO, ILHAS_FUTURAS, TRILHAS).join("\n");
+    expect(problemas).toContain('motor planejado com id repetido: "circuito-logico"');
+    expect(problemas).toContain(`a unidade "${U1.id}" usa o motor planejado "circuito-logico", mas o requerMotor dela (ou da zona) não cita`);
+    expect(problemas).toContain('cita a unidade "sites-inventada-u9", que não está no currículo');
+    expect(problemas).toContain('cita a trilha "culinaria", que não existe');
+    expect(problemas).toContain('cita a ilha futura "atlantida", que não existe');
   });
 });

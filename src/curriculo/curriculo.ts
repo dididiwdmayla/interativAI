@@ -12,6 +12,8 @@ import type { IlhaCurriculo } from "./tipos";
 const MOTOR_LOGICA = "Console interativo, execução de JS isolada e aba Fontes com depurador";
 const MOTOR_PAGINAS_VIVAS = "JS do jogador rodando no site-alvo e aba Aplicação";
 const MOTOR_REDE = "aba Rede, servidor simulado e diagrama de requisições";
+/** Tipo de fase planejado em src/curriculo/motores.ts (ficha com as peças e onde é usado). */
+const MOTOR_CIRCUITO = "tipo de fase circuito-logico (arrastar portões E, OU e NÃO, ligar fios, alternar entradas, ver saídas, tabela verdade e ver como código)";
 const MOTOR_IA =
   "IA ao vivo: nas fases guiadas, código roteirizado aparecendo como se fosse digitado no editor, de forma determinística e com um bug plantado fixo; nas livres, o Gemini escrevendo ao vivo e o jogador aceitando, rejeitando ou corrigindo cada trecho";
 
@@ -61,7 +63,8 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             id: "origens-museu-u6",
             titulo: "Por baixo do capô",
             meta: "Espiar o computador por dentro: memória, processador, sistema, arquivos, binário e hexadecimal, e os cabos da internet.",
-            temas: ["fundamentos", "desempenho"],
+            temas: ["fundamentos", "desempenho", "logica"],
+            requerMotor: `tipos de atividade do museu e ${MOTOR_CIRCUITO}, para somar dois números só com portões e montar uma memória simples com realimentação`,
           },
         ],
       },
@@ -274,6 +277,13 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Decisões",
             meta: "Fazer o programa escolher um caminho com comparações, booleanos e if/else.",
             temas: ["logica"],
+          },
+          {
+            id: "logica-decisoes-u2",
+            titulo: "Portões lógicos",
+            meta: "Montar portões E, OU e NÃO para uma saída acontecer e ver o mesmo circuito virar código com &&, || e !.",
+            temas: ["logica", "fundamentos"],
+            requerMotor: `${MOTOR_LOGICA}; ${MOTOR_CIRCUITO}`,
           },
         ],
       },

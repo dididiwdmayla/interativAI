@@ -4,7 +4,8 @@ Checklist das etapas (Ilha Sites › Zona Elementos). Cada etapa termina com
 `npm run build`, `npm run lint` e (a partir da Etapa 15)
 `npm run testar:conteudo` passando e um commit.
 
-**Estado atual:** rodada 11 concluída (zona Layout completa: L1 a L4; ver
+**Estado atual:** rodada 12 em andamento (ver a seção dela). Antes:
+rodada 11 concluída (zona Layout completa: L1 a L4; ver
 a seção dela e o `docs/ROADMAP.md`). Antes: rodada 10 concluída
 (estabilidade da bateria, trilhas, temas, profissões, glossário e áudio).
 Antes: rodada 9 concluída (painel Estilos, motor de cascata,
@@ -18,6 +19,36 @@ rodada 6 — Unidades 3, 4 e 5 da zona
 Elementos produzidas (Títulos e textos, Links/imagens/id/class, Caixas e
 seções). Próximo passo: a Revisão do dia (ponto fixo no mapa com desafios
 curtos por revisão espaçada).
+
+## Rodada 12: motores que fecham a Ilha Sites
+
+Variáveis CSS e `@media` no motor, E5 (o jogo como site-alvo), modo
+dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
+`docs/ROADMAP.md`.
+
+- [x] **Etapa 1: testes que leem o currículo e os portões lógicos.**
+  - Testes com o estado do currículo escrito à mão agora derivam o
+    esperado: `curriculo.test.ts` (status de toda unidade do currículo
+    contra `UNIDADES`, zona e ilha de cada unidade pronta, "zona com
+    `requerMotor` só tem planejadas"; as sabotagens usam um currículo de
+    mentirinha em vez de "a Responsivo ainda pede motor"), `mapa.test.ts`
+    (a Lógica abre só com todas as prontas de Sites concluídas, testado
+    prefixo a prefixo; os estados da Estilos calculados da lista de
+    prontas) e, nos testes de navegador, `testes/curriculo.mjs` (lê o
+    currículo transpilado e o `publicados.json`): `mapa.mjs` confere a
+    primeira pronta de Sites disponível, as outras prontas bloqueadas, as
+    planejadas planejadas, a primeira ilha em construção da rota (placas,
+    tudo planejado, card "Em breve") e o museu com as salas do currículo;
+    `unidades.mjs` conta as prontas de Sites; `explorar.mjs` acha a
+    planejada com o tema.
+  - Portões lógicos registrados: `logica-decisoes-u2` "Portões lógicos"
+    (depois do if/else, antes do `&&`, `||` e `!` no código), a sala
+    "Por baixo do capô" (`origens-museu-u6`) com o somador e a memória com
+    realimentação, e o motor planejado `circuito-logico` em
+    `src/curriculo/motores.ts` (peças, onde é usado, trilhas Web e
+    Automação), com a checagem `motores-planejados` no `testar:conteudo`
+    e sabotagens. `MAPA-CURRICULAR.md` com a seção "Motores planejados";
+    no `ROADMAP.md`, o motor entra junto com o da Lógica.
 
 ## Rodada 11: zona Layout completa (L1 a L4)
 

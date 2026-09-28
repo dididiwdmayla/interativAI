@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3, L4] = UNIDADES;
+const [U1, U2, U3, U4, U5, U6, E1] = UNIDADES;
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -27,6 +27,8 @@ const ilha = (id: string): IlhaCurriculo => {
 const SITES = ilha("sites");
 const ELEMENTOS = SITES.zonas[0];
 const ESTILOS = SITES.zonas[1];
+/** As unidades prontas de Sites, na ordem do currículo (derivado: vale com qualquer zona pronta). */
+const SITES_PRONTAS = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-"));
 const item = (id: string) => {
   const achado = ELEMENTOS.unidades.find((unidade) => unidade.id === id);
   if (!achado) throw new Error(id);
@@ -67,20 +69,12 @@ describe("ilhas", () => {
     const unidades = [...UNIDADES, LOGICA_FALSA];
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4), unidades })).toBe("bloqueada");
-    // A U6 também está pronta: falta ela.
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5), unidades })).toBe("bloqueada");
-    // A zona Estilos (E1 a E4, as quatro prontas) também precisa acabar.
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3), unidades })).toBe("bloqueada");
-    // A zona Layout (L1 a L4, completa) também precisa acabar.
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3), unidades })).toBe("bloqueada");
-    expect(estadoDaIlha(logica, { progresso: concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3, E4, L1, L2, L3, L4), unidades })).toBe("disponivel");
+    // Cada unidade pronta de Sites precisa acabar: com qualquer uma faltando, a Lógica segue bloqueada.
+    for (let quantas = 0; quantas < SITES_PRONTAS.length; quantas += 1) {
+      const progresso = concluiu(...SITES_PRONTAS.slice(0, quantas));
+      expect(estadoDaIlha(logica, { progresso, unidades }), `com ${quantas} de ${SITES_PRONTAS.length}`).toBe("bloqueada");
+    }
+    expect(estadoDaIlha(logica, { progresso: concluiu(...SITES_PRONTAS), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -116,14 +110,31 @@ describe("zonas e unidades", () => {
     expect(zonaAberta(SITES, ESTILOS, { progresso: concluiu(U1, U2, U3, U4, U5, U6) })).toBe(true);
   });
 
-  it("a E1 fica bloqueada até a zona Elementos acabar (U1 a U6), e a E5 segue planejada", () => {
+  it("a E1 fica bloqueada até a zona Elementos acabar, e as unidades da Estilos vão em sequência (planejadas ficam planejadas)", () => {
     const estados = (progresso: Progresso) => ESTILOS.unidades.map((unidade) => estadoDaUnidade(SITES, ESTILOS, unidade, { progresso }));
+    const prontasEstilos = UNIDADES.filter((unidade) => ESTILOS.unidades.some((item) => item.id === unidade.id));
     expect(E1.id).toBe("sites-estilos-u1");
-    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(["bloqueada", "bloqueada", "bloqueada", "bloqueada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6))).toEqual(["disponivel", "bloqueada", "bloqueada", "bloqueada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1))).toEqual(["concluida", "disponivel", "bloqueada", "bloqueada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1, E2))).toEqual(["concluida", "concluida", "disponivel", "bloqueada", "planejada"]);
-    expect(estados(concluiu(U1, U2, U3, U4, U5, U6, E1, E2, E3))).toEqual(["concluida", "concluida", "concluida", "disponivel", "planejada"]);
+    /** O esperado, derivado do currículo: planejada, concluída, a primeira pronta não concluída disponível, o resto bloqueado. */
+    const esperado = (zonaAberta: boolean, concluidas: number) => {
+      let achouDisponivel = false;
+      return ESTILOS.unidades.map((item) => {
+        const indice = prontasEstilos.findIndex((unidade) => unidade.id === item.id);
+        if (indice < 0) return "planejada";
+        if (!zonaAberta) return "bloqueada";
+        if (indice < concluidas) return "concluida";
+        if (!achouDisponivel) {
+          achouDisponivel = true;
+          return "disponivel";
+        }
+        return "bloqueada";
+      });
+    };
+    expect(estados(concluiu(U1, U2, U3, U4, U5))).toEqual(esperado(false, 0));
+    for (let quantas = 0; quantas <= prontasEstilos.length; quantas += 1) {
+      expect(estados(concluiu(U1, U2, U3, U4, U5, U6, ...prontasEstilos.slice(0, quantas))), `${quantas} concluídas`).toEqual(
+        esperado(true, quantas),
+      );
+    }
   });
 
   it("desbloqueio permanente: uma unidade nova numa zona anterior não tranca de novo a zona já aberta", () => {

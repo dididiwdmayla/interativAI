@@ -78,6 +78,17 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 
 Todos falham se aparecer erro ou aviso no console do navegador.
 
+**O que esperar do mapa vem do currículo, nunca escrito à mão.**
+`testes/curriculo.mjs` lê o `src/curriculo/curriculo.ts` (transpilado
+pelo TypeScript do projeto) e as unidades publicadas
+(`src/conteudo/publicados.json`) e dá `CURRICULO`, `PUBLICADAS`,
+`prontasDaIlha`, `planejadasDaIlha`, `unidadesDaIlha` e
+`planejadaComTema`. Assim, "a primeira pronta disponível, as outras
+bloqueadas, as sem conteúdo planejadas" continua certo quando uma zona
+vira conteúdo (antes, `mapa.mjs` esperava "Layout planejada" e quebrava a
+cada zona nova). Os testes de conteúdo fazem o mesmo com `UNIDADES` e
+`CURRICULO` (`curriculo.test.ts`, `mapa.test.ts`).
+
 ```bash
 npm run bateria           # a bateria inteira (testes/todos.mjs), uma vez
 npm run bateria:repetir   # 5 rodadas seguidas (RODADAS=n muda), com resumo

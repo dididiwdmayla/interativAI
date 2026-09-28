@@ -5,6 +5,7 @@
  */
 import type { Unidade } from "@/conteudo/tipos";
 import { localNoCurriculo, motorQueFalta } from "./index";
+import type { MotorPlanejado } from "./motores";
 import type { Trilha } from "./trilhas";
 import type { IlhaCurriculo } from "./tipos";
 
@@ -144,6 +145,45 @@ export function conferirTrilhas(
   for (const ilha of futuras) {
     if (ilha.zonas.length > 0) problemas.push(`a ilha futura "${ilha.id}" tem zonas: mova ela para o CURRICULO`);
     if (!KEBAB.test(ilha.id)) problemas.push(`id de ilha "${ilha.id}" não está em kebab-case`);
+  }
+  return problemas;
+}
+
+/**
+ * Motores planejados (src/curriculo/motores.ts): ids únicos; toda unidade
+ * citada existe no currículo e continua travada por um `requerMotor` (dela
+ * ou da zona) que nomeia o tipo de fase; as trilhas e as ilhas futuras
+ * citadas existem.
+ */
+export function conferirMotoresPlanejados(
+  motores: readonly MotorPlanejado[],
+  curriculo: readonly IlhaCurriculo[],
+  futuras: readonly IlhaCurriculo[],
+  trilhas: readonly Trilha[],
+): string[] {
+  const problemas: string[] = [];
+  problemas.push(...repetidos(motores.map((motor) => motor.id)).map((id) => `motor planejado com id repetido: "${id}"`));
+  for (const motor of motores) {
+    if (motor.usadoEm.length === 0) problemas.push(`o motor planejado "${motor.id}" não diz onde vai ser usado`);
+    for (const uso of motor.usadoEm) {
+      const local = localNoCurriculo(uso.unidadeId, curriculo);
+      if (!local) {
+        problemas.push(`o motor planejado "${motor.id}" cita a unidade "${uso.unidadeId}", que não está no currículo`);
+        continue;
+      }
+      const falta = motorQueFalta(local.zona, local.unidade);
+      if (!falta?.includes(motor.id)) {
+        problemas.push(
+          `a unidade "${uso.unidadeId}" usa o motor planejado "${motor.id}", mas o requerMotor dela (ou da zona) não cita "${motor.id}"`,
+        );
+      }
+    }
+    for (const id of motor.trilhas) {
+      if (!trilhas.some((trilha) => trilha.id === id)) problemas.push(`o motor planejado "${motor.id}" cita a trilha "${id}", que não existe`);
+    }
+    for (const id of motor.ilhasFuturas) {
+      if (!futuras.some((ilha) => ilha.id === id)) problemas.push(`o motor planejado "${motor.id}" cita a ilha futura "${id}", que não existe`);
+    }
   }
   return problemas;
 }
