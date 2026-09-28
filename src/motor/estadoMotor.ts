@@ -88,9 +88,16 @@ export const FALA_DESAFIO: Fala = {
 
 export const FALA_REVISAO = "Modo revisão: sem estrelas, é só relembrar. Quando quiser, volte ao desafio.";
 
+export const FALA_PROJETO: Fala = {
+  texto: "O site é seu! Sem passo a passo: os requisitos se marcam sozinhos quando você fizer. Travou? O Me ajuda te faz uma pergunta.",
+  expressao: "comemorando",
+};
+
 /** Fala do primeiro momento de objetivos (depois da introdução ou ao abrir direto). */
 export function falaDeInicio(fase: Fase, toque: boolean): Fala {
-  return fase.tipo === "desafio" ? FALA_DESAFIO : falaDoObjetivo(fase, 0, toque);
+  if (fase.tipo === "desafio") return FALA_DESAFIO;
+  if (fase.tipo === "projeto-ponte") return FALA_PROJETO;
+  return falaDoObjetivo(fase, 0, toque);
 }
 
 type OpcoesEstadoInicial = {
@@ -109,7 +116,7 @@ export function criarEstadoInicial(
   toque: boolean,
   { modo, mostrarMeta }: OpcoesEstadoInicial,
 ): EstadoMotor {
-  const total = fase.tipo === "pratica" ? fase.objetivos.length : fase.partes.length;
+  const total = fase.tipo === "pratica" ? fase.objetivos.length : fase.tipo === "desafio" ? fase.partes.length : fase.requisitos.length;
   const base: EstadoMotor = {
     etapa: mostrarMeta ? "meta" : "introducao",
     indiceFala: 0,
@@ -145,8 +152,9 @@ export function criarEstadoInicial(
     return { ...base, etapa: mostrarMeta && !salvo.metaVista ? "meta" : "introducao" };
   }
 
-  if (fase.tipo === "desafio") {
-    const partesFeitas = salvo.partesFeitas.filter((id) => fase.partes.some((parte) => parte.id === id));
+  if (fase.tipo !== "pratica") {
+    const itens = fase.tipo === "desafio" ? fase.partes : fase.requisitos;
+    const partesFeitas = salvo.partesFeitas.filter((id) => itens.some((parte) => parte.id === id));
     const reveres = Math.max(0, salvo.reveres);
     const comum = { ...base, partesFeitas, reveres, concluidos: partesFeitas.length, estrelas: estrelasDoDesafio(reveres) };
     if (partesFeitas.length >= total && salvo.objetivoAtual >= total) {
@@ -155,7 +163,13 @@ export function criarEstadoInicial(
     return {
       ...comum,
       etapa: "objetivos",
-      fala: { texto: "Que bom te ver de novo! O desafio está do jeitinho que você deixou.", expressao: "feliz" },
+      fala: {
+        texto:
+          fase.tipo === "desafio"
+            ? "Que bom te ver de novo! O desafio está do jeitinho que você deixou."
+            : "Que bom te ver de novo! Seu site está do jeitinho que você deixou.",
+        expressao: "feliz",
+      },
     };
   }
 

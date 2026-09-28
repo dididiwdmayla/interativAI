@@ -30,6 +30,14 @@ export const IDS_FERRAMENTAS = [
   "nova-regra",
   "painel-calculado",
   "modelo-de-caixa",
+  // E5: o próprio jogo como site-alvo
+  "salvar-tema",
+  // Zona Responsivo: modo dispositivo
+  "modo-dispositivo",
+  "girar-dispositivo",
+  // Zona Publicar: auditoria
+  "lighthouse",
+  "levar-pro-mundo",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

@@ -21,6 +21,11 @@ import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
 import { IconePainel } from "@/componentes/icones/IconePainel";
 import { IconePrevia } from "@/componentes/icones/IconePrevia";
 import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
+import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
+import { IconeDispositivo } from "@/componentes/icones/IconeDispositivo";
+import { IconeGirar } from "@/componentes/icones/IconeGirar";
+import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
+import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -34,6 +39,7 @@ import { DemoInspecionar } from "./demos/DemoInspecionar";
 import { DemoRenomearTag } from "./demos/DemoRenomearTag";
 import { DemoSincronia } from "./demos/DemoSincronia";
 import { DemoTrilha } from "./demos/DemoTrilha";
+import { ROTA_MEU_TEMA, ROTA_PROJETOS } from "@/lib/rotas";
 import { IDS_FERRAMENTAS, type IdFerramenta, seletorFerramenta } from "./ids";
 
 export type { IdFerramenta } from "./ids";
@@ -64,6 +70,8 @@ export type Ferramenta = {
   liberarNoExperimente?: string[];
   /** Mini animação SVG opcional mostrando o gesto. */
   demo?: ComponentType;
+  /** Um lugar do jogo ligado à ferramenta, com link no card da Caixa (a oficina do Meu tema). */
+  lugar?: { rotulo: string; href: string };
 };
 
 /** O menu do botão direito (e do toque longo) fica livre no "Experimente". */
@@ -580,6 +588,115 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     liberarNoExperimente: [seletorFerramenta("previa")],
+  },
+  // E5: não existe no Chrome (lá, mudar o Styles some ao recarregar); é o
+  // jeito do jogo guardar as variáveis editadas como um tema de verdade.
+  "salvar-tema": {
+    id: "salvar-tema",
+    nome: "Salvar como Meu tema",
+    Icone: IconeSalvarTema,
+    alvo: seletorFerramenta("salvar-tema"),
+    oQueFaz: "Guarda as cores da maquete do jogo como um tema novo, o Meu tema, que vale no jogo inteiro.",
+    praQueServe:
+      "Você muda as variáveis --cor-* e vê o jogo mudar na maquete. Salvando, as cores viram um tema de verdade, que aparece na paleta lá em cima.",
+    comoUsarAqui: {
+      mouse: "Mude as variáveis do :root e clique em Salvar como Meu tema, em cima da tela do site. Antes, eu confiro se o texto continua fácil de ler.",
+      toque: "Mude as variáveis do :root e toque em Salvar como Meu tema, em cima da tela do site. Antes, eu confiro se o texto continua fácil de ler.",
+    },
+    noF12DeVerdade:
+      "não tem esse botão: o que você muda no Styles some ao recarregar. Para guardar, as variáveis vão para o arquivo CSS do site (a aba Changes do Chrome mostra o que você mudou).",
+    experimente: {
+      mouse: "Clique em Salvar como Meu tema.",
+      toque: "Toque em Salvar como Meu tema.",
+    },
+    uso: "sinal",
+    lugar: { rotulo: "Abrir a oficina do Meu tema (editar ou apagar)", href: ROTA_MEU_TEMA },
+  },
+  // Modo dispositivo: conferido no devtools-frontend (emulation-meta.ts: a
+  // ação "Toggle device toolbar", Shift+Ctrl+M, Shift+Cmd+M no Mac;
+  // DeviceModeToolbar: aparelhos prontos, largura livre, girar e zoom).
+  "modo-dispositivo": {
+    id: "modo-dispositivo",
+    nome: "Modo dispositivo",
+    Icone: IconeDispositivo,
+    alvo: seletorFerramenta("modo-dispositivo"),
+    oQueFaz: "Mostra o site como ele fica num celular, num tablet ou num notebook, com a largura de verdade de cada um.",
+    praQueServe:
+      "Serve para ver o que quebra no celular sem ter um celular na mão: texto cortado, coluna espremida, rolagem de lado. As @media reagem à largura escolhida.",
+    comoUsarAqui: {
+      mouse: "Clique no botão do celular e tablet, ao lado da setinha. Escolha o aparelho na barra que aparece em cima da tela, ou arraste as bordas para uma largura livre.",
+      toque: "Toque no botão do celular e tablet, ao lado da setinha. Escolha o aparelho na barra que aparece em cima da tela.",
+    },
+    noF12DeVerdade:
+      "é o Toggle device toolbar (o ícone de celular e tablet no canto do DevTools), ou Ctrl+Shift+M (Cmd+Shift+M no Mac). A barra tem a lista de aparelhos, a largura e a altura, o zoom e o botão de girar.",
+    experimente: {
+      mouse: "Clique no botão do modo dispositivo.",
+      toque: "Toque no botão do modo dispositivo.",
+    },
+    uso: "sinal",
+  },
+  "girar-dispositivo": {
+    id: "girar-dispositivo",
+    nome: "Girar o aparelho",
+    Icone: IconeGirar,
+    alvo: seletorFerramenta("girar-dispositivo"),
+    oQueFaz: "Deita o aparelho: a largura e a altura trocam de lugar.",
+    praQueServe: "Muita gente usa o celular deitado para ver vídeo ou tabela. Girar mostra se o site continua bom assim.",
+    comoUsarAqui: {
+      mouse: "Com o modo dispositivo ligado, clique no botão de girar na barra de cima da tela.",
+      toque: "Com o modo dispositivo ligado, toque no botão de girar na barra de cima da tela.",
+    },
+    noF12DeVerdade: "é o botão Rotate da barra de dispositivo, ao lado do zoom.",
+    experimente: {
+      mouse: "Clique no botão de girar.",
+      toque: "Toque no botão de girar.",
+    },
+    uso: "sinal",
+  },
+  // Lighthouse: conferido no devtools-frontend (a aba Lighthouse, o botão
+  // "Analyze page state") e no Lighthouse (categorias, pesos, faixas 90/50).
+  lighthouse: {
+    id: "lighthouse",
+    nome: "Lighthouse",
+    Icone: IconeLighthouse,
+    alvo: seletorFerramenta("lighthouse"),
+    oQueFaz: "Confere a página e dá uma nota de 0 a 100 em Acessibilidade, Boas práticas e SEO, com a lista do que consertar.",
+    praQueServe:
+      "Serve para achar o que atrapalha as pessoas (imagem sem descrição, texto apagado demais) e o Google, sem precisar lembrar de tudo. Cada problema leva até a peça.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Lighthouse, lá em cima no painel, e clique em Analisar. Clique num problema para ver a peça na árvore.",
+      toque: "Abra a aba Lighthouse, lá em cima no painel, e toque em Analisar. Toque num problema para ver a peça na árvore.",
+    },
+    noF12DeVerdade:
+      "é a aba Lighthouse do DevTools: escolha as categorias e clique em Analyze page load. A de verdade confere bem mais coisas (e o desempenho também); esta é uma versão simplificada.",
+    experimente: {
+      mouse: "Clique em Analisar.",
+      toque: "Toque em Analisar.",
+    },
+    uso: "sinal",
+  },
+  // Levar pro mundo: não é do Chrome. No mundo de verdade, o site é uma
+  // pasta com arquivos; o jogo monta essa pasta (index.html e style.css).
+  "levar-pro-mundo": {
+    id: "levar-pro-mundo",
+    nome: "Levar pro mundo",
+    Icone: IconeLevarProMundo,
+    alvo: seletorFerramenta("levar-pro-mundo"),
+    oQueFaz: "Transforma a página do jogo nos arquivos de um site de verdade: o index.html e o style.css, num .zip.",
+    praQueServe:
+      "Num site de verdade, o HTML e o CSS moram em arquivos separados, ligados por uma linha no head. Com os arquivos na mão, dá para publicar e ganhar um endereço na internet.",
+    comoUsarAqui: {
+      mouse: "Clique em Levar pro mundo, em cima da tela do site. Confira os dois arquivos e baixe o .zip. O guia de publicação mostra o resto.",
+      toque: "Toque em Levar pro mundo, em cima da tela do site. Confira os dois arquivos e baixe o .zip. O guia de publicação mostra o resto.",
+    },
+    noF12DeVerdade:
+      "não tem esse botão: o DevTools mexe numa página que já está publicada. Quem cria o site trabalha num editor (como o VS Code) com os arquivos numa pasta, e publica a pasta.",
+    experimente: {
+      mouse: "Clique em Levar pro mundo.",
+      toque: "Toque em Levar pro mundo.",
+    },
+    uso: "sinal",
+    lugar: { rotulo: "Abrir Meus projetos", href: ROTA_PROJETOS },
   },
 };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { rotuloDaFase } from "@/motor/tiposDeFase";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useEffect, useId, useRef } from "react";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
@@ -147,7 +148,7 @@ export function ListaFases({ aberta, faseAtual, aoEscolher, aoFechar }: Props) {
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-sm font-black text-texto">
-                                {fase.tipo === "desafio" ? "Desafio: " : `Fase ${indice + 1}: `}
+                                {rotuloDaFase(fase.tipo, indice + 1)}: 
                                 {fase.titulo}
                               </span>
                               {!liberada && (

@@ -333,7 +333,8 @@ export async function passarApresentacao(pagina, id, experimentar, aoFalhar = as
     await doisQuadros(pagina);
     if ((await camada.getAttribute("data-passo-apresentacao").catch(() => null)) !== "fala") break;
   }
-  await pagina.locator(`[data-apresentacao="${id}"][data-passo-apresentacao="experimente"]`).waitFor({ timeout: 5000 });
+  // data-alvo-livre: os buracos do véu (o alvo e as áreas extras) já estão medidos.
+  await pagina.locator(`[data-apresentacao="${id}"][data-passo-apresentacao="experimente"][data-alvo-livre="sim"]`).waitFor({ timeout: 5000 });
   await esperarPronto(pagina);
   await experimentar();
   try {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { montarDocumentoSiteAlvo, tagFolhaDoJogo } from "@/lib/documentoSiteAlvo";
+import { comBaseNeutra, montarDocumentoSiteAlvo, tagFolhaDoJogo } from "@/lib/documentoSiteAlvo";
 
 type Props = {
   head: string;
@@ -27,9 +27,11 @@ const ALTURA_VIRTUAL = 540;
 /** O srcdoc da miniatura: no modo documento, o documento com a folha editável antes do </head>. */
 function montarMiniatura(head: string, body: string, css: string | null, documentoInteiro: boolean): string {
   if (!documentoInteiro) return montarDocumentoSiteAlvo(head, body, css);
-  if (css === null) return body;
-  const fim = body.search(/<\/head>/i);
-  return fim >= 0 ? `${body.slice(0, fim)}${tagFolhaDoJogo(css)}${body.slice(fim)}` : `${tagFolhaDoJogo(css)}${body}`;
+  // O <link href="style.css"> do site de verdade não vira pedido ao servidor do jogo.
+  const documento = comBaseNeutra(body);
+  if (css === null) return documento;
+  const fim = documento.search(/<\/head>/i);
+  return fim >= 0 ? `${documento.slice(0, fim)}${tagFolhaDoJogo(css)}${documento.slice(fim)}` : `${tagFolhaDoJogo(css)}${documento}`;
 }
 
 export function MiniPrevia({ head, body, css = null, documentoInteiro = false, legenda, rotulo }: Props) {

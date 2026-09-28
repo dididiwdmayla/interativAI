@@ -21,12 +21,13 @@ import {
   estadoDaUnidade,
   estrelasDaUnidade,
   ilhaAnterior,
+  ilhaCompleta,
   pontoAtual,
   unidadeConcluida,
   zonaAberta,
 } from "@/lib/mapa";
 import { resolverLente, unidadeNaLente } from "@/lib/lentes";
-import { ROTA_MUNDO, rotaDaFase } from "@/lib/rotas";
+import { ROTA_MUNDO, ROTA_PROJETOS, rotaDaFase } from "@/lib/rotas";
 import { Oceano } from "../arte/Oceano";
 import { useAnimarMapa } from "../arte/useAnimarMapa";
 import { type ApiAreaArrastavel, AreaArrastavel } from "../AreaArrastavel";
@@ -36,6 +37,26 @@ import { useTamanho } from "../useTamanho";
 import { CardUnidade } from "./CardUnidade";
 import { desenharIlha } from "./desenhoIlha";
 import { PontoUnidade } from "./PontoUnidade";
+
+/** A borda da ilha acesa (ilha completa): um contorno que pulsa em volta da terra. */
+function BordaAcesa({ terra, px }: { terra: { x: number; y: number; largura: number; altura: number; raio: number }; px: (valor: number) => number }) {
+  const animar = useAnimarMapa();
+  return (
+    <motion.rect
+      x={px(terra.x - 8)}
+      y={px(terra.y - 8)}
+      width={px(terra.largura + 16)}
+      height={px(terra.altura + 16)}
+      rx={px(terra.raio + 8)}
+      fill="none"
+      stroke="var(--cor-destaque)"
+      strokeWidth={px(8)}
+      data-borda-acesa
+      animate={animar ? { opacity: [0.45, 1, 0.45] } : { opacity: 0.8 }}
+      transition={animar ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" } : undefined}
+    />
+  );
+}
 
 /** Botão "Mundo" da barra: volta ao mapa das ilhas. */
 export function BotaoVoltarAoMundo() {
@@ -184,6 +205,24 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
       if (brilho !== null) clearTimeout(brilho);
     };
   }, [comemoracao, abriuNaComemoracao]);
+  // A ilha inteira concluída: ela acende (a borda brilha) e, uma vez só, o computadorzinho comemora.
+  const completa = estadoIlha === "disponivel" && ilhaCompleta(ilha, fonte);
+  const [festaDaIlha, setFestaDaIlha] = useState<"esperando" | "aberta" | null>(() =>
+    completa && !progresso.ilhasComemoradas.includes(ilha.id) ? "esperando" : null,
+  );
+  useEffect(() => {
+    if (festaDaIlha !== "esperando") return;
+    // Depois da comemoração da unidade (se houver), para uma festa não cobrir a outra.
+    const temporizador = setTimeout(
+      () => {
+        setFestaDaIlha("aberta");
+        tocarEfeito("fase-concluida");
+        atualizarProgresso((atual) => ({ ...atual, ilhasComemoradas: [...new Set([...atual.ilhasComemoradas, ilha.id])] }));
+      },
+      comemoracao ? 2600 : 600,
+    );
+    return () => clearTimeout(temporizador);
+  }, [festaDaIlha, comemoracao, ilha.id]);
   useEffect(() => {
     if (!mensagem) return;
     const temporizador = setTimeout(() => setMensagem(null), 4200);
@@ -269,7 +308,13 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const alturaDesenho = px(desenho.altura);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="ilha" data-ilha={ilha.id} data-layout={layout}>
+    <div
+      className="flex h-dvh flex-col overflow-hidden bg-mar"
+      data-mapa="ilha"
+      data-ilha={ilha.id}
+      data-layout={layout}
+      data-ilha-completa={completa ? "sim" : "nao"}
+    >
       <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo={`Mapa da ilha ${ilha.nome}. Arraste ou role para ver o caminho inteiro.`}>
@@ -292,6 +337,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                 stroke="var(--cor-areia-sombra)"
                 strokeWidth="4"
               />
+              {completa && <BordaAcesa terra={desenho.terra} px={px} />}
               <rect
                 x={px(desenho.terra.x + 18)}
                 y={px(desenho.terra.y + 18)}
@@ -398,7 +444,26 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
           </div>
         </AreaArrastavel>
         <div role="status" aria-live="polite" className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4">
-          {mensagem && (
+          {festaDaIlha === "aberta" ? (
+            <div
+              className="pointer-events-auto flex max-w-md items-center gap-3 rounded-2xl border-2 border-destaque bg-superficie px-4 py-3 text-texto shadow-[0_4px_0_var(--cor-sombra)]"
+              data-festa-ilha={ilha.id}
+            >
+              <Mascote expressao="comemorando" tamanho={56} className="shrink-0" />
+              <div className="min-w-0">
+                <p className="font-black">Ilha {ilha.nome} completa!</p>
+                <p className="text-sm font-bold text-texto-suave">A ilha inteira acendeu: do primeiro elemento até o seu site no mundo.</p>
+                <div className="mt-2 flex flex-wrap gap-3 text-sm font-black">
+                  <Link href={ROTA_PROJETOS} className="text-primaria underline" data-festa-projetos>
+                    Ver Meus projetos
+                  </Link>
+                  <button type="button" className="text-texto-suave underline" onClick={() => setFestaDaIlha(null)}>
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : mensagem && (
             <p className="rounded-2xl border-2 border-borda bg-superficie px-4 py-2 text-sm font-bold text-texto shadow-[0_4px_0_var(--cor-sombra)]" data-comemoracao>
               {mensagem}
             </p>

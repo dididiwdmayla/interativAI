@@ -16,17 +16,24 @@ import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
 import { PROFISSOES } from "@/curriculo/profissoes";
 import { conferirProfissoes } from "@/lib/profissoes";
-import { conferirConteudoNoCurriculo, conferirIdsDoCurriculo, conferirMotorDoConteudo, conferirTrilhas } from "@/curriculo/conferir";
+import {
+  conferirConteudoNoCurriculo,
+  conferirIdsDoCurriculo,
+  conferirMotorDoConteudo,
+  conferirMotoresPlanejados,
+  conferirTrilhas,
+} from "@/curriculo/conferir";
+import { MOTORES_PLANEJADOS } from "@/curriculo/motores";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { TIPOS_EVENTO } from "@/motor/eventos";
 import { descreverAcao } from "@/motor/executarAcao";
 import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
 import { propriedadeConhecida } from "@/motor/css/valores";
 import { nomeDeTagValido } from "@/motor/nucleoPainel";
-import { explicarResultado, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
+import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
-import type { Acao, Fase, FaseDesafio, FasePratica, Objetivo, Unidade, Validador } from "./tipos";
+import type { Acao, Fase, FaseDesafio, FasePratica, FaseProjetoPonte, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
 
 /** Limites de tamanho dos textos (em caracteres). */
@@ -75,7 +82,7 @@ const FAIXAS_SIMBOLOS_DE_RISCO: readonly (readonly [number, number])[] = [
 const SELETOR_TEXTO = "︎";
 
 /** Um símbolo de risco (ou emoji) sem o seletor de apresentação de texto logo depois. */
-function temSimboloSemSeletorDeTexto(texto: string): boolean {
+export function temSimboloSemSeletorDeTexto(texto: string): boolean {
   const caracteres = Array.from(texto);
   return caracteres.some((caractere, indice) => {
     const codigo = caractere.codePointAt(0) ?? 0;
@@ -155,7 +162,8 @@ function validadoresDe(fase: Fase): { onde: string; validador: Validador }[] {
   if (fase.tipo === "pratica") {
     return fase.objetivos.map((objetivo, indice) => ({ onde: nomeObjetivo(objetivo, indice), validador: objetivo.validador }));
   }
-  return fase.partes.map((parte) => ({ onde: `parte "${parte.id}"`, validador: parte.validador }));
+  const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
+  return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}"`, validador: parte.validador }));
 }
 
 /** O validador e todos os que estão dentro dele. */
@@ -169,8 +177,9 @@ function achatarValidador(validador: Validador): Validador[] {
 
 /** Ações que o JOGADOR faria (soluções), com um rótulo. */
 function acoesDoJogador(fase: Fase): { onde: string; acoes: readonly Acao[] }[] {
-  if (fase.tipo === "desafio") {
-    return fase.partes.map((parte) => ({ onde: `parte "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
+  if (fase.tipo !== "pratica") {
+    const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
+    return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
   }
   return fase.objetivos.flatMap((objetivo, indice) => {
     const nome = nomeObjetivo(objetivo, indice);
@@ -238,10 +247,21 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "nova-regra";
     case "editarCss":
       return "editor-css";
+    case "salvarTema":
+      return "salvar-tema";
+    case "trocarDispositivo":
+    case "desligarDispositivo":
+      return "modo-dispositivo";
+    case "girarDispositivo":
+      return "girar-dispositivo";
+    case "analisarAuditoria":
+      return "lighthouse";
+    case "levarProMundo":
+      return "levar-pro-mundo";
   }
 }
 
-const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada"]);
+const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada", "variavelCss", "temMediaQuery"]);
 const ACOES_DE_CSS: ReadonlySet<Acao["tipo"]> = new Set(["definirPropriedade", "alternarDeclaracao", "adicionarRegra", "editarCss"]);
 
 /** Onde a fase usa CSS (validadores, ações e linhas de ajuda), com um rótulo. */
@@ -301,7 +321,7 @@ function seletoresDe(fase: Fase): { onde: string; seletor: string; deAcao: boole
   const lista: { onde: string; seletor: string; deAcao: boolean }[] = [];
   for (const { onde, validador } of validadoresDe(fase)) {
     for (const item of achatarValidador(validador)) {
-      if ("seletor" in item) lista.push({ onde, seletor: item.seletor, deAcao: false });
+      if ("seletor" in item && item.seletor !== undefined) lista.push({ onde, seletor: item.seletor, deAcao: false });
     }
   }
   objetivosDe(fase).forEach((objetivo, indice) => {
@@ -434,6 +454,13 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
               problemas.push(`o desafio "${fase.id}" pratica "${conceito}", que nenhuma fase da unidade ensinou`);
             }
           }
+        } else if (fase.tipo === "projeto-ponte") {
+          // O projeto não ensina: tudo o que ele pratica já foi ensinado em alguma fase antes.
+          for (const conceito of fase.conceitos) {
+            if (!ensinados.has(conceito)) {
+              problemas.push(`o projeto "${fase.id}" pratica "${conceito}", que nenhuma fase anterior ensinou`);
+            }
+          }
         } else {
           for (const conceito of fase.conceitos) ensinados.add(conceito);
         }
@@ -479,6 +506,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: ({ unidades }) => conferirTrilhas(TRILHAS, CURRICULO, ILHAS_FUTURAS, unidades, NUCLEO_COMUM, TRILHA_PADRAO),
   },
   {
+    id: "motores-planejados",
+    nome: "todo motor planejado cita unidades que existem e continuam travadas pelo requerMotor",
+    checar: () => conferirMotoresPlanejados(MOTORES_PLANEJADOS, CURRICULO, ILHAS_FUTURAS, TRILHAS),
+  },
+  {
     id: "temas",
     nome: "todo conceito tem tema, todo tema citado existe e os temas das unidades prontas batem com os conceitos",
     checar: ({ unidades, fases }) => conferirTemas(CONCEITOS, CURRICULO, unidades, fases),
@@ -504,9 +536,10 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "ids-internos",
     nome: "ids de objetivos e partes são únicos e em kebab-case",
     checar: (fase) => {
-      const ids = fase.tipo === "pratica" ? fase.objetivos.map((item) => item.id) : fase.partes.map((item) => item.id);
+      const ids = fase.tipo === "pratica" ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
+      const vazio = { pratica: "a fase não tem objetivos", desafio: "o desafio não tem partes", "projeto-ponte": "o projeto não tem requisitos" }[fase.tipo];
       return [
-        ...(ids.length === 0 ? [fase.tipo === "pratica" ? "a fase não tem objetivos" : "o desafio não tem partes"] : []),
+        ...(ids.length === 0 ? [vazio] : []),
         ...repetidos(ids).map((id) => `id repetido dentro da fase: "${id}"`),
         ...ids.filter((id) => !KEBAB.test(id)).map((id) => `id "${id}" não está em kebab-case`),
       ];
@@ -603,6 +636,17 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           }
         }
       }
+      if (fase.tipo === "projeto-ponte") {
+        for (const requisito of fase.requisitos) {
+          if (requisito.descricao.length > LIMITES.descricaoParte) {
+            problemas.push(`requisito "${requisito.id}": descrição com ${requisito.descricao.length} caracteres (máximo ${LIMITES.descricaoParte})`);
+          }
+          if (requisito.pergunta.trim().length === 0) problemas.push(`requisito "${requisito.id}": pergunta vazia`);
+          if (requisito.pergunta.length > LIMITES.fala) {
+            problemas.push(`requisito "${requisito.id}": pergunta com ${requisito.pergunta.length} caracteres (máximo ${LIMITES.fala})`);
+          }
+        }
+      }
       if (fase.missaoDeCampo && fase.missaoDeCampo.length > LIMITES.missaoDeCampo) {
         problemas.push(`missão de campo com ${fase.missaoDeCampo.length} caracteres (máximo ${LIMITES.missaoDeCampo})`);
       }
@@ -653,7 +697,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       validadoresDe(fase).flatMap(({ onde, validador }) =>
         achatarValidador(validador).flatMap((item) => {
           const problemas: string[] = [];
-          if ("seletor" in item && item.seletor.trim().startsWith("$0")) {
+          if ("seletor" in item && item.seletor?.trim().startsWith("$0")) {
             problemas.push(`${onde}: "$0" só vale em ações; em validador use "selecionado"`);
           }
           if (item.tipo === "custom" && !VALIDADORES_CUSTOM[item.id]) {
@@ -715,6 +759,9 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (fase.tipo === "desafio" && apresentadasPor(fase).length > 0) {
         problemas.push("o desafio não apresenta ferramentas: tudo o que ele usa já foi ensinado");
       }
+      if (fase.tipo === "projeto-ponte" && apresentadasPor(fase).length > 0) {
+        problemas.push("o projeto-ponte não apresenta ferramentas: ele usa as que o jogador já conhece");
+      }
       return problemas;
     },
   },
@@ -724,7 +771,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     checar: (fase) => {
       const usos = usosDeCss(fase);
       const problemas: string[] = [];
-      if (usos.length > 0 && fase.siteAlvo.css === undefined) {
+      if (usos.length > 0 && fase.siteAlvo.css === undefined && fase.siteAlvo.tipo !== "jogo") {
         problemas.push(`a fase usa CSS (${usos.slice(0, 3).join("; ")}), mas o site-alvo não tem css (a folha editável)`);
       }
       // O que o jogador faz pelo painel Estilos precisa do painel na tela.
@@ -769,6 +816,67 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           .filter((item) => item.tipo === "tituloDaAba")
           .map(() => `${onde}: validador tituloDaAba numa fase sem modoDocumento (o title fica no head fixo, que o jogador não vê)`),
       );
+    },
+  },
+  {
+    id: "projeto-e-levar-pro-mundo",
+    nome: "projeto-ponte e Levar pro mundo pedem modo documento e style.css (o site vira index.html + style.css)",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const exporta = fase.usaFerramentas.includes("levar-pro-mundo");
+      if (fase.tipo === "projeto-ponte") {
+        if (!fase.modoDocumento) problemas.push("o projeto-ponte precisa de modoDocumento: true (o jogador escreve a página inteira)");
+        if (!exporta) problemas.push('o projeto-ponte usa "levar-pro-mundo" (o site do jogador sai do jogo)');
+        if (fase.nomeDoProjeto.trim().length === 0 || fase.nomeDoProjeto.length > LIMITES.titulo) {
+          problemas.push(`nomeDoProjeto com ${fase.nomeDoProjeto.length} caracteres (de 1 a ${LIMITES.titulo})`);
+        }
+      }
+      if (exporta && !fase.modoDocumento) problemas.push('"levar-pro-mundo" só numa fase com modoDocumento (o index.html é o documento inteiro)');
+      if (exporta && fase.siteAlvo.css === undefined) problemas.push('"levar-pro-mundo" pede siteAlvo.css (vira o style.css)');
+      return problemas;
+    },
+  },
+  {
+    id: "site-do-jogo",
+    nome: 'temaSalvo e salvarTema só com o site-alvo do jogo, que vem sem css (a folha sai do tema do jogador)',
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const doJogo = fase.siteAlvo.tipo === "jogo";
+      if (doJogo && fase.siteAlvo.css !== undefined) {
+        problemas.push('o site-alvo do jogo vem sem css: a folha (o :root com os tokens) é montada com o tema do jogador; use SITE_ALVO_DO_JOGO');
+      }
+      if (doJogo && fase.modoDocumento) problemas.push("o site-alvo do jogo não usa modoDocumento (o head da maquete é fixo)");
+      if (doJogo) return problemas;
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "temaSalvo") problemas.push(`${onde}: temaSalvo só vale numa fase com siteAlvo.tipo "jogo"`);
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        if (acoes.some((acao) => acao.tipo === "salvarTema")) problemas.push(`${onde}: salvarTema só vale numa fase com siteAlvo.tipo "jogo"`);
+      }
+      return problemas;
+    },
+  },
+  {
+    id: "ferramentas-dos-validadores",
+    nome: "validador que olha uma ferramenta (dispositivo, auditoria) pede a ferramenta em usaFerramentas",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "dispositivo" && !fase.usaFerramentas.includes("modo-dispositivo")) {
+            problemas.push(`${onde}: o validador dispositivo pede "modo-dispositivo" em usaFerramentas (sem ela, a barra nem aparece)`);
+          }
+          if ((item.tipo === "notaAuditoria" || item.tipo === "semProblema") && !fase.usaFerramentas.includes("lighthouse")) {
+            problemas.push(`${onde}: o validador ${item.tipo} pede "lighthouse" em usaFerramentas (o jogador precisa da aba para ver as notas)`);
+          }
+          if (item.tipo === "notaAuditoria" && (item.minimo < 0 || item.minimo > 100)) {
+            problemas.push(`${onde}: notaAuditoria com minimo ${item.minimo} (vai de 0 a 100)`);
+          }
+        }
+      }
+      return problemas;
     },
   },
   {
@@ -872,7 +980,7 @@ function jogarObjetivos(fase: FasePratica, usarAjuda: boolean): Jogada {
  * confere a regra de conclusão: todas as partes de estado passando ao
  * mesmo tempo e todas as travadas já marcadas.
  */
-function jogarDesafio(fase: FaseDesafio): Jogada {
+function jogarDesafio(fase: FaseDesafio | FaseProjetoPonte): Jogada {
   const simulacao = criarSimulacao(fase);
   const jogada: Jogada = { eventos: [], solucoes: [] };
   const problemas = jogada.solucoes;
@@ -889,41 +997,45 @@ function jogarDesafio(fase: FaseDesafio): Jogada {
   const atualizar = () => {
     feitas = recalcularPartesFeitas(fase, feitas, simulacao.contexto());
   };
-  for (const parte of fase.partes) {
+  const itens = itensDoChecklist(fase) ?? [];
+  const nomeItem = fase.tipo === "desafio" ? "parte" : "requisito";
+  for (const parte of itens) {
     atualizar();
     if (feitas.includes(parte.id)) {
-      problemas.push(`a parte "${parte.id}" já estava marcada antes da própria solução (as partes se misturam)`);
+      problemas.push(`a ${nomeItem} "${parte.id}" já estava marcada antes da própria solução (os itens se misturam)`);
     }
     try {
       simulacao.executar(parte.solucaoDeTeste);
     } catch (erro) {
-      problemas.push(`parte "${parte.id}": a solucaoDeTeste quebrou na ${mensagemDe(erro)}`);
+      problemas.push(`${nomeItem} "${parte.id}": a solucaoDeTeste quebrou na ${mensagemDe(erro)}`);
       return jogada;
     }
     const resultado = simulacao.avaliar(parte.validador);
     if (!resultado.passou) {
-      problemas.push(`parte "${parte.id}": depois da solucaoDeTeste, o validador ainda não passa:\n${explicarResultado(resultado)}`);
+      problemas.push(`${nomeItem} "${parte.id}": depois da solucaoDeTeste, o validador ainda não passa:\n${explicarResultado(resultado)}`);
       return jogada;
     }
     atualizar();
   }
-  for (const parte of fase.partes) {
+  for (const parte of itens) {
     if (feitas.includes(parte.id)) continue;
     if (validadorTravado(parte.validador)) {
-      problemas.push(`no fim, a parte travada "${parte.id}" não ficou marcada`);
+      problemas.push(`no fim, a ${nomeItem} travada "${parte.id}" não ficou marcada`);
       continue;
     }
     const agora = simulacao.avaliar(parte.validador);
     problemas.push(
-      `no fim, a parte "${parte.id}" (avaliada ao vivo) não passa mais: a solução de uma parte seguinte ` +
+      `no fim, a ${nomeItem} "${parte.id}" (avaliada ao vivo) não passa mais: a solução de uma ${nomeItem} seguinte ` +
         "desfez o efeito dela, e o desafio nunca concluiria (as partes de estado precisam passar ao mesmo tempo):\n" +
         explicarResultado(agora),
     );
   }
-  try {
-    estadoFinalDoDesafio(fase);
-  } catch (erro) {
-    problemas.push(`não deu para gerar o "depois" da meta: ${mensagemDe(erro)}`);
+  if (fase.tipo === "desafio") {
+    try {
+      estadoFinalDoDesafio(fase);
+    } catch (erro) {
+      problemas.push(`não deu para gerar o "depois" da meta: ${mensagemDe(erro)}`);
+    }
   }
   return jogada;
 }

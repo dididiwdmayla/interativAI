@@ -5,6 +5,7 @@
  * Serve para os testes de conteúdo (jsdom), para as checagens do
  * /lab/fases (no navegador) e para gerar o "depois" da meta do desafio.
  */
+import { montarArquivos } from "@/lib/exportarProjeto";
 import type { Acao, Fase, FaseDesafio, Previsao, Validador } from "@/conteudo/tipos";
 import {
   atualizarAcentos,
@@ -17,6 +18,17 @@ import {
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
+import {
+  DISPOSITIVO_INICIAL,
+  type EstadoDispositivo,
+  girarDispositivo,
+  medidasNaTela,
+  orientacaoDe,
+  telaDoDispositivo,
+  trocarModelo,
+} from "./dispositivos";
+import { auditar } from "./auditoria";
+import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
 /**
@@ -25,10 +37,12 @@ import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } fro
  * prévia (estilos do jogo e simulação dos acentos).
  */
 export function documentoSoltoDaFase(fase: Fase): Document {
-  const css = fase.siteAlvo.css ?? null;
+  // Site-alvo "jogo" (E5) sem folha: as cores do Doce (a fase aberta no jogo já vem pronta).
+  const siteAlvo = materializarSiteAlvo(fase.siteAlvo);
+  const css = siteAlvo.css ?? null;
   return fase.modoDocumento
-    ? criarDocumentoInteiroSolto(documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body), css)
-    : criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+    ? criarDocumentoInteiroSolto(documentoInteiroInicial(siteAlvo.head, siteAlvo.body), css)
+    : criarDocumentoSolto(siteAlvo.head, siteAlvo.body, css);
 }
 
 export function criarSimulacao(fase: Fase) {
@@ -37,6 +51,13 @@ export function criarSimulacao(fase: Fase) {
   let eventos: EventoFase[] = [];
   let previsaoAtual: Previsao | null = null;
   let respostaPrevisao: number | null = null;
+  // A barra de dispositivo, só nas fases que têm a ferramenta.
+  let dispositivo: EstadoDispositivo = DISPOSITIVO_INICIAL;
+  const comDispositivo = fase.usaFerramentas.includes("modo-dispositivo");
+  const avisarDispositivo = () => {
+    const { largura, altura } = medidasNaTela(dispositivo);
+    eventos.push({ tipo: "trocouDispositivo", ligado: dispositivo.ligado, modelo: dispositivo.modelo, largura, altura });
+  };
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -68,6 +89,43 @@ export function criarSimulacao(fase: Fase) {
     adicionarRegra: nucleo.adicionarRegra,
     escreverCss: nucleo.escreverCss,
     lerCss: nucleo.lerCss,
+    // Salvar o tema fora da tela: só o evento (o progresso de verdade não é tocado).
+    salvarTema:
+      fase.siteAlvo.tipo === "jogo"
+        ? () => {
+            eventos.push({ tipo: "temaSalvo", paresRuins: 0 });
+            return true;
+          }
+        : undefined,
+    dispositivo: comDispositivo
+      ? {
+          trocar: (modelo, largura) => {
+            dispositivo = trocarModelo(dispositivo, modelo, largura);
+            avisarDispositivo();
+          },
+          girar: () => {
+            dispositivo = girarDispositivo(dispositivo);
+            eventos.push({ tipo: "girou", orientacao: orientacaoDe(dispositivo) });
+          },
+          desligar: () => {
+            dispositivo = { ...dispositivo, ligado: false };
+            avisarDispositivo();
+          },
+        }
+      : undefined,
+    // Levar pro mundo fora da tela: monta os arquivos de verdade (sem baixar) e avisa o evento.
+    levarProMundo: fase.usaFerramentas.includes("levar-pro-mundo")
+      ? () => {
+          const arquivos = montarArquivos(serializarDocumentoInteiro(documento), lerCssDoDocumento(documento));
+          eventos.push({ tipo: "exportouProjeto", arquivos: Object.keys(arquivos) });
+        }
+      : undefined,
+    analisarAuditoria: fase.usaFerramentas.includes("lighthouse")
+      ? () => {
+          const { notas } = auditar(documento, comDispositivo && dispositivo.ligado ? { tela: telaDoDispositivo(dispositivo, documento) ?? undefined } : {});
+          eventos.push({ tipo: "auditou", notas });
+        }
+      : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -82,6 +140,8 @@ export function criarSimulacao(fase: Fase) {
       inicial,
       selecao: selecao && no ? { no, via: viaDaOrigem(selecao.origem) } : null,
       eventos,
+      dispositivo: comDispositivo ? dispositivo : null,
+      tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
     };
   };
 
@@ -96,6 +156,8 @@ export function criarSimulacao(fase: Fase) {
       respostaPrevisao = null;
     },
     respostaPrevisao: () => respostaPrevisao,
+    /** O modo dispositivo agora (nas fases com a ferramenta). */
+    dispositivo: () => dispositivo,
     contexto,
     avaliar: (validador: Validador): ResultadoValidador => avaliarDetalhado(validador, contexto()),
     /** Executa ações pelo painel. Lança ErroAcao dizendo qual quebrou. */

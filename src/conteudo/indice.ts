@@ -39,7 +39,8 @@ export function montarIndice(fases: readonly Fase[] = FASES): EntradaIndice[] {
   };
   for (const fase of fases) {
     for (const id of fase.conceitos) {
-      if (fase.tipo === "desafio") entrada(id).praticam.push(fase.id);
+      // Desafio e projeto-ponte praticam o que a fase lista; só a prática ensina.
+      if (fase.tipo !== "pratica") entrada(id).praticam.push(fase.id);
       else entrada(id).ensinam.push(fase.id);
     }
     if (fase.tipo === "pratica") for (const id of fase.pratica ?? []) entrada(id).praticam.push(fase.id);

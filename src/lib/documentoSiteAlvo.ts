@@ -204,6 +204,23 @@ export function serializarDocumentoInteiro(documento: Document): string {
   return `${doctype}${htmlLimpo(documento).outerHTML}`;
 }
 
+/**
+ * O documento do jogador vai para o srcdoc com um `<base href="about:blank">`
+ * do jogo (escondido da árvore e do código) logo no começo do head: assim
+ * endereços relativos, como o `<link rel="stylesheet" href="style.css">` do
+ * site de verdade ou uma `<img src="foto.jpg">`, não viram pedidos ao
+ * servidor do jogo (sem base, o srcdoc herda o endereço da página do jogo).
+ * O style.css de verdade é a folha editável, que o jogo já põe na página.
+ */
+export function comBaseNeutra(texto: string): string {
+  const base = `<base ${ATRIBUTO_INJETADO} href="about:blank">`;
+  const cabeca = /<head(\s[^>]*)?>/i.exec(texto);
+  if (cabeca) return `${texto.slice(0, cabeca.index + cabeca[0].length)}${base}${texto.slice(cabeca.index + cabeca[0].length)}`;
+  const html = /<html(\s[^>]*)?>/i.exec(texto);
+  if (html) return `${texto.slice(0, html.index + html[0].length)}<head>${base}</head>${texto.slice(html.index + html[0].length)}`;
+  return `${base}${texto}`;
+}
+
 /** Um documento inteiro solto (testes, simulação), já preparado como a prévia. */
 export function criarDocumentoInteiroSolto(texto: string, css: string | null = null): Document {
   const documento = new DOMParser().parseFromString(texto, "text/html");

@@ -8,7 +8,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso } from "@/lib/armazemProgresso";
 import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
-import type { EstadoFaseSalvo } from "@/lib/progresso";
+import { type EstadoFaseSalvo, type Progresso, PROJETO_VAZIO } from "@/lib/progresso";
 import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -25,7 +25,19 @@ import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { documentoSoltoDaFase } from "@/motor/simulacao";
 import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
-import { avaliarValidador, consultar, type ContextoValidacao, recalcularPartesFeitas } from "@/motor/validadores";
+import { avaliarValidador, consultar, type ContextoValidacao, itensDoChecklist, recalcularPartesFeitas } from "@/motor/validadores";
+
+/** Meus projetos: o site do projeto-ponte, copiado a cada mudança (a data só anda se o texto mudou). */
+function espelharProjeto(
+  projetos: Progresso["projetos"],
+  faseId: string,
+  html: string | null,
+  css: string | null,
+): Progresso["projetos"] {
+  const anterior = projetos[faseId] ?? PROJETO_VAZIO;
+  if (html === null || (anterior.html === html && anterior.css === css)) return projetos;
+  return { ...projetos, [faseId]: { ...anterior, html, css, atualizadoEm: Date.now() } };
+}
 
 type Opcoes = {
   fase: Fase;
@@ -52,6 +64,8 @@ type Opcoes = {
   destacarNoEstilos: (destaque: { seletorRegra: string; propriedade?: string } | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
+  /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo">;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -84,6 +98,7 @@ export function useMotorFase({
   limparDestaqueCss,
   destacarNoEstilos,
   toque,
+  extraValidacao,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -97,7 +112,11 @@ export function useMotorFase({
 
   const pratica = fase.tipo === "pratica" ? fase : null;
   const desafio = fase.tipo === "desafio" ? fase : null;
-  const total = pratica ? pratica.objetivos.length : (desafio?.partes.length ?? 0);
+  const projeto = fase.tipo === "projeto-ponte" ? fase : null;
+  /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
+  const comChecklist = desafio ?? projeto;
+  const itensChecklist = comChecklist ? (itensDoChecklist(comChecklist) ?? []) : [];
+  const total = pratica ? pratica.objetivos.length : itensChecklist.length;
   const objetivo = pratica && estado.etapa === "objetivos" ? (pratica.objetivos[estado.objetivoAtual] ?? null) : null;
   const previsaoPendente = objetivo?.tipo === "previsao" && estado.previsao === null;
   const degrauMaximo: DegrauAjuda = objetivo?.modo === "sozinho" ? 2 : 4;
@@ -143,8 +162,8 @@ export function useMotorFase({
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
     const documento = obterDocumento();
     if (!documento?.body) return null;
-    return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current };
-  }, [documentoInicial, obterDocumento, obterSelecao]);
+    return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current, ...extraValidacao?.() };
+  }, [documentoInicial, extraValidacao, obterDocumento, obterSelecao]);
 
   /* ---------------------------------------------------------------- */
   /* Persistência                                                      */
@@ -188,10 +207,11 @@ export function useMotorFase({
                 [fase.id]: Math.max(progresso.estrelasPorFase[fase.id] ?? 0, atual.estrelas),
               }
             : progresso.estrelasPorFase,
+          projetos: projeto ? espelharProjeto(progresso.projetos, fase.id, htmlAtual, cssAtual) : progresso.projetos,
         };
       });
     },
-    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta],
+    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta, projeto],
   );
 
   useEffect(() => {
@@ -327,15 +347,17 @@ export function useMotorFase({
    */
   const atualizarChecklist = useCallback(
     (contexto: ContextoValidacao) => {
-      if (!desafio) return;
+      if (!comChecklist) return;
+      const itens = itensDoChecklist(comChecklist) ?? [];
       setEstado((atual) => {
         if (atual.pausa !== null) return atual;
-        const partesFeitas = recalcularPartesFeitas(desafio, atual.partesFeitas, contexto);
+        const partesFeitas = recalcularPartesFeitas(comChecklist, atual.partesFeitas, contexto);
         const novas = partesFeitas.filter((id) => !atual.partesFeitas.includes(id));
         const mesmas = partesFeitas.length === atual.partesFeitas.length && novas.length === 0;
         if (mesmas) return atual;
-        const todas = partesFeitas.length >= desafio.partes.length;
-        const parte = desafio.partes.find((item) => item.id === novas[novas.length - 1]);
+        const todas = partesFeitas.length >= itens.length;
+        const parte = itens.find((item) => item.id === novas[novas.length - 1]);
+        const noProjeto = comChecklist.tipo === "projeto-ponte";
         return {
           ...atual,
           partesFeitas,
@@ -344,14 +366,16 @@ export function useMotorFase({
           listaRever: novas.length > 0 ? false : atual.listaRever,
           pausa: todas ? "desafioConcluido" : null,
           fala: todas
-            ? { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" }
+            ? noProjeto
+              ? { texto: "Todos os requisitos! O site é seu, feito do zero, sem passo a passo. Que orgulho!", expressao: "comemorando" }
+              : { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" }
             : novas.length > 0
-              ? { texto: `Isso! Parte feita: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
+              ? { texto: `Isso! ${noProjeto ? "Requisito cumprido" : "Parte feita"}: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
               : atual.fala,
         };
       });
     },
-    [desafio],
+    [comChecklist],
   );
 
   /** Roda a validação contra o documento vivo. */
@@ -363,7 +387,7 @@ export function useMotorFase({
       const atual = pratica.objetivos[estado.objetivoAtual];
       if (atual.tipo === "previsao" && estado.previsao === null) return;
       if (avaliarValidador(atual.validador, contexto)) concluirObjetivo(estado.objetivoAtual);
-    } else if (desafio) {
+    } else if (comChecklist) {
       atualizarChecklist(contexto);
     }
   }, [
@@ -374,7 +398,7 @@ export function useMotorFase({
     estado.previsao,
     contextoValidacao,
     pratica,
-    desafio,
+    comChecklist,
     concluirObjetivo,
     atualizarChecklist,
   ]);
@@ -491,6 +515,14 @@ export function useMotorFase({
       setEstado({ ...estado, listaRever: !estado.listaRever });
       return;
     }
+    if (projeto) {
+      // No projeto, o computadorzinho só pergunta: uma pergunta de cada requisito que falta, em rodízio.
+      const pendentes = projeto.requisitos.filter((item) => !estado.partesFeitas.includes(item.id));
+      if (pendentes.length === 0) return;
+      const vez = estado.degrau % pendentes.length;
+      setEstado({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda, fala: { texto: pendentes[vez].pergunta, expressao: "curioso" } });
+      return;
+    }
     if (!objetivo || previsaoPendente) return;
     const proximo = Math.min(estado.degrau + 1, degrauMaximo) as DegrauAjuda;
     if (proximo === estado.degrau) return;
@@ -573,7 +605,7 @@ export function useMotorFase({
     if (estado.etapa !== "objetivos" || estado.pausa !== null) return "Nenhum objetivo ativo agora (pausa ou fase concluída).";
     const acoes = pratica
       ? objetivo?.solucaoDeTeste
-      : desafio?.partes.find((parte) => !estado.partesFeitas.includes(parte.id))?.solucaoDeTeste;
+      : itensChecklist.find((parte) => !estado.partesFeitas.includes(parte.id))?.solucaoDeTeste;
     if (!acoes) return "Nada para aplicar.";
     try {
       executarAcoes(acoes, painelCompleto);

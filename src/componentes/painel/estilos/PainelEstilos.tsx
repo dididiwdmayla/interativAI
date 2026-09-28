@@ -7,7 +7,8 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import type { PainelElementos } from "@/conteudo/tipos";
-import { type Bloco, calcularCascata, folhasDoDocumento, normalizarSeletor } from "@/motor/css/cascata";
+import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
+import { type Bloco, calcularCascata, folhasDoDocumento, normalizarSeletor, type OrigemVariavel } from "@/motor/css/cascata";
 import {
   adicionarDeclaracaoNoTexto,
   alternarDeclaracaoNoTexto,
@@ -19,6 +20,7 @@ import {
   trocarValor,
 } from "@/motor/css/editarCss";
 import { ESPECIFICIDADE_ZERO } from "@/motor/css/especificidade";
+import type { Tela } from "@/motor/css/midia";
 import { BlocoEstilo } from "./BlocoEstilo";
 import type { Saida } from "./CampoEstilo";
 import type { AcoesEstilos, DestaqueEstilos, EdicaoEstilos } from "./tipos";
@@ -28,6 +30,8 @@ type Props = {
   elemento: Element | null;
   /** Sobe quando o documento ou o CSS muda: o painel recalcula a cascata. */
   versao: number;
+  /** A tela das @media (o modo dispositivo); sem ela, a da prévia. */
+  tela?: Tela;
   /** Sub-painéis liberados na fase ("estilos", "calculado"). */
   paineis: readonly PainelElementos[];
   /** A fase tem a folha editável (estilo.css). */
@@ -79,15 +83,19 @@ function proximaEdicao(
   alvo: number,
   campo: "nome" | "valor",
   saida: Saida,
-): Omit<EdicaoEstilos, "bloco"> | null {
+): Omit<EdicaoEstilos, "bloco" | "dono"> | null {
   if (saida === "fora") return null;
   if (saida === "enter") return campo === "nome" ? { alvo, campo: "valor" } : null;
+  // No "Herdado de" só aparecem as herdáveis: anda entre as que estão na tela.
+  const posicao = bloco.declaracoes.findIndex((item) => item.indice === alvo);
+  const seguinte = bloco.declaracoes[posicao + 1];
+  const anterior = bloco.declaracoes[posicao - 1];
   if (saida === "tab") {
     if (campo === "nome") return { alvo, campo: "valor" };
-    return alvo + 1 < bloco.declaracoes.length ? { alvo: alvo + 1, campo: "nome" } : { alvo: "nova", campo: "nome" };
+    return seguinte ? { alvo: seguinte.indice, campo: "nome" } : { alvo: "nova", campo: "nome" };
   }
   if (campo === "valor") return { alvo, campo: "nome" };
-  return alvo > 0 ? { alvo: alvo - 1, campo: "valor" } : null;
+  return anterior ? { alvo: anterior.indice, campo: "valor" } : null;
 }
 
 /**
@@ -104,6 +112,7 @@ function proximaEdicao(
 export function PainelEstilos({
   elemento,
   versao,
+  tela,
   paineis,
   temFolha,
   toque,
@@ -118,8 +127,12 @@ export function PainelEstilos({
   const [filtro, setFiltro] = useState("");
   const [edicao, setEdicao] = useState<EdicaoEstilos | null>(null);
   const recipiente = useRef<HTMLDivElement>(null);
+  // O clique num var(): a declaração da variável pisca e fica à vista (jumpToDeclaration do Chrome).
+  const [apontada, setApontada] = useState<OrigemVariavel | null>(null);
+  const apagarApontada = useRef<TemporizadorRastreado | null>(null);
+  useEffect(() => () => apagarApontada.current?.cancelar(), []);
 
-  const cascata = useMemo(() => (elemento ? { versao, resultado: calcularCascata(elemento) } : null), [elemento, versao]);
+  const cascata = useMemo(() => (elemento ? { versao, resultado: calcularCascata(elemento, { tela }) } : null), [elemento, versao, tela]);
   const resultado = cascata?.resultado ?? null;
   const proprios = useMemo(() => {
     if (!resultado) return [];
@@ -133,6 +146,17 @@ export function PainelEstilos({
     setElementoDaEdicao(elemento);
     setEdicao(null);
   }
+
+  const irParaVariavel = (origem: OrigemVariavel) => {
+    apagarApontada.current?.cancelar();
+    setApontada(origem);
+    apagarApontada.current = agendarRastreado(() => setApontada(null), 1600);
+  };
+
+  useEffect(() => {
+    if (!apontada) return;
+    recipiente.current?.querySelector(`[data-apontada="sim"]`)?.scrollIntoView({ block: "nearest", behavior: "auto" });
+  }, [apontada]);
 
   // A edição nova (regra nova, Tab) fica à vista.
   useEffect(() => {
@@ -178,7 +202,7 @@ export function PainelEstilos({
     const limpo = texto.trim();
     if (alvo === "nova") {
       if (campo === "nome") {
-        setEdicao(limpo.length === 0 || saida === "fora" ? null : { bloco: bloco.id, alvo: "nova", campo: "valor", nomeNovo: limpo });
+        setEdicao(limpo.length === 0 || saida === "fora" ? null : { bloco: bloco.id, dono: bloco.elemento, alvo: "nova", campo: "valor", nomeNovo: limpo });
         return;
       }
       const nome = edicao?.nomeNovo ?? "";
@@ -191,10 +215,10 @@ export function PainelEstilos({
           ? mexerNoInline(bloco, (css) => adicionarDeclaracaoNoTexto(css, 0, nome, limpo)?.texto ?? null, { propriedade: nome, valor: limpo })
           : acoes.adicionarDeclaracao(bloco.indiceRegra, nome, limpo) !== null;
       if (certo) sinalizarUso("editar-valor-css");
-      setEdicao(certo && saida === "tab" ? { bloco: bloco.id, alvo: "nova", campo: "nome" } : null);
+      setEdicao(certo && saida === "tab" ? { bloco: bloco.id, dono: bloco.elemento, alvo: "nova", campo: "nome" } : null);
       return;
     }
-    const item = bloco.declaracoes[alvo];
+    const item = bloco.declaracoes.find((declaracao) => declaracao.indice === alvo);
     if (!item) {
       setEdicao(null);
       return;
@@ -219,11 +243,11 @@ export function PainelEstilos({
       return;
     }
     const proxima = proximaEdicao(bloco, alvo, campo, saida);
-    setEdicao(proxima ? { bloco: bloco.id, ...proxima } : null);
+    setEdicao(proxima ? { bloco: bloco.id, dono: bloco.elemento, ...proxima } : null);
   };
 
   const alternar = (bloco: Bloco, indice: number) => {
-    const item = bloco.declaracoes[indice];
+    const item = bloco.declaracoes.find((declaracao) => declaracao.indice === indice);
     if (!item) return;
     if (bloco.tipo === "inline") {
       mexerNoInline(bloco, (css) => alternarDeclaracaoNoTexto(css, { indiceRegra: 0, indiceDeclaracao: indice }), {
@@ -248,7 +272,7 @@ export function PainelEstilos({
     if (!elemento || !temFolha) return;
     const indice = acoes.adicionarRegra(seletorSimples(elemento));
     const folha = folhasDoDocumento(elemento.ownerDocument).find((item) => item.origem === "folha");
-    if (indice !== null && folha) setEdicao({ bloco: `${folha.indice}:${indice}`, alvo: "nova", campo: "nome" });
+    if (indice !== null && folha) setEdicao({ bloco: `${folha.indice}:${indice}`, dono: elemento, alvo: "nova", campo: "nome" });
   };
 
   const destaqueDo = (bloco: Bloco) => {
@@ -272,15 +296,14 @@ export function PainelEstilos({
       bloco={bloco}
       editavel={editavel(bloco)}
       toque={toque}
-      edicao={edicao?.bloco === bloco.id && bloco.elemento === elemento ? edicao : null}
+      edicao={edicao?.bloco === bloco.id && edicao.dono === bloco.elemento ? edicao : null}
       filtro={filtro.trim().toLowerCase()}
       destaque={destaqueDo(bloco)}
       aoPassarSeletor={(entrando) => passarSeletor(bloco, entrando)}
       aoIrParaFonte={() => bloco.regra && acoes.irParaFonte(bloco.regra.inicio)}
       aoComecar={(alvo, campo) => {
-        if (bloco.elemento !== elemento) return;
         acoes.previsualizarCss(null);
-        setEdicao({ bloco: bloco.id, alvo, campo });
+        setEdicao({ bloco: bloco.id, dono: bloco.elemento, alvo, campo });
       }}
       aoConfirmar={(alvo, campo, texto, saida) => confirmar(bloco, alvo, campo, texto, saida)}
       aoCancelar={cancelar}
@@ -288,6 +311,8 @@ export function PainelEstilos({
       aoAlternar={(indice) => alternar(bloco, indice)}
       aoEscolherCor={(indice, valor, final) => escolherCor(bloco, indice, valor, final)}
       aoUsarSetas={() => sinalizarUso("setas-numericas")}
+      declaracaoApontada={apontada && apontada.elemento === bloco.elemento && apontada.blocoId === bloco.id ? apontada.indice : null}
+      aoIrParaVariavel={(variavel) => variavel.origem && irParaVariavel(variavel.origem)}
     />
   );
 

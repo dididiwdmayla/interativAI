@@ -1,20 +1,21 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import type { ParteDesafio } from "@/conteudo/tipos";
 import { Carinha } from "./Carinha";
 
 type Props = {
-  partes: readonly ParteDesafio[];
+  partes: readonly { id: string; descricao: string }[];
   feitas: readonly string[];
+  /** "Checklist do desafio" ou, no projeto-ponte, "Requisitos do projeto". */
+  titulo?: string;
 };
 
-/** Checklist do desafio: cada parte se marca sozinha quando o validador dela passa. */
-export function ChecklistDesafio({ partes, feitas }: Props) {
+/** Checklist do desafio (ou dos requisitos do projeto): cada item se marca sozinho quando o validador dele passa. */
+export function ChecklistDesafio({ partes, feitas, titulo = "Checklist do desafio" }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl border-2 border-borda bg-painel px-3 py-2" data-checklist>
       <h2 className="mb-1 flex items-center justify-between text-xs font-black uppercase tracking-wide text-texto-suave">
-        Checklist do desafio
+        {titulo}
         <span className="rounded-full bg-superficie px-2 py-0.5 text-[11px] text-texto">
           {feitas.length} de {partes.length}
         </span>

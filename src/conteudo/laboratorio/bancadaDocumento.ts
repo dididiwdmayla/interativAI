@@ -37,7 +37,7 @@ export const FASE_BANCADA_DOCUMENTO: FasePratica = {
   conceitos: ["elemento"],
   revisa: [],
   prerequisitos: [],
-  usaFerramentas: ["arvore", "editor", "editar-duplo-clique", "adicionar-atributo"],
+  usaFerramentas: ["arvore", "editor", "editar-duplo-clique", "adicionar-atributo", "modo-dispositivo", "girar-dispositivo"],
   modoDocumento: true,
   introducao: [{ texto: "Bancada do documento: aqui o editor mostra a página inteira, com o head.", expressao: "curioso" }],
   siteAlvo: SITE_BANCADA_DOCUMENTO,

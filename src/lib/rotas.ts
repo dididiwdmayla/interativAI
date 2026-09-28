@@ -23,3 +23,9 @@ export const ROTA_PROFISSOES = "/profissoes";
 
 /** O glossário vivo: todo conceito, onde se aprende e onde se pratica. */
 export const ROTA_GLOSSARIO = "/glossario";
+
+/** A oficina do Meu tema (E5): mexer nas cores salvas de novo, ou apagar. */
+export const ROTA_MEU_TEMA = "/meu-tema";
+
+/** Meus projetos: os sites que o jogador fez (a semente do portfólio). */
+export const ROTA_PROJETOS = "/projetos";

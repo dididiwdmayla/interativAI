@@ -4,13 +4,16 @@
  * (DOMParser) e com o jsdom dos testes: só usa APIs comuns de DOM.
  */
 import { VALIDADORES_CUSTOM } from "@/conteudo/validadoresCustom";
-import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
+import type { Acao, Fase, FaseDesafio, FaseProjetoPonte, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
-import { calcularCascata, folhasDoDocumento, normalizarSeletor, valorEfetivo } from "./css/cascata";
+import { calcularCascata, folhasDoDocumento, leitorDeValores, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
+import type { Tela } from "./css/midia";
+import { auditar } from "./auditoria";
+import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
-import { abrirAtalho, valoresDaPropriedadeIguais } from "./css/valores";
+import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
 
 /** O que um validador pode olhar. */
@@ -23,7 +26,20 @@ export type ContextoValidacao = {
   selecao: { no: Node; via: ViaSelecao | null } | null;
   /** Eventos desde que o objetivo (ou o desafio) começou. */
   eventos: readonly EventoFase[];
+  /**
+   * A tela da prévia agora (o modo dispositivo muda). Sem ela, vale a da
+   * janela do documento ou, num documento solto, a padrão (1280 x 800).
+   */
+  tela?: Tela;
+  /** O modo dispositivo agora (null ou ausente: a fase não tem a barra). */
+  dispositivo?: EstadoDispositivo | null;
 };
+
+/** A tela de um validador de CSS: a `larguraTela` dele ou a da prévia. */
+function opcoesDaTela(validador: { larguraTela?: number; alturaTela?: number }, contexto: ContextoValidacao): OpcoesCascata {
+  if (validador.larguraTela !== undefined) return { tela: telaDaLargura(validador.larguraTela, validador.alturaTela) };
+  return contexto.tela ? { tela: contexto.tela } : {};
+}
 
 export type ResultadoValidador = {
   passou: boolean;
@@ -80,6 +96,10 @@ function lista(itens: readonly string[]): string {
 }
 
 /** Descrição curta de um validador, em PT-BR. */
+function naTela(validador: { larguraTela?: number }): string {
+  return validador.larguraTela !== undefined ? ` numa tela de ${validador.larguraTela} px` : "";
+}
+
 export function descreverValidador(validador: Validador): string {
   switch (validador.tipo) {
     case "existe":
@@ -107,7 +127,7 @@ export function descreverValidador(validador: Validador): string {
     case "tituloDaAba":
       return validador.valor !== undefined ? `título da aba igual a "${validador.valor}"` : "a aba tem título";
     case "valorEfetivo":
-      return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"`;
+      return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"${naTela(validador)}`;
     case "declaracao":
       return `a regra ${validador.seletorRegra} tem ${validador.propriedade}${validador.valor !== undefined ? `: ${validador.valor}` : ""}${
         validador.ativa === undefined ? "" : validador.ativa ? " (ligada)" : " (desligada)"
@@ -115,7 +135,25 @@ export function descreverValidador(validador: Validador): string {
     case "regraExiste":
       return `existe a regra ${validador.seletorRegra}`;
     case "riscada":
-      return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}`;
+      return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}${naTela(validador)}`;
+    case "variavelCss":
+      return `a variável ${validador.nome}${validador.seletor ? ` em ${validador.seletor}` : ""} ${
+        validador.valor !== undefined ? `vale "${validador.valor}"` : validador.diferenteDoInicial ? "mudou de valor" : "tem valor"
+      }`;
+    case "temaSalvo":
+      return "salvou o Meu tema";
+    case "notaAuditoria":
+      return `nota de ${validador.categoria} na auditoria pelo menos ${validador.minimo}`;
+    case "temMediaQuery":
+      return `o CSS tem pelo menos ${validador.minimo ?? 1} @media`;
+    case "cabeNaTela":
+      return `a página cabe numa tela de ${validador.largura} px sem rolar de lado`;
+    case "semProblema":
+      return `a auditoria não acha "${validador.regra}"`;
+    case "dispositivo":
+      return `modo dispositivo ligado${validador.largura !== undefined ? ` com ${validador.largura} px de largura` : ""}${
+        validador.orientacao ? ` (${validador.orientacao === "retrato" ? "em pé" : "deitado"})` : ""
+      }`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -255,7 +293,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const propriedade = nomeDaPropriedade(validador.propriedade);
       const situacoes: string[] = [];
       const passou = consultar(documento, validador.seletor).some((elemento) => {
-        const cascata = calcularCascata(elemento);
+        const cascata = calcularCascata(elemento, opcoesDaTela(validador, contexto));
         const blocos = [...cascata.proprios, ...cascata.herdados.flatMap((grupo) => grupo.blocos)];
         return blocos.some((bloco) => {
           if (bloco.folha?.origem === "navegador") return false;
@@ -269,6 +307,49 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
         });
       });
       return { passou, descricao, detalhe: situacoes.length === 0 ? "a declaração não vale nesse elemento" : `situação: ${lista(situacoes)}` };
+    }
+    case "variavelCss":
+      return avaliarVariavelCss(validador, contexto, descricao);
+    case "temMediaQuery": {
+      const minimo = validador.minimo ?? 1;
+      const quantas = folhasDoDocumento(documento)
+        .filter((folha) => folha.origem !== "navegador")
+        .reduce((soma, folha) => soma + (folha.analisada.texto.match(/@media\b/gi)?.length ?? 0), 0);
+      return { passou: quantas >= minimo, descricao, detalhe: `achou ${quantas}` };
+    }
+    case "cabeNaTela": {
+      const motivos = motivosDeNaoCaber(documento, validador.largura);
+      return { passou: motivos.length === 0, descricao, detalhe: motivos.length === 0 ? "cabe" : lista(motivos) };
+    }
+    case "notaAuditoria": {
+      const { notas } = auditar(contexto.documento, contexto.tela ? { tela: contexto.tela } : {});
+      return { passou: notas[validador.categoria] >= validador.minimo, descricao, detalhe: `nota ${notas[validador.categoria]}` };
+    }
+    case "semProblema": {
+      const { problemas, naoSeAplicam } = auditar(contexto.documento, contexto.tela ? { tela: contexto.tela } : {});
+      const achado = problemas.find((problema) => problema.regra === validador.regra);
+      return {
+        passou: achado === undefined,
+        descricao,
+        detalhe: achado
+          ? `${Math.max(1, achado.elementos.length)} problema(s)${achado.detalhes.length ? `: ${lista(achado.detalhes)}` : ""}`
+          : naoSeAplicam.includes(validador.regra)
+            ? "não se aplica nesta página"
+            : "nenhum problema",
+      };
+    }
+    case "dispositivo": {
+      const estado = contexto.dispositivo ?? null;
+      if (!estado?.ligado) return { passou: false, descricao, detalhe: "a barra de dispositivo está desligada" };
+      const { largura, altura } = medidasNaTela(estado);
+      const orientacao = orientacaoDe(estado);
+      const passou =
+        (validador.largura === undefined || validador.largura === largura) && (validador.orientacao === undefined || validador.orientacao === orientacao);
+      return { passou, descricao, detalhe: `${largura} x ${altura}, ${orientacao}` };
+    }
+    case "temaSalvo": {
+      const vezes = contexto.eventos.filter((evento) => evento.tipo === "temaSalvo").length;
+      return { passou: vezes > 0, descricao, detalhe: `salvou ${vezes} vez(es)` };
     }
     case "todos": {
       const filhos = validador.validadores.map((filho) => avaliarDetalhado(filho, contexto));
@@ -317,11 +398,11 @@ function avaliarValorEfetivo(
   const encontrados: string[] = [];
   const elementos = consultar(contexto.documento, validador.seletor);
   const passou = elementos.some((elemento) => {
-    const efetivos = valorEfetivo(elemento, propriedade);
+    const efetivos = valorEfetivo(elemento, propriedade, opcoesDaTela(validador, contexto));
     return Object.entries(esperado).every(([longa, valor]) => {
       const efetivo = efetivos[longa];
-      if (!efetivo || efetivo.tipo === "incerto") {
-        encontrados.push(`${longa}: incerto (${efetivo?.motivo ?? "sem valor"})`);
+      if (!efetivo || efetivo.tipo !== "valor") {
+        encontrados.push(`${longa}: ${efetivo?.tipo === "invalido" ? "inválido" : "incerto"} (${efetivo?.motivo ?? "sem valor"})`);
         return false;
       }
       encontrados.push(`${longa}: ${efetivo.valor}`);
@@ -333,6 +414,43 @@ function avaliarValorEfetivo(
     descricao,
     detalhe: elementos.length === 0 ? "o seletor não achou nenhum elemento" : `achou: ${lista([...new Set(encontrados)])}`,
   };
+}
+
+/** O valor de uma variável no primeiro elemento do seletor (padrão: o <html>), ou o motivo de não ter. */
+function valorDaVariavel(documento: Document, nome: string, seletor: string | undefined, opcoes: OpcoesCascata): { valor: string } | { motivo: string } {
+  const elemento = seletor ? consultar(documento, seletor)[0] : documento.documentElement;
+  if (!elemento) return { motivo: "o seletor não achou nenhum elemento" };
+  const efetivo = valorEfetivo(elemento, nome, opcoes)[nome];
+  if (!efetivo || efetivo.tipo !== "valor") return { motivo: efetivo?.motivo ?? "sem valor" };
+  return { valor: efetivo.valor };
+}
+
+/** Duas cores (em qualquer formato) iguais, ou textos iguais normalizados. */
+function valoresDeVariavelIguais(a: string, b: string): boolean {
+  const corA = lerCor(a);
+  const corB = lerCor(b);
+  if (corA && corB) return corA.every((canal, indice) => Math.abs(canal - corB[indice]) < 0.01);
+  return normalizarTexto(a).toLowerCase() === normalizarTexto(b).toLowerCase();
+}
+
+function avaliarVariavelCss(
+  validador: Extract<Validador, { tipo: "variavelCss" }>,
+  contexto: ContextoValidacao,
+  descricao: string,
+): ResultadoValidador {
+  const nome = validador.nome.trim();
+  const opcoes = contexto.tela ? { tela: contexto.tela } : {};
+  const agora = valorDaVariavel(contexto.documento, nome, validador.seletor, opcoes);
+  if ("motivo" in agora) return { passou: false, descricao, detalhe: agora.motivo };
+  let passou = true;
+  if (validador.valor !== undefined) passou = valoresDeVariavelIguais(agora.valor, validador.valor);
+  let detalhe = `vale ${agora.valor}`;
+  if (passou && validador.diferenteDoInicial) {
+    const antes = valorDaVariavel(contexto.inicial, nome, validador.seletor, opcoes);
+    passou = "motivo" in antes || !valoresDeVariavelIguais(agora.valor, antes.valor);
+    detalhe += "motivo" in antes ? " (não existia no começo)" : ` (no começo: ${antes.valor})`;
+  }
+  return { passou, descricao, detalhe };
 }
 
 export function avaliarValidador(validador: Validador, contexto: ContextoValidacao): boolean {
@@ -350,6 +468,7 @@ export function validadorTravado(validador: Validador): boolean {
   switch (validador.tipo) {
     case "selecionado":
     case "evento":
+    case "temaSalvo":
       return true;
     case "todos":
     case "algum":
@@ -361,17 +480,66 @@ export function validadorTravado(validador: Validador): boolean {
   }
 }
 
+/** Px de um valor como "420px" (null se não é px). */
+function emPx(valor: string): number | null {
+  const achado = /^(-?\d*\.?\d+)px$/i.exec(valor.trim());
+  return achado ? Number(achado[1]) : null;
+}
+
 /**
- * Desafio: recalcula quais partes estão marcadas no checklist. As partes
- * travadas (`validadorTravado`) continuam marcadas para sempre, uma vez que
- * passem; as demais são conferidas de novo a cada checagem.
+ * Por que a página não cabe numa tela dessa largura (vazio: cabe). Pelo
+ * motor, sem layout: meta viewport e medidas fixas em px (width,
+ * min-width e colunas de grid) maiores que a tela, com as @media dela.
+ */
+export function motivosDeNaoCaber(documento: Document, largura: number): string[] {
+  const motivos: string[] = [];
+  const viewport = documento.querySelector('meta[name="viewport" i]');
+  if (!viewport || !/width|initial-scale/i.test(viewport.getAttribute("content") ?? "")) {
+    motivos.push("sem meta viewport (o celular desenharia em 980 px e encolheria tudo)");
+  }
+  const ler = leitorDeValores(documento, { tela: telaDaLargura(largura) });
+  for (const elemento of Array.from(documento.body?.querySelectorAll("*") ?? [])) {
+    if (elemento.closest("script, style, template, [hidden]")) continue;
+    const rotulo = `<${elemento.tagName.toLowerCase()}${elemento.id ? `#${elemento.id}` : elemento.classList[0] ? `.${elemento.classList[0]}` : ""}>`;
+    for (const propriedade of ["width", "min-width"]) {
+      const efetivo = ler(elemento, propriedade);
+      const px = efetivo.tipo === "valor" ? emPx(efetivo.valor) : null;
+      if (px !== null && px > largura) motivos.push(`${rotulo} tem ${propriedade}: ${px}px`);
+    }
+    const colunas = ler(elemento, "grid-template-columns");
+    if (colunas.tipo === "valor") {
+      const soma = colunas.valor
+        .split(/\s+/)
+        .map(emPx)
+        .reduce<number>((total, px) => total + (px ?? 0), 0);
+      if (soma > largura) motivos.push(`${rotulo} tem colunas de grid somando ${soma}px`);
+    }
+  }
+  return motivos;
+}
+
+/** Um item de checklist: parte do desafio ou requisito do projeto-ponte. */
+export type ItemChecklist = { id: string; descricao: string; validador: Validador; solucaoDeTeste: readonly Acao[] };
+
+/** Os itens do checklist da fase (partes do desafio, requisitos do projeto), ou null na prática. */
+export function itensDoChecklist(fase: Fase): readonly ItemChecklist[] | null {
+  if (fase.tipo === "desafio") return fase.partes;
+  if (fase.tipo === "projeto-ponte") return fase.requisitos;
+  return null;
+}
+
+/**
+ * Desafio e projeto-ponte: recalcula quais itens estão marcados no
+ * checklist. Os travados (`validadorTravado`) continuam marcados para
+ * sempre, uma vez que passem; os demais são conferidos de novo a cada
+ * checagem.
  */
 export function recalcularPartesFeitas(
-  desafio: FaseDesafio,
+  fase: FaseDesafio | FaseProjetoPonte,
   partesFeitas: readonly string[],
   contexto: ContextoValidacao,
 ): string[] {
-  return desafio.partes
+  return (itensDoChecklist(fase) ?? [])
     .filter((parte) => {
       const passaAgora = avaliarValidador(parte.validador, contexto);
       if (validadorTravado(parte.validador)) return partesFeitas.includes(parte.id) || passaAgora;

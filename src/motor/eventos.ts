@@ -40,7 +40,17 @@ export type EventoFase =
   /** Ligou ou desligou uma declaração pela checkbox do painel Estilos. */
   | { tipo: "alternouDeclaracao"; seletor: string; propriedade: string; ativa: boolean }
   /** Criou uma regra nova pelo painel Estilos. */
-  | { tipo: "adicionouRegra"; seletor: string };
+  | { tipo: "adicionouRegra"; seletor: string }
+  /** (E5) Salvou a maquete do jogo como "Meu tema". `paresRuins`: quantos pares ficaram abaixo de 4,5:1. */
+  | { tipo: "temaSalvo"; paresRuins: number }
+  /** (Modo dispositivo) Ligou, desligou ou trocou o aparelho. `largura` e `altura`: como aparecem na tela. */
+  | { tipo: "trocouDispositivo"; ligado: boolean; modelo: string; largura: number; altura: number }
+  /** (Modo dispositivo) Girou o aparelho. */
+  | { tipo: "girou"; orientacao: "retrato" | "paisagem" }
+  /** (Lighthouse) Rodou a auditoria (o botão Analisar). */
+  | { tipo: "auditou"; notas: Record<"acessibilidade" | "boas-praticas" | "seo", number> }
+  /** (Publicar) Levou o projeto pro mundo: o .zip com os arquivos (os nomes). */
+  | { tipo: "exportouProjeto"; arquivos: string[] };
 
 /**
  * Para onde um link levaria:
@@ -75,4 +85,9 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "editouPropriedade",
   "alternouDeclaracao",
   "adicionouRegra",
+  "temaSalvo",
+  "trocouDispositivo",
+  "girou",
+  "auditou",
+  "exportouProjeto",
 ];

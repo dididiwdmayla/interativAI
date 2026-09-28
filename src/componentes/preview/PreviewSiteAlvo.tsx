@@ -1,11 +1,12 @@
 "use client";
 
-import { type ReactNode, type Ref, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { type PointerEvent, type ReactNode, type Ref, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { ehElemento } from "@/lib/dom";
 import { ATRIBUTO_MODO_DOCUMENTO } from "@/lib/dom";
-import { escreverCssNoDocumento, montarDocumentoSiteAlvo, prepararDocumentoInteiro } from "@/lib/documentoSiteAlvo";
+import { comBaseNeutra, escreverCssNoDocumento, montarDocumentoSiteAlvo, prepararDocumentoInteiro } from "@/lib/documentoSiteAlvo";
 import { linkDoAlvo } from "@/lib/linksPrevia";
 import { comecarPendencia } from "@/lib/pendencias";
+import { type ViewportDoDispositivo, zoomParaCaber } from "@/motor/dispositivos";
 
 /** Teto da pendência de carga: se o load nunca vier, a fase não fica "ocupada" para sempre. */
 const TETO_CARGA_MS = 5000;
@@ -38,7 +39,25 @@ type Props = {
   ref?: Ref<ApiPreview>;
   /** Camadas desenhadas por cima do iframe (sobreposição de inspeção). */
   children?: ReactNode;
+  /**
+   * Modo dispositivo ligado: o iframe ganha a largura de desenho de verdade
+   * (as @media reagem) e encolhe para caber (zoom). Null: ocupa o espaço todo.
+   */
+  dispositivo?: ViewportDoDispositivo | null;
+  /** Arrastar as bordas do aparelho: a largura nova, como aparece na tela (px do aparelho). */
+  aoArrastarLargura?: (largura: number) => void;
+  /** Soltou a alça: a largura livre ficou escolhida. */
+  aoSoltarAlca?: () => void;
+  /** O zoom mudou (para a barra de dispositivo mostrar). */
+  aoMudarZoom?: (zoom: number) => void;
+  /** O iframe mudou de tamanho (painéis que medem o layout recalculam). */
+  aoRedimensionar?: () => void;
 };
+
+/** Espaço de cada alça de arrastar, dos dois lados do aparelho. */
+const ALCA = 14;
+/** Folga em volta do aparelho, dentro da área cinza. */
+const FOLGA = 12;
 
 /**
  * O site-alvo roda num iframe com srcdoc e sandbox sem scripts. Como tem
@@ -54,8 +73,54 @@ export function PreviewSiteAlvo({
   aoClicarLink,
   ref,
   children,
+  dispositivo = null,
+  aoArrastarLargura,
+  aoSoltarAlca,
+  aoMudarZoom,
+  aoRedimensionar,
 }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
+  const area = useRef<HTMLDivElement>(null);
+  const [espaco, setEspaco] = useState({ largura: 0, altura: 0 });
+  useLayoutEffect(() => {
+    const elemento = area.current;
+    if (!elemento) return;
+    const medir = () => setEspaco({ largura: elemento.clientWidth, altura: elemento.clientHeight });
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, []);
+  const zoom = dispositivo
+    ? zoomParaCaber(dispositivo.largura, dispositivo.altura, {
+        largura: espaco.largura - 2 * (ALCA + FOLGA),
+        altura: espaco.altura - 2 * FOLGA,
+      })
+    : 1;
+  useEffect(() => {
+    if (dispositivo) aoMudarZoom?.(zoom);
+  }, [aoMudarZoom, dispositivo, zoom]);
+  const aoRedimensionarAtual = useRef(aoRedimensionar);
+  useEffect(() => {
+    aoRedimensionarAtual.current = aoRedimensionar;
+  }, [aoRedimensionar]);
+  useEffect(() => {
+    const elemento = iframe.current;
+    if (!elemento) return;
+    let primeira = true;
+    const observador = new ResizeObserver(() => {
+      // A primeira medida é a do começo: nada mudou ainda.
+      if (primeira) {
+        primeira = false;
+        return;
+      }
+      aoRedimensionarAtual.current?.();
+    });
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, []);
+  /** Arrasto de uma alça: a largura de partida e o x do dedo (ou do mouse). */
+  const arrasto = useRef<{ largura: number; x: number; lado: 1 | -1 } | null>(null);
   const ultimoBody = useRef(bodyInicial);
   const ultimoCss = useRef(cssInicial);
   const headRef = useRef(head);
@@ -88,7 +153,7 @@ export function PreviewSiteAlvo({
 
   /** O srcdoc: no modo documento, o texto do jogador como está; senão, o head fixo com o body. */
   const montar = useCallback(
-    (body: string): string => (modoDocumentoRef.current ? body : montarDocumentoSiteAlvo(headRef.current, body, ultimoCss.current)),
+    (body: string): string => (modoDocumentoRef.current ? comBaseNeutra(body) : montarDocumentoSiteAlvo(headRef.current, body, ultimoCss.current)),
     [],
   );
 
@@ -199,17 +264,85 @@ export function PreviewSiteAlvo({
     encerrarCarga();
   };
 
+  // O mesmo iframe nos dois modos (ligar o aparelho não recarrega a página):
+  // área > aparelho > página desenhada na largura de layout, encolhida pelo zoom.
+  const escala = dispositivo ? (zoom * dispositivo.largura) / dispositivo.larguraLayout : 1;
+
+  const comecarArrasto = (lado: 1 | -1) => (evento: PointerEvent<HTMLDivElement>) => {
+    if (!dispositivo) return;
+    arrasto.current = { largura: dispositivo.largura, x: evento.clientX, lado };
+    try {
+      evento.currentTarget.setPointerCapture(evento.pointerId);
+    } catch {
+      // Ponteiro que já saiu (ou sintético): o arrasto segue sem captura.
+    }
+  };
+  const arrastar = (evento: PointerEvent<HTMLDivElement>) => {
+    const inicio = arrasto.current;
+    if (!inicio || !dispositivo) return;
+    // O aparelho fica no meio: cada lado anda metade, então a largura muda o dobro do arrasto.
+    aoArrastarLargura?.(inicio.largura + (2 * inicio.lado * (evento.clientX - inicio.x)) / zoom);
+  };
+  const soltar = () => {
+    if (!arrasto.current) return;
+    arrasto.current = null;
+    aoSoltarAlca?.();
+  };
+
+  const alca = (lado: 1 | -1) =>
+    dispositivo && aoArrastarLargura ? (
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={lado === 1 ? "Arrastar a borda direita do aparelho" : "Arrastar a borda esquerda do aparelho"}
+        data-alca-dispositivo={lado === 1 ? "direita" : "esquerda"}
+        onPointerDown={comecarArrasto(lado)}
+        onPointerMove={arrastar}
+        onPointerUp={soltar}
+        onPointerCancel={soltar}
+        className="absolute top-1/2 z-30 grid h-16 -translate-y-1/2 cursor-ew-resize touch-none place-items-center rounded-full bg-borda hover:bg-primaria pointer-coarse:h-20"
+        style={{ width: ALCA, [lado === 1 ? "right" : "left"]: -(ALCA + 4) }}
+      >
+        <span className="h-8 w-0.5 rounded-full bg-superficie" aria-hidden="true" />
+      </div>
+    ) : null;
+
   return (
-    <div className="relative h-full w-full">
-      <iframe
-        ref={iframe}
-        title={titulo}
-        sandbox="allow-same-origin"
-        {...(modoDocumento ? { [ATRIBUTO_MODO_DOCUMENTO]: "" } : {})}
-        onLoad={aoTerminarCarga}
-        className="block h-full w-full border-0"
-      />
-      {children}
+    <div
+      ref={area}
+      className={`relative h-full w-full ${dispositivo ? "grid place-items-center overflow-hidden bg-painel" : ""}`}
+      data-area-previa
+    >
+      <div
+        className={dispositivo ? "relative shrink-0 rounded-md border-2 border-borda bg-superficie shadow-[0_4px_0_var(--cor-sombra)]" : "relative h-full w-full"}
+        style={dispositivo ? { width: dispositivo.largura * zoom + 4, height: dispositivo.altura * zoom + 4 } : undefined}
+        data-aparelho={dispositivo ? "ligado" : "desligado"}
+        data-largura={dispositivo?.largura}
+        data-altura={dispositivo?.altura}
+        data-largura-layout={dispositivo?.larguraLayout}
+        data-zoom={dispositivo ? Math.round(zoom * 100) : undefined}
+      >
+        <div
+          className={dispositivo ? "absolute left-0 top-0 origin-top-left overflow-hidden" : "relative h-full w-full"}
+          style={
+            dispositivo
+              ? { width: dispositivo.larguraLayout, height: dispositivo.alturaLayout, transform: `scale(${escala})` }
+              : undefined
+          }
+        >
+          <iframe
+            ref={iframe}
+            title={titulo}
+            sandbox="allow-same-origin"
+            {...(modoDocumento ? { [ATRIBUTO_MODO_DOCUMENTO]: "" } : {})}
+            onLoad={aoTerminarCarga}
+            className="block h-full w-full border-0"
+          />
+          {children}
+        </div>
+        {alca(-1)}
+        {alca(1)}
+      </div>
     </div>
   );
 }

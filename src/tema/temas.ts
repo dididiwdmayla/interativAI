@@ -1,4 +1,4 @@
-export type TemaId = "doce" | "fliperama" | "segredo";
+export type TemaId = "doce" | "fliperama" | "segredo" | "meu";
 
 export type Tema = {
   id: TemaId;
@@ -6,6 +6,12 @@ export type Tema = {
   descricao: string;
   /** Temas secretos só aparecem no seletor depois de desbloqueados. */
   secreto: boolean;
+  /**
+   * O tema que o jogador cria na E5 ("Salvar como Meu tema"). As cores não
+   * moram no tokens.css: vêm do progresso (src/lib/meuTema.ts). Só aparece
+   * no seletor depois de salvo.
+   */
+  doJogador?: boolean;
 };
 
 export const TEMAS: readonly Tema[] = [
@@ -26,6 +32,13 @@ export const TEMAS: readonly Tema[] = [
     nome: "Segredo",
     descricao: "Tela de fósforo verde, só para quem investiga",
     secreto: true,
+  },
+  {
+    id: "meu",
+    nome: "Meu tema",
+    descricao: "As cores que você escolheu no próprio jogo",
+    secreto: false,
+    doJogador: true,
   },
 ];
 

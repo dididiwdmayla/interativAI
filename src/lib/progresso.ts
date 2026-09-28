@@ -1,4 +1,5 @@
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
+import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
 import { ehTemaId, TEMA_PADRAO, TEMAS_INICIAIS, type TemaId } from "@/tema/temas";
 
 export const CHAVE_PROGRESSO = "ilha-sites:progresso:v2";
@@ -75,7 +76,34 @@ export type Progresso = {
   lente: LenteMapa | null;
   /** Insígnias: o último marco (25, 50, 75, 100) já comemorado de cada tema. */
   marcosInsignias: Record<string, number>;
+  /** (E5) As cores do "Meu tema", salvas da maquete do jogo; null enquanto não existe. */
+  meuTema: MeuTema | null;
+  /** Projetos-ponte (Meus projetos), por id da fase: o site do jogador e a publicação dele. */
+  projetos: Record<string, ProjetoSalvo>;
+  /** Mapa: ilhas cuja conclusão (todas as unidades publicadas) já foi comemorada. */
+  ilhasComemoradas: string[];
 };
+
+/**
+ * O site de um projeto-ponte, guardado fora do "em andamento": sobrevive
+ * ao "Jogar de novo" da ilha (o site é do jogador) e só zera no Recomeçar
+ * da própria fase. O guia e o link ficam mesmo depois de recomeçar (o
+ * site publicado continua no ar).
+ */
+export type ProjetoSalvo = {
+  /** O documento inteiro (index.html) como o jogador deixou; null antes de começar ou depois de recomeçar. */
+  html: string | null;
+  /** O style.css. */
+  css: string | null;
+  /** Quando o site mudou pela última vez (ms desde 1970), ou null. */
+  atualizadoEm: number | null;
+  /** Passos do guia de publicação já marcados (ids de src/conteudo/publicacao.ts). */
+  guia: string[];
+  /** O endereço publicado, colado no fim do guia (formato conferido), ou null. */
+  link: string | null;
+};
+
+export const PROJETO_VAZIO: ProjetoSalvo = { html: null, css: null, atualizadoEm: null, guia: [], link: null };
 
 /** Lente sobre o mapa: acende as unidades de um tema, ou dos temas de uma profissão. */
 export type LenteMapa = { tipo: "tema" | "profissao"; id: string };
@@ -107,6 +135,9 @@ export const PROGRESSO_PADRAO: Progresso = {
   trilha: "web",
   lente: null,
   marcosInsignias: {},
+  meuTema: null,
+  projetos: {},
+  ilhasComemoradas: [],
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -184,6 +215,17 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
   };
 }
 
+function lerProjeto(valor: unknown): ProjetoSalvo | null {
+  if (!ehObjeto(valor)) return null;
+  return {
+    html: typeof valor.html === "string" ? valor.html : null,
+    css: typeof valor.css === "string" ? valor.css : null,
+    atualizadoEm: ehNumero(valor.atualizadoEm) ? valor.atualizadoEm : null,
+    guia: [...new Set(listaDeTextos(valor.guia))],
+    link: typeof valor.link === "string" && valor.link.length <= 300 ? valor.link : null,
+  };
+}
+
 function lerLente(valor: unknown): LenteMapa | null {
   if (!ehObjeto(valor)) return null;
   if ((valor.tipo !== "tema" && valor.tipo !== "profissao") || typeof valor.id !== "string") return null;
@@ -194,8 +236,10 @@ function lerLente(valor: unknown): LenteMapa | null {
 export function normalizarProgresso(bruto: unknown): Progresso {
   if (!ehObjeto(bruto)) return PROGRESSO_PADRAO;
 
+  const meuTema = lerMeuTema(bruto.meuTema);
+  // O Meu tema só vale enquanto as cores dele existem (apagado, some do seletor).
   const temasDesbloqueados = Array.isArray(bruto.temasDesbloqueados)
-    ? bruto.temasDesbloqueados.filter(ehTemaId)
+    ? bruto.temasDesbloqueados.filter((tema): tema is TemaId => ehTemaId(tema) && (tema !== "meu" || meuTema !== null))
     : [];
   for (const tema of TEMAS_INICIAIS) {
     if (!temasDesbloqueados.includes(tema)) temasDesbloqueados.push(tema);
@@ -229,6 +273,9 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     trilha: typeof bruto.trilha === "string" && bruto.trilha.length > 0 ? bruto.trilha : PROGRESSO_PADRAO.trilha,
     lente: lerLente(bruto.lente),
     marcosInsignias: lerRegistro(bruto.marcosInsignias, (item) => (ehNumero(item) ? Math.max(0, Math.min(100, item)) : null)),
+    meuTema,
+    projetos: lerRegistro(bruto.projetos, lerProjeto),
+    ilhasComemoradas: [...new Set(listaDeTextos(bruto.ilhasComemoradas))],
   };
 }
 

@@ -11,6 +11,7 @@
  * Guia completo de como escrever: docs/GUIA-DE-CONTEUDO.md
  * Template anotado de fase: docs/TEMPLATE-FASE.ts
  */
+import type { CategoriaAuditoria, IdRegraAuditoria } from "@/motor/auditoria";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import type { TipoEvento } from "@/motor/eventos";
 import type { Fala } from "@/motor/tipos";
@@ -99,9 +100,16 @@ export type Validador =
    * rgb(255, 0, 0)), números (16.0px = 16px, 0px = 0), espaços e aspas de
    * fonte. Compara o valor DECLARADO, não os pixels calculados (2em
    * continua 2em). Atalho (margin) confere cada propriedade longa. Se o
-   * motor não tem certeza, não passa (e o detalhe diz por quê).
+   * motor não tem certeza, não passa (e o detalhe diz por quê). As
+   * variáveis (var()) já vêm trocadas pelo valor delas.
+   *
+   * `larguraTela` (px, opcional) avalia as @media como numa tela dessa
+   * largura (a altura vem do modelo do modo dispositivo com essa largura,
+   * ou de `alturaTela`); sem ela, vale a largura atual da prévia (no
+   * testar:conteudo, 1280 x 800). Para conferir o site em várias larguras,
+   * use um `todos` com um validador por largura.
    */
-  | { tipo: "valorEfetivo"; seletor: string; propriedade: string; valor: string }
+  | { tipo: "valorEfetivo"; seletor: string; propriedade: string; valor: string; larguraTela?: number; alturaTela?: number }
   /**
    * A regra `seletorRegra` (nas folhas do site) tem a declaração da
    * propriedade. `valor` confere o valor (normalizado); `ativa: true` pede
@@ -115,9 +123,51 @@ export type Validador =
    * Em algum elemento do seletor, a declaração da propriedade que mora na
    * regra `seletorRegra` PERDE para outra (fica riscada no painel).
    * `seletorRegra: "element.style"` fala do estilo inline. Desligada não
-   * conta: aqui é perder a briga.
+   * conta: aqui é perder a briga. `larguraTela` e `alturaTela`: como no
+   * `valorEfetivo`.
    */
-  | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string }
+  | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string; larguraTela?: number; alturaTela?: number }
+  /**
+   * (CSS) A variável `nome` (`--cor-primaria`) vale alguma coisa no
+   * elemento do `seletor` (padrão `:root`, o `<html>`): declarada nele ou
+   * herdada, com os var() de dentro já trocados. Com `valor`, compara (cores
+   * em qualquer formato); com `diferenteDoInicial: true`, pede um valor
+   * diferente do que ela tinha quando a fase abriu (bom para "troque por
+   * uma cor qualquer" quando o valor inicial depende do tema do jogador).
+   */
+  | { tipo: "variavelCss"; nome: string; valor?: string; seletor?: string; diferenteDoInicial?: boolean }
+  /**
+   * (E5) O jogador salvou a maquete como "Meu tema" desde que o objetivo
+   * começou (evento `temaSalvo`). Trava no checklist, como `evento`.
+   */
+  | { tipo: "temaSalvo" }
+  /**
+   * (Modo dispositivo) A barra de dispositivo está ligada, com a largura
+   * do aparelho na tela (já girado) igual a `largura` e na `orientacao`,
+   * quando vierem. Olha o estado de agora (não trava no checklist).
+   */
+  | { tipo: "dispositivo"; largura?: number; orientacao?: "retrato" | "paisagem" }
+  /**
+   * (Lighthouse) A nota da categoria na auditoria simplificada do jogo
+   * (src/motor/auditoria.ts) é pelo menos `minimo` (0 a 100). Calcula na
+   * hora, sobre a página de agora (não precisa ter clicado em Analisar).
+   */
+  | { tipo: "notaAuditoria"; categoria: CategoriaAuditoria; minimo: number }
+  /** (Lighthouse) A verificação `regra` não acha nenhum problema na página agora. */
+  | { tipo: "semProblema"; regra: IdRegraAuditoria }
+  /**
+   * (CSS) As folhas da página (a editável e os <style> do head) têm pelo
+   * menos `minimo` (padrão 1) regras @media.
+   */
+  | { tipo: "temMediaQuery"; minimo?: number }
+  /**
+   * (Responsivo) A página cabe numa tela de `largura` px sem rolar de lado,
+   * pelo motor (sem layout): tem meta viewport e, com as @media dessa
+   * largura, nenhuma peça tem width ou min-width fixos (px) maiores que a
+   * tela, nem colunas de grid em px que somem mais que ela. É uma
+   * simplificação honesta: não mede o texto nem as margens.
+   */
+  | { tipo: "cabeNaTela"; largura: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -180,7 +230,30 @@ export type Acao =
   /** Cria uma regra nova no fim da folha (o botão de regra nova do painel Estilos). */
   | { tipo: "adicionarRegra"; seletorRegra: string; declaracoes?: { propriedade: string; valor: string }[] }
   /** Escreve CSS no começo ou no fim da folha (o que o jogador digitaria no editor CSS). */
-  | { tipo: "editarCss"; posicao: "inicio" | "fim"; texto: string };
+  | { tipo: "editarCss"; posicao: "inicio" | "fim"; texto: string }
+  /**
+   * (E5) "Salvar como Meu tema": guarda as cores da maquete do jogo como o
+   * quarto tema. Nos testes e no lab, salva direto (sem a conversa sobre
+   * contraste). Gera `temaSalvo`.
+   */
+  | { tipo: "salvarTema" }
+  /**
+   * (Modo dispositivo) Liga a barra de dispositivo (se estava desligada) e
+   * escolhe um modelo pronto, ou `"livre"` com a `largura` (como arrastar
+   * as bordas). Gera `trocouDispositivo`.
+   */
+  | { tipo: "trocarDispositivo"; modelo: "celular-360" | "celular-390" | "tablet-768" | "notebook-1280" | "livre"; largura?: number }
+  /** (Modo dispositivo) O botão de girar: em pé vira deitado e vice-versa. Gera `girou`. */
+  | { tipo: "girarDispositivo" }
+  /** (Modo dispositivo) Desliga a barra (Ctrl+Shift+M de novo). Gera `trocouDispositivo` com `ligado: false`. */
+  | { tipo: "desligarDispositivo" }
+  /** (Lighthouse) O botão Analisar do painel Lighthouse. Gera `auditou`, com as notas. */
+  | { tipo: "analisarAuditoria" }
+  /**
+   * (Publicar) O "Levar pro mundo": monta o index.html e o style.css e baixa
+   * o .zip (nos testes, só monta). Gera `exportouProjeto`.
+   */
+  | { tipo: "levarProMundo" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -283,6 +356,14 @@ export type ModoObjetivo = Objetivo["modo"];
  * das cores: o CSS dele tem cores próprias. Mora em `sites/` da unidade.
  */
 export type SiteAlvo = {
+  /**
+   * Opcional. `"jogo"`: o site-alvo é uma maquete do PRÓPRIO jogo (E5),
+   * pintada só com as variáveis `--cor-*` do tema. Use o objeto pronto
+   * `SITE_ALVO_DO_JOGO` (src/motor/siteDoJogo.ts), sem `css`: a folha
+   * editável (um `:root` com os tokens reais do tema do jogador) é montada
+   * quando a fase abre. Nos testes, com o tema Doce.
+   */
+  tipo?: "jogo";
   /** Endereço de mentirinha mostrado na barra do navegador. */
   url: string;
   /** Título acessível do iframe. */
@@ -379,11 +460,45 @@ export type FasePratica = FaseBase & {
 export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[] };
 
 /**
+ * Um requisito do projeto-ponte: marca sozinho quando o validador passa
+ * (ao vivo, como as partes de estado do desafio).
+ */
+export type RequisitoProjeto = {
+  id: string;
+  /** Aparece no checklist. Até 140 caracteres. */
+  descricao: string;
+  validador: Validador;
+  /**
+   * A pergunta do computadorzinho quando o jogador pede ajuda (no projeto o
+   * tutor só pergunta: nada de dica pronta nem solução). Até 160.
+   */
+  pergunta: string;
+  /** Ações que cumprem o requisito (testes e /lab/fases). */
+  solucaoDeTeste: Acao[];
+};
+
+/**
+ * Projeto-ponte: o jogador constrói o PRÓPRIO site no modo documento, com
+ * HTML e CSS livres e as ferramentas que já conhece. Sem passo a passo:
+ * um checklist de requisitos que se marcam sozinhos e o tutor que só
+ * pergunta. O projeto fica salvo (Meus projetos), pode ser reaberto e
+ * editado depois e, com a ferramenta `levar-pro-mundo`, vira um .zip com
+ * index.html e style.css, com o guia de publicação.
+ */
+export type FaseProjetoPonte = FaseBase & {
+  tipo: "projeto-ponte";
+  modoDocumento: true;
+  requisitos: RequisitoProjeto[];
+  /** O nome do projeto no painel Meus projetos e no .zip ("Meu primeiro site"). */
+  nomeDoProjeto: string;
+};
+
+/**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte;
 
 export type TipoFase = Fase["tipo"];
 

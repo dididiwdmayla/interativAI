@@ -56,21 +56,50 @@ import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemP
 import { elementoDoNo } from "@/lib/arvore";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { lerAtributosDigitados } from "@/lib/atributosDigitados";
-import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
+import { documentoInteiroInicial, lerCssDoDocumento } from "@/lib/documentoSiteAlvo";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
-import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
+import { type EstadoFaseSalvo, PROJETO_VAZIO, type ProjetoSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
+import { marcarPassoDoGuia, salvarLinkPublicado } from "@/lib/projetos";
+import { type ArquivosDoProjeto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
+import { DialogoLevarProMundo } from "@/componentes/projeto/DialogoLevarProMundo";
+import { GuiaPublicacao } from "@/componentes/projeto/GuiaPublicacao";
+import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
+import { rotuloDaFase } from "@/motor/tiposDeFase";
+import { itensDoChecklist } from "@/motor/validadores";
 import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import type { EventoFase } from "@/motor/eventos";
-import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
+import { enunciadoDe, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
 import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
-import { NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
+import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
+import { materializarFase } from "@/motor/siteDoJogo";
+import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditoria } from "@/motor/auditoria";
+import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
+import {
+  DISPOSITIVO_INICIAL,
+  type EstadoDispositivo,
+  arrastarLargura,
+  girarDispositivo,
+  type IdModelo,
+  medidasNaTela,
+  orientacaoDe,
+  trocarModelo,
+  viewportDoDispositivo,
+} from "@/motor/dispositivos";
+import type { Tela } from "@/motor/css/midia";
+import { BotaoDispositivo } from "@/componentes/painel/BotaoDispositivo";
+import { BarraDispositivo } from "@/componentes/preview/BarraDispositivo";
+import { AvisoContraste } from "@/componentes/tema/AvisoContraste";
+import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
+import { conferirContraste, coresDoTemaAtual, montarMeuTema, type ResultadoPar, valorDeCorSeguro } from "@/lib/meuTema";
+import { salvarMeuTema } from "@/lib/tema";
+import { tokensDoTema, type Tokens } from "@/tema/tokensDoJogo";
 import { AcoesConversa } from "./AcoesConversa";
 import {
   atalhoHistorico,
@@ -134,13 +163,15 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   adicionouRegra: "duplicar",
 };
 
-/** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
+/** Elementos abre sempre; a aba Lighthouse, nas fases com a ferramenta. */
 const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
+const ABAS_COM_LIGHTHOUSE: readonly Aba[] = ["elementos", "lighthouse"];
 
 /** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
-function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | null {
+function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string | null {
   if (fase.siteAlvo.css === undefined) return null;
-  if (!salvo) return fase.siteAlvo.css;
+  // Projeto-ponte sem estado (Jogar de novo da ilha): o site do jogador, de Meus projetos.
+  if (!salvo) return projeto?.html ? (projeto.css ?? fase.siteAlvo.css) : fase.siteAlvo.css;
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.cssInicioObjetivo !== null) {
     return salvo.cssInicioObjetivo;
@@ -164,9 +195,30 @@ const FALA_ACENTOS: Fala = {
   expressao: "curioso",
 };
 
+/**
+ * O computadorzinho explica a simulação do meta viewport: sem ele, num
+ * celular, a página é desenhada em 980 px e encolhida (a regra que os
+ * navegadores de celular seguem para sites feitos antes do celular).
+ */
+const FALA_VIEWPORT: Fala = {
+  texto:
+    'Simulação: sem <meta name="viewport"> no head, o celular desenha a página em 980 px e encolhe tudo. Com essa linha, ela usa a largura do aparelho.',
+  expressao: "curioso",
+};
+
+const FALA_TEMA_SALVO: Fala = {
+  texto: "Salvei o Meu tema e já liguei no jogo inteiro! Ele aparece na paleta lá em cima, junto dos outros.",
+  expressao: "comemorando",
+};
+
+const FALA_TEMA_SALVO_COM_AVISO: Fala = {
+  texto: "Salvei do seu jeito e já liguei. Se algum texto ficar difícil de ler, dá pra ajustar e salvar de novo, ou trocar de tema na paleta.",
+  expressao: "feliz",
+};
+
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
-function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
-  if (!salvo) return htmlInicialDaFase(fase);
+function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string {
+  if (!salvo) return projeto?.html ?? htmlInicialDaFase(fase);
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
     return salvo.htmlInicioObjetivo;
@@ -175,7 +227,7 @@ function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
 }
 
 export function JogoFase({
-  fase,
+  fase: faseDaProp,
   local,
   aoRecomecar,
   modo = "jogo",
@@ -188,9 +240,28 @@ export function JogoFase({
 }: Props) {
   const lab = modo === "lab";
   const revisao = modo === "revisao";
+  // Site-alvo "jogo" (E5): a maquete ganha as cores do tema que o jogador usa agora.
+  const [coresDaMaquete] = useState(() => {
+    const atual = coresDoTemaAtual(obterProgresso());
+    return { base: atual.base, cores: atual.cores ?? (faseDaProp.siteAlvo.tipo === "jogo" ? tokensDoTema(atual.base) : {}) };
+  });
+  const [fase] = useState(() => materializarFase(faseDaProp, coresDaMaquete.cores));
+  const siteDoJogo = fase.siteAlvo.tipo === "jogo";
+  // Modo dispositivo (a barra de dispositivo do Chrome): só nas fases com a ferramenta.
+  const comDispositivo = fase.usaFerramentas.includes("modo-dispositivo");
+  const [dispositivo, setDispositivo] = useState<EstadoDispositivo>(DISPOSITIVO_INICIAL);
+  /** O mesmo estado, lido na hora pelos validadores (o evento sai antes do React redesenhar). */
+  const dispositivoAtual = useRef<EstadoDispositivo>(DISPOSITIVO_INICIAL);
+  const [zoomDispositivo, setZoomDispositivo] = useState(1);
+  /** Sobe quando a prévia muda de tamanho (aparelho, girar, janela): o Calculado mede de novo. */
+  const [versaoLayout, setVersaoLayout] = useState(0);
+  const aoRedimensionarPrevia = useCallback(() => setVersaoLayout((versao) => versao + 1), []);
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
-  const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
-  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
+  const [projetoSalvo] = useState(() =>
+    modo === "jogo" && fase.tipo === "projeto-ponte" ? obterProgresso().projetos[fase.id] : undefined,
+  );
+  const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo, projetoSalvo));
+  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo, projetoSalvo));
   const temCss = cssInicial !== null;
   const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
@@ -224,7 +295,10 @@ export function JogoFase({
   // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
   // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
   const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
-  const desafioParaMeta = desafioDaUnidade?.tipo === "desafio" ? desafioDaUnidade : null;
+  const desafioParaMeta = useMemo(
+    () => (desafioDaUnidade?.tipo === "desafio" ? materializarFase(desafioDaUnidade, coresDaMaquete.cores) : null),
+    [desafioDaUnidade, coresDaMaquete],
+  );
   const [mostrarMeta] = useState(
     () => modo === "jogo" && desafioParaMeta !== null && faseAbreComMeta(fase, local.unidade, obterProgresso()),
   );
@@ -350,6 +424,123 @@ export function JogoFase({
     [clicarLinkNaTela, obterDocumento],
   );
 
+  // "Salvar como Meu tema" (E5): lê as cores da maquete, confere o contraste e guarda.
+  const [avisoContraste, setAvisoContraste] = useState<ResultadoPar[] | null>(null);
+  /** Quem fala sobre o tema salvo (ligado ao motor mais abaixo, só quando não atrapalha). */
+  const falarDoTema = useRef<(fala: Fala) => void>(() => {});
+  /** O computadorzinho explicando algo do painel (o Lighthouse), só quando não atrapalha. */
+  const falarLivre = useRef<(fala: Fala) => void>(() => {});
+
+  /** As cores da maquete agora: cada token do tema de base, lido no :root com as variáveis trocadas. */
+  const coresDaMaqueteAgora = useCallback((): Tokens | null => {
+    const raiz = obterDocumento()?.documentElement;
+    if (!raiz) return null;
+    const cores: Tokens = {};
+    for (const nome of Object.keys(coresDaMaquete.cores)) {
+      const efetivo = valorEfetivo(raiz, nome)[nome];
+      if (efetivo?.tipo === "valor" && valorDeCorSeguro(efetivo.valor)) cores[nome] = efetivo.valor;
+    }
+    return cores;
+  }, [coresDaMaquete, obterDocumento]);
+
+  /**
+   * Salva o Meu tema. Sem `confirmado`, par com contraste abaixo de 4,5:1
+   * abre o aviso do computadorzinho (que deixa salvar mesmo assim); as
+   * soluções e o lab salvam direto.
+   */
+  const gravarTema = useCallback(
+    (confirmado: boolean): boolean => {
+      const novas = siteDoJogo ? coresDaMaqueteAgora() : null;
+      if (!novas) return false;
+      const meuTema = montarMeuTema(coresDaMaquete.base, coresDaMaquete.cores, novas);
+      const ruins = conferirContraste(meuTema.cores).filter((par) => !par.bom);
+      if (ruins.length > 0 && !confirmado) {
+        setAvisoContraste(ruins);
+        return false;
+      }
+      setAvisoContraste(null);
+      salvarMeuTema(meuTema);
+      tocarEfeito("desbloqueio");
+      barramento.emitir({ tipo: "temaSalvo", paresRuins: ruins.length });
+      falarDoTema.current(ruins.length > 0 ? FALA_TEMA_SALVO_COM_AVISO : FALA_TEMA_SALVO);
+      return true;
+    },
+    [barramento, coresDaMaquete, coresDaMaqueteAgora, siteDoJogo],
+  );
+
+  /** Muda o modo dispositivo e avisa o barramento (trocouDispositivo ou girou). */
+  const mudarDispositivo = useCallback(
+    (novo: EstadoDispositivo, evento: "trocou" | "girou") => {
+      dispositivoAtual.current = novo;
+      setDispositivo(novo);
+      realcar(null);
+      if (evento === "girou") {
+        sinalizarUso("girar-dispositivo");
+        barramento.emitir({ tipo: "girou", orientacao: orientacaoDe(novo) });
+        return;
+      }
+      sinalizarUso("modo-dispositivo");
+      const { largura, altura } = medidasNaTela(novo);
+      barramento.emitir({ tipo: "trocouDispositivo", ligado: novo.ligado, modelo: novo.modelo, largura, altura });
+    },
+    [barramento, realcar],
+  );
+  const acoesDispositivo = useMemo(
+    () => ({
+      trocar: (modelo: IdModelo | "livre", largura?: number) => mudarDispositivo(trocarModelo(dispositivoAtual.current, modelo, largura), "trocou"),
+      girar: () => mudarDispositivo(girarDispositivo(dispositivoAtual.current), "girou"),
+      desligar: () => mudarDispositivo({ ...dispositivoAtual.current, ligado: false }, "trocou"),
+      alternar: () => mudarDispositivo({ ...dispositivoAtual.current, ligado: !dispositivoAtual.current.ligado }, "trocou"),
+      arrastar: (largura: number) => {
+        const novo = arrastarLargura(dispositivoAtual.current, largura);
+        dispositivoAtual.current = novo;
+        setDispositivo(novo);
+      },
+    }),
+    [mudarDispositivo],
+  );
+  // Soltar a alça: a largura livre conta como troca (um evento só, não um por pixel).
+  const soltarAlca = useCallback(() => mudarDispositivo(dispositivoAtual.current, "trocou"), [mudarDispositivo]);
+
+  // Aba Lighthouse (auditoria simplificada): só nas fases com a ferramenta.
+  const comLighthouse = fase.usaFerramentas.includes("lighthouse");
+  const [auditoria, setAuditoria] = useState<{ resultado: ResultadoAuditoria; versao: string } | null>(null);
+  const telaDaAuditoria = useRef<Tela | undefined>(undefined);
+  const versaoDaPaginaAtual = useRef("");
+  const analisarAuditoria = useCallback(() => {
+    const documento = obterDocumento();
+    if (!documento?.body) return;
+    const resultado = auditar(documento, telaDaAuditoria.current ? { tela: telaDaAuditoria.current } : {});
+    setAuditoria({ resultado, versao: versaoDaPaginaAtual.current });
+    sinalizarUso("lighthouse");
+    barramento.emitir({ tipo: "auditou", notas: resultado.notas });
+  }, [barramento, obterDocumento]);
+
+  // Levar pro mundo (Publicar): a página vira index.html + style.css, num .zip.
+  const comLevarProMundo = fase.usaFerramentas.includes("levar-pro-mundo");
+  const nomeDoProjeto = fase.tipo === "projeto-ponte" ? fase.nomeDoProjeto : fase.siteAlvo.titulo;
+  const [janelaProjeto, setJanelaProjeto] = useState<"levar" | "guia" | null>(null);
+  const [arquivosExportados, setArquivosExportados] = useState<ArquivosDoProjeto | null>(null);
+  /** O texto do editor agora (o documento inteiro, no modo documento) e o style.css. */
+  const arquivosAgora = useCallback((): ArquivosDoProjeto => {
+    const documento = obterDocumento();
+    const css = documento ? lerCssDoDocumento(documento) : null;
+    return montarArquivos(htmlAtual, css);
+  }, [htmlAtual, obterDocumento]);
+  const baixarProjeto = useCallback(() => {
+    const arquivos = arquivosAgora();
+    baixarZip(arquivos, nomeDoProjeto);
+    sinalizarUso("levar-pro-mundo");
+    tocarEfeito("desbloqueio");
+    barramento.emitir({ tipo: "exportouProjeto", arquivos: Object.keys(arquivos) });
+  }, [arquivosAgora, barramento, nomeDoProjeto]);
+  const abrirLevarProMundo = () => {
+    tocarEfeito("clique");
+    sinalizarUso("levar-pro-mundo");
+    setArquivosExportados(arquivosAgora());
+    setJanelaProjeto("levar");
+  };
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -371,8 +562,20 @@ export function JogoFase({
       adicionarRegra,
       escreverCss,
       lerCss,
+      salvarTema: siteDoJogo ? () => gravarTema(true) : undefined,
+      dispositivo: comDispositivo ? acoesDispositivo : undefined,
+      analisarAuditoria: comLighthouse ? analisarAuditoria : undefined,
+      levarProMundo: comLevarProMundo ? baixarProjeto : undefined,
     }),
     [
+      baixarProjeto,
+      comLevarProMundo,
+      analisarAuditoria,
+      comLighthouse,
+      acoesDispositivo,
+      comDispositivo,
+      gravarTema,
+      siteDoJogo,
       definirPropriedade,
       alternarPropriedade,
       adicionarRegra,
@@ -450,6 +653,35 @@ export function JogoFase({
     [editorCssRef, lerCss, mostrarEditorCss],
   );
 
+  // Onde a página é desenhada no aparelho (980 px sem meta viewport num celular) e a tela das @media.
+  const viewportAparelho = viewportDoDispositivo(dispositivo, obterDocumento());
+  const aparelhoLigado = comDispositivo && dispositivo.ligado;
+  const simulandoViewport = aparelhoLigado && viewportAparelho.simulandoViewport;
+  const larguraDeDesenho = aparelhoLigado ? viewportAparelho.larguraLayout : 0;
+  const alturaDeDesenho = aparelhoLigado ? viewportAparelho.alturaLayout : 0;
+  const telaDoAparelho = useMemo<Tela | undefined>(
+    () => (larguraDeDesenho > 0 ? { largura: larguraDeDesenho, altura: alturaDeDesenho } : undefined),
+    [alturaDeDesenho, larguraDeDesenho],
+  );
+  const extraValidacao = useCallback(() => {
+    if (!comDispositivo) return {};
+    const estado = dispositivoAtual.current;
+    const atual = viewportDoDispositivo(estado, obterDocumento());
+    return { dispositivo: estado, tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined };
+  }, [comDispositivo, obterDocumento]);
+
+  // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
+  useEffect(() => {
+    if (!comDispositivo) return;
+    const aoTeclar = (evento: KeyboardEvent) => {
+      if (!(evento.ctrlKey || evento.metaKey) || !evento.shiftKey || evento.key.toLowerCase() !== "m") return;
+      evento.preventDefault();
+      acoesDispositivo.alternar();
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [acoesDispositivo, comDispositivo]);
+
   const motor = useMotorFase({
     fase,
     modo,
@@ -467,6 +699,7 @@ export function JogoFase({
     limparDestaqueCss,
     destacarNoEstilos,
     toque,
+    extraValidacao,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -477,6 +710,8 @@ export function JogoFase({
       (estado.etapa === "objetivos" && estado.pausa === null && !previsaoPendente && estado.roteiro === null) ||
       (estado.etapa === "concluida" && !estado.conclusaoAberta);
     falarSobreLink.current = livre ? falar : () => {};
+    falarDoTema.current = livre ? falar : () => {};
+    falarLivre.current = livre ? falar : () => {};
   }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
 
   // Na primeira vez que a prévia quebra os acentos, o computadorzinho explica (quando não atrapalha).
@@ -487,7 +722,19 @@ export function JogoFase({
     explicouAcentos.current = true;
     falar(FALA_ACENTOS);
   }, [simulandoAcentos, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
+  // Na primeira vez que o celular simula os 980 px, o computadorzinho explica (quando não atrapalha).
+  const explicouViewport = useRef(false);
+  useEffect(() => {
+    if (!simulandoViewport || explicouViewport.current) return;
+    if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
+    explicouViewport.current = true;
+    falar(FALA_VIEWPORT);
+  }, [simulandoViewport, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
+  const projeto = fase.tipo === "projeto-ponte" ? fase : null;
+  /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
+  const itensChecklist = itensDoChecklist(fase);
+  const tituloChecklist = projeto ? "Requisitos do projeto" : "Checklist do desafio";
 
   const apresentacoes = useApresentacoes({
     fase,
@@ -536,6 +783,14 @@ export function JogoFase({
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    // A aba Lighthouse para a ferramenta dela; Elementos para as outras (o alvo precisa estar à vista).
+    setAba(ferramenta.id === "lighthouse" ? "lighthouse" : "elementos");
+    // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
+    if (ferramenta.id === "girar-dispositivo" && !dispositivoAtual.current.ligado) {
+      const ligado = { ...dispositivoAtual.current, ligado: true };
+      dispositivoAtual.current = ligado;
+      setDispositivo(ligado);
+    }
     if (FERRAMENTAS_DO_CALCULADO.includes(ferramenta.id)) trocarSubAba("calculado");
     else if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSubAba("estilos");
     // Ferramenta do painel que só se experimenta usando (setas, cor, caixinha...): o painel
@@ -605,11 +860,11 @@ export function JogoFase({
     versao: versaoLab,
     avaliarItens: (): ItemLab[] => {
       const contexto = motor.contextoValidacao();
-      if (fase.tipo === "desafio") {
-        return fase.partes.map((parte, indice) => ({
+      if (fase.tipo !== "pratica") {
+        return (itensChecklist ?? []).map((parte, indice) => ({
           id: parte.id,
           rotulo: `${indice + 1}. ${parte.id}`,
-          etiqueta: `parte, rever em ${parte.revisarEm}`,
+          etiqueta: fase.tipo === "desafio" ? `parte, rever em ${fase.partes[indice].revisarEm}` : "requisito do projeto",
           situacao: estado.partesFeitas.includes(parte.id) ? "feito" : "atual",
           resultado: contexto ? avaliarDetalhado(parte.validador, contexto) : null,
         }));
@@ -634,7 +889,9 @@ export function JogoFase({
     faseId: fase.id,
     objetivo: desafio
       ? { id: "desafio", enunciado: FALA_DESAFIO.texto }
-      : objetivo
+      : projeto
+        ? { id: "projeto", enunciado: FALA_PROJETO.texto }
+        : objetivo
         ? { id: objetivo.id, enunciado: objetivo.enunciado.mouse }
         : null,
     degrau: estado.degrau,
@@ -780,6 +1037,31 @@ export function JogoFase({
     [obterDocumento],
   );
 
+  // A página de agora (documento, CSS e tela): a análise do Lighthouse fica "velha" quando ela muda.
+  const versaoDaPagina = `${versaoDocumento}:${versaoCss}:${telaDoAparelho?.largura ?? 0}x${telaDoAparelho?.altura ?? 0}`;
+  useEffect(() => {
+    versaoDaPaginaAtual.current = versaoDaPagina;
+    telaDaAuditoria.current = telaDoAparelho;
+  }, [telaDoAparelho, versaoDaPagina]);
+
+  /** Troca a aba de cima (Elementos, Lighthouse). */
+  const trocarAba = useCallback((nova: Aba) => {
+    tocarEfeito("clique");
+    setAba(nova);
+  }, []);
+
+  /** Uma peça de um problema do Lighthouse: volta para Elementos, seleciona e o computadorzinho explica. */
+  const irParaPecaDaAuditoria = useCallback(
+    (elemento: Element | null, regra: IdRegraAuditoria) => {
+      setAba("elementos");
+      if (movel) setSegmento("arvore");
+      const caminho = elemento?.isConnected ? caminhoDoElemento(elemento) : null;
+      if (caminho) selecionar(caminho, "sistema");
+      falarLivre.current({ texto: REGRAS_AUDITORIA[regra].porQue, expressao: "curioso" });
+    },
+    [caminhoDoElemento, movel, selecionar],
+  );
+
   const acoesEstilos = useMemo<AcoesEstilos>(
     () => ({
       editarDeclaracao,
@@ -856,6 +1138,7 @@ export function JogoFase({
         previsao={objetivo?.tipo === "previsao" ? objetivo.previsao : null}
         degrauMaximo={motor.degrauMaximo}
         desafio={desafio !== null}
+        projeto={projeto !== null}
         listaRever={
           desafio && (
             <ListaRever
@@ -881,7 +1164,7 @@ export function JogoFase({
     </>
   );
 
-  const objetivoAtivo = estado.etapa === "objetivos" && !desafio ? estado.objetivoAtual : null;
+  const objetivoAtivo = estado.etapa === "objetivos" && !itensChecklist ? estado.objetivoAtual : null;
   const objetivosNaTela: ObjetivoNaTela[] = (fase.tipo === "pratica" ? fase.objetivos : []).map((item) => ({
     id: item.id,
     enunciado: enunciadoDe(item, toque),
@@ -906,7 +1189,9 @@ export function JogoFase({
   const perguntaDaFala =
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
-  const checklist = desafio ? <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} /> : null;
+  const checklist = itensChecklist ? (
+    <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
+  ) : null;
   const objetivoDaLinha = objetivoAtivo !== null ? objetivosNaTela[objetivoAtivo] : null;
 
   const conversa = (
@@ -917,14 +1202,15 @@ export function JogoFase({
           Objetivo {estado.objetivoAtual + 1} de {objetivosNaTela.length}: {objetivoDaLinha.enunciado}
         </p>
       )}
-      {layout === "retrato" && desafio && estado.etapa === "objetivos" && (
+      {layout === "retrato" && itensChecklist && estado.etapa === "objetivos" && (
         <p className="px-1 text-xs font-bold text-texto-suave">
-          Desafio: {estado.partesFeitas.length} de {desafio.partes.length} partes feitas
+          {projeto ? "Projeto" : "Desafio"}: {estado.partesFeitas.length} de {itensChecklist.length}{" "}
+          {projeto ? "requisitos cumpridos" : "partes feitas"}
         </p>
       )}
-      {layout === "paisagem" && desafio && estado.etapa === "objetivos" && (
+      {layout === "paisagem" && itensChecklist && estado.etapa === "objetivos" && (
         <div className="max-h-40 shrink-0">
-          <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} />
+          <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
         </div>
       )}
       <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala} rabo={movel ? "baixo-direita" : "esquerda"}>
@@ -943,7 +1229,7 @@ export function JogoFase({
     </>
   );
 
-  const rotuloFase = fase.tipo === "desafio" ? "Desafio" : `Fase ${local.numero}`;
+  const rotuloFase = rotuloDaFase(fase.tipo, local.numero);
   const botaoMapa = rotaDoMapa && !lab ? <BotaoMapa href={rotaDoMapa} compacto={movel} /> : null;
   const botaoVoltar = revisao ? (
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
@@ -975,7 +1261,9 @@ export function JogoFase({
       ? ""
       : fase.tipo === "pratica"
         ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
-        : "desafio";
+        : fase.tipo === "desafio"
+          ? "desafio"
+          : "projeto";
 
   return (
     <div
@@ -1030,10 +1318,11 @@ export function JogoFase({
           concluidos={estado.concluidos}
           ativo={objetivoAtivo}
           checklist={
-            desafio && checklist
+            itensChecklist && checklist
               ? {
-                  total: desafio.partes.length,
-                  resumo: estado.etapa === "concluida" ? "Desafio completo!" : "Checklist do desafio",
+                  total: itensChecklist.length,
+                  resumo:
+                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
                   lista: checklist,
                 }
               : undefined
@@ -1061,8 +1350,8 @@ export function JogoFase({
           >
             <Painel
               abaAtiva={aba}
-              abasDesbloqueadas={ABAS_DESBLOQUEADAS}
-              aoTrocarAba={setAba}
+              abasDesbloqueadas={comLighthouse ? ABAS_COM_LIGHTHOUSE : ABAS_DESBLOQUEADAS}
+              aoTrocarAba={trocarAba}
               ferramentas={
                 <>
                   <AlvoFerramenta
@@ -1079,6 +1368,24 @@ export function JogoFase({
                       aoAlternar={alternarInspecaoResponsiva}
                     />
                   </AlvoFerramenta>
+                  {comDispositivo && (
+                    <AlvoFerramenta
+                      ids={["modo-dispositivo"]}
+                      marcador="modo-dispositivo"
+                      aoAbrirCard={abrirCard}
+                      classeMarcador="-right-2 -top-1.5"
+                      as="span"
+                      className="ml-1 inline-flex"
+                    >
+                      <BotaoDispositivo
+                        ativo={dispositivo.ligado}
+                        aoAlternar={() => {
+                          tocarEfeito("clique");
+                          acoesDispositivo.alternar();
+                        }}
+                      />
+                    </AlvoFerramenta>
+                  )}
                   <AlvoFerramenta
                     ids={["desfazer"]}
                     marcador="desfazer"
@@ -1097,6 +1404,22 @@ export function JogoFase({
                 </>
               }
             >
+              {comLighthouse && (
+                <div className={aba === "lighthouse" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <AlvoFerramenta ids={["lighthouse"]} marcador="lighthouse" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                    <PainelLighthouse
+                      resultado={auditoria?.resultado ?? null}
+                      desatualizado={auditoria !== null && auditoria.versao !== versaoDaPagina}
+                      aoAnalisar={() => {
+                        tocarEfeito("clique");
+                        analisarAuditoria();
+                      }}
+                      aoIrParaPeca={irParaPecaDaAuditoria}
+                    />
+                  </AlvoFerramenta>
+                </div>
+              )}
+              <div className={aba === "elementos" ? "contents" : "hidden"}>
               {movel && (
                 <div className="flex shrink-0 border-b-2 border-borda bg-painel px-2 py-1.5">
                   <SeletorSegmentado
@@ -1193,7 +1516,8 @@ export function JogoFase({
                         >
                           <PainelEstilos
                             elemento={elementoSelecionado}
-                            versao={versaoDocumento * 100000 + versaoCss}
+                            versao={versaoDocumento * 100000 + versaoCss + versaoLayout * 10_000_000_000}
+                            tela={telaDoAparelho}
                             paineis={paineis}
                             temFolha={temCss}
                             toque={toque}
@@ -1206,7 +1530,8 @@ export function JogoFase({
                               paineis.includes("calculado") ? (
                                 <PainelCalculado
                                   elemento={elementoSelecionado}
-                                  versao={versaoDocumento * 100000 + versaoCss}
+                                  versao={versaoDocumento * 100000 + versaoCss + versaoLayout * 10_000_000_000}
+                                  tela={telaDoAparelho}
                                   toque={toque}
                                   camada={realceCaixa?.camada ?? null}
                                   aoRealcarCamada={realcarCamada}
@@ -1263,6 +1588,7 @@ export function JogoFase({
                   </AlvoFerramenta>
                 }
               />
+              </div>
             </Painel>
           </AlvoFerramenta>
         </section>
@@ -1296,9 +1622,99 @@ export function JogoFase({
             <JanelaNavegador
               url={fase.siteAlvo.url}
               compacta={movel}
+              acoes={
+                comLevarProMundo ? (
+                  <AlvoFerramenta
+                    ids={["levar-pro-mundo"]}
+                    marcador="levar-pro-mundo"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="inline-flex shrink-0"
+                  >
+                    <button
+                      type="button"
+                      data-levar-pro-mundo
+                      onClick={abrirLevarProMundo}
+                      aria-label="Levar pro mundo"
+                      title="Levar pro mundo: baixar os arquivos do site"
+                      className="inline-flex h-7 items-center gap-1 rounded-full border-2 border-primaria bg-primaria px-2.5 text-xs font-black text-sobre-primaria hover:brightness-110 pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
+                    >
+                      <IconeLevarProMundo tamanho={16} />
+                      <span className={movel ? "sr-only" : ""}>Levar pro mundo</span>
+                    </button>
+                  </AlvoFerramenta>
+                ) : siteDoJogo ? (
+                  <AlvoFerramenta
+                    ids={["salvar-tema"]}
+                    marcador="salvar-tema"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="inline-flex shrink-0"
+                  >
+                    <button
+                      type="button"
+                      data-salvar-tema
+                      onClick={() => {
+                        tocarEfeito("clique");
+                        sinalizarUso("salvar-tema");
+                        gravarTema(false);
+                      }}
+                      aria-label="Salvar como Meu tema"
+                      title="Salvar as cores da maquete como Meu tema"
+                      className="inline-flex h-7 items-center gap-1 rounded-full border-2 border-primaria bg-primaria px-2.5 text-xs font-black text-sobre-primaria hover:brightness-110 pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
+                    >
+                      <IconeSalvarTema tamanho={16} />
+                      <span className={movel ? "sr-only" : ""}>Salvar como Meu tema</span>
+                    </button>
+                  </AlvoFerramenta>
+                ) : undefined
+              }
               tituloAba={fase.modoDocumento ? tituloAba : undefined}
+              barra={
+                aparelhoLigado ? (
+                  <AlvoFerramenta ids={["modo-dispositivo"]} className="flex shrink-0 flex-col">
+                    <BarraDispositivo
+                      estado={dispositivo}
+                      zoom={zoomDispositivo}
+                      compacta={movel}
+                      aoTrocarModelo={(modelo, largura) => {
+                        tocarEfeito("clique");
+                        acoesDispositivo.trocar(modelo, largura);
+                      }}
+                      aoGirar={() => {
+                        tocarEfeito("clique");
+                        acoesDispositivo.girar();
+                      }}
+                      alvoGirar={(botao) => (
+                        <AlvoFerramenta
+                          ids={["girar-dispositivo"]}
+                          marcador="girar-dispositivo"
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="-right-2 -top-1.5"
+                          as="span"
+                          className="inline-flex shrink-0"
+                        >
+                          {botao}
+                        </AlvoFerramenta>
+                      )}
+                    />
+                  </AlvoFerramenta>
+                ) : undefined
+              }
               aviso={
-                simulandoAcentos ? (
+                simulandoViewport ? (
+                  <button
+                    type="button"
+                    data-aviso-viewport
+                    onClick={() => falar(FALA_VIEWPORT)}
+                    className="absolute bottom-2 left-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full border-2 border-alerta bg-superficie px-3 py-1 text-left text-xs font-bold text-texto shadow-[0_3px_0_var(--cor-sombra)] pointer-coarse:min-h-11"
+                  >
+                    <IconeAviso className="shrink-0 text-alerta" />
+                    Sem meta viewport: página em 980 px, encolhida (simulação)
+                  </button>
+                ) : simulandoAcentos ? (
                   <button
                     type="button"
                     data-aviso-acentos
@@ -1320,6 +1736,11 @@ export function JogoFase({
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
+                dispositivo={aparelhoLigado ? viewportAparelho : null}
+                aoArrastarLargura={aparelhoLigado ? acoesDispositivo.arrastar : undefined}
+                aoSoltarAlca={soltarAlca}
+                aoMudarZoom={setZoomDispositivo}
+                aoRedimensionar={aoRedimensionarPrevia}
               >
                 <SobreposicaoInspecao realce={realce} extras={realcesExtras} caixa={realceCaixa} />
                 <CamadaInspecao
@@ -1393,6 +1814,40 @@ export function JogoFase({
           apresentacoes.rever(id);
         }}
       />
+      {siteDoJogo && (
+        <AvisoContraste
+          aberto={avisoContraste !== null}
+          ruins={avisoContraste ?? []}
+          aoVoltar={() => setAvisoContraste(null)}
+          aoSalvarMesmoAssim={() => gravarTema(true)}
+        />
+      )}
+      {comLevarProMundo && (
+        <>
+          <DialogoLevarProMundo
+            aberto={janelaProjeto === "levar"}
+            arquivos={arquivosExportados}
+            nome={nomeDoProjeto}
+            linhaAcrescentada={!ligaOCss(htmlAtual)}
+            aoBaixar={baixarProjeto}
+            aoVerGuia={() => setJanelaProjeto("guia")}
+            aoFechar={() => setJanelaProjeto(null)}
+          />
+          <GuiaPublicacao
+            aberto={janelaProjeto === "guia"}
+            marcados={(progresso.projetos[fase.id] ?? PROJETO_VAZIO).guia}
+            link={(progresso.projetos[fase.id] ?? PROJETO_VAZIO).link}
+            aoMarcar={(passo, marcado) => {
+              if (modo === "jogo") marcarPassoDoGuia(fase.id, passo, marcado);
+            }}
+            aoSalvarLink={(link) => {
+              if (modo === "jogo") salvarLinkPublicado(fase.id, link);
+              tocarEfeito("acerto");
+            }}
+            aoFechar={() => setJanelaProjeto(null)}
+          />
+        </>
+      )}
       {desafioParaMeta && (
         <TelaMeta
           aberta={estado.etapa === "meta"}
@@ -1425,6 +1880,13 @@ export function JogoFase({
         aoProxima={() => proxima && aoIrParaFase?.(proxima.id)}
         aoVoltarAIlha={modo === "jogo" && !proxima ? aoVoltarAIlha : undefined}
         aoVoltarAoDesafio={() => aoVoltarAoDesafio?.()}
+        extras={
+          comLevarProMundo ? (
+            <Botao variante="secundario" onClick={abrirLevarProMundo} data-levar-pro-mundo-conclusao>
+              Levar pro mundo
+            </Botao>
+          ) : undefined
+        }
       />
       {lab && painelLab?.(apiLab)}
     </div>

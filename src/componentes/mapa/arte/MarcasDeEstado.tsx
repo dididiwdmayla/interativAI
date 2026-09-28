@@ -4,18 +4,35 @@ import { motion } from "framer-motion";
 import { useAnimarMapa } from "./useAnimarMapa";
 
 /** Brilho suave atrás de uma ilha disponível. Centro em (0, 0). */
-export function BrilhoIlha() {
+export function BrilhoIlha({ completa = false }: { completa?: boolean }) {
   const animar = useAnimarMapa();
   return (
-    <motion.ellipse
-      cx="0"
-      cy="10"
-      rx="132"
-      ry="84"
-      fill="var(--cor-destaque)"
-      animate={animar ? { opacity: [0.18, 0.4, 0.18] } : { opacity: 0.3 }}
-      transition={animar ? { duration: 2.6, repeat: Infinity, ease: "easeInOut" } : undefined}
-    />
+    <>
+      <motion.ellipse
+        cx="0"
+        cy="10"
+        rx="132"
+        ry="84"
+        fill="var(--cor-destaque)"
+        animate={animar ? { opacity: [0.18, 0.4, 0.18] } : { opacity: 0.3 }}
+        transition={animar ? { duration: 2.6, repeat: Infinity, ease: "easeInOut" } : undefined}
+      />
+      {/* Ilha completa: um anel aceso em volta, além do brilho. */}
+      {completa && (
+        <motion.ellipse
+          cx="0"
+          cy="10"
+          rx="146"
+          ry="96"
+          fill="none"
+          stroke="var(--cor-destaque)"
+          strokeWidth="6"
+          data-ilha-acesa
+          animate={animar ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.85 }}
+          transition={animar ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : undefined}
+        />
+      )}
+    </>
   );
 }
 

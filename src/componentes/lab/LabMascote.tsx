@@ -47,7 +47,7 @@ export function LabMascote() {
       </section>
 
       <div className="grid gap-6">
-        {TEMAS.map((tema) => (
+        {TEMAS.filter((tema) => !tema.doJogador).map((tema) => (
           <section
             key={tema.id}
             data-theme={tema.id}

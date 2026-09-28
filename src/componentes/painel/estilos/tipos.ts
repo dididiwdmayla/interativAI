@@ -26,6 +26,12 @@ export type DestaqueEstilos = { seletorRegra: string; propriedade?: string };
 /** O que está sendo editado: uma declaração existente ou a nova, no fim do bloco. */
 export type EdicaoEstilos = {
   bloco: string;
+  /**
+   * O elemento dono do bloco (o selecionado, ou o ancestral de um "Herdado
+   * de": como no Chrome, dá para editar as regras herdadas também).
+   */
+  dono: Element;
+  /** O índice da declaração NA REGRA (o `indice` dela), ou "nova". */
   alvo: number | "nova";
   campo: "nome" | "valor";
   /** Declaração nova: o nome já escolhido, enquanto edita o valor. */

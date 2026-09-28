@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+import { rotuloDaFase } from "@/motor/tiposDeFase";
 import { EstrelasFase } from "@/componentes/layout/EstrelasFase";
 import { BalaoFala } from "@/componentes/mascote/BalaoFala";
 import { Mascote } from "@/componentes/mascote/Mascote";
@@ -29,6 +31,8 @@ type Props = {
   aoVoltarAIlha?: () => void;
   /** Revisão: volta para o desafio que abriu esta fase. */
   aoVoltarAoDesafio: () => void;
+  /** Projeto-ponte: o botão "Levar pro mundo" (e o que mais o projeto oferecer) no fim. */
+  extras?: ReactNode;
 };
 
 /** Tela de fim de fase: estrelas, falas finais, missão de campo e o caminho para a próxima. */
@@ -49,18 +53,20 @@ export function TelaConclusao({
   aoProxima,
   aoVoltarAIlha,
   aoVoltarAoDesafio,
+  extras,
 }: Props) {
   const { fase, unidade, numero } = local;
   const naMissao = indiceFala >= fase.conclusao.length;
   const revisao = modo === "revisao";
-  const titulo = fase.tipo === "desafio" ? "Desafio completo!" : `${fase.titulo}: completa!`;
+  const titulo =
+    fase.tipo === "desafio" ? "Desafio completo!" : fase.tipo === "projeto-ponte" ? "Projeto pronto!" : `${fase.titulo}: completa!`;
 
   return (
     <Modal aberto={aberta} titulo="Fase completa" aoFechar={aoFechar} className="max-w-xl">
       <div className="flex flex-col items-center text-center" data-conclusao>
         <Mascote expressao={naMissao ? fala.expressao : "comemorando"} tamanho={140} />
         <p className="mt-1 text-xs font-black uppercase tracking-wide text-texto-suave">
-          {unidade.ilha} · {unidade.zona} · Unidade {unidade.numero} · {fase.tipo === "desafio" ? "Desafio" : `Fase ${numero}`}
+          {unidade.ilha} · {unidade.zona} · Unidade {unidade.numero} · {rotuloDaFase(fase.tipo, numero)}
         </p>
         <p className="text-2xl font-black text-primaria">{titulo}</p>
         <div className="my-2">
@@ -99,6 +105,7 @@ export function TelaConclusao({
           )}
           <BalaoFala fala={falaFinal} />
           <div className="flex flex-wrap justify-end gap-2">
+            {!revisao && extras}
             {revisao ? (
               <Botao onClick={aoVoltarAoDesafio}>Voltar ao desafio</Botao>
             ) : (

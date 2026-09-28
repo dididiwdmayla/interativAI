@@ -249,6 +249,14 @@ os conjuntos de textos.
 | `{ tipo: "declaracao", seletorRegra, propriedade, valor?, ativa? }` | (CSS) a regra tem a declaração (com o valor, se vier; `ativa: true` ligada, `false` desligada, sem `ativa` qualquer uma) |
 | `{ tipo: "regraExiste", seletorRegra }` | (CSS) existe uma regra com esse seletor nas folhas do site |
 | `{ tipo: "riscada", seletor, propriedade, seletorRegra }` | (CSS) em algum elemento do seletor, a declaração dessa regra perde para outra (riscada no painel); `"element.style"` é o inline |
+| `larguraTela?`, `alturaTela?` (em `valorEfetivo` e `riscada`) | (CSS) confere numa tela desse tamanho: as `@media` são avaliadas contra ela (seção 12.8). Sem eles, vale a tela da prévia (o aparelho do modo dispositivo, se ligado) ou, fora da tela, 1280 x 800 |
+| `{ tipo: "variavelCss", nome, valor?, seletor?, diferenteDoInicial? }` | (CSS) a variável `--nome` vale `valor` no elemento (padrão `:root`), já resolvida; `diferenteDoInicial` pede só que tenha mudado (seção 15) |
+| `{ tipo: "temaSalvo" }` | (site do jogo) o jogador salvou o Meu tema; trava no checklist como `evento` |
+| `{ tipo: "dispositivo", largura?, orientacao? }` | o modo dispositivo está ligado (nessa largura de layout, em `"retrato"` ou `"paisagem"`) (seção 16) |
+| `{ tipo: "notaAuditoria", categoria, minimo }` | a nota da categoria (`"acessibilidade"`, `"boas-praticas"`, `"seo"`) na auditoria, calculada ao vivo, é pelo menos `minimo` (seção 17) |
+| `{ tipo: "semProblema", regra }` | a auditoria não acha aquele problema (ex.: `"imagem-sem-alt"`) |
+| `{ tipo: "temMediaQuery", minimo? }` | as folhas da página têm pelo menos `minimo` (padrão 1) regras `@media` |
+| `{ tipo: "cabeNaTela", largura }` | a página cabe numa tela dessa largura sem rolar de lado: tem meta viewport, nenhuma largura (ou min-width) em px maior que a tela e nenhum grid com colunas em px somando mais que ela, com as `@media` valendo nessa largura (seção 18) |
 | `{ tipo: "todos", validadores }` | todos passam |
 | `{ tipo: "algum", validadores }` | algum passa |
 | `{ tipo: "nao", validador }` | o de dentro não passa |
@@ -260,7 +268,10 @@ não tinha, pelo "Adicionar atributo"), `editouCodigo`, `escondeu`, `mostrou`, `
 `duplicou`, `desfez`, `refez`, `respondeuPrevisao`, `renomeouTag` (trocou o
 nome da tag), `clicouLink` (clicou num link da prévia, com o `href`),
 `editouCss` (digitou no editor CSS), `editouPropriedade`,
-`alternouDeclaracao` e `adicionouRegra` (painel Estilos). As ações dos momentos
+`alternouDeclaracao` e `adicionouRegra` (painel Estilos), `temaSalvo`
+(Salvar como Meu tema), `trocouDispositivo` e `girou` (modo dispositivo),
+`auditou` (Analisar do Lighthouse) e `exportouProjeto` (Baixar .zip do
+Levar pro mundo). As ações dos momentos
 roteirizados (o computadorzinho mexendo) **não contam** como eventos do
 jogador.
 
@@ -303,6 +314,11 @@ soluções testam o caminho real.
 | `{ tipo: "alternarDeclaracao", seletorRegra, propriedade }` | (CSS) liga ou desliga a declaração (a checkbox; no texto vira comentário, como no Chrome) |
 | `{ tipo: "adicionarRegra", seletorRegra, declaracoes? }` | (CSS) cria uma regra nova no fim da folha |
 | `{ tipo: "editarCss", posicao, texto }` | (CSS) o que o jogador escreveria no editor CSS: `inicio` ou `fim` da folha |
+| `{ tipo: "salvarTema" }` | (site do jogo) "Salvar como Meu tema", confirmando mesmo com contraste ruim (seção 15) |
+| `{ tipo: "trocarDispositivo", modelo, largura? }` | liga o modo dispositivo no modelo (`"celular-360"`, `"celular-390"`, `"tablet-768"`, `"notebook-1280"` ou `"livre"` com `largura`) (seção 16) |
+| `{ tipo: "girarDispositivo" }` / `{ tipo: "desligarDispositivo" }` | gira o aparelho / desliga a barra de dispositivo |
+| `{ tipo: "analisarAuditoria" }` | o Analisar da aba Lighthouse (seção 17) |
+| `{ tipo: "levarProMundo" }` | baixa o .zip do Levar pro mundo; gera `exportouProjeto` (seção 18) |
 
 Seletores de ação usam o **primeiro** elemento que casa. `"$0"` é o
 selecionado (como no Console do F12) e `"$0 h3"` procura dentro dele.
@@ -744,12 +760,14 @@ revisão espaçada, confusões atacadas), como a Unidade 2 faz para HTML.
   entra na cascata, mas aparece como "(index)" e não dá para editar).
 - Ligue os sub-painéis na fase: `paineisElementos: ["estilos"]` (e
   `"calculado"` a partir da E3, Modelo de caixa).
-- **Nada de `@media` na folha editável.** O navegador avalia, mas o
-  `testar:conteudo` roda no jsdom, que não tem `matchMedia`: o motor não
-  sabe se a regra vale e deixa a propriedade "incerta" (os validadores
-  dela não passam). Faça a página funcionar em 390 px numa coluna só.
-- Também deixam o motor incerto: `@layer`, `@import`, CSS aninhado e
-  `@container` (nada fica riscado na página inteira).
+- **`@media` pode (desde a Rodada 12).** O motor avalia a condição contra
+  uma tela informada, igual no navegador e no jsdom (seção 12.8). Sem
+  modo dispositivo na fase, a prévia usa a largura da janela; os
+  validadores, a da prévia (ou 1280 px fora da tela). Numa fase sem o
+  modo dispositivo, prefira páginas que funcionem numa coluna só.
+- Deixam o motor incerto: `@layer`, `@import`, CSS aninhado e
+  `@container` (nada fica riscado na página inteira), e `@media` com
+  condição que ele não sabe avaliar (essa regra NÃO se aplica: ver 12.8).
 - Folha começando "sem graça de propósito" ajuda: nome apagado, preço
   quase invisível, tudo à esquerda. O jogador vê o antes e o depois.
 
@@ -812,7 +830,7 @@ revisão espaçada, confusões atacadas), como a Unidade 2 faz para HTML.
 4. Herdadas: a própria vence a herdada; entre ancestrais, o mais perto
    vence.
 5. **Quando não sabe, não risca**: valor que o motor não conhece no topo,
-   atalho que ele não separa, `@media`, lógica misturada com física
+   atalho que ele não separa, lógica misturada com física
    (`margin-inline-start` com `margin-left`), folha com `@layer`. Ele
    prefere deixar de riscar a riscar errado, e o `valorEfetivo` diz
    "incerto" (o detalhe no `/lab/fases` e no teste diz por quê).
@@ -838,7 +856,41 @@ as linhas no editor CSS.
 `/lab/fases?fase=lab-motor-u1-f1` abre a Bancada de estilos (fora do
 currículo): uma página com atalhos, `!important`, inline, herança e uma
 declaração desligada, para ver o motor trabalhando antes de escrever a
-fase.
+fase. As outras bancadas: `f2` (modo documento com dispositivo), `f3`
+(variáveis e `@media`), `f4` (o site do jogo e o Meu tema) e `f5`
+(Lighthouse).
+
+### 12.7 Variáveis CSS
+
+- `--nome: valor` é herdada, como no Chrome: declare no `:root` (ou numa
+  peça) e use com `var(--nome)` em qualquer descendente.
+  `var(--nome, reserva)` usa a reserva quando a variável não existe;
+  pode encadear (`var(--a, var(--b, red))`).
+- Ciclo (`--a: var(--b); --b: var(--a)`): as variáveis do ciclo ficam
+  inválidas, e a propriedade que as usa volta ao herdado ou ao inicial
+  (a "inválida na hora de calcular" da especificação). O motor e o
+  painel concordam.
+- No painel Estilos, as variáveis aparecem na regra onde foram
+  declaradas (e no "Herdado de"); o `var(--nome)` mostra o valor ao lado
+  e é um link até a declaração. `valorEfetivo` compara o valor JÁ
+  RESOLVIDO: `{ propriedade: "color", valor: "#1d5c8a" }` passa com
+  `color: var(--destaque)` se `--destaque` vale isso.
+- Para conferir a própria variável, use `variavelCss` (seção 15).
+
+### 12.8 `@media` e `larguraTela`
+
+- O motor avalia `min-width`, `max-width`, `width` e as de altura (px, em
+  e rem, com 16 px por em), `orientation`, `and`, `or`, `not`, `only`,
+  os tipos `all`, `screen` e `print`, listas com vírgula e a sintaxe de
+  intervalo (`(400px <= width < 800px)`). O que ele não sabe avaliar
+  (`prefers-color-scheme`, `hover`, `vw` na condição) NÃO SE APLICA.
+- A tela vem, nesta ordem: do `larguraTela`/`alturaTela` do validador; do
+  modo dispositivo, se ligado (a largura de LAYOUT: sem meta viewport num
+  celular, 980 px); da prévia; e, fora da tela, 1280 x 800.
+- O painel Estilos só lista a regra de `@media` que vale na largura atual
+  e mostra o cabeçalho `@media (...)` acima do seletor, como o Chrome.
+- Para conferir o site em várias larguras no mesmo objetivo, use `todos`
+  com o mesmo `valorEfetivo` em `larguraTela: 390` e `larguraTela: 1280`.
 
 ---
 
@@ -914,7 +966,8 @@ fase.
       `abrirBalao`, `fecharBalao`), nunca `waitForTimeout` (seção 11).
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
-- [ ] Fase de CSS (seção 12): `siteAlvo.css` sem `@media`,
+- [ ] Fase de CSS (seção 12): `@media` só com condição que o motor sabe
+      (12.8),
       `paineisElementos` ligado, `valorEfetivo` onde o resultado importa e
       `declaracao` onde o caminho importa; nada "incerto" no
       `/lab/fases`.
@@ -922,3 +975,89 @@ fase.
 - [ ] Jogado no `/lab/fases` e de verdade (desktop e celular).
 - [ ] `docs/PROGRESSO.md` atualizado.
 - [ ] Seção Status do `docs/ROADMAP.md` atualizada.
+
+---
+
+## 15. E5: o próprio jogo como site-alvo
+
+- `siteAlvo: SITE_ALVO_DO_JOGO` (de `src/motor/siteDoJogo.ts`), sem
+  `css` e sem `modoDocumento`: a maquete (barra, pedaço do mapa, painel,
+  computadorzinho, botões) é desenhada só com `var(--cor-*)`; a folha
+  editável é um `:root` com os tokens REAIS do tema do jogador, montado
+  quando a fase abre (nos testes, o tema Doce). Nenhuma cor literal no
+  conteúdo: troque cores com `variavelCss` e `diferenteDoInicial`.
+- "Salvar como Meu tema" (ferramenta `salvar-tema`, botão na barra de
+  endereço da prévia): confere o contraste dos 7 pares principais (4,5:1)
+  e deixa salvar mesmo abaixo, avisando. Valide com `temaSalvo` e use a
+  ação `salvarTema` na solução. A checagem `site-do-jogo` acusa
+  `temaSalvo` e `salvarTema` fora do site do jogo.
+- O Meu tema se edita e se apaga depois na oficina `/meu-tema` (o card da
+  ferramenta leva até lá).
+
+## 16. Modo dispositivo
+
+- Ferramentas `modo-dispositivo` (botão ao lado da setinha e
+  Ctrl+Shift+M, como no Chrome) e `girar-dispositivo` (na barra de
+  dispositivo). Modelos: Celular 360 e 390, Tablet 768, Notebook 1280, e
+  largura livre arrastando as alças. O iframe ganha a largura de verdade,
+  então as `@media` reagem de verdade.
+- Sem `<meta name="viewport">` num celular, a prévia desenha em 980 px e
+  encolhe (a regra dos navegadores de celular), com o aviso "simulação" e
+  uma fala; é o jeito de ensinar por que o viewport importa.
+- Validador `dispositivo` (largura e orientação), eventos
+  `trocouDispositivo` e `girou`, ações `trocarDispositivo` (modelo e, no
+  livre, largura), `girarDispositivo` e `desligarDispositivo`. A checagem
+  pede `modo-dispositivo` em `usaFerramentas` para o validador.
+
+## 17. Lighthouse (auditoria simplificada)
+
+- Ferramenta `lighthouse`: a aba de cima com o aviso de versão
+  simplificada e o Analisar. Três categorias (Acessibilidade, Boas
+  práticas, SEO básico) com nota de 0 a 100 no anel (faixas como no
+  Lighthouse: 90 ou mais boa, 50 a 89 média). As 14 verificações moram em
+  `src/motor/auditoria.ts` (pesos, textos de leigo e a regra de cada uma)
+  e rodam no motor, então o `testar:conteudo` vê as mesmas notas.
+- Cada problema abre a peça na árvore e o computadorzinho explica por que
+  importa. Valide com `notaAuditoria` (nota mínima) ou `semProblema`
+  (uma verificação); use a ação `analisarAuditoria` na solução e o evento
+  `auditou` quando o objetivo é RODAR a análise.
+- As notas são calculadas ao vivo: numa página quase vazia, a nota é alta.
+  Para "confira no Lighthouse", junte o evento `auditou` com a nota
+  (`todos`), como faz a P2.
+
+## 18. Projeto-ponte e publicação
+
+O modelo é a P2, "Do jogo pro mundo"
+(`src/conteudo/ilhas/sites/publicar/unidade-2/`).
+
+- Tipo `projeto-ponte` (`FaseProjetoPonte`): o site do PRÓPRIO jogador,
+  sempre com `modoDocumento: true`, `siteAlvo.css` (vira o style.css),
+  `nomeDoProjeto` (até 40 caracteres, aparece em Meus projetos e no nome
+  do .zip) e `levar-pro-mundo` em `usaFerramentas`. Não apresenta
+  ferramenta nenhuma e só pratica conceitos ensinados antes (as
+  checagens acusam).
+- `requisitos` em vez de objetivos: cada um com `id`, `descricao` (até
+  140), `validador`, `pergunta` (até 160: é o que o "Me faz uma pergunta"
+  fala, uma de cada requisito que falta, em rodízio) e `solucaoDeTeste`.
+  Eles se marcam sozinhos como as partes do desafio: os de estado são
+  conferidos ao vivo, os com evento travam. Nenhum pode passar no começo,
+  e a solução de um não pode marcar outro.
+- O ponto de partida é quase vazio de propósito (o `title` vazio, um
+  recado no body, um CSS básico sem `@media`). Para requisitos que uma
+  página vazia já cumpriria (nota alta, nada cortado), peça a ferramenta
+  junto: `auditou` com `notaAuditoria`, `dispositivo` com `cabeNaTela`.
+- O projeto fica salvo em Meus projetos (`/projetos`) e sobrevive ao
+  "Jogar de novo" da ilha; só o Recomeçar da fase zera o site.
+- Levar pro mundo (ferramenta `levar-pro-mundo`, só com modo documento e
+  `siteAlvo.css`): baixa um .zip com `index.html` (o documento do jogador,
+  com a linha `<link rel="stylesheet" href="style.css">` posta no fim do
+  head se faltar) e `style.css` (a aba estilo.css). Valide com o evento
+  `exportouProjeto`; na solução, a ação `levarProMundo`.
+- O guia de publicação é DADO, em `src/conteudo/publicacao.ts`: passos
+  com id estável (ficam no progresso), a data `verificadoEm` e as outras
+  opções. Quando a plataforma mudar, atualize os passos e a data, sem
+  mexer em código; confira de novo antes de publicar uma versão. O campo
+  do link só confere o formato (https:// e um domínio com ponto).
+- Concluir a última unidade pronta de uma ilha acende a ilha no mapa
+  (borda, festa uma vez, "Completa!" no mundo): o fim da ilha pede uma
+  conclusão à altura.

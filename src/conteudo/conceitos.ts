@@ -464,6 +464,33 @@ const CATALOGO = {
     resumo: "z-index decide qual peça fica por cima quando duas se sobrepõem: o número maior vence.",
     temas: ["interfaces"],
   },
+
+  // Zona Publicar, P2: Do jogo pro mundo
+  "modo-dispositivo": {
+    nome: "Modo dispositivo",
+    resumo: "O botão do F12 que mostra a página do tamanho de um celular ou tablet, sem sair do computador.",
+    temas: ["ferramentas", "interfaces"],
+  },
+  "auditoria-lighthouse": {
+    nome: "Lighthouse",
+    resumo: "A aba do F12 que confere a página e dá notas de acessibilidade, boas práticas e SEO, apontando o que consertar.",
+    temas: ["ferramentas", "acessibilidade"],
+  },
+  "css-externo": {
+    nome: "CSS em arquivo separado",
+    resumo: "O visual mora num arquivo .css à parte, ligado à página por uma linha link no head.",
+    temas: ["interfaces", "ferramentas"],
+  },
+  "index-html": {
+    nome: "index.html",
+    resumo: "O nome da página de entrada de um site: é o arquivo que o servidor mostra quando alguém abre o endereço.",
+    temas: ["servidores"],
+  },
+  "publicar-site": {
+    nome: "Publicar um site",
+    resumo: "Pôr os arquivos do site num servidor da internet, para qualquer pessoa abrir pelo endereço.",
+    temas: ["servidores", "ferramentas"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

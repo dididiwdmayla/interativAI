@@ -46,7 +46,7 @@ describe("montarIndice()", () => {
         "praticam",
         entrada.praticam,
         esperado((fase) =>
-          fase.tipo === "desafio" ? fase.conceitos.includes(id) : (fase.pratica ?? []).includes(id),
+          fase.tipo !== "pratica" ? fase.conceitos.includes(id) : (fase.pratica ?? []).includes(id),
         ),
       );
       conferir("revisam", entrada.revisam, esperado((fase) => fase.revisa.includes(id)));

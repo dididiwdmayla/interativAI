@@ -13,7 +13,7 @@ import { ilhasDaTrilha, type Trilha, unidadesDaIlha, unidadesProntasDaIlha } fro
 import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import { useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
-import { estadoDaIlha, type EstadoIlha, ilhaAnterior, ilhaAtual, trilhaDaFonte, unidadeConcluida } from "@/lib/mapa";
+import { estadoDaIlha, type EstadoIlha, ilhaAnterior, ilhaAtual, ilhaCompleta, trilhaDaFonte, unidadeConcluida } from "@/lib/mapa";
 import { rotaDaIlha } from "@/lib/rotas";
 import { ARTE_DAS_ILHAS, ArteFutura } from "./arte";
 import { AndaimesIlha, BrilhoIlha, NevoaIlha } from "./arte/MarcasDeEstado";
@@ -196,7 +196,7 @@ function MundoCarregado() {
                 const Arte = ARTE_DAS_ILHAS[ilha.id] ?? ArteFutura;
                 return (
                   <g key={ilha.id} transform={`translate(${x} ${y})`} data-ilha-arte={ilha.id} opacity={contaNaLente(ilha) === 0 ? 0.35 : 1}>
-                    {estado === "disponivel" && <BrilhoIlha />}
+                    {estado === "disponivel" && <BrilhoIlha completa={ilhaCompleta(ilha, fonte)} />}
                     <Arte />
                     {estado === "construcao" && <AndaimesIlha />}
                     {estado === "bloqueada" && <NevoaIlha />}
@@ -214,7 +214,11 @@ function MundoCarregado() {
                 return conteudo ? unidadeConcluida(conteudo, progresso) : false;
               }).length;
               const detalhe =
-                estado === "disponivel" ? `${concluidas} de ${prontas.length} ${prontas.length === 1 ? "unidade" : "unidades"}` : ROTULO_ESTADO[estado];
+                estado === "disponivel"
+                  ? concluidas === prontas.length && prontas.length > 0
+                    ? "Completa!"
+                    : `${concluidas} de ${prontas.length} ${prontas.length === 1 ? "unidade" : "unidades"}`
+                  : ROTULO_ESTADO[estado];
               // Com uma lente acesa, cada ilha diz quantas unidades do tema ela tem; as sem nenhuma apagam.
               const naLente = contaNaLente(ilha);
               const rotulo = `Ilha ${ilha.nome}${ilha.opcional ? " (opcional)" : ""}: ${detalhe}${
@@ -280,6 +284,7 @@ function MundoCarregado() {
                   onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
                   data-ilha={ilha.id}
                   data-estado={estado}
+                  data-completa={estado === "disponivel" && ilhaCompleta(ilha, fonte) ? "sim" : "nao"}
                   data-lente={naLente === null ? undefined : apagada ? "apagada" : "acesa"}
                   aria-label={rotulo}
                   className={`absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}

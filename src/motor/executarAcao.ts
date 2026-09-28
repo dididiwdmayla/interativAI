@@ -37,6 +37,18 @@ export type PainelDasAcoes = {
   escreverCss: (posicao: "inicio" | "fim", texto: string) => boolean;
   /** O texto da folha editável agora (null: a fase não tem CSS). */
   lerCss: () => string | null;
+  /** (E5) Salva a maquete do jogo como Meu tema. Só existe numa fase com site-alvo "jogo". */
+  salvarTema?: () => boolean;
+  /** (Publicar) O "Levar pro mundo": só existe numa fase com a ferramenta levar-pro-mundo. */
+  levarProMundo?: () => void;
+  /** (Lighthouse) O botão Analisar: só existe numa fase com a ferramenta lighthouse. */
+  analisarAuditoria?: () => void;
+  /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
+  dispositivo?: {
+    trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
+    girar: () => void;
+    desligar: () => void;
+  };
 };
 
 /** Ação que não deu para executar: a mensagem diz o que quebrou. */
@@ -82,6 +94,18 @@ export function descreverAcao(acao: Acao): string {
       return `adicionarRegra ${acao.seletorRegra}`;
     case "editarCss":
       return `editarCss no ${acao.posicao}`;
+    case "salvarTema":
+      return "salvarTema";
+    case "trocarDispositivo":
+      return `trocarDispositivo ${acao.modelo}${acao.largura !== undefined ? ` ${acao.largura}px` : ""}`;
+    case "girarDispositivo":
+      return "girarDispositivo";
+    case "desligarDispositivo":
+      return "desligarDispositivo";
+    case "analisarAuditoria":
+      return "analisarAuditoria";
+    case "levarProMundo":
+      return "levarProMundo";
   }
 }
 
@@ -284,6 +308,31 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "editarCss": {
       exigirCss(painel);
       if (!painel.escreverCss(acao.posicao, acao.texto)) throw new ErroAcao("editarCss não mudou nada");
+      return;
+    }
+    case "salvarTema": {
+      if (!painel.salvarTema) throw new ErroAcao('salvarTema só existe numa fase com o site-alvo do jogo (siteAlvo.tipo: "jogo")');
+      if (!painel.salvarTema()) throw new ErroAcao("não deu para salvar o tema (a maquete sem as cores do jogo?)");
+      return;
+    }
+    case "trocarDispositivo":
+    case "girarDispositivo":
+    case "desligarDispositivo": {
+      const dispositivo = painel.dispositivo;
+      if (!dispositivo) throw new ErroAcao(`${acao.tipo} pede a ferramenta modo-dispositivo em usaFerramentas`);
+      if (acao.tipo === "trocarDispositivo") dispositivo.trocar(acao.modelo, acao.largura);
+      else if (acao.tipo === "girarDispositivo") dispositivo.girar();
+      else dispositivo.desligar();
+      return;
+    }
+    case "analisarAuditoria": {
+      if (!painel.analisarAuditoria) throw new ErroAcao("analisarAuditoria pede a ferramenta lighthouse em usaFerramentas");
+      painel.analisarAuditoria();
+      return;
+    }
+    case "levarProMundo": {
+      if (!painel.levarProMundo) throw new ErroAcao("levarProMundo pede a ferramenta levar-pro-mundo em usaFerramentas");
+      painel.levarProMundo();
       return;
     }
   }

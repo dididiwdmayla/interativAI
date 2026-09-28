@@ -13,13 +13,22 @@ emojis, previsões, soluções que cumprem cada objetivo na hora certa...),
 mais o índice de conceitos, o núcleo do painel, a migração do progresso,
 o congelamento dos ids publicados (`src/conteudo/publicados.json`) e
 o motor de cascata (`cascata.test.ts`: especificidade, ordem, `!important`,
-inline, herança, atalhos, "não sei, não risca" e as edições no texto da
-folha), o CSS no formato declarativo (`css.test.ts`: ações e validadores
+inline, herança, atalhos, "não sei, não risca", as edições no texto da
+folha, as variáveis CSS (herança, encadeadas, reserva, ciclo, atalho com
+`var()`) e as media queries contra uma tela informada (limites exatos, px,
+em e rem, orientação, `and`, `or`, `not`, listas, intervalo e o que o motor
+não sabe avaliar, que não se aplica)), o CSS no formato declarativo (`css.test.ts`: ações e validadores
 de CSS, desfazer com HTML e CSS juntos, checagens de fase de CSS e a
 Bancada de estilos), sabotagens de propósito que confirmam as mensagens das checagens
 (`checagens.test.ts`: desafio cuja parte seguinte desfaz a anterior, id
 publicado alterado, fase só de sozinho com conceito, `revisarEm` sem
 guiado...).
+A auditoria do Lighthouse (`auditoria.test.ts`: cada verificação achando o
+problema e não reclamando da página certa, nomes de link e botão, o que
+não se vê, o que não se aplica, contraste com variáveis, herança, fundo do
+ancestral, texto grande, gradiente e `@media`, as notas pesadas e as
+faixas, os validadores e as sabotagens), o modo dispositivo
+(`dispositivo.test.ts`) e o Meu tema (`meuTema.test.ts`) também.
 As mesmas checagens rodam no navegador em `/lab/fases` (aba Checagens).
 
 ## Áudio (sem navegador)
@@ -69,6 +78,11 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `css.mjs` | CSS editável na Bancada de estilos (`/lab/fases?fase=lab-motor-u1-f1`): abas HTML e CSS do editor, digitar no CSS muda a prévia sem recarregar (marca na janela do iframe), cursor numa regra acende todas as peças dela, desfazer e refazer do painel voltam o CSS no editor e na prévia, soluções de CSS pelo lab (alternarDeclaracao, editarCss) e o CSS sobrevivendo à recarga pelo HTML |
 | `estilos.mjs` | o painel Estilos dentro de Elementos na Bancada de estilos: abas de cima sem Estilos e com Fontes, ordem do Chrome (element.style, regras da que vence para a que perde, "Herdado de" só com herdáveis), riscadas, hover no seletor acendendo as peças, editar valor (Enter, Esc, prévia provisória), setas (1, Shift 10, Alt 0,1), Tab entre campos, "+ declaração", caixinha virando comentário, seletor de cor, regra nova com o seletor do Chrome, element.style, link `estilo.css:N`, desfazer; no celular em pé "Árvore \| Estilos \| Código" com alvos de 44 px e botões de seta, deitado lado a lado |
 | `calculado.mjs` | a aba Calculado na Bancada de estilos: sub-abas Estilos e Calculado, diagrama com as medidas reais (padding, border, margin, zero como 0, largura do conteúdo igual à calculada, 3 casas), camadas acesas na prévia (uma por vez, todas na borda do diagrama, apagar ao sair), lista sem e com "Mostrar todas" (declaradas mais display/width/height, ordem alfabética, -webkit- no fim), filtro, rastro com a regra que vence e as riscadas, link para o editor, diagrama acompanhando edição no Estilos; no celular, tocar liga e desliga a camada e trocar de segmento apaga |
+| `variaveis.mjs [desktop\|retrato\|paisagem]` | variáveis CSS e `@media` no painel Estilos, na Bancada de variáveis (`/lab/fases?fase=lab-motor-u1-f3`): o `var()` como link com o valor resolvido ao lado (encadeado, reserva de variável que não existe, variável sobrescrita numa regra), a prévia concordando (`getComputedStyle`), `--cor-marca` na regra `:root` do "Herdado de html", o clique no nome levando até a declaração; a regra da `@media (max-width: 600px)` só aparece quando o `matchMedia` do iframe diz que vale, com o cabeçalho `@media` acima do seletor |
+| `tema.mjs [desktop\|retrato\|paisagem]` | E5 na Bancada do tema (`/lab/fases?fase=lab-motor-u1-f4`): a maquete do jogo com as cores reais do tema, o `var(--cor-primaria)` na regra `.botao`, a variável do `:root` editada pelo "Herdado de html" repintando a maquete ao vivo (sem recarregar), o aviso de contraste com o par ruim ("Voltar e ajustar" não salva), salvar ligando o Meu tema no jogo inteiro (progresso com o conjunto inteiro de cores), recarregar sem perder (o `<style>` do Meu tema posto antes da pintura), a maquete reabrindo com as cores salvas, o Meu tema no seletor, a oficina `/meu-tema` (editar, salvar, apagar voltando ao Doce) e o card da Caixa levando à oficina; botão de 44 px no toque |
+| `dispositivo.mjs [desktop\|retrato\|paisagem]` | modo dispositivo nas bancadas de variáveis e do documento: Ctrl+Shift+M (desktop) e o botão ao lado da setinha (44 px no toque) ligam a barra; o iframe com 390 px de verdade e o `matchMedia` dele concordando com o painel Estilos (a regra da `@media` aparece e some); Tablet 768, girar (1024 de largura), Notebook 1280 com zoom e o indicador na barra; a setinha acertando a peça com a página encolhida; a alça mudando a largura (vira "Livre", o iframe acompanha); no celular, a barra numa linha e o girar com 44 px; desligar; sem meta viewport, o celular desenha em 980 px com o aviso e a fala, e desfazer volta |
+| `lighthouse.mjs [desktop\|retrato\|paisagem]` | a aba Lighthouse na Bancada do Lighthouse (`/lab/fases?fase=lab-motor-u1-f5`): liberada só nas fases com a ferramenta, o aviso de versão simplificada, o Analisar com as três notas iguais às do `testar:conteudo` e as faixas (ruim, média, boa), os problemas reais da Acessibilidade, um problema explicando por que importa e levando à peça (a aba Elementos com a imagem selecionada e a fala do computadorzinho), a análise avisando que ficou velha depois de um conserto e a nota subindo para a faixa boa; no toque, Analisar e peças com 44 px |
+| `publicar.mjs [desktop\|retrato\|paisagem]` | a P2 "Do jogo pro mundo" jogada pelo mapa (progresso semeado com o resto da Ilha Sites feito): na Fase 1, as apresentações de modo dispositivo, Lighthouse e Levar pro mundo, o .zip baixado de verdade e aberto com o fflate (só index.html e style.css, o `<link rel="stylesheet" href="style.css">` no fim do head, nada do jogo dentro) e o .zip novo do sozinho com a cor nova; na Fase 2 (projeto-ponte), o site escrito do zero, os requisitos marcando sozinhos, o "Me faz uma pergunta" só perguntando, "Projeto pronto!", o projeto salvo, a volta pra ilha que acende inteira (borda e festa), Meus projetos (cartão pronto com miniatura, guia de publicação com passos e link validado e guardado, projeto reaberto como ficou) e o mundo marcando a ilha completa |
 | `documento.mjs` | o modo documento e o "Adicionar atributo" na Bancada do documento (`/lab/fases?fase=lab-motor-u1-f2`): árvore com `<!DOCTYPE html>`, raiz `<html>`, head e title (estilos do jogo escondidos), editor com a página inteira, aba com o `<title>` ao vivo, acentos quebrados sem meta charset (aviso, fala do computadorzinho, código certo), title editado pela árvore mudando a aba, meta charset pelo editor consertando tudo, atributo novo pelo botão direito (mais de um de uma vez, árvore e código, desfazer, Esc desiste) e pelo toque longo no celular |
 | `explorar.mjs [desktop\|retrato\|paisagem]` | trilhas (três cards, Web padrão, escolher Automação troca as ilhas do mundo e move o computadorzinho, ilha só nomeada, escolha salva), lente de tema no mundo (progresso contando as planejadas, ilhas acesas e apagadas, contagem por ilha) e na ilha (planejada acende, X apaga), temas no card da unidade, profissões (seis cards, lente com % do caminho), painel Insígnias, glossário (busca sem acento, fase trancada leva ao ponto da unidade com o card aberto, fase liberada direto, botão dentro da fase e Voltar) e a comemoração de marco de insígnia (uma vez só) |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
@@ -77,6 +91,17 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
 
 Todos falham se aparecer erro ou aviso no console do navegador.
+
+**O que esperar do mapa vem do currículo, nunca escrito à mão.**
+`testes/curriculo.mjs` lê o `src/curriculo/curriculo.ts` (transpilado
+pelo TypeScript do projeto) e as unidades publicadas
+(`src/conteudo/publicados.json`) e dá `CURRICULO`, `PUBLICADAS`,
+`prontasDaIlha`, `planejadasDaIlha`, `unidadesDaIlha` e
+`planejadaComTema`. Assim, "a primeira pronta disponível, as outras
+bloqueadas, as sem conteúdo planejadas" continua certo quando uma zona
+vira conteúdo (antes, `mapa.mjs` esperava "Layout planejada" e quebrava a
+cada zona nova). Os testes de conteúdo fazem o mesmo com `UNIDADES` e
+`CURRICULO` (`curriculo.test.ts`, `mapa.test.ts`).
 
 ```bash
 npm run bateria           # a bateria inteira (testes/todos.mjs), uma vez
@@ -117,7 +142,10 @@ A fase expõe o estado no elemento `[data-jogo-fase="<id da fase>"]`:
 
 No celular, o avatar do computadorzinho tem `data-balao` (`aberto`,
 `fechado`, `abrindo`, `fechando`); a camada da apresentação tem
-`data-passo-apresentacao` (`fala`, `experimente`, `comemorando`); toda
+`data-passo-apresentacao` (`fala`, `experimente`, `comemorando`) e
+`data-alvo-livre="sim"` quando os buracos do véu (o alvo e as áreas
+extras do "Experimente", como a árvore da trilha) já foram medidos: toque
+no alvo só depois (antes disso, o toque cai no véu); toda
 janela (`Modal`: meta, card da unidade, conclusão...) tem
 `data-modal-assentado="sim"` depois da animação de entrada (meça e toque
 só depois).
