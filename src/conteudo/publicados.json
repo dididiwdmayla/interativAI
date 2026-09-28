@@ -86,6 +86,11 @@
       "sites-layout-u4-f3",
       "sites-layout-u4-f4"
     ],
+    "sites-responsivo-u1": [
+      "sites-responsivo-u1-f1",
+      "sites-responsivo-u1-f2",
+      "sites-responsivo-u1-f3"
+    ],
     "sites-publicar-u2": [
       "sites-publicar-u2-f1",
       "sites-publicar-u2-f2"
@@ -496,6 +501,27 @@
         "selo-por-cima-da-fita-bolo",
         "cabecalho-acompanha-rolagem",
         "botao-flutuante"
+      ]
+    },
+    "sites-responsivo-u1-f1": {
+      "objetivos": [
+        "ligar-celular",
+        "previsao-o-que-muda",
+        "tablet-deitado"
+      ]
+    },
+    "sites-responsivo-u1-f2": {
+      "objetivos": [
+        "ver-simulacao",
+        "previsao-viewport",
+        "banner-cabe-na-tela"
+      ]
+    },
+    "sites-responsivo-u1-f3": {
+      "partes": [
+        "meta-viewport",
+        "foto-cabe",
+        "caixa-horarios-cabe"
       ]
     },
     "sites-publicar-u2-f1": {

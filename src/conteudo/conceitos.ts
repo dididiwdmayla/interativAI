@@ -511,6 +511,21 @@ const CATALOGO = {
     resumo: "Guardar o conjunto de cores que você criou como um tema novo, para usar no jogo inteiro a partir de agora.",
     temas: ["interfaces"],
   },
+  "meta-viewport": {
+    nome: "Meta viewport",
+    resumo: "A linha no head que avisa o navegador do celular para desenhar a página do tamanho da tela dele, em vez de uma versão gigante encolhida.",
+    temas: ["interfaces", "acessibilidade"],
+  },
+  "simulacao-sem-viewport": {
+    nome: "Sem viewport, a página desenha gigante",
+    resumo: "Sem o meta viewport, o navegador do celular desenha a página como se a tela tivesse 980px de largura e encolhe tudo para caber: fica pequeno e difícil de tocar.",
+    temas: ["interfaces", "acessibilidade"],
+  },
+  "orientacao-da-tela": {
+    nome: "Retrato e paisagem",
+    resumo: "A tela pode estar em pé (retrato, mais alta que larga) ou deitada (paisagem, mais larga que alta); o layout pode reagir a cada uma.",
+    temas: ["interfaces"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
