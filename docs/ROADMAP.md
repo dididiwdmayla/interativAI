@@ -190,7 +190,9 @@ núcleo comum.
     largura livre pelas alças, zoom, iframe com a largura de verdade,
     simulação honesta dos 980 px sem meta viewport, validador
     `dispositivo`).
-  - [ ] Etapa 5: painel Lighthouse.
+  - [x] Etapa 5: painel Lighthouse (aba nova, 14 verificações sobre o
+    motor, notas pesadas no anel, problema levando à peça com explicação,
+    `notaAuditoria` e `semProblema`).
   - [ ] Etapa 6: projeto-ponte, exportação, guia de publicação, Meus
     projetos e a P2.
   - [ ] Etapa 7: mobile, guia, liberações e bateria completa.

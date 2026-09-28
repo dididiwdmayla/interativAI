@@ -46,7 +46,9 @@ export type EventoFase =
   /** (Modo dispositivo) Ligou, desligou ou trocou o aparelho. `largura` e `altura`: como aparecem na tela. */
   | { tipo: "trocouDispositivo"; ligado: boolean; modelo: string; largura: number; altura: number }
   /** (Modo dispositivo) Girou o aparelho. */
-  | { tipo: "girou"; orientacao: "retrato" | "paisagem" };
+  | { tipo: "girou"; orientacao: "retrato" | "paisagem" }
+  /** (Lighthouse) Rodou a auditoria (o botão Analisar). */
+  | { tipo: "auditou"; notas: Record<"acessibilidade" | "boas-praticas" | "seo", number> };
 
 /**
  * Para onde um link levaria:
@@ -84,4 +86,5 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "temaSalvo",
   "trocouDispositivo",
   "girou",
+  "auditou",
 ];

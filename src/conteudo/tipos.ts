@@ -11,6 +11,7 @@
  * Guia completo de como escrever: docs/GUIA-DE-CONTEUDO.md
  * Template anotado de fase: docs/TEMPLATE-FASE.ts
  */
+import type { CategoriaAuditoria, IdRegraAuditoria } from "@/motor/auditoria";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import type { TipoEvento } from "@/motor/eventos";
 import type { Fala } from "@/motor/tipos";
@@ -146,6 +147,14 @@ export type Validador =
    * quando vierem. Olha o estado de agora (não trava no checklist).
    */
   | { tipo: "dispositivo"; largura?: number; orientacao?: "retrato" | "paisagem" }
+  /**
+   * (Lighthouse) A nota da categoria na auditoria simplificada do jogo
+   * (src/motor/auditoria.ts) é pelo menos `minimo` (0 a 100). Calcula na
+   * hora, sobre a página de agora (não precisa ter clicado em Analisar).
+   */
+  | { tipo: "notaAuditoria"; categoria: CategoriaAuditoria; minimo: number }
+  /** (Lighthouse) A verificação `regra` não acha nenhum problema na página agora. */
+  | { tipo: "semProblema"; regra: IdRegraAuditoria }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -224,7 +233,9 @@ export type Acao =
   /** (Modo dispositivo) O botão de girar: em pé vira deitado e vice-versa. Gera `girou`. */
   | { tipo: "girarDispositivo" }
   /** (Modo dispositivo) Desliga a barra (Ctrl+Shift+M de novo). Gera `trocouDispositivo` com `ligado: false`. */
-  | { tipo: "desligarDispositivo" };
+  | { tipo: "desligarDispositivo" }
+  /** (Lighthouse) O botão Analisar do painel Lighthouse. Gera `auditou`, com as notas. */
+  | { tipo: "analisarAuditoria" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */

@@ -172,6 +172,46 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
     ferramenta. Testes: `testes/conteudo/dispositivo.test.ts` e
     `testes/dispositivo.mjs` (três layouts), na bateria.
 
+- [x] **Etapa 5: painel Lighthouse (auditoria simplificada).**
+  - Conferido no Lighthouse de verdade (`core/config/default-config.js`:
+    categorias e pesos; `shared/util.js`: faixas 0,9 e 0,5) e no
+    devtools-frontend (a aba e o "Analyze page state", que confere a
+    página como ela está). Aba de cima nova, "Lighthouse" (a última, como
+    no Chrome depois de Application), liberada só nas fases com a
+    ferramenta `lighthouse` (nas outras, trancada como Console e Rede).
+  - `src/motor/auditoria.ts`: 14 verificações em cima do DOM e do motor
+    de cascata (sem layout, iguais no navegador e no jsdom): imagem sem
+    alt, contraste (as cores resolvidas pelo motor: variáveis, herança,
+    o primeiro fundo opaco dos ancestrais, texto grande pedindo 3:1, fundo
+    com imagem ou gradiente fica de fora como no Lighthouse, e as `@media`
+    na tela do aparelho), títulos pulando nível, link e botão sem texto
+    (texto, aria-label, title, alt de imagem dentro), html sem lang,
+    página sem title, sem main, sem meta viewport, id duplicado, sem
+    doctype, sem charset, sem descrição e link "clique aqui". O que está
+    escondido (display none, hidden, aria-hidden) não conta. Nota de 0 a
+    100 por categoria (Acessibilidade, Boas práticas e SEO básico): a
+    média pesada das que se aplicam, com os pesos do Lighthouse (viewport
+    e id duplicado em Boas práticas com peso 3, simplificação anotada no
+    arquivo). Leitor de valores que reaproveita a cascata
+    (`leitorDeValores`).
+  - `PainelLighthouse`: aviso de versão simplificada, Analisar (Analisar
+    de novo), o anel de cada categoria (`AnelNota`, cores das faixas pelos
+    tokens de sucesso, alerta e erro), os problemas por categoria (por que
+    importa em linguagem de leigo, como consertar, o nome da verificação
+    no Lighthouse de verdade e as peças com o detalhe, como "1,6:1, o
+    mínimo aqui é 4,5:1") e as aprovadas. A peça leva à aba Elementos com
+    ela selecionada na árvore, e o computadorzinho explica (quando a
+    conversa está livre). A análise avisa quando ficou velha (a página, o
+    CSS ou a tela mudou).
+  - Validadores `{ tipo: "notaAuditoria"; categoria; minimo }` e
+    `{ tipo: "semProblema"; regra }` (calculam na hora, sem precisar
+    clicar em Analisar), evento `auditou`, ação `analisarAuditoria`,
+    ferramenta `lighthouse` com apresentação e card; a checagem
+    `ferramentas-dos-validadores` pede a ferramenta e nota de 0 a 100.
+  - Bancada do Lighthouse (`lab-motor-u1-f5`, modo documento, um problema
+    de cada tipo). Testes: `testes/conteudo/auditoria.test.ts` e
+    `testes/lighthouse.mjs` (três layouts), na bateria.
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

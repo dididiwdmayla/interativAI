@@ -24,6 +24,7 @@ import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
 import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
 import { IconeDispositivo } from "@/componentes/icones/IconeDispositivo";
 import { IconeGirar } from "@/componentes/icones/IconeGirar";
+import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -648,6 +649,28 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     experimente: {
       mouse: "Clique no botão de girar.",
       toque: "Toque no botão de girar.",
+    },
+    uso: "sinal",
+  },
+  // Lighthouse: conferido no devtools-frontend (a aba Lighthouse, o botão
+  // "Analyze page state") e no Lighthouse (categorias, pesos, faixas 90/50).
+  lighthouse: {
+    id: "lighthouse",
+    nome: "Lighthouse",
+    Icone: IconeLighthouse,
+    alvo: seletorFerramenta("lighthouse"),
+    oQueFaz: "Confere a página e dá uma nota de 0 a 100 em Acessibilidade, Boas práticas e SEO, com a lista do que consertar.",
+    praQueServe:
+      "Serve para achar o que atrapalha as pessoas (imagem sem descrição, texto apagado demais) e o Google, sem precisar lembrar de tudo. Cada problema leva até a peça.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Lighthouse, lá em cima no painel, e clique em Analisar. Clique num problema para ver a peça na árvore.",
+      toque: "Abra a aba Lighthouse, lá em cima no painel, e toque em Analisar. Toque num problema para ver a peça na árvore.",
+    },
+    noF12DeVerdade:
+      "é a aba Lighthouse do DevTools: escolha as categorias e clique em Analyze page load. A de verdade confere bem mais coisas (e o desempenho também); esta é uma versão simplificada.",
+    experimente: {
+      mouse: "Clique em Analisar.",
+      toque: "Toque em Analisar.",
     },
     uso: "sinal",
   },

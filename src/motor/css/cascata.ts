@@ -769,3 +769,13 @@ export function valorEfetivo(elemento: Element, propriedade: string, opcoes: Opc
   const nome = propriedade.startsWith("--") ? propriedade : propriedade.toLowerCase();
   return Object.fromEntries(longasDe(nome).map((longa) => [longa, efetivoLonga(contexto, elemento, longa, [])]));
 }
+
+/**
+ * Um leitor de valores efetivos que reaproveita a cascata entre as
+ * perguntas (a auditoria olha muitas peças da mesma página de uma vez).
+ * Só propriedades longas.
+ */
+export function leitorDeValores(documento: Document, opcoes: OpcoesCascata = {}): (elemento: Element, propriedade: string) => ValorEfetivo {
+  const contexto = novoContexto(documento, opcoes);
+  return (elemento, propriedade) => efetivoLonga(contexto, elemento, propriedade, []);
+}

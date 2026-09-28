@@ -35,6 +35,8 @@ export const IDS_FERRAMENTAS = [
   // Zona Responsivo: modo dispositivo
   "modo-dispositivo",
   "girar-dispositivo",
+  // Zona Publicar: auditoria
+  "lighthouse",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

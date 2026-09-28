@@ -252,6 +252,8 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "modo-dispositivo";
     case "girarDispositivo":
       return "girar-dispositivo";
+    case "analisarAuditoria":
+      return "lighthouse";
   }
 }
 
@@ -814,13 +816,19 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
   },
   {
     id: "ferramentas-dos-validadores",
-    nome: "validador que olha uma ferramenta (dispositivo) pede a ferramenta em usaFerramentas",
+    nome: "validador que olha uma ferramenta (dispositivo, auditoria) pede a ferramenta em usaFerramentas",
     checar: (fase) => {
       const problemas: string[] = [];
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
           if (item.tipo === "dispositivo" && !fase.usaFerramentas.includes("modo-dispositivo")) {
             problemas.push(`${onde}: o validador dispositivo pede "modo-dispositivo" em usaFerramentas (sem ela, a barra nem aparece)`);
+          }
+          if ((item.tipo === "notaAuditoria" || item.tipo === "semProblema") && !fase.usaFerramentas.includes("lighthouse")) {
+            problemas.push(`${onde}: o validador ${item.tipo} pede "lighthouse" em usaFerramentas (o jogador precisa da aba para ver as notas)`);
+          }
+          if (item.tipo === "notaAuditoria" && (item.minimo < 0 || item.minimo > 100)) {
+            problemas.push(`${onde}: notaAuditoria com minimo ${item.minimo} (vai de 0 a 100)`);
           }
         }
       }

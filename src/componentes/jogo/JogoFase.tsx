@@ -72,6 +72,8 @@ import { analisarCss } from "@/motor/css/analisarCss";
 import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
 import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
 import { materializarFase } from "@/motor/siteDoJogo";
+import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditoria } from "@/motor/auditoria";
+import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
 import {
   DISPOSITIVO_INICIAL,
   type EstadoDispositivo,
@@ -154,8 +156,9 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   adicionouRegra: "duplicar",
 };
 
-/** Por enquanto toda fase é da zona Elementos: só essa aba abre. */
+/** Elementos abre sempre; a aba Lighthouse, nas fases com a ferramenta. */
 const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
+const ABAS_COM_LIGHTHOUSE: readonly Aba[] = ["elementos", "lighthouse"];
 
 /** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
 function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | null {
@@ -414,6 +417,8 @@ export function JogoFase({
   const [avisoContraste, setAvisoContraste] = useState<ResultadoPar[] | null>(null);
   /** Quem fala sobre o tema salvo (ligado ao motor mais abaixo, só quando não atrapalha). */
   const falarDoTema = useRef<(fala: Fala) => void>(() => {});
+  /** O computadorzinho explicando algo do painel (o Lighthouse), só quando não atrapalha. */
+  const falarLivre = useRef<(fala: Fala) => void>(() => {});
 
   /** As cores da maquete agora: cada token do tema de base, lido no :root com as variáveis trocadas. */
   const coresDaMaqueteAgora = useCallback((): Tokens | null => {
@@ -486,6 +491,20 @@ export function JogoFase({
   // Soltar a alça: a largura livre conta como troca (um evento só, não um por pixel).
   const soltarAlca = useCallback(() => mudarDispositivo(dispositivoAtual.current, "trocou"), [mudarDispositivo]);
 
+  // Aba Lighthouse (auditoria simplificada): só nas fases com a ferramenta.
+  const comLighthouse = fase.usaFerramentas.includes("lighthouse");
+  const [auditoria, setAuditoria] = useState<{ resultado: ResultadoAuditoria; versao: string } | null>(null);
+  const telaDaAuditoria = useRef<Tela | undefined>(undefined);
+  const versaoDaPaginaAtual = useRef("");
+  const analisarAuditoria = useCallback(() => {
+    const documento = obterDocumento();
+    if (!documento?.body) return;
+    const resultado = auditar(documento, telaDaAuditoria.current ? { tela: telaDaAuditoria.current } : {});
+    setAuditoria({ resultado, versao: versaoDaPaginaAtual.current });
+    sinalizarUso("lighthouse");
+    barramento.emitir({ tipo: "auditou", notas: resultado.notas });
+  }, [barramento, obterDocumento]);
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -509,8 +528,11 @@ export function JogoFase({
       lerCss,
       salvarTema: siteDoJogo ? () => gravarTema(true) : undefined,
       dispositivo: comDispositivo ? acoesDispositivo : undefined,
+      analisarAuditoria: comLighthouse ? analisarAuditoria : undefined,
     }),
     [
+      analisarAuditoria,
+      comLighthouse,
       acoesDispositivo,
       comDispositivo,
       gravarTema,
@@ -650,6 +672,7 @@ export function JogoFase({
       (estado.etapa === "concluida" && !estado.conclusaoAberta);
     falarSobreLink.current = livre ? falar : () => {};
     falarDoTema.current = livre ? falar : () => {};
+    falarLivre.current = livre ? falar : () => {};
   }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
 
   // Na primeira vez que a prévia quebra os acentos, o computadorzinho explica (quando não atrapalha).
@@ -717,6 +740,8 @@ export function JogoFase({
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    // A aba Lighthouse para a ferramenta dela; Elementos para as outras (o alvo precisa estar à vista).
+    setAba(ferramenta.id === "lighthouse" ? "lighthouse" : "elementos");
     // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
     if (ferramenta.id === "girar-dispositivo" && !dispositivoAtual.current.ligado) {
       const ligado = { ...dispositivoAtual.current, ligado: true };
@@ -965,6 +990,31 @@ export function JogoFase({
       return raiz ? (elemento === raiz ? [] : caminhoDoNo(raiz, elemento)) : null;
     },
     [obterDocumento],
+  );
+
+  // A página de agora (documento, CSS e tela): a análise do Lighthouse fica "velha" quando ela muda.
+  const versaoDaPagina = `${versaoDocumento}:${versaoCss}:${telaDoAparelho?.largura ?? 0}x${telaDoAparelho?.altura ?? 0}`;
+  useEffect(() => {
+    versaoDaPaginaAtual.current = versaoDaPagina;
+    telaDaAuditoria.current = telaDoAparelho;
+  }, [telaDoAparelho, versaoDaPagina]);
+
+  /** Troca a aba de cima (Elementos, Lighthouse). */
+  const trocarAba = useCallback((nova: Aba) => {
+    tocarEfeito("clique");
+    setAba(nova);
+  }, []);
+
+  /** Uma peça de um problema do Lighthouse: volta para Elementos, seleciona e o computadorzinho explica. */
+  const irParaPecaDaAuditoria = useCallback(
+    (elemento: Element | null, regra: IdRegraAuditoria) => {
+      setAba("elementos");
+      if (movel) setSegmento("arvore");
+      const caminho = elemento?.isConnected ? caminhoDoElemento(elemento) : null;
+      if (caminho) selecionar(caminho, "sistema");
+      falarLivre.current({ texto: REGRAS_AUDITORIA[regra].porQue, expressao: "curioso" });
+    },
+    [caminhoDoElemento, movel, selecionar],
   );
 
   const acoesEstilos = useMemo<AcoesEstilos>(
@@ -1248,8 +1298,8 @@ export function JogoFase({
           >
             <Painel
               abaAtiva={aba}
-              abasDesbloqueadas={ABAS_DESBLOQUEADAS}
-              aoTrocarAba={setAba}
+              abasDesbloqueadas={comLighthouse ? ABAS_COM_LIGHTHOUSE : ABAS_DESBLOQUEADAS}
+              aoTrocarAba={trocarAba}
               ferramentas={
                 <>
                   <AlvoFerramenta
@@ -1302,6 +1352,22 @@ export function JogoFase({
                 </>
               }
             >
+              {comLighthouse && (
+                <div className={aba === "lighthouse" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <AlvoFerramenta ids={["lighthouse"]} marcador="lighthouse" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                    <PainelLighthouse
+                      resultado={auditoria?.resultado ?? null}
+                      desatualizado={auditoria !== null && auditoria.versao !== versaoDaPagina}
+                      aoAnalisar={() => {
+                        tocarEfeito("clique");
+                        analisarAuditoria();
+                      }}
+                      aoIrParaPeca={irParaPecaDaAuditoria}
+                    />
+                  </AlvoFerramenta>
+                </div>
+              )}
+              <div className={aba === "elementos" ? "contents" : "hidden"}>
               {movel && (
                 <div className="flex shrink-0 border-b-2 border-borda bg-painel px-2 py-1.5">
                   <SeletorSegmentado
@@ -1470,6 +1536,7 @@ export function JogoFase({
                   </AlvoFerramenta>
                 }
               />
+              </div>
             </Painel>
           </AlvoFerramenta>
         </section>

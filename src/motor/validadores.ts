@@ -10,6 +10,7 @@ import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
 import { calcularCascata, folhasDoDocumento, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
 import type { Tela } from "./css/midia";
+import { auditar } from "./auditoria";
 import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
@@ -141,6 +142,10 @@ export function descreverValidador(validador: Validador): string {
       }`;
     case "temaSalvo":
       return "salvou o Meu tema";
+    case "notaAuditoria":
+      return `nota de ${validador.categoria} na auditoria pelo menos ${validador.minimo}`;
+    case "semProblema":
+      return `a auditoria não acha "${validador.regra}"`;
     case "dispositivo":
       return `modo dispositivo ligado${validador.largura !== undefined ? ` com ${validador.largura} px de largura` : ""}${
         validador.orientacao ? ` (${validador.orientacao === "retrato" ? "em pé" : "deitado"})` : ""
@@ -301,6 +306,23 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     }
     case "variavelCss":
       return avaliarVariavelCss(validador, contexto, descricao);
+    case "notaAuditoria": {
+      const { notas } = auditar(contexto.documento, contexto.tela ? { tela: contexto.tela } : {});
+      return { passou: notas[validador.categoria] >= validador.minimo, descricao, detalhe: `nota ${notas[validador.categoria]}` };
+    }
+    case "semProblema": {
+      const { problemas, naoSeAplicam } = auditar(contexto.documento, contexto.tela ? { tela: contexto.tela } : {});
+      const achado = problemas.find((problema) => problema.regra === validador.regra);
+      return {
+        passou: achado === undefined,
+        descricao,
+        detalhe: achado
+          ? `${Math.max(1, achado.elementos.length)} problema(s)${achado.detalhes.length ? `: ${lista(achado.detalhes)}` : ""}`
+          : naoSeAplicam.includes(validador.regra)
+            ? "não se aplica nesta página"
+            : "nenhum problema",
+      };
+    }
     case "dispositivo": {
       const estado = contexto.dispositivo ?? null;
       if (!estado?.ligado) return { passou: false, descricao, detalhe: "a barra de dispositivo está desligada" };

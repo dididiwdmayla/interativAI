@@ -40,6 +40,8 @@ export type PainelDasAcoes = {
   /** (E5) Salva a maquete do jogo como Meu tema. Só existe numa fase com site-alvo "jogo". */
   salvarTema?: () => boolean;
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
+  /** (Lighthouse) O botão Analisar: só existe numa fase com a ferramenta lighthouse. */
+  analisarAuditoria?: () => void;
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
     girar: () => void;
@@ -98,6 +100,8 @@ export function descreverAcao(acao: Acao): string {
       return "girarDispositivo";
     case "desligarDispositivo":
       return "desligarDispositivo";
+    case "analisarAuditoria":
+      return "analisarAuditoria";
   }
 }
 
@@ -315,6 +319,11 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       if (acao.tipo === "trocarDispositivo") dispositivo.trocar(acao.modelo, acao.largura);
       else if (acao.tipo === "girarDispositivo") dispositivo.girar();
       else dispositivo.desligar();
+      return;
+    }
+    case "analisarAuditoria": {
+      if (!painel.analisarAuditoria) throw new ErroAcao("analisarAuditoria pede a ferramenta lighthouse em usaFerramentas");
+      painel.analisarAuditoria();
       return;
     }
   }

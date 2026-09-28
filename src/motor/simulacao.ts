@@ -26,6 +26,7 @@ import {
   telaDoDispositivo,
   trocarModelo,
 } from "./dispositivos";
+import { auditar } from "./auditoria";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
@@ -109,6 +110,12 @@ export function criarSimulacao(fase: Fase) {
             dispositivo = { ...dispositivo, ligado: false };
             avisarDispositivo();
           },
+        }
+      : undefined,
+    analisarAuditoria: fase.usaFerramentas.includes("lighthouse")
+      ? () => {
+          const { notas } = auditar(documento, comDispositivo && dispositivo.ligado ? { tela: telaDoDispositivo(dispositivo, documento) ?? undefined } : {});
+          eventos.push({ tipo: "auditou", notas });
         }
       : undefined,
     responderPrevisao: (opcao) => {
