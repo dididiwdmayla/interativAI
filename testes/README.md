@@ -6,6 +6,12 @@
 npm run testar:conteudo
 ```
 
+**Saída resumida (economia de cota):** `npm run testar:conteudo -- --reporter=dot`
+imprime só um ponto por teste e a lista de falhas no fim, em vez do nome
+de cada teste. Use isso ao rodar a bateria de conteúdo durante o
+trabalho; só peça o reporter padrão (sem `--reporter`) para investigar uma
+falha específica.
+
 Vitest com jsdom (`vitest.config.mts`). Os arquivos ficam em
 `testes/conteudo/`: as regras de `src/conteudo/checagens.ts` viram um teste
 por fase (ids, conceitos, ferramentas apresentadas, limites de texto,
@@ -91,6 +97,13 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `tutor.mjs` | falas de sobrecarga, reserva e sem chave, botão Tentar de novo |
 
 Todos falham se aparecer erro ou aviso no console do navegador.
+
+**Saída resumida (economia de cota):** `RESUMO=1` (também lido dentro de
+`npm run bateria` e `npm run bateria:repetir`, que passam o ambiente para
+cada arquivo filho) faz `conferir()` (`testes/util.mjs`) parar de
+imprimir uma linha por checagem que passou; só a falha (que sempre lança
+e para o arquivo) aparece. Use no dia a dia; sem `RESUMO`, cada `ok - ...`
+sai no console, útil para investigar um teste específico.
 
 **O que esperar do mapa vem do currículo, nunca escrito à mão.**
 `testes/curriculo.mjs` lê o `src/curriculo/curriculo.ts` (transpilado
