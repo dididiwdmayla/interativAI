@@ -50,6 +50,46 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
     e sabotagens. `MAPA-CURRICULAR.md` com a seção "Motores planejados";
     no `ROADMAP.md`, o motor entra junto com o da Lógica.
 
+- [x] **Etapa 2: variáveis CSS e `@media` no motor e no painel.**
+  - Media queries (`src/motor/css/midia.ts`): o motor não usa mais o
+    `matchMedia` do navegador; avalia a condição contra uma tela
+    informada (`OpcoesCascata.tela`), então navegador e jsdom chegam à
+    mesma resposta. Sabe `min-width`, `max-width`, `width`, as de altura,
+    px, em e rem (16 px, a fonte inicial, como nas media queries de
+    verdade), `orientation`, `and`, `or`, `not`, `only`, tipos `all`,
+    `screen` e `print`, listas com vírgula e a sintaxe de intervalo
+    (`(400px <= width < 800px)`). O que ele não sabe avaliar
+    (`prefers-color-scheme`, `hover`, `vw`...) NÃO SE APLICA (decisão
+    registrada em teste). Sem tela informada, vale a da janela do
+    documento (a prévia de verdade) ou, num documento solto, a padrão
+    1280 x 800 (o Notebook 1280 do modo dispositivo). O conteúdo publicado
+    não mudou (o `testar:conteudo` passou igual: os `@media` dos heads
+    eram "incertos" no jsdom e agora ficam de fora em 1280 px).
+  - Variáveis: `--nome` herdadas, `var(--nome, reserva)` encadeadas, com
+    proteção contra ciclo (as variáveis do ciclo ficam inválidas, como na
+    especificação), variável que não existe usando a reserva e, sem
+    reserva, a propriedade "inválida na hora de calcular" voltando ao
+    herdado ou ao inicial; atalho com `var()` troca as variáveis antes de
+    separar as partes. `ValorEfetivo` ganhou o caso `invalido`.
+  - Painel Estilos, conferido no devtools-frontend
+    (`VariableRenderer`, `StylePropertiesSection.createMediaElement`): as
+    variáveis aparecem nas regras onde são declaradas (e no "Herdado
+    de"); o `var(` desenha o nome como link (apagado se não existe), o
+    valor aparece no `title` e ao lado (no toque não há hover), a amostra
+    de cor usa o valor resolvido e o clique no nome leva até a declaração
+    (pisca por 1,6 s, como pendência); a regra de `@media` tem o cabeçalho
+    `@media (...)` numa linha acima do seletor (clicável até o editor CSS)
+    e só aparece quando vale na largura atual da prévia.
+  - Validadores: `larguraTela` (e `alturaTela`) opcionais em
+    `valorEfetivo` e `riscada`; `ContextoValidacao.tela` para o jogo
+    passar a tela da prévia. Os modelos do modo dispositivo ficam em
+    `src/motor/dispositivos.ts` (`telaDaLargura`).
+  - Bancada de variáveis e `@media` (`lab-motor-u1-f3`) e o teste de
+    navegador `testes/variaveis.mjs` (desktop e retrato), na bateria.
+    Testes unitários em `cascata.test.ts` (herança, encadeadas, reserva,
+    ciclo, atalho, painel; limites exatos, unidades, orientação, listas,
+    intervalo e condições desconhecidas).
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

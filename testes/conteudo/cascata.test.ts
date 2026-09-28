@@ -16,6 +16,8 @@ import {
   seletorSimples,
 } from "@/motor/css/editarCss";
 import { dividirListaDeSeletores, especificidade } from "@/motor/css/especificidade";
+import { medidaEmPx, midiaSeAplica } from "@/motor/css/midia";
+import { telaDaLargura } from "@/motor/dispositivos";
 import { abrirAtalho, lerCor, normalizarValor, validadeDoValor, valoresIguais } from "@/motor/css/valores";
 
 /** Monta um documento com a folha do jogo e um corpo. */
@@ -42,7 +44,8 @@ function situacao(resultado: ResultadoCascata, seletor: string, propriedade: str
 
 function valor(documento: Document, seletor: string, propriedade: string): string {
   const efetivo = valorEfetivo(elemento(documento, seletor), propriedade)[propriedade];
-  return efetivo.tipo === "valor" ? efetivo.valor : `incerto: ${efetivo.motivo}`;
+  if (efetivo.tipo === "valor") return efetivo.valor;
+  return efetivo.tipo === "invalido" ? `inválido: ${efetivo.motivo}` : `incerto: ${efetivo.motivo}`;
 }
 
 describe("especificidade", () => {
@@ -253,14 +256,23 @@ describe("cascata: ordem e especificidade", () => {
     expect(valor(documento, "h1", "font-weight")).toBe("bold");
   });
 
-  it("regra sob @media vale quando a condição vale e o motor consegue avaliar", () => {
-    const documento = pagina("p { color: red; }\n@media (max-width: 1px) { p { color: blue; } }", "<p>x</p>");
-    // No jsdom não há matchMedia: o motor não tem certeza e não risca.
-    const resultado = calcularCascata(elemento(documento, "p"));
-    expect(situacao(resultado, "p", "color", 0)).not.toBe("perdeu");
-    expect(valor(documento, "p", "color")).toMatch(/^incerto/);
+  it("regra sob @media é avaliada contra a tela: vale, some ou fica fora", () => {
+    const documento = pagina("p { color: red; }\n@media (max-width: 600px) { p { color: blue; } }", "<p>x</p>");
+    // Documento solto: a tela padrão (1280 x 800), então a regra não se aplica e nem aparece.
+    const largo = calcularCascata(elemento(documento, "p"));
+    expect(largo.tela).toEqual({ largura: 1280, altura: 800 });
+    expect(largo.proprios.filter((bloco) => bloco.seletorExibido === "p")).toHaveLength(1);
+    expect(valor(documento, "p", "color")).toBe("red");
+    // Numa tela de celular, ela vale e ganha (vem depois).
+    const estreito = calcularCascata(elemento(documento, "p"), { tela: { largura: 390, altura: 844 } });
+    const doMedia = estreito.proprios.find((bloco) => bloco.condicoes.length > 0);
+    expect(doMedia?.condicoes).toEqual([{ tipo: "media", texto: "(max-width: 600px)" }]);
+    expect(doMedia?.declaracoes[0].situacao).toBe("vence");
+    const semMedia = estreito.proprios.find((bloco) => bloco.seletorExibido === "p" && bloco.condicoes.length === 0);
+    expect(semMedia?.declaracoes[0].situacao).toBe("perdeu");
+    const efetivo = valorEfetivo(elemento(documento, "p"), "color", { tela: { largura: 390, altura: 844 } }).color;
+    expect(efetivo.tipo === "valor" && efetivo.valor).toBe("blue");
   });
-
   it("pseudo-classes de estado (hover) não contam", () => {
     const documento = pagina("a { color: red; }\na:hover { color: blue; }", '<a href="#">x</a>');
     const resultado = calcularCascata(elemento(documento, "a"));
@@ -369,6 +381,152 @@ describe("cascata: herança", () => {
     const documento = pagina(":root { --marca: #c0392b; }\nh1 { color: var(--marca); }\np { color: var(--nada, green); }", "<h1>x</h1><p>y</p>");
     expect(valor(documento, "h1", "color")).toBe("#c0392b");
     expect(valor(documento, "p", "color")).toBe("green");
+  });
+});
+
+describe("variáveis CSS (propriedades personalizadas)", () => {
+  it("herança: a variável declarada mais perto vence, e o var() é resolvido no dono da declaração", () => {
+    const documento = pagina(
+      ":root { --cor: red; --fundo: var(--cor); }\n.card { --cor: blue; }\np { color: var(--cor); }\n.card { background-color: var(--fundo); }",
+      '<p id="fora">x</p><div class="card"><p id="dentro">y</p></div>',
+    );
+    expect(valor(documento, "#fora", "color")).toBe("red");
+    expect(valor(documento, "#dentro", "color")).toBe("blue");
+    // --fundo foi calculado no :root (com o --cor de lá) e herdado já pronto: continua red.
+    expect(valor(documento, ".card", "background-color")).toBe("red");
+    expect(valor(documento, ".card", "--cor")).toBe("blue");
+  });
+
+  it("encadeadas: var() dentro de var() e reserva com var()", () => {
+    const documento = pagina(
+      ":root { --a: var(--b); --b: var(--c); --c: 12px; }\np { font-size: var(--a); }\nh1 { color: var(--x, var(--y, teal)); }",
+      "<p>x</p><h1>y</h1>",
+    );
+    expect(valor(documento, "p", "font-size")).toBe("12px");
+    expect(valor(documento, "h1", "color")).toBe("teal");
+  });
+
+  it("reserva: variável que não existe usa a reserva; sem reserva, a propriedade volta ao herdado ou ao inicial", () => {
+    const documento = pagina(
+      "body { color: navy; }\np { color: var(--nada); margin-top: var(--nada); }\nh1 { color: var(--nada, maroon); }\nh2 { color: var(--nada,); }",
+      "<p>x</p><h1>y</h1><h2>z</h2>",
+    );
+    expect(valor(documento, "p", "color")).toBe("navy");
+    expect(valor(documento, "p", "margin-top")).toBe("0");
+    expect(valor(documento, "h1", "color")).toBe("maroon");
+    expect(valor(documento, "p", "--nada")).toMatch(/^inválido: a variável --nada não foi declarada/);
+  });
+
+  it("ciclo: as variáveis do ciclo ficam inválidas, sem travar, e a reserva salva", () => {
+    const documento = pagina(
+      ":root { --a: var(--b); --b: var(--a); --c: var(--c, 3px); }\nbody { color: navy; }\np { color: var(--a, olive); }\nh1 { color: var(--a); }\nh2 { margin-top: var(--c, 5px); }",
+      "<p>x</p><h1>y</h1><h2>z</h2>",
+    );
+    expect(valor(documento, "p", "color")).toBe("olive");
+    // Sem reserva: inválido na hora de calcular, então herda do body.
+    expect(valor(documento, "h1", "color")).toBe("navy");
+    expect(valor(documento, ":root", "--a")).toMatch(/ciclo/);
+    // --c depende dele mesmo: inválido mesmo tendo reserva lá dentro.
+    expect(valor(documento, "h2", "margin-top")).toBe("5px");
+  });
+
+  it("atalho com var(): as variáveis são trocadas antes de separar as partes", () => {
+    const documento = pagina(":root { --espaco: 4px 8px; }\np { margin: var(--espaco); }", "<p>x</p>");
+    expect(valor(documento, "p", "margin-top")).toBe("4px");
+    expect(valor(documento, "p", "margin-left")).toBe("8px");
+  });
+
+  it("valor final inválido na hora de calcular: volta ao inicial", () => {
+    const documento = pagina(":root { --tamanho: azul; }\np { font-size: 20px; }\np { margin-top: var(--tamanho); }", "<p>x</p>");
+    expect(valor(documento, "p", "margin-top")).toBe("0");
+  });
+
+  it("o painel recebe o valor resolvido e de onde veio cada variável", () => {
+    const documento = pagina(":root { --marca: #0a7; }\nh1 { color: var(--marca); border-top-color: var(--sem, red); }", "<h1>x</h1>");
+    const resultado = calcularCascata(elemento(documento, "h1"));
+    const h1 = resultado.proprios.find((bloco) => bloco.seletorExibido === "h1");
+    const cor = h1?.declaracoes.find((item) => item.declaracao.propriedade === "color");
+    expect(cor?.valorResolvido).toBe("#0a7");
+    expect(cor?.variaveis?.[0]).toMatchObject({ nome: "--marca", valor: "#0a7", usouReserva: false });
+    expect(cor?.variaveis?.[0].origem?.elemento).toBe(documento.documentElement);
+    const raiz = resultado.herdados.find((grupo) => grupo.elemento === documento.documentElement);
+    expect(raiz?.blocos.map((bloco) => bloco.id)).toContain(cor?.variaveis?.[0].origem?.blocoId);
+    const borda = h1?.declaracoes.find((item) => item.declaracao.propriedade === "border-top-color");
+    expect(borda?.variaveis?.[0]).toMatchObject({ nome: "--sem", valor: null, usouReserva: true, origem: null });
+    expect(borda?.valorResolvido).toBe("red");
+  });
+});
+
+describe("media queries (contra a tela informada)", () => {
+  const celular = { largura: 390, altura: 844 };
+  const deitado = { largura: 844, altura: 390 };
+  it.each([
+    ["(max-width: 600px)", celular, true],
+    ["(max-width: 600px)", { largura: 600, altura: 800 }, true],
+    ["(max-width: 600px)", { largura: 601, altura: 800 }, false],
+    ["(min-width: 600px)", { largura: 600, altura: 800 }, true],
+    ["(min-width: 600px)", { largura: 599, altura: 800 }, false],
+    ["(min-width: 37.5em)", { largura: 600, altura: 800 }, true],
+    ["(min-width: 37.5em)", { largura: 599, altura: 800 }, false],
+    ["(max-width: 40rem)", { largura: 640, altura: 800 }, true],
+    ["(max-width: 40rem)", { largura: 641, altura: 800 }, false],
+    ["(width: 390px)", celular, true],
+    ["(orientation: portrait)", celular, true],
+    ["(orientation: portrait)", deitado, false],
+    ["(orientation: landscape)", deitado, true],
+    ["(orientation: portrait)", { largura: 500, altura: 500 }, true],
+    ["screen and (min-width: 300px) and (max-width: 400px)", celular, true],
+    ["screen and (min-width: 300px) and (max-width: 380px)", celular, false],
+    ["only screen and (max-width: 400px)", celular, true],
+    ["print", celular, false],
+    ["print, (max-width: 400px)", celular, true],
+    ["(min-width: 1000px), (orientation: landscape)", deitado, true],
+    ["(min-width: 1000px), (orientation: landscape)", celular, false],
+    ["not screen and (max-width: 400px)", celular, false],
+    ["not all and (min-width: 1000px)", celular, true],
+    ["(width >= 390px)", celular, true],
+    ["(width < 390px)", celular, false],
+    ["(360px <= width <= 400px)", celular, true],
+    ["(400px < width <= 800px)", celular, false],
+    ["(min-width: 300px) or (max-width: 100px)", celular, true],
+  ])("%s numa tela %o: %s", (texto, tela, esperado) => {
+    expect(midiaSeAplica(texto, tela)).toBe(esperado);
+  });
+
+  it.each([
+    "(prefers-color-scheme: dark)",
+    "(hover: hover)",
+    "(min-width: 50vw)",
+    "(min-aspect-ratio: 16/9)",
+    "tv",
+    "(max-width: 600px) and (prefers-reduced-motion: reduce)",
+    "not (prefers-color-scheme: dark)",
+    "isso não é uma media query",
+  ])("o que o motor não sabe avaliar não se aplica: %s", (texto) => {
+    expect(midiaSeAplica(texto, celular)).toBe(false);
+  });
+
+  it("condição desconhecida: a regra fica fora do painel e da cascata", () => {
+    const documento = pagina("p { color: red; }\n@media (prefers-color-scheme: dark) { p { color: white; } }", "<p>x</p>");
+    const resultado = calcularCascata(elemento(documento, "p"));
+    expect(resultado.proprios.some((bloco) => bloco.condicoes.length > 0)).toBe(false);
+    expect(valor(documento, "p", "color")).toBe("red");
+  });
+
+  it("unidades: em e rem valem 16 px (a fonte inicial), px e zero sem unidade", () => {
+    expect(medidaEmPx("600px")).toBe(600);
+    expect(medidaEmPx("37.5em")).toBe(600);
+    expect(medidaEmPx("2rem")).toBe(32);
+    expect(medidaEmPx("0")).toBe(0);
+    expect(medidaEmPx("10vw")).toBeNull();
+    expect(medidaEmPx("600")).toBeNull();
+  });
+
+  it("tela de uma largura: a do modelo, a do modelo deitado ou 800 de altura", () => {
+    expect(telaDaLargura(390)).toEqual({ largura: 390, altura: 844 });
+    expect(telaDaLargura(844)).toEqual({ largura: 844, altura: 390 });
+    expect(telaDaLargura(500)).toEqual({ largura: 500, altura: 800 });
+    expect(telaDaLargura(500, 300)).toEqual({ largura: 500, altura: 300 });
   });
 });
 

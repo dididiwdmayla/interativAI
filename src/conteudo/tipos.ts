@@ -99,9 +99,16 @@ export type Validador =
    * rgb(255, 0, 0)), números (16.0px = 16px, 0px = 0), espaços e aspas de
    * fonte. Compara o valor DECLARADO, não os pixels calculados (2em
    * continua 2em). Atalho (margin) confere cada propriedade longa. Se o
-   * motor não tem certeza, não passa (e o detalhe diz por quê).
+   * motor não tem certeza, não passa (e o detalhe diz por quê). As
+   * variáveis (var()) já vêm trocadas pelo valor delas.
+   *
+   * `larguraTela` (px, opcional) avalia as @media como numa tela dessa
+   * largura (a altura vem do modelo do modo dispositivo com essa largura,
+   * ou de `alturaTela`); sem ela, vale a largura atual da prévia (no
+   * testar:conteudo, 1280 x 800). Para conferir o site em várias larguras,
+   * use um `todos` com um validador por largura.
    */
-  | { tipo: "valorEfetivo"; seletor: string; propriedade: string; valor: string }
+  | { tipo: "valorEfetivo"; seletor: string; propriedade: string; valor: string; larguraTela?: number; alturaTela?: number }
   /**
    * A regra `seletorRegra` (nas folhas do site) tem a declaração da
    * propriedade. `valor` confere o valor (normalizado); `ativa: true` pede
@@ -115,9 +122,10 @@ export type Validador =
    * Em algum elemento do seletor, a declaração da propriedade que mora na
    * regra `seletorRegra` PERDE para outra (fica riscada no painel).
    * `seletorRegra: "element.style"` fala do estilo inline. Desligada não
-   * conta: aqui é perder a briga.
+   * conta: aqui é perder a briga. `larguraTela` e `alturaTela`: como no
+   * `valorEfetivo`.
    */
-  | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string }
+  | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string; larguraTela?: number; alturaTela?: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }

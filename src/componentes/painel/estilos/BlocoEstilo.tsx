@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
-import { type Bloco, type DeclaracaoNaCascata, NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
+import { type Bloco, type DeclaracaoNaCascata, NOME_FOLHA_DO_JOGO, type VariavelNoValor } from "@/motor/css/cascata";
 import { formatarEspecificidade } from "@/motor/css/especificidade";
 import { CampoEstilo, type Saida } from "./CampoEstilo";
 import { LinhaDeclaracao } from "./LinhaDeclaracao";
@@ -26,6 +26,9 @@ type Props = {
   aoAlternar: (indice: number) => void;
   aoEscolherCor: (indice: number, valor: string, final: boolean) => void;
   aoUsarSetas: () => void;
+  /** A declaração que o clique num var() mandou mostrar (índice), se for neste bloco. */
+  declaracaoApontada?: number | null;
+  aoIrParaVariavel?: (variavel: VariavelNoValor) => void;
 };
 
 function passaNoFiltro(item: DeclaracaoNaCascata, filtro: string): boolean {
@@ -51,6 +54,8 @@ export function BlocoEstilo({
   aoAlternar,
   aoEscolherCor,
   aoUsarSetas,
+  declaracaoApontada = null,
+  aoIrParaVariavel,
 }: Props) {
   const doNavegador = bloco.folha?.origem === "navegador";
   const visiveis = bloco.declaracoes.filter((item) => passaNoFiltro(item, filtro));
@@ -94,23 +99,38 @@ export function BlocoEstilo({
             <span className={parte.casa ? "text-codigo-tag" : "text-texto-suave opacity-60"}>{parte.texto}</span>
           </Fragment>
         ))}
-        {bloco.condicoes.length > 0 && (
-          <span className="ml-1 text-[11px] text-texto-suave">
-            ({bloco.condicoes.map((condicao) => `@${condicao.tipo} ${condicao.texto}`).join(" ")})
-          </span>
-        )}
       </span>
     );
 
   return (
     <section
       data-bloco-estilo={bloco.id}
+      data-apontada={declaracaoApontada !== null ? "sim" : undefined}
       data-origem={bloco.tipo === "inline" ? "inline" : bloco.folha?.origem}
       aria-label={bloco.tipo === "inline" ? "element.style" : `Regra ${bloco.seletorExibido}`}
       className={`group/bloco border-b border-borda px-2 py-1.5 font-codigo text-[12px] leading-5 pointer-coarse:text-[13px] ${
         doNavegador ? "bg-painel/60 italic" : ""
       } ${destaque && !destaque.propriedade ? "animate-[pulsar-no_1.1s_ease-in-out_infinite] bg-[var(--cor-codigo-destaque-linha)]" : ""}`}
     >
+      {bloco.condicoes.map((condicao, indice) => (
+        // Como o Chrome (CSSQuery em StylePropertiesSection): a condição numa linha acima do seletor.
+        <div key={`${condicao.tipo}-${indice}`} data-condicao-regra={condicao.tipo} className="text-[11px] not-italic text-texto-suave">
+          {bloco.folha?.origem === "folha" ? (
+            <button
+              type="button"
+              onClick={aoIrParaFonte}
+              title="Abrir no editor CSS, nesta regra"
+              className="rounded text-left hover:bg-hover hover:text-primaria pointer-coarse:min-h-11"
+            >
+              @{condicao.tipo} {condicao.texto}
+            </button>
+          ) : (
+            <span>
+              @{condicao.tipo} {condicao.texto}
+            </span>
+          )}
+        </div>
+      ))}
       <div className="flex items-start gap-2">
         <span className="min-w-0 break-words">
           {seletor}
@@ -128,7 +148,8 @@ export function BlocoEstilo({
               editavel={editavel}
               toque={toque}
               editando={campo}
-              destacada={destaque?.propriedade === item.declaracao.propriedade}
+              destacada={destaque?.propriedade === item.declaracao.propriedade || declaracaoApontada === item.indice}
+              aoIrParaVariavel={aoIrParaVariavel}
               aoComecar={(qual) => aoComecar(item.indice, qual)}
               aoConfirmar={(qual, texto, saida) => aoConfirmar(item.indice, qual, texto, saida)}
               aoCancelar={aoCancelar}

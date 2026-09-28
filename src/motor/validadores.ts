@@ -8,7 +8,9 @@ import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/con
 import { elementoDoNo } from "@/lib/arvore";
 import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
-import { calcularCascata, folhasDoDocumento, normalizarSeletor, valorEfetivo } from "./css/cascata";
+import { calcularCascata, folhasDoDocumento, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
+import type { Tela } from "./css/midia";
+import { telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
@@ -23,7 +25,18 @@ export type ContextoValidacao = {
   selecao: { no: Node; via: ViaSelecao | null } | null;
   /** Eventos desde que o objetivo (ou o desafio) começou. */
   eventos: readonly EventoFase[];
+  /**
+   * A tela da prévia agora (o modo dispositivo muda). Sem ela, vale a da
+   * janela do documento ou, num documento solto, a padrão (1280 x 800).
+   */
+  tela?: Tela;
 };
+
+/** A tela de um validador de CSS: a `larguraTela` dele ou a da prévia. */
+function opcoesDaTela(validador: { larguraTela?: number; alturaTela?: number }, contexto: ContextoValidacao): OpcoesCascata {
+  if (validador.larguraTela !== undefined) return { tela: telaDaLargura(validador.larguraTela, validador.alturaTela) };
+  return contexto.tela ? { tela: contexto.tela } : {};
+}
 
 export type ResultadoValidador = {
   passou: boolean;
@@ -80,6 +93,10 @@ function lista(itens: readonly string[]): string {
 }
 
 /** Descrição curta de um validador, em PT-BR. */
+function naTela(validador: { larguraTela?: number }): string {
+  return validador.larguraTela !== undefined ? ` numa tela de ${validador.larguraTela} px` : "";
+}
+
 export function descreverValidador(validador: Validador): string {
   switch (validador.tipo) {
     case "existe":
@@ -107,7 +124,7 @@ export function descreverValidador(validador: Validador): string {
     case "tituloDaAba":
       return validador.valor !== undefined ? `título da aba igual a "${validador.valor}"` : "a aba tem título";
     case "valorEfetivo":
-      return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"`;
+      return `${validador.propriedade} de ${validador.seletor} vale "${validador.valor}"${naTela(validador)}`;
     case "declaracao":
       return `a regra ${validador.seletorRegra} tem ${validador.propriedade}${validador.valor !== undefined ? `: ${validador.valor}` : ""}${
         validador.ativa === undefined ? "" : validador.ativa ? " (ligada)" : " (desligada)"
@@ -115,7 +132,7 @@ export function descreverValidador(validador: Validador): string {
     case "regraExiste":
       return `existe a regra ${validador.seletorRegra}`;
     case "riscada":
-      return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}`;
+      return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}${naTela(validador)}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -255,7 +272,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const propriedade = nomeDaPropriedade(validador.propriedade);
       const situacoes: string[] = [];
       const passou = consultar(documento, validador.seletor).some((elemento) => {
-        const cascata = calcularCascata(elemento);
+        const cascata = calcularCascata(elemento, opcoesDaTela(validador, contexto));
         const blocos = [...cascata.proprios, ...cascata.herdados.flatMap((grupo) => grupo.blocos)];
         return blocos.some((bloco) => {
           if (bloco.folha?.origem === "navegador") return false;
@@ -317,11 +334,11 @@ function avaliarValorEfetivo(
   const encontrados: string[] = [];
   const elementos = consultar(contexto.documento, validador.seletor);
   const passou = elementos.some((elemento) => {
-    const efetivos = valorEfetivo(elemento, propriedade);
+    const efetivos = valorEfetivo(elemento, propriedade, opcoesDaTela(validador, contexto));
     return Object.entries(esperado).every(([longa, valor]) => {
       const efetivo = efetivos[longa];
-      if (!efetivo || efetivo.tipo === "incerto") {
-        encontrados.push(`${longa}: incerto (${efetivo?.motivo ?? "sem valor"})`);
+      if (!efetivo || efetivo.tipo !== "valor") {
+        encontrados.push(`${longa}: ${efetivo?.tipo === "invalido" ? "inválido" : "incerto"} (${efetivo?.motivo ?? "sem valor"})`);
         return false;
       }
       encontrados.push(`${longa}: ${efetivo.valor}`);

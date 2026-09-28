@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { IconeAviso } from "@/componentes/icones/IconeAviso";
 import { IconeChevron } from "@/componentes/icones/IconeChevron";
-import type { DeclaracaoNaCascata } from "@/motor/css/cascata";
+import { chamadasVar, type DeclaracaoNaCascata, type VariavelNoValor } from "@/motor/css/cascata";
 import { CampoEstilo, type Saida } from "./CampoEstilo";
 import { acharCor, hexDoSeletor, trocarCor } from "./cores";
 
@@ -23,7 +23,65 @@ type Props = {
   /** Seletor de cor: `final` false enquanto arrasta, true ao escolher. */
   aoEscolherCor: (valor: string, final: boolean) => void;
   aoUsarSetas: () => void;
+  /** Clique no nome de uma variável dentro do var(): leva até a declaração dela. */
+  aoIrParaVariavel?: (variavel: VariavelNoValor) => void;
 };
+
+/**
+ * O valor com cada var() desenhado como no Chrome (VariableRenderer do
+ * devtools-frontend): "var(" + o nome como link (sublinhado; apagado se a
+ * variável não existe) + a reserva + ")". O valor da variável aparece ao
+ * passar o mouse (title), e o clique no nome leva até a declaração.
+ */
+function ValorComVariaveis({
+  texto,
+  variaveis,
+  aoIrParaVariavel,
+}: {
+  texto: string;
+  variaveis: readonly VariavelNoValor[];
+  aoIrParaVariavel?: (variavel: VariavelNoValor) => void;
+}) {
+  const pedacos: ReactNode[] = [];
+  let depois = 0;
+  chamadasVar(texto).forEach((chamada, indice) => {
+    const variavel = variaveis[indice];
+    pedacos.push(texto.slice(depois, chamada.inicio));
+    depois = chamada.fim;
+    if (!variavel) {
+      pedacos.push(texto.slice(chamada.inicio, chamada.fim));
+      return;
+    }
+    const definida = variavel.valor !== null;
+    const dica = definida
+      ? `${variavel.nome}: ${variavel.valor}`
+      : `${variavel.nome} não foi definida${variavel.usouReserva ? ": vale a reserva" : ""}`;
+    pedacos.push(
+      <span key={indice} title={dica}>
+        var(
+        <button
+          type="button"
+          data-var-link={variavel.nome}
+          data-definida={definida ? "sim" : "nao"}
+          aria-label={definida ? `Ir até a declaração de ${variavel.nome}, que vale ${variavel.valor}` : dica}
+          disabled={!variavel.origem}
+          onClick={(evento) => {
+            evento.stopPropagation();
+            if (variavel.origem) aoIrParaVariavel?.(variavel);
+          }}
+          className={`rounded underline decoration-dotted underline-offset-2 disabled:cursor-default pointer-coarse:py-1 ${
+            definida ? "text-codigo-atributo hover:bg-hover" : "text-texto-suave opacity-70"
+          }`}
+        >
+          {variavel.nome}
+        </button>
+        {variavel.reserva !== null && `, ${variavel.reserva}`})
+      </span>,
+    );
+  });
+  pedacos.push(texto.slice(depois));
+  return <>{pedacos}</>;
+}
 
 const RISCADAS = new Set(["perdeu", "desligada", "invalida"]);
 
@@ -49,12 +107,16 @@ export function LinhaDeclaracao({
   aoAlternar,
   aoEscolherCor,
   aoUsarSetas,
+  aoIrParaVariavel,
 }: Props) {
   const [aberto, setAberto] = useState(false);
   const { declaracao, situacao } = item;
   const riscada = RISCADAS.has(situacao);
   const atalho = item.longas.length > 1;
-  const cor = declaracao.ativa ? acharCor(declaracao.valorBruto) : null;
+  const comVariaveis = item.variaveis !== undefined && item.variaveis.length > 0;
+  // Com var(), a cor vem do valor resolvido e a amostra só mostra (o nome da variável não é uma cor).
+  const cor = declaracao.ativa && !comVariaveis ? acharCor(declaracao.valorBruto) : null;
+  const corResolvida = declaracao.ativa && comVariaveis && item.valorResolvido ? acharCor(item.valorResolvido) : null;
 
   const nome =
     editando === "nome" ? (
@@ -110,7 +172,11 @@ export function LinhaDeclaracao({
         }}
         className={`text-codigo-valor ${editavel ? "cursor-text rounded hover:bg-hover pointer-coarse:py-1" : ""}`}
       >
-        {declaracao.valorBruto}
+        {comVariaveis ? (
+          <ValorComVariaveis texto={declaracao.valorBruto} variaveis={item.variaveis ?? []} aoIrParaVariavel={aoIrParaVariavel} />
+        ) : (
+          declaracao.valorBruto
+        )}
       </span>
     );
 
@@ -161,8 +227,25 @@ export function LinhaDeclaracao({
               />
             </label>
           )}
+          {corResolvida && editando !== "valor" && item.valorResolvido && (
+            <span
+              data-amostra-variavel
+              aria-hidden="true"
+              className="mr-1 inline-block h-3 w-3 rounded-sm border border-borda align-[-1px]"
+              style={{ backgroundColor: item.valorResolvido.slice(corResolvida.inicio, corResolvida.fim) }}
+            />
+          )}
           {valor}
           <span className="text-texto">;</span>
+          {comVariaveis && editando !== "valor" && (
+            <span
+              data-valor-resolvido
+              title="O valor com as variáveis trocadas"
+              className="ml-1.5 rounded bg-painel px-1 font-codigo text-[11px] not-italic text-texto-suave"
+            >
+              {item.valorResolvido ?? "inválido: vale o herdado ou o inicial"}
+            </span>
+          )}
         </span>
         {situacao === "invalida" && <IconeAviso className="shrink-0 text-alerta" />}
         {atalho && (

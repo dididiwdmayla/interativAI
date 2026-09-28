@@ -178,7 +178,10 @@ núcleo comum.
     o esperado do currículo e do conteúdo registrado) e o registro dos
     portões lógicos (`logica-decisoes-u2`, sala "Por baixo do capô" e o
     motor planejado `circuito-logico` em `src/curriculo/motores.ts`).
-  - [ ] Etapa 2: variáveis CSS e `@media` no motor e no painel.
+  - [x] Etapa 2: variáveis CSS (herança, reserva, encadeadas, ciclo) e
+    `@media` avaliada contra a largura da tela no motor, no painel
+    Estilos (link do `var()`, valor resolvido, cabeçalho `@media`) e nos
+    validadores (`larguraTela`).
   - [ ] Etapa 3: E5 com o próprio jogo como site-alvo e o Meu tema.
   - [ ] Etapa 4: modo dispositivo.
   - [ ] Etapa 5: painel Lighthouse.

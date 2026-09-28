@@ -7,7 +7,8 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import type { PainelElementos } from "@/conteudo/tipos";
-import { type Bloco, calcularCascata, folhasDoDocumento, normalizarSeletor } from "@/motor/css/cascata";
+import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
+import { type Bloco, calcularCascata, folhasDoDocumento, normalizarSeletor, type OrigemVariavel } from "@/motor/css/cascata";
 import {
   adicionarDeclaracaoNoTexto,
   alternarDeclaracaoNoTexto,
@@ -118,6 +119,10 @@ export function PainelEstilos({
   const [filtro, setFiltro] = useState("");
   const [edicao, setEdicao] = useState<EdicaoEstilos | null>(null);
   const recipiente = useRef<HTMLDivElement>(null);
+  // O clique num var(): a declaração da variável pisca e fica à vista (jumpToDeclaration do Chrome).
+  const [apontada, setApontada] = useState<OrigemVariavel | null>(null);
+  const apagarApontada = useRef<TemporizadorRastreado | null>(null);
+  useEffect(() => () => apagarApontada.current?.cancelar(), []);
 
   const cascata = useMemo(() => (elemento ? { versao, resultado: calcularCascata(elemento) } : null), [elemento, versao]);
   const resultado = cascata?.resultado ?? null;
@@ -133,6 +138,17 @@ export function PainelEstilos({
     setElementoDaEdicao(elemento);
     setEdicao(null);
   }
+
+  const irParaVariavel = (origem: OrigemVariavel) => {
+    apagarApontada.current?.cancelar();
+    setApontada(origem);
+    apagarApontada.current = agendarRastreado(() => setApontada(null), 1600);
+  };
+
+  useEffect(() => {
+    if (!apontada) return;
+    recipiente.current?.querySelector(`[data-apontada="sim"]`)?.scrollIntoView({ block: "nearest", behavior: "auto" });
+  }, [apontada]);
 
   // A edição nova (regra nova, Tab) fica à vista.
   useEffect(() => {
@@ -288,6 +304,8 @@ export function PainelEstilos({
       aoAlternar={(indice) => alternar(bloco, indice)}
       aoEscolherCor={(indice, valor, final) => escolherCor(bloco, indice, valor, final)}
       aoUsarSetas={() => sinalizarUso("setas-numericas")}
+      declaracaoApontada={apontada && apontada.elemento === bloco.elemento && apontada.blocoId === bloco.id ? apontada.indice : null}
+      aoIrParaVariavel={(variavel) => variavel.origem && irParaVariavel(variavel.origem)}
     />
   );
 

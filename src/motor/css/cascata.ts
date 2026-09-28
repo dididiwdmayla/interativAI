@@ -32,7 +32,17 @@ import {
 } from "./especificidade";
 import { SELETOR_EXIBIDO, TEXTO_FOLHA_DO_NAVEGADOR } from "./folhaDoNavegador";
 import { ehHerdada, GRUPO_LOGICO_DE, HERDADAS, INICIAIS, longasDe } from "./propriedades";
+import { midiaSeAplica, type Tela, telaDoDocumento } from "./midia";
 import { abrirAtalho, type Validade, validadeDoValor } from "./valores";
+
+export type { Tela } from "./midia";
+
+/**
+ * Onde a cascata é calculada. Sem `tela`, vale a tela do documento (a
+ * janela da prévia, que o modo dispositivo redimensiona de verdade) ou,
+ * num documento solto (testes, simulação), a tela padrão (1280 x 800).
+ */
+export type OpcoesCascata = { tela?: Tela };
 
 /** Onde a folha mora: a do navegador, um <style> fixo da página ou a folha editável do jogo. */
 export type OrigemFolha = "navegador" | "pagina" | "folha";
@@ -77,6 +87,28 @@ export type DeclaracaoNaCascata = {
   validade: Validade;
   /** As propriedades longas que ela define (um item só, se não for atalho). */
   longas: LongaNaCascata[];
+  /** Só em valor com var(): cada var() de fora, com o valor e de onde veio (o painel mostra e leva até lá). */
+  variaveis?: VariavelNoValor[];
+  /**
+   * Só em valor com var(): o valor com as variáveis trocadas, ou null
+   * quando uma variável não existe e não há reserva (o valor é inválido na
+   * hora de calcular, e a propriedade volta ao herdado ou ao inicial).
+   */
+  valorResolvido?: string | null;
+};
+
+/** Onde mora a declaração que deu o valor a uma variável: o painel leva até ela. */
+export type OrigemVariavel = { elemento: Element; blocoId: string; indice: number };
+
+export type VariavelNoValor = {
+  nome: string;
+  /** O texto da reserva (`var(--x, reserva)`), se tiver. */
+  reserva: string | null;
+  /** O valor da variável ali (null: não existe, é inválida ou o motor não sabe). */
+  valor: string | null;
+  /** A reserva foi usada no lugar da variável. */
+  usouReserva: boolean;
+  origem: OrigemVariavel | null;
 };
 
 export type Bloco = {
@@ -104,6 +136,8 @@ export type ResultadoCascata = {
   herdados: { elemento: Element; blocos: Bloco[] }[];
   /** Motivo de incerteza da página inteira (ex.: @layer), ou null. */
   incerta: string | null;
+  /** A tela em que as @media foram avaliadas. */
+  tela: Tela;
 };
 
 /* ------------------------------------------------------------------ */
@@ -180,14 +214,14 @@ function casa(elemento: Element, seletor: string): boolean {
 
 type ResultadoCondicao = "sim" | "nao" | "incerto";
 
-function avaliarCondicoes(condicoes: readonly Condicao[], documento: Document): ResultadoCondicao {
+function avaliarCondicoes(condicoes: readonly Condicao[], documento: Document, tela: Tela): ResultadoCondicao {
   let resultado: ResultadoCondicao = "sim";
   for (const condicao of condicoes) {
     let agora: ResultadoCondicao = "incerto";
     try {
       if (condicao.tipo === "media") {
-        const janela = documento.defaultView as (Window & typeof globalThis) | null;
-        if (janela && typeof janela.matchMedia === "function") agora = janela.matchMedia(condicao.texto).matches ? "sim" : "nao";
+        // O avaliador do motor, contra a tela informada: igual no navegador e no jsdom.
+        agora = midiaSeAplica(condicao.texto, tela) ? "sim" : "nao";
       } else {
         const janela = documento.defaultView as (Window & typeof globalThis) | null;
         const suporta = janela?.CSS?.supports;
@@ -253,7 +287,7 @@ function camada(importante: boolean, origem: OrigemFolha | "inline"): number {
   return doNavegador ? 0 : 1;
 }
 
-function lerBlocos(elemento: Element, folhas: readonly FolhaNaCascata[]): BlocosDoElemento {
+function lerBlocos(elemento: Element, folhas: readonly FolhaNaCascata[], tela: Tela): BlocosDoElemento {
   const documento = elemento.ownerDocument;
   const blocos: Bloco[] = [];
   const duvidosos = new Set<Bloco>();
@@ -284,7 +318,7 @@ function lerBlocos(elemento: Element, folhas: readonly FolhaNaCascata[]): Blocos
       }));
       const casados = seletores.filter((seletor) => seletor.casa);
       if (casados.length === 0) return;
-      const condicao = avaliarCondicoes(regra.condicoes, documento);
+      const condicao = avaliarCondicoes(regra.condicoes, documento, tela);
       if (condicao === "nao") return;
       let maior: Especificidade = ESPECIFICIDADE_ZERO;
       let seletorIlegivel = false;
@@ -380,13 +414,18 @@ export type Vencedor =
 type Contexto = {
   folhas: FolhaNaCascata[];
   incerta: string | null;
+  tela: Tela;
   porElemento: Map<Element, BlocosDoElemento>;
+  /** Um número por elemento, para as chaves da pilha de variáveis. */
+  idsDeElemento: Map<Element, number>;
+  /** Variáveis ("<elemento>|--nome") que caíram num ciclo: inválidas, como manda a especificação. */
+  emCiclo: Set<string>;
 };
 
 function blocosDe(contexto: Contexto, elemento: Element): BlocosDoElemento {
   let achados = contexto.porElemento.get(elemento);
   if (!achados) {
-    achados = lerBlocos(elemento, contexto.folhas);
+    achados = lerBlocos(elemento, contexto.folhas, contexto.tela);
     contexto.porElemento.set(elemento, achados);
   }
   return achados;
@@ -459,8 +498,9 @@ function marcarBloco(contexto: Contexto, alvo: Element, bloco: Bloco, soHerdadas
   const declaracoes = bloco.declaracoes
     .filter((item) => !soHerdadas || item.herdavel)
     .map((item): DeclaracaoNaCascata => {
-      if (!item.declaracao.ativa) return { ...item, situacao: "desligada" };
-      if (item.validade === "invalido") return { ...item, situacao: "invalida" };
+      const comVariaveis = TEM_VAR.test(item.declaracao.valor) ? variaveisDaDeclaracao(contexto, bloco.elemento, item.declaracao) : {};
+      if (!item.declaracao.ativa) return { ...item, ...comVariaveis, situacao: "desligada" };
+      if (item.validade === "invalido") return { ...item, ...comVariaveis, situacao: "invalida" };
       const longas = item.longas.map((longa): LongaNaCascata => {
         const candidato = (achados.candidatos.get(longa.propriedade) ?? []).find(
           (possivel) => possivel.item === item && possivel.bloco === bloco,
@@ -474,24 +514,27 @@ function marcarBloco(contexto: Contexto, alvo: Element, bloco: Bloco, soHerdadas
         : situacoes.includes("vence")
           ? "vence"
           : "incerta";
-      return { ...item, longas, situacao };
+      return { ...item, ...comVariaveis, longas, situacao };
     });
   return { ...bloco, declaracoes };
 }
 
-function novoContexto(documento: Document): Contexto {
+function novoContexto(documento: Document, opcoes: OpcoesCascata = {}): Contexto {
   const folhas = folhasDoDocumento(documento);
   const incerta = folhas.find((folha) => folha.analisada.incerta);
   return {
     folhas,
     incerta: incerta ? `a folha usa ${incerta.analisada.motivoIncerta}` : null,
+    tela: opcoes.tela ?? telaDoDocumento(documento),
     porElemento: new Map(),
+    idsDeElemento: new Map(),
+    emCiclo: new Set(),
   };
 }
 
 /** A cascata inteira de um elemento: o que o painel Estilos mostra. */
-export function calcularCascata(elemento: Element): ResultadoCascata {
-  const contexto = novoContexto(elemento.ownerDocument);
+export function calcularCascata(elemento: Element, opcoes: OpcoesCascata = {}): ResultadoCascata {
+  const contexto = novoContexto(elemento.ownerDocument, opcoes);
   const proprios = blocosDe(contexto, elemento).blocos.map((bloco) => marcarBloco(contexto, elemento, bloco, false));
   const herdados = cadeia(elemento)
     .slice(1)
@@ -502,7 +545,7 @@ export function calcularCascata(elemento: Element): ResultadoCascata {
         .map((bloco) => marcarBloco(contexto, elemento, bloco, true)),
     }))
     .filter((grupo) => grupo.blocos.length > 0);
-  return { elemento, proprios, herdados, incerta: contexto.incerta };
+  return { elemento, proprios, herdados, incerta: contexto.incerta, tela: contexto.tela };
 }
 
 /* ------------------------------------------------------------------ */
@@ -517,65 +560,137 @@ export type ValorEfetivo =
       declaracao: Declaracao | null;
       /** De onde veio: o próprio elemento ou o ancestral de quem herdou. */
       de: Element | null;
+      /** O bloco e a posição da declaração, para o painel levar até ela. */
+      origem: OrigemVariavel | null;
     }
+  /** Uma variável que não existe ou caiu num ciclo (a especificação chama de "garantidamente inválida"). */
+  | { tipo: "invalido"; motivo: string }
   | { tipo: "incerto"; motivo: string };
 
-const PROFUNDIDADE_VAR = 12;
+type Resolucao = { tipo: "valor"; valor: string } | { tipo: "invalido"; motivo: string } | { tipo: "incerto"; motivo: string };
+
+/** Uma variável sendo calculada: o elemento dono e o nome. */
+type Pilha = readonly string[];
+
+const PROFUNDIDADE_VAR = 24;
+const TEM_VAR = /var\(/i;
 
 function valorInicial(propriedade: string): ValorEfetivo {
-  if (Object.hasOwn(INICIAIS, propriedade)) return { tipo: "valor", valor: INICIAIS[propriedade], declaracao: null, de: null };
+  if (Object.hasOwn(INICIAIS, propriedade)) return { tipo: "valor", valor: INICIAIS[propriedade], declaracao: null, de: null, origem: null };
   return { tipo: "incerto", motivo: `nada declara ${propriedade} e o valor inicial depende do navegador` };
 }
 
-function efetivoLonga(contexto: Contexto, elemento: Element, propriedade: string, profundidade: number): ValorEfetivo {
-  if (profundidade > PROFUNDIDADE_VAR) return { tipo: "incerto", motivo: "var() dentro de var() demais" };
+function chaveDaVariavel(contexto: Contexto, elemento: Element, nome: string): string {
+  let id = contexto.idsDeElemento.get(elemento);
+  if (id === undefined) {
+    id = contexto.idsDeElemento.size;
+    contexto.idsDeElemento.set(elemento, id);
+  }
+  return `${id}|${nome}`;
+}
+
+/**
+ * Valor inválido na hora de calcular (var() de uma variável que não existe,
+ * sem reserva): a propriedade se comporta como `unset`, herdando se for
+ * herdada ou voltando ao valor inicial.
+ */
+function comoUnset(contexto: Contexto, dono: Element, propriedade: string, pilha: Pilha): ValorEfetivo {
+  const pai = dono.parentElement;
+  if (HERDADAS.has(propriedade) && pai) return efetivoLonga(contexto, pai, propriedade, pilha);
+  return valorInicial(propriedade);
+}
+
+function efetivoLonga(contexto: Contexto, elemento: Element, propriedade: string, pilha: Pilha): ValorEfetivo {
+  if (pilha.length > PROFUNDIDADE_VAR) return { tipo: "incerto", motivo: "var() dentro de var() demais" };
   const vencedor = vencedorDe(contexto, elemento, propriedade);
   if (vencedor.tipo === "incerto") return { tipo: "incerto", motivo: vencedor.motivo };
+  const personalizada = propriedade.startsWith("--");
   if (vencedor.tipo === "nenhum") {
-    if (propriedade.startsWith("--")) return { tipo: "incerto", motivo: `a variável ${propriedade} não foi declarada` };
+    if (personalizada) return { tipo: "invalido", motivo: `a variável ${propriedade} não foi declarada` };
     return valorInicial(propriedade);
   }
   const { candidato, elemento: dono } = vencedor;
+  const origem: OrigemVariavel = { elemento: dono, blocoId: candidato.bloco.id, indice: candidato.item.indice };
+  const declaracao = candidato.item.declaracao;
+  const pai = dono.parentElement;
+
+  if (personalizada) {
+    const chave = chaveDaVariavel(contexto, dono, propriedade);
+    const posicao = pilha.indexOf(chave);
+    if (posicao >= 0) {
+      // Ciclo: todas as variáveis do ciclo ficam inválidas (CSS Variables, "dependency cycles").
+      for (const outra of pilha.slice(posicao)) contexto.emCiclo.add(outra);
+      return { tipo: "invalido", motivo: `a variável ${propriedade} depende dela mesma (ciclo)` };
+    }
+    const valor = (candidato.valor ?? declaracao.valor).trim();
+    const palavra = valor.toLowerCase();
+    if (palavra === "inherit" || palavra === "unset") {
+      return pai ? efetivoLonga(contexto, pai, propriedade, pilha) : { tipo: "invalido", motivo: `a variável ${propriedade} não foi declarada` };
+    }
+    if (palavra === "initial") return { tipo: "invalido", motivo: `${propriedade}: initial deixa a variável sem valor` };
+    if (!TEM_VAR.test(valor)) return { tipo: "valor", valor, declaracao, de: dono, origem };
+    const resolvido = resolverVariaveis(contexto, dono, valor, [...pilha, chave]);
+    if (contexto.emCiclo.has(chave)) return { tipo: "invalido", motivo: `a variável ${propriedade} depende dela mesma (ciclo)` };
+    if (resolvido.tipo !== "valor") return resolvido;
+    return { tipo: "valor", valor: resolvido.valor, declaracao, de: dono, origem };
+  }
+
   if (candidato.valor === null) {
+    // Atalho com var(): o navegador troca as variáveis primeiro e só depois separa as partes.
+    if (TEM_VAR.test(declaracao.valor)) {
+      const resolvido = resolverVariaveis(contexto, dono, declaracao.valor, pilha);
+      if (resolvido.tipo === "incerto") return resolvido;
+      if (resolvido.tipo === "invalido") return comoUnset(contexto, dono, propriedade, pilha);
+      const aberto = abrirAtalho(declaracao.propriedade, resolvido.valor);
+      if (aberto.validade === "invalido") return comoUnset(contexto, dono, propriedade, pilha);
+      const parte = aberto.longas?.[propriedade];
+      if (parte === undefined) {
+        return { tipo: "incerto", motivo: `o motor não sabe separar "${declaracao.propriedade}: ${resolvido.valor}"` };
+      }
+      return { tipo: "valor", valor: parte, declaracao, de: dono, origem };
+    }
     return {
       tipo: "incerto",
-      motivo: `o motor não sabe separar "${candidato.item.declaracao.propriedade}: ${candidato.item.declaracao.valor}"`,
+      motivo: `o motor não sabe separar "${declaracao.propriedade}: ${declaracao.valor}"`,
     };
   }
   const valor = candidato.valor.trim();
   const palavra = valor.toLowerCase();
-  const pai = dono.parentElement;
-  if (palavra === "inherit" || (palavra === "unset" && (HERDADAS.has(propriedade) || propriedade.startsWith("--")))) {
-    return pai ? efetivoLonga(contexto, pai, propriedade, profundidade + 1) : valorInicial(propriedade);
+  if (palavra === "inherit" || (palavra === "unset" && HERDADAS.has(propriedade))) {
+    return pai ? efetivoLonga(contexto, pai, propriedade, pilha) : valorInicial(propriedade);
   }
   if (palavra === "initial" || palavra === "unset") return valorInicial(propriedade);
   if (palavra === "revert" || palavra === "revert-layer") {
     return { tipo: "incerto", motivo: `${propriedade}: ${valor} depende da folha do navegador inteira` };
   }
-  if (/var\(/i.test(valor)) {
-    const resolvido = resolverVariaveis(contexto, dono, valor, profundidade);
+  if (TEM_VAR.test(valor)) {
+    const resolvido = resolverVariaveis(contexto, dono, valor, pilha);
     if (resolvido.tipo === "incerto") return resolvido;
-    return { tipo: "valor", valor: resolvido.valor, declaracao: candidato.item.declaracao, de: dono };
+    // Inválido na hora de calcular: nem a variável nem a reserva deram valor, ou o valor final não serve.
+    if (resolvido.tipo === "invalido" || validadeDoValor(propriedade, resolvido.valor) === "invalido") {
+      return comoUnset(contexto, dono, propriedade, pilha);
+    }
+    return { tipo: "valor", valor: resolvido.valor, declaracao, de: dono, origem };
   }
-  return { tipo: "valor", valor, declaracao: candidato.item.declaracao, de: dono };
+  return { tipo: "valor", valor, declaracao, de: dono, origem };
 }
 
-/** Troca cada var(--nome, reserva) pelo valor da variável no elemento. */
-function resolverVariaveis(
-  contexto: Contexto,
-  elemento: Element,
-  valor: string,
-  profundidade: number,
-): { tipo: "valor"; valor: string } | { tipo: "incerto"; motivo: string } {
-  let saida = "";
+/** Um var() de fora num valor: onde está, o nome e a reserva. */
+export type ChamadaVar = { inicio: number; fim: number; nome: string; reserva: string | null };
+
+/** As chamadas var() de fora de um valor (as de dentro de uma reserva ficam na reserva). */
+export function chamadasVar(valor: string): ChamadaVar[] {
+  const chamadas: ChamadaVar[] = [];
+  const minusculo = valor.toLowerCase();
   let i = 0;
   while (i < valor.length) {
-    const inicio = valor.toLowerCase().indexOf("var(", i);
-    if (inicio < 0) {
-      saida += valor.slice(i);
-      break;
+    const inicio = minusculo.indexOf("var(", i);
+    if (inicio < 0) break;
+    // "var(" no meio de outra palavra (ex.: "somevar(") não conta.
+    if (inicio > 0 && /[\w-]/.test(valor[inicio - 1])) {
+      i = inicio + 4;
+      continue;
     }
-    saida += valor.slice(i, inicio);
     let nivel = 0;
     let fim = inicio + 3;
     for (; fim < valor.length; fim++) {
@@ -585,29 +700,72 @@ function resolverVariaveis(
         if (nivel === 0) break;
       }
     }
-    const dentro = valor.slice(inicio + 4, fim);
+    const dentro = valor.slice(inicio + 4, Math.min(fim, valor.length));
     const virgula = dentro.indexOf(",");
-    const nome = (virgula >= 0 ? dentro.slice(0, virgula) : dentro).trim();
-    const reserva = virgula >= 0 ? dentro.slice(virgula + 1).trim() : null;
-    const efetivo = efetivoLonga(contexto, elemento, nome, profundidade + 1);
-    if (efetivo.tipo === "valor") saida += efetivo.valor;
-    else if (reserva !== null) {
-      const resolvida = /var\(/i.test(reserva) ? resolverVariaveis(contexto, elemento, reserva, profundidade + 1) : { tipo: "valor" as const, valor: reserva };
-      if (resolvida.tipo === "incerto") return resolvida;
-      saida += resolvida.valor;
-    } else return efetivo;
+    chamadas.push({
+      inicio,
+      fim: Math.min(fim + 1, valor.length),
+      nome: (virgula >= 0 ? dentro.slice(0, virgula) : dentro).trim(),
+      reserva: virgula >= 0 ? dentro.slice(virgula + 1).trim() : null,
+    });
     i = fim + 1;
   }
+  return chamadas;
+}
+
+/** Troca cada var(--nome, reserva) pelo valor da variável no elemento. */
+function resolverVariaveis(contexto: Contexto, elemento: Element, valor: string, pilha: Pilha): Resolucao {
+  let saida = "";
+  let depois = 0;
+  for (const chamada of chamadasVar(valor)) {
+    saida += valor.slice(depois, chamada.inicio);
+    depois = chamada.fim;
+    if (!chamada.nome.startsWith("--")) return { tipo: "invalido", motivo: `var(${chamada.nome}) não é o nome de uma variável` };
+    const efetivo = efetivoLonga(contexto, elemento, chamada.nome, pilha);
+    if (efetivo.tipo === "valor") {
+      saida += efetivo.valor;
+      continue;
+    }
+    if (efetivo.tipo === "incerto") return efetivo;
+    if (chamada.reserva === null) return efetivo;
+    const reserva = TEM_VAR.test(chamada.reserva) ? resolverVariaveis(contexto, elemento, chamada.reserva, pilha) : { tipo: "valor" as const, valor: chamada.reserva };
+    if (reserva.tipo !== "valor") return reserva;
+    saida += reserva.valor;
+  }
+  saida += valor.slice(depois);
   return { tipo: "valor", valor: saida.trim() };
+}
+
+/** As variáveis de uma declaração, resolvidas no elemento dono (o painel mostra o valor e leva até elas). */
+function variaveisDaDeclaracao(
+  contexto: Contexto,
+  dono: Element,
+  declaracao: Declaracao,
+): { variaveis: VariavelNoValor[]; valorResolvido: string | null } {
+  const variaveis = chamadasVar(declaracao.valor).map((chamada): VariavelNoValor => {
+    const efetivo = chamada.nome.startsWith("--") ? efetivoLonga(contexto, dono, chamada.nome, []) : null;
+    const valor = efetivo?.tipo === "valor" ? efetivo.valor : null;
+    return {
+      nome: chamada.nome,
+      reserva: chamada.reserva,
+      valor,
+      usouReserva: efetivo?.tipo === "invalido" && chamada.reserva !== null,
+      origem: efetivo?.tipo === "valor" ? efetivo.origem : null,
+    };
+  });
+  const pilha = declaracao.propriedade.startsWith("--") ? [chaveDaVariavel(contexto, dono, declaracao.propriedade)] : [];
+  const resolvido = resolverVariaveis(contexto, dono, declaracao.valor, pilha);
+  return { variaveis, valorResolvido: resolvido.tipo === "valor" ? resolvido.valor : null };
 }
 
 /**
  * O valor que vence para uma propriedade no elemento (a declarada que
- * ganhou, ou herdada, ou a inicial). Para um atalho, devolve um valor por
- * propriedade longa.
+ * ganhou, ou herdada, ou a inicial), com as variáveis trocadas. Para um
+ * atalho, devolve um valor por propriedade longa. `opcoes.tela` escolhe a
+ * tela das @media (sem ela, a do documento).
  */
-export function valorEfetivo(elemento: Element, propriedade: string): Record<string, ValorEfetivo> {
-  const contexto = novoContexto(elemento.ownerDocument);
+export function valorEfetivo(elemento: Element, propriedade: string, opcoes: OpcoesCascata = {}): Record<string, ValorEfetivo> {
+  const contexto = novoContexto(elemento.ownerDocument, opcoes);
   const nome = propriedade.startsWith("--") ? propriedade : propriedade.toLowerCase();
-  return Object.fromEntries(longasDe(nome).map((longa) => [longa, efetivoLonga(contexto, elemento, longa, 0)]));
+  return Object.fromEntries(longasDe(nome).map((longa) => [longa, efetivoLonga(contexto, elemento, longa, [])]));
 }

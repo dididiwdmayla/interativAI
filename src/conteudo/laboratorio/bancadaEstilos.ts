@@ -13,6 +13,7 @@
  */
 import type { FasePratica, Unidade } from "../tipos";
 import { FASE_BANCADA_DOCUMENTO } from "./bancadaDocumento";
+import { FASE_BANCADA_VARIAVEIS } from "./bancadaVariaveis";
 
 const CSS_DA_BANCADA = `body {
   font-family: Georgia, serif;
@@ -98,7 +99,7 @@ export const UNIDADE_BANCADA: Unidade = {
   numero: 1,
   titulo: "Bancada do motor",
   meta: { enunciado: "Testar o motor: CSS (editor com abas, painel Estilos e Calculado) e o modo documento." },
-  fases: ["lab-motor-u1-f1", "lab-motor-u1-f2"],
+  fases: ["lab-motor-u1-f1", "lab-motor-u1-f2", "lab-motor-u1-f3"],
 };
 
 export const FASE_BANCADA_ESTILOS: FasePratica = {
@@ -184,6 +185,6 @@ export const FASE_BANCADA_ESTILOS: FasePratica = {
 };
 
 /** Fases de laboratório, na ordem em que aparecem no /lab/fases. */
-export const FASES_LABORATORIO: readonly FasePratica[] = [FASE_BANCADA_ESTILOS, FASE_BANCADA_DOCUMENTO];
+export const FASES_LABORATORIO: readonly FasePratica[] = [FASE_BANCADA_ESTILOS, FASE_BANCADA_DOCUMENTO, FASE_BANCADA_VARIAVEIS];
 
 export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA];
