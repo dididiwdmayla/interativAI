@@ -32,6 +32,9 @@ export const IDS_FERRAMENTAS = [
   "modelo-de-caixa",
   // E5: o próprio jogo como site-alvo
   "salvar-tema",
+  // Zona Responsivo: modo dispositivo
+  "modo-dispositivo",
+  "girar-dispositivo",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

@@ -23,8 +23,11 @@ export function CamadaInspecao({ ativa, toque = false, aoApontar, aoEscolher, ao
   if (!ativa) return null;
 
   const posicao = (evento: PointerEvent<HTMLDivElement>) => {
-    const caixa = evento.currentTarget.getBoundingClientRect();
-    return { x: evento.clientX - caixa.left, y: evento.clientY - caixa.top };
+    const camada = evento.currentTarget;
+    const caixa = camada.getBoundingClientRect();
+    // No modo dispositivo a página está encolhida (zoom): volta para os px da página.
+    const escala = camada.offsetWidth > 0 ? caixa.width / camada.offsetWidth : 1;
+    return { x: (evento.clientX - caixa.left) / escala, y: (evento.clientY - caixa.top) / escala };
   };
 
   return (

@@ -186,7 +186,10 @@ núcleo comum.
     tokens reais), "Salvar como Meu tema" com aviso de contraste, o Meu
     tema no seletor e no jogo inteiro, a oficina `/meu-tema` (editar e
     apagar), `temaSalvo` e `variavelCss`.
-  - [ ] Etapa 4: modo dispositivo.
+  - [x] Etapa 4: modo dispositivo (botão e Ctrl+Shift+M, modelos, girar,
+    largura livre pelas alças, zoom, iframe com a largura de verdade,
+    simulação honesta dos 980 px sem meta viewport, validador
+    `dispositivo`).
   - [ ] Etapa 5: painel Lighthouse.
   - [ ] Etapa 6: projeto-ponte, exportação, guia de publicação, Meus
     projetos e a P2.

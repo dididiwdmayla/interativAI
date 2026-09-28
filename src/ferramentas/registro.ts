@@ -22,6 +22,8 @@ import { IconePainel } from "@/componentes/icones/IconePainel";
 import { IconePrevia } from "@/componentes/icones/IconePrevia";
 import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
 import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
+import { IconeDispositivo } from "@/componentes/icones/IconeDispositivo";
+import { IconeGirar } from "@/componentes/icones/IconeGirar";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -607,6 +609,47 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     lugar: { rotulo: "Abrir a oficina do Meu tema (editar ou apagar)", href: ROTA_MEU_TEMA },
+  },
+  // Modo dispositivo: conferido no devtools-frontend (emulation-meta.ts: a
+  // ação "Toggle device toolbar", Shift+Ctrl+M, Shift+Cmd+M no Mac;
+  // DeviceModeToolbar: aparelhos prontos, largura livre, girar e zoom).
+  "modo-dispositivo": {
+    id: "modo-dispositivo",
+    nome: "Modo dispositivo",
+    Icone: IconeDispositivo,
+    alvo: seletorFerramenta("modo-dispositivo"),
+    oQueFaz: "Mostra o site como ele fica num celular, num tablet ou num notebook, com a largura de verdade de cada um.",
+    praQueServe:
+      "Serve para ver o que quebra no celular sem ter um celular na mão: texto cortado, coluna espremida, rolagem de lado. As @media reagem à largura escolhida.",
+    comoUsarAqui: {
+      mouse: "Clique no botão do celular e tablet, ao lado da setinha. Escolha o aparelho na barra que aparece em cima da tela, ou arraste as bordas para uma largura livre.",
+      toque: "Toque no botão do celular e tablet, ao lado da setinha. Escolha o aparelho na barra que aparece em cima da tela.",
+    },
+    noF12DeVerdade:
+      "é o Toggle device toolbar (o ícone de celular e tablet no canto do DevTools), ou Ctrl+Shift+M (Cmd+Shift+M no Mac). A barra tem a lista de aparelhos, a largura e a altura, o zoom e o botão de girar.",
+    experimente: {
+      mouse: "Clique no botão do modo dispositivo.",
+      toque: "Toque no botão do modo dispositivo.",
+    },
+    uso: "sinal",
+  },
+  "girar-dispositivo": {
+    id: "girar-dispositivo",
+    nome: "Girar o aparelho",
+    Icone: IconeGirar,
+    alvo: seletorFerramenta("girar-dispositivo"),
+    oQueFaz: "Deita o aparelho: a largura e a altura trocam de lugar.",
+    praQueServe: "Muita gente usa o celular deitado para ver vídeo ou tabela. Girar mostra se o site continua bom assim.",
+    comoUsarAqui: {
+      mouse: "Com o modo dispositivo ligado, clique no botão de girar na barra de cima da tela.",
+      toque: "Com o modo dispositivo ligado, toque no botão de girar na barra de cima da tela.",
+    },
+    noF12DeVerdade: "é o botão Rotate da barra de dispositivo, ao lado do zoom.",
+    experimente: {
+      mouse: "Clique no botão de girar.",
+      toque: "Toque no botão de girar.",
+    },
+    uso: "sinal",
   },
 };
 

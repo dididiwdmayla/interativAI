@@ -140,6 +140,12 @@ export type Validador =
    * começou (evento `temaSalvo`). Trava no checklist, como `evento`.
    */
   | { tipo: "temaSalvo" }
+  /**
+   * (Modo dispositivo) A barra de dispositivo está ligada, com a largura
+   * do aparelho na tela (já girado) igual a `largura` e na `orientacao`,
+   * quando vierem. Olha o estado de agora (não trava no checklist).
+   */
+  | { tipo: "dispositivo"; largura?: number; orientacao?: "retrato" | "paisagem" }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -208,7 +214,17 @@ export type Acao =
    * quarto tema. Nos testes e no lab, salva direto (sem a conversa sobre
    * contraste). Gera `temaSalvo`.
    */
-  | { tipo: "salvarTema" };
+  | { tipo: "salvarTema" }
+  /**
+   * (Modo dispositivo) Liga a barra de dispositivo (se estava desligada) e
+   * escolhe um modelo pronto, ou `"livre"` com a `largura` (como arrastar
+   * as bordas). Gera `trocouDispositivo`.
+   */
+  | { tipo: "trocarDispositivo"; modelo: "celular-360" | "celular-390" | "tablet-768" | "notebook-1280" | "livre"; largura?: number }
+  /** (Modo dispositivo) O botão de girar: em pé vira deitado e vice-versa. Gera `girou`. */
+  | { tipo: "girarDispositivo" }
+  /** (Modo dispositivo) Desliga a barra (Ctrl+Shift+M de novo). Gera `trocouDispositivo` com `ligado: false`. */
+  | { tipo: "desligarDispositivo" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */

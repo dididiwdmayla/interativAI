@@ -132,6 +132,46 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
   - Bancada do tema (`lab-motor-u1-f4`), `testes/conteudo/meuTema.test.ts`
     e `testes/tema.mjs` (desktop e retrato), na bateria.
 
+- [x] **Etapa 4: modo dispositivo (destrava a zona Responsivo).**
+  - Conferido no devtools-frontend: a ação "Toggle device toolbar"
+    (`emulation-meta.ts`, Shift+Ctrl+M; Shift+Cmd+M no Mac), a barra
+    (`DeviceModeToolbar`: aparelhos, largura e altura, zoom, girar) e o
+    ajuste do zoom para caber (`DeviceModeModel`, "auto-adjust scale").
+  - Botão na barra do painel, ao lado da setinha, e Ctrl+Shift+M (Cmd no
+    Mac), só nas fases com a ferramenta `modo-dispositivo` (as publicadas
+    não mudam). A barra sobre a prévia: aparelho (Celular 360, Celular
+    390, Tablet 768, Notebook 1280 ou Livre), largura (campo no desktop) e
+    altura, girar (`girar-dispositivo`) e o zoom quando o aparelho não
+    cabe. No celular, tudo numa linha (seletor compacto, medida em texto,
+    girar e zoom).
+  - O iframe ganha a largura de desenho de verdade (as `@media` reagem de
+    verdade) e é encolhido para caber, sempre o MESMO iframe (ligar não
+    recarrega a página). Alças dos dois lados mudam a largura (o aparelho
+    fica no meio: a largura muda o dobro do arrasto) e viram "Livre". A
+    setinha converte o ponto da tela pelo zoom (`CamadaInspecao`).
+  - Meta viewport, simulação honesta: num celular, página sem
+    `<meta name="viewport">` é desenhada em 980 px e encolhida para a
+    largura do aparelho (a regra dos navegadores de celular), com o aviso
+    "simulação" na prévia e uma fala do computadorzinho (uma vez, quando
+    não atrapalha), no mesmo padrão dos acentos sem meta charset.
+    Apagar ou pôr o meta (árvore, editor, desfazer) liga e desliga na hora.
+  - Painel Estilos, Calculado e validadores usam a tela do aparelho (a
+    largura de desenho): `ContextoValidacao.tela` e `.dispositivo`, lidos
+    na hora do evento. O Calculado mede de novo quando a prévia muda de
+    tamanho (`aoRedimensionar`, um ResizeObserver no iframe).
+  - Estado puro em `src/motor/dispositivos.ts` (modelos, girar, livre,
+    980 px, zoom, tela das `@media`). Eventos `trocouDispositivo` e
+    `girou`; validador `{ tipo: "dispositivo"; largura?; orientacao? }`;
+    ações `trocarDispositivo`, `girarDispositivo` e
+    `desligarDispositivo`; checagem `ferramentas-dos-validadores` (o
+    validador dispositivo pede a ferramenta). Ferramentas novas com
+    apresentação e card: `modo-dispositivo` e `girar-dispositivo` (a
+    apresentação do girar liga a barra em silêncio, para o botão existir).
+  - A Bancada de variáveis ganhou dois objetivos (Celular 390 e girar,
+    com a `@media` deixando de valer deitado) e a do documento, a
+    ferramenta. Testes: `testes/conteudo/dispositivo.test.ts` e
+    `testes/dispositivo.mjs` (três layouts), na bateria.
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

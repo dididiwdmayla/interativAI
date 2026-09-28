@@ -17,6 +17,15 @@ import {
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
+import {
+  DISPOSITIVO_INICIAL,
+  type EstadoDispositivo,
+  girarDispositivo,
+  medidasNaTela,
+  orientacaoDe,
+  telaDoDispositivo,
+  trocarModelo,
+} from "./dispositivos";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
@@ -40,6 +49,13 @@ export function criarSimulacao(fase: Fase) {
   let eventos: EventoFase[] = [];
   let previsaoAtual: Previsao | null = null;
   let respostaPrevisao: number | null = null;
+  // A barra de dispositivo, só nas fases que têm a ferramenta.
+  let dispositivo: EstadoDispositivo = DISPOSITIVO_INICIAL;
+  const comDispositivo = fase.usaFerramentas.includes("modo-dispositivo");
+  const avisarDispositivo = () => {
+    const { largura, altura } = medidasNaTela(dispositivo);
+    eventos.push({ tipo: "trocouDispositivo", ligado: dispositivo.ligado, modelo: dispositivo.modelo, largura, altura });
+  };
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -79,6 +95,22 @@ export function criarSimulacao(fase: Fase) {
             return true;
           }
         : undefined,
+    dispositivo: comDispositivo
+      ? {
+          trocar: (modelo, largura) => {
+            dispositivo = trocarModelo(dispositivo, modelo, largura);
+            avisarDispositivo();
+          },
+          girar: () => {
+            dispositivo = girarDispositivo(dispositivo);
+            eventos.push({ tipo: "girou", orientacao: orientacaoDe(dispositivo) });
+          },
+          desligar: () => {
+            dispositivo = { ...dispositivo, ligado: false };
+            avisarDispositivo();
+          },
+        }
+      : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -93,6 +125,8 @@ export function criarSimulacao(fase: Fase) {
       inicial,
       selecao: selecao && no ? { no, via: viaDaOrigem(selecao.origem) } : null,
       eventos,
+      dispositivo: comDispositivo ? dispositivo : null,
+      tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
     };
   };
 
@@ -107,6 +141,8 @@ export function criarSimulacao(fase: Fase) {
       respostaPrevisao = null;
     },
     respostaPrevisao: () => respostaPrevisao,
+    /** O modo dispositivo agora (nas fases com a ferramenta). */
+    dispositivo: () => dispositivo,
     contexto,
     avaliar: (validador: Validador): ResultadoValidador => avaliarDetalhado(validador, contexto()),
     /** Executa ações pelo painel. Lança ErroAcao dizendo qual quebrou. */

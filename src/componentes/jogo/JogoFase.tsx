@@ -72,6 +72,20 @@ import { analisarCss } from "@/motor/css/analisarCss";
 import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
 import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
 import { materializarFase } from "@/motor/siteDoJogo";
+import {
+  DISPOSITIVO_INICIAL,
+  type EstadoDispositivo,
+  arrastarLargura,
+  girarDispositivo,
+  type IdModelo,
+  medidasNaTela,
+  orientacaoDe,
+  trocarModelo,
+  viewportDoDispositivo,
+} from "@/motor/dispositivos";
+import type { Tela } from "@/motor/css/midia";
+import { BotaoDispositivo } from "@/componentes/painel/BotaoDispositivo";
+import { BarraDispositivo } from "@/componentes/preview/BarraDispositivo";
 import { AvisoContraste } from "@/componentes/tema/AvisoContraste";
 import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
 import { conferirContraste, coresDoTemaAtual, montarMeuTema, type ResultadoPar, valorDeCorSeguro } from "@/lib/meuTema";
@@ -170,6 +184,17 @@ const FALA_ACENTOS: Fala = {
   expressao: "curioso",
 };
 
+/**
+ * O computadorzinho explica a simulação do meta viewport: sem ele, num
+ * celular, a página é desenhada em 980 px e encolhida (a regra que os
+ * navegadores de celular seguem para sites feitos antes do celular).
+ */
+const FALA_VIEWPORT: Fala = {
+  texto:
+    'Simulação: sem <meta name="viewport"> no head, o celular desenha a página em 980 px e encolhe tudo. Com essa linha, ela usa a largura do aparelho.',
+  expressao: "curioso",
+};
+
 const FALA_TEMA_SALVO: Fala = {
   texto: "Salvei o Meu tema e já liguei no jogo inteiro! Ele aparece na paleta lá em cima, junto dos outros.",
   expressao: "comemorando",
@@ -211,6 +236,15 @@ export function JogoFase({
   });
   const [fase] = useState(() => materializarFase(faseDaProp, coresDaMaquete.cores));
   const siteDoJogo = fase.siteAlvo.tipo === "jogo";
+  // Modo dispositivo (a barra de dispositivo do Chrome): só nas fases com a ferramenta.
+  const comDispositivo = fase.usaFerramentas.includes("modo-dispositivo");
+  const [dispositivo, setDispositivo] = useState<EstadoDispositivo>(DISPOSITIVO_INICIAL);
+  /** O mesmo estado, lido na hora pelos validadores (o evento sai antes do React redesenhar). */
+  const dispositivoAtual = useRef<EstadoDispositivo>(DISPOSITIVO_INICIAL);
+  const [zoomDispositivo, setZoomDispositivo] = useState(1);
+  /** Sobe quando a prévia muda de tamanho (aparelho, girar, janela): o Calculado mede de novo. */
+  const [versaoLayout, setVersaoLayout] = useState(0);
+  const aoRedimensionarPrevia = useCallback(() => setVersaoLayout((versao) => versao + 1), []);
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
   const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
   const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
@@ -418,6 +452,40 @@ export function JogoFase({
     [barramento, coresDaMaquete, coresDaMaqueteAgora, siteDoJogo],
   );
 
+  /** Muda o modo dispositivo e avisa o barramento (trocouDispositivo ou girou). */
+  const mudarDispositivo = useCallback(
+    (novo: EstadoDispositivo, evento: "trocou" | "girou") => {
+      dispositivoAtual.current = novo;
+      setDispositivo(novo);
+      realcar(null);
+      if (evento === "girou") {
+        sinalizarUso("girar-dispositivo");
+        barramento.emitir({ tipo: "girou", orientacao: orientacaoDe(novo) });
+        return;
+      }
+      sinalizarUso("modo-dispositivo");
+      const { largura, altura } = medidasNaTela(novo);
+      barramento.emitir({ tipo: "trocouDispositivo", ligado: novo.ligado, modelo: novo.modelo, largura, altura });
+    },
+    [barramento, realcar],
+  );
+  const acoesDispositivo = useMemo(
+    () => ({
+      trocar: (modelo: IdModelo | "livre", largura?: number) => mudarDispositivo(trocarModelo(dispositivoAtual.current, modelo, largura), "trocou"),
+      girar: () => mudarDispositivo(girarDispositivo(dispositivoAtual.current), "girou"),
+      desligar: () => mudarDispositivo({ ...dispositivoAtual.current, ligado: false }, "trocou"),
+      alternar: () => mudarDispositivo({ ...dispositivoAtual.current, ligado: !dispositivoAtual.current.ligado }, "trocou"),
+      arrastar: (largura: number) => {
+        const novo = arrastarLargura(dispositivoAtual.current, largura);
+        dispositivoAtual.current = novo;
+        setDispositivo(novo);
+      },
+    }),
+    [mudarDispositivo],
+  );
+  // Soltar a alça: a largura livre conta como troca (um evento só, não um por pixel).
+  const soltarAlca = useCallback(() => mudarDispositivo(dispositivoAtual.current, "trocou"), [mudarDispositivo]);
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -440,8 +508,11 @@ export function JogoFase({
       escreverCss,
       lerCss,
       salvarTema: siteDoJogo ? () => gravarTema(true) : undefined,
+      dispositivo: comDispositivo ? acoesDispositivo : undefined,
     }),
     [
+      acoesDispositivo,
+      comDispositivo,
       gravarTema,
       siteDoJogo,
       definirPropriedade,
@@ -521,6 +592,35 @@ export function JogoFase({
     [editorCssRef, lerCss, mostrarEditorCss],
   );
 
+  // Onde a página é desenhada no aparelho (980 px sem meta viewport num celular) e a tela das @media.
+  const viewportAparelho = viewportDoDispositivo(dispositivo, obterDocumento());
+  const aparelhoLigado = comDispositivo && dispositivo.ligado;
+  const simulandoViewport = aparelhoLigado && viewportAparelho.simulandoViewport;
+  const larguraDeDesenho = aparelhoLigado ? viewportAparelho.larguraLayout : 0;
+  const alturaDeDesenho = aparelhoLigado ? viewportAparelho.alturaLayout : 0;
+  const telaDoAparelho = useMemo<Tela | undefined>(
+    () => (larguraDeDesenho > 0 ? { largura: larguraDeDesenho, altura: alturaDeDesenho } : undefined),
+    [alturaDeDesenho, larguraDeDesenho],
+  );
+  const extraValidacao = useCallback(() => {
+    if (!comDispositivo) return {};
+    const estado = dispositivoAtual.current;
+    const atual = viewportDoDispositivo(estado, obterDocumento());
+    return { dispositivo: estado, tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined };
+  }, [comDispositivo, obterDocumento]);
+
+  // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
+  useEffect(() => {
+    if (!comDispositivo) return;
+    const aoTeclar = (evento: KeyboardEvent) => {
+      if (!(evento.ctrlKey || evento.metaKey) || !evento.shiftKey || evento.key.toLowerCase() !== "m") return;
+      evento.preventDefault();
+      acoesDispositivo.alternar();
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [acoesDispositivo, comDispositivo]);
+
   const motor = useMotorFase({
     fase,
     modo,
@@ -538,6 +638,7 @@ export function JogoFase({
     limparDestaqueCss,
     destacarNoEstilos,
     toque,
+    extraValidacao,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -559,6 +660,14 @@ export function JogoFase({
     explicouAcentos.current = true;
     falar(FALA_ACENTOS);
   }, [simulandoAcentos, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
+  // Na primeira vez que o celular simula os 980 px, o computadorzinho explica (quando não atrapalha).
+  const explicouViewport = useRef(false);
+  useEffect(() => {
+    if (!simulandoViewport || explicouViewport.current) return;
+    if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
+    explicouViewport.current = true;
+    falar(FALA_VIEWPORT);
+  }, [simulandoViewport, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
 
   const apresentacoes = useApresentacoes({
@@ -608,6 +717,12 @@ export function JogoFase({
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
+    if (ferramenta.id === "girar-dispositivo" && !dispositivoAtual.current.ligado) {
+      const ligado = { ...dispositivoAtual.current, ligado: true };
+      dispositivoAtual.current = ligado;
+      setDispositivo(ligado);
+    }
     if (FERRAMENTAS_DO_CALCULADO.includes(ferramenta.id)) trocarSubAba("calculado");
     else if (FERRAMENTAS_DOS_ESTILOS.includes(ferramenta.id)) trocarSubAba("estilos");
     // Ferramenta do painel que só se experimenta usando (setas, cor, caixinha...): o painel
@@ -1151,6 +1266,24 @@ export function JogoFase({
                       aoAlternar={alternarInspecaoResponsiva}
                     />
                   </AlvoFerramenta>
+                  {comDispositivo && (
+                    <AlvoFerramenta
+                      ids={["modo-dispositivo"]}
+                      marcador="modo-dispositivo"
+                      aoAbrirCard={abrirCard}
+                      classeMarcador="-right-2 -top-1.5"
+                      as="span"
+                      className="ml-1 inline-flex"
+                    >
+                      <BotaoDispositivo
+                        ativo={dispositivo.ligado}
+                        aoAlternar={() => {
+                          tocarEfeito("clique");
+                          acoesDispositivo.alternar();
+                        }}
+                      />
+                    </AlvoFerramenta>
+                  )}
                   <AlvoFerramenta
                     ids={["desfazer"]}
                     marcador="desfazer"
@@ -1265,7 +1398,8 @@ export function JogoFase({
                         >
                           <PainelEstilos
                             elemento={elementoSelecionado}
-                            versao={versaoDocumento * 100000 + versaoCss}
+                            versao={versaoDocumento * 100000 + versaoCss + versaoLayout * 10_000_000_000}
+                            tela={telaDoAparelho}
                             paineis={paineis}
                             temFolha={temCss}
                             toque={toque}
@@ -1278,7 +1412,8 @@ export function JogoFase({
                               paineis.includes("calculado") ? (
                                 <PainelCalculado
                                   elemento={elementoSelecionado}
-                                  versao={versaoDocumento * 100000 + versaoCss}
+                                  versao={versaoDocumento * 100000 + versaoCss + versaoLayout * 10_000_000_000}
+                                  tela={telaDoAparelho}
                                   toque={toque}
                                   camada={realceCaixa?.camada ?? null}
                                   aoRealcarCamada={realcarCamada}
@@ -1397,8 +1532,49 @@ export function JogoFase({
                 ) : undefined
               }
               tituloAba={fase.modoDocumento ? tituloAba : undefined}
+              barra={
+                aparelhoLigado ? (
+                  <AlvoFerramenta ids={["modo-dispositivo"]} className="flex shrink-0 flex-col">
+                    <BarraDispositivo
+                      estado={dispositivo}
+                      zoom={zoomDispositivo}
+                      compacta={movel}
+                      aoTrocarModelo={(modelo, largura) => {
+                        tocarEfeito("clique");
+                        acoesDispositivo.trocar(modelo, largura);
+                      }}
+                      aoGirar={() => {
+                        tocarEfeito("clique");
+                        acoesDispositivo.girar();
+                      }}
+                      alvoGirar={(botao) => (
+                        <AlvoFerramenta
+                          ids={["girar-dispositivo"]}
+                          marcador="girar-dispositivo"
+                          aoAbrirCard={abrirCard}
+                          classeMarcador="-right-2 -top-1.5"
+                          as="span"
+                          className="inline-flex shrink-0"
+                        >
+                          {botao}
+                        </AlvoFerramenta>
+                      )}
+                    />
+                  </AlvoFerramenta>
+                ) : undefined
+              }
               aviso={
-                simulandoAcentos ? (
+                simulandoViewport ? (
+                  <button
+                    type="button"
+                    data-aviso-viewport
+                    onClick={() => falar(FALA_VIEWPORT)}
+                    className="absolute bottom-2 left-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full border-2 border-alerta bg-superficie px-3 py-1 text-left text-xs font-bold text-texto shadow-[0_3px_0_var(--cor-sombra)] pointer-coarse:min-h-11"
+                  >
+                    <IconeAviso className="shrink-0 text-alerta" />
+                    Sem meta viewport: página em 980 px, encolhida (simulação)
+                  </button>
+                ) : simulandoAcentos ? (
                   <button
                     type="button"
                     data-aviso-acentos
@@ -1420,6 +1596,11 @@ export function JogoFase({
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
+                dispositivo={aparelhoLigado ? viewportAparelho : null}
+                aoArrastarLargura={aparelhoLigado ? acoesDispositivo.arrastar : undefined}
+                aoSoltarAlca={soltarAlca}
+                aoMudarZoom={setZoomDispositivo}
+                aoRedimensionar={aoRedimensionarPrevia}
               >
                 <SobreposicaoInspecao realce={realce} extras={realcesExtras} caixa={realceCaixa} />
                 <CamadaInspecao

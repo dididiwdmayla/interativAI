@@ -5,13 +5,16 @@ import { IconeChevron } from "@/componentes/icones/IconeChevron";
 import { sinalizarUso } from "@/ferramentas/uso";
 import { type CamadaCaixa, formatarMedida, type Lados, medirModeloCaixa, valorDoLado } from "@/lib/modeloCaixa";
 import { calcularCascata, NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
+import type { Tela } from "@/motor/css/midia";
 
 export type CamadaRealcada = CamadaCaixa | "todas" | null;
 
 type Props = {
   elemento: Element | null;
-  /** Sobe quando o documento ou o CSS muda. */
+  /** Sobe quando o documento, o CSS ou o tamanho da prévia muda. */
   versao: number;
+  /** A tela das @media (o modo dispositivo); sem ela, a da prévia. */
+  tela?: Tela;
   toque: boolean;
   /** A camada acesa na prévia agora (quem guarda é o jogo: trocar de aba ou de segmento apaga). */
   camada: CamadaRealcada;
@@ -57,7 +60,7 @@ function ordemDoChrome(a: string, b: string): number {
  * Conferido no devtools-frontend (MetricsSidebarPane e
  * ComputedStyleWidget).
  */
-export function PainelCalculado({ elemento, versao, toque, camada, aoRealcarCamada, aoIrParaFonte }: Props) {
+export function PainelCalculado({ elemento, versao, tela, toque, camada, aoRealcarCamada, aoIrParaFonte }: Props) {
   const [filtro, setFiltro] = useState("");
   const [todas, setTodas] = useState(false);
   const [abertas, setAbertas] = useState<ReadonlySet<string>>(new Set());
@@ -84,7 +87,7 @@ export function PainelCalculado({ elemento, versao, toque, camada, aoRealcarCama
     // O rastro: só as declarações das regras do PRÓPRIO elemento (como o
     // Chrome), na ordem do painel Estilos (a que vence primeiro).
     const rastros = new Map<string, Rastro[]>();
-    for (const bloco of calcularCascata(elemento).proprios) {
+    for (const bloco of calcularCascata(elemento, { tela }).proprios) {
       for (const item of bloco.declaracoes) {
         if (item.situacao === "desligada" || item.situacao === "invalida") continue;
         for (const longa of item.longas) {
@@ -109,7 +112,7 @@ export function PainelCalculado({ elemento, versao, toque, camada, aoRealcarCama
       }
     }
     return { versao, modelo, valores, rastros, nomes: [...valores.keys()].sort(ordemDoChrome) };
-  }, [elemento, versao]);
+  }, [elemento, versao, tela]);
 
   if (!elemento || !dados) {
     return <p className="p-3 text-sm text-texto-suave">Selecione uma peça para ver as medidas dela.</p>;

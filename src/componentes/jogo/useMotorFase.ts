@@ -52,6 +52,8 @@ type Opcoes = {
   destacarNoEstilos: (destaque: { seletorRegra: string; propriedade?: string } | null) => void;
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
+  /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo">;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -84,6 +86,7 @@ export function useMotorFase({
   limparDestaqueCss,
   destacarNoEstilos,
   toque,
+  extraValidacao,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -143,8 +146,8 @@ export function useMotorFase({
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
     const documento = obterDocumento();
     if (!documento?.body) return null;
-    return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current };
-  }, [documentoInicial, obterDocumento, obterSelecao]);
+    return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current, ...extraValidacao?.() };
+  }, [documentoInicial, extraValidacao, obterDocumento, obterSelecao]);
 
   /* ---------------------------------------------------------------- */
   /* Persistência                                                      */

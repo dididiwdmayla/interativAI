@@ -10,7 +10,7 @@ import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
 import { calcularCascata, folhasDoDocumento, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
 import type { Tela } from "./css/midia";
-import { telaDaLargura } from "./dispositivos";
+import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
@@ -30,6 +30,8 @@ export type ContextoValidacao = {
    * janela do documento ou, num documento solto, a padrão (1280 x 800).
    */
   tela?: Tela;
+  /** O modo dispositivo agora (null ou ausente: a fase não tem a barra). */
+  dispositivo?: EstadoDispositivo | null;
 };
 
 /** A tela de um validador de CSS: a `larguraTela` dele ou a da prévia. */
@@ -139,6 +141,10 @@ export function descreverValidador(validador: Validador): string {
       }`;
     case "temaSalvo":
       return "salvou o Meu tema";
+    case "dispositivo":
+      return `modo dispositivo ligado${validador.largura !== undefined ? ` com ${validador.largura} px de largura` : ""}${
+        validador.orientacao ? ` (${validador.orientacao === "retrato" ? "em pé" : "deitado"})` : ""
+      }`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -295,6 +301,15 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     }
     case "variavelCss":
       return avaliarVariavelCss(validador, contexto, descricao);
+    case "dispositivo": {
+      const estado = contexto.dispositivo ?? null;
+      if (!estado?.ligado) return { passou: false, descricao, detalhe: "a barra de dispositivo está desligada" };
+      const { largura, altura } = medidasNaTela(estado);
+      const orientacao = orientacaoDe(estado);
+      const passou =
+        (validador.largura === undefined || validador.largura === largura) && (validador.orientacao === undefined || validador.orientacao === orientacao);
+      return { passou, descricao, detalhe: `${largura} x ${altura}, ${orientacao}` };
+    }
     case "temaSalvo": {
       const vezes = contexto.eventos.filter((evento) => evento.tipo === "temaSalvo").length;
       return { passou: vezes > 0, descricao, detalhe: `salvou ${vezes} vez(es)` };

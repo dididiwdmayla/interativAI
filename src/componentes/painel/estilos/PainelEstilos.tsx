@@ -20,6 +20,7 @@ import {
   trocarValor,
 } from "@/motor/css/editarCss";
 import { ESPECIFICIDADE_ZERO } from "@/motor/css/especificidade";
+import type { Tela } from "@/motor/css/midia";
 import { BlocoEstilo } from "./BlocoEstilo";
 import type { Saida } from "./CampoEstilo";
 import type { AcoesEstilos, DestaqueEstilos, EdicaoEstilos } from "./tipos";
@@ -29,6 +30,8 @@ type Props = {
   elemento: Element | null;
   /** Sobe quando o documento ou o CSS muda: o painel recalcula a cascata. */
   versao: number;
+  /** A tela das @media (o modo dispositivo); sem ela, a da prévia. */
+  tela?: Tela;
   /** Sub-painéis liberados na fase ("estilos", "calculado"). */
   paineis: readonly PainelElementos[];
   /** A fase tem a folha editável (estilo.css). */
@@ -109,6 +112,7 @@ function proximaEdicao(
 export function PainelEstilos({
   elemento,
   versao,
+  tela,
   paineis,
   temFolha,
   toque,
@@ -128,7 +132,7 @@ export function PainelEstilos({
   const apagarApontada = useRef<TemporizadorRastreado | null>(null);
   useEffect(() => () => apagarApontada.current?.cancelar(), []);
 
-  const cascata = useMemo(() => (elemento ? { versao, resultado: calcularCascata(elemento) } : null), [elemento, versao]);
+  const cascata = useMemo(() => (elemento ? { versao, resultado: calcularCascata(elemento, { tela }) } : null), [elemento, versao, tela]);
   const resultado = cascata?.resultado ?? null;
   const proprios = useMemo(() => {
     if (!resultado) return [];

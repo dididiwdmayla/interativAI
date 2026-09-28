@@ -247,6 +247,11 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "editor-css";
     case "salvarTema":
       return "salvar-tema";
+    case "trocarDispositivo":
+    case "desligarDispositivo":
+      return "modo-dispositivo";
+    case "girarDispositivo":
+      return "girar-dispositivo";
   }
 }
 
@@ -803,6 +808,21 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       }
       for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
         if (acoes.some((acao) => acao.tipo === "salvarTema")) problemas.push(`${onde}: salvarTema só vale numa fase com siteAlvo.tipo "jogo"`);
+      }
+      return problemas;
+    },
+  },
+  {
+    id: "ferramentas-dos-validadores",
+    nome: "validador que olha uma ferramenta (dispositivo) pede a ferramenta em usaFerramentas",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "dispositivo" && !fase.usaFerramentas.includes("modo-dispositivo")) {
+            problemas.push(`${onde}: o validador dispositivo pede "modo-dispositivo" em usaFerramentas (sem ela, a barra nem aparece)`);
+          }
+        }
       }
       return problemas;
     },
