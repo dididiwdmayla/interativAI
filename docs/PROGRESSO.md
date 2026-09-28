@@ -301,8 +301,18 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
   - ROADMAP: tudo desta rodada em Feito; Próximo na ordem pedida (Sonnet:
     E5, R1, R2 e P1; Opus: Revisão do dia; Opus: motor da Lógica com o
     circuito-logico).
-  - Bateria completa (`PARALELO=2 npm run bateria`) verde nos três
-    layouts, com build de produção e console limpo.
+  - Falha intermitente achada na primeira bateria (só sob carga):
+    `ferramentas-novas.mjs` tocava a árvore no "Experimente" da trilha e
+    o toque caía no véu. Causa: as áreas extras liberadas no Experimente
+    (a árvore, na trilha) só são medidas no quadro seguinte à troca de
+    passo, então por um instante o véu ainda não tinha o buraco. A camada
+    da apresentação agora diz `data-alvo-livre="sim"` quando os buracos
+    estão medidos, e `passarApresentacao` espera por ele (documentado em
+    `testes/README.md`).
+  - `tema.mjs` e `variaveis.mjs` também em paisagem.
+  - Bateria completa (`PARALELO=2 npm run bateria`, 42 execuções) verde
+    nos três layouts, com build de produção e console limpo;
+    `testar:conteudo` com 1425 testes verdes.
 
 ## Rodada 11: zona Layout completa (L1 a L4)
 
