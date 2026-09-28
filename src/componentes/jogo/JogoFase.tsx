@@ -56,16 +56,23 @@ import { atualizarProgresso, obterProgresso, useProgresso } from "@/lib/armazemP
 import { elementoDoNo } from "@/lib/arvore";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { lerAtributosDigitados } from "@/lib/atributosDigitados";
-import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
+import { documentoInteiroInicial, lerCssDoDocumento } from "@/lib/documentoSiteAlvo";
 import { elementosDaRegra } from "@/lib/elementosDaRegra";
 import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
-import { type EstadoFaseSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
+import { type EstadoFaseSalvo, PROJETO_VAZIO, type ProjetoSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
+import { marcarPassoDoGuia, salvarLinkPublicado } from "@/lib/projetos";
+import { type ArquivosDoProjeto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
+import { DialogoLevarProMundo } from "@/componentes/projeto/DialogoLevarProMundo";
+import { GuiaPublicacao } from "@/componentes/projeto/GuiaPublicacao";
+import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
+import { rotuloDaFase } from "@/motor/tiposDeFase";
+import { itensDoChecklist } from "@/motor/validadores";
 import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import type { EventoFase } from "@/motor/eventos";
-import { enunciadoDe, FALA_DESAFIO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
+import { enunciadoDe, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
@@ -161,9 +168,10 @@ const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
 const ABAS_COM_LIGHTHOUSE: readonly Aba[] = ["elementos", "lighthouse"];
 
 /** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
-function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string | null {
+function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string | null {
   if (fase.siteAlvo.css === undefined) return null;
-  if (!salvo) return fase.siteAlvo.css;
+  // Projeto-ponte sem estado (Jogar de novo da ilha): o site do jogador, de Meus projetos.
+  if (!salvo) return projeto?.html ? (projeto.css ?? fase.siteAlvo.css) : fase.siteAlvo.css;
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.cssInicioObjetivo !== null) {
     return salvo.cssInicioObjetivo;
@@ -209,8 +217,8 @@ const FALA_TEMA_SALVO_COM_AVISO: Fala = {
 };
 
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
-function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
-  if (!salvo) return htmlInicialDaFase(fase);
+function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string {
+  if (!salvo) return projeto?.html ?? htmlInicialDaFase(fase);
   const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
     return salvo.htmlInicioObjetivo;
@@ -249,8 +257,11 @@ export function JogoFase({
   const [versaoLayout, setVersaoLayout] = useState(0);
   const aoRedimensionarPrevia = useCallback(() => setVersaoLayout((versao) => versao + 1), []);
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
-  const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
-  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
+  const [projetoSalvo] = useState(() =>
+    modo === "jogo" && fase.tipo === "projeto-ponte" ? obterProgresso().projetos[fase.id] : undefined,
+  );
+  const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo, projetoSalvo));
+  const [cssInicial] = useState(() => cssParaAbrir(fase, salvo, projetoSalvo));
   const temCss = cssInicial !== null;
   const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
@@ -505,6 +516,31 @@ export function JogoFase({
     barramento.emitir({ tipo: "auditou", notas: resultado.notas });
   }, [barramento, obterDocumento]);
 
+  // Levar pro mundo (Publicar): a página vira index.html + style.css, num .zip.
+  const comLevarProMundo = fase.usaFerramentas.includes("levar-pro-mundo");
+  const nomeDoProjeto = fase.tipo === "projeto-ponte" ? fase.nomeDoProjeto : fase.siteAlvo.titulo;
+  const [janelaProjeto, setJanelaProjeto] = useState<"levar" | "guia" | null>(null);
+  const [arquivosExportados, setArquivosExportados] = useState<ArquivosDoProjeto | null>(null);
+  /** O texto do editor agora (o documento inteiro, no modo documento) e o style.css. */
+  const arquivosAgora = useCallback((): ArquivosDoProjeto => {
+    const documento = obterDocumento();
+    const css = documento ? lerCssDoDocumento(documento) : null;
+    return montarArquivos(htmlAtual, css);
+  }, [htmlAtual, obterDocumento]);
+  const baixarProjeto = useCallback(() => {
+    const arquivos = arquivosAgora();
+    baixarZip(arquivos, nomeDoProjeto);
+    sinalizarUso("levar-pro-mundo");
+    tocarEfeito("desbloqueio");
+    barramento.emitir({ tipo: "exportouProjeto", arquivos: Object.keys(arquivos) });
+  }, [arquivosAgora, barramento, nomeDoProjeto]);
+  const abrirLevarProMundo = () => {
+    tocarEfeito("clique");
+    sinalizarUso("levar-pro-mundo");
+    setArquivosExportados(arquivosAgora());
+    setJanelaProjeto("levar");
+  };
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -529,8 +565,11 @@ export function JogoFase({
       salvarTema: siteDoJogo ? () => gravarTema(true) : undefined,
       dispositivo: comDispositivo ? acoesDispositivo : undefined,
       analisarAuditoria: comLighthouse ? analisarAuditoria : undefined,
+      levarProMundo: comLevarProMundo ? baixarProjeto : undefined,
     }),
     [
+      baixarProjeto,
+      comLevarProMundo,
       analisarAuditoria,
       comLighthouse,
       acoesDispositivo,
@@ -692,6 +731,10 @@ export function JogoFase({
     falar(FALA_VIEWPORT);
   }, [simulandoViewport, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
+  const projeto = fase.tipo === "projeto-ponte" ? fase : null;
+  /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
+  const itensChecklist = itensDoChecklist(fase);
+  const tituloChecklist = projeto ? "Requisitos do projeto" : "Checklist do desafio";
 
   const apresentacoes = useApresentacoes({
     fase,
@@ -817,11 +860,11 @@ export function JogoFase({
     versao: versaoLab,
     avaliarItens: (): ItemLab[] => {
       const contexto = motor.contextoValidacao();
-      if (fase.tipo === "desafio") {
-        return fase.partes.map((parte, indice) => ({
+      if (fase.tipo !== "pratica") {
+        return (itensChecklist ?? []).map((parte, indice) => ({
           id: parte.id,
           rotulo: `${indice + 1}. ${parte.id}`,
-          etiqueta: `parte, rever em ${parte.revisarEm}`,
+          etiqueta: fase.tipo === "desafio" ? `parte, rever em ${fase.partes[indice].revisarEm}` : "requisito do projeto",
           situacao: estado.partesFeitas.includes(parte.id) ? "feito" : "atual",
           resultado: contexto ? avaliarDetalhado(parte.validador, contexto) : null,
         }));
@@ -846,7 +889,9 @@ export function JogoFase({
     faseId: fase.id,
     objetivo: desafio
       ? { id: "desafio", enunciado: FALA_DESAFIO.texto }
-      : objetivo
+      : projeto
+        ? { id: "projeto", enunciado: FALA_PROJETO.texto }
+        : objetivo
         ? { id: objetivo.id, enunciado: objetivo.enunciado.mouse }
         : null,
     degrau: estado.degrau,
@@ -1093,6 +1138,7 @@ export function JogoFase({
         previsao={objetivo?.tipo === "previsao" ? objetivo.previsao : null}
         degrauMaximo={motor.degrauMaximo}
         desafio={desafio !== null}
+        projeto={projeto !== null}
         listaRever={
           desafio && (
             <ListaRever
@@ -1118,7 +1164,7 @@ export function JogoFase({
     </>
   );
 
-  const objetivoAtivo = estado.etapa === "objetivos" && !desafio ? estado.objetivoAtual : null;
+  const objetivoAtivo = estado.etapa === "objetivos" && !itensChecklist ? estado.objetivoAtual : null;
   const objetivosNaTela: ObjetivoNaTela[] = (fase.tipo === "pratica" ? fase.objetivos : []).map((item) => ({
     id: item.id,
     enunciado: enunciadoDe(item, toque),
@@ -1143,7 +1189,9 @@ export function JogoFase({
   const perguntaDaFala =
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
-  const checklist = desafio ? <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} /> : null;
+  const checklist = itensChecklist ? (
+    <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
+  ) : null;
   const objetivoDaLinha = objetivoAtivo !== null ? objetivosNaTela[objetivoAtivo] : null;
 
   const conversa = (
@@ -1154,14 +1202,15 @@ export function JogoFase({
           Objetivo {estado.objetivoAtual + 1} de {objetivosNaTela.length}: {objetivoDaLinha.enunciado}
         </p>
       )}
-      {layout === "retrato" && desafio && estado.etapa === "objetivos" && (
+      {layout === "retrato" && itensChecklist && estado.etapa === "objetivos" && (
         <p className="px-1 text-xs font-bold text-texto-suave">
-          Desafio: {estado.partesFeitas.length} de {desafio.partes.length} partes feitas
+          {projeto ? "Projeto" : "Desafio"}: {estado.partesFeitas.length} de {itensChecklist.length}{" "}
+          {projeto ? "requisitos cumpridos" : "partes feitas"}
         </p>
       )}
-      {layout === "paisagem" && desafio && estado.etapa === "objetivos" && (
+      {layout === "paisagem" && itensChecklist && estado.etapa === "objetivos" && (
         <div className="max-h-40 shrink-0">
-          <ChecklistDesafio partes={desafio.partes} feitas={estado.partesFeitas} />
+          <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
         </div>
       )}
       <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala} rabo={movel ? "baixo-direita" : "esquerda"}>
@@ -1180,7 +1229,7 @@ export function JogoFase({
     </>
   );
 
-  const rotuloFase = fase.tipo === "desafio" ? "Desafio" : `Fase ${local.numero}`;
+  const rotuloFase = rotuloDaFase(fase.tipo, local.numero);
   const botaoMapa = rotaDoMapa && !lab ? <BotaoMapa href={rotaDoMapa} compacto={movel} /> : null;
   const botaoVoltar = revisao ? (
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
@@ -1212,7 +1261,9 @@ export function JogoFase({
       ? ""
       : fase.tipo === "pratica"
         ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
-        : "desafio";
+        : fase.tipo === "desafio"
+          ? "desafio"
+          : "projeto";
 
   return (
     <div
@@ -1267,10 +1318,11 @@ export function JogoFase({
           concluidos={estado.concluidos}
           ativo={objetivoAtivo}
           checklist={
-            desafio && checklist
+            itensChecklist && checklist
               ? {
-                  total: desafio.partes.length,
-                  resumo: estado.etapa === "concluida" ? "Desafio completo!" : "Checklist do desafio",
+                  total: itensChecklist.length,
+                  resumo:
+                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
                   lista: checklist,
                 }
               : undefined
@@ -1571,7 +1623,28 @@ export function JogoFase({
               url={fase.siteAlvo.url}
               compacta={movel}
               acoes={
-                siteDoJogo ? (
+                comLevarProMundo ? (
+                  <AlvoFerramenta
+                    ids={["levar-pro-mundo"]}
+                    marcador="levar-pro-mundo"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="inline-flex shrink-0"
+                  >
+                    <button
+                      type="button"
+                      data-levar-pro-mundo
+                      onClick={abrirLevarProMundo}
+                      aria-label="Levar pro mundo"
+                      title="Levar pro mundo: baixar os arquivos do site"
+                      className="inline-flex h-7 items-center gap-1 rounded-full border-2 border-primaria bg-primaria px-2.5 text-xs font-black text-sobre-primaria hover:brightness-110 pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
+                    >
+                      <IconeLevarProMundo tamanho={16} />
+                      <span className={movel ? "sr-only" : ""}>Levar pro mundo</span>
+                    </button>
+                  </AlvoFerramenta>
+                ) : siteDoJogo ? (
                   <AlvoFerramenta
                     ids={["salvar-tema"]}
                     marcador="salvar-tema"
@@ -1749,6 +1822,32 @@ export function JogoFase({
           aoSalvarMesmoAssim={() => gravarTema(true)}
         />
       )}
+      {comLevarProMundo && (
+        <>
+          <DialogoLevarProMundo
+            aberto={janelaProjeto === "levar"}
+            arquivos={arquivosExportados}
+            nome={nomeDoProjeto}
+            linhaAcrescentada={!ligaOCss(htmlAtual)}
+            aoBaixar={baixarProjeto}
+            aoVerGuia={() => setJanelaProjeto("guia")}
+            aoFechar={() => setJanelaProjeto(null)}
+          />
+          <GuiaPublicacao
+            aberto={janelaProjeto === "guia"}
+            marcados={(progresso.projetos[fase.id] ?? PROJETO_VAZIO).guia}
+            link={(progresso.projetos[fase.id] ?? PROJETO_VAZIO).link}
+            aoMarcar={(passo, marcado) => {
+              if (modo === "jogo") marcarPassoDoGuia(fase.id, passo, marcado);
+            }}
+            aoSalvarLink={(link) => {
+              if (modo === "jogo") salvarLinkPublicado(fase.id, link);
+              tocarEfeito("acerto");
+            }}
+            aoFechar={() => setJanelaProjeto(null)}
+          />
+        </>
+      )}
       {desafioParaMeta && (
         <TelaMeta
           aberta={estado.etapa === "meta"}
@@ -1781,6 +1880,13 @@ export function JogoFase({
         aoProxima={() => proxima && aoIrParaFase?.(proxima.id)}
         aoVoltarAIlha={modo === "jogo" && !proxima ? aoVoltarAIlha : undefined}
         aoVoltarAoDesafio={() => aoVoltarAoDesafio?.()}
+        extras={
+          comLevarProMundo ? (
+            <Botao variante="secundario" onClick={abrirLevarProMundo} data-levar-pro-mundo-conclusao>
+              Levar pro mundo
+            </Botao>
+          ) : undefined
+        }
       />
       {lab && painelLab?.(apiLab)}
     </div>

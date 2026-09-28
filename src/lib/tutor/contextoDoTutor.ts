@@ -6,7 +6,7 @@ export type ContextoDoTutor = { modo: ModoTutor; enunciado: string; siteAlvo: st
 /**
  * O que o tutor precisa saber do objetivo, tirado dos dados da fase no
  * servidor (o que o cliente manda é só reserva): o modo (guiado, sozinho,
- * desafio), o enunciado oficial e o nome do site-alvo.
+ * desafio, projeto), o enunciado oficial e o nome do site-alvo.
  */
 export function contextoDoTutor(faseId: string, objetivoId: string, enunciadoDoCliente: string): ContextoDoTutor {
   const fase = faseDoId(faseId);
@@ -17,6 +17,13 @@ export function contextoDoTutor(faseId: string, objetivoId: string, enunciadoDoC
       modo: "desafio",
       enunciado: `Desafio, sem passo a passo. Partes: ${fase.partes.map((parte) => parte.descricao).join("; ")}`,
       siteAlvo,
+    };
+  }
+  if (fase.tipo === "projeto-ponte") {
+    return {
+      modo: "projeto",
+      enunciado: `Projeto-ponte: o site do próprio aluno, sem passo a passo. Requisitos: ${fase.requisitos.map((item) => item.descricao).join("; ")}`,
+      siteAlvo: fase.nomeDoProjeto,
     };
   }
   const objetivo = fase.objetivos.find((item) => item.id === objetivoId);

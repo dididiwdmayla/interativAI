@@ -39,7 +39,7 @@ type Contexto = { unidades: readonly Unidade[]; fases: readonly Fase[] };
 function idsDaFase(fase: Fase): FasePublicada {
   return fase.tipo === "pratica"
     ? { objetivos: fase.objetivos.map((objetivo) => objetivo.id) }
-    : { partes: fase.partes.map((parte) => parte.id) };
+    : { partes: (fase.tipo === "desafio" ? fase.partes : fase.requisitos).map((parte) => parte.id) };
 }
 
 /** O registro de tudo o que está no jogo agora (o que o publicar:conteudo grava). */

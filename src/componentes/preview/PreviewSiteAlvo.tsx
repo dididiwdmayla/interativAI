@@ -3,7 +3,7 @@
 import { type PointerEvent, type ReactNode, type Ref, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { ehElemento } from "@/lib/dom";
 import { ATRIBUTO_MODO_DOCUMENTO } from "@/lib/dom";
-import { escreverCssNoDocumento, montarDocumentoSiteAlvo, prepararDocumentoInteiro } from "@/lib/documentoSiteAlvo";
+import { comBaseNeutra, escreverCssNoDocumento, montarDocumentoSiteAlvo, prepararDocumentoInteiro } from "@/lib/documentoSiteAlvo";
 import { linkDoAlvo } from "@/lib/linksPrevia";
 import { comecarPendencia } from "@/lib/pendencias";
 import { type ViewportDoDispositivo, zoomParaCaber } from "@/motor/dispositivos";
@@ -153,7 +153,7 @@ export function PreviewSiteAlvo({
 
   /** O srcdoc: no modo documento, o texto do jogador como está; senão, o head fixo com o body. */
   const montar = useCallback(
-    (body: string): string => (modoDocumentoRef.current ? body : montarDocumentoSiteAlvo(headRef.current, body, ultimoCss.current)),
+    (body: string): string => (modoDocumentoRef.current ? comBaseNeutra(body) : montarDocumentoSiteAlvo(headRef.current, body, ultimoCss.current)),
     [],
   );
 

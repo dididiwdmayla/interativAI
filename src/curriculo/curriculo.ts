@@ -210,7 +210,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "publicar",
         nome: "Publicar",
         icone: "publicar",
-        requerMotor: "auditoria simplificada estilo Lighthouse, exportar o projeto do jogador e tipo de fase projeto-ponte",
         unidades: [
           {
             id: "sites-publicar-u1",

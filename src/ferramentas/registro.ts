@@ -24,6 +24,7 @@ import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
 import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
 import { IconeDispositivo } from "@/componentes/icones/IconeDispositivo";
 import { IconeGirar } from "@/componentes/icones/IconeGirar";
+import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
 import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
@@ -38,7 +39,7 @@ import { DemoInspecionar } from "./demos/DemoInspecionar";
 import { DemoRenomearTag } from "./demos/DemoRenomearTag";
 import { DemoSincronia } from "./demos/DemoSincronia";
 import { DemoTrilha } from "./demos/DemoTrilha";
-import { ROTA_MEU_TEMA } from "@/lib/rotas";
+import { ROTA_MEU_TEMA, ROTA_PROJETOS } from "@/lib/rotas";
 import { IDS_FERRAMENTAS, type IdFerramenta, seletorFerramenta } from "./ids";
 
 export type { IdFerramenta } from "./ids";
@@ -673,6 +674,29 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque em Analisar.",
     },
     uso: "sinal",
+  },
+  // Levar pro mundo: não é do Chrome. No mundo de verdade, o site é uma
+  // pasta com arquivos; o jogo monta essa pasta (index.html e style.css).
+  "levar-pro-mundo": {
+    id: "levar-pro-mundo",
+    nome: "Levar pro mundo",
+    Icone: IconeLevarProMundo,
+    alvo: seletorFerramenta("levar-pro-mundo"),
+    oQueFaz: "Transforma a página do jogo nos arquivos de um site de verdade: o index.html e o style.css, num .zip.",
+    praQueServe:
+      "Num site de verdade, o HTML e o CSS moram em arquivos separados, ligados por uma linha no head. Com os arquivos na mão, dá para publicar e ganhar um endereço na internet.",
+    comoUsarAqui: {
+      mouse: "Clique em Levar pro mundo, em cima da tela do site. Confira os dois arquivos e baixe o .zip. O guia de publicação mostra o resto.",
+      toque: "Toque em Levar pro mundo, em cima da tela do site. Confira os dois arquivos e baixe o .zip. O guia de publicação mostra o resto.",
+    },
+    noF12DeVerdade:
+      "não tem esse botão: o DevTools mexe numa página que já está publicada. Quem cria o site trabalha num editor (como o VS Code) com os arquivos numa pasta, e publica a pasta.",
+    experimente: {
+      mouse: "Clique em Levar pro mundo.",
+      toque: "Toque em Levar pro mundo.",
+    },
+    uso: "sinal",
+    lugar: { rotulo: "Abrir Meus projetos", href: ROTA_PROJETOS },
   },
 };
 

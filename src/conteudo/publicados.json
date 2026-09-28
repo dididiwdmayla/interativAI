@@ -79,6 +79,10 @@
       "sites-layout-u4-f2",
       "sites-layout-u4-f3",
       "sites-layout-u4-f4"
+    ],
+    "sites-publicar-u2": [
+      "sites-publicar-u2-f1",
+      "sites-publicar-u2-f2"
     ]
   },
   "fases": {
@@ -457,6 +461,24 @@
         "selo-por-cima-da-fita-bolo",
         "cabecalho-acompanha-rolagem",
         "botao-flutuante"
+      ]
+    },
+    "sites-publicar-u2-f1": {
+      "objetivos": [
+        "no-celular",
+        "analisar",
+        "levar-pro-mundo",
+        "mudar-e-levar-de-novo"
+      ]
+    },
+    "sites-publicar-u2-f2": {
+      "partes": [
+        "titulo-da-aba",
+        "cabecalho-principal-rodape",
+        "sobre-voce",
+        "uma-media-query",
+        "acessibilidade-90",
+        "cabe-no-celular"
       ]
     }
   }

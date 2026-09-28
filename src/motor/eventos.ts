@@ -48,7 +48,9 @@ export type EventoFase =
   /** (Modo dispositivo) Girou o aparelho. */
   | { tipo: "girou"; orientacao: "retrato" | "paisagem" }
   /** (Lighthouse) Rodou a auditoria (o botão Analisar). */
-  | { tipo: "auditou"; notas: Record<"acessibilidade" | "boas-praticas" | "seo", number> };
+  | { tipo: "auditou"; notas: Record<"acessibilidade" | "boas-praticas" | "seo", number> }
+  /** (Publicar) Levou o projeto pro mundo: o .zip com os arquivos (os nomes). */
+  | { tipo: "exportouProjeto"; arquivos: string[] };
 
 /**
  * Para onde um link levaria:
@@ -87,4 +89,5 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "trocouDispositivo",
   "girou",
   "auditou",
+  "exportouProjeto",
 ];

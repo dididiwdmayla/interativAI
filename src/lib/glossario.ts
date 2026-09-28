@@ -4,6 +4,7 @@
  * revisam). Sai do mesmo índice do /lab/fases (`montarIndice`), a base do
  * futuro computadorzinho navegador.
  */
+import { rotuloDaFase } from "@/motor/tiposDeFase";
 import { FASES, localDaFase } from "@/conteudo";
 import { CONCEITOS, type Conceito } from "@/conteudo/conceitos";
 import { montarIndice } from "@/conteudo/indice";
@@ -73,7 +74,7 @@ export function destinoDaFase(faseId: string, progresso: Progresso, fases: reado
   const fase = fases.find((item) => item.id === faseId);
   if (!fase) return null;
   const { unidade, numero } = localDaFase(fase);
-  const rotulo = `${unidade.titulo} · ${fase.tipo === "desafio" ? "Desafio" : `Fase ${numero}`}`;
+  const rotulo = `${unidade.titulo} · ${rotuloDaFase(fase.tipo, numero)}`;
   if (faseLiberada(fase, progresso)) return { faseId, rotulo, href: rotaDaFase(faseId), liberada: true, aviso: null };
   const local = localNoCurriculo(unidade.id);
   const ilha = local?.ilha;

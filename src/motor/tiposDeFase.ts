@@ -1,9 +1,11 @@
 /*
  * Registro dos tipos de fase.
  *
- * Hoje há dois, e os dois usam a tela do DevTools (painel + prévia):
+ * Hoje há três, e os três usam a tela do DevTools (painel + prévia):
  * - "pratica": micro-passos, objetivos guiados e sozinho em sequência;
- * - "desafio": checklist de partes, sem passo a passo, com "Rever".
+ * - "desafio": checklist de partes, sem passo a passo, com "Rever";
+ * - "projeto-ponte": o site do próprio jogador, com checklist de
+ *   requisitos, sem Rever, salvo em Meus projetos e levado pro mundo.
  *
  * Para um tipo novo (ex.: "linha-do-tempo", "comparador",
  * "diagrama-rede"): crie a variante em `Fase` (src/conteudo/tipos.ts),
@@ -32,4 +34,16 @@ export const TIPOS_DE_FASE: Record<TipoFase, DefinicaoTipoFase> = {
     descricao: "Junta tudo da unidade num site novo, sem passo a passo; o checklist marca as partes.",
     tela: "devtools",
   },
+  "projeto-ponte": {
+    nome: "Projeto-ponte",
+    descricao: "O site do próprio jogador, do zero, no modo documento: requisitos que se marcam sozinhos, tutor que só pergunta, projeto salvo e levado pro mundo.",
+    tela: "devtools",
+  },
 };
+
+/** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */
+export function rotuloDaFase(tipo: TipoFase, numero: number): string {
+  if (tipo === "desafio") return "Desafio";
+  if (tipo === "projeto-ponte") return "Projeto";
+  return `Fase ${numero}`;
+}

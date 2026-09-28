@@ -5,6 +5,7 @@
  * Serve para os testes de conteúdo (jsdom), para as checagens do
  * /lab/fases (no navegador) e para gerar o "depois" da meta do desafio.
  */
+import { montarArquivos } from "@/lib/exportarProjeto";
 import type { Acao, Fase, FaseDesafio, Previsao, Validador } from "@/conteudo/tipos";
 import {
   atualizarAcentos,
@@ -110,6 +111,13 @@ export function criarSimulacao(fase: Fase) {
             dispositivo = { ...dispositivo, ligado: false };
             avisarDispositivo();
           },
+        }
+      : undefined,
+    // Levar pro mundo fora da tela: monta os arquivos de verdade (sem baixar) e avisa o evento.
+    levarProMundo: fase.usaFerramentas.includes("levar-pro-mundo")
+      ? () => {
+          const arquivos = montarArquivos(serializarDocumentoInteiro(documento), lerCssDoDocumento(documento));
+          eventos.push({ tipo: "exportouProjeto", arquivos: Object.keys(arquivos) });
         }
       : undefined,
     analisarAuditoria: fase.usaFerramentas.includes("lighthouse")

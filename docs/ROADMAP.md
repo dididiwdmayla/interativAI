@@ -193,8 +193,10 @@ núcleo comum.
   - [x] Etapa 5: painel Lighthouse (aba nova, 14 verificações sobre o
     motor, notas pesadas no anel, problema levando à peça com explicação,
     `notaAuditoria` e `semProblema`).
-  - [ ] Etapa 6: projeto-ponte, exportação, guia de publicação, Meus
-    projetos e a P2.
+  - [x] Etapa 6: projeto-ponte (checklist de requisitos, tutor que só
+    pergunta, projeto salvo), Levar pro mundo (.zip com index.html e
+    style.css pelo fflate), guia de publicação em dados com o link
+    validado, Meus projetos, a ilha que acende e a P2 publicada.
   - [ ] Etapa 7: mobile, guia, liberações e bateria completa.
 
 ### Pendente de decisão

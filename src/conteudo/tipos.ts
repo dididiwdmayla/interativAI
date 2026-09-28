@@ -155,6 +155,19 @@ export type Validador =
   | { tipo: "notaAuditoria"; categoria: CategoriaAuditoria; minimo: number }
   /** (Lighthouse) A verificação `regra` não acha nenhum problema na página agora. */
   | { tipo: "semProblema"; regra: IdRegraAuditoria }
+  /**
+   * (CSS) As folhas da página (a editável e os <style> do head) têm pelo
+   * menos `minimo` (padrão 1) regras @media.
+   */
+  | { tipo: "temMediaQuery"; minimo?: number }
+  /**
+   * (Responsivo) A página cabe numa tela de `largura` px sem rolar de lado,
+   * pelo motor (sem layout): tem meta viewport e, com as @media dessa
+   * largura, nenhuma peça tem width ou min-width fixos (px) maiores que a
+   * tela, nem colunas de grid em px que somem mais que ela. É uma
+   * simplificação honesta: não mede o texto nem as margens.
+   */
+  | { tipo: "cabeNaTela"; largura: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -235,7 +248,12 @@ export type Acao =
   /** (Modo dispositivo) Desliga a barra (Ctrl+Shift+M de novo). Gera `trocouDispositivo` com `ligado: false`. */
   | { tipo: "desligarDispositivo" }
   /** (Lighthouse) O botão Analisar do painel Lighthouse. Gera `auditou`, com as notas. */
-  | { tipo: "analisarAuditoria" };
+  | { tipo: "analisarAuditoria" }
+  /**
+   * (Publicar) O "Levar pro mundo": monta o index.html e o style.css e baixa
+   * o .zip (nos testes, só monta). Gera `exportouProjeto`.
+   */
+  | { tipo: "levarProMundo" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -442,11 +460,45 @@ export type FasePratica = FaseBase & {
 export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[] };
 
 /**
+ * Um requisito do projeto-ponte: marca sozinho quando o validador passa
+ * (ao vivo, como as partes de estado do desafio).
+ */
+export type RequisitoProjeto = {
+  id: string;
+  /** Aparece no checklist. Até 140 caracteres. */
+  descricao: string;
+  validador: Validador;
+  /**
+   * A pergunta do computadorzinho quando o jogador pede ajuda (no projeto o
+   * tutor só pergunta: nada de dica pronta nem solução). Até 160.
+   */
+  pergunta: string;
+  /** Ações que cumprem o requisito (testes e /lab/fases). */
+  solucaoDeTeste: Acao[];
+};
+
+/**
+ * Projeto-ponte: o jogador constrói o PRÓPRIO site no modo documento, com
+ * HTML e CSS livres e as ferramentas que já conhece. Sem passo a passo:
+ * um checklist de requisitos que se marcam sozinhos e o tutor que só
+ * pergunta. O projeto fica salvo (Meus projetos), pode ser reaberto e
+ * editado depois e, com a ferramenta `levar-pro-mundo`, vira um .zip com
+ * index.html e style.css, com o guia de publicação.
+ */
+export type FaseProjetoPonte = FaseBase & {
+  tipo: "projeto-ponte";
+  modoDocumento: true;
+  requisitos: RequisitoProjeto[];
+  /** O nome do projeto no painel Meus projetos e no .zip ("Meu primeiro site"). */
+  nomeDoProjeto: string;
+};
+
+/**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte;
 
 export type TipoFase = Fase["tipo"];
 

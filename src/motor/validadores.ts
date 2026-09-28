@@ -4,11 +4,11 @@
  * (DOMParser) e com o jsdom dos testes: só usa APIs comuns de DOM.
  */
 import { VALIDADORES_CUSTOM } from "@/conteudo/validadoresCustom";
-import type { FaseDesafio, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
+import type { Acao, Fase, FaseDesafio, FaseProjetoPonte, OperadorContagem, Validador, ViaSelecao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { textoVerdadeiro } from "@/lib/documentoSiteAlvo";
 import { estaEscondido } from "@/lib/esconder";
-import { calcularCascata, folhasDoDocumento, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
+import { calcularCascata, folhasDoDocumento, leitorDeValores, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
 import type { Tela } from "./css/midia";
 import { auditar } from "./auditoria";
 import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
@@ -144,6 +144,10 @@ export function descreverValidador(validador: Validador): string {
       return "salvou o Meu tema";
     case "notaAuditoria":
       return `nota de ${validador.categoria} na auditoria pelo menos ${validador.minimo}`;
+    case "temMediaQuery":
+      return `o CSS tem pelo menos ${validador.minimo ?? 1} @media`;
+    case "cabeNaTela":
+      return `a página cabe numa tela de ${validador.largura} px sem rolar de lado`;
     case "semProblema":
       return `a auditoria não acha "${validador.regra}"`;
     case "dispositivo":
@@ -306,6 +310,17 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     }
     case "variavelCss":
       return avaliarVariavelCss(validador, contexto, descricao);
+    case "temMediaQuery": {
+      const minimo = validador.minimo ?? 1;
+      const quantas = folhasDoDocumento(documento)
+        .filter((folha) => folha.origem !== "navegador")
+        .reduce((soma, folha) => soma + (folha.analisada.texto.match(/@media\b/gi)?.length ?? 0), 0);
+      return { passou: quantas >= minimo, descricao, detalhe: `achou ${quantas}` };
+    }
+    case "cabeNaTela": {
+      const motivos = motivosDeNaoCaber(documento, validador.largura);
+      return { passou: motivos.length === 0, descricao, detalhe: motivos.length === 0 ? "cabe" : lista(motivos) };
+    }
     case "notaAuditoria": {
       const { notas } = auditar(contexto.documento, contexto.tela ? { tela: contexto.tela } : {});
       return { passou: notas[validador.categoria] >= validador.minimo, descricao, detalhe: `nota ${notas[validador.categoria]}` };
@@ -465,17 +480,66 @@ export function validadorTravado(validador: Validador): boolean {
   }
 }
 
+/** Px de um valor como "420px" (null se não é px). */
+function emPx(valor: string): number | null {
+  const achado = /^(-?\d*\.?\d+)px$/i.exec(valor.trim());
+  return achado ? Number(achado[1]) : null;
+}
+
 /**
- * Desafio: recalcula quais partes estão marcadas no checklist. As partes
- * travadas (`validadorTravado`) continuam marcadas para sempre, uma vez que
- * passem; as demais são conferidas de novo a cada checagem.
+ * Por que a página não cabe numa tela dessa largura (vazio: cabe). Pelo
+ * motor, sem layout: meta viewport e medidas fixas em px (width,
+ * min-width e colunas de grid) maiores que a tela, com as @media dela.
+ */
+export function motivosDeNaoCaber(documento: Document, largura: number): string[] {
+  const motivos: string[] = [];
+  const viewport = documento.querySelector('meta[name="viewport" i]');
+  if (!viewport || !/width|initial-scale/i.test(viewport.getAttribute("content") ?? "")) {
+    motivos.push("sem meta viewport (o celular desenharia em 980 px e encolheria tudo)");
+  }
+  const ler = leitorDeValores(documento, { tela: telaDaLargura(largura) });
+  for (const elemento of Array.from(documento.body?.querySelectorAll("*") ?? [])) {
+    if (elemento.closest("script, style, template, [hidden]")) continue;
+    const rotulo = `<${elemento.tagName.toLowerCase()}${elemento.id ? `#${elemento.id}` : elemento.classList[0] ? `.${elemento.classList[0]}` : ""}>`;
+    for (const propriedade of ["width", "min-width"]) {
+      const efetivo = ler(elemento, propriedade);
+      const px = efetivo.tipo === "valor" ? emPx(efetivo.valor) : null;
+      if (px !== null && px > largura) motivos.push(`${rotulo} tem ${propriedade}: ${px}px`);
+    }
+    const colunas = ler(elemento, "grid-template-columns");
+    if (colunas.tipo === "valor") {
+      const soma = colunas.valor
+        .split(/\s+/)
+        .map(emPx)
+        .reduce<number>((total, px) => total + (px ?? 0), 0);
+      if (soma > largura) motivos.push(`${rotulo} tem colunas de grid somando ${soma}px`);
+    }
+  }
+  return motivos;
+}
+
+/** Um item de checklist: parte do desafio ou requisito do projeto-ponte. */
+export type ItemChecklist = { id: string; descricao: string; validador: Validador; solucaoDeTeste: readonly Acao[] };
+
+/** Os itens do checklist da fase (partes do desafio, requisitos do projeto), ou null na prática. */
+export function itensDoChecklist(fase: Fase): readonly ItemChecklist[] | null {
+  if (fase.tipo === "desafio") return fase.partes;
+  if (fase.tipo === "projeto-ponte") return fase.requisitos;
+  return null;
+}
+
+/**
+ * Desafio e projeto-ponte: recalcula quais itens estão marcados no
+ * checklist. Os travados (`validadorTravado`) continuam marcados para
+ * sempre, uma vez que passem; os demais são conferidos de novo a cada
+ * checagem.
  */
 export function recalcularPartesFeitas(
-  desafio: FaseDesafio,
+  fase: FaseDesafio | FaseProjetoPonte,
   partesFeitas: readonly string[],
   contexto: ContextoValidacao,
 ): string[] {
-  return desafio.partes
+  return (itensDoChecklist(fase) ?? [])
     .filter((parte) => {
       const passaAgora = avaliarValidador(parte.validador, contexto);
       if (validadorTravado(parte.validador)) return partesFeitas.includes(parte.id) || passaAgora;

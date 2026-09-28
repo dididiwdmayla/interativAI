@@ -20,6 +20,8 @@ type Props = {
   previsao: Previsao | null;
   degrauMaximo: DegrauAjuda;
   desafio: boolean;
+  /** Projeto-ponte: o "Me ajuda" só faz uma pergunta (sem dica, sem solução, sem Rever). */
+  projeto: boolean;
   /** Lista do "Rever", montada por quem chama. */
   listaRever: ReactNode;
   aoAvancar: () => void;
@@ -40,6 +42,7 @@ export function AcoesConversa({
   previsao,
   degrauMaximo,
   desafio,
+  projeto,
   listaRever,
   aoAvancar,
   aoSeguir,
@@ -91,6 +94,22 @@ export function AcoesConversa({
         </Botao>
         <Botao onClick={aoConfirmarSolucao}>Sim, mostrar a solução</Botao>
       </>
+    );
+  }
+  if (emObjetivo && projeto) {
+    return (
+      <AlvoFerramenta
+        ids={["me-ajuda"]}
+        marcador="me-ajuda"
+        aoAbrirCard={aoAbrirCard}
+        classeMarcador="-right-2 -top-2"
+        as="span"
+        className="inline-flex"
+      >
+        <Botao variante="secundario" onClick={aoAjudar} data-pergunta-projeto>
+          Me faz uma pergunta
+        </Botao>
+      </AlvoFerramenta>
     );
   }
   if (emObjetivo && desafio) {

@@ -5,19 +5,20 @@ import { useState } from "react";
 import { tocarEfeito } from "@/audio/motor";
 import { IconeInsignia } from "@/componentes/icones/IconeInsignia";
 import { IconeProfissoes } from "@/componentes/icones/IconeProfissoes";
+import { IconeProjetos } from "@/componentes/icones/IconeProjetos";
 import { IconeTrilhas } from "@/componentes/icones/IconeTrilhas";
 import { PainelInsignias } from "@/componentes/temas/PainelInsignias";
 import { BotaoGlossario } from "./BotaoGlossario";
 import { useProgresso } from "@/lib/armazemProgresso";
 import { trilhaDaFonte } from "@/lib/mapa";
-import { ROTA_PROFISSOES, ROTA_TRILHAS } from "@/lib/rotas";
+import { ROTA_PROFISSOES, ROTA_PROJETOS, ROTA_TRILHAS } from "@/lib/rotas";
 
 type Props = {
   /** No menu do celular: um item por linha, com o nome inteiro. */
   noMenu?: boolean;
 };
 
-/** Os caminhos para explorar o jogo por outros ângulos, na barra do mapa: trilhas, profissões, glossário e insígnias. */
+/** Os caminhos para explorar o jogo por outros ângulos, na barra do mapa: trilhas, profissões, glossário, insígnias e Meus projetos. */
 export function LinksExplorar({ noMenu = false }: Props) {
   const progresso = useProgresso();
   const trilha = trilhaDaFonte({ progresso });
@@ -48,6 +49,10 @@ export function LinksExplorar({ noMenu = false }: Props) {
         <IconeInsignia />
         <span className={noMenu ? "" : "hidden lg:inline"}>Insígnias</span>
       </button>
+      <Link href={ROTA_PROJETOS} onClick={() => tocarEfeito("clique")} className={classe} aria-label="Meus projetos" data-link-projetos>
+        <IconeProjetos />
+        <span className={noMenu ? "" : "hidden lg:inline"}>Meus projetos</span>
+      </Link>
       <PainelInsignias aberto={insignias} aoFechar={() => setInsignias(false)} />
     </>
   );

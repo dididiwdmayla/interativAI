@@ -39,9 +39,11 @@ export type PainelDasAcoes = {
   lerCss: () => string | null;
   /** (E5) Salva a maquete do jogo como Meu tema. Só existe numa fase com site-alvo "jogo". */
   salvarTema?: () => boolean;
-  /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
+  /** (Publicar) O "Levar pro mundo": só existe numa fase com a ferramenta levar-pro-mundo. */
+  levarProMundo?: () => void;
   /** (Lighthouse) O botão Analisar: só existe numa fase com a ferramenta lighthouse. */
   analisarAuditoria?: () => void;
+  /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
     girar: () => void;
@@ -102,6 +104,8 @@ export function descreverAcao(acao: Acao): string {
       return "desligarDispositivo";
     case "analisarAuditoria":
       return "analisarAuditoria";
+    case "levarProMundo":
+      return "levarProMundo";
   }
 }
 
@@ -324,6 +328,11 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "analisarAuditoria": {
       if (!painel.analisarAuditoria) throw new ErroAcao("analisarAuditoria pede a ferramenta lighthouse em usaFerramentas");
       painel.analisarAuditoria();
+      return;
+    }
+    case "levarProMundo": {
+      if (!painel.levarProMundo) throw new ErroAcao("levarProMundo pede a ferramenta levar-pro-mundo em usaFerramentas");
+      painel.levarProMundo();
       return;
     }
   }

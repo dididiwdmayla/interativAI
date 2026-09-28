@@ -1,5 +1,6 @@
 "use client";
 
+import { semOSiteDoProjeto } from "@/lib/projetos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -78,7 +79,7 @@ export function Jogo({ faseId }: { faseId: string }) {
       for (const [id, estado] of Object.entries(atual.fasesEmAndamento)) {
         if (id !== fase.id) fasesEmAndamento[id] = estado;
       }
-      return { ...atual, fasesEmAndamento };
+      return { ...atual, fasesEmAndamento, projetos: semOSiteDoProjeto(atual, fase.id) };
     });
     setRodada((valor) => valor + 1);
   };

@@ -37,6 +37,7 @@ export const IDS_FERRAMENTAS = [
   "girar-dispositivo",
   // Zona Publicar: auditoria
   "lighthouse",
+  "levar-pro-mundo",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

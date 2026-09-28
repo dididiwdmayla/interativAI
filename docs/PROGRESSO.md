@@ -212,6 +212,73 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
     de cada tipo). Testes: `testes/conteudo/auditoria.test.ts` e
     `testes/lighthouse.mjs` (três layouts), na bateria.
 
+- [x] **Etapa 6: projeto-ponte, Levar pro mundo, guia de publicação,
+  Meus projetos e a P2.**
+  - Tipo de fase `projeto-ponte` (`FaseProjetoPonte`: `requisitos`,
+    `nomeDoProjeto`, sempre em `modoDocumento`): o checklist do desafio
+    generalizado (`itensDoChecklist`, `recalcularPartesFeitas` para partes
+    e requisitos; itens de estado conferidos ao vivo, os de evento
+    travam), sem Rever: o "Me faz uma pergunta" só pergunta (uma pergunta
+    de cada requisito que falta, em rodízio) e o tutor ganhou o modo
+    `projeto` (só perguntas, no prompt e no contexto do servidor). Rótulos
+    "Projeto", "Requisitos do projeto" e "Projeto pronto!" (barra,
+    conclusão, lista de fases, glossário: `rotuloDaFase`).
+  - Validadores novos para requisitos: `temMediaQuery` (conta `@media`
+    nas folhas da página, não nas do navegador) e `cabeNaTela` (sem meta
+    viewport num celular, largura ou min-width em px maior que a tela e
+    colunas de grid em px somando mais que ela, avaliados pelo motor na
+    largura pedida, com a `@media` valendo).
+  - Levar pro mundo (ferramenta `levar-pro-mundo`, com apresentação, card
+    e o link para Meus projetos): botão na barra de endereço da prévia,
+    uma janela com os dois arquivos (index.html, a página; style.css, a
+    aba estilo.css) e o aviso da linha `<link rel="stylesheet"
+    href="style.css">` posta no fim do head quando o jogador ainda não
+    escreveu; "Baixar .zip" com o fflate 0.8.3 (MIT, mantido, roda no
+    navegador e no Node; `zipSync`), os dois arquivos na raiz, o nome do
+    .zip vindo do nome do projeto. Evento `exportouProjeto`, ação
+    `levarProMundo` (na simulação, monta os arquivos de verdade sem
+    baixar). A prévia do modo documento ganhou um `<base href="about:blank">`
+    do jogo (escondido da árvore e do código) para o `<link>` e as imagens
+    relativas não virarem pedidos ao servidor do jogo.
+  - Guia de publicação: dados em `src/conteudo/publicacao.ts` (Netlify
+    Drop, 6 passos com id estável, `verificadoEm` 2026-09-28, aviso de que
+    as plataformas mudam, outras opções), janela com os passos marcáveis
+    e o campo do link (só o formato: https:// e domínio com ponto;
+    `linkPublicadoValido`), tudo guardado por projeto.
+  - Meus projetos (`/projetos`, link na barra do mapa e no menu do
+    celular): o cartão "Meu primeiro site" com a miniatura, a situação
+    (trancado, novo, em andamento, pronto), Abrir e editar, Levar pro
+    mundo, o guia e o link publicado. Progresso: `projetos` (o site
+    copiado a cada mudança, sobrevive ao "Jogar de novo" da ilha; o
+    Recomeçar da fase zera o site e mantém guia e link) e
+    `ilhasComemoradas`.
+  - A ilha acende: com todas as unidades prontas concluídas, a ilha
+    ganha a borda acesa, o computadorzinho comemora uma vez ("Ilha Sites
+    completa!", com o caminho para Meus projetos) e, no mundo, a ilha
+    mostra "Completa!" com um anel aceso.
+  - Unidade-modelo P2 "Do jogo pro mundo" (`sites-publicar-u2`), com
+    comentários pedagógicos: Fase 1 "Arquivos de verdade" (o Cantinho da
+    Bia: conferir no Celular 390, Analisar no Lighthouse, previsão do
+    `<link>` e o .zip; sozinho: mudar a cor e levar de novo) e Fase 2
+    "Meu primeiro site" (projeto-ponte com 6 requisitos: título da aba,
+    header/main/footer, h2 e parágrafo sobre você, uma `@media`,
+    Acessibilidade 90+ depois de Analisar e nada cortado no Celular 390
+    com o aparelho ligado). Conceitos novos: `modo-dispositivo`,
+    `auditoria-lighthouse`, `css-externo`, `index-html`, `publicar-site`.
+    Como R1 e P1 ainda não existem, a Fase 1 apresenta o modo dispositivo
+    e o Lighthouse (nota no arquivo para quem escrever R1 e P1). A zona
+    Publicar perdeu o `requerMotor`; a P2 foi publicada
+    (`publicados.json`).
+  - Checagens: `projeto-e-levar-pro-mundo` (projeto em modo documento com
+    levar-pro-mundo e nome; Levar pro mundo só com modo documento e
+    style.css), projeto não apresenta ferramenta, pratica só o que foi
+    ensinado antes, limites da descrição e da pergunta dos requisitos.
+  - Testes: `testes/conteudo/projeto.test.ts` (arquivos e .zip aberto
+    pelo fflate, nome do .zip, guia e link, `temMediaQuery`, `cabeNaTela`,
+    o checklist marcando cada requisito na hora, progresso e sabotagens) e
+    `testes/publicar.mjs` (a P2 jogada pelo mapa nos três layouts, o .zip
+    baixado e aberto, a ilha acendendo, Meus projetos), na bateria.
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

@@ -223,8 +223,9 @@ flex e grid como o do Chrome seria bom, mas não é obrigatório.
 
 ### Zona Publicar (`publicar`)
 
-**Requer motor:** auditoria simplificada estilo Lighthouse; exportar o
-projeto do jogador; tipo de fase projeto-ponte.
+Motores prontos (Rodada 12): aba Lighthouse (auditoria simplificada),
+Levar pro mundo (.zip com index.html e style.css) e o tipo de fase
+projeto-ponte. A P2 está publicada; a P1 espera o conteúdo.
 
 - **P1. Acessibilidade e Lighthouse** (`sites-publicar-u1`): contraste,
   alt, rótulos, ordem de títulos (revisa U3), navegação por teclado.
@@ -233,7 +234,10 @@ projeto do jogador; tipo de fase projeto-ponte.
   de verdade (index.html e style.css), editor real, publicar e ter um
   link. Projeto-ponte: o site pessoal do jogador, publicado. As
   ferramentas e serviços recomendados são verificados na época da
-  produção.
+  produção. Publicada (Rodada 12): Fase 1 "Arquivos de verdade" (o site da
+  Bia conferido no celular e no Lighthouse e levado pro mundo) e Fase 2
+  "Meu primeiro site" (projeto-ponte). O guia de publicação mora em
+  `src/conteudo/publicacao.ts` (Netlify Drop, verificado em 2026-09-28).
 
 ---
 
