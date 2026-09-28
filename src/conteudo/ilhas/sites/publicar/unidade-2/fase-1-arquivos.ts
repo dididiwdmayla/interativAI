@@ -16,12 +16,12 @@
  * A previsão liga a linha do <link> ao arquivo do visual; o sozinho mostra
  * que cada Levar pro mundo leva o site como ele está agora.
  *
- * NOTA PARA QUEM ESCREVER R1 E P1: hoje esta é a primeira fase com modo
- * dispositivo e Lighthouse, então ela apresenta os dois. Quando R1
- * (modo dispositivo) e P1 (Lighthouse) existirem, tire os dois do
- * `apresentar` dos objetivos 1 e 2 e passe "modo-dispositivo" e
- * "auditoria-lighthouse" de conceitos para revisa: aqui eles viram
- * revisão antes de publicar.
+ * ATUALIZADO (R1 e P1 publicadas): modo dispositivo e Lighthouse já
+ * foram apresentados antes (R1 e P1, respectivamente), então esta fase
+ * só REVISA os dois, sem apresentar de novo: "modo-dispositivo" e
+ * "auditoria-lighthouse" saíram de `conceitos` e foram para `revisa`, e
+ * os `apresentar: ["modo-dispositivo"]` / `["lighthouse"]` dos objetivos
+ * 1 e 2 foram removidos.
  */
 import type { FasePratica } from "@/conteudo/tipos";
 import { SITE_CANTINHO_DA_BIA } from "./sites/cantinhoDaBia";
@@ -31,8 +31,8 @@ export const FASE_P2_F1: FasePratica = {
   tipo: "pratica",
   unidadeId: "sites-publicar-u2",
   titulo: "Arquivos de verdade",
-  conceitos: ["modo-dispositivo", "auditoria-lighthouse", "css-externo", "index-html", "publicar-site"],
-  revisa: ["estrutura-do-documento", "cor-do-texto"],
+  conceitos: ["css-externo", "index-html", "publicar-site"],
+  revisa: ["estrutura-do-documento", "cor-do-texto", "modo-dispositivo", "auditoria-lighthouse"],
   prerequisitos: ["estrutura-do-documento", "head-vs-body", "o-que-e-css"],
   usaFerramentas: ["arvore", "editor", "editor-css", "painel-estilos", "editar-valor-css", "seletor-de-cor", "modo-dispositivo", "lighthouse", "levar-pro-mundo"],
   paineisElementos: ["estilos"],
@@ -54,7 +54,6 @@ export const FASE_P2_F1: FasePratica = {
         mouse: "Primeiro, o celular: ligue o modo dispositivo e escolha o Celular 390.",
         toque: "Primeiro, o celular: ligue o modo dispositivo e escolha o Celular 390.",
       },
-      apresentar: ["modo-dispositivo"],
       validador: { tipo: "dispositivo", largura: 390 },
       ajudas: {
         pergunta: "Como ver a página do tamanho de um celular sem sair do computador?",
@@ -76,7 +75,6 @@ export const FASE_P2_F1: FasePratica = {
         mouse: "Agora a conferência: abra a aba Lighthouse, lá em cima no painel, e clique em Analisar.",
         toque: "Agora a conferência: abra a aba Lighthouse, lá em cima no painel, e toque em Analisar.",
       },
-      apresentar: ["lighthouse"],
       validador: { tipo: "evento", evento: "auditou" },
       ajudas: {
         pergunta: "Qual aba do painel dá notas para a página?",

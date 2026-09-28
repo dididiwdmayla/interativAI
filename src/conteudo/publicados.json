@@ -96,6 +96,11 @@
       "sites-responsivo-u2-f2",
       "sites-responsivo-u2-f3"
     ],
+    "sites-publicar-u1": [
+      "sites-publicar-u1-f1",
+      "sites-publicar-u1-f2",
+      "sites-publicar-u1-f3"
+    ],
     "sites-publicar-u2": [
       "sites-publicar-u2-f1",
       "sites-publicar-u2-f2"
@@ -548,6 +553,29 @@
         "cabecalho-empilha",
         "cardapio-uma-coluna",
         "foto-responsiva"
+      ]
+    },
+    "sites-publicar-u1-f1": {
+      "objetivos": [
+        "analisar",
+        "previsao-alt",
+        "analisar-de-novo"
+      ]
+    },
+    "sites-publicar-u1-f2": {
+      "objetivos": [
+        "ordem-dos-titulos",
+        "previsao-contraste",
+        "rotulo-do-link"
+      ]
+    },
+    "sites-publicar-u1-f3": {
+      "partes": [
+        "alt-da-foto",
+        "titulo-sem-pular",
+        "contraste-do-aviso",
+        "botao-comprar-com-nome",
+        "nota-alta"
       ]
     },
     "sites-publicar-u2-f1": {

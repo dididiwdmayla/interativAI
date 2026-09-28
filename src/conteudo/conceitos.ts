@@ -551,6 +551,11 @@ const CATALOGO = {
     resumo: "Uma imagem com max-width: 100% (e height: auto): nunca estoura a largura do espaço dela, em nenhuma tela.",
     temas: ["interfaces", "acessibilidade"],
   },
+  "rotulo-acessivel": {
+    nome: "Rótulo acessível",
+    resumo: "O texto que diz o que um link ou botão faz para quem usa leitor de tela: o texto visível ou, se for só um ícone, um aria-label.",
+    temas: ["acessibilidade", "interfaces"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
