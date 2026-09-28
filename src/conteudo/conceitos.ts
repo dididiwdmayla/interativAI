@@ -491,6 +491,26 @@ const CATALOGO = {
     resumo: "Pôr os arquivos do site num servidor da internet, para qualquer pessoa abrir pelo endereço.",
     temas: ["servidores", "ferramentas"],
   },
+  "variavel-css": {
+    nome: "Variável CSS",
+    resumo: "Um nome que guarda um valor (--nome: valor), usado em qualquer lugar com var(--nome). Mude num lugar só, e tudo que usa ela muda junto.",
+    temas: ["interfaces"],
+  },
+  "escopo-de-variavel": {
+    nome: "Alcance de uma variável",
+    resumo: "Uma variável declarada numa peça só vale nela e em quem está dentro dela; declarada no :root, vale na página inteira.",
+    temas: ["interfaces"],
+  },
+  "contraste-de-cor": {
+    nome: "Contraste de cor",
+    resumo: "A diferença entre a cor do texto e a do fundo. Pouco contraste deixa o texto difícil de ler, principalmente para quem enxerga menos.",
+    temas: ["acessibilidade", "interfaces"],
+  },
+  "salvar-como-meu-tema": {
+    nome: "Salvar como Meu tema",
+    resumo: "Guardar o conjunto de cores que você criou como um tema novo, para usar no jogo inteiro a partir de agora.",
+    temas: ["interfaces"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

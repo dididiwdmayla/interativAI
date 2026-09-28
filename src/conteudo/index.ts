@@ -12,6 +12,7 @@ import { FASES_UNIDADE_E1, UNIDADE_E1 } from "./ilhas/sites/estilos/unidade-1/un
 import { FASES_UNIDADE_E2, UNIDADE_E2 } from "./ilhas/sites/estilos/unidade-2/unidade";
 import { FASES_UNIDADE_E3, UNIDADE_E3 } from "./ilhas/sites/estilos/unidade-3/unidade";
 import { FASES_UNIDADE_E4, UNIDADE_E4 } from "./ilhas/sites/estilos/unidade-4/unidade";
+import { FASES_UNIDADE_E5, UNIDADE_E5 } from "./ilhas/sites/estilos/unidade-5/unidade";
 import { FASES_UNIDADE_L1, UNIDADE_L1 } from "./ilhas/sites/layout/unidade-1/unidade";
 import { FASES_UNIDADE_L2, UNIDADE_L2 } from "./ilhas/sites/layout/unidade-2/unidade";
 import { FASES_UNIDADE_L3, UNIDADE_L3 } from "./ilhas/sites/layout/unidade-3/unidade";
@@ -30,6 +31,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_E2,
   UNIDADE_E3,
   UNIDADE_E4,
+  UNIDADE_E5,
   UNIDADE_L1,
   UNIDADE_L2,
   UNIDADE_L3,
@@ -49,6 +51,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_E2,
   ...FASES_UNIDADE_E3,
   ...FASES_UNIDADE_E4,
+  ...FASES_UNIDADE_E5,
   ...FASES_UNIDADE_L1,
   ...FASES_UNIDADE_L2,
   ...FASES_UNIDADE_L3,

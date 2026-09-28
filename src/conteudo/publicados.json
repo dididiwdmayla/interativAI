@@ -56,6 +56,12 @@
       "sites-estilos-u4-f2",
       "sites-estilos-u4-f3"
     ],
+    "sites-estilos-u5": [
+      "sites-estilos-u5-f1",
+      "sites-estilos-u5-f2",
+      "sites-estilos-u5-f3",
+      "sites-estilos-u5-f4"
+    ],
     "sites-layout-u1": [
       "sites-layout-u1-f1",
       "sites-layout-u1-f2",
@@ -346,6 +352,35 @@
         "titulo-da-marca-laranja",
         "titulo-dos-planos-vermelho",
         "valor-do-plano-destacado"
+      ]
+    },
+    "sites-estilos-u5-f1": {
+      "objetivos": [
+        "trocar-primaria",
+        "quantos-lugares",
+        "trocar-fundo"
+      ]
+    },
+    "sites-estilos-u5-f2": {
+      "objetivos": [
+        "previsao-alcance",
+        "escopo-mascote",
+        "escopo-painel"
+      ]
+    },
+    "sites-estilos-u5-f3": {
+      "objetivos": [
+        "cor-secundaria",
+        "salvar",
+        "trocar-e-salvar-de-novo"
+      ]
+    },
+    "sites-estilos-u5-f4": {
+      "partes": [
+        "primaria-nova",
+        "fundo-novo",
+        "texto-novo",
+        "tema-salvo"
       ]
     },
     "sites-layout-u1-f1": {
