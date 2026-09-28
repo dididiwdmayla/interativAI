@@ -294,9 +294,20 @@ export async function pularMeta(pagina, espera = 3000) {
   return true;
 }
 
+/**
+ * `RESUMO=1`: modo resumido (economia de cota, ver CLAUDE.md) — não
+ * imprime uma linha por checagem que passou, só conta. Falha sempre
+ * aparece (lança e interrompe o arquivo, como sem o modo). Quem chama em
+ * lote (`todos.mjs`) pode então imprimir "N checagens ok" no fim.
+ */
+let contagemResumo = 0;
 export function conferir(condicao, mensagem) {
   if (!condicao) throw new Error(`Falhou: ${mensagem}`);
-  console.log(`ok - ${mensagem}`);
+  if (process.env.RESUMO) contagemResumo += 1;
+  else console.log(`ok - ${mensagem}`);
+}
+export function contagemDeChecagensResumidas() {
+  return contagemResumo;
 }
 
 /**

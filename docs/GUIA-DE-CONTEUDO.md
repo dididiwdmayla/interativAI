@@ -9,6 +9,35 @@ A referência viva é a **Unidade 2, "Faxina no site"**
 dela explica no topo por que foi feito daquele jeito. Na dúvida, copie o
 jeito dela.
 
+## Índice
+
+Leia só as seções que a tarefa pedir (regra de economia de cota do
+`CLAUDE.md`).
+
+0. Como escolher a próxima unidade
+1. A voz do computadorzinho
+2. O modelo pedagógico
+3. O formato (unidade, fase, objetivo, validadores, ações, previsão,
+   momentos roteirizados, desafio, fase só de sozinho, tela de meta)
+4. A escada de ajuda
+5. Regras de dificuldade
+6. Limites e checagens de texto
+7. Ferramentas
+8. Sites-alvo
+9. Conceitos e validador custom (9.1 Temas e conceitos)
+10. Conteúdo publicado é congelado
+11. Testes de navegador
+12. Como escrever fases de CSS (12.1 site-alvo de CSS, 12.2 qual
+    validador usar, 12.3 atalhos, 12.4 riscadas, 12.5 ações e
+    ferramentas, 12.6 a bancada, 12.7 variáveis CSS, 12.8 `@media` e
+    `larguraTela`)
+13. Passo a passo para criar uma unidade
+14. Checklist final antes do commit
+15. E5: o próprio jogo como site-alvo
+16. Modo dispositivo
+17. Lighthouse (auditoria simplificada)
+18. Projeto-ponte e publicação
+
 Arquivos que você vai usar:
 
 | Arquivo | Para quê |

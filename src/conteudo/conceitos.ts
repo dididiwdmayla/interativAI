@@ -491,6 +491,71 @@ const CATALOGO = {
     resumo: "Pôr os arquivos do site num servidor da internet, para qualquer pessoa abrir pelo endereço.",
     temas: ["servidores", "ferramentas"],
   },
+  "variavel-css": {
+    nome: "Variável CSS",
+    resumo: "Um nome que guarda um valor (--nome: valor), usado em qualquer lugar com var(--nome). Mude num lugar só, e tudo que usa ela muda junto.",
+    temas: ["interfaces"],
+  },
+  "escopo-de-variavel": {
+    nome: "Alcance de uma variável",
+    resumo: "Uma variável declarada numa peça só vale nela e em quem está dentro dela; declarada no :root, vale na página inteira.",
+    temas: ["interfaces"],
+  },
+  "contraste-de-cor": {
+    nome: "Contraste de cor",
+    resumo: "A diferença entre a cor do texto e a do fundo. Pouco contraste deixa o texto difícil de ler, principalmente para quem enxerga menos.",
+    temas: ["acessibilidade", "interfaces"],
+  },
+  "salvar-como-meu-tema": {
+    nome: "Salvar como Meu tema",
+    resumo: "Guardar o conjunto de cores que você criou como um tema novo, para usar no jogo inteiro a partir de agora.",
+    temas: ["interfaces"],
+  },
+  "meta-viewport": {
+    nome: "Meta viewport",
+    resumo: "A linha no head que avisa o navegador do celular para desenhar a página do tamanho da tela dele, em vez de uma versão gigante encolhida.",
+    temas: ["interfaces", "acessibilidade"],
+  },
+  "simulacao-sem-viewport": {
+    nome: "Sem viewport, a página desenha gigante",
+    resumo: "Sem o meta viewport, o navegador do celular desenha a página como se a tela tivesse 980px de largura e encolhe tudo para caber: fica pequeno e difícil de tocar.",
+    temas: ["interfaces", "acessibilidade"],
+  },
+  "orientacao-da-tela": {
+    nome: "Retrato e paisagem",
+    resumo: "A tela pode estar em pé (retrato, mais alta que larga) ou deitada (paisagem, mais larga que alta); o layout pode reagir a cada uma.",
+    temas: ["interfaces"],
+  },
+  "media-query": {
+    nome: "Media query (@media)",
+    resumo: "Uma regra de CSS que só vale quando a tela cumpre uma condição, como a largura mínima ou máxima: @media (max-width: 600px) { ... }.",
+    temas: ["interfaces"],
+  },
+  "breakpoint": {
+    nome: "Breakpoint",
+    resumo: "A largura de tela onde o layout muda de jeito, porque uma @media liga ou desliga ali.",
+    temas: ["interfaces"],
+  },
+  "mobile-first": {
+    nome: "Mobile first",
+    resumo: "Escrever primeiro o CSS para a tela pequena (sem @media nenhuma) e usar min-width para ir ACRESCENTANDO layout conforme a tela cresce.",
+    temas: ["interfaces"],
+  },
+  "unidade-responsiva": {
+    nome: "Unidade responsiva (%, max-width)",
+    resumo: "Uma medida que se adapta ao espaço disponível, em vez de um tamanho fixo: max-width: 100% nunca passa da largura do pai.",
+    temas: ["interfaces"],
+  },
+  "imagem-responsiva": {
+    nome: "Imagem responsiva",
+    resumo: "Uma imagem com max-width: 100% (e height: auto): nunca estoura a largura do espaço dela, em nenhuma tela.",
+    temas: ["interfaces", "acessibilidade"],
+  },
+  "rotulo-acessivel": {
+    nome: "Rótulo acessível",
+    resumo: "O texto que diz o que um link ou botão faz para quem usa leitor de tela: o texto visível ou, se for só um ícone, um aria-label.",
+    temas: ["acessibilidade", "interfaces"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

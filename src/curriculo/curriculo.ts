@@ -213,7 +213,7 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             id: "sites-publicar-u1",
             titulo: "Acessibilidade e Lighthouse",
             meta: "Levar um site de nota baixa a nota alta na auditoria de acessibilidade.",
-            temas: ["acessibilidade", "desempenho", "ferramentas"],
+            temas: ["acessibilidade", "ferramentas"],
           },
           {
             id: "sites-publicar-u2",

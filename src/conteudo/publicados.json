@@ -56,6 +56,12 @@
       "sites-estilos-u4-f2",
       "sites-estilos-u4-f3"
     ],
+    "sites-estilos-u5": [
+      "sites-estilos-u5-f1",
+      "sites-estilos-u5-f2",
+      "sites-estilos-u5-f3",
+      "sites-estilos-u5-f4"
+    ],
     "sites-layout-u1": [
       "sites-layout-u1-f1",
       "sites-layout-u1-f2",
@@ -79,6 +85,21 @@
       "sites-layout-u4-f2",
       "sites-layout-u4-f3",
       "sites-layout-u4-f4"
+    ],
+    "sites-responsivo-u1": [
+      "sites-responsivo-u1-f1",
+      "sites-responsivo-u1-f2",
+      "sites-responsivo-u1-f3"
+    ],
+    "sites-responsivo-u2": [
+      "sites-responsivo-u2-f1",
+      "sites-responsivo-u2-f2",
+      "sites-responsivo-u2-f3"
+    ],
+    "sites-publicar-u1": [
+      "sites-publicar-u1-f1",
+      "sites-publicar-u1-f2",
+      "sites-publicar-u1-f3"
     ],
     "sites-publicar-u2": [
       "sites-publicar-u2-f1",
@@ -348,6 +369,35 @@
         "valor-do-plano-destacado"
       ]
     },
+    "sites-estilos-u5-f1": {
+      "objetivos": [
+        "trocar-primaria",
+        "quantos-lugares",
+        "trocar-fundo"
+      ]
+    },
+    "sites-estilos-u5-f2": {
+      "objetivos": [
+        "previsao-alcance",
+        "escopo-mascote",
+        "escopo-painel"
+      ]
+    },
+    "sites-estilos-u5-f3": {
+      "objetivos": [
+        "cor-secundaria",
+        "salvar",
+        "trocar-e-salvar-de-novo"
+      ]
+    },
+    "sites-estilos-u5-f4": {
+      "partes": [
+        "primaria-nova",
+        "fundo-novo",
+        "texto-novo",
+        "tema-salvo"
+      ]
+    },
     "sites-layout-u1-f1": {
       "objetivos": [
         "ver-display-da-etiqueta",
@@ -461,6 +511,71 @@
         "selo-por-cima-da-fita-bolo",
         "cabecalho-acompanha-rolagem",
         "botao-flutuante"
+      ]
+    },
+    "sites-responsivo-u1-f1": {
+      "objetivos": [
+        "ligar-celular",
+        "previsao-o-que-muda",
+        "tablet-deitado"
+      ]
+    },
+    "sites-responsivo-u1-f2": {
+      "objetivos": [
+        "ver-simulacao",
+        "previsao-viewport",
+        "banner-cabe-na-tela"
+      ]
+    },
+    "sites-responsivo-u1-f3": {
+      "partes": [
+        "meta-viewport",
+        "foto-cabe",
+        "caixa-horarios-cabe"
+      ]
+    },
+    "sites-responsivo-u2-f1": {
+      "objetivos": [
+        "primeira-media",
+        "previsao-breakpoint",
+        "breakpoint-diferente"
+      ]
+    },
+    "sites-responsivo-u2-f2": {
+      "objetivos": [
+        "imagem-responsiva",
+        "previsao-mobile-first",
+        "min-width-sozinho"
+      ]
+    },
+    "sites-responsivo-u2-f3": {
+      "partes": [
+        "cabecalho-empilha",
+        "cardapio-uma-coluna",
+        "foto-responsiva"
+      ]
+    },
+    "sites-publicar-u1-f1": {
+      "objetivos": [
+        "analisar",
+        "previsao-alt",
+        "analisar-de-novo"
+      ]
+    },
+    "sites-publicar-u1-f2": {
+      "objetivos": [
+        "ordem-dos-titulos",
+        "previsao-contraste",
+        "rotulo-do-link"
+      ]
+    },
+    "sites-publicar-u1-f3": {
+      "partes": [
+        "alt-da-foto",
+        "titulo-sem-pular",
+        "contraste-do-aviso",
+        "botao-comprar-com-nome",
+        "nota-alta"
       ]
     },
     "sites-publicar-u2-f1": {
