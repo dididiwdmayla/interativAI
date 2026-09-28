@@ -21,6 +21,8 @@ const TESTES = [
   ["documento.mjs"],
   ["variaveis.mjs", "desktop"],
   ["variaveis.mjs", "retrato"],
+  ["tema.mjs", "desktop"],
+  ["tema.mjs", "retrato"],
   ["layout.mjs", "desktop"],
   ["layout.mjs", "retrato"],
   ["layout.mjs", "paisagem"],

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Carinha } from "@/componentes/mascote/Carinha";
 import { Botao } from "@/componentes/ui/Botao";
 import type { Ferramenta } from "@/ferramentas/registro";
@@ -72,6 +73,15 @@ export function CardFerramenta({ ferramenta, conhecida, toque, emFoco, aoRever }
         <div className="mt-2 flex justify-center">
           <Demo />
         </div>
+      )}
+      {ferramenta.lugar && (
+        <Link
+          href={ferramenta.lugar.href}
+          data-lugar-ferramenta={ferramenta.id}
+          className="mt-3 flex min-h-11 items-center rounded-full border-2 border-primaria px-3 text-sm font-black text-primaria hover:bg-hover"
+        >
+          {ferramenta.lugar.rotulo}
+        </Link>
       )}
       {aoRever ? (
         <Botao variante="secundario" tamanho="p" className="mt-3 min-h-11" onClick={aoRever}>

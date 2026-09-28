@@ -13,13 +13,17 @@ type Props = {
   tituloAba?: string | null;
   /** Um aviso por cima da página (a simulação dos acentos quebrados). */
   aviso?: ReactNode;
+  /** Botões no fim da barra de endereço (o "Salvar como Meu tema" da E5). */
+  acoes?: ReactNode;
+  /** Uma barra logo abaixo da de endereço (a barra de dispositivo). */
+  barra?: ReactNode;
   children: ReactNode;
   /** No celular: barra mais baixa, sem as setas de navegação. */
   compacta?: boolean;
 };
 
 /** Moldura de navegador falsa em volta do site-alvo. */
-export function JanelaNavegador({ url, tituloAba, aviso, children, compacta = false }: Props) {
+export function JanelaNavegador({ url, tituloAba, aviso, acoes, barra, children, compacta = false }: Props) {
   const temAba = tituloAba !== undefined;
   const textoAba = tituloAba && tituloAba.trim().length > 0 ? tituloAba.trim() : url;
   return (
@@ -68,7 +72,9 @@ export function JanelaNavegador({ url, tituloAba, aviso, children, compacta = fa
           <span className="text-sucesso">https://</span>
           {url}
         </div>
+        {acoes}
       </div>
+      {barra}
       <div className="relative min-h-0 flex-1">
         {children}
         {aviso}

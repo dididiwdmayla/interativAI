@@ -22,7 +22,7 @@ export function SeletorTema() {
       className="flex items-center gap-1.5 rounded-full border-2 border-borda bg-superficie px-2 py-1"
     >
       <IconePaleta className="mr-0.5 hidden text-texto-suave sm:block" />
-      {TEMAS.map((tema) => {
+      {TEMAS.filter((tema) => !tema.doJogador || progresso.meuTema !== null).map((tema) => {
         const livre = progresso.temasDesbloqueados.includes(tema.id);
         const ativo = progresso.tema === tema.id;
         const rotulo = livre

@@ -17,6 +17,7 @@ import {
 import type { EventoFase } from "./eventos";
 import { executarAcoes, type PainelDasAcoes } from "./executarAcao";
 import { criarNucleoPainel, viaDaOrigem } from "./nucleoPainel";
+import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
 /**
@@ -25,10 +26,12 @@ import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } fro
  * prévia (estilos do jogo e simulação dos acentos).
  */
 export function documentoSoltoDaFase(fase: Fase): Document {
-  const css = fase.siteAlvo.css ?? null;
+  // Site-alvo "jogo" (E5) sem folha: as cores do Doce (a fase aberta no jogo já vem pronta).
+  const siteAlvo = materializarSiteAlvo(fase.siteAlvo);
+  const css = siteAlvo.css ?? null;
   return fase.modoDocumento
-    ? criarDocumentoInteiroSolto(documentoInteiroInicial(fase.siteAlvo.head, fase.siteAlvo.body), css)
-    : criarDocumentoSolto(fase.siteAlvo.head, fase.siteAlvo.body, css);
+    ? criarDocumentoInteiroSolto(documentoInteiroInicial(siteAlvo.head, siteAlvo.body), css)
+    : criarDocumentoSolto(siteAlvo.head, siteAlvo.body, css);
 }
 
 export function criarSimulacao(fase: Fase) {
@@ -68,6 +71,14 @@ export function criarSimulacao(fase: Fase) {
     adicionarRegra: nucleo.adicionarRegra,
     escreverCss: nucleo.escreverCss,
     lerCss: nucleo.lerCss,
+    // Salvar o tema fora da tela: só o evento (o progresso de verdade não é tocado).
+    salvarTema:
+      fase.siteAlvo.tipo === "jogo"
+        ? () => {
+            eventos.push({ tipo: "temaSalvo", paresRuins: 0 });
+            return true;
+          }
+        : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });

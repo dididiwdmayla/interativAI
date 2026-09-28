@@ -21,6 +21,7 @@ import { IconeMeAjuda } from "@/componentes/icones/IconeMeAjuda";
 import { IconePainel } from "@/componentes/icones/IconePainel";
 import { IconePrevia } from "@/componentes/icones/IconePrevia";
 import { IconeRenomearTag } from "@/componentes/icones/IconeRenomearTag";
+import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -34,6 +35,7 @@ import { DemoInspecionar } from "./demos/DemoInspecionar";
 import { DemoRenomearTag } from "./demos/DemoRenomearTag";
 import { DemoSincronia } from "./demos/DemoSincronia";
 import { DemoTrilha } from "./demos/DemoTrilha";
+import { ROTA_MEU_TEMA } from "@/lib/rotas";
 import { IDS_FERRAMENTAS, type IdFerramenta, seletorFerramenta } from "./ids";
 
 export type { IdFerramenta } from "./ids";
@@ -64,6 +66,8 @@ export type Ferramenta = {
   liberarNoExperimente?: string[];
   /** Mini animação SVG opcional mostrando o gesto. */
   demo?: ComponentType;
+  /** Um lugar do jogo ligado à ferramenta, com link no card da Caixa (a oficina do Meu tema). */
+  lugar?: { rotulo: string; href: string };
 };
 
 /** O menu do botão direito (e do toque longo) fica livre no "Experimente". */
@@ -580,6 +584,29 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     liberarNoExperimente: [seletorFerramenta("previa")],
+  },
+  // E5: não existe no Chrome (lá, mudar o Styles some ao recarregar); é o
+  // jeito do jogo guardar as variáveis editadas como um tema de verdade.
+  "salvar-tema": {
+    id: "salvar-tema",
+    nome: "Salvar como Meu tema",
+    Icone: IconeSalvarTema,
+    alvo: seletorFerramenta("salvar-tema"),
+    oQueFaz: "Guarda as cores da maquete do jogo como um tema novo, o Meu tema, que vale no jogo inteiro.",
+    praQueServe:
+      "Você muda as variáveis --cor-* e vê o jogo mudar na maquete. Salvando, as cores viram um tema de verdade, que aparece na paleta lá em cima.",
+    comoUsarAqui: {
+      mouse: "Mude as variáveis do :root e clique em Salvar como Meu tema, em cima da tela do site. Antes, eu confiro se o texto continua fácil de ler.",
+      toque: "Mude as variáveis do :root e toque em Salvar como Meu tema, em cima da tela do site. Antes, eu confiro se o texto continua fácil de ler.",
+    },
+    noF12DeVerdade:
+      "não tem esse botão: o que você muda no Styles some ao recarregar. Para guardar, as variáveis vão para o arquivo CSS do site (a aba Changes do Chrome mostra o que você mudou).",
+    experimente: {
+      mouse: "Clique em Salvar como Meu tema.",
+      toque: "Toque em Salvar como Meu tema.",
+    },
+    uso: "sinal",
+    lugar: { rotulo: "Abrir a oficina do Meu tema (editar ou apagar)", href: ROTA_MEU_TEMA },
   },
 };
 

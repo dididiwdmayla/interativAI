@@ -182,7 +182,10 @@ núcleo comum.
     `@media` avaliada contra a largura da tela no motor, no painel
     Estilos (link do `var()`, valor resolvido, cabeçalho `@media`) e nos
     validadores (`larguraTela`).
-  - [ ] Etapa 3: E5 com o próprio jogo como site-alvo e o Meu tema.
+  - [x] Etapa 3: E5 com o próprio jogo como site-alvo (maquete com os
+    tokens reais), "Salvar como Meu tema" com aviso de contraste, o Meu
+    tema no seletor e no jogo inteiro, a oficina `/meu-tema` (editar e
+    apagar), `temaSalvo` e `variavelCss`.
   - [ ] Etapa 4: modo dispositivo.
   - [ ] Etapa 5: painel Lighthouse.
   - [ ] Etapa 6: projeto-ponte, exportação, guia de publicação, Meus

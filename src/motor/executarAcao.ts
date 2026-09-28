@@ -37,6 +37,8 @@ export type PainelDasAcoes = {
   escreverCss: (posicao: "inicio" | "fim", texto: string) => boolean;
   /** O texto da folha editável agora (null: a fase não tem CSS). */
   lerCss: () => string | null;
+  /** (E5) Salva a maquete do jogo como Meu tema. Só existe numa fase com site-alvo "jogo". */
+  salvarTema?: () => boolean;
 };
 
 /** Ação que não deu para executar: a mensagem diz o que quebrou. */
@@ -82,6 +84,8 @@ export function descreverAcao(acao: Acao): string {
       return `adicionarRegra ${acao.seletorRegra}`;
     case "editarCss":
       return `editarCss no ${acao.posicao}`;
+    case "salvarTema":
+      return "salvarTema";
   }
 }
 
@@ -284,6 +288,11 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "editarCss": {
       exigirCss(painel);
       if (!painel.escreverCss(acao.posicao, acao.texto)) throw new ErroAcao("editarCss não mudou nada");
+      return;
+    }
+    case "salvarTema": {
+      if (!painel.salvarTema) throw new ErroAcao('salvarTema só existe numa fase com o site-alvo do jogo (siteAlvo.tipo: "jogo")');
+      if (!painel.salvarTema()) throw new ErroAcao("não deu para salvar o tema (a maquete sem as cores do jogo?)");
       return;
     }
   }

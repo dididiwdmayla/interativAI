@@ -126,6 +126,20 @@ export type Validador =
    * `valorEfetivo`.
    */
   | { tipo: "riscada"; seletor: string; propriedade: string; seletorRegra: string; larguraTela?: number; alturaTela?: number }
+  /**
+   * (CSS) A variável `nome` (`--cor-primaria`) vale alguma coisa no
+   * elemento do `seletor` (padrão `:root`, o `<html>`): declarada nele ou
+   * herdada, com os var() de dentro já trocados. Com `valor`, compara (cores
+   * em qualquer formato); com `diferenteDoInicial: true`, pede um valor
+   * diferente do que ela tinha quando a fase abriu (bom para "troque por
+   * uma cor qualquer" quando o valor inicial depende do tema do jogador).
+   */
+  | { tipo: "variavelCss"; nome: string; valor?: string; seletor?: string; diferenteDoInicial?: boolean }
+  /**
+   * (E5) O jogador salvou a maquete como "Meu tema" desde que o objetivo
+   * começou (evento `temaSalvo`). Trava no checklist, como `evento`.
+   */
+  | { tipo: "temaSalvo" }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -188,7 +202,13 @@ export type Acao =
   /** Cria uma regra nova no fim da folha (o botão de regra nova do painel Estilos). */
   | { tipo: "adicionarRegra"; seletorRegra: string; declaracoes?: { propriedade: string; valor: string }[] }
   /** Escreve CSS no começo ou no fim da folha (o que o jogador digitaria no editor CSS). */
-  | { tipo: "editarCss"; posicao: "inicio" | "fim"; texto: string };
+  | { tipo: "editarCss"; posicao: "inicio" | "fim"; texto: string }
+  /**
+   * (E5) "Salvar como Meu tema": guarda as cores da maquete do jogo como o
+   * quarto tema. Nos testes e no lab, salva direto (sem a conversa sobre
+   * contraste). Gera `temaSalvo`.
+   */
+  | { tipo: "salvarTema" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -291,6 +311,14 @@ export type ModoObjetivo = Objetivo["modo"];
  * das cores: o CSS dele tem cores próprias. Mora em `sites/` da unidade.
  */
 export type SiteAlvo = {
+  /**
+   * Opcional. `"jogo"`: o site-alvo é uma maquete do PRÓPRIO jogo (E5),
+   * pintada só com as variáveis `--cor-*` do tema. Use o objeto pronto
+   * `SITE_ALVO_DO_JOGO` (src/motor/siteDoJogo.ts), sem `css`: a folha
+   * editável (um `:root` com os tokens reais do tema do jogador) é montada
+   * quando a fase abre. Nos testes, com o tema Doce.
+   */
+  tipo?: "jogo";
   /** Endereço de mentirinha mostrado na barra do navegador. */
   url: string;
   /** Título acessível do iframe. */

@@ -90,6 +90,48 @@ dispositivo, Lighthouse, projeto-ponte e a P2. Status resumido em
     ciclo, atalho, painel; limites exatos, unidades, orientação, listas,
     intervalo e condições desconhecidas).
 
+- [x] **Etapa 3: E5, o próprio jogo como site-alvo, e o Meu tema.**
+  - `siteAlvo.tipo: "jogo"` e o objeto pronto `SITE_ALVO_DO_JOGO`
+    (`src/motor/siteDoJogo.ts`): uma maquete do jogo (barra superior com
+    estrelas, um pedaço do mapa com a rota, o painel com a árvore, o
+    computadorzinho e dois botões) cujo head desenha tudo com
+    `var(--cor-*)`, sem nenhuma cor literal (há teste). A folha editável é
+    um `:root` com os tokens reais do tema aberto, em grupos comentados,
+    montada quando a fase abre (`materializarFase`): no jogo, com o tema
+    do jogador (o Meu tema, se for ele); nos testes, com o Doce.
+  - Tokens reais sem copiar cor nenhuma (`src/tema/tokensDoJogo.ts`): no
+    navegador, lidos das folhas da página (a regra `[data-theme=...]` do
+    tokens.css compilado); no Vitest, do arquivo tokens.css, pelo preparo
+    `testes/conteudo/preparar.ts` (também no `publicar:conteudo`).
+  - Painel Estilos: as regras "Herdado de" agora se editam, como no
+    Chrome (a edição guarda o elemento dono), então as variáveis do
+    `:root` mudam pelo painel com qualquer peça selecionada; Tab anda só
+    entre as declarações que aparecem.
+  - "Salvar como Meu tema" (botão na barra de endereço da prévia,
+    ferramenta `salvar-tema` com apresentação, card e o link "Abrir a
+    oficina do Meu tema"): lê cada token no `:root` com as variáveis
+    resolvidas, cobre o tema de base e confere o contraste dos 7 pares
+    principais (texto e fundo, cartões, painel, texto suave, texto nos
+    três botões; WCAG 2, `src/lib/contraste.ts`). Abaixo de 4,5:1, o
+    computadorzinho lista os pares e deixa salvar mesmo assim
+    (`AvisoContraste`). Salvo, o tema `meu` entra no progresso
+    (`meuTema`: cores limpas, só `--cor-*` com valor de cor seguro, base e
+    claro ou escuro), aparece no seletor e vale no jogo inteiro: um
+    `<style id="estilo-meu-tema">` posto pelo script de antes da pintura
+    (sem piscar ao recarregar) e mantido pelo `EstiloMeuTema`. Os três
+    temas do jogo passam nos 7 pares (teste).
+  - Oficina `/meu-tema`: a mesma maquete, um seletor de cor e o valor em
+    texto por variável, o contraste ao vivo, salvar (com o mesmo aviso),
+    desfazer as mudanças e apagar (volta ao tema de base).
+  - Evento `temaSalvo`, validadores `{ tipo: "temaSalvo" }` (trava no
+    checklist, como `evento`) e `{ tipo: "variavelCss"; nome; valor?;
+    seletor?; diferenteDoInicial? }` (o valor de partida depende do tema
+    do jogador, então "troque por uma cor qualquer" usa
+    `diferenteDoInicial`), ação `salvarTema` e a checagem `site-do-jogo`
+    (temaSalvo e salvarTema só no site do jogo, que vem sem css).
+  - Bancada do tema (`lab-motor-u1-f4`), `testes/conteudo/meuTema.test.ts`
+    e `testes/tema.mjs` (desktop e retrato), na bateria.
+
 ## Rodada 11: zona Layout completa (L1 a L4)
 
 Produção das quatro unidades da zona Layout (motor pronto desde a rodada

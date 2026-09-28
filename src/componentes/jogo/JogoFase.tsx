@@ -70,7 +70,13 @@ import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
 import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
-import { NOME_FOLHA_DO_JOGO } from "@/motor/css/cascata";
+import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
+import { materializarFase } from "@/motor/siteDoJogo";
+import { AvisoContraste } from "@/componentes/tema/AvisoContraste";
+import { IconeSalvarTema } from "@/componentes/icones/IconeSalvarTema";
+import { conferirContraste, coresDoTemaAtual, montarMeuTema, type ResultadoPar, valorDeCorSeguro } from "@/lib/meuTema";
+import { salvarMeuTema } from "@/lib/tema";
+import { tokensDoTema, type Tokens } from "@/tema/tokensDoJogo";
 import { AcoesConversa } from "./AcoesConversa";
 import {
   atalhoHistorico,
@@ -164,6 +170,16 @@ const FALA_ACENTOS: Fala = {
   expressao: "curioso",
 };
 
+const FALA_TEMA_SALVO: Fala = {
+  texto: "Salvei o Meu tema e já liguei no jogo inteiro! Ele aparece na paleta lá em cima, junto dos outros.",
+  expressao: "comemorando",
+};
+
+const FALA_TEMA_SALVO_COM_AVISO: Fala = {
+  texto: "Salvei do seu jeito e já liguei. Se algum texto ficar difícil de ler, dá pra ajustar e salvar de novo, ou trocar de tema na paleta.",
+  expressao: "feliz",
+};
+
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
 function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
   if (!salvo) return htmlInicialDaFase(fase);
@@ -175,7 +191,7 @@ function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined): string {
 }
 
 export function JogoFase({
-  fase,
+  fase: faseDaProp,
   local,
   aoRecomecar,
   modo = "jogo",
@@ -188,6 +204,13 @@ export function JogoFase({
 }: Props) {
   const lab = modo === "lab";
   const revisao = modo === "revisao";
+  // Site-alvo "jogo" (E5): a maquete ganha as cores do tema que o jogador usa agora.
+  const [coresDaMaquete] = useState(() => {
+    const atual = coresDoTemaAtual(obterProgresso());
+    return { base: atual.base, cores: atual.cores ?? (faseDaProp.siteAlvo.tipo === "jogo" ? tokensDoTema(atual.base) : {}) };
+  });
+  const [fase] = useState(() => materializarFase(faseDaProp, coresDaMaquete.cores));
+  const siteDoJogo = fase.siteAlvo.tipo === "jogo";
   const [salvo] = useState(() => (modo === "jogo" ? obterProgresso().fasesEmAndamento[fase.id] : undefined));
   const [bodyInicial] = useState(() => bodyParaAbrir(fase, salvo));
   const [cssInicial] = useState(() => cssParaAbrir(fase, salvo));
@@ -224,7 +247,10 @@ export function JogoFase({
   // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
   // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
   const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
-  const desafioParaMeta = desafioDaUnidade?.tipo === "desafio" ? desafioDaUnidade : null;
+  const desafioParaMeta = useMemo(
+    () => (desafioDaUnidade?.tipo === "desafio" ? materializarFase(desafioDaUnidade, coresDaMaquete.cores) : null),
+    [desafioDaUnidade, coresDaMaquete],
+  );
   const [mostrarMeta] = useState(
     () => modo === "jogo" && desafioParaMeta !== null && faseAbreComMeta(fase, local.unidade, obterProgresso()),
   );
@@ -350,6 +376,48 @@ export function JogoFase({
     [clicarLinkNaTela, obterDocumento],
   );
 
+  // "Salvar como Meu tema" (E5): lê as cores da maquete, confere o contraste e guarda.
+  const [avisoContraste, setAvisoContraste] = useState<ResultadoPar[] | null>(null);
+  /** Quem fala sobre o tema salvo (ligado ao motor mais abaixo, só quando não atrapalha). */
+  const falarDoTema = useRef<(fala: Fala) => void>(() => {});
+
+  /** As cores da maquete agora: cada token do tema de base, lido no :root com as variáveis trocadas. */
+  const coresDaMaqueteAgora = useCallback((): Tokens | null => {
+    const raiz = obterDocumento()?.documentElement;
+    if (!raiz) return null;
+    const cores: Tokens = {};
+    for (const nome of Object.keys(coresDaMaquete.cores)) {
+      const efetivo = valorEfetivo(raiz, nome)[nome];
+      if (efetivo?.tipo === "valor" && valorDeCorSeguro(efetivo.valor)) cores[nome] = efetivo.valor;
+    }
+    return cores;
+  }, [coresDaMaquete, obterDocumento]);
+
+  /**
+   * Salva o Meu tema. Sem `confirmado`, par com contraste abaixo de 4,5:1
+   * abre o aviso do computadorzinho (que deixa salvar mesmo assim); as
+   * soluções e o lab salvam direto.
+   */
+  const gravarTema = useCallback(
+    (confirmado: boolean): boolean => {
+      const novas = siteDoJogo ? coresDaMaqueteAgora() : null;
+      if (!novas) return false;
+      const meuTema = montarMeuTema(coresDaMaquete.base, coresDaMaquete.cores, novas);
+      const ruins = conferirContraste(meuTema.cores).filter((par) => !par.bom);
+      if (ruins.length > 0 && !confirmado) {
+        setAvisoContraste(ruins);
+        return false;
+      }
+      setAvisoContraste(null);
+      salvarMeuTema(meuTema);
+      tocarEfeito("desbloqueio");
+      barramento.emitir({ tipo: "temaSalvo", paresRuins: ruins.length });
+      falarDoTema.current(ruins.length > 0 ? FALA_TEMA_SALVO_COM_AVISO : FALA_TEMA_SALVO);
+      return true;
+    },
+    [barramento, coresDaMaquete, coresDaMaqueteAgora, siteDoJogo],
+  );
+
   /** As mesmas funções que a interface usa; soluções e roteiros passam por elas. */
   const painel = useMemo(
     () => ({
@@ -371,8 +439,11 @@ export function JogoFase({
       adicionarRegra,
       escreverCss,
       lerCss,
+      salvarTema: siteDoJogo ? () => gravarTema(true) : undefined,
     }),
     [
+      gravarTema,
+      siteDoJogo,
       definirPropriedade,
       alternarPropriedade,
       adicionarRegra,
@@ -477,6 +548,7 @@ export function JogoFase({
       (estado.etapa === "objetivos" && estado.pausa === null && !previsaoPendente && estado.roteiro === null) ||
       (estado.etapa === "concluida" && !estado.conclusaoAberta);
     falarSobreLink.current = livre ? falar : () => {};
+    falarDoTema.current = livre ? falar : () => {};
   }, [estado.etapa, estado.pausa, estado.roteiro, estado.conclusaoAberta, previsaoPendente, falar]);
 
   // Na primeira vez que a prévia quebra os acentos, o computadorzinho explica (quando não atrapalha).
@@ -1296,6 +1368,34 @@ export function JogoFase({
             <JanelaNavegador
               url={fase.siteAlvo.url}
               compacta={movel}
+              acoes={
+                siteDoJogo ? (
+                  <AlvoFerramenta
+                    ids={["salvar-tema"]}
+                    marcador="salvar-tema"
+                    aoAbrirCard={abrirCard}
+                    classeMarcador="-right-2 -top-1.5"
+                    as="span"
+                    className="inline-flex shrink-0"
+                  >
+                    <button
+                      type="button"
+                      data-salvar-tema
+                      onClick={() => {
+                        tocarEfeito("clique");
+                        sinalizarUso("salvar-tema");
+                        gravarTema(false);
+                      }}
+                      aria-label="Salvar como Meu tema"
+                      title="Salvar as cores da maquete como Meu tema"
+                      className="inline-flex h-7 items-center gap-1 rounded-full border-2 border-primaria bg-primaria px-2.5 text-xs font-black text-sobre-primaria hover:brightness-110 pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
+                    >
+                      <IconeSalvarTema tamanho={16} />
+                      <span className={movel ? "sr-only" : ""}>Salvar como Meu tema</span>
+                    </button>
+                  </AlvoFerramenta>
+                ) : undefined
+              }
               tituloAba={fase.modoDocumento ? tituloAba : undefined}
               aviso={
                 simulandoAcentos ? (
@@ -1393,6 +1493,14 @@ export function JogoFase({
           apresentacoes.rever(id);
         }}
       />
+      {siteDoJogo && (
+        <AvisoContraste
+          aberto={avisoContraste !== null}
+          ruins={avisoContraste ?? []}
+          aoVoltar={() => setAvisoContraste(null)}
+          aoSalvarMesmoAssim={() => gravarTema(true)}
+        />
+      )}
       {desafioParaMeta && (
         <TelaMeta
           aberta={estado.etapa === "meta"}

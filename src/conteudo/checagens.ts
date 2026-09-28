@@ -245,10 +245,12 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "nova-regra";
     case "editarCss":
       return "editor-css";
+    case "salvarTema":
+      return "salvar-tema";
   }
 }
 
-const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada"]);
+const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada", "variavelCss"]);
 const ACOES_DE_CSS: ReadonlySet<Acao["tipo"]> = new Set(["definirPropriedade", "alternarDeclaracao", "adicionarRegra", "editarCss"]);
 
 /** Onde a fase usa CSS (validadores, ações e linhas de ajuda), com um rótulo. */
@@ -308,7 +310,7 @@ function seletoresDe(fase: Fase): { onde: string; seletor: string; deAcao: boole
   const lista: { onde: string; seletor: string; deAcao: boolean }[] = [];
   for (const { onde, validador } of validadoresDe(fase)) {
     for (const item of achatarValidador(validador)) {
-      if ("seletor" in item) lista.push({ onde, seletor: item.seletor, deAcao: false });
+      if ("seletor" in item && item.seletor !== undefined) lista.push({ onde, seletor: item.seletor, deAcao: false });
     }
   }
   objetivosDe(fase).forEach((objetivo, indice) => {
@@ -665,7 +667,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       validadoresDe(fase).flatMap(({ onde, validador }) =>
         achatarValidador(validador).flatMap((item) => {
           const problemas: string[] = [];
-          if ("seletor" in item && item.seletor.trim().startsWith("$0")) {
+          if ("seletor" in item && item.seletor?.trim().startsWith("$0")) {
             problemas.push(`${onde}: "$0" só vale em ações; em validador use "selecionado"`);
           }
           if (item.tipo === "custom" && !VALIDADORES_CUSTOM[item.id]) {
@@ -736,7 +738,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     checar: (fase) => {
       const usos = usosDeCss(fase);
       const problemas: string[] = [];
-      if (usos.length > 0 && fase.siteAlvo.css === undefined) {
+      if (usos.length > 0 && fase.siteAlvo.css === undefined && fase.siteAlvo.tipo !== "jogo") {
         problemas.push(`a fase usa CSS (${usos.slice(0, 3).join("; ")}), mas o site-alvo não tem css (a folha editável)`);
       }
       // O que o jogador faz pelo painel Estilos precisa do painel na tela.
@@ -781,6 +783,28 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           .filter((item) => item.tipo === "tituloDaAba")
           .map(() => `${onde}: validador tituloDaAba numa fase sem modoDocumento (o title fica no head fixo, que o jogador não vê)`),
       );
+    },
+  },
+  {
+    id: "site-do-jogo",
+    nome: 'temaSalvo e salvarTema só com o site-alvo do jogo, que vem sem css (a folha sai do tema do jogador)',
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const doJogo = fase.siteAlvo.tipo === "jogo";
+      if (doJogo && fase.siteAlvo.css !== undefined) {
+        problemas.push('o site-alvo do jogo vem sem css: a folha (o :root com os tokens) é montada com o tema do jogador; use SITE_ALVO_DO_JOGO');
+      }
+      if (doJogo && fase.modoDocumento) problemas.push("o site-alvo do jogo não usa modoDocumento (o head da maquete é fixo)");
+      if (doJogo) return problemas;
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "temaSalvo") problemas.push(`${onde}: temaSalvo só vale numa fase com siteAlvo.tipo "jogo"`);
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        if (acoes.some((acao) => acao.tipo === "salvarTema")) problemas.push(`${onde}: salvarTema só vale numa fase com siteAlvo.tipo "jogo"`);
+      }
+      return problemas;
     },
   },
   {

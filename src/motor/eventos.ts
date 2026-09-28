@@ -40,7 +40,9 @@ export type EventoFase =
   /** Ligou ou desligou uma declaração pela checkbox do painel Estilos. */
   | { tipo: "alternouDeclaracao"; seletor: string; propriedade: string; ativa: boolean }
   /** Criou uma regra nova pelo painel Estilos. */
-  | { tipo: "adicionouRegra"; seletor: string };
+  | { tipo: "adicionouRegra"; seletor: string }
+  /** (E5) Salvou a maquete do jogo como "Meu tema". `paresRuins`: quantos pares ficaram abaixo de 4,5:1. */
+  | { tipo: "temaSalvo"; paresRuins: number };
 
 /**
  * Para onde um link levaria:
@@ -75,4 +77,5 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "editouPropriedade",
   "alternouDeclaracao",
   "adicionouRegra",
+  "temaSalvo",
 ];

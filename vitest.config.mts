@@ -13,6 +13,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    setupFiles: ["./testes/conteudo/preparar.ts"],
     include: ["testes/conteudo/**/*.test.ts", "testes/audio/**/*.test.ts"],
     reporters: ["default"],
   },

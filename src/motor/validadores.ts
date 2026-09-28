@@ -12,7 +12,7 @@ import { calcularCascata, folhasDoDocumento, normalizarSeletor, type OpcoesCasca
 import type { Tela } from "./css/midia";
 import { telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
-import { abrirAtalho, valoresDaPropriedadeIguais } from "./css/valores";
+import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
 
 /** O que um validador pode olhar. */
@@ -133,6 +133,12 @@ export function descreverValidador(validador: Validador): string {
       return `existe a regra ${validador.seletorRegra}`;
     case "riscada":
       return `${validador.propriedade} de ${validador.seletorRegra} riscada em ${validador.seletor}${naTela(validador)}`;
+    case "variavelCss":
+      return `a variável ${validador.nome}${validador.seletor ? ` em ${validador.seletor}` : ""} ${
+        validador.valor !== undefined ? `vale "${validador.valor}"` : validador.diferenteDoInicial ? "mudou de valor" : "tem valor"
+      }`;
+    case "temaSalvo":
+      return "salvou o Meu tema";
     case "todos":
       return "todos estes";
     case "algum":
@@ -287,6 +293,12 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       });
       return { passou, descricao, detalhe: situacoes.length === 0 ? "a declaração não vale nesse elemento" : `situação: ${lista(situacoes)}` };
     }
+    case "variavelCss":
+      return avaliarVariavelCss(validador, contexto, descricao);
+    case "temaSalvo": {
+      const vezes = contexto.eventos.filter((evento) => evento.tipo === "temaSalvo").length;
+      return { passou: vezes > 0, descricao, detalhe: `salvou ${vezes} vez(es)` };
+    }
     case "todos": {
       const filhos = validador.validadores.map((filho) => avaliarDetalhado(filho, contexto));
       return { passou: filhos.every((filho) => filho.passou), descricao, filhos };
@@ -352,6 +364,43 @@ function avaliarValorEfetivo(
   };
 }
 
+/** O valor de uma variável no primeiro elemento do seletor (padrão: o <html>), ou o motivo de não ter. */
+function valorDaVariavel(documento: Document, nome: string, seletor: string | undefined, opcoes: OpcoesCascata): { valor: string } | { motivo: string } {
+  const elemento = seletor ? consultar(documento, seletor)[0] : documento.documentElement;
+  if (!elemento) return { motivo: "o seletor não achou nenhum elemento" };
+  const efetivo = valorEfetivo(elemento, nome, opcoes)[nome];
+  if (!efetivo || efetivo.tipo !== "valor") return { motivo: efetivo?.motivo ?? "sem valor" };
+  return { valor: efetivo.valor };
+}
+
+/** Duas cores (em qualquer formato) iguais, ou textos iguais normalizados. */
+function valoresDeVariavelIguais(a: string, b: string): boolean {
+  const corA = lerCor(a);
+  const corB = lerCor(b);
+  if (corA && corB) return corA.every((canal, indice) => Math.abs(canal - corB[indice]) < 0.01);
+  return normalizarTexto(a).toLowerCase() === normalizarTexto(b).toLowerCase();
+}
+
+function avaliarVariavelCss(
+  validador: Extract<Validador, { tipo: "variavelCss" }>,
+  contexto: ContextoValidacao,
+  descricao: string,
+): ResultadoValidador {
+  const nome = validador.nome.trim();
+  const opcoes = contexto.tela ? { tela: contexto.tela } : {};
+  const agora = valorDaVariavel(contexto.documento, nome, validador.seletor, opcoes);
+  if ("motivo" in agora) return { passou: false, descricao, detalhe: agora.motivo };
+  let passou = true;
+  if (validador.valor !== undefined) passou = valoresDeVariavelIguais(agora.valor, validador.valor);
+  let detalhe = `vale ${agora.valor}`;
+  if (passou && validador.diferenteDoInicial) {
+    const antes = valorDaVariavel(contexto.inicial, nome, validador.seletor, opcoes);
+    passou = "motivo" in antes || !valoresDeVariavelIguais(agora.valor, antes.valor);
+    detalhe += "motivo" in antes ? " (não existia no começo)" : ` (no começo: ${antes.valor})`;
+  }
+  return { passou, descricao, detalhe };
+}
+
 export function avaliarValidador(validador: Validador, contexto: ContextoValidacao): boolean {
   return avaliarDetalhado(validador, contexto).passou;
 }
@@ -367,6 +416,7 @@ export function validadorTravado(validador: Validador): boolean {
   switch (validador.tipo) {
     case "selecionado":
     case "evento":
+    case "temaSalvo":
       return true;
     case "todos":
     case "algum":

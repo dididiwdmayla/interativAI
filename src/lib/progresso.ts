@@ -1,4 +1,5 @@
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
+import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
 import { ehTemaId, TEMA_PADRAO, TEMAS_INICIAIS, type TemaId } from "@/tema/temas";
 
 export const CHAVE_PROGRESSO = "ilha-sites:progresso:v2";
@@ -75,6 +76,8 @@ export type Progresso = {
   lente: LenteMapa | null;
   /** Insígnias: o último marco (25, 50, 75, 100) já comemorado de cada tema. */
   marcosInsignias: Record<string, number>;
+  /** (E5) As cores do "Meu tema", salvas da maquete do jogo; null enquanto não existe. */
+  meuTema: MeuTema | null;
 };
 
 /** Lente sobre o mapa: acende as unidades de um tema, ou dos temas de uma profissão. */
@@ -107,6 +110,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   trilha: "web",
   lente: null,
   marcosInsignias: {},
+  meuTema: null,
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -194,8 +198,10 @@ function lerLente(valor: unknown): LenteMapa | null {
 export function normalizarProgresso(bruto: unknown): Progresso {
   if (!ehObjeto(bruto)) return PROGRESSO_PADRAO;
 
+  const meuTema = lerMeuTema(bruto.meuTema);
+  // O Meu tema só vale enquanto as cores dele existem (apagado, some do seletor).
   const temasDesbloqueados = Array.isArray(bruto.temasDesbloqueados)
-    ? bruto.temasDesbloqueados.filter(ehTemaId)
+    ? bruto.temasDesbloqueados.filter((tema): tema is TemaId => ehTemaId(tema) && (tema !== "meu" || meuTema !== null))
     : [];
   for (const tema of TEMAS_INICIAIS) {
     if (!temasDesbloqueados.includes(tema)) temasDesbloqueados.push(tema);
@@ -229,6 +235,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     trilha: typeof bruto.trilha === "string" && bruto.trilha.length > 0 ? bruto.trilha : PROGRESSO_PADRAO.trilha,
     lente: lerLente(bruto.lente),
     marcosInsignias: lerRegistro(bruto.marcosInsignias, (item) => (ehNumero(item) ? Math.max(0, Math.min(100, item)) : null)),
+    meuTema,
   };
 }
 
