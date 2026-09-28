@@ -91,6 +91,11 @@
       "sites-responsivo-u1-f2",
       "sites-responsivo-u1-f3"
     ],
+    "sites-responsivo-u2": [
+      "sites-responsivo-u2-f1",
+      "sites-responsivo-u2-f2",
+      "sites-responsivo-u2-f3"
+    ],
     "sites-publicar-u2": [
       "sites-publicar-u2-f1",
       "sites-publicar-u2-f2"
@@ -522,6 +527,27 @@
         "meta-viewport",
         "foto-cabe",
         "caixa-horarios-cabe"
+      ]
+    },
+    "sites-responsivo-u2-f1": {
+      "objetivos": [
+        "primeira-media",
+        "previsao-breakpoint",
+        "breakpoint-diferente"
+      ]
+    },
+    "sites-responsivo-u2-f2": {
+      "objetivos": [
+        "imagem-responsiva",
+        "previsao-mobile-first",
+        "min-width-sozinho"
+      ]
+    },
+    "sites-responsivo-u2-f3": {
+      "partes": [
+        "cabecalho-empilha",
+        "cardapio-uma-coluna",
+        "foto-responsiva"
       ]
     },
     "sites-publicar-u2-f1": {

@@ -526,6 +526,31 @@ const CATALOGO = {
     resumo: "A tela pode estar em pé (retrato, mais alta que larga) ou deitada (paisagem, mais larga que alta); o layout pode reagir a cada uma.",
     temas: ["interfaces"],
   },
+  "media-query": {
+    nome: "Media query (@media)",
+    resumo: "Uma regra de CSS que só vale quando a tela cumpre uma condição, como a largura mínima ou máxima: @media (max-width: 600px) { ... }.",
+    temas: ["interfaces"],
+  },
+  "breakpoint": {
+    nome: "Breakpoint",
+    resumo: "A largura de tela onde o layout muda de jeito, porque uma @media liga ou desliga ali.",
+    temas: ["interfaces"],
+  },
+  "mobile-first": {
+    nome: "Mobile first",
+    resumo: "Escrever primeiro o CSS para a tela pequena (sem @media nenhuma) e usar min-width para ir ACRESCENTANDO layout conforme a tela cresce.",
+    temas: ["interfaces"],
+  },
+  "unidade-responsiva": {
+    nome: "Unidade responsiva (%, max-width)",
+    resumo: "Uma medida que se adapta ao espaço disponível, em vez de um tamanho fixo: max-width: 100% nunca passa da largura do pai.",
+    temas: ["interfaces"],
+  },
+  "imagem-responsiva": {
+    nome: "Imagem responsiva",
+    resumo: "Uma imagem com max-width: 100% (e height: auto): nunca estoura a largura do espaço dela, em nenhuma tela.",
+    temas: ["interfaces", "acessibilidade"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
