@@ -6,129 +6,127 @@ seguindo `docs/GUIA-DE-CONTEUDO.md` e `docs/TEMPLATE-FASE.ts`. Regra de
 economia de cota (`CLAUDE.md`): este arquivo guarda só a rodada mais
 recente; as antigas ficam em `docs/arquivo/`.
 
-**Resumo das rodadas 1 a 3:** o primeiro teste de produção em massa da
-fábrica (Unidade 1), a Unidade 6 e a zona Estilos completa, e a causa raiz
-da instabilidade da bateria no celular (o duplo toque na árvore perdendo
-a linha debaixo do dedo). Detalhe em
-`docs/arquivo/ATRITOS-FABRICA-rodadas-1-a-3.md`.
+**Resumo das rodadas 1 a 4:** o primeiro teste de produção em massa da
+fábrica (Unidade 1), a Unidade 6, a zona Estilos completa, a causa raiz
+da instabilidade da bateria no celular e a zona Layout completa (L1 a
+L4), com a jornada de teste isolada por zona (`UNIDADE=<id>`). Detalhe
+em `docs/arquivo/ATRITOS-FABRICA-rodadas-1-a-3.md` e
+`docs/arquivo/ATRITOS-FABRICA-rodada-4.md`.
 
-## Rodada 4: zona Layout (L1 a L4)
+## Rodada 5: E5, R1, R2 e P1 (a Ilha Sites fica completa)
 
-Produção da zona Layout inteira — L1 "Display", L2 "Flexbox", L3 "Grid" e
-L4 "Posição e camadas" —, a primeira zona toda de CSS de layout depois da
-E1 (modelo). Motor pronto: nenhuma ferramenta, aba nem tipo de fase novo
-foi preciso; toda unidade usa só o painel Estilos que a zona Estilos já
-apresentou.
+Produção das quatro últimas unidades da Ilha Sites num prompt só, cada
+uma com motor pronto desde a Rodada 12.
 
-### 1. `definirPropriedade` (e o "+ declaração") exigem a REGRA já existir na folha
+### 1. `alvo: "css"` em `ajudas.linha` exige `seletorRegra`; um texto de `@media` ali não é seletor válido
 
-Toda propriedade nova de layout (`display`, `flex-direction`,
-`justify-content`, `position`...) começa uma fase sem estar declarada em
-lugar nenhum: é natural o container do exercício (`.cards`, `.produtos`,
-`.destaques`) não ter regra própria nenhuma na folha inicial, só herdando
-do navegador. `definirPropriedade` (o núcleo por trás de "+ declaração")
-recusa acrescentar uma declaração numa regra que NÃO EXISTE na folha —
-ele só troca ou acrescenta declaração numa regra já escrita. A primeira
-versão da L2 e do desafio dela tropeçou exatamente nisso:
-`testar:conteudo` acusou "não deu para definir gap na regra '.cards' (a
-regra não existe...)". Correção: toda peça que vai ganhar uma
-propriedade de layout precisa de uma regra própria na folha inicial,
-mesmo vazia ou só com um `margin: 0` qualquer (como o `.promo`/`.horario`
-da E1, mas ali para `adicionarRegra`; aqui a regra já existe e o jogador
-só entra com "+ declaração").
+Ao escrever a primeira fase de R2 (`@media`), o primeiro rascunho
+apontava a linha de ajuda para `{ alvo: "css", seletorRegra: "@media
+(max-width: 600px)", ... }`, tentando indicar o BLOCO inteiro. O tipo
+`LinhaAjuda` (seção 3.7 do guia) exige um seletor de REGRA de verdade
+(`.cabecalho`, não a condição do `@media`), e a checagem de "seletores
+são CSS válido" acusa. Corrigido apontando para o seletor da regra de
+dentro do bloco (`.cabecalho`), com a fala explicando o `@media` por
+cima. Um objetivo sem `seletorRegra` nenhum (só `{ alvo: "css", fala }`)
+também não passa: o campo é obrigatório para esse `alvo`, sem exceção.
 
-**O que ajudaria:** uma linha no guia (seção 8, Sites-alvo, ou a seção 12
-de CSS) avisando que toda regra que uma solução vai tocar com
-`definirPropriedade`/`alternarDeclaracao` precisa JÁ EXISTIR na folha
-inicial (ainda que vazia); só `adicionarRegra` cria uma regra do zero.
+**O que ajudaria:** um exemplo de `linha` para objetivo de `@media` na
+seção 12.8 do guia, mostrando que o alvo é sempre a regra de dentro, não
+a condição.
 
-### 2. Uma declaração no valor inicial de uma propriedade nunca pode ser o alvo sozinho de um objetivo
+### 2. `ajudas.linha` sem valor em objetivo guiado: erro genérico, não uma mensagem de checagem
 
-`flex-direction: row` é o valor INICIAL da propriedade (sem herdar nada,
-sem regra nenhuma): um objetivo cuja única exigência é "flex-direction
-vale row" já começa cumprido antes de qualquer ação do jogador, porque o
-valor efetivo bate com o inicial mesmo sem declaração. Aconteceu no
-primeiro rascunho da L2F1 (um objetivo sozinho que "desfazia" a previsão,
-voltando o menu para row): `testar:conteudo` acusou "objetivo já passa no
-estado inicial". Corrigido trocando o objetivo por outra peça que ainda
-não é flex (a lista de redes do rodapé). Regra geral: nunca termine um
-objetivo pedindo só o valor INICIAL de uma propriedade (`INICIAIS` em
-`src/motor/css/propriedades.ts` lista todos); combine com outra
-declaração, ou mude de alvo.
+Esquecer `ajudas.linha` (ou deixar `ajudas.solucao` fora) num objetivo
+`modo: "guiado"` não gera a mensagem clara "objetivo guiado precisa de
+`ajudas.linha`" na hora — ela existe (`checagens.ts`), mas OUTRAS
+checagens que leem `objetivo.ajudas.linha.alvo` direto (sem checar
+`modo` primeiro) rodam antes e quebram com `Cannot read properties of
+undefined`, um erro de JavaScript cru, não uma mensagem de conteúdo.
+Aconteceu duas vezes (E5-F2 e E5-F3) ao copiar um objetivo sozinho como
+base e esquecer de completar as `ajudas` ao trocá-lo para guiado.
 
-### 3. `grid-template-areas` não tem checador de valor: é sempre `declaracao`, nunca `valorEfetivo`
+**O que ajudaria:** nenhuma mudança de conteúdo — é uma melhoria de
+motor (ordenar as checagens para a de "guiado precisa de linha" rodar
+antes das que leem o valor dela), registrada aqui em vez de
+"consertada", porque esta rodada é só de conteúdo (regra de parada).
 
-O motor de cascata não tenta validar o TEXTO de `grid-template-areas`
-(não é lista de medidas nem palavra-chave fixa, é uma gramática própria
-de linhas entre aspas), então a propriedade fica "desconhecida" para
-`valorEfetivo` e nenhum objetivo com ela passaria. A seção 12.2 do guia
-já avisava "para as outras, use `declaracao`", mas não citava esse caso
-específico. `declaracao` funciona bem aqui porque compara o texto
-declarado normalizado (`valoresDaPropriedadeIguais` cai no comparador
-genérico quando a propriedade não tem checador próprio).
+### 3. Id de conceito não é o mesmo que id de ferramenta
 
-**O que ajudaria:** citar `grid-template-areas` (e qualquer atalho sem
-checador em `CHECADORES`) como exemplo explícito na seção 12.2 do guia,
-ao lado da tabela "Quero conferir... Use...".
+`revisa`/`prerequisitos`/`pratica` usam ids do catálogo de CONCEITOS
+(`src/conteudo/conceitos.ts`), não ids de FERRAMENTAS
+(`src/ferramentas/ids.ts`) — mas alguns nomes coincidem na cabeça de
+quem escreve ("seletor de cor" é uma ferramenta E um jeito de escolher
+cor, mas só a ferramenta tem id; não existe o conceito
+`seletor-de-cor`). Aconteceu na E5-F1 (`revisa: [...,
+"seletor-de-cor"]`): a checagem "conceitos existem no catálogo" acusa
+direto, com o nome exato que faltou — rápido de corrigir, mas vale o
+registro porque se repetiu (tentei de novo com `editar-valor-css` na
+R1-F2).
 
-### 4. Bateria de teste isolada por zona: `testes/layout.mjs` e o parâmetro `UNIDADE=`
+### 4. Parte de desafio com `solucaoDeTeste: []` nunca passa "na sua vez"
 
-Com a zona Layout inteira dependendo de 35 fases anteriores (U1 a U6 e
-E1 a E4) já concluídas, estender a jornada única `unidades.mjs` faria
-toda rodada de teste de uma unidade nova repetir esse conteúdo antigo (os
-tais ~45 min citados no prompt desta rodada). Em vez de misturar tudo num
-arquivo só, a zona ganhou `testes/layout.mjs`, um script novo e
-independente que:
+Uma parte cujo validador já fica satisfeito pelas AÇÕES de partes
+anteriores (por exemplo, um `cabeNaTela` final depois de três correções
+de largura) não pode ter `solucaoDeTeste: []`: a checagem "as soluções
+cumprem cada parte na hora certa" acusa "já estava marcada antes da
+própria solução", porque ela conta como sempre pronta demais cedo, e a
+ORDEM das partes vira ambígua para quem joga (qual delas o jogador
+"resolveu" de fato?). Removido o validador resumo redundante na R1-F3 em
+vez de forçar uma solução vazia.
 
-- semeia o progresso direto com as 35 fases de Elementos e Estilos
-  concluídas (ids hardcoded, de propósito: é ferramenta de teste, não
-  motor; `publicados.json` seria a fonte de verdade se um dia a lista
-  mudar) e todas as ferramentas já apresentadas, entrando direto na ilha
-  Sites com a zona Layout disponível;
-- aceita `UNIDADE=<id>` para semear também as unidades da própria Layout
-  anteriores à pedida, rodando só a jornada de uma unidade (útil
-  exatamente no ciclo "escrever fase -> testar -> repetir" pedido nesta
-  rodada).
+### 5. Duas partes de desafio com a MESMA `solucaoDeTeste` colidem
 
-Registrado em `testes/todos.mjs` (bateria completa) e no `testes/README.md`.
-A jornada única `unidades.mjs` continua cobrindo Elementos e Estilos (U1 a
-E4); só o contador final ("Sites com X de Y unidades" no mundo) precisou
-subir a cada unidade nova da Layout publicada.
+Parecido com o item 4: se duas partes usam exatamente a mesma ação como
+solução (por exemplo, "acrescentar uma `@media`" e "o cabeçalho empilha
+no celular", quando o jeito de fazer as duas é o mesmo bloco de CSS), a
+segunda parte já passa quando a primeira roda, e a checagem acusa. Em
+vez de inventar uma ação diferente artificial, a R2-F3 fundiu as duas
+num `todos` (uma parte só, com dois validadores).
 
-### 5. Um flake de dev-server, não do conteúdo
+### 6. `revisarEm` só pode apontar para uma fase da MESMA unidade
 
-Numa das primeiras rodadas do `testes/layout.mjs` com `UNIDADE=` (a
-primeira vez que aquela rota específica era pedida na sessão do `next
-dev`), apareceu um console error 404 isolado, sem relação com nenhum
-seletor ou fase; a mesma rodada, repetida na sequência, saiu limpa.
-Consistente com a compilação sob demanda do Turbopack em dev na primeira
-visita a uma rota (não reproduzido em builds seguintes): não gerou
-correção de conteúdo nem de motor, só o registro aqui para não confundir
-quem vir um 404 isolado numa rodada futura.
+O tipo (`ParteDesafio.revisarEm`) já documenta isso, mas vale reforçar
+na prática: um desafio não pode revisitar uma fase de uma unidade
+ANTERIOR (mesmo que a habilidade tenha sido ensinada lá) — só fases da
+própria unidade, que têm pelo menos um objetivo guiado. Isso empurrou a
+R1 a ensinar de forma guiada, na própria Fase 2, o conserto de uma peça
+com largura fixa maior que a tela (ainda que como objetivo "sozinho"),
+só para o desafio poder ter uma parte parecida com um "Rever" que faça
+sentido.
 
-### 6. Um clique perto do canto pode cair na setinha de expandir, no toque
+### 7. `/lab/fases`, "Aplicar solução do objetivo atual" e desafios: o checklist não atualiza sozinho depois de uma ação sintética
 
-A primeira versão de `selecionarNoRobusto` (o ajudante de seleção pela
-árvore do `layout.mjs`) clicava perto do canto esquerdo da linha (posição
-fixa) para não cair fora dela quando um atributo comprido quebra a linha
-em várias, um problema real visto em paisagem. Só que em retrato e
-paisagem (toque), a área de toque da setinha de expandir/recolher de um
-nó colapsado é maior que a marca visível (alvo de 44 px), e esse mesmo
-canto passou a cair nela para uma linha sem atributo comprido (o
-`<header id="cabecalho">`, colapsado): o clique expandia o nó em vez de
-selecioná-lo, e a seleção nunca mudava. Corrigido com duas tentativas: o
-canto primeiro, o centro da linha depois (como o `tocarNo` de
-`testes/util.mjs`) se a primeira não selecionar — cobre os dois casos sem
-precisar calcular a posição da setinha.
+Reproduzido também numa unidade antiga e publicada (U6-F3, "Marcos
+Conserta Bikes"), então NÃO é um bug desta rodada: aplicar a solução de
+uma parte de um DESAFIO pelo botão do Lab (sem nenhuma interação real de
+UI entre um clique e outro) deixa `data-feita` da parte em `false`
+mesmo com o validador já passando — um clique qualquer na árvore
+(mudando a seleção) destrava o recálculo. `testar:conteudo` não é afetado
+(ele usa o motor direto, sem esse botão), e o jogo real também não (o
+jogador sempre interage com alguma coisa entre uma ação e outra). Só
+atrapalha quem usa o Lab para conferir um desafio rodando "Aplicar
+solução" em sequência rápida sem clicar em nada entre elas — registrado
+aqui para não confundir quem vir isso numa unidade futura.
 
-### 7. `mapa.mjs` esperava a Layout "planejada"
+### 8. Unidade nova pode não ter nenhum conceito de algum tema que o currículo já declarava
 
-Como nas rodadas passadas (U6 e E1), publicar a primeira unidade de uma
-zona nova quebra um teste hardcoded que checava essa zona como
-"planejada": `mapa.mjs` esperava `sites-layout-u1` com `data-estado`
-"planejada" e o card dela dizendo "Em breve". Corrigido para checar
-`sites-layout-u1` como "bloqueada" (ela é pronta agora, só espera as
-unidades anteriores da Ilha Sites) e a próxima zona sem conteúdo nenhum
-(`sites-responsivo-u1`) como a "planejada" de verdade. Padrão a repetir:
-sempre que uma zona ganha a primeira unidade, `mapa.mjs` precisa apontar
-para a zona planejada seguinte.
+`curriculo.ts` já trazia `temas: ["acessibilidade", "desempenho",
+"ferramentas"]` para a P1, escrito antes do conteúdo existir. Como a P1
+acabou não ensinando nada de desempenho (~~performance~~; ficou só
+acessibilidade e a ferramenta Lighthouse), a checagem "os temas
+declarados batem com os dos conceitos" acusou. Corrigido tirando
+`"desempenho"` da declaração — o `MAPA-CURRICULAR.md` e o `curriculo.ts`
+descrevem a INTENÇÃO antes de escrever; o conteúdo de verdade é que
+decide os temas finais.
+
+### 9. Tema de insígnia esperando 100% das unidades de Sites: um conceito sem aquele tema quebra a conta
+
+`temas.test.ts` tem um teste que espera "toda unidade de Sites soma para
+a insígnia Interfaces" (todas as 19, até agora, tocavam CSS/HTML de
+alguma forma). A P1 é a primeira cujo foco central é auditoria, não
+interface — sem nenhum conceito com o tema `interfaces`, ela ficou de
+fora da conta, e o teste (que deriva o total das próprias `UNIDADES`,
+não um número fixo) acusou a diferença. Corrigido acrescentando o tema
+`interfaces` (além de `acessibilidade`) ao conceito `rotulo-acessivel`
+— um rótulo de link/botão também é, de fato, uma decisão de interface,
+então o ajuste é honesto, não só para passar no teste.

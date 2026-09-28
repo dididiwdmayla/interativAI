@@ -40,9 +40,8 @@ núcleo comum.
   (`publicar:conteudo`), guia, template, atritos.
 - Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (vazio),
   desbloqueios.
-- Conteúdo: Ilha Sites › Elementos completa (U1 a U6); Estilos completa
-  (E1 a E4); Layout completa (L1 a L4). Só faltam E5 (requer motor),
-  Responsivo e Publicar.
+- Conteúdo: **Ilha Sites completa** — Elementos (U1 a U6), Estilos (E1 a
+  E5), Layout (L1 a L4), Responsivo (R1 e R2) e Publicar (P1 e P2).
 - Rodada 9 (painel Estilos, modo documento, ROADMAP):
   - `docs/ROADMAP.md` (este arquivo) e a regra de atualizar o Status no
     fim de todo prompt (`PROJETO.md` e guia).
@@ -198,26 +197,74 @@ núcleo comum.
     R2) e a P1 liberadas (sem `requerMotor`), esperando o conteúdo.
   - Bateria completa verde nos três layouts, console limpo.
 
+- **Rodada 13: E5, R1, R2 e P1 — a Ilha Sites fica completa** (detalhe em
+  `docs/PROGRESSO.md` e `docs/ATRITOS-FABRICA.md`, "Rodada 5", um commit
+  por unidade):
+  - **E5 "Variáveis e temas"** (`sites-estilos-u5`, última da zona
+    Estilos): variável CSS e `var()`, o alcance de uma variável (no
+    `:root` ou numa regra só) e "Salvar como Meu tema", tudo na maquete
+    do próprio jogo (`SITE_ALVO_DO_JOGO`). O desafio usa o mesmo
+    site-alvo dos micro-passos (decisão registrada no arquivo da fase: a
+    meta da unidade É o tema do próprio jogo, não existe "outro site"
+    possível aqui).
+  - **R1 "Modo dispositivo"** (`sites-responsivo-u1`, abre a zona
+    Responsivo): ligar o modo dispositivo, trocar de aparelho, girar, o
+    meta viewport e a simulação de 980px sem ele. Desafio: diagnosticar
+    três problemas de celular numa academia (site novo). A partir desta
+    unidade, `modo-dispositivo` deixou de ser apresentado pela P2 (que
+    passou a só revisar).
+  - **R2 "Media queries e mobile first"** (`sites-responsivo-u2`, fecha a
+    zona Responsivo): a sintaxe de `@media`, breakpoint, imagem
+    responsiva e mobile first (`min-width` acrescentando, em vez de
+    `max-width` tirando). Desafio: o restaurante do `MAPA-CURRICULAR.md`.
+  - **P1 "Acessibilidade e Lighthouse"** (`sites-publicar-u1`, abre a
+    zona Publicar, antes da P2 na ordem): a aba Lighthouse de verdade
+    pela primeira vez, alt, ordem dos títulos, contraste mínimo (revisa a
+    E5) e rótulo acessível. Desafio: uma livraria de nota baixa a
+    Acessibilidade 90+. A partir desta unidade, `lighthouse` deixou de
+    ser apresentado pela P2. 3 conceitos novos no catálogo entre as
+    quatro unidades, todos com temas.
+  - **A Ilha Sites fica completa**: as 19 unidades das seis zonas
+    (Elementos, Estilos, Layout, Responsivo, Publicar) prontas.
+  - Verificado em cada unidade: `testar:conteudo`, TypeScript limpo,
+    `/lab/fases` (as fases de prática jogadas de ponta a ponta, console
+    limpo), `publicar:conteudo`, build e lint. Sem bateria completa
+    (prompt só de conteúdo, os motores não mudaram).
+  - **Não feito nesta rodada** (ver "Pendências"): jornadas Playwright
+    pelo MAPA (como `layout.mjs`/`publicar.mjs`) para E5, R1, R2 e P1, e
+    os três layouts (retrato/paisagem) das fases de desafio.
+
 ### Em andamento
 
 (nada no momento)
 
-### Pendente de decisão
+### Pendências
 
-(nenhuma no momento)
+- **Jornadas de navegador pelo mapa das unidades novas.** E5, R1, R2 e
+  P1 foram verificadas por `testar:conteudo` (que reproduz o mesmo motor
+  de validação e ações do jogo real) e por fases de prática jogadas de
+  ponta a ponta em `/lab/fases` no desktop; faltam as jornadas
+  Playwright pelo MAPA (mundo → ilha → fase, como `testes/layout.mjs` e
+  `testes/publicar.mjs` fazem) e a cobertura de retrato/paisagem,
+  inclusive dos desafios. Ao escrever essas jornadas, seguir o padrão
+  dinâmico de `publicar.mjs` (`prontasDaIlha`/`PUBLICADAS` de
+  `testes/curriculo.mjs`) em vez de listas de fases hardcoded — evita o
+  atrito registrado nas rodadas 4 e 5 do `ATRITOS-FABRICA.md` de toda
+  zona nova quebrar o semeado das zonas seguintes.
+- **`/lab/fases`, "Aplicar solução do objetivo atual" num desafio:** o
+  checklist não recalcula sozinho depois de uma ação sintética sem
+  nenhuma interação real de UI entre uma parte e outra (reproduzido
+  também num desafio antigo e publicado, U6-F3; não afeta
+  `testar:conteudo` nem o jogo real). Detalhe:
+  `docs/ATRITOS-FABRICA.md`, "Rodada 5", item 7.
 
 ### Próximo (em ordem)
 
-1. Sonnet: E5, R1, R2 e P1 num prompt só (os motores estão prontos; o
-   guia de conteúdo tem as seções 12.7, 12.8 e 15 a 18). Ao escrever R1 e
-   P1, tirar "modo-dispositivo" e "lighthouse" do `apresentar` da P2-f1 e
-   passar os dois conceitos dela para `revisa` (nota no topo de
-   `fase-1-arquivos.ts`).
-2. Opus: Revisão do dia (ponto fixo no mapa com desafios curtos por
+1. Opus: Revisão do dia (ponto fixo no mapa com desafios curtos por
    revisão espaçada).
-3. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
+2. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
    `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
-4. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
+3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
    de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
    Ofício), intercalados com conteúdo, e a trilha Automação industrial a
    partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha
