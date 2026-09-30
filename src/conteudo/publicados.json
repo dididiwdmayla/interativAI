@@ -110,6 +110,13 @@
       "sites-ser-encontrado-u1-f2",
       "sites-ser-encontrado-u1-f3",
       "sites-ser-encontrado-u1-f4"
+    ],
+    "sites-ser-encontrado-u2": [
+      "sites-ser-encontrado-u2-f1",
+      "sites-ser-encontrado-u2-f2",
+      "sites-ser-encontrado-u2-f3",
+      "sites-ser-encontrado-u2-f4",
+      "sites-ser-encontrado-u2-f5"
     ]
   },
   "fases": {
@@ -627,6 +634,43 @@
         "titulo-inteiro",
         "descricao-convite"
       ]
+    },
+    "sites-ser-encontrado-u2-f1": {
+      "objetivos": [
+        "nome-vira-h1",
+        "um-h1-so"
+      ]
+    },
+    "sites-ser-encontrado-u2-f2": {
+      "objetivos": [
+        "resposta-com-preco",
+        "resposta-com-horario",
+        "apagar-enchimento",
+        "achar-enchimento-escondido"
+      ]
+    },
+    "sites-ser-encontrado-u2-f3": {
+      "objetivos": [
+        "trocar-clique-aqui",
+        "trocar-saiba-mais",
+        "alt-nas-fotos"
+      ]
+    },
+    "sites-ser-encontrado-u2-f4": {
+      "objetivos": [
+        "foto-de-baixo-preguicosa",
+        "galeria-toda-menos-a-capa"
+      ]
+    },
+    "sites-ser-encontrado-u2-f5": {
+      "partes": [
+        "h1-certo",
+        "texto-com-preco",
+        "sem-enchimento",
+        "link-que-diz-destino",
+        "fotos-com-alt",
+        "galeria-preguicosa"
+      ]
     }
   },
   "itensRevisao": [
@@ -843,6 +887,18 @@
     "index-html-1",
     "index-html-2",
     "publicar-site-1",
-    "publicar-site-2"
+    "publicar-site-2",
+    "h1-da-pagina-1",
+    "h1-da-pagina-2",
+    "texto-que-responde-1",
+    "texto-que-responde-2",
+    "enchimento-de-palavra-chave-1",
+    "enchimento-de-palavra-chave-2",
+    "texto-de-link-1",
+    "texto-de-link-2",
+    "velocidade-da-pagina-1",
+    "velocidade-da-pagina-2",
+    "imagem-preguicosa-1",
+    "imagem-preguicosa-2"
   ]
 }

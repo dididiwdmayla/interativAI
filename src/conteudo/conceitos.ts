@@ -583,6 +583,37 @@ const CATALOGO = {
     resumo: "Uma meta no head que pede para a página ficar fora da busca: ela continua no ar para quem tem o link.",
     temas: ["presenca-digital"],
   },
+  // Zona Ser encontrado (opcional), S2: SEO na página
+  "h1-da-pagina": {
+    nome: "h1 da página",
+    resumo: "O título principal da página, um só, que diz do que ela trata: a busca e o leitor de tela se orientam por ele.",
+    temas: ["presenca-digital", "acessibilidade"],
+  },
+  "enchimento-de-palavra-chave": {
+    nome: "Enchimento de palavra-chave",
+    resumo: "Repetir a mesma palavra sem sentido para tentar subir na busca: só deixa o texto ruim de ler.",
+    temas: ["presenca-digital"],
+  },
+  "texto-que-responde": {
+    nome: "Texto que responde",
+    resumo: "Um texto que diz o que a pessoa foi buscar (preço, horário, como funciona), com as palavras que ela usaria.",
+    temas: ["presenca-digital"],
+  },
+  "texto-de-link": {
+    nome: "Texto de link",
+    resumo: "O texto do link diz para onde ele leva (\"Veja o cardápio\"), em vez de \"clique aqui\", que fora da frase não diz nada.",
+    temas: ["presenca-digital", "acessibilidade"],
+  },
+  "velocidade-da-pagina": {
+    nome: "Velocidade da página",
+    resumo: "Quanto a página demora para aparecer: foto pesada e muita coisa para baixar fazem a pessoa desistir antes de ver.",
+    temas: ["desempenho", "presenca-digital"],
+  },
+  "imagem-preguicosa": {
+    nome: "Imagem preguiçosa (lazy)",
+    resumo: "Com loading=\"lazy\" na img, a foto só baixa quando a pessoa rola até perto dela, e a página abre mais rápido.",
+    temas: ["desempenho"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -112,6 +112,12 @@ import { ITENS_ROTULO_ACESSIVEL } from "./rotulo-acessivel";
 import { ITENS_CSS_EXTERNO } from "./css-externo";
 import { ITENS_INDEX_HTML } from "./index-html";
 import { ITENS_PUBLICAR_SITE } from "./publicar-site";
+import { ITENS_H1_DA_PAGINA } from "./h1-da-pagina";
+import { ITENS_TEXTO_QUE_RESPONDE } from "./texto-que-responde";
+import { ITENS_ENCHIMENTO_DE_PALAVRA_CHAVE } from "./enchimento-de-palavra-chave";
+import { ITENS_TEXTO_DE_LINK } from "./texto-de-link";
+import { ITENS_VELOCIDADE_DA_PAGINA } from "./velocidade-da-pagina";
+import { ITENS_IMAGEM_PREGUICOSA } from "./imagem-preguicosa";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -229,6 +235,13 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_CSS_EXTERNO,
   ...ITENS_INDEX_HTML,
   ...ITENS_PUBLICAR_SITE,
+  // S2 (SEO na página)
+  ...ITENS_H1_DA_PAGINA,
+  ...ITENS_TEXTO_QUE_RESPONDE,
+  ...ITENS_ENCHIMENTO_DE_PALAVRA_CHAVE,
+  ...ITENS_TEXTO_DE_LINK,
+  ...ITENS_VELOCIDADE_DA_PAGINA,
+  ...ITENS_IMAGEM_PREGUICOSA,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
