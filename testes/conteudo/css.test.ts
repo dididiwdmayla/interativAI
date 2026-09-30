@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
 import { FASES_LABORATORIO } from "@/conteudo/laboratorio/bancadaEstilos";
-import type { FasePratica, Validador } from "@/conteudo/tipos";
+import type { Fase, FasePratica, Validador } from "@/conteudo/tipos";
 import { criarSimulacao } from "@/motor/simulacao";
 
 const CSS = `body {
@@ -182,7 +182,7 @@ describe("CSS na simulação (o mesmo núcleo da interface)", () => {
 });
 
 describe("checagens de fases de CSS", () => {
-  function problemas(fase: FasePratica): string[] {
+  function problemas(fase: Fase): string[] {
     const contexto = { unidades: [], fases: [fase] };
     return REGRAS_DE_FASE.flatMap((regra) => (regra.id === "partes-do-desafio" ? [] : regra.checar(fase, contexto)));
   }

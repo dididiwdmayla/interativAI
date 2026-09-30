@@ -56,5 +56,11 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "lighthouse";
     case "levarProMundo":
       return "levar-pro-mundo";
+    case "clicarNaPrevia":
+      return "medicao";
+    case "simularVisita":
+      return "link-rastreavel";
+    case "configurarCampanha":
+      return "simulador-campanha";
   }
 }

@@ -20,6 +20,7 @@
  * Tudo aqui é função pura sobre o progresso e um "hoje" dado (os testes
  * usam relógio falso). Quem chama pega o dia com `diaLocal()`.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { FASES, UNIDADES } from "@/conteudo";
 import type { IdConceito } from "@/conteudo/conceitos";
 import { ITENS_REVISAO } from "@/conteudo/revisao";
@@ -46,7 +47,7 @@ export const ITENS_POR_SESSAO = 5;
 
 /** Os conceitos que uma fase ensina: os da fase (prática) e os declarados nos objetivos. */
 export function conceitosEnsinadosPor(fase: Fase): IdConceito[] {
-  if (fase.tipo !== "pratica") return [];
+  if (!temObjetivos(fase)) return [];
   return [...new Set([...fase.conceitos, ...fase.objetivos.flatMap((objetivo) => objetivo.conceitos ?? [])])];
 }
 
@@ -55,7 +56,7 @@ export function conceitosEnsinadosPor(fase: Fase): IdConceito[] {
  * os que ele pratica (a ajuda do desafio é o Rever).
  */
 function conceitosDaFase(fase: Fase): IdConceito[] {
-  return fase.tipo === "pratica" ? conceitosEnsinadosPor(fase) : fase.tipo === "desafio" ? [...fase.conceitos] : [];
+  return temObjetivos(fase) ? conceitosEnsinadosPor(fase) : fase.tipo === "desafio" ? [...fase.conceitos] : [];
 }
 
 function novoConceito(hoje: string): EstadoConceitoRevisao {
@@ -74,7 +75,7 @@ export function registrarFaseConcluida(estado: EstadoRevisao, fase: Fase, precis
     const atual = conceitos[id];
     if (!atual) {
       // Desafio só reinicia o que a prática já pôs na fila; não inventa conceito novo.
-      if (fase.tipo !== "pratica") continue;
+      if (!temObjetivos(fase)) continue;
       conceitos[id] = novoConceito(hoje);
       mudou = true;
     } else if (precisouDeAjuda) {

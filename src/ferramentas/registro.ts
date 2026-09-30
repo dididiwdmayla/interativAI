@@ -28,6 +28,9 @@ import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
 import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeDadosEstruturados } from "@/componentes/icones/IconeDadosEstruturados";
 import { IconeResultadoBusca } from "@/componentes/icones/IconeResultadoBusca";
+import { IconeCampanha } from "@/componentes/icones/IconeCampanha";
+import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
+import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -739,6 +742,68 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     experimente: {
       mouse: "Clique na lista de blocos.",
       toque: "Toque na lista de blocos.",
+    },
+    uso: "tocar",
+  },
+  // Medição simulada: o site-alvo não roda JavaScript, então o jogo faz o
+  // papel do código de medição (a tela explica).
+  medicao: {
+    id: "medicao",
+    nome: "Medição",
+    Icone: IconeMedicao,
+    alvo: seletorFerramenta("medicao"),
+    oQueFaz: "Mostra os eventos chegando, como o relatório em tempo real de uma ferramenta de análise: cada clique medido, com a origem da visita.",
+    praQueServe:
+      "Serve para saber o que as pessoas FAZEM no site: quantas clicaram no WhatsApp, quantas mandaram o pedido. Visita não é cliente; o evento de conversão é.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Medição. Clique, na tela do site, numa peça com data-evento e veja o evento chegar no relatório.",
+      toque: "Abra a aba Medição. Toque, na tela do site, numa peça com data-evento e veja o evento chegar no relatório.",
+    },
+    noF12DeVerdade:
+      "não fica no F12: é um código de medição instalado no site que manda os eventos para uma ferramenta de análise. Aqui o jogo simula esse código, que você aprende a escrever na ilha Páginas vivas.",
+    experimente: {
+      mouse: "Clique no relatório.",
+      toque: "Toque no relatório.",
+    },
+    uso: "tocar",
+  },
+  "link-rastreavel": {
+    id: "link-rastreavel",
+    nome: "Link rastreável",
+    Icone: IconeLinkRastreavel,
+    alvo: seletorFerramenta("link-rastreavel"),
+    oQueFaz: "Monta um link com utm_source, utm_medium e utm_campaign no fim, para a medição saber de onde veio cada visita.",
+    praQueServe:
+      "Com um link diferente no Instagram, no panfleto e no e-mail, dá para ver qual divulgação trouxe gente. A página aberta é a mesma: só a medição lê o fim do link.",
+    comoUsarAqui: {
+      mouse: "Na aba Medição, preencha origem, meio e campanha. Copie o link, ponha num href ou clique em Simular uma visita.",
+      toque: "Na aba Medição, preencha origem, meio e campanha. Copie o link, ponha num href ou toque em Simular uma visita.",
+    },
+    noF12DeVerdade:
+      "não precisa de ferramenta: é só texto no fim do endereço. Existem construtores de link prontos nas ferramentas de análise, e o relatório de aquisição mostra as origens.",
+    experimente: {
+      mouse: "Clique no construtor de link.",
+      toque: "Toque no construtor de link.",
+    },
+    uso: "tocar",
+  },
+  "simulador-campanha": {
+    id: "simulador-campanha",
+    nome: "Simulador de campanha",
+    Icone: IconeCampanha,
+    alvo: seletorFerramenta("simulador-campanha"),
+    oQueFaz: "Simula um dia de anúncio pago numa busca: orçamento, palavra-chave e lance, o leilão com os concorrentes, os cliques e os clientes.",
+    praQueServe:
+      "Mostra por dentro por que uma página ruim queima o dinheiro do anúncio: com a mesma verba, uma página melhor paga menos por clique e transforma mais cliques em clientes.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Campanha. Mude orçamento, palavra-chave e lance e veja o leilão e o dia mudarem. Melhore a página e compare.",
+      toque: "Abra a aba Campanha. Mude orçamento, palavra-chave e lance e veja o leilão e o dia mudarem. Melhore a página e compare.",
+    },
+    noF12DeVerdade:
+      "não fica no F12: a campanha é montada na plataforma de anúncios. O que o programador controla é a página de destino (rápida, clara e com o que a pessoa buscou) e a medição da conversão.",
+    experimente: {
+      mouse: "Clique no resultado do dia.",
+      toque: "Toque no resultado do dia.",
     },
     uso: "tocar",
   },

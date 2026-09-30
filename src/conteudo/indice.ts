@@ -3,6 +3,7 @@
  * e revisado. Vai alimentar o computadorzinho navegador ("não sei o que é
  * div, onde vejo?"); por enquanto aparece no /lab/fases.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { FASES } from "./index";
 import { CONCEITOS, type Conceito, type IdConceito } from "./conceitos";
 import type { Fase } from "./tipos";
@@ -40,10 +41,10 @@ export function montarIndice(fases: readonly Fase[] = FASES): EntradaIndice[] {
   for (const fase of fases) {
     for (const id of fase.conceitos) {
       // Desafio e projeto-ponte praticam o que a fase lista; só a prática ensina.
-      if (fase.tipo !== "pratica") entrada(id).praticam.push(fase.id);
+      if (!temObjetivos(fase)) entrada(id).praticam.push(fase.id);
       else entrada(id).ensinam.push(fase.id);
     }
-    if (fase.tipo === "pratica") for (const id of fase.pratica ?? []) entrada(id).praticam.push(fase.id);
+    if (temObjetivos(fase)) for (const id of fase.pratica ?? []) entrada(id).praticam.push(fase.id);
     for (const id of fase.revisa) entrada(id).revisam.push(fase.id);
     for (const id of fase.prerequisitos) entrada(id).pedem.push(fase.id);
   }

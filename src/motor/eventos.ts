@@ -1,3 +1,5 @@
+import type { Utm } from "./medicao";
+
 /**
  * De onde veio uma seleção.
  * - "arvore" e "teclado": clique ou setas na árvore de elementos;
@@ -50,7 +52,13 @@ export type EventoFase =
   /** (Lighthouse) Rodou a auditoria (o botão Analisar). */
   | { tipo: "auditou"; notas: Record<"acessibilidade" | "boas-praticas" | "seo", number> }
   /** (Publicar) Levou o projeto pro mundo: o .zip com os arquivos (os nomes). */
-  | { tipo: "exportouProjeto"; arquivos: string[] };
+  | { tipo: "exportouProjeto"; arquivos: string[] }
+  /** (Medição) Um clique num elemento com data-evento: o evento medido, com a origem da visita (utm) ou null. */
+  | { tipo: "eventoMedido"; nome: string; origem: Utm | null }
+  /** (Medição) Uma visita simulada por um link rastreável. */
+  | { tipo: "visitaSimulada"; utm: Utm }
+  /** (Campanha) Mudou o orçamento, a palavra-chave ou o lance. */
+  | { tipo: "configurouCampanha"; orcamento: number; palavra: string; lance: number };
 
 /**
  * Para onde um link levaria:
@@ -90,4 +98,7 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "girou",
   "auditou",
   "exportouProjeto",
+  "eventoMedido",
+  "visitaSimulada",
+  "configurouCampanha",
 ];

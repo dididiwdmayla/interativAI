@@ -4,6 +4,7 @@
  * foram concluídas (contando as planejadas, porque a ideia é mostrar o
  * percurso inteiro) e os marcos das insígnias.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { FASES, UNIDADES } from "@/conteudo";
 import { conceitoDoId } from "@/conteudo/conceitos";
 import type { Fase, Unidade } from "@/conteudo/tipos";
@@ -29,7 +30,7 @@ export function temasDerivados(unidade: Unidade, fases: readonly Fase[] = FASES)
   for (const id of unidade.fases) {
     const fase = fases.find((item) => item.id === id);
     if (!fase) continue;
-    const conceitos = [...fase.conceitos, ...(fase.tipo === "pratica" ? (fase.pratica ?? []) : [])];
+    const conceitos = [...fase.conceitos, ...(temObjetivos(fase) ? (fase.pratica ?? []) : [])];
     for (const conceito of conceitos) temas.push(...conceitoDoId(conceito).temas);
   }
   return ordenar(temas);

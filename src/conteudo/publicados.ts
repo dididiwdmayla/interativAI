@@ -12,6 +12,7 @@
  * `npm run publicar:conteudo` atualiza o arquivo de propósito quando uma
  * unidade nova é publicada.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import DADOS from "./publicados.json";
 import type { Fase, ItemRevisao, Unidade } from "./tipos";
 
@@ -43,7 +44,7 @@ export const AVISO_PUBLICADOS =
 type Contexto = { unidades: readonly Unidade[]; fases: readonly Fase[]; itens?: readonly ItemRevisao[] };
 
 function idsDaFase(fase: Fase): FasePublicada {
-  return fase.tipo === "pratica"
+  return temObjetivos(fase)
     ? { objetivos: fase.objetivos.map((objetivo) => objetivo.id) }
     : { partes: (fase.tipo === "desafio" ? fase.partes : fase.requisitos).map((parte) => parte.id) };
 }

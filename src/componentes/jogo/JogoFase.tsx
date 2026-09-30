@@ -1,5 +1,6 @@
 "use client";
 
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { tocarEfeito } from "@/audio/motor";
 import type { IdEfeito } from "@/audio/efeitos";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -82,6 +83,10 @@ import { materializarFase } from "@/motor/siteDoJogo";
 import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditoria } from "@/motor/auditoria";
 import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
 import { PainelBusca, type SubAbaBusca } from "@/componentes/painel/busca/PainelBusca";
+import { type LinhaMedicao, PainelMedicao } from "@/componentes/painel/medicao/PainelMedicao";
+import { PainelCampanha } from "@/componentes/painel/campanha/PainelCampanha";
+import { type EstadoCampanha, estadoInicialDaCampanha, simularCampanha } from "@/motor/campanha";
+import { eventoDoClique, type Utm } from "@/motor/medicao";
 import {
   DISPOSITIVO_INICIAL,
   type EstadoDispositivo,
@@ -175,12 +180,23 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
 /** Ferramentas da aba Busca (zona Ser encontrado). */
 const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados-estruturados"];
 
-/** Elementos abre sempre; Lighthouse e Busca, nas fases com as ferramentas delas. */
+/** Ferramentas da aba Medição (zona Ser encontrado). */
+const FERRAMENTAS_DA_MEDICAO: readonly IdFerramenta[] = ["medicao", "link-rastreavel"];
+
+/** Elementos abre sempre; Lighthouse, Busca, Medição e Campanha, nas fases com as ferramentas delas. */
 function abasDaFase(fase: Fase): Aba[] {
   const abas: Aba[] = ["elementos"];
   if (fase.usaFerramentas.includes("lighthouse")) abas.push("lighthouse");
   if (FERRAMENTAS_DA_BUSCA.some((id) => fase.usaFerramentas.includes(id))) abas.push("busca");
+  if (FERRAMENTAS_DA_MEDICAO.some((id) => fase.usaFerramentas.includes(id))) abas.push("medicao");
+  if (fase.tipo === "simulador-campanha") abas.push("campanha");
   return abas;
+}
+
+/** "14:05:32", a hora de uma linha do relatório da Medição. */
+function horaAgora(): string {
+  const agora = new Date();
+  return [agora.getHours(), agora.getMinutes(), agora.getSeconds()].map((numero) => String(numero).padStart(2, "0")).join(":");
 }
 
 /** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
@@ -188,7 +204,7 @@ function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: P
   if (fase.siteAlvo.css === undefined) return null;
   // Projeto-ponte sem estado (Jogar de novo da ilha): o site do jogador, de Meus projetos.
   if (!salvo) return projeto?.html ? (projeto.css ?? fase.siteAlvo.css) : fase.siteAlvo.css;
-  const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
+  const objetivo = temObjetivos(fase) ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.cssInicioObjetivo !== null) {
     return salvo.cssInicioObjetivo;
   }
@@ -235,7 +251,7 @@ const FALA_TEMA_SALVO_COM_AVISO: Fala = {
 /** HTML para abrir a fase: o salvo, ou o de antes do momento roteirizado do objetivo atual. */
 function bodyParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string {
   if (!salvo) return projeto?.html ?? htmlInicialDaFase(fase);
-  const objetivo = fase.tipo === "pratica" ? fase.objetivos[salvo.objetivoAtual] : undefined;
+  const objetivo = temObjetivos(fase) ? fase.objetivos[salvo.objetivoAtual] : undefined;
   if (salvo.introducaoVista && objetivo?.eventoAoComecar && salvo.htmlInicioObjetivo !== null) {
     return salvo.htmlInicioObjetivo;
   }
@@ -528,6 +544,66 @@ export function JogoFase({
   const ferramentasBusca = useMemo(() => FERRAMENTAS_DA_BUSCA.filter((id) => fase.usaFerramentas.includes(id)), [fase]);
   const [subAbaBusca, setSubAbaBusca] = useState<SubAbaBusca>("resultado");
   const abasLivres = useMemo(() => abasDaFase(fase), [fase]);
+
+  // Aba Medição (simulada): os eventos dos data-evento clicados na prévia e as visitas por link rastreável.
+  const ferramentasMedicao = useMemo(() => FERRAMENTAS_DA_MEDICAO.filter((id) => fase.usaFerramentas.includes(id)), [fase]);
+  const comMedicao = fase.usaFerramentas.includes("medicao");
+  const [linhasMedicao, setLinhasMedicao] = useState<LinhaMedicao[]>([]);
+  /** A origem da última visita simulada: os próximos eventos contam com ela. */
+  const visitaAtual = useRef<Utm | null>(null);
+  const medirClique = useCallback(
+    (elemento: Element) => {
+      const medido = eventoDoClique(elemento);
+      if (!medido) return;
+      sinalizarUso("medicao");
+      barramento.emitir({ tipo: "eventoMedido", nome: medido.nome, origem: visitaAtual.current });
+    },
+    [barramento],
+  );
+  const simularVisita = useCallback(
+    (utm: Utm) => {
+      visitaAtual.current = utm;
+      sinalizarUso("link-rastreavel");
+      barramento.emitir({ tipo: "visitaSimulada", utm });
+    },
+    [barramento],
+  );
+  useEffect(
+    () =>
+      barramento.assinar((evento) => {
+        if (evento.tipo !== "eventoMedido" && evento.tipo !== "visitaSimulada") return;
+        tocarEfeito("acerto");
+        setLinhasMedicao((atuais) => [
+          ...atuais,
+          evento.tipo === "eventoMedido"
+            ? { id: atuais.length + 1, tipo: "evento", nome: evento.nome, origem: evento.origem, hora: horaAgora() }
+            : { id: atuais.length + 1, tipo: "visita", origem: evento.utm, hora: horaAgora() },
+        ]);
+      }),
+    [barramento],
+  );
+
+  // Aba Campanha (fase simulador-campanha): orçamento, palavra-chave e lance.
+  const dadosCampanha = fase.tipo === "simulador-campanha" ? fase.campanha : null;
+  const [campanha, setCampanha] = useState<EstadoCampanha | null>(() => (dadosCampanha ? estadoInicialDaCampanha(dadosCampanha) : null));
+  /** O mesmo estado, lido na hora pelos validadores (o evento sai antes do React redesenhar). */
+  const campanhaAtual = useRef(campanha);
+  const configurarCampanha = useCallback(
+    (mudanca: { orcamento?: number; palavra?: string; lance?: number }) => {
+      const atual = campanhaAtual.current;
+      if (!atual) return;
+      const nova: EstadoCampanha = {
+        orcamento: mudanca.orcamento ?? atual.orcamento,
+        palavra: mudanca.palavra ?? atual.palavra,
+        lance: mudanca.lance ?? atual.lance,
+      };
+      campanhaAtual.current = nova;
+      setCampanha(nova);
+      sinalizarUso("simulador-campanha");
+      barramento.emitir({ tipo: "configurouCampanha", ...nova });
+    },
+    [barramento],
+  );
   const [auditoria, setAuditoria] = useState<{ resultado: ResultadoAuditoria; versao: string } | null>(null);
   const telaDaAuditoria = useRef<Tela | undefined>(undefined);
   const versaoDaPaginaAtual = useRef("");
@@ -590,8 +666,25 @@ export function JogoFase({
       dispositivo: comDispositivo ? acoesDispositivo : undefined,
       analisarAuditoria: comLighthouse ? analisarAuditoria : undefined,
       levarProMundo: comLevarProMundo ? baixarProjeto : undefined,
+      // Um clique de verdade na prévia faz as duas coisas: mede (data-evento) e, num link, a prévia segura a navegação.
+      clicarNaPrevia: comMedicao
+        ? (elemento: Element) => {
+            medirClique(elemento);
+            const link = elemento.closest("a, area");
+            if (link) aoClicarLink(link);
+          }
+        : undefined,
+      simularVisita: ferramentasMedicao.includes("link-rastreavel") ? simularVisita : undefined,
+      configurarCampanha: dadosCampanha ? configurarCampanha : undefined,
     }),
     [
+      comMedicao,
+      medirClique,
+      aoClicarLink,
+      ferramentasMedicao,
+      simularVisita,
+      dadosCampanha,
+      configurarCampanha,
       baixarProjeto,
       comLevarProMundo,
       analisarAuditoria,
@@ -688,11 +781,16 @@ export function JogoFase({
     [alturaDeDesenho, larguraDeDesenho],
   );
   const extraValidacao = useCallback(() => {
-    if (!comDispositivo) return {};
+    const doSimulador = dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {};
+    if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
     const atual = viewportDoDispositivo(estado, obterDocumento());
-    return { dispositivo: estado, tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined };
-  }, [comDispositivo, obterDocumento]);
+    return {
+      ...doSimulador,
+      dispositivo: estado,
+      tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
+    };
+  }, [comDispositivo, dadosCampanha, obterDocumento]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -742,7 +840,7 @@ export function JogoFase({
     [aoTerminarRevisao],
   );
   useEffect(() => {
-    if (!revisaoDoDia || estado.etapa !== "concluida" || fase.tipo !== "pratica") return;
+    if (!revisaoDoDia || estado.etapa !== "concluida" || !temObjetivos(fase)) return;
     const item = fase.objetivos[0];
     const errouPrevisao = item.tipo === "previsao" && estado.previsao !== item.previsao.correta;
     // Pergunta ou dica contam como ajuda (mantém o intervalo); a revisão não tem solução.
@@ -832,7 +930,18 @@ export function JogoFase({
   const prepararAlvo = (ferramenta: Ferramenta) => {
     // A aba Lighthouse (ou Busca) para as ferramentas dela; Elementos para as outras (o alvo precisa estar à vista).
     const naBusca = FERRAMENTAS_DA_BUSCA.includes(ferramenta.id);
-    setAba(ferramenta.id === "lighthouse" ? "lighthouse" : naBusca ? "busca" : "elementos");
+    const naMedicao = FERRAMENTAS_DA_MEDICAO.includes(ferramenta.id);
+    setAba(
+      ferramenta.id === "lighthouse"
+        ? "lighthouse"
+        : naBusca
+          ? "busca"
+          : naMedicao
+            ? "medicao"
+            : ferramenta.id === "simulador-campanha"
+              ? "campanha"
+              : "elementos",
+    );
     if (ferramenta.id === "resultado-busca") setSubAbaBusca("resultado");
     if (ferramenta.id === "dados-estruturados") setSubAbaBusca("dados");
     // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
@@ -910,7 +1019,7 @@ export function JogoFase({
     versao: versaoLab,
     avaliarItens: (): ItemLab[] => {
       const contexto = motor.contextoValidacao();
-      if (fase.tipo !== "pratica") {
+      if (!temObjetivos(fase)) {
         return (itensChecklist ?? []).map((parte, indice) => ({
           id: parte.id,
           rotulo: `${indice + 1}. ${parte.id}`,
@@ -1094,6 +1203,13 @@ export function JogoFase({
     telaDaAuditoria.current = telaDoAparelho;
   }, [telaDoAparelho, versaoDaPagina]);
 
+  // O dia simulado da campanha, com a página de destino de agora (muda quando a página muda).
+  const resultadoCampanha = useMemo(() => {
+    void versaoDaPagina;
+    const documento = obterDocumento();
+    return dadosCampanha && campanha && documento?.body ? simularCampanha(dadosCampanha, campanha, documento) : null;
+  }, [dadosCampanha, campanha, obterDocumento, versaoDaPagina]);
+
   /** Troca a aba de cima (Elementos, Lighthouse). */
   const trocarAba = useCallback((nova: Aba) => {
     tocarEfeito("clique");
@@ -1216,7 +1332,7 @@ export function JogoFase({
   );
 
   const objetivoAtivo = estado.etapa === "objetivos" && !itensChecklist ? estado.objetivoAtual : null;
-  const objetivosNaTela: ObjetivoNaTela[] = (fase.tipo === "pratica" ? fase.objetivos : []).map((item) => ({
+  const objetivosNaTela: ObjetivoNaTela[] = (temObjetivos(fase) ? fase.objetivos : []).map((item) => ({
     id: item.id,
     enunciado: enunciadoDe(item, toque),
     sozinho: item.modo === "sozinho",
@@ -1325,7 +1441,7 @@ export function JogoFase({
   const objetivoAtualId =
     estado.etapa !== "objetivos"
       ? ""
-      : fase.tipo === "pratica"
+      : temObjetivos(fase)
         ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
         : fase.tipo === "desafio"
           ? "desafio"
@@ -1470,6 +1586,38 @@ export function JogoFase({
                 </>
               }
             >
+              {ferramentasMedicao.length > 0 && (
+                <div className={aba === "medicao" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelMedicao
+                    linhas={linhasMedicao}
+                    ferramentas={ferramentasMedicao}
+                    url={fase.siteAlvo.url}
+                    podePorNoLink={elementoSelecionado?.closest("a") !== null && elementoSelecionado !== null}
+                    aoPorNoLink={(href) => {
+                      tocarEfeito("clique");
+                      const link = elementoSelecionado?.closest("a");
+                      const caminho = link ? caminhoDoElemento(link) : null;
+                      if (caminho) editarAtributo(caminho, "href", href);
+                    }}
+                    aoSimularVisita={(utm) => {
+                      tocarEfeito("clique");
+                      simularVisita(utm);
+                    }}
+                    aoAbrirCard={abrirCard}
+                  />
+                </div>
+              )}
+              {dadosCampanha && campanha && (
+                <div className={aba === "campanha" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelCampanha
+                    dados={dadosCampanha}
+                    estado={campanha}
+                    resultado={resultadoCampanha}
+                    aoConfigurar={configurarCampanha}
+                    aoAbrirCard={abrirCard}
+                  />
+                </div>
+              )}
               {ferramentasBusca.length > 0 && (
                 <div className={aba === "busca" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
                   <PainelBusca
@@ -1818,6 +1966,7 @@ export function JogoFase({
                 titulo={fase.siteAlvo.titulo}
                 aoCarregar={aoCarregar}
                 aoClicarLink={aoClicarLink}
+                aoClicarElemento={comMedicao ? medirClique : undefined}
                 dispositivo={aparelhoLigado ? viewportAparelho : null}
                 aoArrastarLargura={aparelhoLigado ? acoesDispositivo.arrastar : undefined}
                 aoSoltarAlca={soltarAlca}

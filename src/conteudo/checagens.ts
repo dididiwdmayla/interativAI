@@ -11,6 +11,7 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { conferirPlataformas, PLATAFORMAS_MARKETING } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -37,7 +38,7 @@ import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
-import type { Acao, Fase, FaseDesafio, FasePratica, FaseProjetoPonte, ItemRevisao, Objetivo, Unidade, Validador } from "./tipos";
+import type { Acao, Fase, FaseComObjetivos, FaseDesafio, FaseProjetoPonte, ItemRevisao, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
 import { ferramentaDaAcao } from "./ferramentaDaAcao";
 
@@ -109,7 +110,7 @@ export function temSimboloSemSeletorDeTexto(texto: string): boolean {
 /* ------------------------------------------------------------------ */
 
 function objetivosDe(fase: Fase): readonly Objetivo[] {
-  return fase.tipo === "pratica" ? fase.objetivos : [];
+  return temObjetivos(fase) ? fase.objetivos : [];
 }
 
 function nomeObjetivo(objetivo: Objetivo, indice: number): string {
@@ -171,7 +172,7 @@ function falasDe(fase: Fase): { onde: string; texto: string }[] {
 
 /** Validadores da fase (objetivos e partes), com um rótulo. */
 function validadoresDe(fase: Fase): { onde: string; validador: Validador }[] {
-  if (fase.tipo === "pratica") {
+  if (temObjetivos(fase)) {
     return fase.objetivos.map((objetivo, indice) => ({ onde: nomeObjetivo(objetivo, indice), validador: objetivo.validador }));
   }
   const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
@@ -189,7 +190,7 @@ function achatarValidador(validador: Validador): Validador[] {
 
 /** Ações que o JOGADOR faria (soluções), com um rótulo. */
 function acoesDoJogador(fase: Fase): { onde: string; acoes: readonly Acao[] }[] {
-  if (fase.tipo !== "pratica") {
+  if (!temObjetivos(fase)) {
     const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
     return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
   }
@@ -258,7 +259,7 @@ function apresentadasPor(fase: Fase): IdFerramenta[] {
 
 /** O que a fase treina (campo `pratica`; só fases de prática têm). */
 function praticaDe(fase: Fase): readonly IdConceito[] {
-  return fase.tipo === "pratica" ? (fase.pratica ?? []) : [];
+  return temObjetivos(fase) ? (fase.pratica ?? []) : [];
 }
 
 function conceitosDe(fase: Fase): IdConceito[] {
@@ -400,7 +401,7 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
         if (fase.tipo === "desafio") {
           const daUnidade = new Set(
             fases
-              .filter((item) => item.unidadeId === fase.unidadeId && item.tipo === "pratica")
+              .filter((item) => item.unidadeId === fase.unidadeId && temObjetivos(item))
               .flatMap((item) => item.conceitos),
           );
           for (const conceito of fase.conceitos) {
@@ -500,8 +501,13 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "ids-internos",
     nome: "ids de objetivos e partes são únicos e em kebab-case",
     checar: (fase) => {
-      const ids = fase.tipo === "pratica" ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
-      const vazio = { pratica: "a fase não tem objetivos", desafio: "o desafio não tem partes", "projeto-ponte": "o projeto não tem requisitos" }[fase.tipo];
+      const ids = temObjetivos(fase) ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
+      const vazio = {
+        pratica: "a fase não tem objetivos",
+        desafio: "o desafio não tem partes",
+        "projeto-ponte": "o projeto não tem requisitos",
+        "simulador-campanha": "o simulador não tem objetivos",
+      }[fase.tipo];
       return [
         ...(ids.length === 0 ? [vazio] : []),
         ...repetidos(ids).map((id) => `id repetido dentro da fase: "${id}"`),
@@ -516,7 +522,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       ...conceitosDe(fase)
         .filter((id) => !ehIdConceito(id))
         .map((id) => `o conceito "${id}" não existe em src/conteudo/conceitos.ts`),
-      ...(fase.tipo === "pratica" && fase.conceitos.length === 0 && praticaDe(fase).length === 0
+      ...(temObjetivos(fase) && fase.conceitos.length === 0 && praticaDe(fase).length === 0
         ? ["a fase não ensina (conceitos) nem treina (pratica) nenhum conceito: preencha um dos dois"]
         : []),
       ...praticaDe(fase)
@@ -528,7 +534,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "fase-so-sozinho",
     nome: "fase só de sozinho só treina: conceitos vazio e nenhum objetivo guiado",
     checar: (fase) => {
-      if (fase.tipo !== "pratica" || fase.objetivos.length === 0) return [];
+      if (!temObjetivos(fase) || fase.objetivos.length === 0) return [];
       const problemas: string[] = [];
       const todosSozinho = fase.objetivos.every((objetivo) => objetivo.modo === "sozinho");
       if (todosSozinho && fase.conceitos.length > 0) {
@@ -841,6 +847,18 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if (item.tipo === "dadosEstruturados" && !fase.usaFerramentas.includes("dados-estruturados")) {
             problemas.push(`${onde}: o validador dadosEstruturados pede "dados-estruturados" em usaFerramentas`);
           }
+          if (item.tipo === "eventoMedido" && !fase.usaFerramentas.includes("medicao")) {
+            problemas.push(`${onde}: o validador eventoMedido pede "medicao" em usaFerramentas (a aba que mostra os eventos)`);
+          }
+          if (item.tipo === "linkRastreavel" && !fase.usaFerramentas.includes("link-rastreavel")) {
+            problemas.push(`${onde}: o validador linkRastreavel pede "link-rastreavel" em usaFerramentas (o construtor do link)`);
+          }
+          if (item.tipo === "simulacao" && fase.tipo !== "simulador-campanha") {
+            problemas.push(`${onde}: o validador simulacao só vale numa fase do tipo "simulador-campanha"`);
+          }
+          if (item.tipo === "simulacao" && !fase.usaFerramentas.includes("simulador-campanha")) {
+            problemas.push(`${onde}: o validador simulacao pede "simulador-campanha" em usaFerramentas`);
+          }
           if (item.tipo === "notaAuditoria" && (item.minimo < 0 || item.minimo > 100)) {
             problemas.push(`${onde}: notaAuditoria com minimo ${item.minimo} (vai de 0 a 100)`);
           }
@@ -859,7 +877,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         const alvo = fases.find((item) => item.id === parte.revisarEm);
         if (!alvo) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não existe`];
         if (alvo.unidadeId !== fase.unidadeId) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" é de outra unidade`];
-        if (alvo.tipo !== "pratica") return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
+        if (!temObjetivos(alvo)) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
         if (fases.indexOf(alvo) > indice) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" vem depois do desafio`];
         if (!temObjetivoGuiado(alvo)) {
           return [
@@ -888,7 +906,7 @@ type Jogada = {
  * Joga os objetivos em ordem com as soluções (de teste ou do "Me ajuda").
  * Para no primeiro erro que deixa o resto sem sentido.
  */
-function jogarObjetivos(fase: FasePratica, usarAjuda: boolean): Jogada {
+function jogarObjetivos(fase: FaseComObjetivos, usarAjuda: boolean): Jogada {
   const simulacao = criarSimulacao(fase);
   const jogada: Jogada = { eventos: [], solucoes: [] };
   for (const [indice, evento] of (fase.eventosIniciais ?? []).entries()) {
@@ -1011,7 +1029,7 @@ function jogarDesafio(fase: FaseDesafio | FaseProjetoPonte): Jogada {
 }
 
 function jogar(fase: Fase, usarAjuda: boolean): Jogada {
-  return fase.tipo === "pratica" ? jogarObjetivos(fase, usarAjuda) : jogarDesafio(fase);
+  return temObjetivos(fase) ? jogarObjetivos(fase, usarAjuda) : jogarDesafio(fase);
 }
 
 const REGRAS_DE_SIMULACAO: readonly RegraFase[] = [
@@ -1059,7 +1077,7 @@ const REGRAS_DE_SIMULACAO: readonly RegraFase[] = [
     id: "solucoes-do-me-ajuda",
     nome: "a solução do Me ajuda (degrau 4) cumpre cada objetivo guiado",
     simulacao: true,
-    checar: (fase) => (fase.tipo === "pratica" ? jogar(fase, true).solucoes : []),
+    checar: (fase) => (temObjetivos(fase) ? jogar(fase, true).solucoes : []),
   },
 ];
 

@@ -41,6 +41,10 @@ export const IDS_FERRAMENTAS = [
   // Zona Ser encontrado (opcional): a aba Busca
   "resultado-busca",
   "dados-estruturados",
+  // Zona Ser encontrado: a aba Medição e a aba Campanha (simulador)
+  "medicao",
+  "link-rastreavel",
+  "simulador-campanha",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

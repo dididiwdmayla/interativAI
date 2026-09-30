@@ -1,5 +1,6 @@
 "use client";
 
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { useCallback, useMemo, useState } from "react";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso, useProgresso } from "@/lib/armazemProgresso";
@@ -30,7 +31,7 @@ export function useApresentacoes({ fase, etapa, objetivoAtual, pausa, bloqueada 
     if (etapa !== "objetivos" || pausa !== null) return [];
     const pedidas = [
       ...(fase.apresentar ?? []),
-      ...(fase.tipo === "pratica" ? fase.objetivos : [])
+      ...(temObjetivos(fase) ? fase.objetivos : [])
         .slice(0, objetivoAtual + 1)
         .flatMap((objetivo) => objetivo.apresentar ?? []),
     ];

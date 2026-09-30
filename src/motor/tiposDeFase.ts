@@ -1,18 +1,20 @@
 /*
  * Registro dos tipos de fase.
  *
- * Hoje há três, e os três usam a tela do DevTools (painel + prévia):
+ * Hoje há quatro, e todos usam a tela do DevTools (painel + prévia):
  * - "pratica": micro-passos, objetivos guiados e sozinho em sequência;
  * - "desafio": checklist de partes, sem passo a passo, com "Rever";
  * - "projeto-ponte": o site do próprio jogador, com checklist de
- *   requisitos, sem Rever, salvo em Meus projetos e levado pro mundo.
+ *   requisitos, sem Rever, salvo em Meus projetos e levado pro mundo;
+ * - "simulador-campanha": objetivos como na prática, mais a aba Campanha
+ *   (orçamento, palavra-chave, lance, o leilão e o dia simulado).
  *
  * Para um tipo novo (ex.: "linha-do-tempo", "comparador",
  * "diagrama-rede"): crie a variante em `Fase` (src/conteudo/tipos.ts),
  * registre aqui com a tela que ele usa, ensine o Jogo a montar essa tela
  * e acrescente as checagens dele em src/conteudo/checagens.ts.
  */
-import type { TipoFase } from "@/conteudo/tipos";
+import type { Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
 
 export type TelaDaFase = "devtools";
 
@@ -39,7 +41,17 @@ export const TIPOS_DE_FASE: Record<TipoFase, DefinicaoTipoFase> = {
     descricao: "O site do próprio jogador, do zero, no modo documento: requisitos que se marcam sozinhos, tutor que só pergunta, projeto salvo e levado pro mundo.",
     tela: "devtools",
   },
+  "simulador-campanha": {
+    nome: "Simulador de campanha",
+    descricao: "Um anúncio pago por dentro: orçamento, palavra-chave e lance, o leilão e o dia simulado, com a página de destino decidindo quantos cliques viram clientes. Números fictícios.",
+    tela: "devtools",
+  },
 };
+
+/** A fase tem objetivos em sequência (prática e simulador de campanha): o mesmo motor de objetivos. */
+export function temObjetivos(fase: Fase): fase is FaseComObjetivos {
+  return fase.tipo === "pratica" || fase.tipo === "simulador-campanha";
+}
 
 /** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */
 export function rotuloDaFase(tipo: TipoFase, numero: number): string {

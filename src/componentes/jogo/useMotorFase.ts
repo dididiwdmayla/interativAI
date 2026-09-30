@@ -1,5 +1,6 @@
 "use client";
 
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
@@ -66,7 +67,7 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha">;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -111,7 +112,7 @@ export function useMotorFase({
   const aplicando = useRef(false);
   const temporizadores = useRef<TemporizadorRastreado[]>([]);
 
-  const pratica = fase.tipo === "pratica" ? fase : null;
+  const pratica = temObjetivos(fase) ? fase : null;
   const desafio = fase.tipo === "desafio" ? fase : null;
   const projeto = fase.tipo === "projeto-ponte" ? fase : null;
   /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */

@@ -4,11 +4,11 @@
  * (Styles e Computed), e aqui também (ver PainelElementos em
  * src/conteudo/tipos.ts).
  *
- * Busca e Medição (zona "Ser encontrado") não existem no Chrome: são
+ * Busca, Medição e Campanha (zona "Ser encontrado") não existem no Chrome: são
  * simulações do jogo, então só aparecem nas fases que as usam
  * (`soQuandoLivre`), e as fases publicadas continuam com as abas de sempre.
  */
-export type Aba = "elementos" | "console" | "fontes" | "rede" | "aplicacao" | "lighthouse" | "busca" | "medicao";
+export type Aba = "elementos" | "console" | "fontes" | "rede" | "aplicacao" | "lighthouse" | "busca" | "medicao" | "campanha";
 
 export type DefinicaoAba = { id: Aba; rotulo: string; soQuandoLivre?: true };
 
@@ -22,4 +22,5 @@ export const ABAS: readonly DefinicaoAba[] = [
   { id: "lighthouse", rotulo: "Lighthouse" },
   { id: "busca", rotulo: "Busca", soQuandoLivre: true },
   { id: "medicao", rotulo: "Medição", soQuandoLivre: true },
+  { id: "campanha", rotulo: "Campanha", soQuandoLivre: true },
 ];

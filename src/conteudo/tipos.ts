@@ -12,6 +12,8 @@
  * Template anotado de fase: docs/TEMPLATE-FASE.ts
  */
 import type { CategoriaAuditoria, IdRegraAuditoria } from "@/motor/auditoria";
+import type { DadosCampanha, MetricaCampanha } from "@/motor/campanha";
+import type { Utm } from "@/motor/medicao";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import type { TipoEvento } from "@/motor/eventos";
 import type { Fala } from "@/motor/tipos";
@@ -188,6 +190,28 @@ export type Validador =
    * (caminhos com ponto valem: "address.streetAddress").
    */
   | { tipo: "dadosEstruturados"; tipoSchema: string; campos: string[] }
+  /*
+   * Medição simulada e campanha (S4 e S5): src/motor/medicao.ts e
+   * src/motor/campanha.ts.
+   */
+  /**
+   * (Medição) Um clique num elemento com `data-evento="<nome>"` gerou o
+   * evento desde que o objetivo começou. Trava no checklist, como `evento`.
+   */
+  | { tipo: "eventoMedido"; nome: string }
+  /**
+   * (Medição) Algum elemento do seletor (um link) tem no href os três
+   * parâmetros utm_source, utm_medium e utm_campaign, com os valores de
+   * `utm` (os que vierem; sem diferenciar maiúsculas).
+   */
+  | { tipo: "linkRastreavel"; seletor: string; utm: Partial<Utm> }
+  /**
+   * (Simulador de campanha) Uma métrica do dia simulado, com a página de
+   * agora e a campanha configurada: cliques, clientes, custoPorCliente (R$),
+   * posicao (1 = primeiro), taxaConversao (%), qualidade (1 a 10) ou
+   * notaPagina (0 a 100). Só numa fase `simulador-campanha`.
+   */
+  | { tipo: "simulacao"; metrica: MetricaCampanha; op: OperadorContagem; valor: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -273,7 +297,24 @@ export type Acao =
    * (Publicar) O "Levar pro mundo": monta o index.html e o style.css e baixa
    * o .zip (nos testes, só monta). Gera `exportouProjeto`.
    */
-  | { tipo: "levarProMundo" };
+  | { tipo: "levarProMundo" }
+  /**
+   * (Medição) Clica num elemento da prévia, como o jogador clicaria. Um
+   * `data-evento` nele (ou num ancestral) gera `eventoMedido`; num link, a
+   * prévia segura a navegação como sempre. Pede a ferramenta medicao.
+   */
+  | { tipo: "clicarNaPrevia"; seletor: string }
+  /**
+   * (Medição) "Simular uma visita por este link", no construtor de link
+   * rastreável: as próximas medições contam com essa origem. Gera
+   * `visitaSimulada`. Pede a ferramenta link-rastreavel.
+   */
+  | { tipo: "simularVisita"; utm: Utm }
+  /**
+   * (Simulador de campanha) Muda o orçamento do dia (R$), a palavra-chave
+   * (o id) ou o lance máximo por clique (R$). Gera `configurouCampanha`.
+   */
+  | { tipo: "configurarCampanha"; orcamento?: number; palavraChave?: string; lance?: number };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -521,11 +562,29 @@ export type FaseProjetoPonte = FaseBase & {
 };
 
 /**
+ * Simulador de campanha (S5): objetivos como numa fase de prática
+ * (guiados, sozinho, previsões), mais a aba Campanha, onde o jogador
+ * escolhe orçamento, palavra-chave e lance e vê o leilão e o dia simulado.
+ * A página de destino é o site-alvo: melhorar a página (no painel, como
+ * sempre) melhora o resultado. Números fictícios, declarados na tela.
+ */
+export type FaseSimuladorCampanha = FaseBase & {
+  tipo: "simulador-campanha";
+  objetivos: Objetivo[];
+  /** Como na prática: conceitos que a fase só treina. */
+  pratica?: IdConceito[];
+  campanha: DadosCampanha;
+};
+
+/** Fases com objetivos em sequência (prática e simulador de campanha). */
+export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha;
+
+/**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha;
 
 export type TipoFase = Fase["tipo"];
 
