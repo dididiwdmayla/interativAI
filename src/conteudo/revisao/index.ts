@@ -98,6 +98,20 @@ import { ITENS_POSITION_ABSOLUTE } from "./position-absolute";
 import { ITENS_POSITION_FIXED } from "./position-fixed";
 import { ITENS_POSITION_STICKY } from "./position-sticky";
 import { ITENS_Z_INDEX_CSS } from "./z-index-css";
+import { ITENS_MODO_DISPOSITIVO } from "./modo-dispositivo";
+import { ITENS_ORIENTACAO_DA_TELA } from "./orientacao-da-tela";
+import { ITENS_META_VIEWPORT } from "./meta-viewport";
+import { ITENS_SIMULACAO_SEM_VIEWPORT } from "./simulacao-sem-viewport";
+import { ITENS_MEDIA_QUERY } from "./media-query";
+import { ITENS_BREAKPOINT } from "./breakpoint";
+import { ITENS_MOBILE_FIRST } from "./mobile-first";
+import { ITENS_UNIDADE_RESPONSIVA } from "./unidade-responsiva";
+import { ITENS_IMAGEM_RESPONSIVA } from "./imagem-responsiva";
+import { ITENS_AUDITORIA_LIGHTHOUSE } from "./auditoria-lighthouse";
+import { ITENS_ROTULO_ACESSIVEL } from "./rotulo-acessivel";
+import { ITENS_CSS_EXTERNO } from "./css-externo";
+import { ITENS_INDEX_HTML } from "./index-html";
+import { ITENS_PUBLICAR_SITE } from "./publicar-site";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -200,6 +214,21 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_POSITION_FIXED,
   ...ITENS_POSITION_STICKY,
   ...ITENS_Z_INDEX_CSS,
+  // R1, R2, P1 e P2 (Responsivo e Publicar)
+  ...ITENS_MODO_DISPOSITIVO,
+  ...ITENS_ORIENTACAO_DA_TELA,
+  ...ITENS_META_VIEWPORT,
+  ...ITENS_SIMULACAO_SEM_VIEWPORT,
+  ...ITENS_MEDIA_QUERY,
+  ...ITENS_BREAKPOINT,
+  ...ITENS_MOBILE_FIRST,
+  ...ITENS_UNIDADE_RESPONSIVA,
+  ...ITENS_IMAGEM_RESPONSIVA,
+  ...ITENS_AUDITORIA_LIGHTHOUSE,
+  ...ITENS_ROTULO_ACESSIVEL,
+  ...ITENS_CSS_EXTERNO,
+  ...ITENS_INDEX_HTML,
+  ...ITENS_PUBLICAR_SITE,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
