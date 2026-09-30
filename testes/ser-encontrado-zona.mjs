@@ -126,7 +126,11 @@ async function jogarUnidade(unidadeId) {
     const ultima = indice === fases.length - 1;
     const rotulo = `${MODO} ${faseId.replace("sites-ser-encontrado-", "")}`;
     if (indice > 0) await pagina.locator(`[data-jogo-fase="${faseId}"]`).waitFor({ timeout: 10000 });
-    if (indice === 0 || ultima) conferir(await pularMeta(pagina), `${rotulo}: abre com a meta`);
+    if (indice === 0 || ultima) {
+      // A meta (com o antes e depois) só existe quando a unidade tem `meta.desafioId`.
+      const viuMeta = await pularMeta(pagina);
+      conferir(viuMeta === !roteiro.semMeta, `${rotulo}: ${roteiro.semMeta ? "sem meta (a unidade não tem desafio do tipo desafio)" : "abre com a meta"}`);
+    }
     await introducao();
     const roteiroDaFase = roteiro.fases[indice];
     if (!Array.isArray(roteiroDaFase)) {

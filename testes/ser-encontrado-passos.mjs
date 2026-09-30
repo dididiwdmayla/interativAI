@@ -5,7 +5,74 @@
 // { fazer: async (contexto) => ... } para o que é próprio da unidade.
 // `ferramentasNovas`: o que a unidade apresenta (o resto vem como já visto).
 
+import { selecionarNo } from "./util.mjs";
+
 const trocar = (de, para) => ({ editar: [[de, para]] });
+
+/** Um clique de verdade na prévia (o data-evento vira evento medido); no toque, um toque nas coordenadas. */
+const clicarNaPrevia = (seletor) => ({
+  fazer: async ({ pagina, fecharBalao, assentar, toque }) => {
+    await fecharBalao();
+    const alvo = pagina.frameLocator("section[data-previa] iframe").first().locator(seletor).first();
+    await alvo.scrollIntoViewIfNeeded();
+    const caixa = await alvo.boundingBox();
+    const x = caixa.x + Math.min(20, caixa.width / 2);
+    const y = caixa.y + caixa.height / 2;
+    if (toque) await pagina.touchscreen.tap(x, y);
+    else await pagina.mouse.click(x, y);
+    await assentar();
+  },
+});
+
+/** Mexe na campanha (aba Campanha): lance, orçamento e palavra-chave (o id da opção). */
+const campanha = ({ lance, orcamento, palavra }) => ({
+  fazer: async ({ pagina, aba, assentar, fecharBalao }) => {
+    await fecharBalao();
+    await aba("Campanha");
+    if (palavra !== undefined) {
+      const campo = pagina.locator('[data-campo-campanha="palavra"]');
+      await campo.scrollIntoViewIfNeeded();
+      await campo.selectOption(palavra);
+    }
+    for (const [nome, valor] of [["orcamento", orcamento], ["lance", lance]]) {
+      if (valor === undefined) continue;
+      const campo = pagina.locator(`[data-campo-campanha="${nome}"]`);
+      await campo.scrollIntoViewIfNeeded();
+      await campo.fill(String(valor));
+    }
+    await assentar();
+  },
+});
+
+/** O botão Analisar da aba Lighthouse. */
+const analisar = {
+  fazer: async ({ pagina, tocar, aba, assentar, fecharBalao }) => {
+    await fecharBalao();
+    await aba("Lighthouse");
+    await tocar(pagina.locator("[data-analisar-auditoria]"));
+    await assentar();
+  },
+};
+
+/** Monta o link rastreável na aba Medição, põe no link selecionado (pela árvore) e simula uma visita. */
+const linkRastreavel = (seletor, [origem, meio, campanha]) => ({
+  fazer: async ({ pagina, tocar, aba, assentar, fecharBalao }) => {
+    await aba("Elementos");
+    await selecionarNo(pagina, seletor);
+    await aba("Medição");
+    for (const [campo, valor] of [["source", origem], ["medium", meio], ["campaign", campanha]]) {
+      const entrada = pagina.locator(`[data-campo-utm="${campo}"]`);
+      await entrada.scrollIntoViewIfNeeded();
+      await entrada.fill(valor);
+    }
+    await fecharBalao();
+    await tocar(pagina.locator("[data-por-no-link]"));
+    await assentar();
+    await fecharBalao();
+    await tocar(pagina.locator("[data-simular-visita]"));
+    await assentar();
+  },
+});
 
 /** A apresentação de uma ferramenta, com o "Experimente" tocando no alvo dela. */
 const apresentar = (id, alvo) => ({
@@ -134,6 +201,107 @@ export const PASSOS = {
           trocar('<p class="resposta-dono" id="resposta-1">Sem resposta da padaria.</p>', '<p class="resposta-dono" id="resposta-1">Sentimos muito. Vamos assar de hora em hora.</p>'),
         ],
       },
+    ],
+  },
+
+  "sites-ser-encontrado-u4": {
+    ferramentasNovas: ["medicao", "link-rastreavel"],
+    fases: [
+      // F1: o que as pessoas fazem no site (apresenta a aba Medição)
+      [
+        {
+          id: "medir-whatsapp",
+          passos: [
+            { previsao: 1 },
+            apresentar("medicao", '[data-ferramenta~="medicao"]'),
+            clicarNaPrevia("#pedir-whatsapp"),
+          ],
+        },
+        {
+          id: "medir-pedido",
+          passos: [trocar('<button id="enviar-pedido" type="button">', '<button id="enviar-pedido" data-evento="pedido_enviado" type="button">'), clicarNaPrevia("#enviar-pedido")],
+        },
+        {
+          id: "medir-ligacao",
+          passos: [trocar('<a id="ligar" class="ligar"', '<a id="ligar" data-evento="clique_ligar" class="ligar"'), clicarNaPrevia("#ligar")],
+        },
+      ],
+      // F2: o que a busca vê do seu site
+      [
+        { id: "voltar-para-a-busca", passos: [{ previsao: 2 }, trocar('<meta name="robots" content="noindex">', "")] },
+        { id: "title-com-a-pesquisa", passos: [trocar("<title>Loja Vale Verde | Início</title>", "<title>Loja Vale Verde | Vasos de cerâmica em Goiânia</title>")] },
+      ],
+      // F3: links rastreáveis (apresenta o construtor de link)
+      [
+        {
+          id: "link-do-instagram",
+          passos: [
+            { previsao: 0 },
+            apresentar("link-rastreavel", '[data-ferramenta~="link-rastreavel"]'),
+            linkRastreavel("#link-insta", ["instagram", "social", "natal"]),
+          ],
+        },
+        { id: "link-do-email", passos: [linkRastreavel("#link-email", ["email", "email", "natal"])] },
+      ],
+      // F4: o desafio
+      {
+        desafio: [
+          linkRastreavel("#link-insta", ["instagram", "social", "verao"]),
+          linkRastreavel("#link-folheto", ["folheto", "impresso", "verao"]),
+          trocar('<button id="fazer-pedido" type="button">', '<button id="fazer-pedido" data-evento="pedido_enviado" type="button">'),
+          clicarNaPrevia("#fazer-pedido"),
+        ],
+      },
+    ],
+  },
+
+  "sites-ser-encontrado-u5": {
+    // O tipo simulador-campanha não é "desafio": a unidade não tem meta.desafioId, então não há meta.
+    semMeta: true,
+    ferramentasNovas: ["simulador-campanha"],
+    fases: [
+      // F1: o leilão (apresenta a aba Campanha)
+      [
+        {
+          id: "primeiro-lugar",
+          passos: [{ previsao: 1 }, apresentar("simulador-campanha", '[data-ferramenta~="simulador-campanha"]'), campanha({ lance: 4 })],
+        },
+        { id: "custo-por-clique", passos: [{ previsao: 2 }, campanha({ lance: 2.8 })] },
+        { id: "outra-palavra-chave", passos: [campanha({ palavra: "pizzaria-no-cambui" })] },
+      ],
+      // F2: verba e palavras-chave
+      [
+        { id: "orcamento-acabou", passos: [{ previsao: 0 }, campanha({ orcamento: 150 })] },
+        { id: "comecar-pequeno", passos: [campanha({ palavra: "oculos-de-sol" })] },
+      ],
+      // F3: a página que decide
+      [
+        { id: "diagnostico-da-pagina", passos: [{ previsao: 1 }, analisar] },
+        {
+          id: "melhorar-a-busca-da-pagina",
+          passos: [
+            { previsao: 2 },
+            trocar(
+              '<meta name="viewport" content="width=device-width, initial-scale=1">',
+              '<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Doceria Casa de Bolo | Bolos de pote e doces em Recife</title>\n<meta name="description" content="Bolos de pote e doces para festa feitos por encomenda em Recife. Peça pelo WhatsApp e receba o orçamento na hora.">',
+            ),
+          ],
+        },
+        { id: "alt-e-custo-por-cliente", passos: [trocar('<img class="foto"', '<img alt="Potes de bolo com brigadeiro" class="foto"')] },
+      ],
+      // F4: o desafio (só sozinho)
+      [
+        {
+          id: "melhorar-a-pagina",
+          passos: [
+            trocar(
+              '<meta name="viewport" content="width=device-width, initial-scale=1">',
+              '<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Pet Shop Rabo Feliz | Banho e tosa em Aracaju</title>\n<meta name="description" content="Banho e tosa, ração e veterinário em Aracaju, com leva e traz. Agende pelo WhatsApp e receba o horário na hora.">',
+            ),
+          ],
+        },
+        { id: "a-conta-fecha", passos: [trocar('<img class="foto"', '<img alt="Cachorro tomando banho de espuma" class="foto"')] },
+      ],
     ],
   },
 };

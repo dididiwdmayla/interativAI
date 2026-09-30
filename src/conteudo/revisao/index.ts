@@ -123,6 +123,11 @@ import { ITENS_NOME_ENDERECO_TELEFONE } from "./nome-endereco-telefone";
 import { ITENS_AVALIACOES_DO_CLIENTE } from "./avaliacoes-do-cliente";
 import { ITENS_DADOS_ESTRUTURADOS } from "./dados-estruturados";
 import { ITENS_LOCAL_BUSINESS } from "./local-business";
+import { ITENS_ANALYTICS } from "./analytics";
+import { ITENS_SEARCH_CONSOLE } from "./search-console";
+import { ITENS_EVENTO_DE_MEDICAO } from "./evento-de-medicao";
+import { ITENS_CONVERSAO } from "./conversao";
+import { ITENS_LINK_RASTREAVEL_UTM } from "./link-rastreavel-utm";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -253,6 +258,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_AVALIACOES_DO_CLIENTE,
   ...ITENS_DADOS_ESTRUTURADOS,
   ...ITENS_LOCAL_BUSINESS,
+  // S4 (Medir quem chega)
+  ...ITENS_ANALYTICS,
+  ...ITENS_SEARCH_CONSOLE,
+  ...ITENS_EVENTO_DE_MEDICAO,
+  ...ITENS_CONVERSAO,
+  ...ITENS_LINK_RASTREAVEL_UTM,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

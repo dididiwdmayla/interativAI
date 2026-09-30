@@ -175,6 +175,41 @@ export const PLATAFORMAS_MARKETING: readonly PlataformaMarketing[] = [
       "unhead.unjs.io/docs/schema-org/api/schema/local-business",
     ],
   },
+  {
+    id: "search-console",
+    nome: "Google Search Console",
+    paraQue: "Ferramenta gratuita do Google que mostra como o site aparece na busca.",
+    endereco: "support.google.com/webmasters/answer/34592",
+    verificadoEm: "2026-09-30",
+    usadaEm: ["sites-ser-encontrado-u4"],
+    passos: [
+      { id: "adicionar-propriedade", titulo: "Adicionar uma propriedade", detalhe: "A propriedade é o site (ou o endereço) que você quer acompanhar." },
+      {
+        id: "provar-que-o-site-e-seu",
+        titulo: "Provar que o site é seu",
+        detalhe: "O jeito de provar depende do tipo de propriedade (domínio ou prefixo de URL, nos fatos abaixo).",
+      },
+      {
+        id: "usar",
+        titulo: "Enviar o sitemap e ver os dados",
+        detalhe: "Depois de verificar, dá para enviar o sitemap e ver pesquisas, cliques e problemas de indexação.",
+      },
+    ],
+    fatos: [
+      {
+        id: "propriedade-de-dominio",
+        titulo: "Propriedade de domínio",
+        detalhe: "Por exemplo, exemplo.com: cobre todos os subdomínios e protocolos. Só pode ser verificada por registro DNS.",
+      },
+      {
+        id: "propriedade-de-prefixo",
+        titulo: "Propriedade de prefixo de URL",
+        detalhe:
+          "Por exemplo, https://www.exemplo.com: cobre só aquele endereço exato. Pode ser verificada por arquivo HTML, tag HTML no head, Google Analytics, Gerenciador de tags ou DNS.",
+      },
+    ],
+    fontes: ["support.google.com/webmasters/answer/34592?hl=pt-BR"],
+  },
 ];
 
 /** "conferido em 30/09/2026", para a tela. */

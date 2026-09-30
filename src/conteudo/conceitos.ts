@@ -640,6 +640,32 @@ const CATALOGO = {
     resumo: "O tipo de dado que descreve um negócio local; use o subtipo mais específico que existir, como Bakery, Plumber ou Dentist.",
     temas: ["presenca-digital", "dados"],
   },
+  // Zona Ser encontrado (opcional), S4: medir quem chega
+  analytics: {
+    nome: "Analytics",
+    resumo: "Um programa de análise que o site carrega para contar visitas e eventos: mostra o que as pessoas fazem no site.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "search-console": {
+    nome: "Search Console",
+    resumo: "Ferramenta gratuita do Google que mostra como o site aparece na busca: pesquisas, cliques e problemas de indexação.",
+    temas: ["presenca-digital", "ferramentas"],
+  },
+  "evento-de-medicao": {
+    nome: "Evento de medição",
+    resumo: "O registro de que algo aconteceu no site, com um nome, como clique_whatsapp; no jogo, o data-evento da peça gera ele.",
+    temas: ["presenca-digital", "dados"],
+  },
+  conversao: {
+    nome: "Conversão",
+    resumo: "Uma ação importante depois do clique, como compra, ligação ou cadastro: é o que conta, mais do que a visita.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "link-rastreavel-utm": {
+    nome: "Link rastreável (utm)",
+    resumo: "Um link com utm_source, utm_medium e utm_campaign no fim, que diz à medição de onde a visita veio; a página não muda.",
+    temas: ["presenca-digital", "dados"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

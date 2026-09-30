@@ -124,6 +124,12 @@
       "sites-ser-encontrado-u3-f3",
       "sites-ser-encontrado-u3-f4",
       "sites-ser-encontrado-u3-f5"
+    ],
+    "sites-ser-encontrado-u4": [
+      "sites-ser-encontrado-u4-f1",
+      "sites-ser-encontrado-u4-f2",
+      "sites-ser-encontrado-u4-f3",
+      "sites-ser-encontrado-u4-f4"
     ]
   },
   "fases": {
@@ -710,6 +716,33 @@
         "tipo-bakery",
         "resposta-a-cliente"
       ]
+    },
+    "sites-ser-encontrado-u4-f1": {
+      "objetivos": [
+        "medir-whatsapp",
+        "medir-pedido",
+        "medir-ligacao"
+      ]
+    },
+    "sites-ser-encontrado-u4-f2": {
+      "objetivos": [
+        "voltar-para-a-busca",
+        "title-com-a-pesquisa"
+      ]
+    },
+    "sites-ser-encontrado-u4-f3": {
+      "objetivos": [
+        "link-do-instagram",
+        "link-do-email"
+      ]
+    },
+    "sites-ser-encontrado-u4-f4": {
+      "partes": [
+        "link-do-instagram",
+        "link-do-folheto",
+        "pedido-medido",
+        "uma-visita-de-cada"
+      ]
     }
   },
   "itensRevisao": [
@@ -948,6 +981,16 @@
     "dados-estruturados-1",
     "dados-estruturados-2",
     "local-business-1",
-    "local-business-2"
+    "local-business-2",
+    "analytics-1",
+    "analytics-2",
+    "search-console-1",
+    "search-console-2",
+    "evento-de-medicao-1",
+    "evento-de-medicao-2",
+    "conversao-1",
+    "conversao-2",
+    "link-rastreavel-utm-1",
+    "link-rastreavel-utm-2"
   ]
 }
