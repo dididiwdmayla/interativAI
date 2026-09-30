@@ -276,7 +276,9 @@ unidade-modelo.
   dizem para onde vão e velocidade (revisa P1 e o Lighthouse). Desafio:
   uma página bonita e invisível para a busca. Confusões: "encher de
   palavra-chave ajuda"; "SEO é truque" (é, na maior parte, fazer a página
-  boa para quem lê).
+  boa para quem lê). **Publicada (Rodada 16):** 4 fases (h1; texto que
+  responde e enchimento; links e alt; velocidade e imagem preguiçosa) e o
+  desafio Casa de Chá Lótus.
 - **S3. Seu negócio no mapa** (`sites-ser-encontrado-u3`): o perfil da
   empresa no Google (o que é, o que o programador ajuda a preencher; o
   passo a passo fica no arquivo de plataformas), nome, endereço e telefone
@@ -285,6 +287,8 @@ unidade-modelo.
   Desafio: uma padaria com três endereços diferentes espalhados. Painel
   "Teste de dados estruturados". Confusões: "dados estruturados garantem o
   cartão no mapa" (ajudam a busca a entender; quem decide é ela).
+  **Publicada (Rodada 16):** 4 fases (dados iguais e o perfil; avaliações;
+  JSON-LD; subtipos) e o desafio Padaria Pão de Mel.
 - **S4. Medir quem chega** (`sites-ser-encontrado-u4`): Search Console (o
   que a busca vê do seu site) e Analytics (o que as pessoas fazem nele),
   como conceitos; links rastreáveis com `utm_source`, `utm_medium` e
@@ -292,14 +296,20 @@ unidade-modelo.
   pedido). Painel "Medição" (simulado: o site-alvo ainda não roda
   JavaScript; o código de medição de verdade vem na Páginas vivas).
   Desafio: descobrir qual divulgação trouxe clientes. Confusões: "visita é
-  cliente"; "UTM muda a página".
+  cliente"; "UTM muda a página". **Publicada (Rodada 16):** 3 fases
+  (eventos e conversão; Search Console; utm) e o desafio Casa de Sucos
+  Vitamina.
 - **S5. Anúncio pago por dentro** (`sites-ser-encontrado-u5`): leilão,
   palavra-chave, orçamento diário, custo por clique, página de destino e
   conversão; a posição depende do lance vezes a qualidade. Por que um site
   ruim queima o dinheiro do anúncio. Tipo de fase `simulador-campanha`
   (números fictícios, declarados). Desafio: a mesma verba trazendo mais
   clientes depois de melhorar a página. Confusões: "quem paga mais sempre
-  aparece em primeiro"; "mais cliques é mais clientes".
+  aparece em primeiro"; "mais cliques é mais clientes". **Publicada
+  (Rodada 16):** 4 fases do tipo simulador-campanha; a última é o desafio
+  "mesma verba, mais clientes" (sem meta com antes e depois). O texto diz
+  que lance vezes qualidade é simplificação e que o Índice de qualidade é só
+  diagnóstico.
 
 ---
 
