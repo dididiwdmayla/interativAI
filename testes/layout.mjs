@@ -1,6 +1,6 @@
 // Jornada da zona Layout (L1 a L4), a partir do mapa, com o progresso das
-// zonas Elementos e Estilos JÁ SEMEADO (35 fases, U1 a U6 e E1 a E4
-// concluídas, todas as ferramentas já apresentadas): jogar essas 34 fases
+// zonas Elementos e Estilos JÁ SEMEADO (todas as unidades publicadas
+// delas concluídas, todas as ferramentas já apresentadas): jogar essas fases
 // de novo aqui seria repetir o que `unidades.mjs` já cobre e levaria a
 // bateria a uns 45 min extras sem testar nada novo.
 //
@@ -20,6 +20,7 @@ import {
   linhaDaArvore,
   mostrarArvore,
 } from "./util.mjs";
+import { PUBLICADAS, prontasDaIlha } from "./curriculo.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -30,28 +31,13 @@ const TAMANHOS = {
 const toque = TAMANHOS[MODO].toque;
 const movel = MODO !== "desktop";
 
-// Todas as fases de U1 a U6 (Elementos) e E1 a E4 (Estilos), publicadas
-// (src/conteudo/publicados.json): a fonte de verdade de quantas fases
-// existem antes da Layout. Hardcoded aqui de propósito (é uma semente de
-// teste, não motor); se um dia a lista mudar, os testes de conteúdo
-// (publicados.json) acusam primeiro.
-const FASES_ELEMENTOS_E_ESTILOS = [
-  "sites-elementos-u1-f1", "sites-elementos-u1-f2", "sites-elementos-u1-f3",
-  "sites-elementos-u2-f1", "sites-elementos-u2-f2", "sites-elementos-u2-f3", "sites-elementos-u2-f4",
-  "sites-elementos-u3-f1", "sites-elementos-u3-f2", "sites-elementos-u3-f3", "sites-elementos-u3-f4",
-  "sites-elementos-u4-f1", "sites-elementos-u4-f2", "sites-elementos-u4-f3", "sites-elementos-u4-f4",
-  "sites-elementos-u5-f1", "sites-elementos-u5-f2", "sites-elementos-u5-f3", "sites-elementos-u5-f4",
-  "sites-elementos-u6-f1", "sites-elementos-u6-f2", "sites-elementos-u6-f3",
-  "sites-estilos-u1-f1", "sites-estilos-u1-f2", "sites-estilos-u1-f3", "sites-estilos-u1-f4",
-  "sites-estilos-u2-f1", "sites-estilos-u2-f2", "sites-estilos-u2-f3",
-  "sites-estilos-u3-f1", "sites-estilos-u3-f2", "sites-estilos-u3-f3",
-  "sites-estilos-u4-f1", "sites-estilos-u4-f2", "sites-estilos-u4-f3",
-];
-const UNIDADES_ELEMENTOS_E_ESTILOS = [
-  "sites-elementos-u1", "sites-elementos-u2", "sites-elementos-u3", "sites-elementos-u4",
-  "sites-elementos-u5", "sites-elementos-u6",
-  "sites-estilos-u1", "sites-estilos-u2", "sites-estilos-u3", "sites-estilos-u4",
-];
+// Todas as unidades publicadas das zonas Elementos e Estilos, com as fases
+// delas, derivadas do currículo e do publicados.json (testes/curriculo.mjs):
+// uma unidade nova numa dessas zonas (como a E5) entra sozinha no semeado.
+const UNIDADES_ELEMENTOS_E_ESTILOS = prontasDaIlha("sites")
+  .filter((unidade) => unidade.zona.id === "elementos" || unidade.zona.id === "estilos")
+  .map((unidade) => unidade.id);
+const FASES_ELEMENTOS_E_ESTILOS = UNIDADES_ELEMENTOS_E_ESTILOS.flatMap((id) => PUBLICADAS[id]);
 // Ferramentas usadas até o fim da zona Estilos: a Layout não apresenta
 // nenhuma ferramenta nova, então todas precisam já estar vistas.
 const FERRAMENTAS_ATE_ESTILOS = [

@@ -272,6 +272,11 @@ núcleo comum.
 
 ### Pendências
 
+- **Bateria completa (rodada 14):** três testes quebrados desde a rodada
+  13 foram corrigidos: `publicar.mjs` (a P2 não apresenta mais o modo
+  dispositivo e o Lighthouse), `layout.mjs` (o semeado de Elementos e
+  Estilos agora vem do `publicados.json`, com a E5) e `explorar.mjs` (12
+  temas).
 - **Jornadas de navegador pelo mapa das unidades novas.** E5, R1, R2 e
   P1 foram verificadas por `testar:conteudo` (que reproduz o mesmo motor
   de validação e ações do jogo real) e por fases de prática jogadas de

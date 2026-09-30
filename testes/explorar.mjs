@@ -105,7 +105,7 @@ await tocar(pagina.getByRole("button", { name: /Apagar a lente/ }));
 // ---------------------------------------------------------------- insígnias (painel)
 await itemDaBarra("Abrir o painel Insígnias");
 await pagina.locator("[data-painel-insignias]").waitFor();
-conferir((await pagina.locator("[data-insignia-tema]").count()) === 11, `${MODO}: uma insígnia por tema`);
+conferir((await pagina.locator("[data-insignia-tema]").count()) === 12, `${MODO}: uma insígnia por tema`);
 conferir((await pagina.locator('[data-insignia-tema="interfaces"] [data-marco="25"]').getAttribute("data-atingido")) === "nao", `${MODO}: do zero, nenhum marco aceso`);
 await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
 
