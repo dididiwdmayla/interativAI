@@ -100,8 +100,8 @@ export const FASE_U2_F2: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "Palpite: e se, em vez de esconder, a gente APAGAR o pop-up de cookies? O que acontece com o espaço?",
-        opcoes: ["Fica um buraco vazio, igual ao do banner", "O conteúdo de baixo sobe e ocupa o lugar", "O site inteiro quebra"],
-        correta: 1,
+        opcoes: ["O conteúdo de baixo sobe e ocupa o lugar", "Fica um buraco vazio, igual ao do banner", "O site inteiro quebra"],
+        correta: 0,
         explicacao: "Apagar tira a peça da página de vez. Sem ela, as notícias de baixo sobem e fecham o espaço.",
       },
       enunciado: {
@@ -130,7 +130,7 @@ export const FASE_U2_F2: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "apagar", seletor: "#popup-cookies" },
       ],
     },

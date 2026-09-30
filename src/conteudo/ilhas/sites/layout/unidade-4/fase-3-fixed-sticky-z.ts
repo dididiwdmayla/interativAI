@@ -80,11 +80,11 @@ export const FASE_L4_F3: FasePratica = {
       previsao: {
         pergunta: "Se você der position: sticky; top: 0 ao cabeçalho, o que acontece ao rolar a página para baixo?",
         opcoes: [
-          "Ele fica no lugar normal até a rolagem alcançá-lo, e então gruda no topo",
           "Ele já nasce grudado no topo, desde o início, como o fixed",
           "Ele desaparece assim que a rolagem começa",
+          "Ele fica no lugar normal até a rolagem alcançá-lo, e então gruda no topo",
         ],
-        correta: 0,
+        correta: 2,
         explicacao: "sticky se comporta como normal (static) até a rolagem chegar no limite (top: 0); só então ele gruda, como um fixed.",
       },
       enunciado: {
@@ -115,7 +115,7 @@ export const FASE_L4_F3: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "definirPropriedade", seletorRegra: "#cabecalho", propriedade: "position", valor: "sticky" },
         { tipo: "definirPropriedade", seletorRegra: "#cabecalho", propriedade: "top", valor: "0" },
       ],

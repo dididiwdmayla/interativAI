@@ -76,8 +76,8 @@ export const FASE_U4_F1: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "Palpite: o que muda se a gente acrescentar target=\"_blank\" no link da bilheteria?",
-        opcoes: ["Ele some da página", "Abre numa aba nova, sem sair daqui", "Fica sublinhado"],
-        correta: 1,
+        opcoes: ["Abre numa aba nova, sem sair daqui", "Ele some da página", "Fica sublinhado"],
+        correta: 0,
         explicacao: "target=\"_blank\" faz o link abrir numa aba nova. A página do coral continua aberta do jeito que estava.",
       },
       enunciado: {
@@ -96,7 +96,7 @@ export const FASE_U4_F1: FasePratica = {
       },
       falaAoConcluir: { texto: "Boa! Aba nova, sem perder o lugar onde você estava.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "definirAtributo", seletor: "#link-ingressos", nome: "target", valor: "_blank" },
       ],
     },

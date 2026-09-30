@@ -7,6 +7,7 @@ import { FASES, UNIDADES } from "@/conteudo";
 import { REGRAS_DE_FASE, REGRAS_GERAIS, type ContextoChecagem } from "@/conteudo/checagens";
 import { FASE_U1_F2 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-2";
 import { FASE_U1_F3 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-3-desafio";
+import { conferirPosicaoDaCorreta } from "@/conteudo/checagens";
 import { conferirPublicados, montarPublicados, PUBLICADOS } from "@/conteudo/publicados";
 import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 
@@ -234,5 +235,31 @@ describe("congelamento do conteúdo publicado", () => {
     const vazio = { unidades: {}, fases: {} };
     expect(conferirPublicados(vazio, CONTEXTO)).toEqual([]);
     expect(Object.keys(montarPublicados(CONTEXTO).fases)).toEqual(FASES.map((fase) => fase.id));
+  });
+});
+
+describe("posição da opção correta", () => {
+  it("acusa previsões da mesma unidade, ou do mesmo conceito na revisão, com a certa sempre na mesma posição", () => {
+    const previsao = (correta: number) => ({ pergunta: "?", opcoes: ["a", "b", "c"], correta, explicacao: "." });
+    const objetivo = (id: string, correta: number) => ({ ...FASE_U1_F2.objetivos[0], id, tipo: "previsao" as const, previsao: previsao(correta) });
+    const fase = (correta: number[]): FasePratica => ({ ...FASE_U1_F2, objetivos: correta.map((valor, indice) => objetivo(`o${indice}`, valor)) });
+    const unidade = UNIDADES.find((item) => item.id === FASE_U1_F2.unidadeId)!;
+    const mesma = conferirPosicaoDaCorreta([unidade], [fase([1, 1, 1])], []);
+    expect(mesma.join("\n")).toContain("todas com a certa na posição 1");
+    expect(conferirPosicaoDaCorreta([unidade], [fase([1, 0, 1])], [])).toEqual([]);
+    expect(conferirPosicaoDaCorreta([unidade], [fase([1])], [])).toEqual([]);
+
+    const item = (id: string, correta: number) => ({
+      id,
+      conceito: "elemento" as const,
+      tipo: "previsao" as const,
+      enunciado: { mouse: "x", toque: "x" },
+      siteAlvo: { body: "<p>x</p>" },
+      previsao: previsao(correta),
+      ajudas: { pergunta: "?", dica: "." },
+      solucaoDeTeste: [],
+    });
+    expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 0)]).join("\n")).toContain('o conceito "elemento"');
+    expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 2)])).toEqual([]);
   });
 });

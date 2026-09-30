@@ -37,8 +37,8 @@ export const FASE_S1_F3: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "O head tem <meta name=\"robots\" content=\"noindex\">. O que acontece com a página?",
-        opcoes: ["Continua no ar, mas fica fora da busca", "Sai do ar para todo mundo", "Aparece em primeiro na busca"],
-        correta: 0,
+        opcoes: ["Sai do ar para todo mundo", "Aparece em primeiro na busca", "Continua no ar, mas fica fora da busca"],
+        correta: 2,
         explicacao: "noindex pede para a busca não guardar a página no catálogo. Quem tem o link ainda abre; quem busca, não acha.",
       },
       enunciado: {
@@ -60,7 +60,7 @@ export const FASE_S1_F3: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "apagar", seletor: 'meta[name="robots"]' },
       ],
     },

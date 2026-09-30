@@ -481,6 +481,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: ({ fases, itens }) => conferirItensDeRevisao(itens ?? ITENS_REVISAO, fases),
   },
   {
+    id: "posicao-da-correta",
+    nome: "a opção correta das previsões de uma mesma unidade (ou de um mesmo conceito, na revisão) não fica sempre na mesma posição",
+    checar: ({ unidades, fases, itens }) => conferirPosicaoDaCorreta(unidades, fases, itens ?? ITENS_REVISAO),
+  },
+  {
     id: "plataformas-marketing",
     nome: "o arquivo de plataformas de marketing tem ids únicos, data conferida e passos",
     checar: () => conferirPlataformas(PLATAFORMAS_MARKETING),
@@ -491,6 +496,41 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
   },
 ];
+
+/**
+ * Quem escreve previsões em volume tende a pôr a certa sempre na mesma
+ * posição, e o jogador que "escolhe a primeira" acertaria tudo. Acusa, por
+ * unidade (objetivos) e por conceito (itens de revisão), 2 ou mais
+ * previsões com o mesmo `correta`. Com uma previsão só, não há o que comparar.
+ */
+export function conferirPosicaoDaCorreta(
+  unidades: readonly Unidade[],
+  fases: readonly Fase[],
+  itens: readonly ItemRevisao[],
+): string[] {
+  const problemas: string[] = [];
+  const sempreIgual = (posicoes: readonly number[]) => posicoes.length >= 2 && posicoes.every((posicao) => posicao === posicoes[0]);
+  for (const unidade of unidades) {
+    const posicoes = fases
+      .filter((fase) => fase.unidadeId === unidade.id)
+      .flatMap((fase) => objetivosDe(fase))
+      .flatMap((objetivo) => (objetivo.tipo === "previsao" ? [objetivo.previsao.correta] : []));
+    if (sempreIgual(posicoes)) {
+      problemas.push(`a unidade "${unidade.id}" tem ${posicoes.length} previsões, todas com a certa na posição ${posicoes[0]}: gire a posição`);
+    }
+  }
+  const porConceito = new Map<string, number[]>();
+  for (const item of itens) {
+    if (item.tipo !== "previsao" || !item.previsao) continue;
+    porConceito.set(item.conceito, [...(porConceito.get(item.conceito) ?? []), item.previsao.correta]);
+  }
+  for (const [conceito, posicoes] of porConceito) {
+    if (sempreIgual(posicoes)) {
+      problemas.push(`o conceito "${conceito}" tem ${posicoes.length} previsões de revisão, todas com a certa na posição ${posicoes[0]}: gire a posição`);
+    }
+  }
+  return problemas;
+}
 
 /* ------------------------------------------------------------------ */
 /* Regras de uma fase (só dados)                                      */

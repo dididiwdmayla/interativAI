@@ -65,8 +65,8 @@ export const FASE_U5_F2: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "Palpite: esse card de serviço (nome, descrição e preço) pede section ou article?",
-        opcoes: ["section, porque agrupa por tema", "article, porque se basta sozinho e daria pra reaproveitar", "Tanto faz, as duas são iguais"],
-        correta: 1,
+        opcoes: ["article, porque se basta sozinho e daria pra reaproveitar", "section, porque agrupa por tema", "Tanto faz, as duas são iguais"],
+        correta: 0,
         explicacao: "Um card assim faz sentido sozinho: dá pra tirar ele da página e colar em outro lugar (um catálogo, um anúncio) sem perder o sentido. Isso é article.",
       },
       enunciado: {
@@ -85,7 +85,7 @@ export const FASE_U5_F2: FasePratica = {
       },
       falaAoConcluir: { texto: "Exato! article é pra quem se vira sozinho fora da página.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "renomearTag", seletor: "#servico-revisao", novaTag: "article" },
       ],
     },

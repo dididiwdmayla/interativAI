@@ -71,8 +71,8 @@ export const FASE_S1_F2: FasePratica = {
       },
       previsao: {
         pergunta: "A descrição agora tem quase 300 letras. O que a busca faz com ela?",
-        opcoes: ["Corta no meio, com reticências", "Mostra inteira, em várias linhas", "Esconde o resultado"],
-        correta: 0,
+        opcoes: ["Mostra inteira, em várias linhas", "Corta no meio, com reticências", "Esconde o resultado"],
+        correta: 1,
         explicacao: "A busca tem pouco espaço (uns 150 caracteres no computador, menos no celular) e corta o resto. O começo tem que dizer o principal.",
       },
       enunciado: {
@@ -91,7 +91,7 @@ export const FASE_S1_F2: FasePratica = {
       },
       falaAoConcluir: { texto: "Cabe inteira! Menos texto, mais convite.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "responderPrevisao", opcao: 1 },
         { tipo: "definirAtributo", seletor: 'meta[name="description"]', nome: "content", valor: DESCRICAO_CURTA },
       ],
     },
