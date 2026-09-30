@@ -98,6 +98,14 @@ import { ITENS_POSITION_ABSOLUTE } from "./position-absolute";
 import { ITENS_POSITION_FIXED } from "./position-fixed";
 import { ITENS_POSITION_STICKY } from "./position-sticky";
 import { ITENS_Z_INDEX_CSS } from "./z-index-css";
+import { ITENS_CONSOLE_JS } from "./console-js";
+import { ITENS_OPERACOES_ARITMETICAS } from "./operacoes-aritmeticas";
+import { ITENS_ORDEM_DAS_OPERACOES } from "./ordem-das-operacoes";
+import { ITENS_VARIAVEL_LET } from "./variavel-let";
+import { ITENS_UNDEFINED_JS } from "./undefined-js";
+import { ITENS_VARIAVEL_CONST } from "./variavel-const";
+import { ITENS_LER_MENSAGEM_DE_ERRO } from "./ler-mensagem-de-erro";
+import { ITENS_NOME_DE_VARIAVEL } from "./nome-de-variavel";
 import { ITENS_MODO_DISPOSITIVO } from "./modo-dispositivo";
 import { ITENS_ORIENTACAO_DA_TELA } from "./orientacao-da-tela";
 import { ITENS_META_VIEWPORT } from "./meta-viewport";
@@ -277,6 +285,15 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_ORCAMENTO_DIARIO,
   ...ITENS_PAGINA_DE_DESTINO,
   ...ITENS_INDICE_DE_QUALIDADE,
+  // Ilha Lógica, U1 (rodada 17)
+  ...ITENS_CONSOLE_JS,
+  ...ITENS_OPERACOES_ARITMETICAS,
+  ...ITENS_ORDEM_DAS_OPERACOES,
+  ...ITENS_VARIAVEL_LET,
+  ...ITENS_UNDEFINED_JS,
+  ...ITENS_VARIAVEL_CONST,
+  ...ITENS_LER_MENSAGEM_DE_ERRO,
+  ...ITENS_NOME_DE_VARIAVEL,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

@@ -82,6 +82,22 @@
   --cor-caixa-borda: #fde39b;
   --cor-caixa-preenchimento: #c6dd96;
   --cor-caixa-conteudo: #9cc8e0;
+  /* Valores de JavaScript (Console e palco da memória), por tipo */
+  --cor-js-texto: #b3261e;
+  --cor-js-numero: #1a4fd6;
+  --cor-js-booleano: #7a2bc2;
+  --cor-js-nulo: #74677f;
+  --cor-js-funcao: #a35a00;
+  --cor-js-objeto: #13866c;
+  --cor-js-erro-fundo: #fde8e9;
+  --cor-js-aviso-fundo: #fff4d6;
+
+  /* Circuito lógico */
+  --cor-circuito-fundo: #fbf6ff;
+  --cor-circuito-grade: #efe2f8;
+  --cor-fio-desligado: #b9a6c9;
+  --cor-fio-ligado: #f59e0b;
+  --cor-lampada-acesa: #ffd23f;
 }
 
 [data-theme="fliperama"] {
@@ -148,6 +164,20 @@
   --cor-caixa-borda: #9e8420;
   --cor-caixa-preenchimento: #4f7d24;
   --cor-caixa-conteudo: #236a94;
+  --cor-js-texto: #ff8fa3;
+  --cor-js-numero: #7cc4ff;
+  --cor-js-booleano: #d7a6ff;
+  --cor-js-nulo: #9a92c4;
+  --cor-js-funcao: #ffd166;
+  --cor-js-objeto: #5cff9d;
+  --cor-js-erro-fundo: #3a1020;
+  --cor-js-aviso-fundo: #3a2e0c;
+
+  --cor-circuito-fundo: #120f2a;
+  --cor-circuito-grade: #221d4a;
+  --cor-fio-desligado: #4b4390;
+  --cor-fio-ligado: #faf45a;
+  --cor-lampada-acesa: #faf45a;
 }
 
 [data-theme="segredo"] {
@@ -214,4 +244,18 @@
   --cor-caixa-borda: #98812a;
   --cor-caixa-preenchimento: #447238;
   --cor-caixa-conteudo: #27637e;
+  --cor-js-texto: #ffb3a1;
+  --cor-js-numero: #8fd3ff;
+  --cor-js-booleano: #e0a8ff;
+  --cor-js-nulo: #7fa892;
+  --cor-js-funcao: #ffe08a;
+  --cor-js-objeto: #3dff8f;
+  --cor-js-erro-fundo: #3a1414;
+  --cor-js-aviso-fundo: #33300c;
+
+  --cor-circuito-fundo: #04140e;
+  --cor-circuito-grade: #0c2a1f;
+  --cor-fio-desligado: #2f5c48;
+  --cor-fio-ligado: #3dff8f;
+  --cor-lampada-acesa: #d9ff5c;
 }

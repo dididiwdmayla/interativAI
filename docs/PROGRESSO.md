@@ -5,7 +5,7 @@ cota (`CLAUDE.md`): este arquivo guarda só a rodada mais recente; as
 antigas ficam em `docs/arquivo/`. Status consolidado: `docs/ROADMAP.md`
 (fonte única).
 
-**Resumo das rodadas 1 a 15:** a fábrica de conteúdo declarativo e o
+**Resumo das rodadas 1 a 16:** a fábrica de conteúdo declarativo e o
 `testar:conteudo`; o congelamento (`publicar:conteudo`); o painel Estilos
 dentro de Elementos com o motor de cascata próprio (especificidade,
 `!important`, herança, atalhos, variáveis CSS e `@media`); o modo
@@ -16,96 +16,113 @@ para fechar a Ilha Sites (E5/Meu tema, modo dispositivo, painel
 Lighthouse, projeto-ponte, Levar pro mundo) com a P2 como unidade-modelo;
 a Ilha Sites completa (E5, R1, R2 e P1); e a Revisão do dia com a zona
 opcional Ser encontrado (S1), a aba Busca, a Medição e o simulador de
-campanha; e os itens de revisão de U3 a P2 (174 itens) com a `bateria:conteudo`. Detalhe em
+campanha; os itens de revisão de U3 a P2 (174 itens) com a `bateria:conteudo`; e a zona Ser encontrado (S2 a S5) com o `/lab/revisao`. Detalhe em
 `docs/arquivo/PROGRESSO-rodadas-1-a-11.md`,
 `docs/arquivo/PROGRESSO-rodada-12.md`,
 `docs/arquivo/PROGRESSO-rodada-13.md`,
-`docs/arquivo/PROGRESSO-rodada-14.md` e
-`docs/arquivo/PROGRESSO-rodada-15.md`.
+`docs/arquivo/PROGRESSO-rodada-14.md`,
+`docs/arquivo/PROGRESSO-rodada-15.md` e
+`docs/arquivo/PROGRESSO-rodada-16.md`.
 
-## Rodada 16: a zona "Ser encontrado" (S2 a S5), a checagem de posição e o `/lab/revisao`
+## Rodada 17: Ilha Lógica, parte A (Console, execução, palco da memória, circuito lógico)
 
-Um commit por etapa. Prompt só de conteúdo: nenhum motor mudou (só uma lista de
-dados em `busca.ts` e uma frase do painel Campanha), então sem bateria
-completa; no fim, `bateria:conteudo` (verde).
+Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
 
-### Etapa 0
+### Etapa 1: currículo detalhado da Lógica
 
-- **Checagem `posicao-da-correta`** (`src/conteudo/checagens.ts`): 2 ou mais
-  previsões da mesma unidade, ou do mesmo conceito nos itens de revisão, com a
-  mesma `correta` falham. Pegou 11 unidades e 1 conceito (rastreamento): as 15
-  previsões giradas e a S1 mexeram só na ordem das opções e no
-  `responderPrevisao` (ids e conteúdo intactos). Teste de sabotagem em
-  `checagens.test.ts`.
-- **`/lab/revisao`** (`src/componentes/lab/LabRevisao.tsx`): lista os itens por
-  zona e conceito e abre qualquer um direto (`?item=<id>`), com o motor da
-  revisão do dia e sem mexer no progresso. `testes/lab-revisao.mjs` nos três
-  layouts.
+- `src/curriculo/curriculo.ts`: a ilha com 10 zonas e 33 unidades. Ordem
+  ajustada (o porquê no `MAPA-CURRICULAR.md`): Resolvendo problemas foi para
+  depois de Listas e objetos; Depuração para antes de Algoritmos; zona nova
+  **Programa de verdade** (projeto-ponte: snippet no Chrome de verdade, sem
+  Node). Ids antigos mantidos (nenhum publicado); títulos e metas das u1
+  refeitos.
+- `requerMotor` por unidade para a parte B: `ordenar-passos` (Resolvendo
+  problemas u1 a u3), `depurador-fontes` (Depuração u2 e u3),
+  `visualizador-arvore` (Estruturas u3) e `projeto-ponte-js`; fichas novas em
+  `src/curriculo/motores.ts`. As zonas seguem com o `requerMotor` da parte A
+  até a etapa 6.
+- `docs/MAPA-CURRICULAR.md`: princípio da ilha (palco da memória), missão de
+  campo por zona e as unidades com meta, conceitos, micro-passos, desafio,
+  revisa e confusões.
 
-### Etapas 1 a 4: as unidades
+### Etapa 2: executor instrumentado
 
-| Unidade | Fases | Desafio (site novo) | Conceitos novos | Itens |
-| --- | --- | --- | --- | --- |
-| S2 SEO na página | h1; texto e enchimento; links e alt; velocidade | Casa de Chá Lótus | 6 | 12 |
-| S3 Seu negócio no mapa | dados iguais e perfil; avaliações; JSON-LD; subtipos | Padaria Pão de Mel | 5 | 10 |
-| S4 Medir quem chega | eventos e conversão; Search Console; utm | Casa de Sucos Vitamina | 5 | 10 |
-| S5 Anúncio pago por dentro | leilão; verba e palavras; página de destino | Desafio (a última fase do simulador): Pet Shop Rabo Feliz | 6 | 12 |
+- `src/motor/executor/`: `instrumentar.ts` (acorn, ganchos no texto, sem
+  mudar as linhas; `sintaxesUsadas` para o validador `usouSintaxe`),
+  `nucleo.ts` (ganchos, rastro, memória com referências, console, teste de
+  funções), `formatar.ts` (texto no formato do Chrome), `erros.ts`
+  (dicionário de erros de iniciante), `node.ts` (vm) e
+  `executor.worker.ts` + `sessaoNavegador.ts` (Web Worker com reserva de
+  tempo). Decisão e detalhes no `PROJETO.md`, "Executor de JavaScript".
+- Dependência nova: `acorn` (o astring foi avaliado e ficou de fora).
+- Testes: `testes/conteudo/executor.test.ts`, 59 casos.
 
-- Por unidade: `testar:conteudo` verde, jornada da unidade pelo mapa nos três
-  layouts (`testes/ser-encontrado-zona.mjs`), `publicar:conteudo`, build, lint
-  e commit. Registro de itens: 258 (214 + 44).
-- **Plataformas** (`src/conteudo/plataformas-marketing.ts`): perfil da empresa,
-  schema.org (subtipos e campos), Search Console e Google Ads, todos com
-  `verificadoEm: "2026-09-30"`, `fatos`, `fontes` e `usadaEm`. O tipo ganhou
-  `fatos` e `fontes` (o campo de data segue se chamando `verificadoEm`).
-  Regra `conferido-em-nas-fases`: a unidade que cita a plataforma mostra
-  "conferido em 30/09/2026" em uma fala ou na missão de campo, e nenhuma fase
-  mostra data que o arquivo não tem.
-- **S3, subtipos:** a lista `TIPOS_DE_NEGOCIO_LOCAL` não tinha os subtipos do ANEXO
-  FastFoodRestaurant, NailSalon, DaySpa, TattooParlor,
-  HomeAndConstructionBusiness, Plumber, Electrician, RoofingContractor,
-  HousePainter, AutoWash, AutoDealer, LegalService e RealEstateAgent. A S3 usa
-  o Plumber (e o IceCreamShop e o Bakery, que já estavam); entraram todos,
-  com teste que trava a lista contra o arquivo. Ficaram os três que já existiam
-  fora do ANEXO (BookStore, GroceryStore, ProfessionalService).
-- **S4:** Analytics e Search Console são conceitos (sem nomes de menu); a
-  Medição é simulada e a fase diz isso; utm_source, utm_medium e utm_campaign
-  em links do jogo.
-- **S5:** a simplificação (lance vezes qualidade) é dita na introdução, na
-  previsão e na conclusão; o que o Google considera vem do arquivo
-  (`google-ads`); o Índice de qualidade só aparece como diagnóstico, em três
-  partes, e a "qualidade" da tela é chamada de "do simulador". A lição central
-  (página melhor barateia o cliente) sai dos números do motor: com a página
-  fraca o cliente custa uns R$ 66; com title e descrição, uns R$ 22; com o alt
-  da foto, uns R$ 18 (os limites de cada objetivo estão conferidos pelo
-  `testar:conteudo`). O painel Campanha
-  deixou de dizer que a posição sai de lance vezes qualidade sem ressalva.
-- **Testes de navegador:** `ser-encontrado-zona.mjs [layout] [unidade]`, com a
-  tabela de passos em `ser-encontrado-passos.mjs` (previsões, Me ajuda até a
-  solução, editor de código, clique na prévia, construtor de link, campanha,
-  Lighthouse). Detalhes que custaram tentativa: `ATRITOS-FABRICA.md`, rodada 7.
+### Etapa 3: Console, Snippet, declarativo e tutor
 
-### Decisões a conferir
+- Fase de programa (`programa` na fase), abas Console e Fontes liberadas por
+  fase, o palco no lugar da prévia (versão simples; a completa é a etapa 4).
+- `usePrograma`, `PainelConsole`, `PainelFontes`, `EntradaConsole`,
+  `ValorConsole`, `BarraSimbolos`; `EditorCodigo` com JavaScript.
+- Validadores `valorVariavel`, `respostaDoConsole`, `saida`, `semErro`,
+  `erroDoTipo`, `usouSintaxe`, `funcaoPassa`; ações `executarNoConsole`,
+  `definirSnippet`, `executarSnippet`; evento `executouCodigo`; regra
+  `fase-de-programa`; progresso com o programa salvo; tutor com o código.
+- Ferramentas `console` e `snippet` (e já registradas `palco-memoria` e
+  `linha-do-tempo`). Tokens `--cor-js-*` e do circuito nos três temas.
+- Os conceitos da Lógica ficam fora do catálogo até a unidade que os ensina
+  (o glossário exige onde aprender).
+- Testes: `programa.test.ts` (12), tutor e progresso;
+  `testes/console.mjs` nos três layouts (verde, também no build de produção).
 
-- A S5 não tem desafio do tipo `desafio` (os validadores `simulacao` só existem
-  no simulador): a última fase é o desafio, só de sozinho, e a unidade fica
-  sem meta com antes e depois.
-- Não há tela que liste os passos das plataformas: as fases carregam o
-  caminho geral em falas e o "conferido em" (com regra no `testar:conteudo`).
-- Textos livres (h1, resposta a avaliação, texto que responde) só conferem que
-  mudaram; o comentário de cada fase diz isso.
-- O campo da data das plataformas continua `verificadoEm` (o prompt dizia
-  `conferidoEm`): mudar o nome quebraria o guia e a regra sem ganho.
-- Afirmações fora do ANEXO, só de linguagem: JSON com erro "não consegue ler o
-  bloco", avaliação comprada "é falsa e queima a confiança", loading lazy
-  (HTML padrão). Nenhum nome de menu ou passo de plataforma veio de memória.
-- Os tipos de correspondência de palavra-chave aparecem só pelos nomes (ampla,
-  de frase e exata), como no ANEXO, sem definição de memória.
+### Etapa 4: palco da memória e linha do tempo
 
-### Riscos
+- `src/motor/palco.ts` (plano puro: caixinhas, vagões, fichas, ponteiros com
+  seta, molduras, o que surge e o que muda) e `componentes/palco/`
+  (`PalcoMemoria`, `QuadroPalco`, `CaixinhaPalco`, `ValorPalco`,
+  `LinhaDoTempo`). Animações `palco-surgir` e `palco-piscar`.
+- Linha do tempo no `JogoFase` (o passo escolhido vale só para aquela
+  execução), com a linha acesa no Snippet.
+- Testes: `palco.test.ts` (6) e `testes/palco.mjs` nos três layouts.
 
-- A jornada por unidade usa o editor de código para os "sozinho" (o gesto
-  fino de cada peça, como o menu do nó, está coberto pelas jornadas das
-  unidades antigas e pelas soluções do `testar:conteudo`).
-- Os números do simulador foram conferidos com o motor, mas dependem dele:
-  se o modelo de `campanha.ts` mudar, as 4 fases da S5 podem acusar.
+### Etapa 5: circuito lógico e a demonstração no /lab
+
+- `src/motor/circuito/modelo.ts` (independente da ilha, com realimentação),
+  tipo de fase `circuito-logico`, `useCircuito`, `BancadaCircuito`,
+  `PecaCircuito`, `PainelTabelaVerdade`; validadores `circuitoTabela` e
+  `usouPortao`, ações, eventos, regra `circuito-logico`, progresso com o
+  circuito, tutor com o circuito como código; ferramentas `circuito` e
+  `tabela-verdade`.
+- Currículo: o `circuito-logico` saiu de `MOTORES_PLANEJADOS`; a Decisões u2
+  perdeu o `requerMotor` próprio (a zona ainda espera a etapa 6) e a sala
+  "Por baixo do capô" espera só as atividades do museu.
+- Demonstração `lab-logica-u1-f2` (modelo para o Sonnet).
+- Testes: `circuito.test.ts` (9: simulação, De Morgan, memória, código
+  batendo com a tabela, sabotagens) e `testes/circuito.mjs` nos três layouts.
+
+### Etapa 6: unidade-modelo, guia, liberações e bateria
+
+- Unidade `logica-primeiros-comandos-u1` "O Console calcula": F1 contas no
+  Console (previsão da ordem das operações, parênteses), F2 `let` e o
+  `undefined` do Console (previsão), F3 `const`, ler o TypeError, nomes
+  bons e programa de três linhas com a linha do tempo, F4 desafio
+  Mercadinho do Seu Zé (contexto novo, 4 partes). 8 conceitos de volta ao
+  catálogo; 16 itens de revisão de programa (`ItemRevisao.programa`).
+- Meta de desafio de programa com mini-palcos antes e depois
+  (`memoriasDoDesafio`).
+- Currículo: as 10 zonas sem `requerMotor`; a Ilha Lógica abre com a Sites
+  completa. `faseLiberada`: a primeira fase de uma unidade segue o estado
+  da unidade no mapa (antes dependia da última fase global anterior, que
+  era da zona opcional S5 e trancava a Lógica).
+- Guia, seção 25 (executor, Console e Snippet, validadores de código com
+  `funcaoPassa`, ações, palco e linha do tempo, itens de revisão de
+  programa, circuito, a unidade-modelo). MAPA, PROJETO e ROADMAP.
+- Teste `testes/logica.mjs` (mundo, ilha, meta, apresentações, todos os
+  objetivos, recarga no meio da F2, linha do tempo, desafio, unidade
+  concluída) nos três layouts; entrou no `todos.mjs`.
+- Bateria completa: além da Lógica, quebras antigas consertadas nos
+  testes. `unidades.mjs` e `layout.mjs` clicavam em posições fixas das
+  previsões giradas na rodada 16 (que só rodou a bateria de conteúdo).
+  `audio.mjs` entrava na Lógica como ilha em construção; agora entra em
+  Páginas vivas. `ferramentas-novas.mjs` tocava a árvore com o cartão da
+  apresentação ainda deslizando; `passarApresentacao` agora espera o
+  cartão parar.

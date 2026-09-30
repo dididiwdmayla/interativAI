@@ -29,6 +29,12 @@ import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeDadosEstruturados } from "@/componentes/icones/IconeDadosEstruturados";
 import { IconeResultadoBusca } from "@/componentes/icones/IconeResultadoBusca";
 import { IconeCampanha } from "@/componentes/icones/IconeCampanha";
+import { IconeConsole } from "@/componentes/icones/IconeConsole";
+import { IconeLinhaDoTempo } from "@/componentes/icones/IconeLinhaDoTempo";
+import { IconePalcoMemoria } from "@/componentes/icones/IconePalcoMemoria";
+import { IconeSnippet } from "@/componentes/icones/IconeSnippet";
+import { IconeCircuito } from "@/componentes/icones/IconeCircuito";
+import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -806,6 +812,128 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque no resultado do dia.",
     },
     uso: "tocar",
+  },
+  // Ilha Lógica (rodada 17). Comportamento do Console e dos Snippets conferido na
+  // documentação do Chrome (developer.chrome.com, Console e "Run snippets").
+  console: {
+    id: "console",
+    nome: "Console",
+    Icone: IconeConsole,
+    alvo: seletorFerramenta("console"),
+    oQueFaz: "Roda JavaScript na hora: você escreve um comando, aperta Enter e o Console responde embaixo.",
+    praQueServe:
+      "Serve para fazer contas, testar uma ideia e ver o valor de uma variável sem criar arquivo nenhum. Depois de let ou const, ele responde undefined: a linha guardou algo, mas não tem valor para mostrar.",
+    comoUsarAqui: {
+      mouse: "Clique na linha com o sinal >, escreva e aperte Enter. Shift+Enter pula linha. A seta para cima traz o comando anterior.",
+      toque: "Toque na linha com o sinal >, escreva e toque em Rodar. A barra de símbolos em cima do teclado tem os sinais do JavaScript.",
+    },
+    noF12DeVerdade:
+      "é a aba Console (Ctrl+Shift+J no Windows, Cmd+Option+J no Mac). Funciona em qualquer site: o que você aprende aqui roda lá igualzinho.",
+    experimente: {
+      mouse: "Escreva 2 + 3 e aperte Enter.",
+      toque: "Escreva 2 + 3 e toque em Rodar.",
+    },
+    uso: "sinal",
+  },
+  snippet: {
+    id: "snippet",
+    nome: "Snippet",
+    Icone: IconeSnippet,
+    alvo: seletorFerramenta("snippet"),
+    oQueFaz: "Um editor para programas de várias linhas, que roda tudo de uma vez com Executar. O que o programa mostra aparece no Console.",
+    praQueServe:
+      "O Console é ótimo para um comando; um programa maior fica melhor escrito com calma, com as linhas numeradas, e rodado de novo sempre que mudar.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Fontes, escreva no editor e clique em Executar (ou aperte Ctrl+Enter).",
+      toque: "Abra a aba Fontes, escreva no editor e toque em Executar.",
+    },
+    noF12DeVerdade:
+      "fica em Fontes > Snippets (Sources > Snippets): crie um snippet novo, escreva e rode com Ctrl+Enter. Ele fica salvo no seu Chrome e roda em qualquer página.",
+    experimente: {
+      mouse: "Clique em Executar.",
+      toque: "Toque em Executar.",
+    },
+    uso: "sinal",
+  },
+  "palco-memoria": {
+    id: "palco-memoria",
+    nome: "Palco da memória",
+    Icone: IconePalcoMemoria,
+    alvo: seletorFerramenta("palco-memoria"),
+    oQueFaz: "Mostra a memória do programa: cada variável é uma caixinha com nome, valor e tipo; listas são vagões numerados e objetos, fichas.",
+    praQueServe:
+      "Programa não tem tela de site: o que muda é a memória. Aqui você vê a caixinha nascer, o valor trocar e duas variáveis apontando para a mesma lista.",
+    comoUsarAqui: {
+      mouse: "Rode algo no Console ou no Snippet e olhe o palco mudar. A plaquinha no canto de cada caixinha diz o tipo do valor, com a cor dele.",
+      toque: "Rode algo no Console ou no Snippet e olhe o palco mudar. A plaquinha no canto de cada caixinha diz o tipo do valor, com a cor dele.",
+    },
+    noF12DeVerdade:
+      "não tem um palco igual: o mais perto é o painel Escopo (Scope) da aba Fontes, que lista as variáveis quando o programa pausa num ponto de parada.",
+    experimente: {
+      mouse: "Clique no palco.",
+      toque: "Toque no palco.",
+    },
+    uso: "tocar",
+  },
+  "linha-do-tempo": {
+    id: "linha-do-tempo",
+    nome: "Linha do tempo",
+    Icone: IconeLinhaDoTempo,
+    alvo: seletorFerramenta("linha-do-tempo"),
+    oQueFaz: "Rebobina o programa: cada ponto da barra é um passo que ele deu, com a linha do código acesa e a memória daquele momento.",
+    praQueServe:
+      "O programa roda rápido demais para ver. Voltando passo a passo, dá para achar em que linha um valor mudou e o que tinha na memória na hora do erro.",
+    comoUsarAqui: {
+      mouse: "Arraste a bolinha da barra ou use os botões de passo anterior e próximo. A linha do código acende no Snippet.",
+      toque: "Arraste a bolinha da barra ou toque nos botões de passo anterior e próximo. A linha do código acende no Snippet.",
+    },
+    noF12DeVerdade:
+      "o Chrome anda para a frente, não para trás: na aba Fontes, os botões de passo a passo avançam uma linha de cada vez depois de um ponto de parada.",
+    experimente: {
+      mouse: "Clique no botão de passo anterior.",
+      toque: "Toque no botão de passo anterior.",
+    },
+    uso: "sinal",
+  },
+  circuito: {
+    id: "circuito",
+    nome: "Bancada de circuito",
+    Icone: IconeCircuito,
+    alvo: seletorFerramenta("circuito"),
+    oQueFaz: "Uma bancada com chaves, portões E, OU e NÃO e uma saída: você liga os fios e vê a corrente acender.",
+    praQueServe:
+      "Todo if decide com sim ou não. Montar o portão com as mãos mostra o que E, OU e NÃO fazem antes de escrever && , || e ! no código.",
+    comoUsarAqui: {
+      mouse: "Arraste um portão da paleta. Clique na bolinha da direita de uma peça e depois numa bolinha da esquerda de outra: nasce o fio. Clique numa chave para ligar e desligar.",
+      toque: "Toque num portão da paleta. Toque na bolinha da direita de uma peça e depois numa bolinha da esquerda de outra: nasce o fio. Toque numa chave para ligar e desligar.",
+    },
+    noF12DeVerdade:
+      "não existe no F12: os portões moram dentro do processador, aos bilhões. No código, eles viram os operadores &&, || e !, que funcionam no Console de qualquer site.",
+    experimente: {
+      mouse: "Clique numa chave para ligar.",
+      toque: "Toque numa chave para ligar.",
+    },
+    uso: "tocar",
+  },
+  "tabela-verdade": {
+    id: "tabela-verdade",
+    nome: "Tabela verdade",
+    Icone: IconeTabelaVerdade,
+    alvo: seletorFerramenta("tabela-verdade"),
+    oQueFaz: "Mostra, para cada jeito de ligar as chaves, se a saída acende. As linhas que você já testou ficam marcadas.",
+    praQueServe:
+      "É o resumo do circuito inteiro: dá para conferir todas as combinações sem esquecer nenhuma. O botão Ver como código mostra o mesmo circuito escrito em JavaScript.",
+    comoUsarAqui: {
+      mouse: "Ligue e desligue as chaves e veja a linha acender na tabela. Clique em Ver como código.",
+      toque: "Ligue e desligue as chaves e veja a linha acender na tabela. Toque em Ver como código.",
+    },
+    noF12DeVerdade:
+      "não é uma aba do Chrome: é como programadores e engenheiros conferem uma condição. O código que aparece roda no Console de qualquer site.",
+    experimente: {
+      mouse: "Clique em Ver como código.",
+      toque: "Toque em Ver como código.",
+    },
+    uso: "sinal",
   },
 };
 

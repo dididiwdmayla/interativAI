@@ -9,6 +9,7 @@ import { conceitoDoId, ehIdConceito } from "../conceitos";
 import { ferramentaDaAcao } from "../ferramentaDaAcao";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import type { FasePratica, ItemRevisao, Objetivo, Validador } from "../tipos";
+import { SITE_DO_PROGRAMA } from "@/motor/programa";
 
 /** Prefixo dos ids das fases de revisão (o tutor e a rota reconhecem por ele). */
 export const PREFIXO_FASE_REVISAO = "revisao-";
@@ -28,6 +29,9 @@ const FERRAMENTAS_BASE: readonly IdFerramenta[] = [
   "editor",
   "sincronia",
 ];
+
+/** Item de programa (Ilha Lógica): o Console e o palco (apresentados na primeira fase da ilha). */
+const FERRAMENTAS_PROGRAMA: readonly IdFerramenta[] = ["me-ajuda", "tutor", "console", "palco-memoria"];
 
 /** Com CSS, o painel Estilos e o editor CSS (apresentados na zona Estilos). */
 const FERRAMENTAS_CSS: readonly IdFerramenta[] = ["editor-css", "painel-estilos", "editar-valor-css"];
@@ -69,7 +73,8 @@ export function faseDoItem(item: ItemRevisao): FasePratica {
   const acoes = item.solucaoDeTeste.map(ferramentaDaAcao).filter((id): id is IdFerramenta => id !== null);
   const comCss = item.siteAlvo.css !== undefined;
   const doValidador = item.validador ? ferramentasDoValidador(item.validador) : [];
-  const usaFerramentas = [...new Set([...FERRAMENTAS_BASE, ...(comCss ? FERRAMENTAS_CSS : []), ...acoes, ...doValidador])];
+  const base = item.programa ? [...FERRAMENTAS_PROGRAMA, ...(item.programa.snippet ? (["snippet"] as const) : [])] : FERRAMENTAS_BASE;
+  const usaFerramentas = [...new Set([...base, ...(comCss ? FERRAMENTAS_CSS : []), ...acoes, ...doValidador])];
   const comum = {
     id: "item",
     enunciado: item.enunciado,
@@ -98,13 +103,16 @@ export function faseDoItem(item: ItemRevisao): FasePratica {
     prerequisitos: [item.conceito],
     usaFerramentas,
     introducao: [{ texto: "Hora de relembrar, sem passo a passo.", expressao: "curioso" }],
-    siteAlvo: {
+    siteAlvo: item.programa
+      ? SITE_DO_PROGRAMA
+      : {
       url: item.siteAlvo.url ?? "revisao.exemplo",
       titulo: item.siteAlvo.titulo ?? "Mini-site da revisão",
       head: item.siteAlvo.head ?? "",
       body: item.siteAlvo.body,
       ...(comCss ? { css: item.siteAlvo.css } : {}),
     },
+    ...(item.programa ? { programa: item.programa } : {}),
     ...(comCss ? { paineisElementos: ["estilos" as const] } : {}),
     ...(item.modoDocumento ? { modoDocumento: true as const } : {}),
     objetivos: [objetivo],

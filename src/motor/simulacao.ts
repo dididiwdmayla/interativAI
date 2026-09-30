@@ -33,6 +33,10 @@ import { eventoDoClique, type Utm } from "./medicao";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
+import { criarNucleoSincrono } from "./executor/fabrica";
+import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
+import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import * as bancada from "./circuito/modelo";
 
 /**
  * O documento inicial da fase, solto (fora da tela): o head fixo com o
@@ -64,6 +68,30 @@ export function criarSimulacao(fase: Fase) {
   const avisarDispositivo = () => {
     const { largura, altura } = medidasNaTela(dispositivo);
     eventos.push({ tipo: "trocouDispositivo", ligado: dispositivo.ligado, modelo: dispositivo.modelo, largura, altura });
+  };
+
+  // Fase de programa: o executor síncrono (vm no Node, iframe no /lab e na meta), com a mesma lógica do jogo.
+  const executor = fase.programa ? criarNucleoSincrono() : null;
+  let snippet = fase.programa?.snippet?.codigoInicial ?? "";
+  let ultimaExecucao: ResultadoExecucao | null = null;
+  const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
+  const testesDaFase = fase.programa ? testesDeFuncaoDaFase(fase) : [];
+  const rodarCodigo = (codigo: string, origem: OrigemCodigo, registrar = true) => {
+    if (!executor) return;
+    const resultado = executor.executar(codigo, origem);
+    ultimaExecucao = resultado;
+    estadoPrograma.memoria = resultado.memoriaFinal;
+    for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
+    if (registrar) eventos.push({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+  };
+  if (fase.programa?.preparo) rodarCodigo(fase.programa.preparo, "console", false);
+
+  // Circuito lógico: as mesmas funções do modelo que a bancada da tela usa.
+  let circuito: bancada.Circuito | null = fase.tipo === "circuito-logico" ? fase.circuito.inicial : null;
+  const mudarCircuito = (novo: bancada.Circuito | null): boolean => {
+    if (!novo || !circuito) return false;
+    circuito = novo;
+    return true;
   };
 
   const nucleo = criarNucleoPainel({
@@ -160,6 +188,48 @@ export function criarSimulacao(fase: Fase) {
           eventos.push({ tipo: "configurouCampanha", ...campanha });
         }
       : undefined,
+    programa: executor
+      ? {
+          executarNoConsole: (codigo) => rodarCodigo(codigo, "console"),
+          definirSnippet: (codigo) => {
+            snippet = codigo;
+          },
+          executarSnippet: () => rodarCodigo(snippet, "snippet"),
+        }
+      : undefined,
+    circuito:
+      fase.tipo === "circuito-logico"
+        ? {
+            adicionarPortao: (portao, id, lugar) => {
+              if (!circuito || circuito.pecas.some((p) => p.id === id)) return false;
+              mudarCircuito(bancada.adicionarPortao(circuito, portao, id, lugar));
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            ligarFio: (de, para, porta) => {
+              if (!circuito || !mudarCircuito(bancada.ligarFio(circuito, { de, para, porta }))) return false;
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            alternarEntrada: (entrada, ligada) => {
+              const peca = circuito?.pecas.find((p) => p.id === entrada && p.tipo === "entrada");
+              if (!circuito || !peca) return false;
+              mudarCircuito(bancada.alternarEntrada(circuito, entrada, ligada));
+              eventos.push({ tipo: "alternouEntrada", entrada, ligada: ligada ?? !peca.ligada });
+              return true;
+            },
+            apagarPeca: (id) => {
+              const peca = circuito?.pecas.find((p) => p.id === id);
+              if (!circuito || !peca || peca.fixa) return false;
+              mudarCircuito(bancada.apagarPeca(circuito, id));
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            verComoCodigo: () => {
+              eventos.push({ tipo: "viuCodigoDoCircuito" });
+            },
+          }
+        : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -177,6 +247,8 @@ export function criarSimulacao(fase: Fase) {
       dispositivo: comDispositivo ? dispositivo : null,
       tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
       campanha: campanhaDaFase ? { dados: campanhaDaFase, estado: campanha } : undefined,
+      programa: fase.programa ? estadoPrograma : undefined,
+      circuito: circuito ?? undefined,
     };
   };
 
@@ -200,6 +272,10 @@ export function criarSimulacao(fase: Fase) {
     /** O texto do editor: o body ou, no modo documento, o documento inteiro. */
     htmlAtual: () => (fase.modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
     cssAtual: () => lerCssDoDocumento(documento),
+    /** (Fase de programa) A última execução e o texto do Snippet agora. */
+    programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null }),
+    /** (Circuito) O circuito agora. */
+    circuito: () => circuito,
   };
 }
 
@@ -220,4 +296,21 @@ export function estadoFinalDoDesafio(fase: FaseDesafio): { body: string; css: st
     }
   }
   return { body: simulacao.htmlAtual(), css: simulacao.cssAtual() };
+}
+
+/**
+ * (Desafio de programa) A memória antes (depois do preparo) e depois das
+ * soluções de todas as partes: o palco da meta. Sem onde rodar, null.
+ */
+export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | null; depois: FotoMemoria | null } {
+  const simulacao = criarSimulacao(fase);
+  const antes = simulacao.programa().ultimaExecucao?.memoriaFinal ?? null;
+  for (const parte of fase.partes) {
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch {
+      // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+    }
+  }
+  return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
 }

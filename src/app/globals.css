@@ -34,6 +34,7 @@
   --color-codigo-valor: var(--cor-codigo-valor);
   --color-codigo-texto: var(--cor-codigo-texto);
   --color-codigo-comentario: var(--cor-codigo-comentario);
+  --color-codigo-destaque-linha: var(--cor-codigo-destaque-linha);
   --color-mar: var(--cor-mar);
   --color-mar-fundo: var(--cor-mar-fundo);
   --color-areia: var(--cor-areia);
@@ -45,6 +46,19 @@
   --color-caixa-borda: var(--cor-caixa-borda);
   --color-caixa-preenchimento: var(--cor-caixa-preenchimento);
   --color-caixa-conteudo: var(--cor-caixa-conteudo);
+  --color-js-texto: var(--cor-js-texto);
+  --color-js-numero: var(--cor-js-numero);
+  --color-js-booleano: var(--cor-js-booleano);
+  --color-js-nulo: var(--cor-js-nulo);
+  --color-js-funcao: var(--cor-js-funcao);
+  --color-js-objeto: var(--cor-js-objeto);
+  --color-js-erro-fundo: var(--cor-js-erro-fundo);
+  --color-js-aviso-fundo: var(--cor-js-aviso-fundo);
+  --color-circuito-fundo: var(--cor-circuito-fundo);
+  --color-circuito-grade: var(--cor-circuito-grade);
+  --color-fio-desligado: var(--cor-fio-desligado);
+  --color-fio-ligado: var(--cor-fio-ligado);
+  --color-lampada-acesa: var(--cor-lampada-acesa);
 
   --font-ui: var(--fonte-ui);
   --font-codigo: var(--fonte-codigo);
@@ -155,4 +169,48 @@ body {
   50% {
     box-shadow: 0 0 0 8px color-mix(in srgb, var(--cor-destaque) 0%, transparent);
   }
+}
+
+/* Palco da memória (Ilha Lógica): caixinha nova surge, valor novo pisca. */
+@keyframes palco-surgir {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes palco-piscar {
+  0% {
+    box-shadow: 0 0 0 0 var(--cor-destaque);
+    background-color: var(--cor-codigo-destaque-linha);
+  }
+  60% {
+    box-shadow: 0 0 0 5px var(--cor-destaque);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.palco-surgir {
+  animation: palco-surgir 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+.palco-piscar {
+  animation: palco-piscar 0.9s ease-out;
+}
+
+/* Circuito lógico: a corrente andando nos fios acesos. */
+@keyframes corrente-no-fio {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+.corrente-no-fio {
+  animation: corrente-no-fio 0.6s linear infinite;
 }

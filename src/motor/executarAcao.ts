@@ -12,6 +12,7 @@ import { caminhoDoNo, ehTexto, filhosVisiveis, raizDaArvore } from "@/lib/dom";
 import { temClasseEsconder } from "@/lib/esconder";
 import type { OrigemSelecao } from "./eventos";
 import type { Utm } from "./medicao";
+import type { TipoPortao } from "./circuito/modelo";
 import { origemDaVia } from "./nucleoPainel";
 
 /** O que o executor precisa do painel. */
@@ -50,6 +51,20 @@ export type PainelDasAcoes = {
   simularVisita?: (utm: Utm) => void;
   /** (Campanha) Muda o orçamento, a palavra-chave ou o lance: só numa fase simulador-campanha. */
   configurarCampanha?: (mudanca: { orcamento?: number; palavra?: string; lance?: number }) => void;
+  /** (Código) Console e Snippet: só existem numa fase de programa. */
+  programa?: {
+    executarNoConsole: (codigo: string) => void;
+    definirSnippet: (codigo: string) => void;
+    executarSnippet: () => void;
+  };
+  /** (Circuito) A bancada: só existe numa fase circuito-logico. Devolve false se não deu (peça que não existe). */
+  circuito?: {
+    adicionarPortao: (portao: TipoPortao, id: string, lugar?: { x: number; y: number }) => boolean;
+    ligarFio: (de: string, para: string, porta: number) => boolean;
+    alternarEntrada: (entrada: string, ligada?: boolean) => boolean;
+    apagarPeca: (id: string) => boolean;
+    verComoCodigo: () => void;
+  };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
@@ -121,6 +136,22 @@ export function descreverAcao(acao: Acao): string {
       return `configurarCampanha${acao.orcamento !== undefined ? ` orçamento ${acao.orcamento}` : ""}${
         acao.palavraChave !== undefined ? ` palavra ${acao.palavraChave}` : ""
       }${acao.lance !== undefined ? ` lance ${acao.lance}` : ""}`;
+    case "executarNoConsole":
+      return `executarNoConsole ${JSON.stringify(acao.codigo.length > 60 ? `${acao.codigo.slice(0, 60)}…` : acao.codigo)}`;
+    case "definirSnippet":
+      return `definirSnippet (${acao.codigo.split("\n").length} linha(s))`;
+    case "executarSnippet":
+      return "executarSnippet";
+    case "adicionarPortao":
+      return `adicionarPortao ${acao.portao} (${acao.id})`;
+    case "ligarFio":
+      return `ligarFio ${acao.de} -> ${acao.para}:${acao.porta ?? 0}`;
+    case "alternarEntrada":
+      return `alternarEntrada ${acao.entrada}${acao.ligada === undefined ? "" : acao.ligada ? " ligada" : " desligada"}`;
+    case "apagarPeca":
+      return `apagarPeca ${acao.id}`;
+    case "verComoCodigo":
+      return "verComoCodigo";
   }
 }
 
@@ -363,6 +394,31 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "configurarCampanha": {
       if (!painel.configurarCampanha) throw new ErroAcao("configurarCampanha só existe numa fase simulador-campanha");
       painel.configurarCampanha({ orcamento: acao.orcamento, palavra: acao.palavraChave, lance: acao.lance });
+      return;
+    }
+    case "executarNoConsole":
+    case "definirSnippet":
+    case "executarSnippet": {
+      if (!painel.programa) throw new ErroAcao(`${acao.tipo} só existe numa fase de programa (com o campo programa)`);
+      if (acao.tipo === "executarNoConsole") painel.programa.executarNoConsole(acao.codigo);
+      else if (acao.tipo === "definirSnippet") painel.programa.definirSnippet(acao.codigo);
+      else painel.programa.executarSnippet();
+      return;
+    }
+    case "adicionarPortao":
+    case "ligarFio":
+    case "alternarEntrada":
+    case "apagarPeca":
+    case "verComoCodigo": {
+      const bancada = painel.circuito;
+      if (!bancada) throw new ErroAcao(`${acao.tipo} só existe numa fase circuito-logico`);
+      let deu = true;
+      if (acao.tipo === "adicionarPortao") deu = bancada.adicionarPortao(acao.portao, acao.id, acao.x !== undefined && acao.y !== undefined ? { x: acao.x, y: acao.y } : undefined);
+      else if (acao.tipo === "ligarFio") deu = bancada.ligarFio(acao.de, acao.para, acao.porta ?? 0);
+      else if (acao.tipo === "alternarEntrada") deu = bancada.alternarEntrada(acao.entrada, acao.ligada);
+      else if (acao.tipo === "apagarPeca") deu = bancada.apagarPeca(acao.id);
+      else bancada.verComoCodigo();
+      if (!deu) throw new ErroAcao(`não deu para ${descreverAcao(acao)} (peça ou porta que não existe?)`);
       return;
     }
   }

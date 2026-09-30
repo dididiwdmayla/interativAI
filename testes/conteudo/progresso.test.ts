@@ -118,4 +118,22 @@ describe("meta da unidade: uma vez só na entrada, sempre no desafio", () => {
   it("no desafio, a meta continua aparecendo", () => {
     expect(faseAbreComMeta(desafio, u1, { ...PROGRESSO_PADRAO, metasVistas: [u1.id], fasesConcluidas: [...u1.fases] })).toBe(true);
   });
+
+  it("fase de programa: o que rodou no Console e o Snippet voltam; progresso antigo ganha null", () => {
+    const lido = normalizarProgresso({
+      versao: 2,
+      fasesEmAndamento: {
+        antiga: { objetivoAtual: 1, htmlAtual: null, estrelas: 3, introducaoVista: true },
+        logica: {
+          objetivoAtual: 0,
+          htmlAtual: "",
+          estrelas: 3,
+          introducaoVista: true,
+          programa: { entradas: [{ codigo: "let x = 1", origem: "console" }, { codigo: 5, origem: "console" }, { codigo: "f()", origem: "outra" }], snippet: "// oi" },
+        },
+      },
+    });
+    expect(lido.fasesEmAndamento.antiga.programa).toBeNull();
+    expect(lido.fasesEmAndamento.logica.programa).toEqual({ entradas: [{ codigo: "let x = 1", origem: "console" }], snippet: "// oi" });
+  });
 });

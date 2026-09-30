@@ -45,6 +45,14 @@ export const IDS_FERRAMENTAS = [
   "medicao",
   "link-rastreavel",
   "simulador-campanha",
+  // Ilha Lógica: Console, Snippet (Fontes > Snippets), palco da memória e linha do tempo
+  "console",
+  "snippet",
+  "palco-memoria",
+  "linha-do-tempo",
+  // Circuito lógico (a bancada e a tabela verdade com "ver como código")
+  "circuito",
+  "tabela-verdade",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

@@ -316,6 +316,201 @@ src/
   continuam com o menu de sempre. (Dois cliques no nome da tag, no
   Chrome, renomeiam a tag: é o `renomear-tag`.)
 
+### Executor de JavaScript (Ilha Lógica, rodada 17)
+
+Em `src/motor/executor/`. O código do jogador roda isolado e gera o RASTRO
+da execução: um passo por comando, com a linha, a memória (quadros de
+chamada, escopos, variáveis e o monte de objetos por referência), a
+resposta da última expressão, as saídas do console e o erro.
+
+- **Decisão: instrumentar o código, com acorn, inserindo os ganchos no
+  texto** (sem regerar o código). Avaliadas: (1) acorn + astring (parser +
+  gerador) e (2) um interpretador passo a passo. O interpretador clássico
+  (JS-Interpreter) só entende ES5 (sem let, const, arrow, template), e os
+  que entendem JS moderno não andam passo a passo; interpretar também
+  deixaria o código centenas de vezes mais lento e com diferenças sutis do
+  motor de verdade. A instrumentação roda no motor de JavaScript do próprio
+  navegador (a mensagem de erro é a mesma do Chrome). Das duas formas de
+  instrumentar, regerar com astring muda o layout do código e exigiria
+  mapa de fontes para a linha do erro; inserir no texto pelas posições do
+  acorn não acrescenta quebra de linha, então a linha N do instrumentado é
+  a linha N do jogador. Só o acorn entrou (mantido, 8.18 de jul/2026, sem
+  dependências, roda igual no navegador e no Node); o astring ficou de fora.
+- **Ganchos** (`instrumentar.ts`, comentário do topo): passo antes de cada
+  comando, moldura de função com um leitor das variáveis (criado DENTRO do
+  try que embrulha o corpo, para enxergar as let e const), escopo de bloco,
+  retorno, local do erro, globais e a const do Console.
+- **Modo do Console** (REPL do Chrome, que aceita declarar de novo let,
+  const e class em entradas separadas desde o Chrome 80 e 92): as
+  declarações do nível de cima viram `var` no global; a const continua
+  protegida (`__r.k` lança o mesmo TypeError do navegador); a mesma
+  variável duas vezes na mesma entrada continua erro. O Snippet usa a mesma
+  memória do Console, como no Chrome (Fontes > Snippets roda na página).
+- **Proteção contra loop infinito**: limite de passos (100 mil) e de tempo
+  (1,5 s) conferidos pelos ganchos, com a parada "grudada" (um try/catch do
+  jogador não engole); reserva de 4 s no hospedeiro (o worker é encerrado e
+  as entradas boas rodam de novo em silêncio; no Node, o timeout do vm).
+- **Determinístico**: `Math.random` com semente e `Date` parado em
+  5/1/2026 15h UTC (`CODIGO_PREPARO`).
+- **Isolamento no navegador**: `executor.worker.ts` (Web Worker de módulo,
+  sem página, sem localStorage; rede, armazenamento, timers, outros
+  workers e o canal de mensagens apagados do global e dos protótipos antes
+  do primeiro código; `import()` recusado na leitura). Um worker por fase
+  (`SessaoNavegador`, `sessaoNavegador.ts`), pedidos em fila. **No Node**
+  (`node.ts`): um contexto `vm` por sessão, síncrono, para o
+  `testar:conteudo` e os testes (não é barreira de segurança, e nem
+  precisa: só roda conteúdo do projeto).
+- **Formato do Chrome** (`formatar.ts`, conferido no devtools-frontend):
+  resposta com texto entre aspas simples, `console.log` com texto primeiro
+  sem aspas, `(3) [1, 2, 3]`, `{nome: 'Ana'}`, `{…}`, `Array(3)`, `ƒ`,
+  `Map(1) {'a' => 1}`, até 5 campos na prévia.
+- **Erros** (`erros.ts`): a mensagem original do motor vem primeiro
+  ("Uncaught TypeError: ...") e embaixo a explicação de leigo com uma dica
+  em forma de pergunta; padrões do V8, do SpiderMonkey e do
+  JavaScriptCore. A linha é a do comando que estava rodando no quadro mais
+  de dentro (gancho `__r.c` no catch que embrulha cada função).
+- Não roda (ainda): async/await, geradores, timers (`setTimeout`), `with`
+  e `import()`; a entrada recebe o erro "Ainda não roda aqui".
+- Testes: `testes/conteudo/executor.test.ts` (escopos, loop infinito,
+  erros, saída, determinismo, modo do Console, funções e 23 programas
+  comparados com a execução sem ganchos).
+
+### Fases de programa: Console e Snippet (rodada 17)
+
+- Campo `programa` na fase (`BancadaPrograma` em `src/conteudo/tipos.ts`):
+  liga a aba **Console** e, com `snippet`, a aba **Fontes** (o Snippet);
+  a aba Elementos fica trancada (não há página) e a tela do site vira o
+  **palco da memória**. O site-alvo é o vazio `SITE_DO_PROGRAMA`
+  (`src/motor/programa.ts`); `preparo` roda quieto na abertura.
+- Estado: `usePrograma` (`componentes/jogo/usePrograma.ts`) guarda a
+  sessão do Web Worker, as linhas do Console, o Snippet e o que os
+  validadores olham (a memória depois da última execução e os resultados
+  dos `funcaoPassa`, que rodam de novo a cada execução). Cada execução
+  vira o evento `executouCodigo` com o resumo (saídas no texto do Chrome,
+  erro, sintaxes usadas, resposta do Console). O motor da fase não sabe de
+  worker: o contexto de validação ganhou `programa` e, numa fase de
+  programa, o documento é o vazio do começo (`useMotorFase`).
+- Progresso: `EstadoFaseSalvo.programa` (entradas que rodaram e o texto do
+  Snippet). Ao voltar, o preparo e as entradas rodam de novo em silêncio
+  (`SessaoNavegador.restaurar`) e a memória volta como estava.
+- Console (`componentes/painel/console/`), conferido na documentação do
+  Chrome (repositório GoogleChrome/developer.chrome.com, Console reference
+  e "New in DevTools 80/92") e no devtools-frontend: entrada com o sinal
+  >, resposta com a setinha de volta, `undefined` depois de declarações,
+  valores coloridos pelo tipo (tokens `--cor-js-*`), listas e objetos que
+  abrem com o triângulo (dentro, textos com aspas duplas e `length`),
+  warn e error com fundo, erro em vermelho ("Uncaught ...") com a
+  explicação de leigo embaixo, seta para cima e para baixo no histórico
+  (só na primeira ou na última linha), Shift+Enter para várias linhas,
+  botão de limpar e `console.clear()`. Toque: botão Rodar e a barra de
+  símbolos (`( ) { } [ ] ; = " ' < > + - . ,`, 44 px, sem tirar o foco).
+- Snippet (`componentes/painel/fontes/PainelFontes.tsx`): o editor
+  CodeMirror em JavaScript, Executar (Ctrl+Enter ou Cmd+Enter) e a gaveta
+  do Console embaixo, como o Chrome faz ao rodar um snippet; no celular,
+  "Snippet | Console". Snippet e Console dividem a memória.
+- Validadores de código (`src/motor/validadores.ts`): `valorVariavel` e
+  `funcaoPassa` olham o estado de agora; `respostaDoConsole`, `saida`,
+  `semErro`, `erroDoTipo` e `usouSintaxe` olham as execuções desde o
+  começo do objetivo e travam no checklist. **Decisão:**
+  `respostaDoConsole` não estava no pedido; entrou porque a resposta do
+  Console a uma expressão (o 14 de `2 + 3 * 4`) não é saída de
+  `console.log` e é o coração do "Console como calculadora".
+- Ações: `executarNoConsole`, `definirSnippet` e, além do pedido,
+  `executarSnippet` (o botão Executar; as soluções precisam dele).
+  Degrau 3: `{ alvo: "console" }` pisca a linha de digitar e
+  `{ alvo: "snippet", linhas }` pisca linhas do Snippet.
+- Simulação fora da tela (`testar:conteudo`, `/lab/fases`, o "depois" da
+  meta): `criarNucleoSincrono` (`executor/fabrica.ts`), o vm do Node nos
+  testes e um iframe escondido da mesma origem no navegador, que só roda
+  conteúdo do projeto (as soluções), nunca o código do jogador.
+- Tutor: recebe o código (Snippet e últimas entradas), o último erro e as
+  variáveis no fim; o prompt manda ajudar a LER o erro e nunca dar a linha
+  certa.
+- Ferramentas novas com apresentação: `console` e `snippet`.
+- Regra `fase-de-programa` no `testar:conteudo` e a Bancada do Console
+  (`/lab/fases?fase=lab-logica-u1-f1`), com um objetivo por validador.
+
+### Palco da memória e linha do tempo (rodada 17)
+
+- Na fase de programa, a tela do site vira o palco
+  (`componentes/palco/`). As regras do desenho são puras, em
+  `src/motor/palco.ts` (`planoDoPalco`, testado em
+  `testes/conteudo/palco.test.ts`): cada variável é uma caixinha (nome,
+  let/const/parâmetro, valor e a plaquinha do tipo, na cor do token
+  `--cor-js-*`); lista é uma fileira de vagões com o índice embaixo;
+  objeto é uma ficha de chave e valor; Map e Set, fichas próprias.
+- **Decisão (referências):** a lista (ou o objeto) é desenhada DENTRO da
+  primeira variável que aponta para ela; as outras (outra variável, um item
+  de lista, um campo, o parâmetro de uma função) mostram "a mesma de a" com
+  uma seta tracejada até ela, em SVG medido depois do desenho
+  (`ResizeObserver`). Sem cópia: é o jeito de o jogador ver que `let b = a`
+  não copia a lista. Objeto que aponta para ele mesmo também vira seta.
+- Moldura por chamada: a memória global sempre; cada função, enquanto
+  roda, com a própria moldura ("somar() rodando") e os blocos com variáveis
+  (o corpo de um for) numa moldura tracejada dentro; no passo de retorno, a
+  moldura diz "devolve 8".
+- Animação: caixinha nova surge (`palco-surgir`), valor que mudou pisca
+  (`palco-piscar`, também o vagão ou o campo que mudou), comparando com o
+  passo anterior (`mudancasDoPalco`); sem animação com
+  `prefers-reduced-motion`.
+- Linha do tempo (`LinhaDoTempo.tsx`, só nas fases com a ferramenta
+  `linha-do-tempo`): uma barra com um ponto por passo do rastro da última
+  execução, passo anterior e próximo (44 px no toque), a descrição ("Passo
+  6 de 13 · linha 6: for (...)") e, num Snippet, a linha acesa no editor.
+  Uma execução nova volta ao fim. Ao vivo (no fim), o palco pisca o que a
+  execução inteira mudou; andando na barra, o que aquele passo mudou.
+- Ferramentas com apresentação: `palco-memoria` (sempre na tela de uma fase
+  de programa; a regra `fase-de-programa` exige) e `linha-do-tempo`.
+
+### Circuito lógico (rodada 17)
+
+- Modelo em `src/motor/circuito/modelo.ts`, **independente da Ilha
+  Lógica** (serve às Origens e à trilha Automação): peças (entrada/chave,
+  saída/lâmpada, porta ou alarme, portões E, OU, NÃO e o OU exclusivo
+  marcado como extra), fios de uma saída para uma porta de entrada (uma
+  porta, um fio), simulação em rodadas até ficar estável começando do
+  estado anterior (realimentação guarda estado: a memória simples e o selo
+  da contatora; oscilação é detectada), tabela verdade, "ver como código"
+  (`const portaAbre = temCliente && lojaAberta;`, com parênteses só onde
+  precisa) e as mudanças (ligar, tirar, alternar, mover, pôr portão) como
+  funções puras que a tela, as ações e a simulação dos testes usam.
+- Tipo de fase `circuito-logico` (`FaseCircuitoLogico`: objetivos como numa
+  prática e `circuito: { inicial, paleta }`; `siteAlvo: SITE_DO_PROGRAMA`).
+  Na tela, a bancada fica no lugar da prévia e a tabela verdade no lugar
+  do painel (`componentes/circuito/`, `useCircuito`). O circuito é salvo no
+  progresso (`EstadoFaseSalvo.circuito`).
+- Validadores `circuitoTabela` (confere a TABELA, qualquer montagem certa
+  passa: um E montado com NÃO e OU também) e `usouPortao`; eventos
+  `mudouCircuito`, `alternouEntrada` e `viuCodigoDoCircuito`; ações
+  `adicionarPortao` (com id), `ligarFio`, `alternarEntrada`, `apagarPeca` e
+  `verComoCodigo`; degrau 3 `{ alvo: "circuito", peca? }`. Regra
+  `circuito-logico` no `testar:conteudo`.
+- Interação (mouse e toque pelos Pointer Events): arrastar o corpo move;
+  tocar sem arrastar liga a chave ou escolhe o portão (Tirar peça, Tirar
+  fio); tocar na bolinha da direita puxa o fio e tocar na outra peça (ou na
+  bolinha da esquerda, com o mouse) liga, na porta mais perto do dedo.
+  **Decisão:** as duas bolinhas de entrada de um portão ficam perto demais
+  para 44 px num celular; o alvo grande do toque é o corpo inteiro da peça.
+  A bancada enquadra só a área com peças (maiores numa tela estreita) e, em
+  pé, começa com a divisória no máximo. Os fios acesos mostram a corrente
+  andando; a tabela marca a linha de agora e as já testadas.
+- Ferramentas com apresentação: `circuito` e `tabela-verdade`.
+  Demonstração em `/lab/fases?fase=lab-logica-u1-f2` (a porta da padaria:
+  E, a previsão, ver como código e o NÃO sozinho).
+
+### Unidade-modelo da Lógica (rodada 17)
+
+- `logica-primeiros-comandos-u1` "O Console calcula" (3 fases + desafio
+  Mercadinho do Seu Zé), em `src/conteudo/ilhas/logica/`. As 10 zonas da
+  Lógica deixaram de requerer motor; só as unidades da parte B (ordenar
+  passos, depurador, árvore, projeto-ponte) seguem com `requerMotor`.
+- A tela de meta de um desafio de programa mostra dois mini-palcos, antes
+  e depois (`memoriasDoDesafio` em `src/motor/simulacao.ts`, rodando o
+  preparo e as soluções no executor).
+- Itens de revisão com `programa` (`ItemRevisao.programa`) viram fases de
+  programa (Console e palco, sem mini-site); `conferirItens` roda a
+  solução no executor em vez de comparar mini-site.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
@@ -373,7 +568,10 @@ src/
   ilha -> mundo. Ids fora do currículo ou do conteúdo dão 404
   (`generateStaticParams` + `dynamicParams = false`).
 - `Jogo` recebe o id da rota; fase ainda trancada
-  (`src/lib/liberacao.ts`: abre quando a anterior foi concluída) mostra um
+  (`src/lib/liberacao.ts`: abre quando a anterior DA UNIDADE foi concluída;
+  a primeira fase de uma unidade abre quando o mapa abre a unidade, para a
+  primeira fase de uma ilha nova não depender de uma zona opcional que vem
+  antes na lista; mudança da rodada 17) mostra um
   aviso com o caminho de volta. A fase aberta vira `faseAtual` (o mapa põe
   o computadorzinho nela e o card diz "Continuar").
 - Dentro da fase, o botão "Mapa" (barra do desktop; no celular, à esquerda

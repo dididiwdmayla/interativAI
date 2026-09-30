@@ -33,4 +33,23 @@ describe("contexto do tutor", () => {
     expect(mensagem).toContain("modo: sozinho");
     expect(mensagem).toContain("Site-alvo: Site do Jornal da Vila");
   });
+
+  it("numa fase de programa, a mensagem leva o código, o último erro e as variáveis", () => {
+    const mensagem = montarMensagemAtual({
+      faseId: "lab-logica-u1-f1",
+      objetivoId: "variavel",
+      enunciado: "x",
+      degrauAtual: 0,
+      htmlAtual: "",
+      programa: { codigo: "> let total = 15", erro: "Uncaught ReferenceError: totl is not defined (linha 1)", variaveis: "total = 15" },
+      pergunta: "por que deu erro?",
+      historico: [],
+      modo: "sozinho",
+      siteAlvo: "Palco da memória",
+    });
+    expect(mensagem).toContain("FASE DE PROGRAMA");
+    expect(mensagem).toContain("> let total = 15");
+    expect(mensagem).toContain("Último erro: Uncaught ReferenceError");
+    expect(mensagem).toContain("Variáveis no fim da última execução: total = 15");
+  });
 });

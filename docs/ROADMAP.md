@@ -320,11 +320,68 @@ núcleo comum.
     `testes/ser-encontrado-passos.mjs`: S2 a S5 pelo mapa nos três layouts) e
     `testes/lab-revisao.mjs`. Bateria de conteúdo verde no fim.
 
+- **Rodada 17: Ilha Lógica, parte A (Console, execução, palco da memória,
+  circuito lógico)** (detalhe em `docs/PROGRESSO.md`, um commit por etapa):
+  - **Currículo.** Lógica detalhada em 10 zonas e 33 unidades
+    (`src/curriculo/curriculo.ts`, `docs/MAPA-CURRICULAR.md`), zonas
+    reordenadas (Resolvendo problemas depois de Listas e objetos, Depuração
+    antes de Algoritmos). Motores planejados da parte B em
+    `src/curriculo/motores.ts`: `ordenar-passos`, `depurador-fontes`,
+    `visualizador-arvore`, `projeto-ponte-js`.
+  - **Executor** (`src/motor/executor/`): acorn inserindo ganchos no texto
+    (linhas preservadas), modo do Console do Chrome (let e const de novo em
+    entradas separadas, const protegida), limite de passos e de tempo (loop
+    infinito não trava), Math.random e Date previsíveis, Web Worker sem
+    rede nem página (vm no Node para os testes), formato e erros do Chrome
+    com explicação de leigo.
+  - **Console e Snippet** fiéis ao Chrome, fase de programa (`programa`,
+    `SITE_DO_PROGRAMA`), validadores `valorVariavel`, `respostaDoConsole`,
+    `saida`, `semErro`, `erroDoTipo`, `usouSintaxe`, `funcaoPassa`, ações
+    `executarNoConsole`, `definirSnippet`, `executarSnippet`, progresso da
+    memória, tutor com o código.
+  - **Palco da memória e linha do tempo**: caixinhas com nome, let/const,
+    tipo e valor; listas e objetos desenhados, referência como seta,
+    quadros de função; voltar e avançar a execução passo a passo.
+  - **Circuito lógico** (`src/motor/circuito/`, independente da ilha): tipo
+    de fase `circuito-logico`, portões E, OU, NÃO (e OU exclusivo), tabela
+    verdade, "Ver como código", mouse e toque; validadores `circuitoTabela`
+    e `usouPortao`. Demonstrações no `/lab/fases` (`lab-logica-u1-f1` e
+    `-f2`).
+  - **Unidade-modelo** `logica-primeiros-comandos-u1` "O Console calcula"
+    (3 fases + desafio Mercadinho do Seu Zé, meta com mini-palcos antes e
+    depois), 8 conceitos, 16 itens de revisão de programa (registro: 274).
+    A Ilha Lógica abre depois da Ilha Sites completa; a primeira fase de
+    cada unidade segue o mapa (`src/lib/liberacao.ts`). Guia, seção 25.
+  - **Testes.** `executor.test.ts`, `programa.test.ts`, `palco.test.ts`,
+    `circuito.test.ts`; navegador `console.mjs`, `palco.mjs`,
+    `circuito.mjs` e `logica.mjs` (jornada pelo mapa) nos três layouts.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
+
+- **Lógica, parte A (rodada 17), para depois:**
+  - Numa fase de programa a aba Elementos aparece trancada (não há
+    página); talvez escondê-la.
+  - No celular, o computadorzinho às vezes cobre parte da barra de
+    símbolos do Console.
+  - Circuito em pé (retrato): peças pequenas com muitos portões; a
+    bancada enquadra, mas pode ficar apertado em fases grandes.
+  - O executor não roda `setTimeout`, `async`/`await` e `fetch` (erro
+    "Ainda não roda aqui"): ficam para a Ilha Rede e Servidor.
+  - No Console, usar uma `let` do topo antes de declarar dá `undefined` em
+    vez do ReferenceError do Chrome (efeito de virar `var`; no Snippet e
+    dentro de blocos e funções é igual ao Chrome).
+  - Apresentação no celular: no passo "Experimente" o cartão desliza até o
+    lugar (0,3 s); um toque na árvore durante o deslize pode ser engolido
+    pelo cartão (o click chega depois do touchstart). Os testes esperam o
+    cartão parar (`passarApresentacao`); no jogo, vale desligar os toques
+    no cartão enquanto ele se move.
+  - As bancadas do `/lab` usam o conceito "elemento" como marcador; os
+    conceitos `snippet-js`, `funcao-js` e `portao-logico` entram com as
+    unidades que os ensinam.
 
 - **Tela dos passos das plataformas (rodada 16):** o
   `plataformas-marketing.ts` (perfil da empresa, Search Console, Google Ads,
@@ -373,9 +430,13 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
-   `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
-2. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
+1. Sonnet: zonas Primeiros comandos e Decisões da Ilha Lógica (a partir
+   da unidade-modelo `logica-primeiros-comandos-u1` e do guia, seção 25;
+   portões lógicos em `logica-decisoes-u2`, com o `circuito-logico`).
+2. Opus: Lógica, parte B (Fontes com depurador, ordenar passos,
+   visualizador de árvore), que libera Resolvendo problemas, Depuração u2
+   e u3 e Estruturas de dados u3.
+3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
    de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
    Ofício), intercalados com conteúdo, e a trilha Automação industrial a
    partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha

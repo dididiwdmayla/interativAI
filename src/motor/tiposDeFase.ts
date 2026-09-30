@@ -16,7 +16,7 @@
  */
 import type { Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
 
-export type TelaDaFase = "devtools";
+export type TelaDaFase = "devtools" | "circuito";
 
 export type DefinicaoTipoFase = {
   nome: string;
@@ -46,11 +46,21 @@ export const TIPOS_DE_FASE: Record<TipoFase, DefinicaoTipoFase> = {
     descricao: "Um anúncio pago por dentro: orçamento, palavra-chave e lance, o leilão e o dia simulado, com a página de destino decidindo quantos cliques viram clientes. Números fictícios.",
     tela: "devtools",
   },
+  "circuito-logico": {
+    nome: "Circuito lógico",
+    descricao: "Portões E, OU e NÃO numa bancada: arrastar, ligar fios, alternar as entradas e ver a corrente acender, com a tabela verdade ao lado e o circuito escrito como código.",
+    tela: "circuito",
+  },
 };
 
 /** A fase tem objetivos em sequência (prática e simulador de campanha): o mesmo motor de objetivos. */
 export function temObjetivos(fase: Fase): fase is FaseComObjetivos {
-  return fase.tipo === "pratica" || fase.tipo === "simulador-campanha";
+  return fase.tipo === "pratica" || fase.tipo === "simulador-campanha" || fase.tipo === "circuito-logico";
+}
+
+/** A fase não tem página de site (programa ou circuito): a validação usa o documento vazio do começo. */
+export function semPagina(fase: Fase): boolean {
+  return fase.programa !== undefined || fase.tipo === "circuito-logico";
 }
 
 /** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */

@@ -4,6 +4,7 @@ import { autocompletion, closeBrackets, completionKeymap } from "@codemirror/aut
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { css as linguagemCss } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
+import { javascript } from "@codemirror/lang-javascript";
 import { bracketMatching, indentOnInput } from "@codemirror/language";
 import { Annotation, Compartment, EditorState } from "@codemirror/state";
 import {
@@ -40,12 +41,14 @@ export type ApiEditor = {
   obterTexto: () => string;
   /** Põe o cursor numa posição do texto e rola até ela (o link "estilo.css:12"). */
   irParaPosicao: (posicao: number, opcoes?: { focar?: boolean }) => void;
+  /** Escreve no lugar do cursor, como se o jogador digitasse (a barra de símbolos do celular). */
+  inserirNoCursor: (texto: string) => void;
 };
 
 type Props = {
   textoInicial: string;
-  /** "html" (padrão) ou "css" (a aba CSS). */
-  linguagem?: "html" | "css";
+  /** "html" (padrão), "css" (a aba CSS) ou "javascript" (o Snippet da Ilha Lógica). */
+  linguagem?: "html" | "css" | "javascript";
   aoMudar: (texto: string) => void;
   quebrarLinhas: boolean;
   rotulo: string;
@@ -117,7 +120,7 @@ export function EditorCodigo({
           bracketMatching(),
           closeBrackets(),
           autocompletion(),
-          linguagemRef.current === "css" ? linguagemCss() : html(),
+          linguagemRef.current === "css" ? linguagemCss() : linguagemRef.current === "javascript" ? javascript() : html(),
           keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap, indentWithTab]),
           temaEditor,
           destaqueLinhas,
@@ -147,7 +150,7 @@ export function EditorCodigo({
                 if (!view) return;
                 const posicao = view.state.selection.main.head;
                 if (linguagemRef.current === "css") aoMoverCursorPosicaoAtual.current?.(posicao);
-                else aoMoverCursorAtual.current?.(alvoNaPosicao(view.state, posicao));
+                else if (linguagemRef.current === "html") aoMoverCursorAtual.current?.(alvoNaPosicao(view.state, posicao));
               }, ESPERA_CURSOR_MS);
             }
           }),
@@ -231,6 +234,12 @@ export function EditorCodigo({
           annotations: origemExterna.of(true),
         });
         if (opcoes?.focar) view.focus();
+      },
+      inserirNoCursor(texto) {
+        const view = visao.current;
+        if (!view) return;
+        view.dispatch(view.state.replaceSelection(texto));
+        view.focus();
       },
     }),
     [],

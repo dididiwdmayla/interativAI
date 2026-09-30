@@ -11,8 +11,20 @@ export type EntradaTutor = {
   htmlAtual: string;
   /** CSS da folha editável (fases com CSS); vazio nas outras. */
   cssAtual?: string;
+  /** (Fase de programa) O código, o último erro e as variáveis no fim da última execução. */
+  programa?: ContextoProgramaTutor;
   pergunta: string;
   historico: MensagemTutor[];
+};
+
+/** O que o tutor sabe de uma fase de programa (Ilha Lógica): tudo já em texto curto. */
+export type ContextoProgramaTutor = {
+  /** O Snippet e as últimas entradas do Console. */
+  codigo: string;
+  /** "Uncaught TypeError: ... (linha 3)", ou vazio. */
+  erro: string;
+  /** As variáveis globais no fim da última execução: "total = 15; nomes = (2) ['Ana', 'Bia']". */
+  variaveis: string;
 };
 
 export type SaidaTutor = { texto: string; expressao: Expressao };
@@ -20,6 +32,9 @@ export type SaidaTutor = { texto: string; expressao: Expressao };
 export const LIMITES_TUTOR = {
   html: 6000,
   css: 4000,
+  codigo: 4000,
+  erro: 400,
+  variaveis: 1200,
   pergunta: 300,
   mensagemHistorico: 600,
   historico: 6,

@@ -298,7 +298,7 @@ async function rodarL1() {
   await conversar(1);
   await abrirBalao();
   await pagina.locator("[data-previsao]").waitFor();
-  await tocar(pagina.locator("[data-previsao] button").nth(1));
+  await tocar(pagina.locator("[data-previsao] button").nth(0));
   await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
   await selecionarParaEstilos(".preco");
   await acrescentarDisplay(".preco", "inline-block");
@@ -313,7 +313,7 @@ async function rodarL1() {
   await conversar(2);
   await abrirBalao();
   await pagina.locator("[data-previsao]").waitFor();
-  await tocar(pagina.locator("[data-previsao] button").nth(1));
+  await tocar(pagina.locator("[data-previsao] button").nth(2));
   await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
   await selecionarParaEstilos("#aviso-frete");
   await acrescentarDisplay("#aviso-frete", "none");
@@ -583,7 +583,7 @@ async function rodarL4() {
   await proximoObjetivo("L4F2 objetivo 1 (card vira âncora)");
   await abrirBalao();
   await pagina.locator("[data-previsao]").waitFor();
-  await tocar(pagina.locator("[data-previsao] button").nth(0));
+  await tocar(pagina.locator("[data-previsao] button").nth(1));
   await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
   await selecionarParaEstilos(".selo");
   await acrescentarNoPainel(".selo", "position", "absolute");
@@ -606,7 +606,7 @@ async function rodarL4() {
   await proximoObjetivo("L4F3 objetivo 1 (botão vira fixed)");
   await abrirBalao();
   await pagina.locator("[data-previsao]").waitFor();
-  await tocar(pagina.locator("[data-previsao] button").nth(0));
+  await tocar(pagina.locator("[data-previsao] button").nth(2));
   await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
   await selecionarParaEstilos("#cabecalho");
   await acrescentarNoPainel("#cabecalho", "position", "sticky");

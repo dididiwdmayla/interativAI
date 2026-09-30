@@ -135,10 +135,11 @@ const esperarEfeito = async (pagina, id) => {
   // Voltar ao mapa e entrar numa ilha em construção (que já tem faixa): troca direto.
   await pagina.goBack();
   await pagina.locator("[data-mapa=mundo]").waitFor();
-  await pagina.locator('[data-ilha="logica"]').first().click();
-  await pagina.locator("[data-mapa=ilha][data-ilha=logica]").waitFor();
-  await esperarFaixa(pagina, "logica");
-  conferir(true, "navegação: a ilha Lógica toca a faixa logica");
+  // (A Lógica tem unidade pronta desde a rodada 17 e fica trancada até a Sites acabar.)
+  await pagina.locator('[data-ilha="paginas-vivas"]').first().click();
+  await pagina.locator("[data-mapa=ilha][data-ilha=paginas-vivas]").waitFor();
+  await esperarFaixa(pagina, "paginas-vivas");
+  conferir(true, "navegação: a ilha Páginas vivas toca a faixa paginas-vivas");
   await pagina.goBack();
   await pagina.locator("[data-mapa=mundo]").waitFor();
   await pagina.locator('[data-ilha="frameworks"]').first().click();

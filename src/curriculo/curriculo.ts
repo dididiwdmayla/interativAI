@@ -9,11 +9,14 @@
  */
 import type { IlhaCurriculo } from "./tipos";
 
-const MOTOR_LOGICA = "Console interativo, execução de JS isolada e aba Fontes com depurador";
+/** Parte B do motor da Lógica (planejados em src/curriculo/motores.ts). */
+const MOTOR_ORDENAR_PASSOS = "atividade ordenar-passos (arrastar os passos de um programa para a ordem certa)";
+const MOTOR_DEPURADOR = "depurador-fontes: aba Fontes com depurador (pontos de parada, passo a passo e variáveis observadas)";
+const MOTOR_ARVORE = "visualizador-arvore (desenhar e percorrer uma árvore de dados)";
+const MOTOR_PROJETO_JS =
+  "projeto-ponte-js: projeto-ponte de JavaScript (levar o programa para Fontes > Snippets do Chrome, com o guia passo a passo)";
 const MOTOR_PAGINAS_VIVAS = "JS do jogador rodando no site-alvo e aba Aplicação";
 const MOTOR_REDE = "aba Rede, servidor simulado e diagrama de requisições";
-/** Tipo de fase planejado em src/curriculo/motores.ts (ficha com as peças e onde é usado). */
-const MOTOR_CIRCUITO = "tipo de fase circuito-logico (arrastar portões E, OU e NÃO, ligar fios, alternar entradas, ver saídas, tabela verdade e ver como código)";
 const MOTOR_IA =
   "IA ao vivo: nas fases guiadas, código roteirizado aparecendo como se fosse digitado no editor, de forma determinística e com um bug plantado fixo; nas livres, o Gemini escrevendo ao vivo e o jogador aceitando, rejeitando ou corrigindo cada trecho";
 
@@ -64,7 +67,8 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Por baixo do capô",
             meta: "Espiar o computador por dentro: memória, processador, sistema, arquivos, binário e hexadecimal, e os cabos da internet.",
             temas: ["fundamentos", "desempenho", "logica"],
-            requerMotor: `tipos de atividade do museu e ${MOTOR_CIRCUITO}, para somar dois números só com portões e montar uma memória simples com realimentação`,
+            // O circuito-logico ficou pronto na rodada 17 (com realimentação): falta o resto do museu.
+            requerMotor: "tipos de atividade do museu (linha do tempo, comparador de linguagens e diagrama)",
           },
         ],
       },
@@ -267,38 +271,33 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
   {
     id: "logica",
     nome: "Lógica",
+    // Motor da parte A pronto (rodada 17): as zonas não pedem mais motor; só as unidades da parte B.
+    // Ordem das zonas (docs/MAPA-CURRICULAR.md, "Ilha 2: Lógica", explica cada troca):
+    // as ferramentas da linguagem primeiro, depois resolver problemas com elas,
+    // o depurador antes dos algoritmos e as estruturas por último.
     zonas: [
       {
         id: "primeiros-comandos",
         nome: "Primeiros comandos",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-primeiros-comandos-u1",
-            titulo: "Primeiros comandos",
-            meta: "Usar o Console para calcular e guardar valores em variáveis de tipos diferentes.",
+            titulo: "O Console calcula",
+            meta: "Usar o Console como calculadora e guardar os resultados em variáveis com nomes bons.",
             temas: ["logica", "dados"],
           },
-        ],
-      },
-      {
-        id: "resolvendo-problemas",
-        nome: "Resolvendo problemas",
-        icone: "fontes",
-        requerMotor: MOTOR_LOGICA,
-        unidades: [
           {
-            id: "logica-resolvendo-problemas-u1",
-            titulo: "Decompor um problema",
-            meta: "Quebrar um problema grande em passos pequenos, que dá para resolver um de cada vez.",
-            temas: ["logica"],
+            id: "logica-primeiros-comandos-u2",
+            titulo: "Textos",
+            meta: "Escrever textos entre aspas, juntar textos e montar frases com valores dentro.",
+            temas: ["logica", "dados"],
           },
           {
-            id: "logica-resolvendo-problemas-u2",
-            titulo: "Pseudocódigo",
-            meta: "Escrever o passo a passo em português antes de escrever o código.",
-            temas: ["logica"],
+            id: "logica-primeiros-comandos-u3",
+            titulo: "Tipos",
+            meta: "Descobrir o tipo de cada valor com typeof e entender por que \"2\" + 2 dá \"22\".",
+            temas: ["logica", "dados"],
           },
         ],
       },
@@ -306,12 +305,11 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "decisoes",
         nome: "Decisões",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-decisoes-u1",
-            titulo: "Decisões",
-            meta: "Fazer o programa escolher um caminho com comparações, booleanos e if/else.",
+            titulo: "Verdadeiro ou falso",
+            meta: "Fazer perguntas ao programa com comparações e receber true ou false.",
             temas: ["logica"],
           },
           {
@@ -319,7 +317,18 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Portões lógicos",
             meta: "Montar portões E, OU e NÃO para uma saída acontecer e ver o mesmo circuito virar código com &&, || e !.",
             temas: ["logica", "fundamentos"],
-            requerMotor: `${MOTOR_LOGICA}; ${MOTOR_CIRCUITO}`,
+          },
+          {
+            id: "logica-decisoes-u3",
+            titulo: "Se, senão",
+            meta: "Fazer o programa escolher um caminho com if, else if e else.",
+            temas: ["logica"],
+          },
+          {
+            id: "logica-decisoes-u4",
+            titulo: "Verdadeiro disfarçado",
+            meta: "Prever quando um valor que não é booleano conta como verdadeiro ou falso num if.",
+            temas: ["logica"],
           },
         ],
       },
@@ -327,13 +336,24 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "repeticao",
         nome: "Repetição",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-repeticao-u1",
-            titulo: "Repetição",
-            meta: "Repetir uma tarefa com for e while, sem copiar código.",
+            titulo: "Enquanto for verdade",
+            meta: "Repetir uma tarefa com while, contando as voltas, e reconhecer um loop que nunca para.",
             temas: ["logica"],
+          },
+          {
+            id: "logica-repeticao-u2",
+            titulo: "for e for...of",
+            meta: "Repetir um número certo de vezes com for e passar por cada item com for...of.",
+            temas: ["logica"],
+          },
+          {
+            id: "logica-repeticao-u3",
+            titulo: "Contar e somar",
+            meta: "Usar contadores e acumuladores para contar, somar e achar o maior valor.",
+            temas: ["logica", "dados"],
           },
         ],
       },
@@ -341,12 +361,29 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "funcoes",
         nome: "Funções",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-funcoes-u1",
-            titulo: "Funções",
-            meta: "Guardar um passo a passo numa função e usar de novo com valores diferentes.",
+            titulo: "Criar e chamar",
+            meta: "Guardar um passo a passo numa função e usar de novo quando quiser.",
+            temas: ["logica"],
+          },
+          {
+            id: "logica-funcoes-u2",
+            titulo: "Parâmetros e retorno",
+            meta: "Dar valores para a função trabalhar e receber a resposta de volta com return.",
+            temas: ["logica"],
+          },
+          {
+            id: "logica-funcoes-u3",
+            titulo: "Escopo",
+            meta: "Saber onde cada variável existe e por que a de dentro da função some quando ela termina.",
+            temas: ["logica"],
+          },
+          {
+            id: "logica-funcoes-u4",
+            titulo: "Arrow functions",
+            meta: "Escrever funções curtas com a seta => e reconhecer as duas formas no código dos outros.",
             temas: ["logica"],
           },
         ],
@@ -355,13 +392,64 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "listas-e-objetos",
         nome: "Listas e objetos",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-listas-e-objetos-u1",
-            titulo: "Listas e objetos",
-            meta: "Organizar dados em listas e objetos e percorrer cada item.",
+            titulo: "Listas",
+            meta: "Guardar vários valores numa lista, pegar cada um pelo índice e pôr e tirar itens.",
             temas: ["logica", "dados"],
+          },
+          {
+            id: "logica-listas-e-objetos-u2",
+            titulo: "Percorrer listas",
+            meta: "Passar por todos os itens de uma lista e transformar, filtrar e achar itens.",
+            temas: ["logica", "dados"],
+          },
+          {
+            id: "logica-listas-e-objetos-u3",
+            titulo: "Objetos",
+            meta: "Descrever uma coisa com chaves e valores, e ler e mudar cada campo.",
+            temas: ["logica", "dados"],
+          },
+          {
+            id: "logica-listas-e-objetos-u4",
+            titulo: "Listas de objetos",
+            meta: "Organizar o cardápio de uma padaria como dados e responder perguntas sobre ele.",
+            temas: ["dados", "logica"],
+          },
+        ],
+      },
+      {
+        id: "resolvendo-problemas",
+        nome: "Resolvendo problemas",
+        icone: "fontes",
+        unidades: [
+          {
+            id: "logica-resolvendo-problemas-u1",
+            titulo: "Decompor um problema",
+            meta: "Quebrar um problema grande em passos pequenos, que dá para resolver um de cada vez.",
+            temas: ["logica"],
+            requerMotor: MOTOR_ORDENAR_PASSOS,
+          },
+          {
+            id: "logica-resolvendo-problemas-u2",
+            titulo: "Pseudocódigo",
+            meta: "Escrever o passo a passo em português antes de escrever o código.",
+            temas: ["logica"],
+            requerMotor: MOTOR_ORDENAR_PASSOS,
+          },
+          {
+            id: "logica-resolvendo-problemas-u3",
+            titulo: "Ordenar os passos",
+            meta: "Pôr os passos de um programa na ordem certa e ver o que quebra quando a ordem muda.",
+            temas: ["logica"],
+            requerMotor: MOTOR_ORDENAR_PASSOS,
+          },
+          {
+            id: "logica-resolvendo-problemas-u4",
+            titulo: "Testar com exemplos",
+            meta: "Escolher exemplos que provam que o programa funciona, inclusive os casos esquisitos.",
+            temas: ["logica", "ferramentas"],
           },
         ],
       },
@@ -369,39 +457,26 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "depuracao",
         nome: "Depuração",
         icone: "fontes",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-depuracao-u1",
-            titulo: "Depuração",
-            meta: "Ler mensagens de erro e achar o bug com breakpoints na aba Fontes.",
+            titulo: "Ler a mensagem de erro",
+            meta: "Ler o que o erro diz, achar a linha e consertar sem chutar.",
             temas: ["logica", "ferramentas"],
           },
-        ],
-      },
-      {
-        id: "estruturas-de-dados",
-        nome: "Estruturas de dados",
-        icone: "aplicacao",
-        requerMotor: MOTOR_LOGICA,
-        unidades: [
           {
-            id: "logica-estruturas-de-dados-u1",
-            titulo: "Listas e dicionários",
-            meta: "Escolher entre lista e dicionário para guardar dados e achar o que precisa rápido.",
-            temas: ["dados", "logica"],
+            id: "logica-depuracao-u2",
+            titulo: "Pontos de parada",
+            meta: "Parar o programa numa linha com um ponto de parada, na aba Fontes, e olhar o que está acontecendo.",
+            temas: ["logica", "ferramentas"],
+            requerMotor: MOTOR_DEPURADOR,
           },
           {
-            id: "logica-estruturas-de-dados-u2",
-            titulo: "Pilhas e filas",
-            meta: "Usar pilhas e filas, e reconhecer as duas no desfazer e na fila de impressão.",
-            temas: ["dados", "logica"],
-          },
-          {
-            id: "logica-estruturas-de-dados-u3",
-            titulo: "Árvores",
-            meta: "Percorrer uma árvore e perceber que o DOM, a árvore de elementos do F12, é uma delas.",
-            temas: ["dados", "logica"],
+            id: "logica-depuracao-u3",
+            titulo: "Passo a passo",
+            meta: "Andar uma linha de cada vez, observar as variáveis e achar onde o valor fica errado.",
+            temas: ["logica", "ferramentas"],
+            requerMotor: MOTOR_DEPURADOR,
           },
         ],
       },
@@ -409,7 +484,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "algoritmos-essenciais",
         nome: "Algoritmos essenciais",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-algoritmos-essenciais-u1",
@@ -420,7 +494,7 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
           {
             id: "logica-algoritmos-essenciais-u2",
             titulo: "Ordenar",
-            meta: "Ordenar uma lista e comparar jeitos diferentes de fazer isso.",
+            meta: "Ordenar uma lista vendo cada troca acontecer e comparar jeitos diferentes de fazer isso.",
             temas: ["logica", "desempenho"],
           },
           {
@@ -434,6 +508,46 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Por que isso trava?",
             meta: "Entender, sem fórmula, por que um programa que voa com dez itens trava com um milhão.",
             temas: ["desempenho", "logica"],
+          },
+        ],
+      },
+      {
+        id: "estruturas-de-dados",
+        nome: "Estruturas de dados",
+        icone: "aplicacao",
+        unidades: [
+          {
+            id: "logica-estruturas-de-dados-u1",
+            titulo: "Pilhas e filas",
+            meta: "Usar pilhas e filas, e reconhecer as duas no desfazer e na fila de impressão.",
+            temas: ["dados", "logica"],
+          },
+          {
+            id: "logica-estruturas-de-dados-u2",
+            titulo: "Dicionários",
+            meta: "Guardar pares de chave e valor num Map e achar o que precisa sem percorrer tudo.",
+            temas: ["dados", "logica", "desempenho"],
+          },
+          {
+            id: "logica-estruturas-de-dados-u3",
+            titulo: "Árvores",
+            meta: "Percorrer uma árvore e perceber que o DOM, a árvore de elementos do F12, é uma delas.",
+            temas: ["dados", "logica"],
+            requerMotor: MOTOR_ARVORE,
+          },
+        ],
+      },
+      {
+        id: "programa-de-verdade",
+        nome: "Programa de verdade",
+        icone: "fontes",
+        unidades: [
+          {
+            id: "logica-programa-de-verdade-u1",
+            titulo: "Meu primeiro programa",
+            meta: "Escrever sozinho um programa que resolve um problema seu e rodar no Chrome de verdade, como snippet.",
+            temas: ["logica", "ferramentas"],
+            requerMotor: MOTOR_PROJETO_JS,
           },
         ],
       },

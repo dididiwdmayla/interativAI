@@ -697,6 +697,47 @@ const CATALOGO = {
     resumo: "Uma nota de 1 a 10, por palavra-chave, que só serve de diagnóstico do anúncio e da página: não entra no leilão.",
     temas: ["presenca-digital", "dados"],
   },
+  // Ilha Lógica, Primeiros comandos: U1 (rodada 17)
+  "console-js": {
+    nome: "Console",
+    resumo: "A aba do F12 onde você escreve um comando de JavaScript, aperta Enter e vê a resposta na hora, em qualquer site.",
+    temas: ["logica", "ferramentas"],
+  },
+  "operacoes-aritmeticas": {
+    nome: "Operações de conta",
+    resumo: "Os sinais que fazem conta no código: + soma, - subtrai, * multiplica, / divide e % dá o resto da divisão.",
+    temas: ["logica"],
+  },
+  "ordem-das-operacoes": {
+    nome: "Ordem das operações",
+    resumo: "Como na escola: vezes e dividir vêm antes de mais e menos, e o que está entre parênteses vem primeiro.",
+    temas: ["logica"],
+  },
+  "variavel-let": {
+    nome: "Variável com let",
+    resumo: "Uma caixinha com nome que guarda um valor e pode trocar de valor depois: let total = 10.",
+    temas: ["logica", "dados"],
+  },
+  "variavel-const": {
+    nome: "Constante com const",
+    resumo: "Uma caixinha com nome que guarda o mesmo valor para sempre: tentar trocar dá erro.",
+    temas: ["logica", "dados"],
+  },
+  "nome-de-variavel": {
+    nome: "Nome de variável",
+    resumo: "Um bom nome diz o que a caixinha guarda (precoDoPao, e não x), sem espaço nem acento, com as palavras coladas e a segunda em maiúscula.",
+    temas: ["logica"],
+  },
+  "undefined-js": {
+    nome: "undefined",
+    resumo: "O jeito do JavaScript dizer que não tem valor ali: é o que o Console responde depois de uma linha que só guarda algo, como let preco = 5.",
+    temas: ["logica", "dados"],
+  },
+  "ler-mensagem-de-erro": {
+    nome: "Ler a mensagem de erro",
+    resumo: "O erro vermelho diz o tipo do problema, o que aconteceu e a linha: ler com calma mostra por onde começar a consertar.",
+    temas: ["logica", "ferramentas"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
