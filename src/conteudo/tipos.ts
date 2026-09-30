@@ -18,6 +18,8 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import type { TipoEvento } from "@/motor/eventos";
 import type { Fala } from "@/motor/tipos";
 import type { IdConceito } from "./conceitos";
+import type { SintaxeJs } from "@/motor/executor/instrumentar";
+import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -212,6 +214,54 @@ export type Validador =
    * notaPagina (0 a 100). Só numa fase `simulador-campanha`.
    */
   | { tipo: "simulacao"; metrica: MetricaCampanha; op: OperadorContagem; valor: number }
+  /*
+   * Validadores de código (Ilha Lógica, fases com `programa`): olham o
+   * que o executor devolveu (src/motor/executor). Ver o guia, seção 25.
+   */
+  /**
+   * (Código) A variável global `nome` existe na memória agora e vale
+   * `valor` (JSON: número, texto, booleano, null, lista ou objeto; números
+   * com tolerância de arredondamento). Olha o estado de agora.
+   */
+  | { tipo: "valorVariavel"; nome: string; valor: ValorEsperado }
+  /**
+   * (Código) Alguma entrada do Console, desde que o objetivo começou,
+   * RESPONDEU este valor (a linha que o Console escreve depois de uma
+   * expressão, como 14 para 2 + 3 * 4). Não é o console.log: é a resposta
+   * do Console. Trava no checklist.
+   */
+  | { tipo: "respostaDoConsole"; valor: ValorEsperado }
+  /**
+   * (Código) O que o console mostrou desde que o objetivo começou. `contem`:
+   * alguma linha tem esse trecho. `igual`: numa mesma execução, as linhas
+   * foram exatamente estas, em ordem (o texto como o Console mostra:
+   * console.log('oi', 1) vira "oi 1"). Trava no checklist, como `evento`.
+   */
+  | { tipo: "saida"; contem?: string; igual?: string[] }
+  /** (Código) Rodou alguma coisa desde que o objetivo começou e a última execução não deu erro. Trava no checklist. */
+  | { tipo: "semErro" }
+  /**
+   * (Código) Alguma execução desde que o objetivo começou terminou com um
+   * erro deste tipo ("ReferenceError", "TypeError", "SyntaxError"...). Para
+   * fases que ensinam a LER o erro. Trava no checklist.
+   */
+  | { tipo: "erroDoTipo"; nome: string }
+  /**
+   * (Código) O código que o jogador RODOU desde que o objetivo começou usa
+   * a sintaxe (lida da árvore do código, não do texto: "if" dentro de aspas
+   * não conta): if, else, for, for-of, while, funcao, arrow, template,
+   * return, let, const, e-logico, ou-logico, nao-logico, igualdade-estrita,
+   * console-log, metodo:push... (lista em src/motor/executor/instrumentar.ts).
+   * Trava no checklist.
+   */
+  | { tipo: "usouSintaxe"; sintaxe: SintaxeJs }
+  /**
+   * (Código) A função global `nome` do jogador, chamada com os `args` de
+   * cada caso, DEVOLVE (return) o `esperado`. É o jeito certo de validar
+   * uma função: console.log no lugar do return não passa. Olha o estado de
+   * agora (roda de novo a cada execução).
+   */
+  | { tipo: "funcaoPassa"; nome: string; casos: CasoFuncao[] }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -314,7 +364,17 @@ export type Acao =
    * (Simulador de campanha) Muda o orçamento do dia (R$), a palavra-chave
    * (o id) ou o lance máximo por clique (R$). Gera `configurouCampanha`.
    */
-  | { tipo: "configurarCampanha"; orcamento?: number; palavraChave?: string; lance?: number };
+  | { tipo: "configurarCampanha"; orcamento?: number; palavraChave?: string; lance?: number }
+  /**
+   * (Código) Digita no Console e aperta Enter: roda como uma entrada do
+   * Console (a resposta, as saídas e o erro aparecem lá). Gera
+   * `executouCodigo`. Pede a ferramenta console.
+   */
+  | { tipo: "executarNoConsole"; codigo: string }
+  /** (Código) Troca o texto do Snippet (aba Fontes), sem rodar. Pede a ferramenta snippet. */
+  | { tipo: "definirSnippet"; codigo: string }
+  /** (Código) O botão Executar do Snippet (Ctrl+Enter). Gera `executouCodigo`. Pede a ferramenta snippet. */
+  | { tipo: "executarSnippet" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -331,7 +391,11 @@ export type AjudaLinha =
   /** Pisca no editor CSS as linhas da regra (e, com `propriedade`, só a declaração). */
   | { alvo: "css"; seletorRegra: string; propriedade?: string; fala: string }
   /** Pisca a regra no painel Estilos (e, com `propriedade`, só a declaração). */
-  | { alvo: "estilos"; seletorRegra: string; propriedade?: string; fala: string };
+  | { alvo: "estilos"; seletorRegra: string; propriedade?: string; fala: string }
+  /** (Código) Pisca linhas do Snippet (a partir de 1). */
+  | { alvo: "snippet"; linhas: number[]; fala: string }
+  /** (Código) Pisca a linha de digitar do Console. */
+  | { alvo: "console"; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -452,6 +516,21 @@ export type SiteAlvo = {
   css?: string;
 };
 
+/** A bancada de uma fase de programa (Console, Snippet e palco da memória). */
+export type BancadaPrograma = {
+  /**
+   * O Snippet (Fontes > Snippets, no Chrome): um editor de programas maiores
+   * com Executar. Sem o campo, a fase só tem o Console. `codigoInicial`: o
+   * que já vem escrito (pode ser vazio).
+   */
+  snippet?: { codigoInicial: string; nome?: string };
+  /**
+   * Código que roda quietinho quando a fase abre (sem aparecer no Console),
+   * para a memória já começar com algo (ex.: a lista de preços do desafio).
+   */
+  preparo?: string;
+};
+
 /** Sub-painéis da aba Elementos, como no Chrome (Styles e Computed). */
 export type PainelElementos = "estilos" | "calculado";
 
@@ -504,6 +583,13 @@ type FaseBase = {
    * siteAlvo.body.
    */
   modoDocumento?: true;
+  /**
+   * Fase de programa (Ilha Lógica): o jogador escreve JavaScript no
+   * Console e, se a fase quiser, no Snippet (aba Fontes). A tela do site
+   * vira o palco da memória. Use `siteAlvo: SITE_DO_PROGRAMA`
+   * (src/motor/programa.ts). Ver o guia, seção 25.
+   */
+  programa?: BancadaPrograma;
   conclusao: Fala[];
   /** Algo para o jogador fazer num site de verdade, pelo F12. */
   missaoDeCampo?: string;

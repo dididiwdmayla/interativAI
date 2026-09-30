@@ -45,6 +45,10 @@ import type { AcoesEstilos, DestaqueEstilos } from "@/componentes/painel/estilos
 import { CamadaInspecao } from "@/componentes/preview/CamadaInspecao";
 import { JanelaNavegador } from "@/componentes/preview/JanelaNavegador";
 import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
+import { PainelConsole } from "@/componentes/painel/console/PainelConsole";
+import { PainelFontes } from "@/componentes/painel/fontes/PainelFontes";
+import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
+import { usePrograma } from "./usePrograma";
 import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { Botao } from "@/componentes/ui/Botao";
 import { SeletorSegmentado } from "@/componentes/ui/SeletorSegmentado";
@@ -185,6 +189,8 @@ const FERRAMENTAS_DA_MEDICAO: readonly IdFerramenta[] = ["medicao", "link-rastre
 
 /** Elementos abre sempre; Lighthouse, Busca, Medição e Campanha, nas fases com as ferramentas delas. */
 function abasDaFase(fase: Fase): Aba[] {
+  // Fase de programa (Ilha Lógica): o Console e, com o Snippet, a aba Fontes. Não há página para Elementos.
+  if (fase.programa) return fase.programa.snippet ? ["console", "fontes"] : ["console"];
   const abas: Aba[] = ["elementos"];
   if (fase.usaFerramentas.includes("lighthouse")) abas.push("lighthouse");
   if (FERRAMENTAS_DA_BUSCA.some((id) => fase.usaFerramentas.includes(id))) abas.push("busca");
@@ -301,7 +307,26 @@ export function JogoFase({
   const temCss = cssInicial !== null;
   const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
-  const [aba, setAba] = useState<Aba>("elementos");
+  const [aba, setAba] = useState<Aba>(() => (faseDaProp.programa ? "console" : "elementos"));
+  // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
+  const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
+  const [destaqueConsole, setDestaqueConsole] = useState(false);
+  const { editorSnippetRef } = programa;
+  const destacarNoPrograma = useCallback(
+    (alvo: number[] | "console" | null) => {
+      if (alvo === null) {
+        setDestaqueConsole(false);
+        editorSnippetRef.current?.destacarLinhas([]);
+      } else if (alvo === "console") {
+        setAba("console");
+        setDestaqueConsole(true);
+      } else {
+        setAba("fontes");
+        editorSnippetRef.current?.destacarLinhas(alvo);
+      }
+    },
+    [editorSnippetRef],
+  );
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
   const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
   /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
@@ -676,8 +701,15 @@ export function JogoFase({
         : undefined,
       simularVisita: ferramentasMedicao.includes("link-rastreavel") ? simularVisita : undefined,
       configurarCampanha: dadosCampanha ? configurarCampanha : undefined,
+      programa: fase.programa
+        ? { executarNoConsole: programa.executarNoConsole, definirSnippet: programa.definirSnippet, executarSnippet: programa.executarSnippet }
+        : undefined,
     }),
     [
+      fase.programa,
+      programa.executarNoConsole,
+      programa.definirSnippet,
+      programa.executarSnippet,
       comMedicao,
       medirClique,
       aoClicarLink,
@@ -780,8 +812,12 @@ export function JogoFase({
     () => (larguraDeDesenho > 0 ? { largura: larguraDeDesenho, altura: alturaDeDesenho } : undefined),
     [alturaDeDesenho, larguraDeDesenho],
   );
+  const { estadoValidacao: estadoDoPrograma } = programa;
   const extraValidacao = useCallback(() => {
-    const doSimulador = dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {};
+    const doSimulador = {
+      ...(dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {}),
+      ...(fase.programa ? { programa: estadoDoPrograma() } : {}),
+    };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
     const atual = viewportDoDispositivo(estado, obterDocumento());
@@ -790,7 +826,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [comDispositivo, dadosCampanha, obterDocumento]);
+  }, [comDispositivo, dadosCampanha, estadoDoPrograma, fase.programa, obterDocumento]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -822,6 +858,8 @@ export function JogoFase({
     destacarNoEstilos,
     toque,
     extraValidacao,
+    destacarNoPrograma,
+    programaSalvo: programa.programaSalvo,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -940,7 +978,11 @@ export function JogoFase({
             ? "medicao"
             : ferramenta.id === "simulador-campanha"
               ? "campanha"
-              : "elementos",
+              : ferramenta.id === "snippet"
+                ? "fontes"
+                : fase.programa
+                  ? "console"
+                  : "elementos",
     );
     if (ferramenta.id === "resultado-busca") setSubAbaBusca("resultado");
     if (ferramenta.id === "dados-estruturados") setSubAbaBusca("dados");
@@ -1056,6 +1098,7 @@ export function JogoFase({
     degrau: estado.degrau,
     htmlAtual,
     cssAtual,
+    obterPrograma: programa.contextoTutor,
     falar,
     interceptar: (pergunta) => responderSegredo(pergunta, falar),
   });
@@ -1173,6 +1216,10 @@ export function JogoFase({
   useEffect(() => {
     if (versaoCssCalma > 0) verificarAtual.current();
   }, [versaoCssCalma]);
+  // Fase de programa: não há página para carregar; o roteiro inicial (se houver) roda quando a tela monta.
+  useEffect(() => {
+    if (fase.programa) aoDocumentoPronto();
+  }, [aoDocumentoPronto, fase.programa]);
   const aoCarregar = useCallback(
     (documento: Document) => {
       aoCarregarDocumento(documento);
@@ -1535,7 +1582,7 @@ export function JogoFase({
               abasDesbloqueadas={abasLivres}
               aoTrocarAba={trocarAba}
               ferramentas={
-                <>
+                fase.programa ? undefined : <>
                   <AlvoFerramenta
                     ids={["inspecionar"]}
                     marcador="inspecionar"
@@ -1586,6 +1633,63 @@ export function JogoFase({
                 </>
               }
             >
+              {fase.programa && (
+                <div className={aba === "console" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <AlvoFerramenta ids={["console"]} marcador="console" aoAbrirCard={abrirCard} classeMarcador="right-2 top-1.5" className="flex min-h-0 flex-1 flex-col">
+                    <PainelConsole
+                      linhas={programa.linhas}
+                      historico={programa.historico}
+                      aoExecutar={(codigo) => {
+                        setDestaqueConsole(false);
+                        programa.executarNoConsole(codigo);
+                      }}
+                      aoLimpar={() => {
+                        tocarEfeito("clique");
+                        programa.limparConsole();
+                      }}
+                      toque={toque}
+                      ocupado={programa.ocupado}
+                      destacado={destaqueConsole}
+                      aoFocar={aoFocarEditor}
+                    />
+                  </AlvoFerramenta>
+                </div>
+              )}
+              {fase.programa?.snippet && (
+                <div className={aba === "fontes" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelFontes
+                    nome={programa.nomeSnippet}
+                    textoInicial={programa.snippetInicial}
+                    editorRef={programa.editorSnippetRef}
+                    aoMudar={programa.aoMudarSnippet}
+                    aoExecutar={() => {
+                      tocarEfeito("clique");
+                      programa.executarSnippet();
+                    }}
+                    alvoExecutar={(botao) => (
+                      <AlvoFerramenta ids={["snippet"]} marcador="snippet" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-1.5" as="span" className="inline-flex shrink-0">
+                        {botao}
+                      </AlvoFerramenta>
+                    )}
+                    gaveta={
+                      <PainelConsole
+                        linhas={programa.linhas}
+                        historico={programa.historico}
+                        aoExecutar={programa.executarNoConsole}
+                        aoLimpar={programa.limparConsole}
+                        toque={toque}
+                        ocupado={programa.ocupado}
+                        destacado={false}
+                        aoFocar={aoFocarEditor}
+                      />
+                    }
+                    toque={toque}
+                    movel={movel}
+                    ocupado={programa.ocupado}
+                    aoFocar={aoFocarEditor}
+                  />
+                </div>
+              )}
               {ferramentasMedicao.length > 0 && (
                 <div className={aba === "medicao" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
                   <PainelMedicao
@@ -1837,11 +1941,22 @@ export function JogoFase({
           />
         )}
         <section
-          aria-label="Tela do site"
+          aria-label={fase.programa ? "Palco da memória" : "Tela do site"}
           data-previa
           className={`flex min-h-0 min-w-0 flex-col ${classesTela}`}
           style={layout === "retrato" ? { flexBasis: `${proporcaoPrevia * 100}%` } : undefined}
         >
+          {fase.programa ? (
+            <AlvoFerramenta
+              ids={["palco-memoria"]}
+              marcador="palco-memoria"
+              aoAbrirCard={abrirCard}
+              classeMarcador="right-3 top-3"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda shadow-[0_8px_0_var(--cor-sombra)]"
+            >
+              <PalcoMemoria memoria={programa.ultimo?.memoriaFinal ?? null} />
+            </AlvoFerramenta>
+          ) : (
           <AlvoFerramenta
             ids={["previa"]}
             marcador="previa"
@@ -1985,6 +2100,7 @@ export function JogoFase({
               </PreviewSiteAlvo>
             </JanelaNavegador>
           </AlvoFerramenta>
+          )}
         </section>
       </AlvoFerramenta>
       {movel ? (

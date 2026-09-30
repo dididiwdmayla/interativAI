@@ -12,6 +12,8 @@ import { LIMITES, type CasoFuncao, type OrigemCodigo, type ResultadoExecucao, ty
 export interface SessaoExecutor {
   executar(codigo: string, origem: OrigemCodigo): Promise<ResultadoExecucao>;
   testarFuncao(nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao>;
+  /** Roda de novo, em silêncio, o que já tinha rodado (a memória volta como estava). */
+  restaurar(entradas: { codigo: string; origem: OrigemCodigo }[]): Promise<void>;
   /** Começa do zero (memória vazia). */
   reiniciar(): void;
   encerrar(): void;
@@ -99,6 +101,13 @@ export class SessaoNavegador implements SessaoExecutor {
     });
   }
 
+  restaurar(entradas: { codigo: string; origem: OrigemCodigo }[]): Promise<void> {
+    return this.emFila(async () => {
+      this.historico = [...entradas];
+      await this.recuperar();
+    });
+  }
+
   reiniciar() {
     for (const espera of this.esperas.values()) clearTimeout(espera.relogio);
     this.esperas.clear();
@@ -129,5 +138,6 @@ function resultadoDeEstouro(codigo: string, origem: OrigemCodigo, falha: string 
     totalPassos: 0,
     memoriaFinal: { quadros: [{ nome: "Global", chamada: 0, escopos: [] }], monte: {} },
     globais: [],
+    sintaxes: [],
   };
 }

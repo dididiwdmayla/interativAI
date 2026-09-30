@@ -915,6 +915,48 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     },
   },
   {
+    id: "fase-de-programa",
+    nome: "fase de programa (Console, Snippet): validadores e ações de código só nela, com as ferramentas certas e sem página",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const programa = fase.programa;
+      const deCodigo = new Set(["valorVariavel", "respostaDoConsole", "saida", "semErro", "erroDoTipo", "usouSintaxe", "funcaoPassa"]);
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (deCodigo.has(item.tipo) && !programa) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa (campo programa)`);
+          if (programa && "seletor" in item) problemas.push(`${onde}: fase de programa não tem página; o validador ${item.tipo} olha a página`);
+          if (item.tipo === "saida" && item.contem === undefined && item.igual === undefined) problemas.push(`${onde}: saida sem contem nem igual`);
+          if (item.tipo === "funcaoPassa") {
+            if (!/^[A-Za-z_$][\w$]*$/.test(item.nome)) problemas.push(`${onde}: funcaoPassa com nome "${item.nome}", que não é um nome de função`);
+            if (item.casos.length === 0) problemas.push(`${onde}: funcaoPassa sem casos`);
+          }
+          if (item.tipo === "valorVariavel" && !/^[A-Za-z_$][\w$]*$/.test(item.nome)) problemas.push(`${onde}: valorVariavel com nome "${item.nome}"`);
+        }
+      }
+      if (!programa) return problemas;
+      if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim() || fase.siteAlvo.css !== undefined) {
+        problemas.push("fase de programa usa siteAlvo: SITE_DO_PROGRAMA (sem página: a tela é o palco da memória)");
+      }
+      if (fase.modoDocumento) problemas.push("fase de programa não usa modoDocumento");
+      if (!fase.usaFerramentas.includes("console")) problemas.push('fase de programa pede "console" em usaFerramentas (o Console sempre aparece)');
+      const usaSnippet = [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)].some(({ acoes }) =>
+        acoes.some((acao) => acao.tipo === "definirSnippet" || acao.tipo === "executarSnippet"),
+      );
+      if (usaSnippet && !programa.snippet) problemas.push("as ações usam o Snippet, mas a fase não tem programa.snippet");
+      if (programa.snippet && !fase.usaFerramentas.includes("snippet")) problemas.push('a fase tem programa.snippet: ponha "snippet" em usaFerramentas');
+      objetivosDe(fase).forEach((objetivo, indice) => {
+        if (objetivo.modo !== "guiado") return;
+        const { linha } = objetivo.ajudas;
+        if (linha.alvo === "snippet" && !programa.snippet) problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta o Snippet, que a fase não tem`);
+        if (linha.alvo === "snippet" && linha.linhas.some((n) => !Number.isInteger(n) || n < 1)) problemas.push(`${nomeObjetivo(objetivo, indice)}: linhas do Snippet começam em 1`);
+        if (linha.alvo === "arvore" || linha.alvo === "editor" || linha.alvo === "css" || linha.alvo === "estilos") {
+          problemas.push(`${nomeObjetivo(objetivo, indice)}: fase de programa não tem ${linha.alvo}; aponte o console ou o snippet`);
+        }
+      });
+      return problemas;
+    },
+  },
+  {
     id: "ferramentas-dos-validadores",
     nome: "validador que olha uma ferramenta (dispositivo, auditoria) pede a ferramenta em usaFerramentas",
     checar: (fase) => {

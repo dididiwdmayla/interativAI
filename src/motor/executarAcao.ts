@@ -50,6 +50,12 @@ export type PainelDasAcoes = {
   simularVisita?: (utm: Utm) => void;
   /** (Campanha) Muda o orçamento, a palavra-chave ou o lance: só numa fase simulador-campanha. */
   configurarCampanha?: (mudanca: { orcamento?: number; palavra?: string; lance?: number }) => void;
+  /** (Código) Console e Snippet: só existem numa fase de programa. */
+  programa?: {
+    executarNoConsole: (codigo: string) => void;
+    definirSnippet: (codigo: string) => void;
+    executarSnippet: () => void;
+  };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
@@ -121,6 +127,12 @@ export function descreverAcao(acao: Acao): string {
       return `configurarCampanha${acao.orcamento !== undefined ? ` orçamento ${acao.orcamento}` : ""}${
         acao.palavraChave !== undefined ? ` palavra ${acao.palavraChave}` : ""
       }${acao.lance !== undefined ? ` lance ${acao.lance}` : ""}`;
+    case "executarNoConsole":
+      return `executarNoConsole ${JSON.stringify(acao.codigo.length > 60 ? `${acao.codigo.slice(0, 60)}…` : acao.codigo)}`;
+    case "definirSnippet":
+      return `definirSnippet (${acao.codigo.split("\n").length} linha(s))`;
+    case "executarSnippet":
+      return "executarSnippet";
   }
 }
 
@@ -363,6 +375,15 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "configurarCampanha": {
       if (!painel.configurarCampanha) throw new ErroAcao("configurarCampanha só existe numa fase simulador-campanha");
       painel.configurarCampanha({ orcamento: acao.orcamento, palavra: acao.palavraChave, lance: acao.lance });
+      return;
+    }
+    case "executarNoConsole":
+    case "definirSnippet":
+    case "executarSnippet": {
+      if (!painel.programa) throw new ErroAcao(`${acao.tipo} só existe numa fase de programa (com o campo programa)`);
+      if (acao.tipo === "executarNoConsole") painel.programa.executarNoConsole(acao.codigo);
+      else if (acao.tipo === "definirSnippet") painel.programa.definirSnippet(acao.codigo);
+      else painel.programa.executarSnippet();
       return;
     }
   }

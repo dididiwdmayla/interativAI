@@ -29,6 +29,10 @@ import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
 import { IconeDadosEstruturados } from "@/componentes/icones/IconeDadosEstruturados";
 import { IconeResultadoBusca } from "@/componentes/icones/IconeResultadoBusca";
 import { IconeCampanha } from "@/componentes/icones/IconeCampanha";
+import { IconeConsole } from "@/componentes/icones/IconeConsole";
+import { IconeLinhaDoTempo } from "@/componentes/icones/IconeLinhaDoTempo";
+import { IconePalcoMemoria } from "@/componentes/icones/IconePalcoMemoria";
+import { IconeSnippet } from "@/componentes/icones/IconeSnippet";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -806,6 +810,88 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque no resultado do dia.",
     },
     uso: "tocar",
+  },
+  // Ilha Lógica (rodada 17). Comportamento do Console e dos Snippets conferido na
+  // documentação do Chrome (developer.chrome.com, Console e "Run snippets").
+  console: {
+    id: "console",
+    nome: "Console",
+    Icone: IconeConsole,
+    alvo: seletorFerramenta("console"),
+    oQueFaz: "Roda JavaScript na hora: você escreve um comando, aperta Enter e o Console responde embaixo.",
+    praQueServe:
+      "Serve para fazer contas, testar uma ideia e ver o valor de uma variável sem criar arquivo nenhum. Depois de let ou const, ele responde undefined: a linha guardou algo, mas não tem valor para mostrar.",
+    comoUsarAqui: {
+      mouse: "Clique na linha com o sinal >, escreva e aperte Enter. Shift+Enter pula linha. A seta para cima traz o comando anterior.",
+      toque: "Toque na linha com o sinal >, escreva e toque em Rodar. A barra de símbolos em cima do teclado tem os sinais do JavaScript.",
+    },
+    noF12DeVerdade:
+      "é a aba Console (Ctrl+Shift+J no Windows, Cmd+Option+J no Mac). Funciona em qualquer site: o que você aprende aqui roda lá igualzinho.",
+    experimente: {
+      mouse: "Escreva 2 + 3 e aperte Enter.",
+      toque: "Escreva 2 + 3 e toque em Rodar.",
+    },
+    uso: "sinal",
+  },
+  snippet: {
+    id: "snippet",
+    nome: "Snippet",
+    Icone: IconeSnippet,
+    alvo: seletorFerramenta("snippet"),
+    oQueFaz: "Um editor para programas de várias linhas, que roda tudo de uma vez com Executar. O que o programa mostra aparece no Console.",
+    praQueServe:
+      "O Console é ótimo para um comando; um programa maior fica melhor escrito com calma, com as linhas numeradas, e rodado de novo sempre que mudar.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Fontes, escreva no editor e clique em Executar (ou aperte Ctrl+Enter).",
+      toque: "Abra a aba Fontes, escreva no editor e toque em Executar.",
+    },
+    noF12DeVerdade:
+      "fica em Fontes > Snippets (Sources > Snippets): crie um snippet novo, escreva e rode com Ctrl+Enter. Ele fica salvo no seu Chrome e roda em qualquer página.",
+    experimente: {
+      mouse: "Clique em Executar.",
+      toque: "Toque em Executar.",
+    },
+    uso: "sinal",
+  },
+  "palco-memoria": {
+    id: "palco-memoria",
+    nome: "Palco da memória",
+    Icone: IconePalcoMemoria,
+    alvo: seletorFerramenta("palco-memoria"),
+    oQueFaz: "Mostra a memória do programa: cada variável é uma caixinha com nome, valor e tipo; listas são vagões numerados e objetos, fichas.",
+    praQueServe:
+      "Programa não tem tela de site: o que muda é a memória. Aqui você vê a caixinha nascer, o valor trocar e duas variáveis apontando para a mesma lista.",
+    comoUsarAqui: {
+      mouse: "Rode algo no Console ou no Snippet e olhe o palco mudar. Passe o mouse numa caixinha para ver o tipo do valor.",
+      toque: "Rode algo no Console ou no Snippet e olhe o palco mudar. Toque numa caixinha para ver o tipo do valor.",
+    },
+    noF12DeVerdade:
+      "não tem um palco igual: o mais perto é o painel Escopo (Scope) da aba Fontes, que lista as variáveis quando o programa pausa num ponto de parada.",
+    experimente: {
+      mouse: "Clique no palco.",
+      toque: "Toque no palco.",
+    },
+    uso: "tocar",
+  },
+  "linha-do-tempo": {
+    id: "linha-do-tempo",
+    nome: "Linha do tempo",
+    Icone: IconeLinhaDoTempo,
+    alvo: seletorFerramenta("linha-do-tempo"),
+    oQueFaz: "Rebobina o programa: cada ponto da barra é um passo que ele deu, com a linha do código acesa e a memória daquele momento.",
+    praQueServe:
+      "O programa roda rápido demais para ver. Voltando passo a passo, dá para achar em que linha um valor mudou e o que tinha na memória na hora do erro.",
+    comoUsarAqui: {
+      mouse: "Arraste a bolinha da barra ou use os botões de passo anterior e próximo. A linha do código acende no Snippet.",
+      toque: "Arraste a bolinha da barra ou toque nos botões de passo anterior e próximo. A linha do código acende no Snippet.",
+    },
+    noF12DeVerdade:
+      "o Chrome anda para a frente, não para trás: na aba Fontes, os botões de passo a passo avançam uma linha de cada vez depois de um ponto de parada.",
+    experimente: {
+      mouse: "Clique no botão de passo anterior.",
+      toque: "Toque no botão de passo anterior.",
+    },
+    uso: "sinal",
   },
 };
 

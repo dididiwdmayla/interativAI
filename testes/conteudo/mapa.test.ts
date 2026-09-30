@@ -167,6 +167,7 @@ describe("zonas e unidades", () => {
           previsaoRespondida: null,
           partesFeitas: [],
           reveres: 0,
+          programa: null,
         },
       },
     };

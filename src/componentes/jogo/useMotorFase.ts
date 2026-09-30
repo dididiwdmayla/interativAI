@@ -9,7 +9,7 @@ import type { IdFerramenta } from "@/ferramentas/ids";
 import { atualizarProgresso } from "@/lib/armazemProgresso";
 import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
-import { type EstadoFaseSalvo, type Progresso, PROJETO_VAZIO } from "@/lib/progresso";
+import { type EstadoFaseSalvo, type Progresso, type ProgramaSalvo, PROJETO_VAZIO } from "@/lib/progresso";
 import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -67,7 +67,11 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa">;
+  /** (Fase de programa) Degrau 3: pisca linhas do Snippet ou a linha do Console; null apaga. */
+  destacarNoPrograma?: (alvo: number[] | "console" | null) => void;
+  /** (Fase de programa) O que rodou e o Snippet, para salvar junto com a fase. */
+  programaSalvo?: ProgramaSalvo | null;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -101,6 +105,8 @@ export function useMotorFase({
   destacarNoEstilos,
   toque,
   extraValidacao,
+  destacarNoPrograma,
+  programaSalvo = null,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -157,15 +163,17 @@ export function useMotorFase({
     editorRef.current?.destacarLinhas([]);
     limparDestaqueCss();
     destacarNoEstilos(null);
+    destacarNoPrograma?.(null);
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, destacarNoEstilos, editorRef, limparDestaqueCss]);
+  }, [destacarNaArvore, destacarNoEstilos, destacarNoPrograma, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
-    const documento = obterDocumento();
+    // Fase de programa: não há página (a tela é o palco); o documento é o vazio do começo.
+    const documento = fase.programa ? documentoInicial : obterDocumento();
     if (!documento?.body) return null;
     return { documento, inicial: documentoInicial, selecao: obterSelecao(), eventos: eventosObjetivo.current, ...extraValidacao?.() };
-  }, [documentoInicial, extraValidacao, obterDocumento, obterSelecao]);
+  }, [documentoInicial, extraValidacao, fase.programa, obterDocumento, obterSelecao]);
 
   /* ---------------------------------------------------------------- */
   /* Persistência                                                      */
@@ -198,6 +206,7 @@ export function useMotorFase({
               previsaoRespondida: atual.previsao,
               partesFeitas: atual.partesFeitas,
               reveres: atual.reveres,
+              programa: programaSalvo,
             },
           },
           // Passou da meta: a da entrada da unidade não aparece de novo.
@@ -223,7 +232,7 @@ export function useMotorFase({
         };
       });
     },
-    [cssAtual, fase, htmlAtual, modo, mostrarMeta, projeto],
+    [cssAtual, fase, htmlAtual, modo, mostrarMeta, programaSalvo, projeto],
   );
 
   useEffect(() => {
@@ -515,6 +524,8 @@ export function useMotorFase({
       destacarNoCss(linha.seletorRegra, linha.propriedade);
     } else if (linha.alvo === "estilos") {
       destacarNoEstilos({ seletorRegra: linha.seletorRegra, propriedade: linha.propriedade });
+    } else if (linha.alvo === "snippet" || linha.alvo === "console") {
+      destacarNoPrograma?.(linha.alvo === "snippet" ? linha.linhas : "console");
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }
@@ -575,7 +586,7 @@ export function useMotorFase({
 
   /** Degrau 4: aplica a solução pelas funções da interface, explica e cobra 1 estrela. */
   const confirmarSolucao = () => {
-    if (!objetivo || objetivo.modo !== "guiado" || !obterDocumento()?.body) return;
+    if (!objetivo || objetivo.modo !== "guiado" || (!fase.programa && !obterDocumento()?.body)) return;
     aplicando.current = true;
     try {
       executarAcoes(objetivo.ajudas.solucao.acoes, painelCompleto);

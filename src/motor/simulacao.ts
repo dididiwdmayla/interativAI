@@ -33,6 +33,9 @@ import { eventoDoClique, type Utm } from "./medicao";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
+import { criarNucleoSincrono } from "./executor/fabrica";
+import type { OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
+import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 
 /**
  * O documento inicial da fase, solto (fora da tela): o head fixo com o
@@ -65,6 +68,22 @@ export function criarSimulacao(fase: Fase) {
     const { largura, altura } = medidasNaTela(dispositivo);
     eventos.push({ tipo: "trocouDispositivo", ligado: dispositivo.ligado, modelo: dispositivo.modelo, largura, altura });
   };
+
+  // Fase de programa: o executor síncrono (vm no Node, iframe no /lab e na meta), com a mesma lógica do jogo.
+  const executor = fase.programa ? criarNucleoSincrono() : null;
+  let snippet = fase.programa?.snippet?.codigoInicial ?? "";
+  let ultimaExecucao: ResultadoExecucao | null = null;
+  const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
+  const testesDaFase = fase.programa ? testesDeFuncaoDaFase(fase) : [];
+  const rodarCodigo = (codigo: string, origem: OrigemCodigo, registrar = true) => {
+    if (!executor) return;
+    const resultado = executor.executar(codigo, origem);
+    ultimaExecucao = resultado;
+    estadoPrograma.memoria = resultado.memoriaFinal;
+    for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
+    if (registrar) eventos.push({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+  };
+  if (fase.programa?.preparo) rodarCodigo(fase.programa.preparo, "console", false);
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -160,6 +179,15 @@ export function criarSimulacao(fase: Fase) {
           eventos.push({ tipo: "configurouCampanha", ...campanha });
         }
       : undefined,
+    programa: executor
+      ? {
+          executarNoConsole: (codigo) => rodarCodigo(codigo, "console"),
+          definirSnippet: (codigo) => {
+            snippet = codigo;
+          },
+          executarSnippet: () => rodarCodigo(snippet, "snippet"),
+        }
+      : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -177,6 +205,7 @@ export function criarSimulacao(fase: Fase) {
       dispositivo: comDispositivo ? dispositivo : null,
       tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
       campanha: campanhaDaFase ? { dados: campanhaDaFase, estado: campanha } : undefined,
+      programa: fase.programa ? estadoPrograma : undefined,
     };
   };
 
@@ -200,6 +229,8 @@ export function criarSimulacao(fase: Fase) {
     /** O texto do editor: o body ou, no modo documento, o documento inteiro. */
     htmlAtual: () => (fase.modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
     cssAtual: () => lerCssDoDocumento(documento),
+    /** (Fase de programa) A última execução e o texto do Snippet agora. */
+    programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null }),
   };
 }
 

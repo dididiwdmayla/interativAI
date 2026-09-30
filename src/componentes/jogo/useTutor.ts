@@ -8,6 +8,7 @@ import {
   FALA_SEM_SINAL,
   FALA_SOBRECARGA,
   LIMITES_TUTOR,
+  type ContextoProgramaTutor,
   type MensagemTutor,
   type TipoErroTutor,
 } from "@/lib/tutor/tipos";
@@ -20,6 +21,8 @@ type Opcoes = {
   htmlAtual: string;
   /** CSS da folha editável (null: a fase não tem). */
   cssAtual?: string | null;
+  /** (Fase de programa) Lido na hora de perguntar: código, último erro e variáveis. */
+  obterPrograma?: () => ContextoProgramaTutor | null;
   falar: (fala: Fala) => void;
   /** Chance de responder sem ir ao servidor (easter egg). Devolve a fala, se tratou. */
   interceptar?: (pergunta: string) => Fala | null;
@@ -33,7 +36,7 @@ function falaDaFalha(tipo: TipoErroTutor): Fala {
 }
 
 /** Conversa com o computadorzinho pela rota /api/tutor. */
-export function useTutor({ faseId, objetivo, degrau, htmlAtual, cssAtual = null, falar, interceptar }: Opcoes) {
+export function useTutor({ faseId, objetivo, degrau, htmlAtual, cssAtual = null, obterPrograma, falar, interceptar }: Opcoes) {
   const [pendente, setPendente] = useState<string | null>(null);
   const carregando = pendente !== null;
   const [ultima, setUltima] = useState<{ pergunta: string; fala: Fala } | null>(null);
@@ -57,6 +60,7 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, cssAtual = null,
 
     setPendente(pergunta);
     setRepetir(null);
+    const programa = obterPrograma?.() ?? null;
     try {
       const resposta = await perguntarAoTutor({
         faseId,
@@ -65,6 +69,15 @@ export function useTutor({ faseId, objetivo, degrau, htmlAtual, cssAtual = null,
         degrauAtual: degrau,
         htmlAtual: htmlAtual.slice(0, LIMITES_TUTOR.html),
         ...(cssAtual !== null ? { cssAtual: cssAtual.slice(0, LIMITES_TUTOR.css) } : {}),
+        ...(programa
+          ? {
+              programa: {
+                codigo: programa.codigo.slice(-LIMITES_TUTOR.codigo),
+                erro: programa.erro.slice(0, LIMITES_TUTOR.erro),
+                variaveis: programa.variaveis.slice(0, LIMITES_TUTOR.variaveis),
+              },
+            }
+          : {}),
         pergunta,
         historico: historico.current,
       });

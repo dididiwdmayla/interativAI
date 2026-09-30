@@ -81,6 +81,11 @@ const cores = HighlightStyle.define([
   { tag: t.invalid, color: "var(--cor-erro)", textDecoration: "underline wavy" },
   { tag: [t.keyword, t.propertyName], color: "var(--cor-codigo-tag)" },
   { tag: [t.number, t.bool], color: "var(--cor-codigo-valor)" },
+  // JavaScript (Snippet e Console): as cores dos valores seguem as do palco da memória.
+  { tag: [t.special(t.string), t.regexp], color: "var(--cor-js-texto)" },
+  { tag: [t.null, t.atom], color: "var(--cor-js-nulo)" },
+  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "var(--cor-js-funcao)" },
+  { tag: [t.definition(t.variableName)], color: "var(--cor-codigo-atributo)" },
 ]);
 
 export const temaEditor: Extension = [aparencia, syntaxHighlighting(cores)];

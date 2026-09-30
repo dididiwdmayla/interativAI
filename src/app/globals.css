@@ -34,6 +34,7 @@
   --color-codigo-valor: var(--cor-codigo-valor);
   --color-codigo-texto: var(--cor-codigo-texto);
   --color-codigo-comentario: var(--cor-codigo-comentario);
+  --color-codigo-destaque-linha: var(--cor-codigo-destaque-linha);
   --color-mar: var(--cor-mar);
   --color-mar-fundo: var(--cor-mar-fundo);
   --color-areia: var(--cor-areia);
@@ -45,6 +46,19 @@
   --color-caixa-borda: var(--cor-caixa-borda);
   --color-caixa-preenchimento: var(--cor-caixa-preenchimento);
   --color-caixa-conteudo: var(--cor-caixa-conteudo);
+  --color-js-texto: var(--cor-js-texto);
+  --color-js-numero: var(--cor-js-numero);
+  --color-js-booleano: var(--cor-js-booleano);
+  --color-js-nulo: var(--cor-js-nulo);
+  --color-js-funcao: var(--cor-js-funcao);
+  --color-js-objeto: var(--cor-js-objeto);
+  --color-js-erro-fundo: var(--cor-js-erro-fundo);
+  --color-js-aviso-fundo: var(--cor-js-aviso-fundo);
+  --color-circuito-fundo: var(--cor-circuito-fundo);
+  --color-circuito-grade: var(--cor-circuito-grade);
+  --color-fio-desligado: var(--cor-fio-desligado);
+  --color-fio-ligado: var(--cor-fio-ligado);
+  --color-lampada-acesa: var(--cor-lampada-acesa);
 
   --font-ui: var(--fonte-ui);
   --font-codigo: var(--fonte-codigo);

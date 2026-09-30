@@ -548,6 +548,7 @@ export class NucleoExecutor {
       totalPassos: 0,
       memoriaFinal: this.fotografar(),
       globais: this.listaDeGlobais(),
+      sintaxes: [],
     });
     if (!fonteOriginal.trim()) return vazio(null, fonteOriginal);
 
@@ -591,6 +592,7 @@ export class NucleoExecutor {
       totalPassos: this.total,
       memoriaFinal,
       globais: this.listaDeGlobais(),
+      sintaxes: inst.sintaxes,
     };
   }
 

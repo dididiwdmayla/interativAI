@@ -21,6 +21,13 @@ export function validarEntradaTutor(corpo: unknown): EntradaTutor | null {
   const enunciado = texto(corpo.enunciado, 400);
   const htmlAtual = texto(corpo.htmlAtual, LIMITES_TUTOR.html);
   const cssAtual = texto(corpo.cssAtual, LIMITES_TUTOR.css) ?? undefined;
+  const programa = ehObjeto(corpo.programa)
+    ? {
+        codigo: texto(corpo.programa.codigo, LIMITES_TUTOR.codigo) ?? "",
+        erro: texto(corpo.programa.erro, LIMITES_TUTOR.erro) ?? "",
+        variaveis: texto(corpo.programa.variaveis, LIMITES_TUTOR.variaveis) ?? "",
+      }
+    : undefined;
   const pergunta = texto(corpo.pergunta, LIMITES_TUTOR.pergunta)?.trim();
   if (!faseId || !objetivoId || enunciado === null || htmlAtual === null || !pergunta) return null;
   if (!ehDegrau(corpo.degrauAtual)) return null;
@@ -42,6 +49,7 @@ export function validarEntradaTutor(corpo: unknown): EntradaTutor | null {
     degrauAtual: corpo.degrauAtual,
     htmlAtual,
     ...(cssAtual ? { cssAtual } : {}),
+    ...(programa ? { programa } : {}),
     pergunta,
     historico,
   };

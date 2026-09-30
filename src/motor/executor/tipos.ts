@@ -1,3 +1,5 @@
+import type { SintaxeJs } from "./instrumentar";
+
 /*
  * Tipos do executor de JavaScript do jogador (Ilha Lógica). Tudo aqui é
  * JSON puro: atravessa o postMessage do Web Worker e o vm do Node do mesmo
@@ -118,6 +120,8 @@ export type ResultadoExecucao = {
   memoriaFinal: FotoMemoria;
   /** Nomes globais declarados até agora na sessão, com o tipo de declaração. */
   globais: { nome: string; declaracao: TipoDeclaracao }[];
+  /** O que o código usa (if, for, arrow...), lido da árvore: validador `usouSintaxe`. */
+  sintaxes: SintaxeJs[];
 };
 
 /** Valor esperado num caso de teste de função (JSON). */

@@ -62,5 +62,10 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "link-rastreavel";
     case "configurarCampanha":
       return "simulador-campanha";
+    case "executarNoConsole":
+      return "console";
+    case "definirSnippet":
+    case "executarSnippet":
+      return "snippet";
   }
 }

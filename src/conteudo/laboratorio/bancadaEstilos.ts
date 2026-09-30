@@ -18,6 +18,7 @@ import { FASE_BANCADA_DOCUMENTO } from "./bancadaDocumento";
 import { FASE_BANCADA_LIGHTHOUSE } from "./bancadaLighthouse";
 import { FASE_BANCADA_TEMA } from "./bancadaTema";
 import { FASE_BANCADA_VARIAVEIS } from "./bancadaVariaveis";
+import { FASES_BANCADA_LOGICA, UNIDADE_BANCADA_LOGICA } from "./bancadaLogica";
 
 const CSS_DA_BANCADA = `body {
   font-family: Georgia, serif;
@@ -197,6 +198,7 @@ export const FASES_LABORATORIO: readonly (FasePratica | FaseSimuladorCampanha)[]
   FASE_BANCADA_LIGHTHOUSE,
   FASE_BANCADA_BUSCA,
   FASE_DEMO_CAMPANHA,
+  ...FASES_BANCADA_LOGICA,
 ];
 
-export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA];
+export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA, UNIDADE_BANCADA_LOGICA];

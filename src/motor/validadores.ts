@@ -18,6 +18,8 @@ import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } fr
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
+import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlobal } from "./programa";
+import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -38,7 +40,14 @@ export type ContextoValidacao = {
   dispositivo?: EstadoDispositivo | null;
   /** (Simulador de campanha) Os dados da fase e a campanha configurada agora. */
   campanha?: { dados: DadosCampanha; estado: EstadoCampanha };
+  /** (Fase de programa) A memória depois da última execução e os testes de função. */
+  programa?: EstadoPrograma;
 };
+
+/** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
+function execucoesDoObjetivo(contexto: ContextoValidacao): ResumoExecucao[] {
+  return contexto.eventos.flatMap((evento) => (evento.tipo === "executouCodigo" ? [evento.execucao] : []));
+}
 
 /** A tela de um validador de CSS: a `larguraTela` dele ou a da prévia. */
 function opcoesDaTela(validador: { larguraTela?: number; alturaTela?: number }, contexto: ContextoValidacao): OpcoesCascata {
@@ -175,6 +184,25 @@ export function descreverValidador(validador: Validador): string {
     }
     case "simulacao":
       return `campanha simulada: ${validador.metrica} ${validador.op} ${validador.valor}`;
+    case "valorVariavel":
+      return `a variável ${validador.nome} vale ${textoDoEsperado(validador.valor)}`;
+    case "respostaDoConsole":
+      return `o Console respondeu ${textoDoEsperado(validador.valor)}`;
+    case "saida":
+      return `o console mostrou ${[
+        validador.contem !== undefined ? `uma linha com "${validador.contem}"` : "",
+        validador.igual ? `exatamente ${validador.igual.map((linha) => `"${linha}"`).join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(" e ")}`;
+    case "semErro":
+      return "rodou sem erro";
+    case "erroDoTipo":
+      return `deu ${validador.nome}`;
+    case "usouSintaxe":
+      return `o código rodado usa ${validador.sintaxe}`;
+    case "funcaoPassa":
+      return `a função ${validador.nome} devolve o certo em ${validador.casos.length} caso(s)`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -386,6 +414,58 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const { passou, detalhe } = conferirLinkRastreavel(consultar(documento, validador.seletor), validador.utm);
       return { passou, descricao, detalhe };
     }
+    case "valorVariavel": {
+      if (!contexto.programa?.memoria) return { passou: false, descricao, detalhe: "nada rodou ainda" };
+      const valor = variavelGlobal(contexto.programa.memoria, validador.nome);
+      if (!valor) return { passou: false, descricao, detalhe: `não existe variável ${validador.nome}` };
+      return { passou: valorIgual(valor, validador.valor), descricao, detalhe: `${validador.nome} vale ${textoPrevia(valor)}` };
+    }
+    case "respostaDoConsole": {
+      const respostas = execucoesDoObjetivo(contexto).flatMap((execucao) => (execucao.resposta ? [execucao.resposta] : []));
+      return {
+        passou: respostas.some((resposta) => valorIgual(resposta, validador.valor)),
+        descricao,
+        detalhe: respostas.length ? `respostas: ${lista(respostas.slice(-6).map((r) => textoPrevia(r)))}` : "o Console ainda não respondeu nada",
+      };
+    }
+    case "saida": {
+      const execucoes = execucoesDoObjetivo(contexto);
+      const linhas = execucoes.flatMap((execucao) => execucao.saidas);
+      const contem = validador.contem === undefined || linhas.some((linha) => linha.includes(validador.contem as string));
+      const igual =
+        validador.igual === undefined ||
+        execucoes.some((execucao) => execucao.saidas.length === validador.igual?.length && execucao.saidas.every((linha, i) => linha === validador.igual?.[i]));
+      return { passou: contem && igual, descricao, detalhe: linhas.length ? `linhas: ${lista(linhas.slice(-8))}` : "o console não mostrou nada" };
+    }
+    case "semErro": {
+      const execucoes = execucoesDoObjetivo(contexto);
+      const ultima = execucoes[execucoes.length - 1];
+      if (!ultima) return { passou: false, descricao, detalhe: "nada rodou desde o começo do objetivo" };
+      return { passou: ultima.erro === null, descricao, detalhe: ultima.erro ? `${ultima.erro.nome}: ${ultima.erro.mensagem}` : "sem erro" };
+    }
+    case "erroDoTipo": {
+      const erros = execucoesDoObjetivo(contexto).flatMap((execucao) => (execucao.erro ? [execucao.erro.nome || execucao.erro.tipo] : []));
+      return { passou: erros.includes(validador.nome), descricao, detalhe: erros.length ? `erros: ${lista(erros)}` : "nenhum erro" };
+    }
+    case "usouSintaxe": {
+      const usadas = new Set(execucoesDoObjetivo(contexto).flatMap((execucao) => execucao.sintaxes));
+      return { passou: usadas.has(validador.sintaxe), descricao, detalhe: usadas.size ? `usou: ${[...usadas].join(", ")}` : "nada rodou" };
+    }
+    case "funcaoPassa": {
+      const teste = contexto.programa?.testes[chaveFuncaoPassa(validador)];
+      if (!teste) return { passou: false, descricao, detalhe: "a função ainda não foi testada (nada rodou)" };
+      if (!teste.existe) return { passou: false, descricao, detalhe: `não existe função ${validador.nome}` };
+      const falhas = teste.casos.filter((caso) => !caso.passou);
+      const detalhe = falhas.length
+        ? falhas
+            .map(
+              (caso) =>
+                `${validador.nome}(${caso.args.map(textoDoEsperado).join(", ")}) devolveu ${caso.erro ? `${caso.erro.nome}: ${caso.erro.mensagem}` : caso.obtido ? textoPrevia(caso.obtido) : "nada"}, esperado ${textoDoEsperado(caso.esperado)}`,
+            )
+            .join("; ")
+        : "todos os casos passaram";
+      return { passou: teste.passou, descricao, detalhe };
+    }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
       const resultado = simularCampanha(contexto.campanha.dados, contexto.campanha.estado, documento);
@@ -525,6 +605,11 @@ export function validadorTravado(validador: Validador): boolean {
     case "evento":
     case "temaSalvo":
     case "eventoMedido":
+    case "saida":
+    case "respostaDoConsole":
+    case "semErro":
+    case "erroDoTipo":
+    case "usouSintaxe":
       return true;
     case "todos":
     case "algum":

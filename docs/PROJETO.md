@@ -375,6 +375,61 @@ resposta da última expressão, as saídas do console e o erro.
   erros, saída, determinismo, modo do Console, funções e 23 programas
   comparados com a execução sem ganchos).
 
+### Fases de programa: Console e Snippet (rodada 17)
+
+- Campo `programa` na fase (`BancadaPrograma` em `src/conteudo/tipos.ts`):
+  liga a aba **Console** e, com `snippet`, a aba **Fontes** (o Snippet);
+  a aba Elementos fica trancada (não há página) e a tela do site vira o
+  **palco da memória**. O site-alvo é o vazio `SITE_DO_PROGRAMA`
+  (`src/motor/programa.ts`); `preparo` roda quieto na abertura.
+- Estado: `usePrograma` (`componentes/jogo/usePrograma.ts`) guarda a
+  sessão do Web Worker, as linhas do Console, o Snippet e o que os
+  validadores olham (a memória depois da última execução e os resultados
+  dos `funcaoPassa`, que rodam de novo a cada execução). Cada execução
+  vira o evento `executouCodigo` com o resumo (saídas no texto do Chrome,
+  erro, sintaxes usadas, resposta do Console). O motor da fase não sabe de
+  worker: o contexto de validação ganhou `programa` e, numa fase de
+  programa, o documento é o vazio do começo (`useMotorFase`).
+- Progresso: `EstadoFaseSalvo.programa` (entradas que rodaram e o texto do
+  Snippet). Ao voltar, o preparo e as entradas rodam de novo em silêncio
+  (`SessaoNavegador.restaurar`) e a memória volta como estava.
+- Console (`componentes/painel/console/`), conferido na documentação do
+  Chrome (repositório GoogleChrome/developer.chrome.com, Console reference
+  e "New in DevTools 80/92") e no devtools-frontend: entrada com o sinal
+  >, resposta com a setinha de volta, `undefined` depois de declarações,
+  valores coloridos pelo tipo (tokens `--cor-js-*`), listas e objetos que
+  abrem com o triângulo (dentro, textos com aspas duplas e `length`),
+  warn e error com fundo, erro em vermelho ("Uncaught ...") com a
+  explicação de leigo embaixo, seta para cima e para baixo no histórico
+  (só na primeira ou na última linha), Shift+Enter para várias linhas,
+  botão de limpar e `console.clear()`. Toque: botão Rodar e a barra de
+  símbolos (`( ) { } [ ] ; = " ' < > + - . ,`, 44 px, sem tirar o foco).
+- Snippet (`componentes/painel/fontes/PainelFontes.tsx`): o editor
+  CodeMirror em JavaScript, Executar (Ctrl+Enter ou Cmd+Enter) e a gaveta
+  do Console embaixo, como o Chrome faz ao rodar um snippet; no celular,
+  "Snippet | Console". Snippet e Console dividem a memória.
+- Validadores de código (`src/motor/validadores.ts`): `valorVariavel` e
+  `funcaoPassa` olham o estado de agora; `respostaDoConsole`, `saida`,
+  `semErro`, `erroDoTipo` e `usouSintaxe` olham as execuções desde o
+  começo do objetivo e travam no checklist. **Decisão:**
+  `respostaDoConsole` não estava no pedido; entrou porque a resposta do
+  Console a uma expressão (o 14 de `2 + 3 * 4`) não é saída de
+  `console.log` e é o coração do "Console como calculadora".
+- Ações: `executarNoConsole`, `definirSnippet` e, além do pedido,
+  `executarSnippet` (o botão Executar; as soluções precisam dele).
+  Degrau 3: `{ alvo: "console" }` pisca a linha de digitar e
+  `{ alvo: "snippet", linhas }` pisca linhas do Snippet.
+- Simulação fora da tela (`testar:conteudo`, `/lab/fases`, o "depois" da
+  meta): `criarNucleoSincrono` (`executor/fabrica.ts`), o vm do Node nos
+  testes e um iframe escondido da mesma origem no navegador, que só roda
+  conteúdo do projeto (as soluções), nunca o código do jogador.
+- Tutor: recebe o código (Snippet e últimas entradas), o último erro e as
+  variáveis no fim; o prompt manda ajudar a LER o erro e nunca dar a linha
+  certa.
+- Ferramentas novas com apresentação: `console` e `snippet`.
+- Regra `fase-de-programa` no `testar:conteudo` e a Bancada do Console
+  (`/lab/fases?fase=lab-logica-u1-f1`), com um objetivo por validador.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é

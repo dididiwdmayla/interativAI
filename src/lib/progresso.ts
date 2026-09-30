@@ -38,7 +38,21 @@ export type EstadoFaseSalvo = {
   partesFeitas: string[];
   /** Desafio: quantas vezes o "Rever" foi usado. */
   reveres: number;
+  /**
+   * (Fase de programa, Ilha Lógica) O que rodou no Console e no Snippet e o
+   * texto do Snippet: ao voltar, as entradas rodam de novo em silêncio e a
+   * memória volta como estava. null nas outras fases.
+   */
+  programa: ProgramaSalvo | null;
 };
+
+export type ProgramaSalvo = {
+  entradas: { codigo: string; origem: "console" | "snippet" }[];
+  snippet: string | null;
+};
+
+/** Quantas entradas do Console e do Snippet ficam guardadas por fase. */
+export const MAXIMO_ENTRADAS_SALVAS = 200;
 
 export type Progresso = {
   versao: 2;
@@ -160,6 +174,7 @@ export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
   previsaoRespondida: null,
   partesFeitas: [],
   reveres: 0,
+  programa: null,
 };
 
 function ehObjeto(valor: unknown): valor is Record<string, unknown> {
@@ -220,7 +235,20 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     previsaoRespondida: ehNumero(valor.previsaoRespondida) ? valor.previsaoRespondida : null,
     partesFeitas: [...new Set(listaDeTextos(valor.partesFeitas))],
     reveres: ehNumero(valor.reveres) ? Math.max(0, Math.round(valor.reveres)) : 0,
+    programa: lerProgramaSalvo(valor.programa),
   };
+}
+
+function lerProgramaSalvo(valor: unknown): ProgramaSalvo | null {
+  if (!ehObjeto(valor)) return null;
+  const entradas = Array.isArray(valor.entradas)
+    ? valor.entradas.flatMap((item) =>
+        ehObjeto(item) && typeof item.codigo === "string" && (item.origem === "console" || item.origem === "snippet")
+          ? [{ codigo: item.codigo, origem: item.origem as "console" | "snippet" }]
+          : [],
+      )
+    : [];
+  return { entradas: entradas.slice(-MAXIMO_ENTRADAS_SALVAS), snippet: typeof valor.snippet === "string" ? valor.snippet : null };
 }
 
 function lerProjeto(valor: unknown): ProjetoSalvo | null {

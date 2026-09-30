@@ -56,3 +56,20 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
   tempo). Decisão e detalhes no `PROJETO.md`, "Executor de JavaScript".
 - Dependência nova: `acorn` (o astring foi avaliado e ficou de fora).
 - Testes: `testes/conteudo/executor.test.ts`, 59 casos.
+
+### Etapa 3: Console, Snippet, declarativo e tutor
+
+- Fase de programa (`programa` na fase), abas Console e Fontes liberadas por
+  fase, o palco no lugar da prévia (versão simples; a completa é a etapa 4).
+- `usePrograma`, `PainelConsole`, `PainelFontes`, `EntradaConsole`,
+  `ValorConsole`, `BarraSimbolos`; `EditorCodigo` com JavaScript.
+- Validadores `valorVariavel`, `respostaDoConsole`, `saida`, `semErro`,
+  `erroDoTipo`, `usouSintaxe`, `funcaoPassa`; ações `executarNoConsole`,
+  `definirSnippet`, `executarSnippet`; evento `executouCodigo`; regra
+  `fase-de-programa`; progresso com o programa salvo; tutor com o código.
+- Ferramentas `console` e `snippet` (e já registradas `palco-memoria` e
+  `linha-do-tempo`). Tokens `--cor-js-*` e do circuito nos três temas.
+- Os conceitos da Lógica ficam fora do catálogo até a unidade que os ensina
+  (o glossário exige onde aprender).
+- Testes: `programa.test.ts` (12), tutor e progresso;
+  `testes/console.mjs` nos três layouts (verde, também no build de produção).
