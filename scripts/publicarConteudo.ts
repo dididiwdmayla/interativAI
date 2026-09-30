@@ -13,10 +13,11 @@ import { it } from "vitest";
 import { FASES, UNIDADES } from "@/conteudo";
 import { checarTudo } from "@/conteudo/checagens";
 import { conferirPublicados, montarPublicados, PUBLICADOS } from "@/conteudo/publicados";
+import { ITENS_REVISAO } from "@/conteudo/revisao";
 
 // O npm roda os scripts na raiz do projeto (no jsdom, import.meta.url não é file:).
 const ARQUIVO = resolve(process.cwd(), "src/conteudo/publicados.json");
-const contexto = { unidades: UNIDADES, fases: FASES };
+const contexto = { unidades: UNIDADES, fases: FASES, itens: ITENS_REVISAO };
 
 it("publica o conteúdo registrado em src/conteudo/publicados.json", () => {
   const congelados = conferirPublicados(PUBLICADOS, contexto);
@@ -31,10 +32,11 @@ it("publica o conteúdo registrado em src/conteudo/publicados.json", () => {
   const novo = montarPublicados(contexto);
   const unidadesNovas = Object.keys(novo.unidades).filter((id) => !(id in PUBLICADOS.unidades));
   const fasesNovas = Object.keys(novo.fases).filter((id) => !(id in PUBLICADOS.fases));
+  const itensNovos = (novo.itensRevisao ?? []).filter((id) => !(PUBLICADOS.itensRevisao ?? []).includes(id));
   writeFileSync(ARQUIVO, `${JSON.stringify(novo, null, 2)}\n`);
   console.log(
-    unidadesNovas.length + fasesNovas.length === 0
+    unidadesNovas.length + fasesNovas.length + itensNovos.length === 0
       ? "publicados.json regravado: nada novo para publicar."
-      : `publicados.json atualizado. Unidades novas: ${unidadesNovas.join(", ") || "nenhuma"}. Fases novas: ${fasesNovas.join(", ") || "nenhuma"}.`,
+      : `publicados.json atualizado. Unidades novas: ${unidadesNovas.join(", ") || "nenhuma"}. Fases novas: ${fasesNovas.join(", ") || "nenhuma"}. Itens de revisão novos: ${itensNovos.join(", ") || "nenhum"}.`,
   );
 });

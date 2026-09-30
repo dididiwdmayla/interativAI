@@ -24,7 +24,8 @@ import {
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { documentoSoltoDaFase } from "@/motor/simulacao";
-import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
+import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
+import { diaLocal, registrarFaseConcluida } from "@/lib/revisao";
 import { avaliarValidador, consultar, type ContextoValidacao, itensDoChecklist, recalcularPartesFeitas } from "@/motor/validadores";
 
 /** Meus projetos: o site do projeto-ponte, copiado a cada mudança (a data só anda se o texto mudou). */
@@ -169,9 +170,15 @@ export function useMotorFase({
   /* Persistência                                                      */
   /* ---------------------------------------------------------------- */
 
+  // Revisão do dia: a fase concluída agora (não a que já abriu concluída) põe os conceitos na fila, uma vez.
+  const concluidaAoAbrir = useRef(estado.etapa === "concluida");
+  const revisaoRegistrada = useRef(false);
+
   const salvar = useCallback(
     (atual: EstadoMotor) => {
       if (modo !== "jogo") return;
+      const registrarRevisao = atual.etapa === "concluida" && !concluidaAoAbrir.current && !revisaoRegistrada.current;
+      if (registrarRevisao) revisaoRegistrada.current = true;
       atualizarProgresso((progresso) => {
         const concluida = atual.etapa === "concluida";
         return {
@@ -208,10 +215,14 @@ export function useMotorFase({
               }
             : progresso.estrelasPorFase,
           projetos: projeto ? espelharProjeto(progresso.projetos, fase.id, htmlAtual, cssAtual) : progresso.projetos,
+          // A ajuda da fase, aproximada pelas estrelas: só a solução e o Rever tiram estrela.
+          revisao: registrarRevisao
+            ? registrarFaseConcluida(progresso.revisao, fase, atual.estrelas < ESTRELAS_INICIAIS, diaLocal())
+            : progresso.revisao,
         };
       });
     },
-    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta, projeto],
+    [cssAtual, fase, htmlAtual, modo, mostrarMeta, projeto],
   );
 
   useEffect(() => {

@@ -331,6 +331,13 @@ type ObjetivoBase = {
    * /lab/fases. Num objetivo de previsão, comece com responderPrevisao.
    */
   solucaoDeTeste: Acao[];
+  /**
+   * Opcional (precisão futura da Revisão do dia): os conceitos que ESTE
+   * objetivo ensina ou treina. Hoje a revisão usa os conceitos da fase e a
+   * ajuda registrada por fase (as estrelas) como aproximação; com este
+   * campo, um dia dá para agendar por objetivo. Não muda nenhum id.
+   */
+  conceitos?: IdConceito[];
 };
 
 type ObjetivoPorModo =
@@ -527,4 +534,43 @@ export type Unidade = {
   };
   /** Ids das fases, em ordem, terminando no desafio. */
   fases: string[];
+};
+
+/* ------------------------------------------------------------------ */
+/* Revisão do dia                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Um item da Revisão do dia: um desafio curto (1 a 2 minutos) sobre UM
+ * conceito já aprendido, num mini-site próprio, diferente dos sites das
+ * fases (senão vira decoreba). Mora em src/conteudo/revisao/<conceito>.ts,
+ * com pelo menos 2 variações por conceito, em situações diferentes.
+ *
+ * Na sessão, o item vira uma fase de um objetivo "sozinho": o tutor só
+ * pergunta e o "Me ajuda" para na dica. O `testar:conteudo` confere os
+ * itens com as mesmas regras dos objetivos (estado inicial não passa,
+ * solução passa, limites de texto, sem emoji, conceito existe). O id de um
+ * item publicado é congelado, como os das fases.
+ */
+export type ItemRevisao = {
+  /** kebab-case, único entre todos os itens; por convenção "<conceito>-<n>". */
+  id: string;
+  conceito: IdConceito;
+  /**
+   * "acao": fazer algo no mini-site (precisa de `validador`).
+   * "previsao": prever o que acontece (precisa de `previsao`); com
+   * `validador`, depois de prever o jogador faz e vê acontecer; sem ele, o
+   * item acaba na resposta.
+   */
+  tipo: "acao" | "previsao";
+  /** Até 140 caracteres cada. `toque` troca "clique" por "toque" e afins. */
+  enunciado: { mouse: string; toque: string };
+  /** Mini-site próprio e pequeno. `url` e `titulo` têm padrão. */
+  siteAlvo: { head?: string; body: string; css?: string; url?: string; titulo?: string };
+  validador?: Validador;
+  previsao?: Previsao;
+  /** Só pergunta e dica: sem linha e sem solução (a revisão é "sozinho"). */
+  ajudas: AjudasSozinho;
+  /** Ações que cumprem o item (testes). Num item de previsão, comece com responderPrevisao. */
+  solucaoDeTeste: Acao[];
 };

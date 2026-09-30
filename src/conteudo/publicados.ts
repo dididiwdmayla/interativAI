@@ -13,7 +13,7 @@
  * unidade nova é publicada.
  */
 import DADOS from "./publicados.json";
-import type { Fase, Unidade } from "./tipos";
+import type { Fase, ItemRevisao, Unidade } from "./tipos";
 
 export type FasePublicada = {
   /** Fase de prática: ids dos objetivos, em ordem. */
@@ -27,6 +27,12 @@ export type RegistroPublicados = {
   /** Unidade publicada -> ids das fases dela, em ordem. */
   unidades: Record<string, string[]>;
   fases: Record<string, FasePublicada>;
+  /**
+   * Ids dos itens da Revisão do dia publicados. O progresso guarda o estado
+   * por conceito, mas a variação da vez sai da lista do conceito: item
+   * publicado não some nem muda de id (acrescentar pode).
+   */
+  itensRevisao?: string[];
 };
 
 export const PUBLICADOS: RegistroPublicados = DADOS;
@@ -34,7 +40,7 @@ export const PUBLICADOS: RegistroPublicados = DADOS;
 export const AVISO_PUBLICADOS =
   "Ids publicados: nunca mude nem apague (isso apaga o progresso de quem já jogou). Atualize só com npm run publicar:conteudo.";
 
-type Contexto = { unidades: readonly Unidade[]; fases: readonly Fase[] };
+type Contexto = { unidades: readonly Unidade[]; fases: readonly Fase[]; itens?: readonly ItemRevisao[] };
 
 function idsDaFase(fase: Fase): FasePublicada {
   return fase.tipo === "pratica"
@@ -43,8 +49,8 @@ function idsDaFase(fase: Fase): FasePublicada {
 }
 
 /** O registro de tudo o que está no jogo agora (o que o publicar:conteudo grava). */
-export function montarPublicados({ unidades, fases }: Contexto): RegistroPublicados {
-  const registro: RegistroPublicados = { aviso: AVISO_PUBLICADOS, unidades: {}, fases: {} };
+export function montarPublicados({ unidades, fases, itens = [] }: Contexto): RegistroPublicados {
+  const registro: RegistroPublicados = { aviso: AVISO_PUBLICADOS, unidades: {}, fases: {}, itensRevisao: itens.map((item) => item.id) };
   for (const unidade of unidades) registro.unidades[unidade.id] = [...unidade.fases];
   for (const fase of fases) registro.fases[fase.id] = idsDaFase(fase);
   return registro;
@@ -72,8 +78,13 @@ const MOTIVO = "Ids publicados nunca mudam: isso apaga o progresso de quem já j
  * Confere o conteúdo atual contra o publicado. Lista vazia = nada
  * publicado sumiu nem mudou. Conteúdo NOVO (ainda não publicado) é livre.
  */
-export function conferirPublicados(publicados: RegistroPublicados, { unidades, fases }: Contexto): string[] {
+export function conferirPublicados(publicados: RegistroPublicados, { unidades, fases, itens }: Contexto): string[] {
   const problemas: string[] = [];
+  if (itens) {
+    for (const id of publicados.itensRevisao ?? []) {
+      if (!itens.some((item) => item.id === id)) problemas.push(`o item de revisão publicado "${id}" sumiu ou mudou de id. ${MOTIVO}`);
+    }
+  }
   for (const [id, fasesPublicadas] of Object.entries(publicados.unidades)) {
     const unidade = unidades.find((item) => item.id === id);
     if (!unidade) {

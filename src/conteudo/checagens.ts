@@ -12,6 +12,9 @@
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
 import { conferirPlataformas, PLATAFORMAS_MARKETING } from "./plataformas-marketing";
+import { ITENS_REVISAO } from "./revisao";
+import { conferirItensDeRevisao } from "./revisao/conferirItens";
+import { faseDoItem } from "./revisao/faseDoItem";
 import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
 import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
@@ -34,8 +37,11 @@ import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
-import type { Acao, Fase, FaseDesafio, FasePratica, FaseProjetoPonte, Objetivo, Unidade, Validador } from "./tipos";
+import type { Acao, Fase, FaseDesafio, FasePratica, FaseProjetoPonte, ItemRevisao, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
+import { ferramentaDaAcao } from "./ferramentaDaAcao";
+
+export { ferramentaDaAcao } from "./ferramentaDaAcao";
 
 /** Limites de tamanho dos textos (em caracteres). */
 export const LIMITES = {
@@ -48,7 +54,12 @@ export const LIMITES = {
   titulo: 40,
 } as const;
 
-export type ContextoChecagem = { unidades: readonly Unidade[]; fases: readonly Fase[] };
+export type ContextoChecagem = {
+  unidades: readonly Unidade[];
+  fases: readonly Fase[];
+  /** Itens da Revisão do dia (padrão: os registrados em src/conteudo/revisao). */
+  itens?: readonly ItemRevisao[];
+};
 
 export type RegraGeral = { id: string; nome: string; checar: (contexto: ContextoChecagem) => string[] };
 
@@ -202,64 +213,6 @@ function acoesRoteirizadas(fase: Fase): { onde: string; acoes: readonly Acao[] }
     }
   });
   return lista;
-}
-
-/** A ferramenta que o jogador usa para fazer a ação à mão. */
-export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
-  switch (acao.tipo) {
-    case "selecionar":
-      switch (acao.via ?? "arvore") {
-        case "arvore":
-          return "arvore";
-        case "inspecionar":
-          return "inspecionar";
-        case "editor":
-          return "sincronia";
-        case "trilha":
-          return "trilha";
-      }
-      return null;
-    case "definirTexto":
-    case "definirAtributo":
-      return "editar-duplo-clique";
-    case "adicionarAtributo":
-      return "adicionar-atributo";
-    case "inserirHTML":
-      return "editor";
-    case "esconder":
-      return "esconder";
-    case "apagar":
-      return "apagar";
-    case "duplicar":
-      return "duplicar";
-    case "renomearTag":
-      return "renomear-tag";
-    case "clicarLink":
-      return "previa";
-    case "desfazer":
-      return "desfazer";
-    case "responderPrevisao":
-      return null;
-    case "definirPropriedade":
-      return "editar-valor-css";
-    case "alternarDeclaracao":
-      return "ligar-desligar-declaracao";
-    case "adicionarRegra":
-      return "nova-regra";
-    case "editarCss":
-      return "editor-css";
-    case "salvarTema":
-      return "salvar-tema";
-    case "trocarDispositivo":
-    case "desligarDispositivo":
-      return "modo-dispositivo";
-    case "girarDispositivo":
-      return "girar-dispositivo";
-    case "analisarAuditoria":
-      return "lighthouse";
-    case "levarProMundo":
-      return "levar-pro-mundo";
-  }
 }
 
 const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada", "variavelCss", "temMediaQuery"]);
@@ -522,6 +475,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: () => conferirProfissoes(PROFISSOES),
   },
   {
+    id: "itens-de-revisao",
+    nome: "itens de revisão: ids únicos, conceito ensinado, tipo coerente, 2 variações e site próprio",
+    checar: ({ fases, itens }) => conferirItensDeRevisao(itens ?? ITENS_REVISAO, fases),
+  },
+  {
     id: "plataformas-marketing",
     nome: "o arquivo de plataformas de marketing tem ids únicos, data conferida e passos",
     checar: () => conferirPlataformas(PLATAFORMAS_MARKETING),
@@ -529,7 +487,7 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
   {
     id: "publicados-congelados",
     nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
-    checar: (contexto) => conferirPublicados(PUBLICADOS, contexto),
+    checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
   },
 ];
 
@@ -1118,6 +1076,30 @@ export function checarTudo(contexto: ContextoChecagem): ProblemaConteudo[] {
         mensagens = [`a checagem quebrou: ${mensagemDe(erro)}`];
       }
       for (const mensagem of mensagens) problemas.push({ onde: fase.id, regra: regra.nome, mensagem });
+    }
+  }
+  problemas.push(...checarItensDeRevisao(contexto.itens ?? ITENS_REVISAO, contexto));
+  return problemas;
+}
+
+/**
+ * Os itens da Revisão do dia com as MESMAS regras dos objetivos: cada item
+ * vira a fase de um objetivo sozinho (`faseDoItem`) e passa pelas regras
+ * de fase (estado inicial não passa, solução passa, limites de texto, sem
+ * emoji, conceito existe, ferramentas das ações...).
+ */
+export function checarItensDeRevisao(itens: readonly ItemRevisao[], contexto: ContextoChecagem): ProblemaConteudo[] {
+  const problemas: ProblemaConteudo[] = [];
+  for (const item of itens) {
+    const fase = faseDoItem(item);
+    for (const regra of REGRAS_DE_FASE) {
+      let mensagens: string[];
+      try {
+        mensagens = regra.checar(fase, contexto);
+      } catch (erro) {
+        mensagens = [`a checagem quebrou: ${mensagemDe(erro)}`];
+      }
+      for (const mensagem of mensagens) problemas.push({ onde: `revisao:${item.id}`, regra: regra.nome, mensagem });
     }
   }
   return problemas;
