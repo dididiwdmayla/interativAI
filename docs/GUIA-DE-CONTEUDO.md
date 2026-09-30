@@ -1131,6 +1131,22 @@ da S1 (mini-sites no modo documento).
   (`itensRevisao`).
 - O agendamento (1, 3, 7, 21 e 60 dias; o que conta como ajuda; o treino
   livre) está no topo de `src/lib/revisao.ts`.
+- **Escrevendo em volume** (U3 a P2, rodada 15, um arquivo por conceito):
+  - Itens de CSS levam `css` e o head `HEAD_CSS` (`sites/estilos.ts`, só
+    charset e viewport); o visual do mini-site mora no `css`, que o
+    jogador vê no painel Estilos. Só o painel Estilos existe (sem o
+    Calculado), então o modelo de caixa se resolve pelas propriedades.
+  - Imagem do mini-site é sempre `data:` (um SVG de retângulo colorido):
+    um `src="foto.jpg"` gera 404 no console e derruba o teste de navegador.
+  - **Gire a posição da resposta certa** nas previsões (nenhuma checagem
+    acusa `correta` sempre igual). Nas ações de variável, use só
+    `definirPropriedade` no `:root` (sem `selecionar`); `grid-template-areas`
+    se valida com `declaracao`, não `valorEfetivo`.
+  - Conceito que só vive numa maquete que o item não aceita (o Meu tema,
+    `SITE_ALVO_DO_JOGO`) ou que não tem gesto no jogo (o nome
+    `index.html`) fica só com previsões, com o motivo no comentário.
+  - Para conferir no navegador: `node testes/revisao-zonas.mjs [layout]
+    [zona]` (seção "Navegador" do `testes/README.md`).
 
 ## 20. Zona opcional
 

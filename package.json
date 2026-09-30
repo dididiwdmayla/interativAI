@@ -11,6 +11,7 @@
     "testar:audio": "vitest run --config vitest.config.mts testes/audio",
     "publicar:conteudo": "vitest run --config scripts/vitest.publicar.mts",
     "bateria": "node testes/todos.mjs",
+    "bateria:conteudo": "node testes/conteudo-navegador.mjs",
     "bateria:repetir": "node testes/repetir.mjs"
   },
   "dependencies": {

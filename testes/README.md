@@ -91,6 +91,7 @@ npm run dev  # sem GEMINI_API_KEY             # e então: SEM_CHAVE=1 node teste
 | `publicar.mjs [desktop\|retrato\|paisagem]` | a P2 "Do jogo pro mundo" jogada pelo mapa (progresso semeado com o resto da Ilha Sites feito): na Fase 1, as apresentações de modo dispositivo, Lighthouse e Levar pro mundo, o .zip baixado de verdade e aberto com o fflate (só index.html e style.css, o `<link rel="stylesheet" href="style.css">` no fim do head, nada do jogo dentro) e o .zip novo do sozinho com a cor nova; na Fase 2 (projeto-ponte), o site escrito do zero, os requisitos marcando sozinhos, o "Me faz uma pergunta" só perguntando, "Projeto pronto!", o projeto salvo, a volta pra ilha que acende inteira (borda e festa), Meus projetos (cartão pronto com miniatura, guia de publicação com passos e link validado e guardado, projeto reaberto como ficou) e o mundo marcando a ilha completa |
 | `documento.mjs` | o modo documento e o "Adicionar atributo" na Bancada do documento (`/lab/fases?fase=lab-motor-u1-f2`): árvore com `<!DOCTYPE html>`, raiz `<html>`, head e title (estilos do jogo escondidos), editor com a página inteira, aba com o `<title>` ao vivo, acentos quebrados sem meta charset (aviso, fala do computadorzinho, código certo), title editado pela árvore mudando a aba, meta charset pelo editor consertando tudo, atributo novo pelo botão direito (mais de um de uma vez, árvore e código, desfazer, Esc desiste) e pelo toque longo no celular |
 | `explorar.mjs [desktop\|retrato\|paisagem]` | trilhas (três cards, Web padrão, escolher Automação troca as ilhas do mundo e move o computadorzinho, ilha só nomeada, escolha salva), lente de tema no mundo (progresso contando as planejadas, ilhas acesas e apagadas, contagem por ilha) e na ilha (planejada acende, X apaga), temas no card da unidade, profissões (seis cards, lente com % do caminho), painel Insígnias, glossário (busca sem acento, fase trancada leva ao ponto da unidade com o card aberto, fase liberada direto, botão dentro da fase e Voltar) e a comemoração de marco de insígnia (uma vez só) |
+| `revisao-zonas.mjs [desktop\|retrato\|paisagem] [zona]` | a Revisão do dia com os itens de uma zona (`elementos`, `estilos`, `layout`, `responsivo` ou `publicar`; sem zona, todas): progresso semeado com as fases publicadas e os conceitos da zona vencidos, uma sessão por grupo de 5, cada item aberto direto no objetivo, sem estrelas, com o mini-site na prévia, percorrido pela previsão (a resposta errada e o Próximo) ou pelo "Não lembrei", o resumo com os conceitos da sessão e o console limpo. A solução de cada item já é do `testar:conteudo`; este confere que o item MONTA e roda no navegador, nos três layouts |
 | `retomar.mjs` | recarregar no meio do esbarrão: a página volta, o momento roda de novo e o Desfazer vale |
 | `migracao.mjs` | progresso da chave v1 migra para a v2 sem perder nada, entrando pelo mapa (computadorzinho em Sites, U1 com "Continuar", sem a meta de novo) |
 | `audio.mjs` | ajustes de som (padrões, mudar pelo mouse e pelo teclado, silenciar, salvos depois de recarregar), navegação mapa -> ilha -> fase -> ilha -> mapa -> museu com o AudioContext real (faixa certa em cada tela, `mapa` no mundo, sem reiniciar entre ilha e fase, silêncio em Frameworks, boot do arquivo no primeiro gesto, momentos grandes tocando os arquivos, console limpo), efeitos em 404 caindo no sintetizado, os controles no toque, em pé, **sem arquivo nenhum** (manifestos vazios e ausentes: silêncio, momentos grandes sintetizados, nenhum arquivo pedido, console limpo) e a **pré-carga** da próxima tela provável |
@@ -121,6 +122,21 @@ npm run bateria           # a bateria inteira (testes/todos.mjs), uma vez
 npm run bateria:repetir   # 5 rodadas seguidas (RODADAS=n muda), com resumo
 PARALELO=2 npm run bateria  # dois arquivos ao mesmo tempo (mais rápido; a saída de cada um sai inteira no fim)
 ```
+
+**Bateria de conteúdo (prompts só de conteúdo):**
+
+```bash
+npm run bateria:conteudo   # com o jogo no ar (npm run dev ou npm start)
+```
+
+`testes/conteudo-navegador.mjs` roda só o que depende do currículo e do
+conteúdo, no desktop e com `RESUMO=1`: `mapa.mjs`, `explorar.mjs` (lentes,
+trilhas, glossário), `publicar.mjs` (o fim da ilha) e `revisao.mjs`. Uma
+linha por arquivo (ok ou FALHOU, com o começo do erro). Serve para pegar
+o que um prompt de conteúdo quebra no currículo (rodada 13: mapa, lentes e
+fim da ilha quebraram sem ninguém ver) sem pagar a bateria completa. Ela
+não substitui `npm run bateria`, que continua sendo do fim dos prompts que
+mexem no motor. Se o jogo não estiver no ar, avisa e sai com código 2.
 
 Critério de estabilidade: `bateria:repetir` com 5 rodadas seguidas verdes
 no build de produção (`npm run build && npm start`).

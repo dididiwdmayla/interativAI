@@ -10,7 +10,7 @@ Antes de qualquer tarefa, leia `docs/PROJETO.md` (visão, regras, arquitetura),
 - Testes em camadas:
   - durante o trabalho: unitários, testar:conteudo e só o teste do que mudou, em um layout;
   - no fim de cada etapa ou unidade: o que mudou, nos três layouts;
-  - bateria completa: uma vez no fim do prompt, e só em prompts que mexem no motor; prompts só de conteúdo não rodam a bateria completa;
+  - bateria completa: uma vez no fim do prompt, e só em prompts que mexem no motor; prompts só de conteúdo não rodam a bateria completa, mas rodam `npm run bateria:conteudo` uma vez no fim;
   - depois de corrigir uma falha: rode só o teste que falhou e os que tocam o código alterado;
   - bateria:repetir só pra investigar instabilidade.
 - Saída de teste resumida (resumo e falhas). Não leia logs inteiros.

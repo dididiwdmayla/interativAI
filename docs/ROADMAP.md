@@ -266,12 +266,36 @@ núcleo comum.
   - Testes de navegador novos nos três layouts: `revisao.mjs`,
     `busca.mjs`, `campanha.mjs`, `ser-encontrado.mjs`.
 
+- **Rodada 15: itens de revisão de U3 a P2 e a `bateria:conteudo`**
+  (detalhe em `docs/PROGRESSO.md` e `docs/ATRITOS-FABRICA.md`, "Rodada 6",
+  um commit por zona):
+  - `npm run bateria:conteudo` (`testes/conteudo-navegador.mjs`): mapa,
+    explorar (lentes, trilhas, glossário), publicar (fim da ilha) e
+    revisão, só no desktop e resumida; roda uma vez no fim dos prompts só
+    de conteúdo (regra no `CLAUDE.md`).
+  - **Itens de revisão até a P2**: 87 conceitos, 174 itens (2 por
+    conceito, ação e previsão), em mini-sites próprios: Elementos (U3 a U6,
+    20 conceitos), Estilos (E1 a E5, 31), Layout (L1 a L4, 22) e
+    Responsivo e Publicar (R1, R2, P1 e P2, 14). Com os 40 dos modelos
+    (U1, U2 e S1), o registro tem 214 itens, com os ids congelados.
+  - `testes/revisao-zonas.mjs [layout] [zona]`: a sessão de revisão com o
+    progresso semeado por zona (uma sessão por grupo de 5 conceitos),
+    jogada nos três layouts.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
 
+- **Checagem de `correta` repetida (rodada 15):** nada acusa previsões
+  com a resposta certa sempre na mesma posição; os itens novos foram
+  girados na escrita. Uma checagem por unidade ou lote de itens
+  (mais da metade com o mesmo `correta`) fecharia a porta.
+- **Itens de revisão de `salvar-como-meu-tema` e `index-html`:** só
+  previsões (o Meu tema só existe na maquete do jogo; o `index.html` não
+  tem gesto próprio). Se `ItemRevisao` um dia aceitar o site do jogo,
+  ganham uma ação.
 - **Bateria completa (rodada 14):** três testes quebrados desde a rodada
   13 foram corrigidos: `publicar.mjs` (a P2 não apresenta mais o modo
   dispositivo e o Lighthouse), `layout.mjs` (o semeado de Elementos e
@@ -301,10 +325,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Sonnet: itens de revisão das unidades U3 a P2, mais S2 a S5 (dividir
-   em dois prompts se precisar), seguindo a seção 19 do guia e os
-   modelos da U1, U2 e S1; as unidades S2 a S5 seguem as seções 20 a 24
-   (o passo a passo das plataformas vai em
+1. Sonnet: unidades S2 a S5 da zona Ser encontrado (com os itens de
+   revisão de cada uma, seção 19 do guia), seguindo as seções 20 a 24 (o
+   passo a passo das plataformas vai em
    `src/conteudo/plataformas-marketing.ts`, conferido na época).
 2. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
    `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
