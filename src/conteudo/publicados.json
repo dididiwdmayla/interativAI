@@ -136,6 +136,12 @@
       "sites-ser-encontrado-u5-f2",
       "sites-ser-encontrado-u5-f3",
       "sites-ser-encontrado-u5-f4"
+    ],
+    "logica-primeiros-comandos-u1": [
+      "logica-primeiros-comandos-u1-f1",
+      "logica-primeiros-comandos-u1-f2",
+      "logica-primeiros-comandos-u1-f3",
+      "logica-primeiros-comandos-u1-f4"
     ]
   },
   "fases": {
@@ -775,6 +781,38 @@
         "melhorar-a-pagina",
         "a-conta-fecha"
       ]
+    },
+    "logica-primeiros-comandos-u1-f1": {
+      "objetivos": [
+        "primeira-conta",
+        "ordem-das-operacoes",
+        "conta-da-padaria",
+        "parenteses"
+      ]
+    },
+    "logica-primeiros-comandos-u1-f2": {
+      "objetivos": [
+        "primeira-caixinha",
+        "o-undefined",
+        "conta-com-caixinhas",
+        "trocar-a-quantidade"
+      ]
+    },
+    "logica-primeiros-comandos-u1-f3": {
+      "objetivos": [
+        "criar-const",
+        "ler-o-erro",
+        "nome-bom",
+        "encomenda"
+      ]
+    },
+    "logica-primeiros-comandos-u1-f4": {
+      "partes": [
+        "precos-em-const",
+        "total-da-compra",
+        "troco",
+        "dividir-entre-irmaos"
+      ]
     }
   },
   "itensRevisao": [
@@ -1035,6 +1073,22 @@
     "pagina-de-destino-1",
     "pagina-de-destino-2",
     "indice-de-qualidade-1",
-    "indice-de-qualidade-2"
+    "indice-de-qualidade-2",
+    "console-js-1",
+    "console-js-2",
+    "operacoes-aritmeticas-1",
+    "operacoes-aritmeticas-2",
+    "ordem-das-operacoes-1",
+    "ordem-das-operacoes-2",
+    "variavel-let-1",
+    "variavel-let-2",
+    "undefined-js-1",
+    "undefined-js-2",
+    "variavel-const-1",
+    "variavel-const-2",
+    "ler-mensagem-de-erro-1",
+    "ler-mensagem-de-erro-2",
+    "nome-de-variavel-1",
+    "nome-de-variavel-2"
   ]
 }

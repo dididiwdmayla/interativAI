@@ -498,6 +498,19 @@ resposta da última expressão, as saídas do console e o erro.
   Demonstração em `/lab/fases?fase=lab-logica-u1-f2` (a porta da padaria:
   E, a previsão, ver como código e o NÃO sozinho).
 
+### Unidade-modelo da Lógica (rodada 17)
+
+- `logica-primeiros-comandos-u1` "O Console calcula" (3 fases + desafio
+  Mercadinho do Seu Zé), em `src/conteudo/ilhas/logica/`. As 10 zonas da
+  Lógica deixaram de requerer motor; só as unidades da parte B (ordenar
+  passos, depurador, árvore, projeto-ponte) seguem com `requerMotor`.
+- A tela de meta de um desafio de programa mostra dois mini-palcos, antes
+  e depois (`memoriasDoDesafio` em `src/motor/simulacao.ts`, rodando o
+  preparo e as soluções no executor).
+- Itens de revisão com `programa` (`ItemRevisao.programa`) viram fases de
+  programa (Console e palco, sem mini-site); `conferirItens` roda a
+  solução no executor em vez de comparar mini-site.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
@@ -555,7 +568,10 @@ resposta da última expressão, as saídas do console e o erro.
   ilha -> mundo. Ids fora do currículo ou do conteúdo dão 404
   (`generateStaticParams` + `dynamicParams = false`).
 - `Jogo` recebe o id da rota; fase ainda trancada
-  (`src/lib/liberacao.ts`: abre quando a anterior foi concluída) mostra um
+  (`src/lib/liberacao.ts`: abre quando a anterior DA UNIDADE foi concluída;
+  a primeira fase de uma unidade abre quando o mapa abre a unidade, para a
+  primeira fase de uma ilha nova não depender de uma zona opcional que vem
+  antes na lista; mudança da rodada 17) mostra um
   aviso com o caminho de volta. A fase aberta vira `faseAtual` (o mapa põe
   o computadorzinho nela e o card diz "Continuar").
 - Dentro da fase, o botão "Mapa" (barra do desktop; no celular, à esquerda

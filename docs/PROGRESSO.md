@@ -98,3 +98,24 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
 - Demonstração `lab-logica-u1-f2` (modelo para o Sonnet).
 - Testes: `circuito.test.ts` (9: simulação, De Morgan, memória, código
   batendo com a tabela, sabotagens) e `testes/circuito.mjs` nos três layouts.
+
+### Etapa 6: unidade-modelo, guia, liberações e bateria
+
+- Unidade `logica-primeiros-comandos-u1` "O Console calcula": F1 contas no
+  Console (previsão da ordem das operações, parênteses), F2 `let` e o
+  `undefined` do Console (previsão), F3 `const`, ler o TypeError, nomes
+  bons e programa de três linhas com a linha do tempo, F4 desafio
+  Mercadinho do Seu Zé (contexto novo, 4 partes). 8 conceitos de volta ao
+  catálogo; 16 itens de revisão de programa (`ItemRevisao.programa`).
+- Meta de desafio de programa com mini-palcos antes e depois
+  (`memoriasDoDesafio`).
+- Currículo: as 10 zonas sem `requerMotor`; a Ilha Lógica abre com a Sites
+  completa. `faseLiberada`: a primeira fase de uma unidade segue o estado
+  da unidade no mapa (antes dependia da última fase global anterior, que
+  era da zona opcional S5 e trancava a Lógica).
+- Guia, seção 25 (executor, Console e Snippet, validadores de código com
+  `funcaoPassa`, ações, palco e linha do tempo, itens de revisão de
+  programa, circuito, a unidade-modelo). MAPA, PROJETO e ROADMAP.
+- Teste `testes/logica.mjs` (mundo, ilha, meta, apresentações, todos os
+  objetivos, recarga no meio da F2, linha do tempo, desafio, unidade
+  concluída) nos três layouts; entrou no `todos.mjs`.

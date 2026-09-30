@@ -34,7 +34,7 @@ import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 import { criarNucleoSincrono } from "./executor/fabrica";
-import type { OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
+import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 import * as bancada from "./circuito/modelo";
 
@@ -296,4 +296,21 @@ export function estadoFinalDoDesafio(fase: FaseDesafio): { body: string; css: st
     }
   }
   return { body: simulacao.htmlAtual(), css: simulacao.cssAtual() };
+}
+
+/**
+ * (Desafio de programa) A memória antes (depois do preparo) e depois das
+ * soluções de todas as partes: o palco da meta. Sem onde rodar, null.
+ */
+export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | null; depois: FotoMemoria | null } {
+  const simulacao = criarSimulacao(fase);
+  const antes = simulacao.programa().ultimaExecucao?.memoriaFinal ?? null;
+  for (const parte of fase.partes) {
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch {
+      // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+    }
+  }
+  return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
 }

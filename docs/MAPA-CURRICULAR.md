@@ -332,8 +332,10 @@ de cada expressão, `undefined` depois de declarações, histórico com a seta
 para cima, Shift+Enter para várias linhas, limpar), o Snippet (editor de
 programas maiores com Executar e Ctrl+Enter; no Chrome fica em Fontes >
 Snippets), o palco da memória, a linha do tempo e o tipo de fase
-`circuito-logico`. Validadores de código: `valorVariavel`, `saida`,
-`semErro`, `erroDoTipo`, `usouSintaxe` e `funcaoPassa` (guia, seção 25).
+`circuito-logico`. Validadores de código: `valorVariavel`,
+`respostaDoConsole`, `saida`, `semErro`, `erroDoTipo`, `usouSintaxe` e
+`funcaoPassa` (guia, seção 25). As zonas não requerem mais motor; só as
+unidades da parte B abaixo.
 
 **Ler erro desde o começo.** Todo erro aparece em vermelho com a mensagem
 original do navegador e, embaixo, a explicação em linguagem de leigo e a
@@ -370,7 +372,7 @@ fichas estão em `src/curriculo/motores.ts`.
 Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
 (`3 * 4.5 + 2 * 7`), guardar em uma variável e perguntar o `typeof` dela.
 
-#### U1. O Console calcula — `logica-primeiros-comandos-u1` (unidade-modelo)
+#### U1. O Console calcula (pronta) — `logica-primeiros-comandos-u1` (unidade-modelo)
 
 - **Meta:** usar o Console como calculadora e guardar os resultados em
   variáveis com nomes bons.

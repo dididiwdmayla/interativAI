@@ -781,6 +781,12 @@ export type ItemRevisao = {
   siteAlvo: { head?: string; body: string; css?: string; url?: string; titulo?: string };
   /** O jogador edita o documento inteiro (head e body), como numa fase com modoDocumento. */
   modoDocumento?: true;
+  /**
+   * Item de programa (Ilha Lógica): o Console e o palco no lugar do
+   * mini-site (use `siteAlvo: { body: "" }`). A situação diferente da fase
+   * vem do `preparo` e do enunciado.
+   */
+  programa?: BancadaPrograma;
   validador?: Validador;
   previsao?: Previsao;
   /** Só pergunta e dica: sem linha e sem solução (a revisão é "sozinho"). */

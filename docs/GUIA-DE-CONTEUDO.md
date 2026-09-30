@@ -43,6 +43,10 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
 22. Medição simulada
 23. Simulador de campanha
 24. Plataformas de marketing (arquivo com data)
+25. Programação: a Ilha Lógica (25.1 executor, 25.2 Console e Snippet,
+    25.3 validadores de código, 25.4 ações, 25.5 palco e linha do tempo,
+    25.6 itens de revisão de programa, 25.7 circuito lógico, 25.8 a
+    unidade-modelo)
 
 Arquivos que você vai usar:
 
@@ -1282,3 +1286,165 @@ Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`
   cita o caminho geral em falas e mostra o "conferido em <data>" (fala ou
   missão de campo). A regra `conferido-em-nas-fases` confere que a data da
   fase é a do arquivo; ao atualizar uma plataforma, troque a data nos dois.
+
+## 25. Programação: a Ilha Lógica
+
+Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
+`src/conteudo/ilhas/logica/primeiros-comandos/unidade-1/`). As bancadas
+`/lab/fases?fase=lab-logica-u1-f1` (Console, Snippet, palco) e
+`lab-logica-u1-f2` (circuito) mostram tudo ao vivo.
+
+### 25.1 O executor
+
+- O código do jogador roda em `src/motor/executor`, nunca no jogo: no
+  navegador, num Web Worker sem rede, sem timers e sem acesso à página;
+  nos testes, no `vm` do Node. O jogo só vê o resumo (respostas,
+  console.log, erro, memória passo a passo).
+- Limites: 100 mil passos e 1,5 s por execução. Laço infinito para com a
+  explicação "Loop que nunca termina?" e o jogo não trava.
+- Previsível de propósito: `Math.random` tem semente fixa e a data é
+  sempre 5 de janeiro de 2026, 15h (UTC). Escreva objetivos que não
+  dependam disso; se depender, confira o valor em
+  `testes/conteudo/executor.test.ts`.
+- O Console guarda a memória entre entradas, como o do Chrome: `let` e
+  `const` do topo continuam existindo, e redeclarar `let x` numa entrada
+  nova funciona (no Chrome também). Trocar uma `const` dá `TypeError:
+  Assignment to constant variable.`
+- Sem `setTimeout`, `fetch`, `async`/`await` de verdade nesta parte: ficam
+  para a Ilha Rede e Servidor (Pendências no ROADMAP).
+- As respostas seguem o formato do Chrome: textos com aspas simples
+  (`'oi'`), listas como `(3) [1, 2, 3]`, objetos como `{nome: 'Ana'}`,
+  função como `ƒ soma(a, b)`. Os erros usam o nome e a mensagem do V8
+  (Chrome); `src/motor/executor/erros.ts` explica cada um em PT-BR.
+
+### 25.2 Console e Snippet (a fase de programa)
+
+- Uma fase é de programa quando tem o campo `programa` (`BancadaPrograma`)
+  e `siteAlvo: SITE_DO_PROGRAMA` (`src/motor/programa.ts`): não há página,
+  a tela é o palco da memória. `usaFerramentas` precisa de `"console"` e
+  `"palco-memoria"`; `"linha-do-tempo"` e `"snippet"` quando a fase usar.
+- `programa.snippet` (`codigoInicial`, `nome`) põe o editor de Fontes >
+  Snippets com Executar, para programas de várias linhas. Sem ele, o
+  jogador escreve várias linhas no Console com Shift+Enter (no toque, o
+  botão de nova linha da barra de símbolos).
+- `programa.preparo`: código que roda escondido quando a fase abre, para a
+  memória já começar com algo (a lista do desafio, por exemplo).
+- A linha de ajuda aponta `{ alvo: "console", fala }` ou
+  `{ alvo: "snippet", linhas: [1, 2], fala }` (linhas do Snippet começam
+  em 1). A regra `fase-de-programa` recusa `arvore`, `editor`, `css`,
+  `estilos` e `circuito` aqui, e qualquer validador com `seletor`.
+- A memória, as entradas do Console e o Snippet ficam salvos no progresso
+  (o jogador recarrega e as caixinhas voltam).
+
+### 25.3 Validadores de código
+
+Só em fase com `programa` (a regra `fase-de-programa` confere). Os que
+"travam no checklist" contam desde que o objetivo começou; os outros
+olham a memória de agora.
+
+| Validador | Passa quando | Use para |
+| --- | --- | --- |
+| `valorVariavel` (`nome`, `valor`) | a variável global vale isso agora (número com tolerância; lista e objeto comparados por valor) | criar e trocar caixinhas |
+| `respostaDoConsole` (`valor`) | alguma entrada do Console respondeu isso (trava) | contas no Console, sem variável |
+| `saida` (`contem` ou `igual`) | o console.log mostrou esse trecho, ou exatamente essas linhas numa execução (trava) | console.log, laços que imprimem |
+| `semErro` | rodou algo e a última execução não deu erro (trava) | "agora roda" depois de consertar |
+| `erroDoTipo` (`nome`) | alguma execução deu esse erro, como `"TypeError"` (trava) | fases que ensinam a LER o erro |
+| `usouSintaxe` (`sintaxe`) | o código rodado usa essa sintaxe, lida da árvore (trava) | exigir `let`, `if`, `for`, `return`... |
+| `funcaoPassa` (`nome`, `casos`) | a função global, chamada com os `args` de cada caso, devolve o `esperado` | TODA fase de função |
+
+- **`funcaoPassa` é o jeito de validar função.** Ele chama a função do
+  jogador com cada caso e compara o que ela DEVOLVE (`return`). Função que
+  só faz `console.log` não passa, e isso é de propósito: é a confusão
+  número um de quem começa. O detalhe (no /lab e no tutor) diz o caso que
+  falhou: `dobro(2) devolveu undefined, esperado 4`. Dê pelo menos 2
+  casos, um deles de borda (zero, lista vazia, texto vazio), para que
+  "devolver sempre o mesmo número" não passe. Os casos rodam de novo a
+  cada execução, com cópias dos argumentos (a função não estraga o caso
+  seguinte).
+- `respostaDoConsole` é a resposta do Console (a linha depois da entrada,
+  como `14` para `2 + 3 * 4`), não o console.log. Previsão "o que o
+  Console responde se...?" combina com ele.
+- `usouSintaxe` sozinho não prova nada; combine com um validador de
+  resultado (`todos`). Exemplo: `valorVariavel` + `usouSintaxe: "let"`.
+- Para o erro: `erroDoTipo` no objetivo que faz o erro acontecer, e a fala
+  ao concluir explica a mensagem (a primeira palavra diz o tipo, o resto
+  diz o motivo).
+
+### 25.4 Ações de programa
+
+- `executarNoConsole` (`codigo`): escreve e roda no Console, como Enter.
+  Várias linhas com `\n`.
+- `definirSnippet` (`codigo`) e `executarSnippet`: trocam o texto do
+  Snippet e o rodam (só com `programa.snippet`).
+- A `solucao` do "Me mostra" e a `solucaoDeTeste` usam essas ações. A
+  checagem "objetivo não nasce resolvido" roda o executor de verdade, em
+  sequência, fase por fase.
+
+### 25.5 Palco da memória e linha do tempo
+
+- O palco (`src/motor/palco.ts`) é a tela da fase: cada variável é uma
+  caixinha com o nome, `let` ou `const`, o tipo (número, texto,
+  booleano...) e o valor. Lista e objeto aparecem desenhados; quando
+  outra variável aponta a MESMA lista, ela vira uma seta até lá (é assim
+  que o jogo ensina referência). Cada chamada de função abre um quadro
+  próprio, que some quando ela devolve.
+- A linha do tempo (`"linha-do-tempo"`) deixa voltar e avançar a última
+  execução passo a passo. Cada passo mostra a memória ANTES da linha
+  marcada rodar, como o depurador do Chrome pausado nela. Com três linhas
+  (`let total = 0`, `total = total + 18`, `total = total + 5`), um passo
+  para trás a partir do fim mostra `total` em 18.
+- Apresente o palco na primeira fase de programa e a linha do tempo na
+  primeira fase com um programa de várias linhas (campo `apresentar`).
+- A tela de meta de um desafio de programa mostra dois mini-palcos, antes
+  e depois (`memoriasDoDesafio` em `src/motor/simulacao.ts`, com o
+  `preparo` e as soluções do desafio).
+
+### 25.6 Itens de revisão de programa
+
+- Um item de revisão (seção 19) com `programa: {}` (ou com `preparo`)
+  vira uma fase de programa: `siteAlvo` sem página (`body: ""`),
+  ferramentas `console` e `palco-memoria`. A checagem de itens não compara
+  mini-site nesses; roda a solução no executor e confere que passa.
+- Modelo: `src/conteudo/revisao/variavel-let.ts`.
+
+### 25.7 Circuito lógico
+
+- Tipo de fase `circuito-logico` (`FaseCircuitoLogico`): objetivos como
+  numa prática, `siteAlvo: SITE_DO_PROGRAMA`, e `circuito`
+  (`DadosCircuito`: `inicial` com as peças e os fios que a fase traz, e
+  `paleta` com os portões que o jogador pode puxar: `"e"`, `"ou"`,
+  `"nao"`, e o extra `"xou"`). O modelo mora em
+  `src/motor/circuito/modelo.ts` e não depende da tela.
+- Entradas e saídas têm `nome` de variável JavaScript (`temCliente`):
+  "Ver como código" mostra o circuito com `&&`, `||` e `!` usando esses
+  nomes, e a tabela verdade ao lado usa os mesmos.
+- Validadores (só nesse tipo): `circuitoTabela` (`esperado`: linhas com
+  `entradas` e `saida`; o validador simula todas as combinações, então
+  ligar e desligar as entradas à mão não conta) e `usouPortao` (`portao`,
+  `minimo`). Ações: `adicionarPortao` (`portao`, `id`, `x`, `y`),
+  `ligarFio` (`de`, `para`, `porta`), `alternarEntrada`, `apagarPeca`,
+  `verComoCodigo`. A linha de ajuda aponta `{ alvo: "circuito", peca,
+  fala }`.
+- No toque: toque a porta de saída de uma peça e depois o corpo da peça
+  de destino (o fio vai para a entrada livre mais perto). No mouse,
+  arrastar da saída até a entrada.
+- Ferramentas: `"circuito"` e `"tabela-verdade"`. Primeira unidade que usa:
+  `logica-decisoes-u2` (portões lógicos, logo depois do if).
+
+### 25.8 A unidade-modelo
+
+`logica-primeiros-comandos-u1` segue o formato de sempre (meta, guiado e
+sozinho, previsões, desafio em contexto novo, itens de revisão), com o
+Console no lugar do painel Elementos:
+
+- Fase 1: contas no Console (`respostaDoConsole`), previsão da ordem das
+  operações, parênteses.
+- Fase 2: `let` e o `undefined` que o Console responde depois dela
+  (previsão), caixinhas no palco (`valorVariavel` + `usouSintaxe`).
+- Fase 3: `const` e o TypeError de trocá-la (`erroDoTipo`), nomes bons,
+  programa de três linhas com a linha do tempo.
+- Fase 4 (desafio): o Mercadinho do Seu Zé, contexto novo, 4 partes com
+  `valorVariavel` e `respostaDoConsole`.
+- Teste de navegador: `testes/logica.mjs` (a jornada pelo mapa, com
+  recarga no meio da fase 2).
+

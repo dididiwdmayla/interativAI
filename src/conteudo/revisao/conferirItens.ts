@@ -46,6 +46,11 @@ export function conferirItensDeRevisao(itens: readonly ItemRevisao[], fases: rea
     if ("linha" in ajudas || "solucao" in ajudas) {
       problemas.push(`${onde}: a revisão é sozinho, então as ajudas são só pergunta e dica (sem linha e sem solução)`);
     }
+    if (item.programa) {
+      // Item de programa: não há mini-site; a situação nova vem do preparo e do enunciado.
+      if (item.siteAlvo.body.trim()) problemas.push(`${onde}: item de programa usa siteAlvo: { body: "" } (a tela é o palco)`);
+      continue;
+    }
     const mesmoCorpo = corpos.get(normalizar(item.siteAlvo.body));
     if (mesmoCorpo) problemas.push(`${onde}: o mini-site é igual ao da fase "${mesmoCorpo}"; use uma situação diferente`);
     const mesmaUrl = item.siteAlvo.url ? urls.get(item.siteAlvo.url) : undefined;

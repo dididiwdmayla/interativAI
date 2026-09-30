@@ -9,7 +9,6 @@
  */
 import type { IlhaCurriculo } from "./tipos";
 
-const MOTOR_LOGICA = "Console interativo, execução de JS isolada e palco da memória (motor da Lógica, parte A)";
 /** Parte B do motor da Lógica (planejados em src/curriculo/motores.ts). */
 const MOTOR_ORDENAR_PASSOS = "atividade ordenar-passos (arrastar os passos de um programa para a ordem certa)";
 const MOTOR_DEPURADOR = "depurador-fontes: aba Fontes com depurador (pontos de parada, passo a passo e variáveis observadas)";
@@ -272,6 +271,7 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
   {
     id: "logica",
     nome: "Lógica",
+    // Motor da parte A pronto (rodada 17): as zonas não pedem mais motor; só as unidades da parte B.
     // Ordem das zonas (docs/MAPA-CURRICULAR.md, "Ilha 2: Lógica", explica cada troca):
     // as ferramentas da linguagem primeiro, depois resolver problemas com elas,
     // o depurador antes dos algoritmos e as estruturas por último.
@@ -280,7 +280,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "primeiros-comandos",
         nome: "Primeiros comandos",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-primeiros-comandos-u1",
@@ -306,7 +305,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "decisoes",
         nome: "Decisões",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-decisoes-u1",
@@ -338,7 +336,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "repeticao",
         nome: "Repetição",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-repeticao-u1",
@@ -364,7 +361,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "funcoes",
         nome: "Funções",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-funcoes-u1",
@@ -396,7 +392,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "listas-e-objetos",
         nome: "Listas e objetos",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-listas-e-objetos-u1",
@@ -428,7 +423,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "resolvendo-problemas",
         nome: "Resolvendo problemas",
         icone: "fontes",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-resolvendo-problemas-u1",
@@ -463,7 +457,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "depuracao",
         nome: "Depuração",
         icone: "fontes",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-depuracao-u1",
@@ -491,7 +484,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "algoritmos-essenciais",
         nome: "Algoritmos essenciais",
         icone: "console",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-algoritmos-essenciais-u1",
@@ -523,7 +515,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "estruturas-de-dados",
         nome: "Estruturas de dados",
         icone: "aplicacao",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-estruturas-de-dados-u1",
@@ -550,7 +541,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "programa-de-verdade",
         nome: "Programa de verdade",
         icone: "fontes",
-        requerMotor: MOTOR_LOGICA,
         unidades: [
           {
             id: "logica-programa-de-verdade-u1",

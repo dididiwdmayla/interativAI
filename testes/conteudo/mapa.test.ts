@@ -53,12 +53,12 @@ const LOGICA_FALSA: Unidade = {
 };
 
 describe("ilhas", () => {
-  it("do zero: Sites aberta, as sem unidade pronta em construção (Origens inclusive)", () => {
+  it("do zero: Sites aberta, Lógica trancada (tem unidade pronta), as sem unidade pronta em construção (Origens inclusive)", () => {
     const fonte = { progresso: PROGRESSO_PADRAO };
     expect(CURRICULO.map((item) => [item.id, estadoDaIlha(item, fonte)])).toEqual([
       ["origens", "construcao"],
       ["sites", "disponivel"],
-      ["logica", "construcao"],
+      ["logica", "bloqueada"],
       ["paginas-vivas", "construcao"],
       ["rede-servidor", "construcao"],
       ["ia", "construcao"],
