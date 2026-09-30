@@ -38,6 +38,9 @@ export const IDS_FERRAMENTAS = [
   // Zona Publicar: auditoria
   "lighthouse",
   "levar-pro-mundo",
+  // Zona Ser encontrado (opcional): a aba Busca
+  "resultado-busca",
+  "dados-estruturados",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

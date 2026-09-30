@@ -11,6 +11,7 @@ import { estaEscondido } from "@/lib/esconder";
 import { calcularCascata, folhasDoDocumento, leitorDeValores, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
 import type { Tela } from "./css/midia";
 import { auditar } from "./auditoria";
+import { conferirDadosEstruturados, motivoNoindex, resultadoNaBusca } from "./busca";
 import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
@@ -154,6 +155,14 @@ export function descreverValidador(validador: Validador): string {
       return `modo dispositivo ligado${validador.largura !== undefined ? ` com ${validador.largura} px de largura` : ""}${
         validador.orientacao ? ` (${validador.orientacao === "retrato" ? "em pé" : "deitado"})` : ""
       }`;
+    case "resultadoBusca":
+      return `${validador.campo === "titulo" ? "o título" : "a descrição"} na busca vem da página${
+        validador.contem !== undefined ? ` e tem "${validador.contem}"` : ""
+      }${validador.semCorte ? ", sem corte" : ""}`;
+    case "indexavel":
+      return validador.valor ? "a página pode aparecer na busca" : "a página está fora da busca (noindex)";
+    case "dadosEstruturados":
+      return `dados estruturados ${validador.tipoSchema}${validador.campos.length > 0 ? ` com ${validador.campos.join(", ")}` : ""}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -337,6 +346,25 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
             ? "não se aplica nesta página"
             : "nenhum problema",
       };
+    }
+    case "resultadoBusca": {
+      const resultado = resultadoNaBusca(contexto.documento, "");
+      const campo = validador.campo === "titulo" ? resultado.titulo : resultado.descricao;
+      if (campo.declarado === null) {
+        return { passou: false, descricao, detalhe: validador.campo === "titulo" ? "a página não tem <title>" : "a página não tem meta description" };
+      }
+      const temTrecho =
+        validador.contem === undefined || normalizarTexto(campo.declarado).toLowerCase().includes(normalizarTexto(validador.contem).toLowerCase());
+      const passou = temTrecho && !(validador.semCorte && campo.cortou);
+      return { passou, descricao, detalhe: `"${campo.declarado}"${campo.cortou ? " (cortado na busca)" : ""}` };
+    }
+    case "indexavel": {
+      const motivo = motivoNoindex(contexto.documento);
+      return { passou: (motivo === null) === validador.valor, descricao, detalhe: motivo ?? "sem noindex" };
+    }
+    case "dadosEstruturados": {
+      const { passou, detalhe } = conferirDadosEstruturados(contexto.documento, validador.tipoSchema, validador.campos);
+      return { passou, descricao, detalhe };
     }
     case "dispositivo": {
       const estado = contexto.dispositivo ?? null;

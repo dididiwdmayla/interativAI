@@ -835,6 +835,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if ((item.tipo === "notaAuditoria" || item.tipo === "semProblema") && !fase.usaFerramentas.includes("lighthouse")) {
             problemas.push(`${onde}: o validador ${item.tipo} pede "lighthouse" em usaFerramentas (o jogador precisa da aba para ver as notas)`);
           }
+          if ((item.tipo === "resultadoBusca" || item.tipo === "indexavel") && !fase.usaFerramentas.includes("resultado-busca")) {
+            problemas.push(`${onde}: o validador ${item.tipo} pede "resultado-busca" em usaFerramentas (o jogador precisa ver o resultado)`);
+          }
+          if (item.tipo === "dadosEstruturados" && !fase.usaFerramentas.includes("dados-estruturados")) {
+            problemas.push(`${onde}: o validador dadosEstruturados pede "dados-estruturados" em usaFerramentas`);
+          }
           if (item.tipo === "notaAuditoria" && (item.minimo < 0 || item.minimo > 100)) {
             problemas.push(`${onde}: notaAuditoria com minimo ${item.minimo} (vai de 0 a 100)`);
           }

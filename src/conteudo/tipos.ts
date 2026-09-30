@@ -168,6 +168,26 @@ export type Validador =
    * simplificação honesta: não mede o texto nem as margens.
    */
   | { tipo: "cabeNaTela"; largura: number }
+  /*
+   * Busca simulada (zona "Ser encontrado"): src/motor/busca.ts. Olham o
+   * documento de agora; pedem a ferramenta do painel em usaFerramentas.
+   */
+  /**
+   * (Resultado na busca) O título (o <title>) ou a descrição (a meta
+   * description) DECLARADOS pela página: sem eles, não passa (o que a busca
+   * inventa não conta). `contem` confere um trecho (sem diferenciar
+   * maiúsculas); `semCorte: true` pede que caibam sem "..." no computador.
+   */
+  | { tipo: "resultadoBusca"; campo: "titulo" | "descricao"; contem?: string; semCorte?: boolean }
+  /** (Resultado na busca) A página pode (true) ou não (false, noindex) aparecer na busca. */
+  | { tipo: "indexavel"; valor: boolean }
+  /**
+   * (Teste de dados estruturados) Algum <script type="application/ld+json">
+   * válido tem um item com o @type `tipoSchema` ("LocalBusiness" aceita os
+   * subtipos conhecidos, como Bakery) e todos os `campos` preenchidos
+   * (caminhos com ponto valem: "address.streetAddress").
+   */
+  | { tipo: "dadosEstruturados"; tipoSchema: string; campos: string[] }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }

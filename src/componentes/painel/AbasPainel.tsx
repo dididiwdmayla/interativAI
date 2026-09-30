@@ -16,6 +16,8 @@ export function AbasPainel({ ativa, desbloqueadas, aoTrocar }: Props) {
     <div role="tablist" aria-label="Painéis do DevTools" className="flex min-w-0 items-end gap-0.5 overflow-x-auto">
       {ABAS.map((aba) => {
         const livre = desbloqueadas.includes(aba.id);
+        // Abas que não são do Chrome (Busca, Medição) só aparecem nas fases que as usam.
+        if (aba.soQuandoLivre && !livre) return null;
         const selecionada = ativa === aba.id;
         const botao = (
           <button

@@ -81,6 +81,7 @@ import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
 import { materializarFase } from "@/motor/siteDoJogo";
 import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditoria } from "@/motor/auditoria";
 import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
+import { PainelBusca, type SubAbaBusca } from "@/componentes/painel/busca/PainelBusca";
 import {
   DISPOSITIVO_INICIAL,
   type EstadoDispositivo,
@@ -171,9 +172,16 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
   adicionouRegra: "duplicar",
 };
 
-/** Elementos abre sempre; a aba Lighthouse, nas fases com a ferramenta. */
-const ABAS_DESBLOQUEADAS: readonly Aba[] = ["elementos"];
-const ABAS_COM_LIGHTHOUSE: readonly Aba[] = ["elementos", "lighthouse"];
+/** Ferramentas da aba Busca (zona Ser encontrado). */
+const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados-estruturados"];
+
+/** Elementos abre sempre; Lighthouse e Busca, nas fases com as ferramentas delas. */
+function abasDaFase(fase: Fase): Aba[] {
+  const abas: Aba[] = ["elementos"];
+  if (fase.usaFerramentas.includes("lighthouse")) abas.push("lighthouse");
+  if (FERRAMENTAS_DA_BUSCA.some((id) => fase.usaFerramentas.includes(id))) abas.push("busca");
+  return abas;
+}
 
 /** CSS para abrir a fase (null sem folha editável): o salvo, ou o de antes do momento roteirizado. */
 function cssParaAbrir(fase: Fase, salvo: EstadoFaseSalvo | undefined, projeto: ProjetoSalvo | undefined): string | null {
@@ -516,6 +524,10 @@ export function JogoFase({
 
   // Aba Lighthouse (auditoria simplificada): só nas fases com a ferramenta.
   const comLighthouse = fase.usaFerramentas.includes("lighthouse");
+  // Aba Busca (resultado na busca e dados estruturados): só nas fases com as ferramentas.
+  const ferramentasBusca = useMemo(() => FERRAMENTAS_DA_BUSCA.filter((id) => fase.usaFerramentas.includes(id)), [fase]);
+  const [subAbaBusca, setSubAbaBusca] = useState<SubAbaBusca>("resultado");
+  const abasLivres = useMemo(() => abasDaFase(fase), [fase]);
   const [auditoria, setAuditoria] = useState<{ resultado: ResultadoAuditoria; versao: string } | null>(null);
   const telaDaAuditoria = useRef<Tela | undefined>(undefined);
   const versaoDaPaginaAtual = useRef("");
@@ -818,8 +830,11 @@ export function JogoFase({
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
-    // A aba Lighthouse para a ferramenta dela; Elementos para as outras (o alvo precisa estar à vista).
-    setAba(ferramenta.id === "lighthouse" ? "lighthouse" : "elementos");
+    // A aba Lighthouse (ou Busca) para as ferramentas dela; Elementos para as outras (o alvo precisa estar à vista).
+    const naBusca = FERRAMENTAS_DA_BUSCA.includes(ferramenta.id);
+    setAba(ferramenta.id === "lighthouse" ? "lighthouse" : naBusca ? "busca" : "elementos");
+    if (ferramenta.id === "resultado-busca") setSubAbaBusca("resultado");
+    if (ferramenta.id === "dados-estruturados") setSubAbaBusca("dados");
     // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
     if (ferramenta.id === "girar-dispositivo" && !dispositivoAtual.current.ligado) {
       const ligado = { ...dispositivoAtual.current, ligado: true };
@@ -1401,7 +1416,7 @@ export function JogoFase({
           >
             <Painel
               abaAtiva={aba}
-              abasDesbloqueadas={comLighthouse ? ABAS_COM_LIGHTHOUSE : ABAS_DESBLOQUEADAS}
+              abasDesbloqueadas={abasLivres}
               aoTrocarAba={trocarAba}
               ferramentas={
                 <>
@@ -1455,6 +1470,22 @@ export function JogoFase({
                 </>
               }
             >
+              {ferramentasBusca.length > 0 && (
+                <div className={aba === "busca" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelBusca
+                    obterDocumento={obterDocumento}
+                    versao={versaoDaPagina}
+                    url={fase.siteAlvo.url}
+                    aba={subAbaBusca}
+                    aoTrocarAba={(nova) => {
+                      tocarEfeito("clique");
+                      setSubAbaBusca(nova);
+                    }}
+                    ferramentas={ferramentasBusca}
+                    aoAbrirCard={abrirCard}
+                  />
+                </div>
+              )}
               {comLighthouse && (
                 <div className={aba === "lighthouse" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
                   <AlvoFerramenta ids={["lighthouse"]} marcador="lighthouse" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">

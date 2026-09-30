@@ -26,6 +26,8 @@ import { IconeDispositivo } from "@/componentes/icones/IconeDispositivo";
 import { IconeGirar } from "@/componentes/icones/IconeGirar";
 import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
 import { IconeLighthouse } from "@/componentes/icones/IconeLighthouse";
+import { IconeDadosEstruturados } from "@/componentes/icones/IconeDadosEstruturados";
+import { IconeResultadoBusca } from "@/componentes/icones/IconeResultadoBusca";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
@@ -697,6 +699,48 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     },
     uso: "sinal",
     lugar: { rotulo: "Abrir Meus projetos", href: ROTA_PROJETOS },
+  },
+  // Busca simulada (zona Ser encontrado): não é do Chrome. O painel imita o
+  // resultado do Google e diz que é uma simulação aproximada.
+  "resultado-busca": {
+    id: "resultado-busca",
+    nome: "Resultado na busca",
+    Icone: IconeResultadoBusca,
+    alvo: seletorFerramenta("resultado-busca"),
+    oQueFaz: "Mostra, ao vivo, como esta página apareceria num resultado de busca: título, endereço e descrição.",
+    praQueServe:
+      "Serve para ver o que a pessoa lê ANTES de entrar no site. Um título cortado ou uma descrição vazia fazem ela escolher outro resultado.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Busca, lá em cima no painel. Mexa no title ou na meta description e veja o resultado mudar na hora.",
+      toque: "Abra a aba Busca, lá em cima no painel. Mexa no title ou na meta description e veja o resultado mudar na hora.",
+    },
+    noF12DeVerdade:
+      "não existe: o resultado de verdade só aparece no Google depois que ele visita a página. Para conferir, busque site:seu-endereco no Google, ou use o Search Console.",
+    experimente: {
+      mouse: "Clique no resultado simulado.",
+      toque: "Toque no resultado simulado.",
+    },
+    uso: "tocar",
+  },
+  "dados-estruturados": {
+    id: "dados-estruturados",
+    nome: "Teste de dados estruturados",
+    Icone: IconeDadosEstruturados,
+    alvo: seletorFerramenta("dados-estruturados"),
+    oQueFaz: "Lê os blocos de dados estruturados (JSON-LD) da página e aponta JSON quebrado e campos que faltam.",
+    praQueServe:
+      "Dados estruturados contam para a busca, num formato que ela entende, quem é o negócio: nome, endereço, horário. Um erro de vírgula faz a busca ignorar tudo.",
+    comoUsarAqui: {
+      mouse: "Na aba Busca, clique em Dados estruturados. Cada bloco mostra o tipo, o que falta e a linha do erro, se houver.",
+      toque: "Na aba Busca, toque em Dados estruturados. Cada bloco mostra o tipo, o que falta e a linha do erro, se houver.",
+    },
+    noF12DeVerdade:
+      "fica fora do F12: é o Teste de pesquisa aprimorada do Google (search.google.com/test/rich-results), que confere a página publicada. Este é uma versão simplificada.",
+    experimente: {
+      mouse: "Clique na lista de blocos.",
+      toque: "Toque na lista de blocos.",
+    },
+    uso: "tocar",
   },
 };
 
