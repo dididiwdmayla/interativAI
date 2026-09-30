@@ -76,6 +76,28 @@ import { ITENS_VARIAVEL_CSS } from "./variavel-css";
 import { ITENS_ESCOPO_DE_VARIAVEL } from "./escopo-de-variavel";
 import { ITENS_CONTRASTE_DE_COR } from "./contraste-de-cor";
 import { ITENS_SALVAR_COMO_MEU_TEMA } from "./salvar-como-meu-tema";
+import { ITENS_DISPLAY_CSS } from "./display-css";
+import { ITENS_DISPLAY_BLOCK } from "./display-block";
+import { ITENS_DISPLAY_INLINE } from "./display-inline";
+import { ITENS_DISPLAY_INLINE_BLOCK } from "./display-inline-block";
+import { ITENS_DISPLAY_NONE } from "./display-none";
+import { ITENS_FLEXBOX } from "./flexbox";
+import { ITENS_FLEX_DIRECTION } from "./flex-direction";
+import { ITENS_JUSTIFY_CONTENT } from "./justify-content";
+import { ITENS_ALIGN_ITEMS } from "./align-items";
+import { ITENS_GAP_CSS } from "./gap-css";
+import { ITENS_FLEX_WRAP } from "./flex-wrap";
+import { ITENS_CSS_GRID } from "./css-grid";
+import { ITENS_GRID_TEMPLATE_COLUMNS } from "./grid-template-columns";
+import { ITENS_FR_DO_GRID } from "./fr-do-grid";
+import { ITENS_GRID_TEMPLATE_ROWS } from "./grid-template-rows";
+import { ITENS_GRID_TEMPLATE_AREAS } from "./grid-template-areas";
+import { ITENS_POSITION_CSS } from "./position-css";
+import { ITENS_POSITION_RELATIVE } from "./position-relative";
+import { ITENS_POSITION_ABSOLUTE } from "./position-absolute";
+import { ITENS_POSITION_FIXED } from "./position-fixed";
+import { ITENS_POSITION_STICKY } from "./position-sticky";
+import { ITENS_Z_INDEX_CSS } from "./z-index-css";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -155,6 +177,29 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_ESCOPO_DE_VARIAVEL,
   ...ITENS_CONTRASTE_DE_COR,
   ...ITENS_SALVAR_COMO_MEU_TEMA,
+  // L1 a L4 (zona Layout)
+  ...ITENS_DISPLAY_CSS,
+  ...ITENS_DISPLAY_BLOCK,
+  ...ITENS_DISPLAY_INLINE,
+  ...ITENS_DISPLAY_INLINE_BLOCK,
+  ...ITENS_DISPLAY_NONE,
+  ...ITENS_FLEXBOX,
+  ...ITENS_FLEX_DIRECTION,
+  ...ITENS_JUSTIFY_CONTENT,
+  ...ITENS_ALIGN_ITEMS,
+  ...ITENS_GAP_CSS,
+  ...ITENS_FLEX_WRAP,
+  ...ITENS_CSS_GRID,
+  ...ITENS_GRID_TEMPLATE_COLUMNS,
+  ...ITENS_FR_DO_GRID,
+  ...ITENS_GRID_TEMPLATE_ROWS,
+  ...ITENS_GRID_TEMPLATE_AREAS,
+  ...ITENS_POSITION_CSS,
+  ...ITENS_POSITION_RELATIVE,
+  ...ITENS_POSITION_ABSOLUTE,
+  ...ITENS_POSITION_FIXED,
+  ...ITENS_POSITION_STICKY,
+  ...ITENS_Z_INDEX_CSS,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
