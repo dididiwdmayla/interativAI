@@ -1,5 +1,6 @@
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
+import { type EstadoRevisao, lerEstadoRevisao, REVISAO_PADRAO } from "@/lib/estadoRevisao";
 import { ehTemaId, TEMA_PADRAO, TEMAS_INICIAIS, type TemaId } from "@/tema/temas";
 
 export const CHAVE_PROGRESSO = "ilha-sites:progresso:v2";
@@ -82,6 +83,12 @@ export type Progresso = {
   projetos: Record<string, ProjetoSalvo>;
   /** Mapa: ilhas cuja conclusão (todas as unidades publicadas) já foi comemorada. */
   ilhasComemoradas: string[];
+  /**
+   * Revisão do dia: o agendamento por conceito e a sequência de dias
+   * (src/lib/revisao.ts). Progresso antigo nasce vazio e os conceitos das
+   * fases já concluídas entram na fila na primeira visita ao mapa.
+   */
+  revisao: EstadoRevisao;
 };
 
 /**
@@ -138,6 +145,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   meuTema: null,
   projetos: {},
   ilhasComemoradas: [],
+  revisao: REVISAO_PADRAO,
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -276,6 +284,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     meuTema,
     projetos: lerRegistro(bruto.projetos, lerProjeto),
     ilhasComemoradas: [...new Set(listaDeTextos(bruto.ilhasComemoradas))],
+    revisao: lerEstadoRevisao(bruto.revisao),
   };
 }
 

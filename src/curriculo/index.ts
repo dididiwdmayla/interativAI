@@ -70,6 +70,16 @@ export function unidadesDaIlha(ilha: IlhaCurriculo): UnidadeCurriculo[] {
   return ilha.zonas.flatMap((zona) => zona.unidades);
 }
 
+/** Zonas que contam para concluir a ilha (sem as opcionais). */
+export function zonasObrigatorias(ilha: IlhaCurriculo): ZonaCurriculo[] {
+  return ilha.zonas.filter((zona) => !zona.opcional);
+}
+
+/** Unidades que contam para concluir a ilha (as das zonas obrigatórias). */
+export function unidadesObrigatoriasDaIlha(ilha: IlhaCurriculo): UnidadeCurriculo[] {
+  return zonasObrigatorias(ilha).flatMap((zona) => zona.unidades);
+}
+
 /** Unidades prontas de uma ilha (as que têm conteúdo). */
 export function unidadesProntasDaIlha(ilha: IlhaCurriculo, unidades: readonly Unidade[] = UNIDADES): UnidadeCurriculo[] {
   return unidadesDaIlha(ilha).filter((unidade) => statusDaUnidade(unidade.id, unidades) === "pronta");

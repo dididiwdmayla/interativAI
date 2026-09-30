@@ -39,6 +39,8 @@ export function unidadesDaIlha(id) {
 }
 
 export const prontasDaIlha = (id) => unidadesDaIlha(id).filter((unidade) => ehPronta(unidade.id));
+/** As prontas das zonas que contam para concluir a ilha (sem as opcionais, como "Ser encontrado"). */
+export const obrigatoriasProntasDaIlha = (id) => prontasDaIlha(id).filter((unidade) => !unidade.zona.opcional);
 export const planejadasDaIlha = (id) => unidadesDaIlha(id).filter((unidade) => !ehPronta(unidade.id));
 
 /** A primeira unidade planejada com o tema, procurando nas ilhas dadas, na ordem. */

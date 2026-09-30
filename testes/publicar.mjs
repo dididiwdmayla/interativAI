@@ -27,7 +27,8 @@ const P2 = "sites-publicar-u2";
 // O jogador acabou tudo o que a ilha tem antes da P2 e já viu as ferramentas de antes.
 const antes = prontasDaIlha("sites").filter((unidade) => unidade.id !== P2).map((unidade) => unidade.id);
 const IDS_FERRAMENTAS = [...readFileSync(new URL("../src/ferramentas/ids.ts", import.meta.url), "utf8").matchAll(/^ {2}"([a-z-]+)",$/gm)].map((m) => m[1]);
-const NOVAS = ["modo-dispositivo", "lighthouse", "levar-pro-mundo"];
+// Modo dispositivo e Lighthouse são apresentados pela R1 e pela P1: a P2 só apresenta o Levar pro mundo.
+const NOVAS = ["levar-pro-mundo"];
 const progresso = {
   versao: 2,
   fasesConcluidas: antes.flatMap((id) => PUBLICADAS[id]),
@@ -145,14 +146,14 @@ await assentar();
 
 // ---------------------------------------------------------------- Fase 1: Arquivos de verdade
 await introducao();
-await passarApresentacao(pagina, "modo-dispositivo", () => tocar(pagina.locator("[data-botao-dispositivo]")));
+await tocarNoJogo(pagina.locator("[data-botao-dispositivo]"));
 await pagina.waitForFunction(() => document.querySelector("section[data-previa] iframe")?.contentWindow?.innerWidth === 390);
 conferir(true, `${MODO}: o modo dispositivo liga no Celular 390`);
 await botaoConversa("Próximo objetivo");
 
 await esperarObjetivo("analisar");
-// A apresentação já abre a aba Lighthouse; o Experimente é o próprio Analisar.
-await passarApresentacao(pagina, "lighthouse", () => tocar(pagina.locator("[data-analisar-auditoria]")));
+await tocarNoJogo(pagina.getByRole("tab", { name: "Lighthouse", exact: true }));
+await tocarNoJogo(pagina.locator("[data-analisar-auditoria]"));
 await pagina.locator("[data-notas-auditoria]").waitFor();
 const notaA11y = Number(await pagina.locator('[data-nota-auditoria="acessibilidade"]').getAttribute("data-nota"));
 conferir(notaA11y >= 90, `${MODO}: o site da Bia tem Acessibilidade ${notaA11y}`);

@@ -42,7 +42,7 @@ const ponto = (id) => pagina.locator(`[data-unidade="${id}"]`);
 
 // ---------------------------------------------------------------- lente de tema no mundo
 await pagina.locator("[data-barra-lentes]").waitFor();
-conferir((await pagina.locator("[data-barra-lentes] [data-tema]").count()) === 11, `${MODO}: barra de temas com os 11 temas`);
+conferir((await pagina.locator("[data-barra-lentes] [data-tema]").count()) === 12, `${MODO}: barra de temas com os 12 temas`);
 await tocar(pagina.locator('[data-barra-lentes] [data-tema="seguranca"]'));
 const progressoLente = pagina.locator("[data-progresso-lente]");
 await progressoLente.waitFor();
@@ -105,7 +105,7 @@ await tocar(pagina.getByRole("button", { name: /Apagar a lente/ }));
 // ---------------------------------------------------------------- insígnias (painel)
 await itemDaBarra("Abrir o painel Insígnias");
 await pagina.locator("[data-painel-insignias]").waitFor();
-conferir((await pagina.locator("[data-insignia-tema]").count()) === 11, `${MODO}: uma insígnia por tema`);
+conferir((await pagina.locator("[data-insignia-tema]").count()) === 12, `${MODO}: uma insígnia por tema`);
 conferir((await pagina.locator('[data-insignia-tema="interfaces"] [data-marco="25"]').getAttribute("data-atingido")) === "nao", `${MODO}: do zero, nenhum marco aceso`);
 await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Fechar" }));
 

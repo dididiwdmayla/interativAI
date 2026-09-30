@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ilhaDoId } from "@/curriculo";
+import { CURRICULO, ilhaDoId, localNoCurriculo } from "@/curriculo";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import {
   acaoDaUnidade,
@@ -29,6 +29,8 @@ const ELEMENTOS = SITES.zonas[0];
 const ESTILOS = SITES.zonas[1];
 /** As unidades prontas de Sites, na ordem do currículo (derivado: vale com qualquer zona pronta). */
 const SITES_PRONTAS = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-"));
+/** As que contam para abrir a Lógica: sem as da zona opcional (Ser encontrado). */
+const SITES_OBRIGATORIAS = SITES_PRONTAS.filter((unidade) => !localNoCurriculo(unidade.id)?.zona.opcional);
 const item = (id: string) => {
   const achado = ELEMENTOS.unidades.find((unidade) => unidade.id === id);
   if (!achado) throw new Error(id);
@@ -70,11 +72,13 @@ describe("ilhas", () => {
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
     // Cada unidade pronta de Sites precisa acabar: com qualquer uma faltando, a Lógica segue bloqueada.
-    for (let quantas = 0; quantas < SITES_PRONTAS.length; quantas += 1) {
-      const progresso = concluiu(...SITES_PRONTAS.slice(0, quantas));
-      expect(estadoDaIlha(logica, { progresso, unidades }), `com ${quantas} de ${SITES_PRONTAS.length}`).toBe("bloqueada");
+    for (let quantas = 0; quantas < SITES_OBRIGATORIAS.length; quantas += 1) {
+      const progresso = concluiu(...SITES_OBRIGATORIAS.slice(0, quantas));
+      expect(estadoDaIlha(logica, { progresso, unidades }), `com ${quantas} de ${SITES_OBRIGATORIAS.length}`).toBe("bloqueada");
     }
-    expect(estadoDaIlha(logica, { progresso: concluiu(...SITES_PRONTAS), unidades })).toBe("disponivel");
+    // A zona opcional (Ser encontrado) não tranca: sem nenhuma unidade dela, a Lógica abre.
+    expect(SITES_OBRIGATORIAS.length).toBeLessThan(SITES_PRONTAS.length);
+    expect(estadoDaIlha(logica, { progresso: concluiu(...SITES_OBRIGATORIAS), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {
@@ -190,5 +194,51 @@ describe("zonas e unidades", () => {
 
   it("total de estrelas soma todas as fases", () => {
     expect(totalDeEstrelas(concluiu(U1, U2))).toBe(3 * (U1.fases.length + U2.fases.length));
+  });
+});
+
+describe("zona opcional", () => {
+  // Currículo de mentirinha: a ilha A tem uma zona opcional no meio; a B vem depois.
+  const unidade = (id: string): Unidade => ({
+    id,
+    ilha: "Ilha A",
+    zona: "z",
+    numero: 1,
+    titulo: id,
+    meta: { enunciado: "meta" },
+    fases: [`${id}-f1`],
+  });
+  const [A1, AOPC, A3, B1] = ["a-z1-u1", "a-opc-u1", "a-z3-u1", "b-z1-u1"].map(unidade);
+  const zona = (id: string, u: Unidade, opcional?: true) => ({
+    id,
+    nome: id,
+    icone: "elementos" as const,
+    ...(opcional ? { opcional } : {}),
+    unidades: [{ id: u.id, titulo: u.titulo, meta: "meta" }],
+  });
+  const A: IlhaCurriculo = { id: "a", nome: "A", zonas: [zona("z1", A1), zona("opc", AOPC, true), zona("z3", A3)] };
+  const B: IlhaCurriculo = { id: "b", nome: "B", zonas: [zona("z1", B1)] };
+  const fonte = (...feitas: Unidade[]) => ({
+    progresso: concluiu(...feitas),
+    unidades: [A1, AOPC, A3, B1],
+    curriculo: [A, B],
+  });
+
+  it("a zona opcional abre como as outras, depois das obrigatórias de antes", () => {
+    expect(zonaAberta(A, A.zonas[1], fonte())).toBe(false);
+    expect(zonaAberta(A, A.zonas[1], fonte(A1))).toBe(true);
+  });
+
+  it("não tranca a zona seguinte nem a próxima ilha", () => {
+    expect(zonaAberta(A, A.zonas[2], fonte(A1))).toBe(true);
+    expect(estadoDaIlha(B, fonte(A1))).toBe("bloqueada");
+    expect(estadoDaIlha(B, fonte(A1, A3))).toBe("disponivel");
+  });
+
+  it("no jogo de verdade, a zona Ser encontrado é opcional e fica no fim da Ilha Sites", () => {
+    const ultima = SITES.zonas[SITES.zonas.length - 1];
+    expect(ultima.id).toBe("ser-encontrado");
+    expect(ultima.opcional).toBe(true);
+    expect(SITES.zonas.filter((item) => item.opcional)).toHaveLength(1);
   });
 });

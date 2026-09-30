@@ -16,6 +16,7 @@ export type IconeZona =
   | "layout"
   | "responsivo"
   | "publicar"
+  | "busca"
   | "console"
   | "fontes"
   | "rede"
@@ -54,6 +55,14 @@ export type ZonaCurriculo = {
   icone: IconeZona;
   /** Texto curto do que falta no motor; ausente = motor pronto. */
   requerMotor?: string;
+  /**
+   * Zona opcional (ex.: "Ser encontrado", no fim da Ilha Sites): não conta
+   * para concluir a ilha nem para liberar a próxima ilha ou zona, aparece
+   * no mapa com a plaquinha "Opcional" e continua valendo nas lentes de
+   * tema e profissão. Abre como as outras (quando as zonas obrigatórias
+   * antes dela estão concluídas).
+   */
+  opcional?: true;
   unidades: UnidadeCurriculo[];
 };
 

@@ -16,6 +16,8 @@ type Props = {
   totalIntroducao: number;
   /** A pausa atual leva para a conclusão ("Ver resultado"). */
   ultimaPausa: boolean;
+  /** O rótulo do botão da última pausa (padrão "Ver resultado"; na Revisão do dia, "Próximo"). */
+  rotuloFim?: string;
   /** Objetivo de previsão: a pergunta e as opções. */
   previsao: Previsao | null;
   degrauMaximo: DegrauAjuda;
@@ -39,6 +41,7 @@ export function AcoesConversa({
   estado,
   totalIntroducao,
   ultimaPausa,
+  rotuloFim = "Ver resultado",
   previsao,
   degrauMaximo,
   desafio,
@@ -78,7 +81,7 @@ export function AcoesConversa({
   if (estado.pausa !== null) {
     return (
       <Botao onClick={aoSeguir} className="ml-auto">
-        {ultimaPausa ? "Ver resultado" : "Próximo objetivo"}
+        {ultimaPausa ? rotuloFim : "Próximo objetivo"}
       </Botao>
     );
   }

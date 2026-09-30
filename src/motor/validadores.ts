@@ -11,6 +11,9 @@ import { estaEscondido } from "@/lib/esconder";
 import { calcularCascata, folhasDoDocumento, leitorDeValores, normalizarSeletor, type OpcoesCascata, valorEfetivo } from "./css/cascata";
 import type { Tela } from "./css/midia";
 import { auditar } from "./auditoria";
+import { conferirDadosEstruturados, motivoNoindex, resultadoNaBusca } from "./busca";
+import { type DadosCampanha, type EstadoCampanha, simularCampanha, valorDaMetrica } from "./campanha";
+import { conferirLinkRastreavel } from "./medicao";
 import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } from "./dispositivos";
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
@@ -33,6 +36,8 @@ export type ContextoValidacao = {
   tela?: Tela;
   /** O modo dispositivo agora (null ou ausente: a fase não tem a barra). */
   dispositivo?: EstadoDispositivo | null;
+  /** (Simulador de campanha) Os dados da fase e a campanha configurada agora. */
+  campanha?: { dados: DadosCampanha; estado: EstadoCampanha };
 };
 
 /** A tela de um validador de CSS: a `larguraTela` dele ou a da prévia. */
@@ -154,6 +159,22 @@ export function descreverValidador(validador: Validador): string {
       return `modo dispositivo ligado${validador.largura !== undefined ? ` com ${validador.largura} px de largura` : ""}${
         validador.orientacao ? ` (${validador.orientacao === "retrato" ? "em pé" : "deitado"})` : ""
       }`;
+    case "resultadoBusca":
+      return `${validador.campo === "titulo" ? "o título" : "a descrição"} na busca vem da página${
+        validador.contem !== undefined ? ` e tem "${validador.contem}"` : ""
+      }${validador.semCorte ? ", sem corte" : ""}`;
+    case "indexavel":
+      return validador.valor ? "a página pode aparecer na busca" : "a página está fora da busca (noindex)";
+    case "dadosEstruturados":
+      return `dados estruturados ${validador.tipoSchema}${validador.campos.length > 0 ? ` com ${validador.campos.join(", ")}` : ""}`;
+    case "eventoMedido":
+      return `a medição recebeu o evento "${validador.nome}"`;
+    case "linkRastreavel": {
+      const pedidos = Object.entries(validador.utm).map(([chave, valor]) => `utm_${chave}=${valor}`);
+      return `${validador.seletor} é um link rastreável${pedidos.length > 0 ? ` (${pedidos.join(", ")})` : ""}`;
+    }
+    case "simulacao":
+      return `campanha simulada: ${validador.metrica} ${validador.op} ${validador.valor}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -338,6 +359,40 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
             : "nenhum problema",
       };
     }
+    case "resultadoBusca": {
+      const resultado = resultadoNaBusca(contexto.documento, "");
+      const campo = validador.campo === "titulo" ? resultado.titulo : resultado.descricao;
+      if (campo.declarado === null) {
+        return { passou: false, descricao, detalhe: validador.campo === "titulo" ? "a página não tem <title>" : "a página não tem meta description" };
+      }
+      const temTrecho =
+        validador.contem === undefined || normalizarTexto(campo.declarado).toLowerCase().includes(normalizarTexto(validador.contem).toLowerCase());
+      const passou = temTrecho && !(validador.semCorte && campo.cortou);
+      return { passou, descricao, detalhe: `"${campo.declarado}"${campo.cortou ? " (cortado na busca)" : ""}` };
+    }
+    case "indexavel": {
+      const motivo = motivoNoindex(contexto.documento);
+      return { passou: (motivo === null) === validador.valor, descricao, detalhe: motivo ?? "sem noindex" };
+    }
+    case "dadosEstruturados": {
+      const { passou, detalhe } = conferirDadosEstruturados(contexto.documento, validador.tipoSchema, validador.campos);
+      return { passou, descricao, detalhe };
+    }
+    case "eventoMedido": {
+      const medidos = contexto.eventos.flatMap((evento) => (evento.tipo === "eventoMedido" ? [evento.nome] : []));
+      return { passou: medidos.includes(validador.nome), descricao, detalhe: medidos.length > 0 ? `medidos: ${lista(medidos)}` : "nenhum evento medido" };
+    }
+    case "linkRastreavel": {
+      const { passou, detalhe } = conferirLinkRastreavel(consultar(documento, validador.seletor), validador.utm);
+      return { passou, descricao, detalhe };
+    }
+    case "simulacao": {
+      if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
+      const resultado = simularCampanha(contexto.campanha.dados, contexto.campanha.estado, documento);
+      const valor = valorDaMetrica(resultado, validador.metrica);
+      if (valor === null) return { passou: false, descricao, detalhe: "sem nenhum cliente, não dá para calcular o custo por cliente" };
+      return { passou: comparar(valor, validador.op, validador.valor), descricao, detalhe: `${validador.metrica} = ${valor}` };
+    }
     case "dispositivo": {
       const estado = contexto.dispositivo ?? null;
       if (!estado?.ligado) return { passou: false, descricao, detalhe: "a barra de dispositivo está desligada" };
@@ -469,6 +524,7 @@ export function validadorTravado(validador: Validador): boolean {
     case "selecionado":
     case "evento":
     case "temaSalvo":
+    case "eventoMedido":
       return true;
     case "todos":
     case "algum":

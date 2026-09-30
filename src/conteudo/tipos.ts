@@ -12,6 +12,8 @@
  * Template anotado de fase: docs/TEMPLATE-FASE.ts
  */
 import type { CategoriaAuditoria, IdRegraAuditoria } from "@/motor/auditoria";
+import type { DadosCampanha, MetricaCampanha } from "@/motor/campanha";
+import type { Utm } from "@/motor/medicao";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import type { TipoEvento } from "@/motor/eventos";
 import type { Fala } from "@/motor/tipos";
@@ -168,6 +170,48 @@ export type Validador =
    * simplificação honesta: não mede o texto nem as margens.
    */
   | { tipo: "cabeNaTela"; largura: number }
+  /*
+   * Busca simulada (zona "Ser encontrado"): src/motor/busca.ts. Olham o
+   * documento de agora; pedem a ferramenta do painel em usaFerramentas.
+   */
+  /**
+   * (Resultado na busca) O título (o <title>) ou a descrição (a meta
+   * description) DECLARADOS pela página: sem eles, não passa (o que a busca
+   * inventa não conta). `contem` confere um trecho (sem diferenciar
+   * maiúsculas); `semCorte: true` pede que caibam sem "..." no computador.
+   */
+  | { tipo: "resultadoBusca"; campo: "titulo" | "descricao"; contem?: string; semCorte?: boolean }
+  /** (Resultado na busca) A página pode (true) ou não (false, noindex) aparecer na busca. */
+  | { tipo: "indexavel"; valor: boolean }
+  /**
+   * (Teste de dados estruturados) Algum <script type="application/ld+json">
+   * válido tem um item com o @type `tipoSchema` ("LocalBusiness" aceita os
+   * subtipos conhecidos, como Bakery) e todos os `campos` preenchidos
+   * (caminhos com ponto valem: "address.streetAddress").
+   */
+  | { tipo: "dadosEstruturados"; tipoSchema: string; campos: string[] }
+  /*
+   * Medição simulada e campanha (S4 e S5): src/motor/medicao.ts e
+   * src/motor/campanha.ts.
+   */
+  /**
+   * (Medição) Um clique num elemento com `data-evento="<nome>"` gerou o
+   * evento desde que o objetivo começou. Trava no checklist, como `evento`.
+   */
+  | { tipo: "eventoMedido"; nome: string }
+  /**
+   * (Medição) Algum elemento do seletor (um link) tem no href os três
+   * parâmetros utm_source, utm_medium e utm_campaign, com os valores de
+   * `utm` (os que vierem; sem diferenciar maiúsculas).
+   */
+  | { tipo: "linkRastreavel"; seletor: string; utm: Partial<Utm> }
+  /**
+   * (Simulador de campanha) Uma métrica do dia simulado, com a página de
+   * agora e a campanha configurada: cliques, clientes, custoPorCliente (R$),
+   * posicao (1 = primeiro), taxaConversao (%), qualidade (1 a 10) ou
+   * notaPagina (0 a 100). Só numa fase `simulador-campanha`.
+   */
+  | { tipo: "simulacao"; metrica: MetricaCampanha; op: OperadorContagem; valor: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -253,7 +297,24 @@ export type Acao =
    * (Publicar) O "Levar pro mundo": monta o index.html e o style.css e baixa
    * o .zip (nos testes, só monta). Gera `exportouProjeto`.
    */
-  | { tipo: "levarProMundo" };
+  | { tipo: "levarProMundo" }
+  /**
+   * (Medição) Clica num elemento da prévia, como o jogador clicaria. Um
+   * `data-evento` nele (ou num ancestral) gera `eventoMedido`; num link, a
+   * prévia segura a navegação como sempre. Pede a ferramenta medicao.
+   */
+  | { tipo: "clicarNaPrevia"; seletor: string }
+  /**
+   * (Medição) "Simular uma visita por este link", no construtor de link
+   * rastreável: as próximas medições contam com essa origem. Gera
+   * `visitaSimulada`. Pede a ferramenta link-rastreavel.
+   */
+  | { tipo: "simularVisita"; utm: Utm }
+  /**
+   * (Simulador de campanha) Muda o orçamento do dia (R$), a palavra-chave
+   * (o id) ou o lance máximo por clique (R$). Gera `configurouCampanha`.
+   */
+  | { tipo: "configurarCampanha"; orcamento?: number; palavraChave?: string; lance?: number };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -331,6 +392,13 @@ type ObjetivoBase = {
    * /lab/fases. Num objetivo de previsão, comece com responderPrevisao.
    */
   solucaoDeTeste: Acao[];
+  /**
+   * Opcional (precisão futura da Revisão do dia): os conceitos que ESTE
+   * objetivo ensina ou treina. Hoje a revisão usa os conceitos da fase e a
+   * ajuda registrada por fase (as estrelas) como aproximação; com este
+   * campo, um dia dá para agendar por objetivo. Não muda nenhum id.
+   */
+  conceitos?: IdConceito[];
 };
 
 type ObjetivoPorModo =
@@ -494,11 +562,29 @@ export type FaseProjetoPonte = FaseBase & {
 };
 
 /**
+ * Simulador de campanha (S5): objetivos como numa fase de prática
+ * (guiados, sozinho, previsões), mais a aba Campanha, onde o jogador
+ * escolhe orçamento, palavra-chave e lance e vê o leilão e o dia simulado.
+ * A página de destino é o site-alvo: melhorar a página (no painel, como
+ * sempre) melhora o resultado. Números fictícios, declarados na tela.
+ */
+export type FaseSimuladorCampanha = FaseBase & {
+  tipo: "simulador-campanha";
+  objetivos: Objetivo[];
+  /** Como na prática: conceitos que a fase só treina. */
+  pratica?: IdConceito[];
+  campanha: DadosCampanha;
+};
+
+/** Fases com objetivos em sequência (prática e simulador de campanha). */
+export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha;
+
+/**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha;
 
 export type TipoFase = Fase["tipo"];
 
@@ -527,4 +613,45 @@ export type Unidade = {
   };
   /** Ids das fases, em ordem, terminando no desafio. */
   fases: string[];
+};
+
+/* ------------------------------------------------------------------ */
+/* Revisão do dia                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Um item da Revisão do dia: um desafio curto (1 a 2 minutos) sobre UM
+ * conceito já aprendido, num mini-site próprio, diferente dos sites das
+ * fases (senão vira decoreba). Mora em src/conteudo/revisao/<conceito>.ts,
+ * com pelo menos 2 variações por conceito, em situações diferentes.
+ *
+ * Na sessão, o item vira uma fase de um objetivo "sozinho": o tutor só
+ * pergunta e o "Me ajuda" para na dica. O `testar:conteudo` confere os
+ * itens com as mesmas regras dos objetivos (estado inicial não passa,
+ * solução passa, limites de texto, sem emoji, conceito existe). O id de um
+ * item publicado é congelado, como os das fases.
+ */
+export type ItemRevisao = {
+  /** kebab-case, único entre todos os itens; por convenção "<conceito>-<n>". */
+  id: string;
+  conceito: IdConceito;
+  /**
+   * "acao": fazer algo no mini-site (precisa de `validador`).
+   * "previsao": prever o que acontece (precisa de `previsao`); com
+   * `validador`, depois de prever o jogador faz e vê acontecer; sem ele, o
+   * item acaba na resposta.
+   */
+  tipo: "acao" | "previsao";
+  /** Até 140 caracteres cada. `toque` troca "clique" por "toque" e afins. */
+  enunciado: { mouse: string; toque: string };
+  /** Mini-site próprio e pequeno. `url` e `titulo` têm padrão. */
+  siteAlvo: { head?: string; body: string; css?: string; url?: string; titulo?: string };
+  /** O jogador edita o documento inteiro (head e body), como numa fase com modoDocumento. */
+  modoDocumento?: true;
+  validador?: Validador;
+  previsao?: Previsao;
+  /** Só pergunta e dica: sem linha e sem solução (a revisão é "sozinho"). */
+  ajudas: AjudasSozinho;
+  /** Ações que cumprem o item (testes). Num item de previsão, comece com responderPrevisao. */
+  solucaoDeTeste: Acao[];
 };

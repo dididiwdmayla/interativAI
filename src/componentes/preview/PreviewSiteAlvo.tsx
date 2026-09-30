@@ -36,6 +36,8 @@ type Props = {
   aoCarregar: (documento: Document) => void;
   /** Clique num link da página: a navegação já foi segurada. */
   aoClicarLink?: (link: Element) => void;
+  /** Qualquer clique num elemento da página (a Medição simulada lê o data-evento). */
+  aoClicarElemento?: (elemento: Element) => void;
   ref?: Ref<ApiPreview>;
   /** Camadas desenhadas por cima do iframe (sobreposição de inspeção). */
   children?: ReactNode;
@@ -71,6 +73,7 @@ export function PreviewSiteAlvo({
   titulo,
   aoCarregar,
   aoClicarLink,
+  aoClicarElemento,
   ref,
   children,
   dispositivo = null,
@@ -157,10 +160,12 @@ export function PreviewSiteAlvo({
     [],
   );
 
+  const aoClicarElementoAtual = useRef(aoClicarElemento);
   useEffect(() => {
     aoCarregarAtual.current = aoCarregar;
     aoClicarLinkAtual.current = aoClicarLink;
-  }, [aoCarregar, aoClicarLink]);
+    aoClicarElementoAtual.current = aoClicarElemento;
+  }, [aoCarregar, aoClicarLink, aoClicarElemento]);
 
   useEffect(() => {
     headRef.current = head;
@@ -240,6 +245,7 @@ export function PreviewSiteAlvo({
     documento.addEventListener(
       "click",
       (evento) => {
+        if (ehElemento(evento.target)) aoClicarElementoAtual.current?.(evento.target);
         const link = linkDoAlvo(evento.target);
         if (link) {
           evento.preventDefault();

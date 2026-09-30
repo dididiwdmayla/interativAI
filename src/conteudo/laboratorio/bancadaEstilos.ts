@@ -11,7 +11,9 @@
  * progresso e não é publicada. As checagens da fábrica rodam nela mesmo
  * assim (testes/conteudo/css.test.ts), para ela não apodrecer.
  */
-import type { FasePratica, Unidade } from "../tipos";
+import type { FasePratica, FaseSimuladorCampanha, Unidade } from "../tipos";
+import { FASE_BANCADA_BUSCA } from "./bancadaBusca";
+import { FASE_DEMO_CAMPANHA } from "./demoCampanha";
 import { FASE_BANCADA_DOCUMENTO } from "./bancadaDocumento";
 import { FASE_BANCADA_LIGHTHOUSE } from "./bancadaLighthouse";
 import { FASE_BANCADA_TEMA } from "./bancadaTema";
@@ -101,7 +103,7 @@ export const UNIDADE_BANCADA: Unidade = {
   numero: 1,
   titulo: "Bancada do motor",
   meta: { enunciado: "Testar o motor: CSS (editor com abas, painel Estilos e Calculado) e o modo documento." },
-  fases: ["lab-motor-u1-f1", "lab-motor-u1-f2", "lab-motor-u1-f3", "lab-motor-u1-f4", "lab-motor-u1-f5"],
+  fases: ["lab-motor-u1-f1", "lab-motor-u1-f2", "lab-motor-u1-f3", "lab-motor-u1-f4", "lab-motor-u1-f5", "lab-motor-u1-f6", "lab-motor-u1-f7"],
 };
 
 export const FASE_BANCADA_ESTILOS: FasePratica = {
@@ -187,6 +189,14 @@ export const FASE_BANCADA_ESTILOS: FasePratica = {
 };
 
 /** Fases de laboratório, na ordem em que aparecem no /lab/fases. */
-export const FASES_LABORATORIO: readonly FasePratica[] = [FASE_BANCADA_ESTILOS, FASE_BANCADA_DOCUMENTO, FASE_BANCADA_VARIAVEIS, FASE_BANCADA_TEMA, FASE_BANCADA_LIGHTHOUSE];
+export const FASES_LABORATORIO: readonly (FasePratica | FaseSimuladorCampanha)[] = [
+  FASE_BANCADA_ESTILOS,
+  FASE_BANCADA_DOCUMENTO,
+  FASE_BANCADA_VARIAVEIS,
+  FASE_BANCADA_TEMA,
+  FASE_BANCADA_LIGHTHOUSE,
+  FASE_BANCADA_BUSCA,
+  FASE_DEMO_CAMPANHA,
+];
 
 export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA];

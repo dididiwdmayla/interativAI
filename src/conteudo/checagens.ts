@@ -11,6 +11,11 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
+import { conferirPlataformas, PLATAFORMAS_MARKETING } from "./plataformas-marketing";
+import { ITENS_REVISAO } from "./revisao";
+import { conferirItensDeRevisao } from "./revisao/conferirItens";
+import { faseDoItem } from "./revisao/faseDoItem";
 import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
 import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
@@ -33,8 +38,11 @@ import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
-import type { Acao, Fase, FaseDesafio, FasePratica, FaseProjetoPonte, Objetivo, Unidade, Validador } from "./tipos";
+import type { Acao, Fase, FaseComObjetivos, FaseDesafio, FaseProjetoPonte, ItemRevisao, Objetivo, Unidade, Validador } from "./tipos";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
+import { ferramentaDaAcao } from "./ferramentaDaAcao";
+
+export { ferramentaDaAcao } from "./ferramentaDaAcao";
 
 /** Limites de tamanho dos textos (em caracteres). */
 export const LIMITES = {
@@ -47,7 +55,12 @@ export const LIMITES = {
   titulo: 40,
 } as const;
 
-export type ContextoChecagem = { unidades: readonly Unidade[]; fases: readonly Fase[] };
+export type ContextoChecagem = {
+  unidades: readonly Unidade[];
+  fases: readonly Fase[];
+  /** Itens da Revisão do dia (padrão: os registrados em src/conteudo/revisao). */
+  itens?: readonly ItemRevisao[];
+};
 
 export type RegraGeral = { id: string; nome: string; checar: (contexto: ContextoChecagem) => string[] };
 
@@ -97,7 +110,7 @@ export function temSimboloSemSeletorDeTexto(texto: string): boolean {
 /* ------------------------------------------------------------------ */
 
 function objetivosDe(fase: Fase): readonly Objetivo[] {
-  return fase.tipo === "pratica" ? fase.objetivos : [];
+  return temObjetivos(fase) ? fase.objetivos : [];
 }
 
 function nomeObjetivo(objetivo: Objetivo, indice: number): string {
@@ -159,7 +172,7 @@ function falasDe(fase: Fase): { onde: string; texto: string }[] {
 
 /** Validadores da fase (objetivos e partes), com um rótulo. */
 function validadoresDe(fase: Fase): { onde: string; validador: Validador }[] {
-  if (fase.tipo === "pratica") {
+  if (temObjetivos(fase)) {
     return fase.objetivos.map((objetivo, indice) => ({ onde: nomeObjetivo(objetivo, indice), validador: objetivo.validador }));
   }
   const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
@@ -177,7 +190,7 @@ function achatarValidador(validador: Validador): Validador[] {
 
 /** Ações que o JOGADOR faria (soluções), com um rótulo. */
 function acoesDoJogador(fase: Fase): { onde: string; acoes: readonly Acao[] }[] {
-  if (fase.tipo !== "pratica") {
+  if (!temObjetivos(fase)) {
     const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
     return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
   }
@@ -201,64 +214,6 @@ function acoesRoteirizadas(fase: Fase): { onde: string; acoes: readonly Acao[] }
     }
   });
   return lista;
-}
-
-/** A ferramenta que o jogador usa para fazer a ação à mão. */
-export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
-  switch (acao.tipo) {
-    case "selecionar":
-      switch (acao.via ?? "arvore") {
-        case "arvore":
-          return "arvore";
-        case "inspecionar":
-          return "inspecionar";
-        case "editor":
-          return "sincronia";
-        case "trilha":
-          return "trilha";
-      }
-      return null;
-    case "definirTexto":
-    case "definirAtributo":
-      return "editar-duplo-clique";
-    case "adicionarAtributo":
-      return "adicionar-atributo";
-    case "inserirHTML":
-      return "editor";
-    case "esconder":
-      return "esconder";
-    case "apagar":
-      return "apagar";
-    case "duplicar":
-      return "duplicar";
-    case "renomearTag":
-      return "renomear-tag";
-    case "clicarLink":
-      return "previa";
-    case "desfazer":
-      return "desfazer";
-    case "responderPrevisao":
-      return null;
-    case "definirPropriedade":
-      return "editar-valor-css";
-    case "alternarDeclaracao":
-      return "ligar-desligar-declaracao";
-    case "adicionarRegra":
-      return "nova-regra";
-    case "editarCss":
-      return "editor-css";
-    case "salvarTema":
-      return "salvar-tema";
-    case "trocarDispositivo":
-    case "desligarDispositivo":
-      return "modo-dispositivo";
-    case "girarDispositivo":
-      return "girar-dispositivo";
-    case "analisarAuditoria":
-      return "lighthouse";
-    case "levarProMundo":
-      return "levar-pro-mundo";
-  }
 }
 
 const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada", "variavelCss", "temMediaQuery"]);
@@ -304,7 +259,7 @@ function apresentadasPor(fase: Fase): IdFerramenta[] {
 
 /** O que a fase treina (campo `pratica`; só fases de prática têm). */
 function praticaDe(fase: Fase): readonly IdConceito[] {
-  return fase.tipo === "pratica" ? (fase.pratica ?? []) : [];
+  return temObjetivos(fase) ? (fase.pratica ?? []) : [];
 }
 
 function conceitosDe(fase: Fase): IdConceito[] {
@@ -446,7 +401,7 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
         if (fase.tipo === "desafio") {
           const daUnidade = new Set(
             fases
-              .filter((item) => item.unidadeId === fase.unidadeId && item.tipo === "pratica")
+              .filter((item) => item.unidadeId === fase.unidadeId && temObjetivos(item))
               .flatMap((item) => item.conceitos),
           );
           for (const conceito of fase.conceitos) {
@@ -521,9 +476,19 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: () => conferirProfissoes(PROFISSOES),
   },
   {
+    id: "itens-de-revisao",
+    nome: "itens de revisão: ids únicos, conceito ensinado, tipo coerente, 2 variações e site próprio",
+    checar: ({ fases, itens }) => conferirItensDeRevisao(itens ?? ITENS_REVISAO, fases),
+  },
+  {
+    id: "plataformas-marketing",
+    nome: "o arquivo de plataformas de marketing tem ids únicos, data conferida e passos",
+    checar: () => conferirPlataformas(PLATAFORMAS_MARKETING),
+  },
+  {
     id: "publicados-congelados",
     nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
-    checar: (contexto) => conferirPublicados(PUBLICADOS, contexto),
+    checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
   },
 ];
 
@@ -536,8 +501,13 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "ids-internos",
     nome: "ids de objetivos e partes são únicos e em kebab-case",
     checar: (fase) => {
-      const ids = fase.tipo === "pratica" ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
-      const vazio = { pratica: "a fase não tem objetivos", desafio: "o desafio não tem partes", "projeto-ponte": "o projeto não tem requisitos" }[fase.tipo];
+      const ids = temObjetivos(fase) ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
+      const vazio = {
+        pratica: "a fase não tem objetivos",
+        desafio: "o desafio não tem partes",
+        "projeto-ponte": "o projeto não tem requisitos",
+        "simulador-campanha": "o simulador não tem objetivos",
+      }[fase.tipo];
       return [
         ...(ids.length === 0 ? [vazio] : []),
         ...repetidos(ids).map((id) => `id repetido dentro da fase: "${id}"`),
@@ -552,7 +522,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       ...conceitosDe(fase)
         .filter((id) => !ehIdConceito(id))
         .map((id) => `o conceito "${id}" não existe em src/conteudo/conceitos.ts`),
-      ...(fase.tipo === "pratica" && fase.conceitos.length === 0 && praticaDe(fase).length === 0
+      ...(temObjetivos(fase) && fase.conceitos.length === 0 && praticaDe(fase).length === 0
         ? ["a fase não ensina (conceitos) nem treina (pratica) nenhum conceito: preencha um dos dois"]
         : []),
       ...praticaDe(fase)
@@ -564,7 +534,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "fase-so-sozinho",
     nome: "fase só de sozinho só treina: conceitos vazio e nenhum objetivo guiado",
     checar: (fase) => {
-      if (fase.tipo !== "pratica" || fase.objetivos.length === 0) return [];
+      if (!temObjetivos(fase) || fase.objetivos.length === 0) return [];
       const problemas: string[] = [];
       const todosSozinho = fase.objetivos.every((objetivo) => objetivo.modo === "sozinho");
       if (todosSozinho && fase.conceitos.length > 0) {
@@ -871,6 +841,24 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if ((item.tipo === "notaAuditoria" || item.tipo === "semProblema") && !fase.usaFerramentas.includes("lighthouse")) {
             problemas.push(`${onde}: o validador ${item.tipo} pede "lighthouse" em usaFerramentas (o jogador precisa da aba para ver as notas)`);
           }
+          if ((item.tipo === "resultadoBusca" || item.tipo === "indexavel") && !fase.usaFerramentas.includes("resultado-busca")) {
+            problemas.push(`${onde}: o validador ${item.tipo} pede "resultado-busca" em usaFerramentas (o jogador precisa ver o resultado)`);
+          }
+          if (item.tipo === "dadosEstruturados" && !fase.usaFerramentas.includes("dados-estruturados")) {
+            problemas.push(`${onde}: o validador dadosEstruturados pede "dados-estruturados" em usaFerramentas`);
+          }
+          if (item.tipo === "eventoMedido" && !fase.usaFerramentas.includes("medicao")) {
+            problemas.push(`${onde}: o validador eventoMedido pede "medicao" em usaFerramentas (a aba que mostra os eventos)`);
+          }
+          if (item.tipo === "linkRastreavel" && !fase.usaFerramentas.includes("link-rastreavel")) {
+            problemas.push(`${onde}: o validador linkRastreavel pede "link-rastreavel" em usaFerramentas (o construtor do link)`);
+          }
+          if (item.tipo === "simulacao" && fase.tipo !== "simulador-campanha") {
+            problemas.push(`${onde}: o validador simulacao só vale numa fase do tipo "simulador-campanha"`);
+          }
+          if (item.tipo === "simulacao" && !fase.usaFerramentas.includes("simulador-campanha")) {
+            problemas.push(`${onde}: o validador simulacao pede "simulador-campanha" em usaFerramentas`);
+          }
           if (item.tipo === "notaAuditoria" && (item.minimo < 0 || item.minimo > 100)) {
             problemas.push(`${onde}: notaAuditoria com minimo ${item.minimo} (vai de 0 a 100)`);
           }
@@ -889,7 +877,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         const alvo = fases.find((item) => item.id === parte.revisarEm);
         if (!alvo) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não existe`];
         if (alvo.unidadeId !== fase.unidadeId) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" é de outra unidade`];
-        if (alvo.tipo !== "pratica") return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
+        if (!temObjetivos(alvo)) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
         if (fases.indexOf(alvo) > indice) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" vem depois do desafio`];
         if (!temObjetivoGuiado(alvo)) {
           return [
@@ -918,7 +906,7 @@ type Jogada = {
  * Joga os objetivos em ordem com as soluções (de teste ou do "Me ajuda").
  * Para no primeiro erro que deixa o resto sem sentido.
  */
-function jogarObjetivos(fase: FasePratica, usarAjuda: boolean): Jogada {
+function jogarObjetivos(fase: FaseComObjetivos, usarAjuda: boolean): Jogada {
   const simulacao = criarSimulacao(fase);
   const jogada: Jogada = { eventos: [], solucoes: [] };
   for (const [indice, evento] of (fase.eventosIniciais ?? []).entries()) {
@@ -1041,7 +1029,7 @@ function jogarDesafio(fase: FaseDesafio | FaseProjetoPonte): Jogada {
 }
 
 function jogar(fase: Fase, usarAjuda: boolean): Jogada {
-  return fase.tipo === "pratica" ? jogarObjetivos(fase, usarAjuda) : jogarDesafio(fase);
+  return temObjetivos(fase) ? jogarObjetivos(fase, usarAjuda) : jogarDesafio(fase);
 }
 
 const REGRAS_DE_SIMULACAO: readonly RegraFase[] = [
@@ -1089,7 +1077,7 @@ const REGRAS_DE_SIMULACAO: readonly RegraFase[] = [
     id: "solucoes-do-me-ajuda",
     nome: "a solução do Me ajuda (degrau 4) cumpre cada objetivo guiado",
     simulacao: true,
-    checar: (fase) => (fase.tipo === "pratica" ? jogar(fase, true).solucoes : []),
+    checar: (fase) => (temObjetivos(fase) ? jogar(fase, true).solucoes : []),
   },
 ];
 
@@ -1112,6 +1100,30 @@ export function checarTudo(contexto: ContextoChecagem): ProblemaConteudo[] {
         mensagens = [`a checagem quebrou: ${mensagemDe(erro)}`];
       }
       for (const mensagem of mensagens) problemas.push({ onde: fase.id, regra: regra.nome, mensagem });
+    }
+  }
+  problemas.push(...checarItensDeRevisao(contexto.itens ?? ITENS_REVISAO, contexto));
+  return problemas;
+}
+
+/**
+ * Os itens da Revisão do dia com as MESMAS regras dos objetivos: cada item
+ * vira a fase de um objetivo sozinho (`faseDoItem`) e passa pelas regras
+ * de fase (estado inicial não passa, solução passa, limites de texto, sem
+ * emoji, conceito existe, ferramentas das ações...).
+ */
+export function checarItensDeRevisao(itens: readonly ItemRevisao[], contexto: ContextoChecagem): ProblemaConteudo[] {
+  const problemas: ProblemaConteudo[] = [];
+  for (const item of itens) {
+    const fase = faseDoItem(item);
+    for (const regra of REGRAS_DE_FASE) {
+      let mensagens: string[];
+      try {
+        mensagens = regra.checar(fase, contexto);
+      } catch (erro) {
+        mensagens = [`a checagem quebrou: ${mensagemDe(erro)}`];
+      }
+      for (const mensagem of mensagens) problemas.push({ onde: `revisao:${item.id}`, regra: regra.nome, mensagem });
     }
   }
   return problemas;

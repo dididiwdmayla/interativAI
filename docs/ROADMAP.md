@@ -234,12 +234,49 @@ núcleo comum.
     pelo MAPA (como `layout.mjs`/`publicar.mjs`) para E5, R1, R2 e P1, e
     os três layouts (retrato/paisagem) das fases de desafio.
 
+- **Rodada 14: Revisão do dia e o motor da zona "Ser encontrado"**
+  (detalhe em `docs/PROGRESSO.md`, um commit por etapa):
+  - Zona opcional no currículo (`opcional: true`: não conta para concluir
+    a ilha nem tranca o caminho; plaquinha "Opcional"; vale nas lentes) e
+    a zona **Ser encontrado** (S1 a S5) no fim da Ilha Sites, com a
+    filosofia no `MAPA-CURRICULAR.md`. Tema novo **Presença digital** (12
+    temas). `src/conteudo/plataformas-marketing.ts` (estrutura vazia, com
+    data de verificação e "conferido em").
+  - **Revisão do dia**: itens declarativos (`src/conteudo/revisao/`,
+    mesmas regras dos objetivos no `testar:conteudo`, ids congelados),
+    agendador por conceito (1, 3, 7, 21 e 60 dias, testes com relógio
+    falso), estado no progresso com migração, sessão em `/revisao` (até 5
+    itens, tutor só pergunta, Me ajuda até a dica, "Não lembrei", treino
+    livre, resumo com quando volta, "Rever onde aprendi" e a sequência
+    sem culpa) e o **Porto da revisão** no mundo. 40 itens-modelo (U1, U2
+    e S1).
+  - Aba **Busca**: Resultado na busca (título, endereço, descrição, corte
+    aproximado, noindex, cartão do negócio no mapa) e Teste de dados
+    estruturados (JSON com a linha do erro, LocalBusiness e subtipos).
+    Validadores `resultadoBusca`, `indexavel`, `dadosEstruturados`.
+  - Aba **Medição** (eventos de `data-evento`, link rastreável com utm,
+    visita simulada) e tipo de fase **`simulador-campanha`** (aba
+    Campanha: leilão por lance vezes qualidade, dia simulado, página de
+    destino decidindo a conversão). Validadores `eventoMedido`,
+    `linkRastreavel`, `simulacao`. Demonstração em
+    `/lab/fases?fase=lab-motor-u1-f7`. Tudo que é simulação diz isso na
+    tela.
+  - **S1 "Como o Google acha seu site"** publicada (unidade-modelo da
+    zona), jogável pelo mapa. Guia com as seções 19 a 24.
+  - Testes de navegador novos nos três layouts: `revisao.mjs`,
+    `busca.mjs`, `campanha.mjs`, `ser-encontrado.mjs`.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
 
+- **Bateria completa (rodada 14):** três testes quebrados desde a rodada
+  13 foram corrigidos: `publicar.mjs` (a P2 não apresenta mais o modo
+  dispositivo e o Lighthouse), `layout.mjs` (o semeado de Elementos e
+  Estilos agora vem do `publicados.json`, com a E5) e `explorar.mjs` (12
+  temas).
 - **Jornadas de navegador pelo mapa das unidades novas.** E5, R1, R2 e
   P1 foram verificadas por `testar:conteudo` (que reproduz o mesmo motor
   de validação e ações do jogo real) e por fases de prática jogadas de
@@ -251,6 +288,10 @@ núcleo comum.
   `testes/curriculo.mjs`) em vez de listas de fases hardcoded — evita o
   atrito registrado nas rodadas 4 e 5 do `ATRITOS-FABRICA.md` de toda
   zona nova quebrar o semeado das zonas seguintes.
+- **Revisão do dia, detalhes para depois:** o Porto só aparece na trilha
+  Web na posição fixa (trilhas futuras podem querer outro lugar); a
+  música da revisão é a do mapa; `Objetivo.conceitos` ainda não é usado
+  por nenhuma fase (a ajuda é aproximada pelas estrelas da fase).
 - **`/lab/fases`, "Aplicar solução do objetivo atual" num desafio:** o
   checklist não recalcula sozinho depois de uma ação sintética sem
   nenhuma interação real de UI entre uma parte e outra (reproduzido
@@ -260,8 +301,11 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: Revisão do dia (ponto fixo no mapa com desafios curtos por
-   revisão espaçada).
+1. Sonnet: itens de revisão das unidades U3 a P2, mais S2 a S5 (dividir
+   em dois prompts se precisar), seguindo a seção 19 do guia e os
+   modelos da U1, U2 e S1; as unidades S2 a S5 seguem as seções 20 a 24
+   (o passo a passo das plataformas vai em
+   `src/conteudo/plataformas-marketing.ts`, conferido na época).
 2. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
    `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
 3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador

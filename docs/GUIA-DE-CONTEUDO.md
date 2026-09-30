@@ -37,6 +37,12 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
 16. Modo dispositivo
 17. Lighthouse (auditoria simplificada)
 18. Projeto-ponte e publicação
+19. Itens de revisão (Revisão do dia)
+20. Zona opcional
+21. Busca simulada e dados estruturados
+22. Medição simulada
+23. Simulador de campanha
+24. Plataformas de marketing (arquivo com data)
 
 Arquivos que você vai usar:
 
@@ -1090,3 +1096,127 @@ O modelo é a P2, "Do jogo pro mundo"
 - Concluir a última unidade pronta de uma ilha acende a ilha no mapa
   (borda, festa uma vez, "Completa!" no mundo): o fim da ilha pede uma
   conclusão à altura.
+
+## 19. Itens de revisão (Revisão do dia)
+
+Modelo: os itens da U1 e da U2 (`src/conteudo/revisao/`, um arquivo por
+conceito, com um comentário no topo dizendo por que aqueles itens) e os
+da S1 (mini-sites no modo documento).
+
+- Um item (`ItemRevisao`, `src/conteudo/tipos.ts`) é um desafio curto (1 a
+  2 minutos) sobre UM conceito já ensinado, num mini-site próprio e
+  pequeno. Na sessão ele vira a fase de um objetivo sozinho
+  (`faseDoItem`): o tutor só pergunta, o "Me ajuda" para na dica, não há
+  estrelas nem apresentações.
+- Pelo menos **2 variações por conceito**, em situações **diferentes das
+  fases** (outro site, outro alvo, a direção contrária do que a fase fez).
+  A checagem acusa mini-site igual ao de uma fase.
+- `tipo: "acao"` precisa de `validador`; `tipo: "previsao"` precisa de
+  `previsao` (com `validador`, o jogador prevê e depois faz; sem ele, o
+  item acaba na resposta, e a explicação é a fala final). Errar a
+  previsão conta como "ainda não firmou".
+- `ajudas` são só `pergunta` e `dica`. `enunciado` com mouse e toque
+  (até 140). `solucaoDeTeste` como nos objetivos (previsão começa com
+  `responderPrevisao`).
+- `siteAlvo`: `body` (obrigatório), `head`, `css` (liga o painel Estilos),
+  `url` e `titulo`; `modoDocumento: true` quando o item mexe no head. As
+  cores dos mini-sites moram em `src/conteudo/revisao/sites/` (a exceção
+  das cores dos sites-alvo).
+- As ferramentas vêm sozinhas das ações e dos validadores (Busca,
+  Medição, Lighthouse): só use ferramentas que o conceito já apresentou.
+- Registre em `src/conteudo/revisao/index.ts`. O conceito precisa ser
+  ensinado (campo `conceitos`) por alguma fase de prática, senão nunca
+  entra na fila. O `testar:conteudo` roda as mesmas regras dos objetivos
+  em cada item; os ids publicados ficam congelados em `publicados.json`
+  (`itensRevisao`).
+- O agendamento (1, 3, 7, 21 e 60 dias; o que conta como ajuda; o treino
+  livre) está no topo de `src/lib/revisao.ts`.
+
+## 20. Zona opcional
+
+- `opcional: true` numa zona do currículo (`ZonaCurriculo`): ela não
+  conta para concluir a ilha, não tranca a zona seguinte nem a próxima
+  ilha, aparece no mapa com a plaquinha "Opcional" e vale nas lentes. Ela
+  mesma abre como as outras (quando as zonas obrigatórias antes dela
+  estão concluídas).
+- Nos testes de navegador, use `obrigatoriasProntasDaIlha` (de
+  `testes/curriculo.mjs`) para contar o que fecha a ilha, e
+  `prontasDaIlha` para semear tudo o que tem conteúdo.
+
+## 21. Busca simulada e dados estruturados
+
+Modelo: a S1 (`src/conteudo/ilhas/sites/ser-encontrado/unidade-1/`) e a
+Bancada da Busca (`/lab/fases?fase=lab-motor-u1-f6`).
+
+- A aba **Busca** só aparece nas fases com `resultado-busca` ou
+  `dados-estruturados` em `usaFerramentas`. Use `modoDocumento: true`
+  para o jogador mexer no head (title, metas, scripts).
+- **Resultado na busca** (`resultado-busca`): título (o `<title>`),
+  endereço e descrição (a meta description), ao vivo, no computador e no
+  celular. É uma simulação aproximada, e a tela diz isso: o corte é por
+  largura em pixels (uns 60 caracteres no título, uns 150 na descrição do
+  computador), estimada em `src/motor/busca.ts`. Sem title, a busca
+  inventa com o h1; sem descrição, mostra o primeiro parágrafo. Com
+  `noindex` (meta robots ou googlebot, também "none"), a página some.
+- Validadores: `resultadoBusca` (`campo: "titulo" | "descricao"`,
+  `contem`, `semCorte`; só passa com o texto DECLARADO pela página) e
+  `indexavel` (`valor: true | false`). Para "a página X fora da busca"
+  quando a página começa com noindex, junte com algo que marque a
+  situação nova (`todos`), senão o estado inicial já passa (S1, Fase 3).
+- **Teste de dados estruturados** (`dados-estruturados`): lê os
+  `<script type="application/ld+json">`, aponta JSON inválido com linha e
+  coluna (leitor próprio, mensagem em português) e, para LocalBusiness e
+  subtipos comuns (Bakery, Restaurant, Store, HairSalon...), os
+  obrigatórios `name` e `address` e os recomendados principais. Com um
+  negócio local válido e a página indexável, o Resultado mostra o cartão
+  do negócio no mapa. Validador `dadosEstruturados` (`tipoSchema`,
+  `campos`, com ponto: `"address.streetAddress"`).
+
+## 22. Medição simulada
+
+Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`.
+
+- A aba **Medição** aparece com `medicao` e/ou `link-rastreavel` em
+  `usaFerramentas`. O site-alvo não roda JavaScript: um elemento com
+  `data-evento="<nome>"` (minúsculas, números e `_`) gera o evento quando
+  é clicado na prévia. A tela explica que, na vida real, é um código de
+  medição (ensinado na Páginas vivas).
+- O construtor de link rastreável monta `utm_source`, `utm_medium` e
+  `utm_campaign`, copia, põe no link selecionado e simula uma visita: os
+  eventos seguintes contam com essa origem.
+- Validadores: `eventoMedido` (`nome`, trava no checklist, como
+  `evento`) e `linkRastreavel` (`seletor`, `utm` com os valores pedidos).
+  Ações: `clicarNaPrevia` (`seletor`, o clique de verdade) e
+  `simularVisita` (`utm`).
+
+## 23. Simulador de campanha
+
+Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`
+(`src/conteudo/laboratorio/demoCampanha.ts`).
+
+- Tipo de fase `simulador-campanha` (`FaseSimuladorCampanha`): objetivos
+  como numa prática, mais `campanha` (`DadosCampanha`: anunciante, 2 ou 3
+  palavras-chave com buscas por dia, custo médio e concorrência, 2 ou 3
+  concorrentes com lance e qualidade, orçamento, palavra e lance
+  iniciais). Números fictícios, declarados na tela.
+- A aba **Campanha** mostra a configuração, o leilão (posição = lance x
+  qualidade) e o dia simulado. A qualidade e a conversão saem da nota da
+  página de destino (auditoria e busca): melhorar a página no painel
+  muda o resultado com a mesma verba. O modelo está no topo de
+  `src/motor/campanha.ts`.
+- Validador `simulacao` (`metrica`: cliques, clientes, custoPorCliente,
+  posicao, taxaConversao em %, qualidade, notaPagina; `op`; `valor`), só
+  neste tipo de fase. Ação `configurarCampanha` (`orcamento`,
+  `palavraChave`, `lance`). Confira os números em
+  `testes/conteudo/campanha.test.ts` antes de escrever o objetivo: o
+  estado inicial de cada objetivo não pode já passar.
+
+## 24. Plataformas de marketing (arquivo com data)
+
+- O passo a passo do perfil da empresa no Google, do Search Console e das
+  plataformas de anúncio mora em `src/conteudo/plataformas-marketing.ts`,
+  só como dado, com `verificadoEm` (AAAA-MM-DD). A tela mostra
+  "conferido em <data>" (`rotuloConferido`).
+- Escreva os passos na produção da unidade, conferidos na época, nunca de
+  memória. As fases ensinam o conceito e o que o programador faz; o
+  clique a clique de cada plataforma fica no arquivo.

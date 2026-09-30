@@ -72,6 +72,13 @@ const DESENHOS: Record<IdTema, ReactNode> = {
       <circle cx="10" cy="14" r="1.2" fill="currentColor" />
     </>
   ),
+  // Alfinete de mapa: ser encontrado.
+  "presenca-digital": (
+    <>
+      <path d="M10 17.5s-5.5-5.2-5.5-9.3a5.5 5.5 0 0 1 11 0c0 4.1-5.5 9.3-5.5 9.3z" fill="currentColor" fillOpacity={0.15} />
+      <circle cx="10" cy="8" r="2" />
+    </>
+  ),
   // Estrela de quatro pontas: a faísca da IA.
   ia: (
     <>

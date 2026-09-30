@@ -1,4 +1,5 @@
-import type { Fase, FasePratica, Objetivo } from "@/conteudo/tipos";
+import { temObjetivos } from "@/motor/tiposDeFase";
+import type { Fase, FaseComObjetivos, Objetivo } from "@/conteudo/tipos";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
 import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "./tipos";
 
@@ -17,9 +18,12 @@ export type PausaMotor = "objetivoConcluido" | "solucao" | "desafioConcluido" | 
  * Como a fase está sendo jogada:
  * - "jogo": normal, com estrelas e progresso salvo;
  * - "revisao": aberta pelo "Rever" do desafio (sem estrelas, sem salvar);
- * - "lab": o /lab/fases (sem salvar, sem apresentações).
+ * - "lab": o /lab/fases (sem salvar, sem apresentações);
+ * - "revisao-dia": um item da Revisão do dia (sem salvar a fase, sem
+ *   estrelas, sem apresentações, direto no objetivo; quem guarda o
+ *   resultado é a sessão, em src/componentes/revisao).
  */
-export type ModoJogo = "jogo" | "revisao" | "lab";
+export type ModoJogo = "jogo" | "revisao" | "lab" | "revisao-dia";
 
 export type EstadoMotor = {
   etapa: EtapaFase;
@@ -65,7 +69,7 @@ export function enunciadoDe(objetivo: Objetivo, toque: boolean): string {
 }
 
 /** Fala que apresenta um objetivo quando ele começa. */
-export function falaDoObjetivo(fase: FasePratica, indice: number, toque: boolean): Fala {
+export function falaDoObjetivo(fase: FaseComObjetivos, indice: number, toque: boolean): Fala {
   const objetivo = fase.objetivos[indice];
   if (objetivo.tipo === "previsao") return { texto: objetivo.previsao.pergunta, expressao: "curioso" };
   return { texto: enunciadoDe(objetivo, toque), expressao: "feliz" };
@@ -116,7 +120,7 @@ export function criarEstadoInicial(
   toque: boolean,
   { modo, mostrarMeta }: OpcoesEstadoInicial,
 ): EstadoMotor {
-  const total = fase.tipo === "pratica" ? fase.objetivos.length : fase.tipo === "desafio" ? fase.partes.length : fase.requisitos.length;
+  const total = temObjetivos(fase) ? fase.objetivos.length : fase.tipo === "desafio" ? fase.partes.length : fase.requisitos.length;
   const base: EstadoMotor = {
     etapa: mostrarMeta ? "meta" : "introducao",
     indiceFala: 0,
@@ -152,7 +156,7 @@ export function criarEstadoInicial(
     return { ...base, etapa: mostrarMeta && !salvo.metaVista ? "meta" : "introducao" };
   }
 
-  if (fase.tipo !== "pratica") {
+  if (!temObjetivos(fase)) {
     const itens = fase.tipo === "desafio" ? fase.partes : fase.requisitos;
     const partesFeitas = salvo.partesFeitas.filter((id) => itens.some((parte) => parte.id === id));
     const reveres = Math.max(0, salvo.reveres);

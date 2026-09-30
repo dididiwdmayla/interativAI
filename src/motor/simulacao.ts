@@ -28,6 +28,9 @@ import {
   trocarModelo,
 } from "./dispositivos";
 import { auditar } from "./auditoria";
+import { type EstadoCampanha, estadoInicialDaCampanha } from "./campanha";
+import { eventoDoClique, type Utm } from "./medicao";
+import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 
@@ -54,6 +57,10 @@ export function criarSimulacao(fase: Fase) {
   // A barra de dispositivo, só nas fases que têm a ferramenta.
   let dispositivo: EstadoDispositivo = DISPOSITIVO_INICIAL;
   const comDispositivo = fase.usaFerramentas.includes("modo-dispositivo");
+  // A origem da última visita simulada (medição) e a campanha (simulador).
+  let visita: Utm | null = null;
+  const campanhaDaFase = fase.tipo === "simulador-campanha" ? fase.campanha : null;
+  let campanha: EstadoCampanha = campanhaDaFase ? estadoInicialDaCampanha(campanhaDaFase) : { orcamento: 0, palavra: "", lance: 0 };
   const avisarDispositivo = () => {
     const { largura, altura } = medidasNaTela(dispositivo);
     eventos.push({ tipo: "trocouDispositivo", ligado: dispositivo.ligado, modelo: dispositivo.modelo, largura, altura });
@@ -126,6 +133,33 @@ export function criarSimulacao(fase: Fase) {
           eventos.push({ tipo: "auditou", notas });
         }
       : undefined,
+    // Medição simulada fora da tela: o mesmo evento que a prévia gera.
+    clicarNaPrevia: fase.usaFerramentas.includes("medicao")
+      ? (elemento) => {
+          const medido = eventoDoClique(elemento);
+          if (medido) eventos.push({ tipo: "eventoMedido", nome: medido.nome, origem: visita });
+          const raiz = raizDaArvore(documento);
+          const link = elemento.closest("a, area");
+          const caminho = link && raiz ? caminhoDoNo(raiz, link) : null;
+          if (caminho) nucleo.clicarLink(caminho);
+        }
+      : undefined,
+    simularVisita: fase.usaFerramentas.includes("link-rastreavel")
+      ? (utm) => {
+          visita = utm;
+          eventos.push({ tipo: "visitaSimulada", utm });
+        }
+      : undefined,
+    configurarCampanha: campanhaDaFase
+      ? (mudanca) => {
+          campanha = {
+            orcamento: mudanca.orcamento ?? campanha.orcamento,
+            palavra: mudanca.palavra ?? campanha.palavra,
+            lance: mudanca.lance ?? campanha.lance,
+          };
+          eventos.push({ tipo: "configurouCampanha", ...campanha });
+        }
+      : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -142,6 +176,7 @@ export function criarSimulacao(fase: Fase) {
       eventos,
       dispositivo: comDispositivo ? dispositivo : null,
       tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
+      campanha: campanhaDaFase ? { dados: campanhaDaFase, estado: campanha } : undefined,
     };
   };
 

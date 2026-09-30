@@ -239,6 +239,68 @@ projeto-ponte. A P2 está publicada; a P1 espera o conteúdo.
   "Meu primeiro site" (projeto-ponte). O guia de publicação mora em
   `src/conteudo/publicacao.ts` (Netlify Drop, verificado em 2026-09-28).
 
+### Zona Ser encontrado (`ser-encontrado`, opcional)
+
+**Zona opcional** (`opcional: true` no currículo): no fim da Ilha Sites,
+depois de Publicar. Não conta para concluir a ilha nem para abrir a
+Lógica; aparece no mapa com a plaquinha "Opcional" e vale nas lentes de
+tema (Presença digital) e de profissão.
+
+**Filosofia da zona:** ensinar o que o programador faz (o HTML que a busca
+lê, os dados estruturados, os eventos e os links rastreáveis, a página de
+destino rápida e clara) e os conceitos que não envelhecem (rastreamento,
+indexação, leilão, conversão). O passo a passo de cada plataforma (o
+perfil da empresa no Google, o Search Console, as plataformas de anúncio)
+muda de tela o tempo todo: ele mora num arquivo de dados com data de
+verificação, `src/conteudo/plataformas-marketing.ts`, e a tela mostra
+"conferido em <data>". Os textos entram na produção de conteúdo, conferidos
+na época, nunca de memória. Toda ferramenta da zona que simula algo
+(busca, medição, campanha) diz na tela que é uma simulação aproximada.
+
+**Motores (Rodada 14):** painel "Resultado na busca" e "Teste de dados
+estruturados" (S1 a S3), "Medição" com o construtor de link rastreável
+(S4) e o tipo de fase `simulador-campanha` (S5). S1 publicada como
+unidade-modelo.
+
+- **S1. Como o Google acha seu site** (`sites-ser-encontrado-u1`):
+  rastreamento (o robô que visita e segue links), indexação (a página
+  entra no catálogo), o `<title>` e a `<meta name="description">` como o
+  título e a descrição do resultado, o corte dos textos longos e o
+  `noindex` (a página some da busca). Desafio: a página de uma loja que
+  não aparece direito na busca. Confusões: "o Google lê o site na hora da
+  busca"; "a descrição muda o ranking"; "noindex é segredo" (a página
+  continua no ar, só sai da busca).
+- **S2. SEO na página** (`sites-ser-encontrado-u2`): um h1 que diz do que a
+  página trata e títulos em ordem (revisa U3), textos que respondem o que
+  a pessoa busca, alt nas imagens (revisa U4 e P1), textos de link que
+  dizem para onde vão e velocidade (revisa P1 e o Lighthouse). Desafio:
+  uma página bonita e invisível para a busca. Confusões: "encher de
+  palavra-chave ajuda"; "SEO é truque" (é, na maior parte, fazer a página
+  boa para quem lê).
+- **S3. Seu negócio no mapa** (`sites-ser-encontrado-u3`): o perfil da
+  empresa no Google (o que é, o que o programador ajuda a preencher; o
+  passo a passo fica no arquivo de plataformas), nome, endereço e telefone
+  iguais em todo lugar, avaliações (responder, nunca comprar) e os dados
+  estruturados `LocalBusiness` (JSON-LD) ligando o site ao negócio.
+  Desafio: uma padaria com três endereços diferentes espalhados. Painel
+  "Teste de dados estruturados". Confusões: "dados estruturados garantem o
+  cartão no mapa" (ajudam a busca a entender; quem decide é ela).
+- **S4. Medir quem chega** (`sites-ser-encontrado-u4`): Search Console (o
+  que a busca vê do seu site) e Analytics (o que as pessoas fazem nele),
+  como conceitos; links rastreáveis com `utm_source`, `utm_medium` e
+  `utm_campaign`; eventos de conversão (o clique no WhatsApp, o envio do
+  pedido). Painel "Medição" (simulado: o site-alvo ainda não roda
+  JavaScript; o código de medição de verdade vem na Páginas vivas).
+  Desafio: descobrir qual divulgação trouxe clientes. Confusões: "visita é
+  cliente"; "UTM muda a página".
+- **S5. Anúncio pago por dentro** (`sites-ser-encontrado-u5`): leilão,
+  palavra-chave, orçamento diário, custo por clique, página de destino e
+  conversão; a posição depende do lance vezes a qualidade. Por que um site
+  ruim queima o dinheiro do anúncio. Tipo de fase `simulador-campanha`
+  (números fictícios, declarados). Desafio: a mesma verba trazendo mais
+  clientes depois de melhorar a página. Confusões: "quem paga mais sempre
+  aparece em primeiro"; "mais cliques é mais clientes".
+
 ---
 
 ## Ilha 2: Lógica (JavaScript puro)

@@ -508,7 +508,12 @@ camada de trilhas e a fábrica estiverem estáveis.
   tinha 10 temas; entrou Fundamentos (como o computador funciona, história
   e carreiras), porque as Origens e a sala "Por baixo do capô" não cabiam
   em nenhum dos outros sem forçar, e uma unidade sem tema nunca acenderia
-  na lente.
+  na lente. **Decisão (rodada 14)**: entrou Presença digital (12 temas),
+  para a zona opcional "Ser encontrado" (busca, mapa, medição e anúncio).
+  Ela não cabia em Interfaces nem em Dados sem forçar: o assunto é o site
+  ser achado e medido por quem está fora dele, uma preocupação real de
+  quem faz site para um pequeno negócio, e a lente precisa juntar as
+  cinco unidades num lugar só. Pesa 1 no Front-end e no Dados.
 - Cada `Conceito` tem `temas` (pelo menos um). Cada unidade do currículo
   declara `temas` (as planejadas também, para acenderem). Na unidade
   pronta, os temas de verdade são os dos conceitos que as fases ensinam
@@ -563,6 +568,32 @@ camada de trilhas e a fábrica estiverem estáveis.
   dela), com o texto "Você chega lá na Ilha X". `/glossario#<conceito>`
   abre no verbete.
 
+### Revisão do dia (rodada 14)
+
+- Itens declarativos em `src/conteudo/revisao/<conceito>.ts` (guia, seção
+  19); cada item vira a fase de um objetivo sozinho (`faseDoItem`) e é
+  jogado pelo `JogoFase` no modo `revisao-dia` (sem salvar a fase, sem
+  estrelas, sem apresentações, "Não lembrei"; o resultado vai para a
+  sessão por `aoTerminarRevisao`).
+- Agendador em `src/lib/revisao.ts` (regras no topo), estado em
+  `progresso.revisao` (`src/lib/estadoRevisao.ts`, leitura segura). A fase
+  concluída registra os conceitos (`useMotorFase`); progresso antigo é
+  sincronizado no mundo e na `/revisao` (`useSincronizarRevisao`).
+- `/revisao` (`componentes/revisao/`) e o Porto da revisão no mundo
+  (`ArtePorto`, `data-porto`, `data-porto-itens`).
+
+### Ser encontrado: busca, medição e campanha (rodada 14)
+
+- Abas que não são do Chrome (Busca, Medição, Campanha) só aparecem nas
+  fases que usam as ferramentas delas (`soQuandoLivre` em
+  `src/motor/abas.ts`); as fases publicadas não mudam.
+- Motores puros de DOM: `src/motor/busca.ts` (resultado, corte, noindex,
+  JSON-LD), `src/motor/medicao.ts` (data-evento, utm) e
+  `src/motor/campanha.ts` (nota da página, leilão, dia simulado). Todos
+  são simulações aproximadas, e a tela diz isso.
+- Tipo de fase `simulador-campanha` com objetivos: o motor de objetivos
+  vale para os dois tipos por `temObjetivos` (`src/motor/tiposDeFase.ts`).
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,
@@ -571,6 +602,12 @@ camada de trilhas e a fábrica estiverem estáveis.
   (`opcional`, `sempreAberta`), zona (`icone`, `requerMotor`) e unidade
   (id `<ilha>-<zona>-u<n>`, título, meta em uma frase e, raro,
   `requerMotor` só dela, como a U6).
+- Zona opcional (`opcional: true`, rodada 14): não conta para concluir a
+  ilha nem para abrir a zona seguinte ou a próxima ilha
+  (`ilhaCompleta`, `zonaAberta` em `src/lib/mapa.ts`; `zonasObrigatorias`
+  e `unidadesObrigatoriasDaIlha` no currículo), abre como as outras e
+  aparece no mapa com a plaquinha "Opcional". Hoje: "Ser encontrado", no
+  fim da Ilha Sites. As lentes contam as unidades dela normalmente.
 - Status não é guardado: unidade com conteúdo registrado de mesmo id é
   "pronta"; o resto é "planejada" (`statusDaUnidade`).
 - Checagens (`src/curriculo/conferir.ts`, no `testar:conteudo`): ids

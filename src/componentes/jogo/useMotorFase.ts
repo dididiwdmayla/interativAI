@@ -1,5 +1,6 @@
 "use client";
 
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
 import type { ApiEditor } from "@/componentes/painel/editor/EditorCodigo";
@@ -24,7 +25,8 @@ import {
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { documentoSoltoDaFase } from "@/motor/simulacao";
-import { type DegrauAjuda, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
+import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
+import { diaLocal, registrarFaseConcluida } from "@/lib/revisao";
 import { avaliarValidador, consultar, type ContextoValidacao, itensDoChecklist, recalcularPartesFeitas } from "@/motor/validadores";
 
 /** Meus projetos: o site do projeto-ponte, copiado a cada mudança (a data só anda se o texto mudou). */
@@ -65,7 +67,7 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha">;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -110,7 +112,7 @@ export function useMotorFase({
   const aplicando = useRef(false);
   const temporizadores = useRef<TemporizadorRastreado[]>([]);
 
-  const pratica = fase.tipo === "pratica" ? fase : null;
+  const pratica = temObjetivos(fase) ? fase : null;
   const desafio = fase.tipo === "desafio" ? fase : null;
   const projeto = fase.tipo === "projeto-ponte" ? fase : null;
   /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
@@ -169,9 +171,15 @@ export function useMotorFase({
   /* Persistência                                                      */
   /* ---------------------------------------------------------------- */
 
+  // Revisão do dia: a fase concluída agora (não a que já abriu concluída) põe os conceitos na fila, uma vez.
+  const concluidaAoAbrir = useRef(estado.etapa === "concluida");
+  const revisaoRegistrada = useRef(false);
+
   const salvar = useCallback(
     (atual: EstadoMotor) => {
       if (modo !== "jogo") return;
+      const registrarRevisao = atual.etapa === "concluida" && !concluidaAoAbrir.current && !revisaoRegistrada.current;
+      if (registrarRevisao) revisaoRegistrada.current = true;
       atualizarProgresso((progresso) => {
         const concluida = atual.etapa === "concluida";
         return {
@@ -208,10 +216,14 @@ export function useMotorFase({
               }
             : progresso.estrelasPorFase,
           projetos: projeto ? espelharProjeto(progresso.projetos, fase.id, htmlAtual, cssAtual) : progresso.projetos,
+          // A ajuda da fase, aproximada pelas estrelas: só a solução e o Rever tiram estrela.
+          revisao: registrarRevisao
+            ? registrarFaseConcluida(progresso.revisao, fase, atual.estrelas < ESTRELAS_INICIAIS, diaLocal())
+            : progresso.revisao,
         };
       });
     },
-    [cssAtual, fase.id, fase.unidadeId, htmlAtual, modo, mostrarMeta, projeto],
+    [cssAtual, fase, htmlAtual, modo, mostrarMeta, projeto],
   );
 
   useEffect(() => {

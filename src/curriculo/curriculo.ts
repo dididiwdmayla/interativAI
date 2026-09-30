@@ -223,6 +223,45 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
           },
         ],
       },
+      {
+        // Zona opcional (docs/MAPA-CURRICULAR.md, "Ser encontrado"): não tranca a Lógica.
+        id: "ser-encontrado",
+        nome: "Ser encontrado",
+        icone: "busca",
+        opcional: true,
+        unidades: [
+          {
+            id: "sites-ser-encontrado-u1",
+            titulo: "Como o Google acha seu site",
+            meta: "Fazer uma página aparecer do jeito certo na busca: título, descrição e sem noindex esquecido.",
+            temas: ["presenca-digital"],
+          },
+          {
+            id: "sites-ser-encontrado-u2",
+            titulo: "SEO na página",
+            meta: "Deixar uma página boa para quem busca: títulos, textos, alt, links e velocidade.",
+            temas: ["presenca-digital", "acessibilidade", "desempenho"],
+          },
+          {
+            id: "sites-ser-encontrado-u3",
+            titulo: "Seu negócio no mapa",
+            meta: "Ligar o site ao negócio no mapa com dados iguais em todo lugar e dados estruturados.",
+            temas: ["presenca-digital", "dados"],
+          },
+          {
+            id: "sites-ser-encontrado-u4",
+            titulo: "Medir quem chega",
+            meta: "Saber de onde vêm as visitas e o que elas fazem, com links rastreáveis e eventos de conversão.",
+            temas: ["presenca-digital", "dados"],
+          },
+          {
+            id: "sites-ser-encontrado-u5",
+            titulo: "Anúncio pago por dentro",
+            meta: "Entender o leilão do anúncio e ver por que uma página ruim queima o dinheiro da campanha.",
+            temas: ["presenca-digital", "desempenho"],
+          },
+        ],
+      },
     ],
   },
   {
