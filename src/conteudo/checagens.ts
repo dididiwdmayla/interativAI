@@ -939,6 +939,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       }
       if (fase.modoDocumento) problemas.push("fase de programa não usa modoDocumento");
       if (!fase.usaFerramentas.includes("console")) problemas.push('fase de programa pede "console" em usaFerramentas (o Console sempre aparece)');
+      if (!fase.usaFerramentas.includes("palco-memoria")) problemas.push('fase de programa pede "palco-memoria" em usaFerramentas (o palco é a tela da fase)');
       const usaSnippet = [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)].some(({ acoes }) =>
         acoes.some((acao) => acao.tipo === "definirSnippet" || acao.tipo === "executarSnippet"),
       );

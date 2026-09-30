@@ -430,6 +430,38 @@ resposta da última expressão, as saídas do console e o erro.
 - Regra `fase-de-programa` no `testar:conteudo` e a Bancada do Console
   (`/lab/fases?fase=lab-logica-u1-f1`), com um objetivo por validador.
 
+### Palco da memória e linha do tempo (rodada 17)
+
+- Na fase de programa, a tela do site vira o palco
+  (`componentes/palco/`). As regras do desenho são puras, em
+  `src/motor/palco.ts` (`planoDoPalco`, testado em
+  `testes/conteudo/palco.test.ts`): cada variável é uma caixinha (nome,
+  let/const/parâmetro, valor e a plaquinha do tipo, na cor do token
+  `--cor-js-*`); lista é uma fileira de vagões com o índice embaixo;
+  objeto é uma ficha de chave e valor; Map e Set, fichas próprias.
+- **Decisão (referências):** a lista (ou o objeto) é desenhada DENTRO da
+  primeira variável que aponta para ela; as outras (outra variável, um item
+  de lista, um campo, o parâmetro de uma função) mostram "a mesma de a" com
+  uma seta tracejada até ela, em SVG medido depois do desenho
+  (`ResizeObserver`). Sem cópia: é o jeito de o jogador ver que `let b = a`
+  não copia a lista. Objeto que aponta para ele mesmo também vira seta.
+- Moldura por chamada: a memória global sempre; cada função, enquanto
+  roda, com a própria moldura ("somar() rodando") e os blocos com variáveis
+  (o corpo de um for) numa moldura tracejada dentro; no passo de retorno, a
+  moldura diz "devolve 8".
+- Animação: caixinha nova surge (`palco-surgir`), valor que mudou pisca
+  (`palco-piscar`, também o vagão ou o campo que mudou), comparando com o
+  passo anterior (`mudancasDoPalco`); sem animação com
+  `prefers-reduced-motion`.
+- Linha do tempo (`LinhaDoTempo.tsx`, só nas fases com a ferramenta
+  `linha-do-tempo`): uma barra com um ponto por passo do rastro da última
+  execução, passo anterior e próximo (44 px no toque), a descrição ("Passo
+  6 de 13 · linha 6: for (...)") e, num Snippet, a linha acesa no editor.
+  Uma execução nova volta ao fim. Ao vivo (no fim), o palco pisca o que a
+  execução inteira mudou; andando na barra, o que aquele passo mudou.
+- Ferramentas com apresentação: `palco-memoria` (sempre na tela de uma fase
+  de programa; a regra `fase-de-programa` exige) e `linha-do-tempo`.
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é

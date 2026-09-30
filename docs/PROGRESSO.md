@@ -73,3 +73,13 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
   (o glossário exige onde aprender).
 - Testes: `programa.test.ts` (12), tutor e progresso;
   `testes/console.mjs` nos três layouts (verde, também no build de produção).
+
+### Etapa 4: palco da memória e linha do tempo
+
+- `src/motor/palco.ts` (plano puro: caixinhas, vagões, fichas, ponteiros com
+  seta, molduras, o que surge e o que muda) e `componentes/palco/`
+  (`PalcoMemoria`, `QuadroPalco`, `CaixinhaPalco`, `ValorPalco`,
+  `LinhaDoTempo`). Animações `palco-surgir` e `palco-piscar`.
+- Linha do tempo no `JogoFase` (o passo escolhido vale só para aquela
+  execução), com a linha acesa no Snippet.
+- Testes: `palco.test.ts` (6) e `testes/palco.mjs` nos três layouts.

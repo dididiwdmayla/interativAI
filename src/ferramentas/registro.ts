@@ -862,8 +862,8 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     praQueServe:
       "Programa não tem tela de site: o que muda é a memória. Aqui você vê a caixinha nascer, o valor trocar e duas variáveis apontando para a mesma lista.",
     comoUsarAqui: {
-      mouse: "Rode algo no Console ou no Snippet e olhe o palco mudar. Passe o mouse numa caixinha para ver o tipo do valor.",
-      toque: "Rode algo no Console ou no Snippet e olhe o palco mudar. Toque numa caixinha para ver o tipo do valor.",
+      mouse: "Rode algo no Console ou no Snippet e olhe o palco mudar. A plaquinha no canto de cada caixinha diz o tipo do valor, com a cor dele.",
+      toque: "Rode algo no Console ou no Snippet e olhe o palco mudar. A plaquinha no canto de cada caixinha diz o tipo do valor, com a cor dele.",
     },
     noF12DeVerdade:
       "não tem um palco igual: o mais perto é o painel Escopo (Scope) da aba Fontes, que lista as variáveis quando o programa pausa num ponto de parada.",

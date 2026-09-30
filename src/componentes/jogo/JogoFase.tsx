@@ -48,6 +48,7 @@ import { PreviewSiteAlvo } from "@/componentes/preview/PreviewSiteAlvo";
 import { PainelConsole } from "@/componentes/painel/console/PainelConsole";
 import { PainelFontes } from "@/componentes/painel/fontes/PainelFontes";
 import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
+import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
 import { SobreposicaoInspecao } from "@/componentes/preview/SobreposicaoInspecao";
 import { Botao } from "@/componentes/ui/Botao";
@@ -312,6 +313,24 @@ export function JogoFase({
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   const { editorSnippetRef } = programa;
+  // Linha do tempo: o passo escolhido vale só para a execução em que foi escolhido (uma nova volta ao fim).
+  const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
+  const [escolhaDePasso, setEscolhaDePasso] = useState<{ de: typeof programa.ultimo; indice: number } | null>(null);
+  const passosDoRastro = programa.ultimo?.passos ?? [];
+  const passoEscolhido = escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null;
+  const indicePasso = passoEscolhido ?? passosDoRastro.length - 1;
+  const passoNoPalco = passosDoRastro[indicePasso] ?? null;
+  const fotoNoPalco = passoNoPalco?.memoria ?? programa.ultimo?.memoriaFinal ?? null;
+  const fotoAnteriorNoPalco = passoEscolhido !== null ? (passosDoRastro[passoEscolhido - 1]?.memoria ?? programa.memoriaAnterior) : programa.memoriaAnterior;
+  const irParaPasso = (indice: number) => {
+    const ultimo = programa.ultimo;
+    if (!ultimo || !passosDoRastro.length) return;
+    const alvo = Math.max(0, Math.min(passosDoRastro.length - 1, indice));
+    setEscolhaDePasso({ de: ultimo, indice: alvo });
+    sinalizarUso("linha-do-tempo");
+    const linha = passosDoRastro[alvo]?.linha;
+    if (ultimo.origem === "snippet") editorSnippetRef.current?.destacarLinhas(linha && alvo < passosDoRastro.length - 1 ? [linha] : []);
+  };
   const destacarNoPrograma = useCallback(
     (alvo: number[] | "console" | null) => {
       if (alvo === null) {
@@ -1952,9 +1971,21 @@ export function JogoFase({
               marcador="palco-memoria"
               aoAbrirCard={abrirCard}
               classeMarcador="right-3 top-3"
-              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda shadow-[0_8px_0_var(--cor-sombra)]"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
             >
-              <PalcoMemoria memoria={programa.ultimo?.memoriaFinal ?? null} />
+              <PalcoMemoria foto={fotoNoPalco} anterior={fotoAnteriorNoPalco} passo={passoNoPalco} erro={programa.ultimo?.erro ?? null} />
+              {comLinhaDoTempo && (
+                <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
+                  <LinhaDoTempo
+                    passos={passosDoRastro}
+                    indice={indicePasso}
+                    aoMudar={irParaPasso}
+                    codigo={programa.ultimo?.codigo ?? ""}
+                    cortado={programa.ultimo?.rastroCortado ?? false}
+                    totalPassos={programa.ultimo?.totalPassos ?? 0}
+                  />
+                </AlvoFerramenta>
+              )}
             </AlvoFerramenta>
           ) : (
           <AlvoFerramenta

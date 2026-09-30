@@ -29,8 +29,8 @@ export const FASE_BANCADA_CONSOLE: FasePratica = {
   conceitos: ["elemento"],
   revisa: [],
   prerequisitos: [],
-  usaFerramentas: ["console", "snippet"],
-  apresentar: ["console"],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "linha-do-tempo"],
+  apresentar: ["console", "palco-memoria"],
   siteAlvo: SITE_DO_PROGRAMA,
   programa: {
     snippet: { codigoInicial: "// Escreva seu programa aqui\n", nome: "programa.js" },
@@ -98,7 +98,7 @@ export const FASE_BANCADA_CONSOLE: FasePratica = {
       id: "funcao",
       tipo: "acao",
       modo: "guiado",
-      apresentar: ["snippet"],
+      apresentar: ["snippet", "linha-do-tempo"],
       enunciado: {
         mouse: "No Snippet, crie a função dobro(n) que DEVOLVE o dobro de n, e execute.",
         toque: "No Snippet, crie a função dobro(n) que DEVOLVE o dobro de n, e execute.",

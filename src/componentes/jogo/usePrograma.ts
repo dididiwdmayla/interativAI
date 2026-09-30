@@ -51,6 +51,14 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
   const [entradas, setEntradas] = useState<ProgramaSalvo["entradas"]>(() => salvo?.entradas ?? []);
   const [snippetSalvo, setSnippetSalvo] = useState<string | null>(salvo?.snippet ?? null);
   const [ultimo, setUltimo] = useState<ResultadoExecucao | null>(null);
+  /** A memória do fim da execução anterior (o palco pisca o que esta execução mudou). */
+  const [memoriaAnterior, setMemoriaAnterior] = useState<ResultadoExecucao["memoriaFinal"] | null>(null);
+  const ultimoAtual = useRef<ResultadoExecucao | null>(null);
+  const mostrarResultado = useCallback((resultado: ResultadoExecucao) => {
+    setMemoriaAnterior(ultimoAtual.current?.memoriaFinal ?? null);
+    ultimoAtual.current = resultado;
+    setUltimo(resultado);
+  }, []);
   const [ocupado, setOcupado] = useState(0);
   const [pronto, setPronto] = useState(!ativo);
   const editorSnippetRef = useRef<ApiEditor | null>(null) as RefObject<ApiEditor | null>;
@@ -94,6 +102,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       if (cancelado) return;
       await atualizarEstado(agora);
       if (cancelado) return;
+      ultimoAtual.current = agora;
       setUltimo(agora);
       if (salvo?.entradas.length) acrescentar([{ tipo: "info", texto: "A memória de antes voltou: as variáveis continuam como estavam." }]);
       setPronto(true);
@@ -131,7 +140,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem });
         else if (origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
         acrescentar(novas, ultimoLimpar >= 0);
-        setUltimo(resultado);
+        mostrarResultado(resultado);
         if (!resultado.erro || resultado.erro.tipo === "execucao") {
           setEntradas((atuais) => [...atuais, { codigo, origem: origem === "snippet" ? ("snippet" as const) : ("console" as const) }].slice(-MAXIMO_ENTRADAS_SALVAS));
         }
@@ -141,7 +150,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         encerrar();
       }
     },
-    [acrescentar, atualizarEstado, barramento, nomeSnippet, sessao],
+    [acrescentar, atualizarEstado, barramento, mostrarResultado, nomeSnippet, sessao],
   );
 
   const executarNoConsole = useCallback(
@@ -208,6 +217,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     snippetInicial,
     editorSnippetRef,
     ultimo,
+    memoriaAnterior,
     programaSalvo,
     executarNoConsole,
     executarSnippet,
