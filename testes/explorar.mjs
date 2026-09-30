@@ -42,7 +42,7 @@ const ponto = (id) => pagina.locator(`[data-unidade="${id}"]`);
 
 // ---------------------------------------------------------------- lente de tema no mundo
 await pagina.locator("[data-barra-lentes]").waitFor();
-conferir((await pagina.locator("[data-barra-lentes] [data-tema]").count()) === 11, `${MODO}: barra de temas com os 11 temas`);
+conferir((await pagina.locator("[data-barra-lentes] [data-tema]").count()) === 12, `${MODO}: barra de temas com os 12 temas`);
 await tocar(pagina.locator('[data-barra-lentes] [data-tema="seguranca"]'));
 const progressoLente = pagina.locator("[data-progresso-lente]");
 await progressoLente.waitFor();

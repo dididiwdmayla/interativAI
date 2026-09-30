@@ -9,7 +9,7 @@ import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { UNIDADES } from "@/conteudo";
-import { ilhasDaTrilha, type Trilha, unidadesDaIlha, unidadesProntasDaIlha } from "@/curriculo";
+import { ilhasDaTrilha, statusDaUnidade, type Trilha, unidadesDaIlha, unidadesObrigatoriasDaIlha } from "@/curriculo";
 import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import { useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
@@ -208,7 +208,8 @@ function MundoCarregado() {
             {ilhasDoMundo.map((ilha) => {
               const { x, y } = posicaoDa(ilha);
               const estado = estadoDaIlha(ilha, fonte);
-              const prontas = unidadesProntasDaIlha(ilha);
+              // As zonas opcionais não contam para a ilha ficar "Completa!".
+              const prontas = unidadesObrigatoriasDaIlha(ilha).filter((item) => statusDaUnidade(item.id) === "pronta");
               const concluidas = prontas.filter((item) => {
                 const conteudo = UNIDADES.find((unidade) => unidade.id === item.id);
                 return conteudo ? unidadeConcluida(conteudo, progresso) : false;

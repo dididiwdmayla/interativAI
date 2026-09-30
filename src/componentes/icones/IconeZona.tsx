@@ -67,6 +67,13 @@ const DESENHOS: Record<IdIconeZona, ReactNode> = {
       <path d="M7 12l-2.5 3h3M13 12l2.5 3h-3M9 14.5v2.5M11 14.5v2.5" />
     </>
   ),
+  // Lupa de busca.
+  busca: (
+    <>
+      <circle cx="8.5" cy="8.5" r="5" fill="currentColor" fillOpacity={0.15} />
+      <path d="M12.2 12.2l4.8 4.8" />
+    </>
+  ),
   // A aba Console: prompt.
   console: (
     <>

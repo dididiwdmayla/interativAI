@@ -35,6 +35,7 @@ export const PROFISSOES: readonly Profissao[] = [
       { tema: "desempenho", peso: 2 },
       { tema: "apis", peso: 1 },
       { tema: "ferramentas", peso: 1 },
+      { tema: "presenca-digital", peso: 1 },
     ],
   },
   {
@@ -98,6 +99,7 @@ export const PROFISSOES: readonly Profissao[] = [
       { tema: "ia", peso: 2 },
       { tema: "apis", peso: 1 },
       { tema: "desempenho", peso: 1 },
+      { tema: "presenca-digital", peso: 1 },
     ],
   },
   {

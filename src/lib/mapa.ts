@@ -16,13 +16,24 @@
  * - sem conteúdo: "planejada";
  * - todas as fases concluídas: "concluida";
  * - a zona abre quando a anterior tem todas as unidades prontas concluídas,
- *   e dentro da zona as unidades prontas vão em sequência.
+ *   e dentro da zona as unidades prontas vão em sequência;
+ * - zona opcional (`opcional`): não conta para concluir a ilha nem para
+ *   abrir as zonas seguintes ou a próxima ilha; ela mesma abre como as
+ *   outras (as obrigatórias antes dela concluídas).
  *
  * O /lab/mapa liga `mapaDesbloqueado`, que abre tudo o que tem conteúdo.
  */
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ilhasDaTrilha, localNoCurriculo, type Trilha, trilhaDoId, trilhasDaIlha } from "@/curriculo";
+import {
+  CURRICULO,
+  ilhasDaTrilha,
+  localNoCurriculo,
+  type Trilha,
+  trilhaDoId,
+  trilhasDaIlha,
+  unidadesObrigatoriasDaIlha,
+} from "@/curriculo";
 import type { IlhaCurriculo, UnidadeCurriculo, ZonaCurriculo } from "@/curriculo/tipos";
 import type { Progresso } from "./progresso";
 
@@ -108,14 +119,10 @@ function ilhaComProgresso(ilha: IlhaCurriculo, unidades: readonly Unidade[], pro
   return ilha.zonas.some((zona) => zonaComProgresso(zona, unidades, progresso));
 }
 
-/** A ilha tem todas as unidades prontas concluídas. */
+/** A ilha tem todas as unidades prontas concluídas (as das zonas opcionais não contam). */
 export function ilhaCompleta(ilha: IlhaCurriculo, fonte: FonteMapa): boolean {
   const unidades = fonte.unidades ?? UNIDADES;
-  return prontasConcluidas(
-    ilha.zonas.flatMap((zona) => zona.unidades),
-    unidades,
-    fonte.progresso,
-  );
+  return prontasConcluidas(unidadesObrigatoriasDaIlha(ilha), unidades, fonte.progresso);
 }
 
 /** A ilha está aberta pela regra de desbloqueio (sem olhar se tem conteúdo). */
@@ -155,7 +162,9 @@ export function zonaAberta(ilha: IlhaCurriculo, zona: ZonaCurriculo, fonte: Font
   if (zonaComProgresso(zona, unidades, fonte.progresso)) return true;
   if (estadoDaIlha(ilha, fonte) === "bloqueada") return false;
   const indice = ilha.zonas.findIndex((item) => item.id === zona.id);
-  return ilha.zonas.slice(0, Math.max(0, indice)).every((anterior) => prontasConcluidas(anterior.unidades, unidades, fonte.progresso));
+  return ilha.zonas
+    .slice(0, Math.max(0, indice))
+    .every((anterior) => anterior.opcional === true || prontasConcluidas(anterior.unidades, unidades, fonte.progresso));
 }
 
 /** Estado de um ponto (unidade) na ilha. */

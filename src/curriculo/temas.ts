@@ -11,7 +11,8 @@
  * contidos neles (checagem do testar:conteudo).
  *
  * O catálogo segue o ponto de partida do prompt da rodada 10, com um tema
- * a mais, Fundamentos (ver docs/PROJETO.md, "Temas").
+ * a mais, Fundamentos, e Presença digital (a zona opcional "Ser
+ * encontrado"); ver docs/PROJETO.md, "Temas".
  */
 
 export const IDS_TEMAS = [
@@ -26,6 +27,7 @@ export const IDS_TEMAS = [
   "desempenho",
   "ia",
   "ferramentas",
+  "presenca-digital",
 ] as const;
 
 export type IdTema = (typeof IDS_TEMAS)[number];
@@ -92,6 +94,11 @@ export const TEMAS: readonly DadosTema[] = [
     id: "ferramentas",
     nome: "Ferramentas do ofício",
     descricao: "As ferramentas do dia a dia de quem programa: F12, terminal, Git, editor, testes e publicação.",
+  },
+  {
+    id: "presenca-digital",
+    nome: "Presença digital",
+    descricao: "Fazer o site ser encontrado: aparecer na busca e no mapa, medir quem chega e entender o anúncio pago por dentro.",
   },
 ];
 

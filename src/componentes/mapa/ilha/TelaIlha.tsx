@@ -72,6 +72,21 @@ export function BotaoVoltarAoMundo() {
 }
 
 /** Placa de madeira "Em construção" (sem o texto técnico do que falta). */
+/** Zona opcional: não conta para concluir a ilha nem tranca o caminho. */
+function PlacaOpcional() {
+  return (
+    <span
+      data-placa-opcional
+      className="flex items-center gap-1 rounded-md border-2 border-borda bg-superficie px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-texto-suave"
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M3 8h10M8 3v10" stroke="var(--cor-primaria)" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 2.2" />
+      </svg>
+      Opcional
+    </span>
+  );
+}
+
 function PlacaConstrucao() {
   return (
     <span className="flex items-center gap-1 rounded-md border-2 border-madeira bg-areia px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-texto">
@@ -404,6 +419,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                   <IconeZona icone={regiao.zona.icone} tamanho={18} className="text-primaria" />
                   {regiao.zona.nome}
                 </span>
+                {regiao.zona.opcional && <PlacaOpcional />}
                 {regiao.zona.requerMotor && <PlacaConstrucao />}
               </div>
             ))}

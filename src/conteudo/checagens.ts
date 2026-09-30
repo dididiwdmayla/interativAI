@@ -11,6 +11,7 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
+import { conferirPlataformas, PLATAFORMAS_MARKETING } from "./plataformas-marketing";
 import { CURRICULO, ILHAS_FUTURAS } from "@/curriculo/curriculo";
 import { NUCLEO_COMUM, TRILHA_PADRAO, TRILHAS } from "@/curriculo/trilhas";
 import { conferirTemas } from "@/lib/temas";
@@ -519,6 +520,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "profissoes",
     nome: "toda profissão usa temas que existem, com pesos de 1 a 3",
     checar: () => conferirProfissoes(PROFISSOES),
+  },
+  {
+    id: "plataformas-marketing",
+    nome: "o arquivo de plataformas de marketing tem ids únicos, data conferida e passos",
+    checar: () => conferirPlataformas(PLATAFORMAS_MARKETING),
   },
   {
     id: "publicados-congelados",

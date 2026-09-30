@@ -508,7 +508,12 @@ camada de trilhas e a fábrica estiverem estáveis.
   tinha 10 temas; entrou Fundamentos (como o computador funciona, história
   e carreiras), porque as Origens e a sala "Por baixo do capô" não cabiam
   em nenhum dos outros sem forçar, e uma unidade sem tema nunca acenderia
-  na lente.
+  na lente. **Decisão (rodada 14)**: entrou Presença digital (12 temas),
+  para a zona opcional "Ser encontrado" (busca, mapa, medição e anúncio).
+  Ela não cabia em Interfaces nem em Dados sem forçar: o assunto é o site
+  ser achado e medido por quem está fora dele, uma preocupação real de
+  quem faz site para um pequeno negócio, e a lente precisa juntar as
+  cinco unidades num lugar só. Pesa 1 no Front-end e no Dados.
 - Cada `Conceito` tem `temas` (pelo menos um). Cada unidade do currículo
   declara `temas` (as planejadas também, para acenderem). Na unidade
   pronta, os temas de verdade são os dos conceitos que as fases ensinam
@@ -571,6 +576,12 @@ camada de trilhas e a fábrica estiverem estáveis.
   (`opcional`, `sempreAberta`), zona (`icone`, `requerMotor`) e unidade
   (id `<ilha>-<zona>-u<n>`, título, meta em uma frase e, raro,
   `requerMotor` só dela, como a U6).
+- Zona opcional (`opcional: true`, rodada 14): não conta para concluir a
+  ilha nem para abrir a zona seguinte ou a próxima ilha
+  (`ilhaCompleta`, `zonaAberta` em `src/lib/mapa.ts`; `zonasObrigatorias`
+  e `unidadesObrigatoriasDaIlha` no currículo), abre como as outras e
+  aparece no mapa com a plaquinha "Opcional". Hoje: "Ser encontrado", no
+  fim da Ilha Sites. As lentes contam as unidades dela normalmente.
 - Status não é guardado: unidade com conteúdo registrado de mesmo id é
   "pronta"; o resto é "planejada" (`statusDaUnidade`).
 - Checagens (`src/curriculo/conferir.ts`, no `testar:conteudo`): ids
