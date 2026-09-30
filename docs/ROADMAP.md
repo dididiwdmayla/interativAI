@@ -374,6 +374,11 @@ núcleo comum.
   - No Console, usar uma `let` do topo antes de declarar dá `undefined` em
     vez do ReferenceError do Chrome (efeito de virar `var`; no Snippet e
     dentro de blocos e funções é igual ao Chrome).
+  - Apresentação no celular: no passo "Experimente" o cartão desliza até o
+    lugar (0,3 s); um toque na árvore durante o deslize pode ser engolido
+    pelo cartão (o click chega depois do touchstart). Os testes esperam o
+    cartão parar (`passarApresentacao`); no jogo, vale desligar os toques
+    no cartão enquanto ele se move.
   - As bancadas do `/lab` usam o conceito "elemento" como marcador; os
     conceitos `snippet-js`, `funcao-js` e `portao-logico` entram com as
     unidades que os ensinam.

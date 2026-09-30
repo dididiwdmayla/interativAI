@@ -325,6 +325,24 @@ export function errosRelevantes(erros) {
 }
 
 /**
+ * Espera o cartão da apresentação parar de se mover: a mesma posição por
+ * 400 ms (mais que a transição de 0,3 s; o cartão pode ficar alguns quadros
+ * no lugar antigo antes de começar a deslizar).
+ */
+async function cartaoParado(pagina, camada) {
+  const cartao = camada.locator(".cartao-apresentacao");
+  let antes = null;
+  let parado = 0;
+  for (let i = 0; i < 40 && parado < 4; i++) {
+    const caixa = await cartao.boundingBox().catch(() => null);
+    const agora = caixa ? `${Math.round(caixa.x)},${Math.round(caixa.y)}` : "";
+    parado = agora && agora === antes ? parado + 1 : 0;
+    antes = agora;
+    await pagina.waitForTimeout(100);
+  }
+}
+
+/**
  * Uma apresentação de ferramenta inteira: espera ela aparecer, passa as 3
  * falas, espera o passo "Experimente" e faz a ação; confere que ela fecha.
  * `aoFalhar(nome, erro)` tira a foto da tela, se o teste quiser.
@@ -347,6 +365,9 @@ export async function passarApresentacao(pagina, id, experimentar, aoFalhar = as
   // data-alvo-livre: os buracos do véu (o alvo e as áreas extras) já estão medidos.
   await pagina.locator(`[data-apresentacao="${id}"][data-passo-apresentacao="experimente"][data-alvo-livre="sim"]`).waitFor({ timeout: 5000 });
   await esperarPronto(pagina);
+  // O cartão desliza para o lugar do "Experimente" (transição de 0,3 s em left e top). Um toque
+  // no meio do caminho pode acertar o alvo no touchstart e o cartão no click, que vem logo depois.
+  await cartaoParado(pagina, camada);
   await experimentar();
   try {
     await camada.waitFor({ state: "detached", timeout: 8000 });

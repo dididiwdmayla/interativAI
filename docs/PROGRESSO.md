@@ -119,3 +119,10 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
 - Teste `testes/logica.mjs` (mundo, ilha, meta, apresentações, todos os
   objetivos, recarga no meio da F2, linha do tempo, desafio, unidade
   concluída) nos três layouts; entrou no `todos.mjs`.
+- Bateria completa: além da Lógica, quebras antigas consertadas nos
+  testes. `unidades.mjs` e `layout.mjs` clicavam em posições fixas das
+  previsões giradas na rodada 16 (que só rodou a bateria de conteúdo).
+  `audio.mjs` entrava na Lógica como ilha em construção; agora entra em
+  Páginas vivas. `ferramentas-novas.mjs` tocava a árvore com o cartão da
+  apresentação ainda deslizando; `passarApresentacao` agora espera o
+  cartão parar.
