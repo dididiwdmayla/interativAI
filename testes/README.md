@@ -122,6 +122,21 @@ npm run bateria:repetir   # 5 rodadas seguidas (RODADAS=n muda), com resumo
 PARALELO=2 npm run bateria  # dois arquivos ao mesmo tempo (mais rápido; a saída de cada um sai inteira no fim)
 ```
 
+**Bateria de conteúdo (prompts só de conteúdo):**
+
+```bash
+npm run bateria:conteudo   # com o jogo no ar (npm run dev ou npm start)
+```
+
+`testes/conteudo-navegador.mjs` roda só o que depende do currículo e do
+conteúdo, no desktop e com `RESUMO=1`: `mapa.mjs`, `explorar.mjs` (lentes,
+trilhas, glossário), `publicar.mjs` (o fim da ilha) e `revisao.mjs`. Uma
+linha por arquivo (ok ou FALHOU, com o começo do erro). Serve para pegar
+o que um prompt de conteúdo quebra no currículo (rodada 13: mapa, lentes e
+fim da ilha quebraram sem ninguém ver) sem pagar a bateria completa. Ela
+não substitui `npm run bateria`, que continua sendo do fim dos prompts que
+mexem no motor. Se o jogo não estiver no ar, avisa e sai com código 2.
+
 Critério de estabilidade: `bateria:repetir` com 5 rodadas seguidas verdes
 no build de produção (`npm run build && npm start`).
 
