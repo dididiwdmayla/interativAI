@@ -20,3 +20,7 @@ export const HEAD_MINI_ESCURO =
   "h1,h2{margin:0 0 8px;color:#ffd166}p{margin:0 0 8px}.cartao{background:#2b3242;border-radius:12px;padding:12px;margin-bottom:12px}" +
   "button,.botao{background:#ffd166;color:#1f2430;border:0;border-radius:999px;padding:8px 14px;font-weight:700}" +
   "ul,ol{margin:0 0 8px;padding-left:20px}nav a{margin-right:10px;color:#8fd3ff}</style>";
+
+/** Head dos itens com CSS editável: só o essencial (o visual mora no `css` do item, que aparece no painel Estilos). */
+export const HEAD_CSS =
+  '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">';

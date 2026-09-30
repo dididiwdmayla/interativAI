@@ -25,6 +25,26 @@ import { ITENS_INDEXACAO } from "./indexacao";
 import { ITENS_NOINDEX } from "./noindex";
 import { ITENS_RASTREAMENTO } from "./rastreamento";
 import { ITENS_TITULO_NA_BUSCA } from "./titulo-na-busca";
+import { ITENS_TITULOS_HIERARQUIA } from "./titulos-hierarquia";
+import { ITENS_PARAGRAFO } from "./paragrafo";
+import { ITENS_ENFASE_FORTE } from "./enfase-forte";
+import { ITENS_ENFASE_LEVE } from "./enfase-leve";
+import { ITENS_LISTA_NUMERADA } from "./lista-numerada";
+import { ITENS_EDITAR_ATRIBUTO } from "./editar-atributo";
+import { ITENS_LINK_HREF } from "./link-href";
+import { ITENS_LINK_ANCORA } from "./link-ancora";
+import { ITENS_LINK_ABA_NOVA } from "./link-aba-nova";
+import { ITENS_IMAGEM_ALT } from "./imagem-alt";
+import { ITENS_ID_UNICO } from "./id-unico";
+import { ITENS_CLASS_REPETIVEL } from "./class-repetivel";
+import { ITENS_DIV_GENERICA } from "./div-generica";
+import { ITENS_SEMANTICA_HTML } from "./semantica-html";
+import { ITENS_SECTION_VS_ARTICLE } from "./section-vs-article";
+import { ITENS_SPAN_GENERICO } from "./span-generico";
+import { ITENS_ESTRUTURA_DO_DOCUMENTO } from "./estrutura-do-documento";
+import { ITENS_HEAD_VS_BODY } from "./head-vs-body";
+import { ITENS_TITLE } from "./title";
+import { ITENS_META_CHARSET } from "./meta-charset";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -51,6 +71,27 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_TITULO_NA_BUSCA,
   ...ITENS_DESCRICAO_NA_BUSCA,
   ...ITENS_NOINDEX,
+  // U3 a U6 (zona Elementos)
+  ...ITENS_TITULOS_HIERARQUIA,
+  ...ITENS_PARAGRAFO,
+  ...ITENS_ENFASE_FORTE,
+  ...ITENS_ENFASE_LEVE,
+  ...ITENS_LISTA_NUMERADA,
+  ...ITENS_EDITAR_ATRIBUTO,
+  ...ITENS_LINK_HREF,
+  ...ITENS_LINK_ANCORA,
+  ...ITENS_LINK_ABA_NOVA,
+  ...ITENS_IMAGEM_ALT,
+  ...ITENS_ID_UNICO,
+  ...ITENS_CLASS_REPETIVEL,
+  ...ITENS_DIV_GENERICA,
+  ...ITENS_SEMANTICA_HTML,
+  ...ITENS_SECTION_VS_ARTICLE,
+  ...ITENS_SPAN_GENERICO,
+  ...ITENS_ESTRUTURA_DO_DOCUMENTO,
+  ...ITENS_HEAD_VS_BODY,
+  ...ITENS_TITLE,
+  ...ITENS_META_CHARSET,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
