@@ -12,7 +12,7 @@
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
 import { temObjetivos } from "@/motor/tiposDeFase";
-import { conferirPlataformas, PLATAFORMAS_MARKETING } from "./plataformas-marketing";
+import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
 import { faseDoItem } from "./revisao/faseDoItem";
@@ -491,6 +491,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     checar: () => conferirPlataformas(PLATAFORMAS_MARKETING),
   },
   {
+    id: "conferido-em-nas-fases",
+    nome: "toda unidade que cita uma plataforma mostra o \"conferido em\" com a data do arquivo de plataformas",
+    checar: ({ unidades, fases }) => conferirConferidoNasFases(PLATAFORMAS_MARKETING, unidades, fases),
+  },
+  {
     id: "publicados-congelados",
     nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
     checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
@@ -527,6 +532,47 @@ export function conferirPosicaoDaCorreta(
   for (const [conceito, posicoes] of porConceito) {
     if (sempreIgual(posicoes)) {
       problemas.push(`o conceito "${conceito}" tem ${posicoes.length} previsões de revisão, todas com a certa na posição ${posicoes[0]}: gire a posição`);
+    }
+  }
+  return problemas;
+}
+
+/**
+ * O passo a passo das plataformas mora em plataformas-marketing.ts, com a
+ * data em que foi conferido. Como o jogo não tem uma tela que liste os
+ * passos, as fases carregam o "conferido em <data>" (uma fala ou a missão de
+ * campo). Cada unidade em `usadaEm` mostra a data do arquivo, e nenhuma fase
+ * mostra uma data que o arquivo não tem (o arquivo foi atualizado e o texto
+ * ficou para trás).
+ */
+export function conferirConferidoNasFases(
+  plataformas: readonly PlataformaMarketing[],
+  unidades: readonly Unidade[],
+  fases: readonly Fase[],
+): string[] {
+  const problemas: string[] = [];
+  const textosDaFase = (fase: Fase) => [...falasDe(fase).map((fala) => fala.texto), fase.missaoDeCampo ?? ""];
+  for (const plataforma of plataformas) {
+    const rotulo = rotuloConferido(plataforma.verificadoEm);
+    for (const unidadeId of plataforma.usadaEm) {
+      if (!unidades.some((unidade) => unidade.id === unidadeId)) {
+        problemas.push(`a plataforma "${plataforma.id}" diz ser usada em "${unidadeId}", que não existe`);
+        continue;
+      }
+      const mostra = fases.filter((fase) => fase.unidadeId === unidadeId).some((fase) => textosDaFase(fase).some((texto) => texto.includes(rotulo)));
+      if (!mostra) {
+        problemas.push(`nenhuma fase da unidade "${unidadeId}" mostra "${rotulo}", e ela cita a plataforma "${plataforma.id}"`);
+      }
+    }
+  }
+  for (const fase of fases) {
+    const datas = new Set(plataformas.filter((plataforma) => plataforma.usadaEm.includes(fase.unidadeId)).map((plataforma) => rotuloConferido(plataforma.verificadoEm)));
+    for (const texto of textosDaFase(fase)) {
+      for (const achado of texto.match(/conferido em \d{2}\/\d{2}\/\d{4}/g) ?? []) {
+        if (!datas.has(achado)) {
+          problemas.push(`a fase "${fase.id}" diz "${achado}", mas nenhuma plataforma da unidade tem essa data em plataformas-marketing.ts`);
+        }
+      }
     }
   }
   return problemas;

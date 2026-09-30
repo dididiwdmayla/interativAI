@@ -614,6 +614,32 @@ const CATALOGO = {
     resumo: "Com loading=\"lazy\" na img, a foto só baixa quando a pessoa rola até perto dela, e a página abre mais rápido.",
     temas: ["desempenho"],
   },
+  // Zona Ser encontrado (opcional), S3: seu negócio no mapa
+  "perfil-da-empresa": {
+    nome: "Perfil da Empresa no Google",
+    resumo: "A ficha do negócio no Google, com endereço, telefone, horário, fotos e avaliações: é o que faz ele aparecer na busca local e no mapa.",
+    temas: ["presenca-digital"],
+  },
+  "nome-endereco-telefone": {
+    nome: "Nome, endereço e telefone iguais",
+    resumo: "Os mesmos dados do negócio no site, no perfil e nas redes: dado diferente confunde o cliente e a busca.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "avaliacoes-do-cliente": {
+    nome: "Avaliações dos clientes",
+    resumo: "O que os clientes dizem do negócio: peça e responda com educação, nunca compre, porque avaliação comprada é falsa.",
+    temas: ["presenca-digital"],
+  },
+  "dados-estruturados": {
+    nome: "Dados estruturados (JSON-LD)",
+    resumo: "Um bloco de dados no head que descreve o negócio para a busca num formato que ela lê fácil; ajuda, mas não garante o cartão no mapa.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "local-business": {
+    nome: "LocalBusiness e subtipos",
+    resumo: "O tipo de dado que descreve um negócio local; use o subtipo mais específico que existir, como Bakery, Plumber ou Dentist.",
+    temas: ["presenca-digital", "dados"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

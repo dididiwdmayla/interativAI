@@ -97,10 +97,13 @@ async function jogarUnidade(unidadeId) {
     const conteudo = pagina.locator(".cm-content").first();
     // O texto inteiro do documento (o DOM do CodeMirror só desenha as linhas visíveis).
     const texto = await conteudo.evaluate((no) => no.cmTile?.view?.state.doc.toString() ?? no.innerText);
-    if (!texto.includes(de)) await falhar("editor", new Error(`Falhou: o editor não tem "${de}"`));
+    // O editor recua o conteúdo do head: o trecho a trocar aceita espaços no começo de cada linha.
+    const escapar = (trecho) => trecho.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const padrao = new RegExp(de.split("\n").map(escapar).join("\\n\\s*"));
+    if (!padrao.test(texto)) await falhar("editor", new Error(`Falhou: o editor não tem "${de}"`));
     await conteudo.click();
     await pagina.keyboard.press("ControlOrMeta+A");
-    await pagina.keyboard.insertText(texto.replace(de, para));
+    await pagina.keyboard.insertText(texto.replace(padrao, () => para));
     await assentar();
   };
   const contexto = { pagina, tocar, assentar, aba, trocarNoEditor, botaoConversa, abrirBalao: () => (movel ? abrirBalao(pagina) : assentar()), fecharBalao: () => (movel ? fecharBalao(pagina) : assentar()), movel, toque, MODO, falhar, conferir, passarApresentacao };

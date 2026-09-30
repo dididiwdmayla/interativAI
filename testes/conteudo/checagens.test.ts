@@ -7,7 +7,8 @@ import { FASES, UNIDADES } from "@/conteudo";
 import { REGRAS_DE_FASE, REGRAS_GERAIS, type ContextoChecagem } from "@/conteudo/checagens";
 import { FASE_U1_F2 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-2";
 import { FASE_U1_F3 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-3-desafio";
-import { conferirPosicaoDaCorreta } from "@/conteudo/checagens";
+import { conferirConferidoNasFases, conferirPosicaoDaCorreta } from "@/conteudo/checagens";
+import { conferirPlataformas, PLATAFORMAS_MARKETING } from "@/conteudo/plataformas-marketing";
 import { conferirPublicados, montarPublicados, PUBLICADOS } from "@/conteudo/publicados";
 import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 
@@ -261,5 +262,28 @@ describe("posição da opção correta", () => {
     });
     expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 0)]).join("\n")).toContain('o conceito "elemento"');
     expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 2)])).toEqual([]);
+  });
+});
+
+describe("arquivo de plataformas e o conferido em", () => {
+  it("o arquivo de verdade está em ordem", () => {
+    expect(conferirPlataformas(PLATAFORMAS_MARKETING)).toEqual([]);
+  });
+
+  it("acusa fontes ou passos e fatos que faltam, e data fora do formato", () => {
+    const base = PLATAFORMAS_MARKETING[0];
+    const problemas = conferirPlataformas([{ ...base, verificadoEm: "30/09/2026", passos: [], fatos: [], fontes: [] }]);
+    expect(problemas.join("\n")).toContain("AAAA-MM-DD");
+    expect(problemas.join("\n")).toContain("não tem passos nem fatos");
+    expect(problemas.join("\n")).toContain("fontes");
+  });
+
+  it("acusa unidade que não mostra o conferido em, e fase com data que o arquivo não tem", () => {
+    const base = PLATAFORMAS_MARKETING[0];
+    const outraData = { ...base, verificadoEm: "2026-10-15" };
+    const semRotulo = conferirConferidoNasFases([outraData], UNIDADES, FASES);
+    expect(semRotulo.join("\n")).toContain('nenhuma fase da unidade "sites-ser-encontrado-u3" mostra "conferido em 15/10/2026"');
+    expect(semRotulo.join("\n")).toContain("nenhuma plataforma da unidade tem essa data");
+    expect(conferirConferidoNasFases([{ ...base, usadaEm: ["sites-nao-existe"] }], UNIDADES, FASES).join("\n")).toContain("que não existe");
   });
 });

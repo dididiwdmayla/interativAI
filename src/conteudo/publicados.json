@@ -117,6 +117,13 @@
       "sites-ser-encontrado-u2-f3",
       "sites-ser-encontrado-u2-f4",
       "sites-ser-encontrado-u2-f5"
+    ],
+    "sites-ser-encontrado-u3": [
+      "sites-ser-encontrado-u3-f1",
+      "sites-ser-encontrado-u3-f2",
+      "sites-ser-encontrado-u3-f3",
+      "sites-ser-encontrado-u3-f4",
+      "sites-ser-encontrado-u3-f5"
     ]
   },
   "fases": {
@@ -671,6 +678,38 @@
         "fotos-com-alt",
         "galeria-preguicosa"
       ]
+    },
+    "sites-ser-encontrado-u3-f1": {
+      "objetivos": [
+        "telefone-igual",
+        "endereco-igual"
+      ]
+    },
+    "sites-ser-encontrado-u3-f2": {
+      "objetivos": [
+        "responder-avaliacao-ruim",
+        "agradecer-avaliacao"
+      ]
+    },
+    "sites-ser-encontrado-u3-f3": {
+      "objetivos": [
+        "consertar-o-json",
+        "acrescentar-endereco"
+      ]
+    },
+    "sites-ser-encontrado-u3-f4": {
+      "objetivos": [
+        "sorveteria-especifica",
+        "encanador-especifico"
+      ]
+    },
+    "sites-ser-encontrado-u3-f5": {
+      "partes": [
+        "enderecos-iguais",
+        "json-sem-erro",
+        "tipo-bakery",
+        "resposta-a-cliente"
+      ]
     }
   },
   "itensRevisao": [
@@ -899,6 +938,16 @@
     "velocidade-da-pagina-1",
     "velocidade-da-pagina-2",
     "imagem-preguicosa-1",
-    "imagem-preguicosa-2"
+    "imagem-preguicosa-2",
+    "perfil-da-empresa-1",
+    "perfil-da-empresa-2",
+    "nome-endereco-telefone-1",
+    "nome-endereco-telefone-2",
+    "avaliacoes-do-cliente-1",
+    "avaliacoes-do-cliente-2",
+    "dados-estruturados-1",
+    "dados-estruturados-2",
+    "local-business-1",
+    "local-business-2"
   ]
 }

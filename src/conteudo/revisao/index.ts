@@ -118,6 +118,11 @@ import { ITENS_ENCHIMENTO_DE_PALAVRA_CHAVE } from "./enchimento-de-palavra-chave
 import { ITENS_TEXTO_DE_LINK } from "./texto-de-link";
 import { ITENS_VELOCIDADE_DA_PAGINA } from "./velocidade-da-pagina";
 import { ITENS_IMAGEM_PREGUICOSA } from "./imagem-preguicosa";
+import { ITENS_PERFIL_DA_EMPRESA } from "./perfil-da-empresa";
+import { ITENS_NOME_ENDERECO_TELEFONE } from "./nome-endereco-telefone";
+import { ITENS_AVALIACOES_DO_CLIENTE } from "./avaliacoes-do-cliente";
+import { ITENS_DADOS_ESTRUTURADOS } from "./dados-estruturados";
+import { ITENS_LOCAL_BUSINESS } from "./local-business";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -242,6 +247,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_TEXTO_DE_LINK,
   ...ITENS_VELOCIDADE_DA_PAGINA,
   ...ITENS_IMAGEM_PREGUICOSA,
+  // S3 (Seu negócio no mapa)
+  ...ITENS_PERFIL_DA_EMPRESA,
+  ...ITENS_NOME_ENDERECO_TELEFONE,
+  ...ITENS_AVALIACOES_DO_CLIENTE,
+  ...ITENS_DADOS_ESTRUTURADOS,
+  ...ITENS_LOCAL_BUSINESS,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

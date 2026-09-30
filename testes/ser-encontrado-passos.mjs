@@ -7,6 +7,21 @@
 
 const trocar = (de, para) => ({ editar: [[de, para]] });
 
+/** A apresentação de uma ferramenta, com o "Experimente" tocando no alvo dela. */
+const apresentar = (id, alvo) => ({
+  fazer: async ({ pagina, tocar, fecharBalao, passarApresentacao, falhar }) => {
+    await passarApresentacao(
+      pagina,
+      id,
+      async () => {
+        await fecharBalao();
+        await tocar(pagina.locator(alvo).first());
+      },
+      falhar,
+    );
+  },
+});
+
 export const PASSOS = {
   "sites-ser-encontrado-u2": {
     fases: [
@@ -63,6 +78,60 @@ export const PASSOS = {
           trocar('<img id="galeria-1"', '<img alt="Docinhos" loading="lazy" id="galeria-1"'),
           trocar('<img id="galeria-2"', '<img alt="Chá de hibisco" loading="lazy" id="galeria-2"'),
           trocar('<img id="galeria-3"', '<img alt="Bandeja de chás" loading="lazy" id="galeria-3"'),
+        ],
+      },
+    ],
+  },
+
+  "sites-ser-encontrado-u3": {
+    ferramentasNovas: ["dados-estruturados"],
+    fases: [
+      // F1: os mesmos dados em todo lugar
+      [
+        { id: "telefone-igual", passos: [{ previsao: 0 }, trocar('<span id="tel-rodape">(21) 3555-0124</span>', '<span id="tel-rodape">(21) 3555-0142</span>')] },
+        { id: "endereco-igual", passos: [trocar('<p id="endereco-contato">Rua das Acácias, 54, Niterói</p>', '<p id="endereco-contato">Rua das Acácias, 45, Niterói</p>')] },
+      ],
+      // F2: avaliações
+      [
+        { id: "responder-avaliacao-ruim", passos: [{ previsao: 2 }, { ajuda: true }] },
+        {
+          id: "agradecer-avaliacao",
+          passos: [trocar('<p class="resposta-dono" id="resposta-3">Sem resposta do restaurante.</p>', '<p class="resposta-dono" id="resposta-3">Que bom que gostou da feijoada! Anotamos a sobremesa.</p>')],
+        },
+      ],
+      // F3: o JSON que a busca lê (apresenta o Teste de dados estruturados)
+      [
+        {
+          id: "consertar-o-json",
+          passos: [{ previsao: 1 }, apresentar("dados-estruturados", '[data-ferramenta~="dados-estruturados"]'), trocar('"(27) 3555-0188",\n}', '"(27) 3555-0188"\n}')],
+        },
+        {
+          id: "acrescentar-endereco",
+          passos: [
+            trocar(
+              '"telephone": "(27) 3555-0188"\n}',
+              '"telephone": "(27) 3555-0188",\n  "address": { "@type": "PostalAddress", "streetAddress": "Rua Sete de Setembro, 95", "addressLocality": "Vitória" }\n}',
+            ),
+          ],
+        },
+      ],
+      // F4: o tipo certo de negócio
+      [
+        {
+          id: "sorveteria-especifica",
+          passos: [{ previsao: 0 }, trocar('"@type": "LocalBusiness",\n  "name": "Sorveteria Gelato Bello"', '"@type": "IceCreamShop",\n  "name": "Sorveteria Gelato Bello"')],
+        },
+        { id: "encanador-especifico", passos: [trocar('"@type": "LocalBusiness",\n  "name": "Hidráulica Seu Nilo"', '"@type": "Plumber",\n  "name": "Hidráulica Seu Nilo"')] },
+      ],
+      // F5: o desafio
+      {
+        desafio: [
+          trocar('<span id="end-contato">Rua das Flores, 102, Sarandi</span>', '<span id="end-contato">Rua das Flores, 120, Sarandi</span>'),
+          trocar('<span id="end-rodape">R. das Flores, 210, Sarandi</span>', '<span id="end-rodape">Rua das Flores, 120, Sarandi</span>'),
+          trocar('"streetAddress": "Rua das Flores, 210"', '"streetAddress": "Rua das Flores, 120"'),
+          trocar('"telephone": "(44) 3555-0100",\n}', '"telephone": "(44) 3555-0100"\n}'),
+          trocar('"@type": "LocalBusiness"', '"@type": "Bakery"'),
+          trocar('<p class="resposta-dono" id="resposta-1">Sem resposta da padaria.</p>', '<p class="resposta-dono" id="resposta-1">Sentimos muito. Vamos assar de hora em hora.</p>'),
         ],
       },
     ],

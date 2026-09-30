@@ -12,6 +12,7 @@ import {
   larguraAproximada,
   lerJsonComLinha,
   resultadoNaBusca,
+  TIPOS_DE_NEGOCIO_LOCAL,
 } from "@/motor/busca";
 import { avaliarDetalhado, type ContextoValidacao } from "@/motor/validadores";
 import type { Validador } from "@/conteudo/tipos";
@@ -156,5 +157,30 @@ describe("teste de dados estruturados", () => {
     expect(bloco.itens.map((item) => item.tipo)).toEqual(["WebSite", "Store"]);
     expect(bloco.itens[1].avisos).toEqual([]);
     expect(resultadoNaBusca(doc, "x.exemplo").negocio?.endereco).toBe("Rua A, 1");
+  });
+});
+
+describe("subtipos de LocalBusiness", () => {
+  // Os subtipos comuns conferidos em 30/09/2026 (dados-estruturados-schema, em src/conteudo/plataformas-marketing.ts).
+  const DO_ARQUIVO = [
+    "Bakery", "CafeOrCoffeeShop", "Restaurant", "BarOrPub", "IceCreamShop", "FastFoodRestaurant", "FoodEstablishment",
+    "HairSalon", "BeautySalon", "NailSalon", "DaySpa", "TattooParlor", "HealthAndBeautyBusiness", "Dentist",
+    "Plumber", "Electrician", "RoofingContractor", "HousePainter", "HomeAndConstructionBusiness",
+    "AutoRepair", "AutoWash", "AutoDealer", "AutomotiveBusiness", "LegalService", "RealEstateAgent", "PetStore", "ClothingStore", "Store",
+  ];
+
+  it("a lista do validador tem todos os subtipos que o arquivo de plataformas cita", () => {
+    const faltam = DO_ARQUIVO.filter((tipo) => !TIPOS_DE_NEGOCIO_LOCAL.includes(tipo));
+    expect(faltam).toEqual([]);
+  });
+
+  it("um encanador (Plumber) é negócio local e pede name e address", () => {
+    const doc = documento(
+      '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Plumber","name":"Hidráulica"}</script>',
+      "<p>x</p>",
+    );
+    const [bloco] = analisarDadosEstruturados(doc);
+    expect(bloco.itens[0].negocioLocal).toBe(true);
+    expect(bloco.itens[0].faltam).toEqual(["address"]);
   });
 });

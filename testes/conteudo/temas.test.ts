@@ -111,7 +111,8 @@ describe("lente e insígnias", () => {
   });
 
   it("concluir as unidades de Sites enche a insígnia Interfaces", () => {
-    const sites = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-"));
+    // Sem a zona opcional Ser encontrado: ela é de Presença digital, e nem toda unidade dela ensina algo de Interfaces.
+    const sites = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-") && !unidade.id.startsWith("sites-ser-encontrado-"));
     const progresso = { ...PROGRESSO_PADRAO, fasesConcluidas: sites.flatMap((unidade) => unidade.fases) };
     const interfaces = progressoDoTema("interfaces", web, progresso);
     expect(interfaces.concluidas).toBe(sites.length);
