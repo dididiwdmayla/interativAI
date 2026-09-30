@@ -33,6 +33,8 @@ import { IconeConsole } from "@/componentes/icones/IconeConsole";
 import { IconeLinhaDoTempo } from "@/componentes/icones/IconeLinhaDoTempo";
 import { IconePalcoMemoria } from "@/componentes/icones/IconePalcoMemoria";
 import { IconeSnippet } from "@/componentes/icones/IconeSnippet";
+import { IconeCircuito } from "@/componentes/icones/IconeCircuito";
+import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -890,6 +892,46 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     experimente: {
       mouse: "Clique no botão de passo anterior.",
       toque: "Toque no botão de passo anterior.",
+    },
+    uso: "sinal",
+  },
+  circuito: {
+    id: "circuito",
+    nome: "Bancada de circuito",
+    Icone: IconeCircuito,
+    alvo: seletorFerramenta("circuito"),
+    oQueFaz: "Uma bancada com chaves, portões E, OU e NÃO e uma saída: você liga os fios e vê a corrente acender.",
+    praQueServe:
+      "Todo if decide com sim ou não. Montar o portão com as mãos mostra o que E, OU e NÃO fazem antes de escrever && , || e ! no código.",
+    comoUsarAqui: {
+      mouse: "Arraste um portão da paleta. Clique na bolinha da direita de uma peça e depois numa bolinha da esquerda de outra: nasce o fio. Clique numa chave para ligar e desligar.",
+      toque: "Toque num portão da paleta. Toque na bolinha da direita de uma peça e depois numa bolinha da esquerda de outra: nasce o fio. Toque numa chave para ligar e desligar.",
+    },
+    noF12DeVerdade:
+      "não existe no F12: os portões moram dentro do processador, aos bilhões. No código, eles viram os operadores &&, || e !, que funcionam no Console de qualquer site.",
+    experimente: {
+      mouse: "Clique numa chave para ligar.",
+      toque: "Toque numa chave para ligar.",
+    },
+    uso: "tocar",
+  },
+  "tabela-verdade": {
+    id: "tabela-verdade",
+    nome: "Tabela verdade",
+    Icone: IconeTabelaVerdade,
+    alvo: seletorFerramenta("tabela-verdade"),
+    oQueFaz: "Mostra, para cada jeito de ligar as chaves, se a saída acende. As linhas que você já testou ficam marcadas.",
+    praQueServe:
+      "É o resumo do circuito inteiro: dá para conferir todas as combinações sem esquecer nenhuma. O botão Ver como código mostra o mesmo circuito escrito em JavaScript.",
+    comoUsarAqui: {
+      mouse: "Ligue e desligue as chaves e veja a linha acender na tabela. Clique em Ver como código.",
+      toque: "Ligue e desligue as chaves e veja a linha acender na tabela. Toque em Ver como código.",
+    },
+    noF12DeVerdade:
+      "não é uma aba do Chrome: é como programadores e engenheiros conferem uma condição. O código que aparece roda no Console de qualquer site.",
+    experimente: {
+      mouse: "Clique em Ver como código.",
+      toque: "Toque em Ver como código.",
     },
     uso: "sinal",
   },

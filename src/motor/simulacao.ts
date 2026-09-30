@@ -36,6 +36,7 @@ import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } fro
 import { criarNucleoSincrono } from "./executor/fabrica";
 import type { OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import * as bancada from "./circuito/modelo";
 
 /**
  * O documento inicial da fase, solto (fora da tela): o head fixo com o
@@ -84,6 +85,14 @@ export function criarSimulacao(fase: Fase) {
     if (registrar) eventos.push({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
   };
   if (fase.programa?.preparo) rodarCodigo(fase.programa.preparo, "console", false);
+
+  // Circuito lógico: as mesmas funções do modelo que a bancada da tela usa.
+  let circuito: bancada.Circuito | null = fase.tipo === "circuito-logico" ? fase.circuito.inicial : null;
+  const mudarCircuito = (novo: bancada.Circuito | null): boolean => {
+    if (!novo || !circuito) return false;
+    circuito = novo;
+    return true;
+  };
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -188,6 +197,39 @@ export function criarSimulacao(fase: Fase) {
           executarSnippet: () => rodarCodigo(snippet, "snippet"),
         }
       : undefined,
+    circuito:
+      fase.tipo === "circuito-logico"
+        ? {
+            adicionarPortao: (portao, id, lugar) => {
+              if (!circuito || circuito.pecas.some((p) => p.id === id)) return false;
+              mudarCircuito(bancada.adicionarPortao(circuito, portao, id, lugar));
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            ligarFio: (de, para, porta) => {
+              if (!circuito || !mudarCircuito(bancada.ligarFio(circuito, { de, para, porta }))) return false;
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            alternarEntrada: (entrada, ligada) => {
+              const peca = circuito?.pecas.find((p) => p.id === entrada && p.tipo === "entrada");
+              if (!circuito || !peca) return false;
+              mudarCircuito(bancada.alternarEntrada(circuito, entrada, ligada));
+              eventos.push({ tipo: "alternouEntrada", entrada, ligada: ligada ?? !peca.ligada });
+              return true;
+            },
+            apagarPeca: (id) => {
+              const peca = circuito?.pecas.find((p) => p.id === id);
+              if (!circuito || !peca || peca.fixa) return false;
+              mudarCircuito(bancada.apagarPeca(circuito, id));
+              eventos.push({ tipo: "mudouCircuito" });
+              return true;
+            },
+            verComoCodigo: () => {
+              eventos.push({ tipo: "viuCodigoDoCircuito" });
+            },
+          }
+        : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -206,6 +248,7 @@ export function criarSimulacao(fase: Fase) {
       tela: (comDispositivo ? telaDoDispositivo(dispositivo, documento) : null) ?? undefined,
       campanha: campanhaDaFase ? { dados: campanhaDaFase, estado: campanha } : undefined,
       programa: fase.programa ? estadoPrograma : undefined,
+      circuito: circuito ?? undefined,
     };
   };
 
@@ -231,6 +274,8 @@ export function criarSimulacao(fase: Fase) {
     cssAtual: () => lerCssDoDocumento(documento),
     /** (Fase de programa) A última execução e o texto do Snippet agora. */
     programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null }),
+    /** (Circuito) O circuito agora. */
+    circuito: () => circuito,
   };
 }
 

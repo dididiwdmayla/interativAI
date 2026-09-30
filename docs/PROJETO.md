@@ -462,6 +462,42 @@ resposta da última expressão, as saídas do console e o erro.
 - Ferramentas com apresentação: `palco-memoria` (sempre na tela de uma fase
   de programa; a regra `fase-de-programa` exige) e `linha-do-tempo`.
 
+### Circuito lógico (rodada 17)
+
+- Modelo em `src/motor/circuito/modelo.ts`, **independente da Ilha
+  Lógica** (serve às Origens e à trilha Automação): peças (entrada/chave,
+  saída/lâmpada, porta ou alarme, portões E, OU, NÃO e o OU exclusivo
+  marcado como extra), fios de uma saída para uma porta de entrada (uma
+  porta, um fio), simulação em rodadas até ficar estável começando do
+  estado anterior (realimentação guarda estado: a memória simples e o selo
+  da contatora; oscilação é detectada), tabela verdade, "ver como código"
+  (`const portaAbre = temCliente && lojaAberta;`, com parênteses só onde
+  precisa) e as mudanças (ligar, tirar, alternar, mover, pôr portão) como
+  funções puras que a tela, as ações e a simulação dos testes usam.
+- Tipo de fase `circuito-logico` (`FaseCircuitoLogico`: objetivos como numa
+  prática e `circuito: { inicial, paleta }`; `siteAlvo: SITE_DO_PROGRAMA`).
+  Na tela, a bancada fica no lugar da prévia e a tabela verdade no lugar
+  do painel (`componentes/circuito/`, `useCircuito`). O circuito é salvo no
+  progresso (`EstadoFaseSalvo.circuito`).
+- Validadores `circuitoTabela` (confere a TABELA, qualquer montagem certa
+  passa: um E montado com NÃO e OU também) e `usouPortao`; eventos
+  `mudouCircuito`, `alternouEntrada` e `viuCodigoDoCircuito`; ações
+  `adicionarPortao` (com id), `ligarFio`, `alternarEntrada`, `apagarPeca` e
+  `verComoCodigo`; degrau 3 `{ alvo: "circuito", peca? }`. Regra
+  `circuito-logico` no `testar:conteudo`.
+- Interação (mouse e toque pelos Pointer Events): arrastar o corpo move;
+  tocar sem arrastar liga a chave ou escolhe o portão (Tirar peça, Tirar
+  fio); tocar na bolinha da direita puxa o fio e tocar na outra peça (ou na
+  bolinha da esquerda, com o mouse) liga, na porta mais perto do dedo.
+  **Decisão:** as duas bolinhas de entrada de um portão ficam perto demais
+  para 44 px num celular; o alvo grande do toque é o corpo inteiro da peça.
+  A bancada enquadra só a área com peças (maiores numa tela estreita) e, em
+  pé, começa com a divisória no máximo. Os fios acesos mostram a corrente
+  andando; a tabela marca a linha de agora e as já testadas.
+- Ferramentas com apresentação: `circuito` e `tabela-verdade`.
+  Demonstração em `/lab/fases?fase=lab-logica-u1-f2` (a porta da padaria:
+  E, a previsão, ver como código e o NÃO sozinho).
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é

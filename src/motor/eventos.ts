@@ -61,7 +61,13 @@ export type EventoFase =
   /** (Campanha) Mudou o orçamento, a palavra-chave ou o lance. */
   | { tipo: "configurouCampanha"; orcamento: number; palavra: string; lance: number }
   /** (Código) Rodou código no Console ou no Snippet: o resumo do que aconteceu (saídas, erro, sintaxes usadas). */
-  | { tipo: "executouCodigo"; execucao: ResumoExecucao };
+  | { tipo: "executouCodigo"; execucao: ResumoExecucao }
+  /** (Circuito) Pôs ou tirou peça, ligou ou tirou fio. */
+  | { tipo: "mudouCircuito" }
+  /** (Circuito) Ligou ou desligou uma entrada. */
+  | { tipo: "alternouEntrada"; entrada: string; ligada: boolean }
+  /** (Circuito) Abriu o "Ver como código". */
+  | { tipo: "viuCodigoDoCircuito" };
 
 /**
  * Para onde um link levaria:
@@ -105,4 +111,7 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "visitaSimulada",
   "configurouCampanha",
   "executouCodigo",
+  "mudouCircuito",
+  "alternouEntrada",
+  "viuCodigoDoCircuito",
 ];

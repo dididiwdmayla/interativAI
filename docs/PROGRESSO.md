@@ -83,3 +83,18 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
 - Linha do tempo no `JogoFase` (o passo escolhido vale só para aquela
   execução), com a linha acesa no Snippet.
 - Testes: `palco.test.ts` (6) e `testes/palco.mjs` nos três layouts.
+
+### Etapa 5: circuito lógico e a demonstração no /lab
+
+- `src/motor/circuito/modelo.ts` (independente da ilha, com realimentação),
+  tipo de fase `circuito-logico`, `useCircuito`, `BancadaCircuito`,
+  `PecaCircuito`, `PainelTabelaVerdade`; validadores `circuitoTabela` e
+  `usouPortao`, ações, eventos, regra `circuito-logico`, progresso com o
+  circuito, tutor com o circuito como código; ferramentas `circuito` e
+  `tabela-verdade`.
+- Currículo: o `circuito-logico` saiu de `MOTORES_PLANEJADOS`; a Decisões u2
+  perdeu o `requerMotor` próprio (a zona ainda espera a etapa 6) e a sala
+  "Por baixo do capô" espera só as atividades do museu.
+- Demonstração `lab-logica-u1-f2` (modelo para o Sonnet).
+- Testes: `circuito.test.ts` (9: simulação, De Morgan, memória, código
+  batendo com a tabela, sabotagens) e `testes/circuito.mjs` nos três layouts.

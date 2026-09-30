@@ -203,3 +203,14 @@ body {
 .palco-piscar {
   animation: palco-piscar 0.9s ease-out;
 }
+
+/* Circuito lógico: a corrente andando nos fios acesos. */
+@keyframes corrente-no-fio {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+.corrente-no-fio {
+  animation: corrente-no-fio 0.6s linear infinite;
+}

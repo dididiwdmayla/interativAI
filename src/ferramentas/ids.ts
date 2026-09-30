@@ -50,6 +50,9 @@ export const IDS_FERRAMENTAS = [
   "snippet",
   "palco-memoria",
   "linha-do-tempo",
+  // Circuito lógico (a bancada e a tabela verdade com "ver como código")
+  "circuito",
+  "tabela-verdade",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

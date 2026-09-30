@@ -18,6 +18,7 @@ import { type EstadoDispositivo, medidasNaTela, orientacaoDe, telaDaLargura } fr
 import { ehAtalho } from "./css/propriedades";
 import { abrirAtalho, lerCor, valoresDaPropriedadeIguais } from "./css/valores";
 import type { EventoFase } from "./eventos";
+import { NOME_DO_PORTAO, portoesUsados, tabelaVerdade, type Circuito } from "./circuito/modelo";
 import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlobal } from "./programa";
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 
@@ -42,6 +43,8 @@ export type ContextoValidacao = {
   campanha?: { dados: DadosCampanha; estado: EstadoCampanha };
   /** (Fase de programa) A memória depois da última execução e os testes de função. */
   programa?: EstadoPrograma;
+  /** (Circuito lógico) O circuito de agora. */
+  circuito?: Circuito;
 };
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
@@ -203,6 +206,10 @@ export function descreverValidador(validador: Validador): string {
       return `o código rodado usa ${validador.sintaxe}`;
     case "funcaoPassa":
       return `a função ${validador.nome} devolve o certo em ${validador.casos.length} caso(s)`;
+    case "circuitoTabela":
+      return `o circuito dá a tabela verdade pedida (${validador.esperado.length} linha(s))`;
+    case "usouPortao":
+      return `usou pelo menos ${validador.minimo ?? 1} portão ${NOME_DO_PORTAO[validador.portao]} ligado`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -465,6 +472,36 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
             .join("; ")
         : "todos os casos passaram";
       return { passou: teste.passou, descricao, detalhe };
+    }
+    case "circuitoTabela": {
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      const tabela = tabelaVerdade(contexto.circuito);
+      const erradas: string[] = [];
+      for (const linha of validador.esperado) {
+        const achada = tabela.find((t) => Object.entries(linha.entradas).every(([nome, valor]) => t.entradas[nome] === valor));
+        const combinacao = Object.entries(linha.entradas)
+          .map(([nome, valor]) => `${nome}=${valor}`)
+          .join(", ");
+        if (!achada) {
+          erradas.push(`${combinacao}: o circuito não tem essas entradas`);
+          continue;
+        }
+        const nomes = Object.keys(achada.saidas);
+        const esperado = typeof linha.saida === "boolean" ? (nomes.length === 1 ? { [nomes[0]]: linha.saida } : null) : linha.saida;
+        if (!esperado) {
+          erradas.push(`${combinacao}: o circuito tem ${nomes.length} saídas`);
+          continue;
+        }
+        for (const [nome, valor] of Object.entries(esperado)) {
+          if (achada.saidas[nome] !== valor) erradas.push(`${combinacao}: ${nome} deu ${achada.saidas[nome]}, esperado ${valor}`);
+        }
+      }
+      return { passou: erradas.length === 0, descricao, detalhe: erradas.length ? erradas.slice(0, 4).join("; ") : "todas as linhas batem" };
+    }
+    case "usouPortao": {
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      const usados = portoesUsados(contexto.circuito, validador.portao);
+      return { passou: usados >= (validador.minimo ?? 1), descricao, detalhe: `${usados} ligado(s)` };
     }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };

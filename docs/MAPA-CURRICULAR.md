@@ -80,8 +80,9 @@ ids):
    com portões lógicos** (ideia aprovada na rodada 12): somar dois números
    só com portões E, OU e NÃO e montar uma memória simples com
    realimentação (a saída voltando para a entrada, o mesmo princípio do
-   selo da contatora dos comandos elétricos). **Requer motor:** o tipo de
-   fase `circuito-logico` (ver "Motores planejados", abaixo).
+   selo da contatora dos comandos elétricos). O tipo de fase
+   `circuito-logico` ficou pronto na rodada 17, já com realimentação;
+   **requer motor:** os tipos de atividade do museu.
 
 ---
 
@@ -729,14 +730,11 @@ Tipos de fase aprovados que ainda não existem. A ficha em dados fica em
 `motores-planejados` do `testar:conteudo` confere que toda unidade citada
 existe e continua travada por um `requerMotor` que nomeia o tipo.
 
-- **`circuito-logico`** (Circuito lógico): arrastar portões E, OU e NÃO
-  numa bancada, ligar fios, alternar as entradas (chaves), ver as saídas
-  acenderem (lâmpada, porta que abre), a tabela verdade preenchida ao vivo
-  e o botão "ver como código" (o mesmo circuito com `&&`, `||` e `!`);
-  realimentação para a memória simples. Usado em
-  `logica-decisoes-u2` (Portões lógicos), `origens-museu-u6` (Por baixo
-  do capô: somador e memória) e na futura trilha Automação industrial
-  (Comandos elétricos e CLP e Ladder). Entra junto com o motor da Lógica.
+- **`circuito-logico`** (Circuito lógico): **pronto na rodada 17**
+  (`src/motor/circuito/modelo.ts`, independente da ilha). Serve a
+  `logica-decisoes-u2`, a `origens-museu-u6` (somador e memória com
+  realimentação) e a futura trilha Automação industrial. Demonstração em
+  `/lab/fases?fase=lab-logica-u1-f2`.
 - **`ordenar-passos`**, **`depurador-fontes`**, **`visualizador-arvore`** e
   **`projeto-ponte-js`**: a parte B do motor da Lógica (fichas em
   `src/curriculo/motores.ts`).

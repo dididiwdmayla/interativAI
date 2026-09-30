@@ -1,3 +1,4 @@
+import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
 import { type EstadoRevisao, lerEstadoRevisao, REVISAO_PADRAO } from "@/lib/estadoRevisao";
@@ -44,6 +45,8 @@ export type EstadoFaseSalvo = {
    * memória volta como estava. null nas outras fases.
    */
   programa: ProgramaSalvo | null;
+  /** (Circuito lógico) O circuito montado na bancada. null nas outras fases. */
+  circuito: Circuito | null;
 };
 
 export type ProgramaSalvo = {
@@ -175,6 +178,7 @@ export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
   partesFeitas: [],
   reveres: 0,
   programa: null,
+  circuito: null,
 };
 
 function ehObjeto(valor: unknown): valor is Record<string, unknown> {
@@ -236,7 +240,34 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     partesFeitas: [...new Set(listaDeTextos(valor.partesFeitas))],
     reveres: ehNumero(valor.reveres) ? Math.max(0, Math.round(valor.reveres)) : 0,
     programa: lerProgramaSalvo(valor.programa),
+    circuito: lerCircuitoSalvo(valor.circuito),
   };
+}
+
+const TIPOS_DE_PECA = ["entrada", "saida", "e", "ou", "nao", "xou"];
+
+function lerCircuitoSalvo(valor: unknown): Circuito | null {
+  if (!ehObjeto(valor) || !Array.isArray(valor.pecas) || !Array.isArray(valor.fios)) return null;
+  const pecas: Peca[] = valor.pecas.flatMap((item) => {
+    if (!ehObjeto(item) || typeof item.id !== "string" || typeof item.tipo !== "string" || !TIPOS_DE_PECA.includes(item.tipo) || !ehNumero(item.x) || !ehNumero(item.y)) return [];
+    return [
+      {
+        id: item.id,
+        tipo: item.tipo as Peca["tipo"],
+        x: item.x,
+        y: item.y,
+        ...(typeof item.nome === "string" ? { nome: item.nome } : {}),
+        ...(typeof item.rotulo === "string" ? { rotulo: item.rotulo } : {}),
+        ...(item.forma === "lampada" || item.forma === "porta" || item.forma === "alarme" ? { forma: item.forma } : {}),
+        ...(typeof item.ligada === "boolean" ? { ligada: item.ligada } : {}),
+        ...(item.fixa === true ? { fixa: true } : {}),
+      },
+    ];
+  });
+  const fios: Fio[] = valor.fios.flatMap((item) =>
+    ehObjeto(item) && typeof item.de === "string" && typeof item.para === "string" && ehNumero(item.porta) ? [{ de: item.de, para: item.para, porta: item.porta }] : [],
+  );
+  return { pecas, fios };
 }
 
 function lerProgramaSalvo(valor: unknown): ProgramaSalvo | null {

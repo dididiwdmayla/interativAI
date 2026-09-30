@@ -8,7 +8,7 @@
  * casos) e `saida` com `semErro`.
  */
 import { SITE_DO_PROGRAMA } from "@/motor/programa";
-import type { FasePratica, Unidade } from "../tipos";
+import type { FaseCircuitoLogico, FasePratica, Unidade } from "../tipos";
 
 export const UNIDADE_BANCADA_LOGICA: Unidade = {
   id: "lab-logica-u1",
@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -151,4 +151,159 @@ export const FASE_BANCADA_CONSOLE: FasePratica = {
   falaFinal: { texto: "Pode continuar mexendo na bancada.", expressao: "feliz" },
 };
 
-export const FASES_BANCADA_LOGICA: readonly FasePratica[] = [FASE_BANCADA_CONSOLE];
+/*
+ * Demonstração do circuito lógico (modelo para as fases da Decisões u2 e,
+ * depois, das Origens e da Automação). O que ela mostra:
+ * - a bancada já vem com as chaves e a saída (fixas: não saem); o jogador
+ *   tira os portões da paleta;
+ * - `circuitoTabela` confere a TABELA (qualquer montagem certa passa) e
+ *   `usouPortao` garante o portão que o objetivo ensina;
+ * - as soluções usam ids próprios nos portões (adicionarPortao com id) para
+ *   os fios das ações seguintes;
+ * - testar as combinações é evento (`alternouEntrada`), e "Ver como código"
+ *   também (`viuCodigoDoCircuito`), a ponte para o if.
+ */
+const TABELA_E = [
+  { entradas: { temCliente: false, lojaAberta: false }, saida: false },
+  { entradas: { temCliente: true, lojaAberta: false }, saida: false },
+  { entradas: { temCliente: false, lojaAberta: true }, saida: false },
+  { entradas: { temCliente: true, lojaAberta: true }, saida: true },
+];
+
+export const FASE_DEMO_CIRCUITO: FaseCircuitoLogico = {
+  id: "lab-logica-u1-f2",
+  tipo: "circuito-logico",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do circuito lógico",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["circuito", "tabela-verdade"],
+  apresentar: ["circuito", "tabela-verdade"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  circuito: {
+    paleta: ["e", "ou", "nao", "xou"],
+    inicial: {
+      pecas: [
+        { id: "cliente", tipo: "entrada", nome: "temCliente", rotulo: "tem cliente", x: 24, y: 70, fixa: true },
+        { id: "aberta", tipo: "entrada", nome: "lojaAberta", rotulo: "loja aberta", x: 24, y: 250, fixa: true },
+        { id: "porta", tipo: "saida", nome: "portaAbre", rotulo: "porta abre", forma: "porta", x: 520, y: 150, fixa: true },
+      ],
+      fios: [],
+    },
+  },
+  introducao: [{ texto: "A porta da padaria só abre se tiver cliente E a loja estiver aberta. Vamos montar isso com portões.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "porta-com-e",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: {
+        mouse: "Ponha um portão E e ligue: as duas chaves nas entradas dele, a saída dele na porta.",
+        toque: "Ponha um portão E e ligue: as duas chaves nas entradas dele, a saída dele na porta.",
+      },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "circuitoTabela", esperado: TABELA_E },
+          { tipo: "usouPortao", portao: "e" },
+        ],
+      },
+      ajudas: {
+        pergunta: "Qual portão só deixa passar quando as DUAS coisas são verdade?",
+        dica: "O E. Cada chave vai numa bolinha da esquerda dele, e a bolinha da direita vai na porta.",
+        linha: { alvo: "circuito", fala: "Os portões moram aqui, na paleta." },
+        solucao: {
+          fala: "Pus um E: as duas chaves entram nele, e ele manda na porta.",
+          acoes: [
+            { tipo: "adicionarPortao", portao: "e", id: "e1", x: 280, y: 150 },
+            { tipo: "ligarFio", de: "cliente", para: "e1", porta: 0 },
+            { tipo: "ligarFio", de: "aberta", para: "e1", porta: 1 },
+            { tipo: "ligarFio", de: "e1", para: "porta" },
+          ],
+        },
+      },
+      falaAoConcluir: { texto: "Montado! Agora a porta obedece às duas chaves ao mesmo tempo.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "adicionarPortao", portao: "e", id: "e1", x: 280, y: 150 },
+        { tipo: "ligarFio", de: "cliente", para: "e1", porta: 0 },
+        { tipo: "ligarFio", de: "aberta", para: "e1", porta: 1 },
+        { tipo: "ligarFio", de: "e1", para: "porta" },
+      ],
+    },
+    {
+      id: "testar",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Com só a loja aberta (sem cliente), a porta abre?",
+        opcoes: ["Abre", "Não abre"],
+        correta: 1,
+        explicacao: "O E precisa das duas: sem cliente, a porta fica fechada.",
+      },
+      enunciado: { mouse: "Ligue só a chave loja aberta e veja a porta.", toque: "Ligue só a chave loja aberta e veja a porta." },
+      validador: { tipo: "evento", evento: "alternouEntrada" },
+      ajudas: {
+        pergunta: "Como se liga uma chave?",
+        dica: "Clicando nela (no celular, tocando).",
+        linha: { alvo: "circuito", peca: "aberta", fala: "Esta chave." },
+        solucao: { fala: "Liguei a loja aberta: sem cliente, a porta continua fechada.", acoes: [{ tipo: "alternarEntrada", entrada: "aberta", ligada: true }] },
+      },
+      falaAoConcluir: { texto: "Viu a linha acender na tabela? Cada combinação testada fica marcada.", expressao: "feliz" },
+      solucaoDeTeste: [
+        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "alternarEntrada", entrada: "aberta", ligada: true },
+      ],
+    },
+    {
+      id: "ver-codigo",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique em Ver como código.", toque: "Toque em Ver como código." },
+      validador: { tipo: "evento", evento: "viuCodigoDoCircuito" },
+      ajudas: {
+        pergunta: "Onde a tabela mostra o circuito escrito em JavaScript?",
+        dica: "No botão Ver como código, em cima da tabela.",
+        linha: { alvo: "ferramenta", ferramenta: "tabela-verdade", fala: "Aqui, na tabela verdade." },
+        solucao: { fala: "O E virou &&: temCliente && lojaAberta.", acoes: [{ tipo: "verComoCodigo" }] },
+      },
+      falaAoConcluir: { texto: "temCliente && lojaAberta: o mesmo circuito, em código. Isso vai dentro de um if.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "verComoCodigo" }],
+    },
+    {
+      id: "sem-cliente",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: {
+        mouse: "Agora a porta abre para a faxina: loja aberta E NÃO tem cliente.",
+        toque: "Agora a porta abre para a faxina: loja aberta E NÃO tem cliente.",
+      },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          {
+            tipo: "circuitoTabela",
+            esperado: [
+              { entradas: { temCliente: false, lojaAberta: false }, saida: false },
+              { entradas: { temCliente: true, lojaAberta: false }, saida: false },
+              { entradas: { temCliente: false, lojaAberta: true }, saida: true },
+              { entradas: { temCliente: true, lojaAberta: true }, saida: false },
+            ],
+          },
+          { tipo: "usouPortao", portao: "nao" },
+        ],
+      },
+      ajudas: { pergunta: "Qual portão vira o sim em não?", dica: "O NÃO fica entre a chave tem cliente e o E." },
+      falaAoConcluir: { texto: "O NÃO inverteu o cliente. No código: lojaAberta && !temCliente.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "adicionarPortao", portao: "nao", id: "n1", x: 170, y: 60 },
+        { tipo: "ligarFio", de: "cliente", para: "n1" },
+        { tipo: "ligarFio", de: "n1", para: "e1", porta: 0 },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Circuito testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar mexendo na bancada.", expressao: "feliz" },
+};
+
+export const FASES_BANCADA_LOGICA: readonly (FasePratica | FaseCircuitoLogico)[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO];

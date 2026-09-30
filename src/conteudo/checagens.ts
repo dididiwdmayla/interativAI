@@ -593,6 +593,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         desafio: "o desafio não tem partes",
         "projeto-ponte": "o projeto não tem requisitos",
         "simulador-campanha": "o simulador não tem objetivos",
+        "circuito-logico": "o circuito não tem objetivos",
       }[fase.tipo];
       return [
         ...(ids.length === 0 ? [vazio] : []),
@@ -950,9 +951,61 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         const { linha } = objetivo.ajudas;
         if (linha.alvo === "snippet" && !programa.snippet) problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta o Snippet, que a fase não tem`);
         if (linha.alvo === "snippet" && linha.linhas.some((n) => !Number.isInteger(n) || n < 1)) problemas.push(`${nomeObjetivo(objetivo, indice)}: linhas do Snippet começam em 1`);
-        if (linha.alvo === "arvore" || linha.alvo === "editor" || linha.alvo === "css" || linha.alvo === "estilos") {
+        if (linha.alvo === "arvore" || linha.alvo === "editor" || linha.alvo === "css" || linha.alvo === "estilos" || linha.alvo === "circuito") {
           problemas.push(`${nomeObjetivo(objetivo, indice)}: fase de programa não tem ${linha.alvo}; aponte o console ou o snippet`);
         }
+      });
+      return problemas;
+    },
+  },
+  {
+    id: "circuito-logico",
+    nome: "fase de circuito: peças com ids e nomes válidos, sem página, e validadores e ações de circuito só nela",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const deCircuito = new Set(["circuitoTabela", "usouPortao"]);
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (deCircuito.has(item.tipo) && fase.tipo !== "circuito-logico") problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase circuito-logico`);
+          if (fase.tipo === "circuito-logico" && "seletor" in item) problemas.push(`${onde}: fase de circuito não tem página; o validador ${item.tipo} olha a página`);
+          if (item.tipo === "circuitoTabela" && fase.tipo === "circuito-logico") {
+            const entradas = new Set(fase.circuito.inicial.pecas.filter((p) => p.tipo === "entrada").map((p) => p.nome ?? p.id));
+            const saidas = fase.circuito.inicial.pecas.filter((p) => p.tipo === "saida").map((p) => p.nome ?? p.id);
+            if (item.esperado.length === 0) problemas.push(`${onde}: circuitoTabela sem linhas`);
+            for (const linha of item.esperado) {
+              for (const nome of Object.keys(linha.entradas)) if (!entradas.has(nome)) problemas.push(`${onde}: circuitoTabela cita a entrada "${nome}", que o circuito não tem`);
+              if (typeof linha.saida === "boolean" && saidas.length !== 1) problemas.push(`${onde}: saida como true/false só vale com uma saída (o circuito tem ${saidas.length})`);
+              if (typeof linha.saida === "object") for (const nome of Object.keys(linha.saida)) if (!saidas.includes(nome)) problemas.push(`${onde}: circuitoTabela cita a saída "${nome}", que o circuito não tem`);
+            }
+          }
+        }
+      }
+      if (fase.tipo !== "circuito-logico") return problemas;
+      const { inicial, paleta } = fase.circuito;
+      problemas.push(...repetidos(inicial.pecas.map((p) => p.id)).map((id) => `peça com id repetido: "${id}"`));
+      const nomes = inicial.pecas.filter((p) => p.tipo === "entrada" || p.tipo === "saida").map((p) => p.nome ?? p.id);
+      problemas.push(...repetidos(nomes).map((nome) => `entrada ou saída com nome repetido: "${nome}"`));
+      for (const peca of inicial.pecas) {
+        if ((peca.tipo === "entrada" || peca.tipo === "saida") && !/^[A-Za-z_$][\w$]*$/.test(peca.nome ?? peca.id)) {
+          problemas.push(`a peça "${peca.id}" tem nome "${peca.nome ?? peca.id}", que não vira nome de variável no "ver como código"`);
+        }
+        if ((peca.tipo === "entrada" || peca.tipo === "saida") && !peca.rotulo) problemas.push(`a peça "${peca.id}" precisa de rotulo (o nome na tela)`);
+      }
+      if (inicial.pecas.filter((p) => p.tipo === "entrada").length > 4) problemas.push("mais de 4 entradas: a tabela verdade passa de 16 linhas");
+      if (!inicial.pecas.some((p) => p.tipo === "saida")) problemas.push("o circuito não tem saída");
+      if (paleta.length === 0) problemas.push("a paleta não tem portões");
+      if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase de circuito usa siteAlvo: SITE_DO_PROGRAMA (sem página)");
+      if (!fase.usaFerramentas.includes("circuito")) problemas.push('fase de circuito pede "circuito" em usaFerramentas (a bancada)');
+      if (!fase.usaFerramentas.includes("tabela-verdade")) problemas.push('fase de circuito pede "tabela-verdade" em usaFerramentas (sempre na tela)');
+      if (fase.programa) problemas.push("fase de circuito não tem programa (o Console é de outra fase)");
+      for (const { onde, acoes } of acoesDoJogador(fase)) {
+        for (const acao of acoes) if (acao.tipo === "adicionarPortao" && !paleta.includes(acao.portao)) problemas.push(`${onde}: o portão "${acao.portao}" não está na paleta`);
+      }
+      objetivosDe(fase).forEach((objetivo, indice) => {
+        if (objetivo.modo !== "guiado") return;
+        const { linha } = objetivo.ajudas;
+        if (linha.alvo !== "circuito" && linha.alvo !== "ferramenta") problemas.push(`${nomeObjetivo(objetivo, indice)}: fase de circuito aponta a bancada (alvo circuito)`);
+        if (linha.alvo === "circuito" && linha.peca && !inicial.pecas.some((p) => p.id === linha.peca)) problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta a peça "${linha.peca}", que não vem na bancada`);
       });
       return problemas;
     },

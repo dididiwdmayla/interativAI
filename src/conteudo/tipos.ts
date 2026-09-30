@@ -20,6 +20,7 @@ import type { Fala } from "@/motor/tipos";
 import type { IdConceito } from "./conceitos";
 import type { SintaxeJs } from "@/motor/executor/instrumentar";
 import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
+import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -262,6 +263,19 @@ export type Validador =
    * agora (roda de novo a cada execução).
    */
   | { tipo: "funcaoPassa"; nome: string; casos: CasoFuncao[] }
+  /*
+   * Circuito lógico (fase do tipo circuito-logico): src/motor/circuito.
+   */
+  /**
+   * (Circuito) O circuito do jogador produz esta tabela verdade, do jeito
+   * que ele montou (o validador simula todas as combinações das entradas).
+   * `entradas` pelo nome no código (temCliente); `saida` é o valor da saída
+   * (com mais de uma saída, um objeto { nomeDaSaida: valor }). Linhas que
+   * não aparecem não são conferidas.
+   */
+  | { tipo: "circuitoTabela"; esperado: { entradas: Record<string, boolean>; saida: boolean | Record<string, boolean> }[] }
+  /** (Circuito) Pelo menos `minimo` (padrão 1) portões desse tipo com a saída ligada em alguma coisa. */
+  | { tipo: "usouPortao"; portao: TipoPortao; minimo?: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -374,7 +388,17 @@ export type Acao =
   /** (Código) Troca o texto do Snippet (aba Fontes), sem rodar. Pede a ferramenta snippet. */
   | { tipo: "definirSnippet"; codigo: string }
   /** (Código) O botão Executar do Snippet (Ctrl+Enter). Gera `executouCodigo`. Pede a ferramenta snippet. */
-  | { tipo: "executarSnippet" };
+  | { tipo: "executarSnippet" }
+  /** (Circuito) Tira um portão da paleta e põe na bancada, com o id dado (as ações seguintes usam o id). */
+  | { tipo: "adicionarPortao"; portao: TipoPortao; id: string; x?: number; y?: number }
+  /** (Circuito) Liga a saída da peça `de` na porta `porta` (padrão 0) da peça `para`. */
+  | { tipo: "ligarFio"; de: string; para: string; porta?: number }
+  /** (Circuito) Liga ou desliga uma entrada (sem `ligada`, troca). */
+  | { tipo: "alternarEntrada"; entrada: string; ligada?: boolean }
+  /** (Circuito) Tira uma peça da bancada (a que veio pronta na fase não sai). */
+  | { tipo: "apagarPeca"; id: string }
+  /** (Circuito) O botão "Ver como código". */
+  | { tipo: "verComoCodigo" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -395,7 +419,9 @@ export type AjudaLinha =
   /** (Código) Pisca linhas do Snippet (a partir de 1). */
   | { alvo: "snippet"; linhas: number[]; fala: string }
   /** (Código) Pisca a linha de digitar do Console. */
-  | { alvo: "console"; fala: string };
+  | { alvo: "console"; fala: string }
+  /** (Circuito) Pisca uma peça da bancada (ou, sem `peca`, a paleta de portões). */
+  | { alvo: "circuito"; peca?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -662,15 +688,36 @@ export type FaseSimuladorCampanha = FaseBase & {
   campanha: DadosCampanha;
 };
 
-/** Fases com objetivos em sequência (prática e simulador de campanha). */
-export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha;
+/** A bancada de uma fase de circuito lógico. */
+export type DadosCircuito = {
+  /** O circuito que a fase já traz: as entradas (chaves) e as saídas, às vezes portões e fios. */
+  inicial: Circuito;
+  /** Os portões que o jogador pode tirar da paleta. O OU exclusivo ("xou") é extra. */
+  paleta: TipoPortao[];
+};
+
+/**
+ * Circuito lógico: objetivos como numa prática, numa bancada onde o jogador
+ * arrasta portões E, OU e NÃO, liga fios, alterna as entradas e vê a
+ * corrente acender; a tabela verdade fica ao lado e "Ver como código"
+ * mostra o circuito com &&, || e !. Use `siteAlvo: SITE_DO_PROGRAMA`.
+ */
+export type FaseCircuitoLogico = FaseBase & {
+  tipo: "circuito-logico";
+  objetivos: Objetivo[];
+  pratica?: IdConceito[];
+  circuito: DadosCircuito;
+};
+
+/** Fases com objetivos em sequência (prática, simulador de campanha e circuito lógico). */
+export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico;
 
 /**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha | FaseCircuitoLogico;
 
 export type TipoFase = Fase["tipo"];
 

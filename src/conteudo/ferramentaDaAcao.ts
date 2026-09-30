@@ -67,5 +67,12 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "definirSnippet":
     case "executarSnippet":
       return "snippet";
+    case "adicionarPortao":
+    case "ligarFio":
+    case "alternarEntrada":
+    case "apagarPeca":
+      return "circuito";
+    case "verComoCodigo":
+      return "tabela-verdade";
   }
 }

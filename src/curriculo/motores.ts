@@ -6,13 +6,16 @@
  * para ninguém produzir conteúdo antes: toda unidade citada aqui tem um
  * `requerMotor` (dela ou da zona) que nomeia o tipo de fase.
  *
+ * O `circuito-logico` saiu daqui na rodada 17 (src/motor/circuito,
+ * tipo de fase em src/motor/tiposDeFase.ts).
+ *
  * Quando o motor ficar pronto, o tipo de fase entra no registro de tipos
  * (src/motor/tiposDeFase.ts), a entrada sai daqui e o `requerMotor` das
  * unidades cai.
  */
 import type { IdIlha } from "./trilhas";
 
-export type IdMotorPlanejado = "circuito-logico" | "ordenar-passos" | "depurador-fontes" | "visualizador-arvore" | "projeto-ponte-js";
+export type IdMotorPlanejado = "ordenar-passos" | "depurador-fontes" | "visualizador-arvore" | "projeto-ponte-js";
 
 export type UsoDoMotor = {
   /** Unidade do currículo que usa o tipo de fase. */
@@ -37,33 +40,6 @@ export type MotorPlanejado = {
 };
 
 export const MOTORES_PLANEJADOS: readonly MotorPlanejado[] = [
-  {
-    id: "circuito-logico",
-    nome: "Circuito lógico",
-    ideia:
-      "Montar portões lógicos (E, OU, NÃO) arrastando e ligando peças para fazer uma saída acontecer, e depois ver o mesmo circuito escrito como código.",
-    pecas: [
-      "portões E, OU e NÃO para arrastar numa bancada",
-      "fios ligando saídas a entradas",
-      "entradas que o jogador liga e desliga (chaves)",
-      "saídas que acendem (lâmpada, porta que abre)",
-      "tabela verdade do circuito, preenchida ao vivo",
-      'botão "ver como código", que mostra o circuito com &&, || e !',
-      "realimentação (a saída voltando para a entrada), para a memória simples",
-    ],
-    usadoEm: [
-      {
-        unidadeId: "logica-decisoes-u2",
-        como: 'Antes de escrever if com &&, || e !, montar o circuito ("a porta da padaria só abre se tiver cliente E a loja estiver aberta") e depois ver o mesmo circuito como código.',
-      },
-      {
-        unidadeId: "origens-museu-u6",
-        como: "Quebra-cabeças maiores: somar dois números só com portões e uma memória simples com realimentação (o mesmo princípio do selo da contatora).",
-      },
-    ],
-    trilhas: ["web", "automacao"],
-    ilhasFuturas: ["comandos-eletricos", "clp-e-ladder"],
-  },
   {
     id: "ordenar-passos",
     nome: "Ordenar passos",

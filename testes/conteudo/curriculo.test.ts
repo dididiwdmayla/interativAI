@@ -92,17 +92,11 @@ describe("currículo em dados", () => {
     }
   });
 
-  it("portões lógicos: a Decisões e a sala Por baixo do capô esperam o motor circuito-logico", () => {
-    const [circuito] = MOTORES_PLANEJADOS;
-    expect(circuito.id).toBe("circuito-logico");
-    expect(circuito.usadoEm.map((uso) => uso.unidadeId)).toEqual(["logica-decisoes-u2", "origens-museu-u6"]);
-    for (const uso of circuito.usadoEm) {
-      const local = localNoCurriculo(uso.unidadeId);
-      expect(local?.unidade.requerMotor, uso.unidadeId).toContain("circuito-logico");
-    }
-    // Antes de escrever if com &&, || e !: a u2 vem logo depois da u1 (comparações e if/else).
+  it("portões lógicos: o circuito-logico está pronto (Decisões u2 logo depois da u1); a parte B da Lógica segue planejada", () => {
+    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual(["ordenar-passos", "depurador-fontes", "visualizador-arvore", "projeto-ponte-js"]);
     expect(localNoCurriculo("logica-decisoes-u2")?.indice).toBe(1);
-    expect(circuito.trilhas).toContain("automacao");
+    expect(localNoCurriculo("logica-decisoes-u2")?.unidade.requerMotor).toBeUndefined();
+    expect(localNoCurriculo("origens-museu-u6")?.unidade.requerMotor).not.toContain("circuito-logico");
     expect(conferirMotoresPlanejados(MOTORES_PLANEJADOS, CURRICULO, ILHAS_FUTURAS, TRILHAS)).toEqual([]);
   });
 });
@@ -164,8 +158,8 @@ describe("checagens do currículo (sabotagens)", () => {
       ilhasFuturas: ["atlantida"],
     };
     const problemas = conferirMotoresPlanejados([quebrado, quebrado], CURRICULO, ILHAS_FUTURAS, TRILHAS).join("\n");
-    expect(problemas).toContain('motor planejado com id repetido: "circuito-logico"');
-    expect(problemas).toContain(`a unidade "${U1.id}" usa o motor planejado "circuito-logico", mas o requerMotor dela (ou da zona) não cita`);
+    expect(problemas).toContain('motor planejado com id repetido: "ordenar-passos"');
+    expect(problemas).toContain(`a unidade "${U1.id}" usa o motor planejado "ordenar-passos", mas o requerMotor dela (ou da zona) não cita`);
     expect(problemas).toContain('cita a unidade "sites-inventada-u9", que não está no currículo');
     expect(problemas).toContain('cita a trilha "culinaria", que não existe');
     expect(problemas).toContain('cita a ilha futura "atlantida", que não existe');

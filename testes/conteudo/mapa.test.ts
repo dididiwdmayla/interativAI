@@ -168,6 +168,7 @@ describe("zonas e unidades", () => {
           partesFeitas: [],
           reveres: 0,
           programa: null,
+          circuito: null,
         },
       },
     };
