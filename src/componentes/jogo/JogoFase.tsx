@@ -122,6 +122,7 @@ import { useMotorFase } from "./useMotorFase";
 import { usePainelElementos } from "./usePainelElementos";
 import { useSiteAlvo } from "./useSiteAlvo";
 import { useTutor } from "./useTutor";
+import type { ResultadoItem } from "@/lib/estadoRevisao";
 
 type Props = {
   fase: Fase;
@@ -141,6 +142,13 @@ type Props = {
   aoVoltarAoDesafio?: () => void;
   /** Só no lab: a gaveta com os validadores ao vivo. */
   painelLab?: (api: ApiLab) => ReactNode;
+  /**
+   * Revisão do dia: o item acabou (depois do "Seguir"), com o resultado
+   * para o agendador. "Não lembrei" também chama, com "errou".
+   */
+  aoTerminarRevisao?: (resultado: ResultadoItem) => void;
+  /** Revisão do dia: o caminho da barra (desktop) e o título (celular), no lugar de "Unidade N". */
+  barra?: { caminho: string[]; tituloMovel: string };
 };
 
 /**
@@ -237,9 +245,13 @@ export function JogoFase({
   aoRever,
   aoVoltarAoDesafio,
   painelLab,
+  aoTerminarRevisao,
+  barra,
 }: Props) {
   const lab = modo === "lab";
   const revisao = modo === "revisao";
+  /** Um item da Revisão do dia: sem estrelas, sem glossário, sem recomeçar e sem conclusão própria. */
+  const revisaoDoDia = modo === "revisao-dia";
   // Site-alvo "jogo" (E5): a maquete ganha as cores do tema que o jogador usa agora.
   const [coresDaMaquete] = useState(() => {
     const atual = coresDoTemaAtual(obterProgresso());
@@ -703,6 +715,28 @@ export function JogoFase({
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
+  // Revisão do dia: o maior degrau de ajuda usado e, no fim, o resultado (uma vez só).
+  const maiorDegrau = useRef(0);
+  useEffect(() => {
+    maiorDegrau.current = Math.max(maiorDegrau.current, estado.degrau);
+  }, [estado.degrau]);
+  const terminou = useRef(false);
+  const terminarRevisao = useCallback(
+    (resultado: ResultadoItem) => {
+      if (terminou.current) return;
+      terminou.current = true;
+      aoTerminarRevisao?.(resultado);
+    },
+    [aoTerminarRevisao],
+  );
+  useEffect(() => {
+    if (!revisaoDoDia || estado.etapa !== "concluida" || fase.tipo !== "pratica") return;
+    const item = fase.objetivos[0];
+    const errouPrevisao = item.tipo === "previsao" && estado.previsao !== item.previsao.correta;
+    // Pergunta ou dica contam como ajuda (mantém o intervalo); a revisão não tem solução.
+    terminarRevisao(errouPrevisao ? "errou" : maiorDegrau.current > 0 ? "com-ajuda" : "sem-ajuda");
+  }, [revisaoDoDia, estado.etapa, estado.previsao, fase, terminarRevisao]);
+
   // A fala do link só entra quando não atrapalha: fora da conversa, da
   // pausa, do card de previsão e dos momentos roteirizados.
   useEffect(() => {
@@ -743,6 +777,7 @@ export function JogoFase({
     pausa: estado.pausa,
     bloqueada:
       lab ||
+      revisaoDoDia ||
       caixa.aberta ||
       estado.roteiro !== null ||
       previsaoPendente ||
@@ -1135,6 +1170,7 @@ export function JogoFase({
         estado={estado}
         totalIntroducao={fase.introducao.length}
         ultimaPausa={ultimaPausa}
+        rotuloFim={revisaoDoDia ? "Próximo" : undefined}
         previsao={objetivo?.tipo === "previsao" ? objetivo.previsao : null}
         degrauMaximo={motor.degrauMaximo}
         desafio={desafio !== null}
@@ -1235,7 +1271,22 @@ export function JogoFase({
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
       Voltar ao desafio
     </Botao>
+  ) : revisaoDoDia && estado.etapa === "objetivos" && estado.pausa === null ? (
+    <Botao
+      variante="secundario"
+      tamanho={movel ? "m" : "p"}
+      onClick={() => {
+        tocarEfeito("clique");
+        terminarRevisao("errou");
+      }}
+      className="min-h-9"
+      data-nao-lembrei
+    >
+      Não lembrei
+    </Botao>
   ) : null;
+  const semEstrelas = revisao || revisaoDoDia;
+  const semExtras = revisao || revisaoDoDia;
 
   const classesMain = {
     desktop: "flex min-h-0 flex-1 gap-4 p-3 lg:p-4",
@@ -1279,35 +1330,35 @@ export function JogoFase({
     >
       {movel ? (
         <BarraSuperiorMovel
-          titulo={`Unidade ${local.unidade.numero} › ${rotuloFase}`}
-          estrelas={revisao ? null : estado.estrelas}
+          titulo={barra?.tituloMovel ?? `Unidade ${local.unidade.numero} › ${rotuloFase}`}
+          estrelas={semEstrelas ? null : estado.estrelas}
           fina={layout === "paisagem"}
           inicio={botaoMapa}
           acaoFixa={botaoVoltar}
           menu={
             <>
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !revisao && <BotaoGlossario noMenu />}
+              {!lab && !semExtras && <BotaoGlossario noMenu />}
               <SeletorTema />
               <div data-manter-menu className="border-t-2 border-borda pt-2">
                 <AjustesSom />
               </div>
-              {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
             </>
           }
         />
       ) : (
         <BarraSuperior
-          caminho={[local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
-          estrelas={revisao ? null : estado.estrelas}
+          caminho={barra?.caminho ?? [local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
+          estrelas={semEstrelas ? null : estado.estrelas}
           logo={<Mascote tamanho={34} />}
           acoes={
             <>
               {botaoVoltar}
               {botaoMapa}
               <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !revisao && <BotaoGlossario />}
-              {!revisao && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
+              {!lab && !semExtras && <BotaoGlossario />}
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
             </>
           }
         />
@@ -1859,7 +1910,7 @@ export function JogoFase({
       )}
       {!(estado.etapa === "concluida" && estado.conclusaoAberta) && <ComemoracaoSozinho vez={estado.comemoracoesSozinho} />}
       <TelaConclusao
-        aberta={estado.etapa === "concluida" && estado.conclusaoAberta}
+        aberta={estado.etapa === "concluida" && estado.conclusaoAberta && !revisaoDoDia}
         local={local}
         modo={modo}
         falaFinal={falaFinalDe(fase)}

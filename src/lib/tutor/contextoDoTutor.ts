@@ -1,4 +1,6 @@
 import { faseDoId } from "@/conteudo";
+import { itemDoId } from "@/conteudo/revisao";
+import { PREFIXO_FASE_REVISAO } from "@/conteudo/revisao/faseDoItem";
 import type { ModoTutor } from "./promptTutor";
 
 export type ContextoDoTutor = { modo: ModoTutor; enunciado: string; siteAlvo: string };
@@ -9,6 +11,15 @@ export type ContextoDoTutor = { modo: ModoTutor; enunciado: string; siteAlvo: st
  * desafio, projeto), o enunciado oficial e o nome do site-alvo.
  */
 export function contextoDoTutor(faseId: string, objetivoId: string, enunciadoDoCliente: string): ContextoDoTutor {
+  // Revisão do dia: todo item é "sozinho" (o tutor só pergunta), com o enunciado do item.
+  if (faseId.startsWith(PREFIXO_FASE_REVISAO)) {
+    const item = itemDoId(faseId.slice(PREFIXO_FASE_REVISAO.length));
+    return {
+      modo: "sozinho",
+      enunciado: item ? (item.previsao?.pergunta ?? item.enunciado.mouse) : enunciadoDoCliente,
+      siteAlvo: item?.siteAlvo.titulo ?? "mini-site da revisão",
+    };
+  }
   const fase = faseDoId(faseId);
   if (!fase) return { modo: "guiado", enunciado: enunciadoDoCliente, siteAlvo: "site fictício" };
   const siteAlvo = fase.siteAlvo.titulo;

@@ -14,7 +14,10 @@ import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import { useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import { estadoDaIlha, type EstadoIlha, ilhaAnterior, ilhaAtual, ilhaCompleta, trilhaDaFonte, unidadeConcluida } from "@/lib/mapa";
-import { rotaDaIlha } from "@/lib/rotas";
+import { ROTA_REVISAO, rotaDaIlha } from "@/lib/rotas";
+import { diaLocal, temConceitoAprendido, vencidosHoje } from "@/lib/revisao";
+import { useSincronizarRevisao } from "@/componentes/revisao/useSincronizarRevisao";
+import { ArtePorto } from "./arte/ArtePorto";
 import { ARTE_DAS_ILHAS, ArteFutura } from "./arte";
 import { AndaimesIlha, BrilhoIlha, NevoaIlha } from "./arte/MarcasDeEstado";
 import { Oceano } from "./arte/Oceano";
@@ -39,6 +42,9 @@ const POSICOES_WEB: Record<string, Ponto> = {
   oficio: { x: 1680, y: 530 },
   frameworks: { x: 1450, y: 700 },
 };
+
+/** O Porto da revisão: um ponto fixo no mar, embaixo, perto do começo da rota. */
+const POSICAO_PORTO: Ponto = { x: 330, y: 700 };
 
 /** O desenho do mundo de uma trilha: largura e onde cada ilha fica. */
 function desenhoDoMundo(trilha: Trilha, ilhas: readonly IlhaCurriculo[]): { largura: number; posicao: (ilha: IlhaCurriculo) => Ponto } {
@@ -96,6 +102,7 @@ export function MundoMapa() {
 }
 
 function MundoCarregado() {
+  useSincronizarRevisao();
   const progresso = useProgresso();
   const area = useRef<ApiAreaArrastavel>(null);
   const moldura = useRef<HTMLDivElement>(null);
@@ -146,6 +153,10 @@ function MundoCarregado() {
     return () => clearTimeout(temporizador);
   }, [aviso]);
 
+  // O Porto aparece depois do primeiro conceito aprendido (com item de revisão) e diz quantos vencem hoje.
+  const comPorto = temConceitoAprendido(progresso.revisao);
+  const itensDeHoje = comPorto ? vencidosHoje(progresso.revisao, diaLocal()).length : 0;
+
   const pontosDaRota = rota.map((ilha) => posicaoDa(ilha));
   const opcionais = ilhasDoMundo.filter((ilha) => ilha.opcional);
   const ultimaDaRota = pontosDaRota[pontosDaRota.length - 1];
@@ -190,6 +201,11 @@ function MundoCarregado() {
                 );
               })}
               <Barquinho {...posicaoBarco} />
+              {comPorto && (
+                <g transform={`translate(${POSICAO_PORTO.x} ${POSICAO_PORTO.y})`} data-porto-arte>
+                  <ArtePorto comItens={itensDeHoje > 0} />
+                </g>
+              )}
               {ilhasDoMundo.map((ilha) => {
                 const { x, y } = posicaoDa(ilha);
                 const estado = estadoDaIlha(ilha, fonte);
@@ -295,6 +311,39 @@ function MundoCarregado() {
                 </Link>
               );
             })}
+
+            {comPorto && (
+              <Link
+                href={ROTA_REVISAO}
+                onClick={() => tocarEfeito("clique")}
+                onPointerEnter={(evento) => evento.pointerType === "mouse" && tocarHover()}
+                data-porto
+                data-porto-itens={itensDeHoje}
+                aria-label={`Porto da revisão: ${
+                  itensDeHoje === 0 ? "nada pra revisar hoje" : `${itensDeHoje} ${itensDeHoje === 1 ? "item vence" : "itens vencem"} hoje`
+                }`}
+                className="absolute rounded-[40%] focus-visible:outline-offset-4"
+                style={{
+                  left: (POSICAO_PORTO.x - 80) * escala,
+                  top: (POSICAO_PORTO.y - 60) * escala,
+                  width: 200 * escala,
+                  height: 110 * escala,
+                }}
+              >
+                <span className="pointer-events-none absolute left-1/2 top-full flex -translate-x-1/2 -translate-y-3 items-center gap-1 whitespace-nowrap">
+                  <span className="rounded-full border-2 border-borda bg-superficie px-3 py-0.5 text-sm font-black text-texto shadow-[0_3px_0_var(--cor-sombra)]">
+                    Porto da revisão
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-black ${
+                      itensDeHoje > 0 ? "bg-destaque text-sobre-destaque" : "bg-painel text-texto-suave"
+                    }`}
+                  >
+                    {itensDeHoje > 0 ? `${itensDeHoje} hoje` : "Em dia"}
+                  </span>
+                </span>
+              </Link>
+            )}
 
             {/* O computadorzinho mora na ilha atual. */}
             <motion.div

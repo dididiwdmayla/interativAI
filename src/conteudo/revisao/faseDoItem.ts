@@ -48,7 +48,11 @@ export function faseDoItem(item: ItemRevisao): FasePratica {
     id: "item",
     enunciado: item.enunciado,
     validador: item.validador ?? DEPOIS_DE_RESPONDER,
-    falaAoConcluir: { texto: "Isso! Você lembrou direitinho.", expressao: "comemorando" as const },
+    // Na previsão, o fim mostra a explicação (certa ou errada, ela ensina); na ação, a comemoração.
+    falaAoConcluir:
+      item.tipo === "previsao" && item.previsao
+        ? { texto: item.previsao.explicacao, expressao: "feliz" as const }
+        : { texto: "Isso! Você lembrou direitinho.", expressao: "comemorando" as const },
     solucaoDeTeste: item.solucaoDeTeste,
     modo: "sozinho" as const,
     ajudas: { pergunta: item.ajudas.pergunta, dica: item.ajudas.dica },

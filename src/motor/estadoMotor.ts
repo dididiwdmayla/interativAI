@@ -17,9 +17,12 @@ export type PausaMotor = "objetivoConcluido" | "solucao" | "desafioConcluido" | 
  * Como a fase está sendo jogada:
  * - "jogo": normal, com estrelas e progresso salvo;
  * - "revisao": aberta pelo "Rever" do desafio (sem estrelas, sem salvar);
- * - "lab": o /lab/fases (sem salvar, sem apresentações).
+ * - "lab": o /lab/fases (sem salvar, sem apresentações);
+ * - "revisao-dia": um item da Revisão do dia (sem salvar a fase, sem
+ *   estrelas, sem apresentações, direto no objetivo; quem guarda o
+ *   resultado é a sessão, em src/componentes/revisao).
  */
-export type ModoJogo = "jogo" | "revisao" | "lab";
+export type ModoJogo = "jogo" | "revisao" | "lab" | "revisao-dia";
 
 export type EstadoMotor = {
   etapa: EtapaFase;

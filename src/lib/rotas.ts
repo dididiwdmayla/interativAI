@@ -29,3 +29,6 @@ export const ROTA_MEU_TEMA = "/meu-tema";
 
 /** Meus projetos: os sites que o jogador fez (a semente do portfólio). */
 export const ROTA_PROJETOS = "/projetos";
+
+/** A Revisão do dia (o Porto da revisão, no mundo). */
+export const ROTA_REVISAO = "/revisao";
