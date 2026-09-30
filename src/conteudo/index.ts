@@ -21,6 +21,7 @@ import { FASES_UNIDADE_P1, UNIDADE_P1 } from "./ilhas/sites/publicar/unidade-1/u
 import { FASES_UNIDADE_P2, UNIDADE_P2 } from "./ilhas/sites/publicar/unidade-2/unidade";
 import { FASES_UNIDADE_R1, UNIDADE_R1 } from "./ilhas/sites/responsivo/unidade-1/unidade";
 import { FASES_UNIDADE_R2, UNIDADE_R2 } from "./ilhas/sites/responsivo/unidade-2/unidade";
+import { FASES_UNIDADE_S1, UNIDADE_S1 } from "./ilhas/sites/ser-encontrado/unidade-1/unidade";
 import type { Fase, Unidade } from "./tipos";
 
 export const UNIDADES: readonly Unidade[] = [
@@ -43,6 +44,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_R2,
   UNIDADE_P1,
   UNIDADE_P2,
+  UNIDADE_S1,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -66,6 +68,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_R2,
   ...FASES_UNIDADE_P1,
   ...FASES_UNIDADE_P2,
+  ...FASES_UNIDADE_S1,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

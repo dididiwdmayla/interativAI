@@ -8,7 +8,7 @@
 // atributo) e, na E1, o painel Estilos (editar valor, caixinha, setas,
 // seletor de cor, + declaração e regra nova).
 // Uso: node testes/unidades.mjs [desktop|retrato|paisagem]
-import { prontasDaIlha } from "./curriculo.mjs";
+import { obrigatoriasProntasDaIlha } from "./curriculo.mjs";
 import {
   abaDaArvore,
   acaoDaBarra,
@@ -1552,7 +1552,7 @@ await pagina.locator("[data-mapa=mundo]").waitFor();
 // O total de prontas vem do conteúdo publicado (testes/curriculo.mjs): as
 // zonas depois da Estilos não são jogadas aqui (ver testes/layout.mjs e os
 // testes das zonas seguintes).
-const totalSites = prontasDaIlha("sites").length;
+const totalSites = obrigatoriasProntasDaIlha("sites").length;
 conferir(
   (await pagina.locator("[data-ilha=sites]").textContent()).includes(`10 de ${totalSites} unidades`),
   `mundo: Sites com 10 de ${totalSites} unidades`,

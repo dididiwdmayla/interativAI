@@ -35,6 +35,31 @@ const FERRAMENTAS_CSS: readonly IdFerramenta[] = ["editor-css", "painel-estilos"
 /** Item de previsão sem validador: acaba quando o jogador responde. */
 const DEPOIS_DE_RESPONDER: Validador = { tipo: "evento", evento: "respondeuPrevisao" };
 
+/** Painéis que o validador pede para o jogador enxergar (a aba Busca, a Medição, o Lighthouse). */
+function ferramentasDoValidador(validador: Validador): IdFerramenta[] {
+  switch (validador.tipo) {
+    case "todos":
+    case "algum":
+      return validador.validadores.flatMap(ferramentasDoValidador);
+    case "nao":
+      return ferramentasDoValidador(validador.validador);
+    case "resultadoBusca":
+    case "indexavel":
+      return ["resultado-busca"];
+    case "dadosEstruturados":
+      return ["dados-estruturados"];
+    case "eventoMedido":
+      return ["medicao"];
+    case "linkRastreavel":
+      return ["link-rastreavel"];
+    case "notaAuditoria":
+    case "semProblema":
+      return ["lighthouse"];
+    default:
+      return [];
+  }
+}
+
 export function idDaFaseDoItem(itemId: string): string {
   return `${PREFIXO_FASE_REVISAO}${itemId}`;
 }
@@ -43,7 +68,8 @@ export function faseDoItem(item: ItemRevisao): FasePratica {
   const nome = ehIdConceito(item.conceito) ? conceitoDoId(item.conceito).nome : item.conceito;
   const acoes = item.solucaoDeTeste.map(ferramentaDaAcao).filter((id): id is IdFerramenta => id !== null);
   const comCss = item.siteAlvo.css !== undefined;
-  const usaFerramentas = [...new Set([...FERRAMENTAS_BASE, ...(comCss ? FERRAMENTAS_CSS : []), ...acoes])];
+  const doValidador = item.validador ? ferramentasDoValidador(item.validador) : [];
+  const usaFerramentas = [...new Set([...FERRAMENTAS_BASE, ...(comCss ? FERRAMENTAS_CSS : []), ...acoes, ...doValidador])];
   const comum = {
     id: "item",
     enunciado: item.enunciado,
@@ -80,6 +106,7 @@ export function faseDoItem(item: ItemRevisao): FasePratica {
       ...(comCss ? { css: item.siteAlvo.css } : {}),
     },
     ...(comCss ? { paineisElementos: ["estilos" as const] } : {}),
+    ...(item.modoDocumento ? { modoDocumento: true as const } : {}),
     objetivos: [objetivo],
     conclusao: [{ texto: "Revisado!", expressao: "comemorando" }],
   };

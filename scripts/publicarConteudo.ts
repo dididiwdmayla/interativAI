@@ -19,6 +19,7 @@ import { ITENS_REVISAO } from "@/conteudo/revisao";
 const ARQUIVO = resolve(process.cwd(), "src/conteudo/publicados.json");
 const contexto = { unidades: UNIDADES, fases: FASES, itens: ITENS_REVISAO };
 
+// As checagens de todas as fases e itens de revisão passam de 5 s (o padrão do Vitest).
 it("publica o conteúdo registrado em src/conteudo/publicados.json", () => {
   const congelados = conferirPublicados(PUBLICADOS, contexto);
   if (congelados.length > 0) {
@@ -39,4 +40,4 @@ it("publica o conteúdo registrado em src/conteudo/publicados.json", () => {
       ? "publicados.json regravado: nada novo para publicar."
       : `publicados.json atualizado. Unidades novas: ${unidadesNovas.join(", ") || "nenhuma"}. Fases novas: ${fasesNovas.join(", ") || "nenhuma"}. Itens de revisão novos: ${itensNovos.join(", ") || "nenhum"}.`,
   );
-});
+}, 120_000);

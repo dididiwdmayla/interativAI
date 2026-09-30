@@ -568,6 +568,32 @@ camada de trilhas e a fábrica estiverem estáveis.
   dela), com o texto "Você chega lá na Ilha X". `/glossario#<conceito>`
   abre no verbete.
 
+### Revisão do dia (rodada 14)
+
+- Itens declarativos em `src/conteudo/revisao/<conceito>.ts` (guia, seção
+  19); cada item vira a fase de um objetivo sozinho (`faseDoItem`) e é
+  jogado pelo `JogoFase` no modo `revisao-dia` (sem salvar a fase, sem
+  estrelas, sem apresentações, "Não lembrei"; o resultado vai para a
+  sessão por `aoTerminarRevisao`).
+- Agendador em `src/lib/revisao.ts` (regras no topo), estado em
+  `progresso.revisao` (`src/lib/estadoRevisao.ts`, leitura segura). A fase
+  concluída registra os conceitos (`useMotorFase`); progresso antigo é
+  sincronizado no mundo e na `/revisao` (`useSincronizarRevisao`).
+- `/revisao` (`componentes/revisao/`) e o Porto da revisão no mundo
+  (`ArtePorto`, `data-porto`, `data-porto-itens`).
+
+### Ser encontrado: busca, medição e campanha (rodada 14)
+
+- Abas que não são do Chrome (Busca, Medição, Campanha) só aparecem nas
+  fases que usam as ferramentas delas (`soQuandoLivre` em
+  `src/motor/abas.ts`); as fases publicadas não mudam.
+- Motores puros de DOM: `src/motor/busca.ts` (resultado, corte, noindex,
+  JSON-LD), `src/motor/medicao.ts` (data-evento, utm) e
+  `src/motor/campanha.ts` (nota da página, leilão, dia simulado). Todos
+  são simulações aproximadas, e a tela diz isso.
+- Tipo de fase `simulador-campanha` com objetivos: o motor de objetivos
+  vale para os dois tipos por `temObjetivos` (`src/motor/tiposDeFase.ts`).
+
 ### Currículo
 
 - `docs/MAPA-CURRICULAR.md` é o percurso inteiro (ilhas Origens, Sites,

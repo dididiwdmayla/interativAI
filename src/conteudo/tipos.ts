@@ -646,6 +646,8 @@ export type ItemRevisao = {
   enunciado: { mouse: string; toque: string };
   /** Mini-site próprio e pequeno. `url` e `titulo` têm padrão. */
   siteAlvo: { head?: string; body: string; css?: string; url?: string; titulo?: string };
+  /** O jogador edita o documento inteiro (head e body), como numa fase com modoDocumento. */
+  modoDocumento?: true;
   validador?: Validador;
   previsao?: Previsao;
   /** Só pergunta e dica: sem linha e sem solução (a revisão é "sozinho"). */

@@ -104,6 +104,12 @@
     "sites-publicar-u2": [
       "sites-publicar-u2-f1",
       "sites-publicar-u2-f2"
+    ],
+    "sites-ser-encontrado-u1": [
+      "sites-ser-encontrado-u1-f1",
+      "sites-ser-encontrado-u1-f2",
+      "sites-ser-encontrado-u1-f3",
+      "sites-ser-encontrado-u1-f4"
     ]
   },
   "fases": {
@@ -595,6 +601,74 @@
         "acessibilidade-90",
         "cabe-no-celular"
       ]
+    },
+    "sites-ser-encontrado-u1-f1": {
+      "objetivos": [
+        "titulo-com-nome",
+        "titulo-com-cidade"
+      ]
+    },
+    "sites-ser-encontrado-u1-f2": {
+      "objetivos": [
+        "criar-descricao",
+        "descricao-sem-corte",
+        "descricao-com-telefone"
+      ]
+    },
+    "sites-ser-encontrado-u1-f3": {
+      "objetivos": [
+        "tirar-noindex",
+        "pagina-de-teste"
+      ]
+    },
+    "sites-ser-encontrado-u1-f4": {
+      "partes": [
+        "volta-pra-busca",
+        "titulo-inteiro",
+        "descricao-convite"
+      ]
     }
-  }
+  },
+  "itensRevisao": [
+    "elemento-1",
+    "elemento-2",
+    "tag-1",
+    "tag-2",
+    "selecionar-pela-arvore-1",
+    "selecionar-pela-arvore-2",
+    "modo-inspecionar-1",
+    "modo-inspecionar-2",
+    "editar-texto-1",
+    "editar-texto-2",
+    "codigo-html-1",
+    "codigo-html-2",
+    "lista-e-itens-1",
+    "lista-e-itens-2",
+    "elemento-pai-1",
+    "elemento-pai-2",
+    "elemento-filho-1",
+    "elemento-filho-2",
+    "aninhamento-1",
+    "aninhamento-2",
+    "esconder-elemento-1",
+    "esconder-elemento-2",
+    "remover-do-documento-1",
+    "remover-do-documento-2",
+    "desfazer-1",
+    "desfazer-2",
+    "duplicar-elemento-1",
+    "duplicar-elemento-2",
+    "elementos-irmaos-1",
+    "elementos-irmaos-2",
+    "rastreamento-1",
+    "rastreamento-2",
+    "indexacao-1",
+    "indexacao-2",
+    "titulo-na-busca-1",
+    "titulo-na-busca-2",
+    "descricao-na-busca-1",
+    "descricao-na-busca-2",
+    "noindex-1",
+    "noindex-2"
+  ]
 }

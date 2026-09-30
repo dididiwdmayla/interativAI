@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ilhaDoId } from "@/curriculo";
+import { CURRICULO, ilhaDoId, localNoCurriculo } from "@/curriculo";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import {
   acaoDaUnidade,
@@ -29,6 +29,8 @@ const ELEMENTOS = SITES.zonas[0];
 const ESTILOS = SITES.zonas[1];
 /** As unidades prontas de Sites, na ordem do currículo (derivado: vale com qualquer zona pronta). */
 const SITES_PRONTAS = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-"));
+/** As que contam para abrir a Lógica: sem as da zona opcional (Ser encontrado). */
+const SITES_OBRIGATORIAS = SITES_PRONTAS.filter((unidade) => !localNoCurriculo(unidade.id)?.zona.opcional);
 const item = (id: string) => {
   const achado = ELEMENTOS.unidades.find((unidade) => unidade.id === id);
   if (!achado) throw new Error(id);
@@ -70,11 +72,13 @@ describe("ilhas", () => {
     const logica = ilha("logica");
     expect(estadoDaIlha(logica, { progresso: PROGRESSO_PADRAO, unidades })).toBe("bloqueada");
     // Cada unidade pronta de Sites precisa acabar: com qualquer uma faltando, a Lógica segue bloqueada.
-    for (let quantas = 0; quantas < SITES_PRONTAS.length; quantas += 1) {
-      const progresso = concluiu(...SITES_PRONTAS.slice(0, quantas));
-      expect(estadoDaIlha(logica, { progresso, unidades }), `com ${quantas} de ${SITES_PRONTAS.length}`).toBe("bloqueada");
+    for (let quantas = 0; quantas < SITES_OBRIGATORIAS.length; quantas += 1) {
+      const progresso = concluiu(...SITES_OBRIGATORIAS.slice(0, quantas));
+      expect(estadoDaIlha(logica, { progresso, unidades }), `com ${quantas} de ${SITES_OBRIGATORIAS.length}`).toBe("bloqueada");
     }
-    expect(estadoDaIlha(logica, { progresso: concluiu(...SITES_PRONTAS), unidades })).toBe("disponivel");
+    // A zona opcional (Ser encontrado) não tranca: sem nenhuma unidade dela, a Lógica abre.
+    expect(SITES_OBRIGATORIAS.length).toBeLessThan(SITES_PRONTAS.length);
+    expect(estadoDaIlha(logica, { progresso: concluiu(...SITES_OBRIGATORIAS), unidades })).toBe("disponivel");
   });
 
   it("o /lab/mapa desbloqueia tudo o que tem conteúdo", () => {

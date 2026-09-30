@@ -20,6 +20,11 @@ import { ITENS_MODO_INSPECIONAR } from "./modo-inspecionar";
 import { ITENS_REMOVER_DO_DOCUMENTO } from "./remover-do-documento";
 import { ITENS_SELECIONAR_PELA_ARVORE } from "./selecionar-pela-arvore";
 import { ITENS_TAG } from "./tag";
+import { ITENS_DESCRICAO_NA_BUSCA } from "./descricao-na-busca";
+import { ITENS_INDEXACAO } from "./indexacao";
+import { ITENS_NOINDEX } from "./noindex";
+import { ITENS_RASTREAMENTO } from "./rastreamento";
+import { ITENS_TITULO_NA_BUSCA } from "./titulo-na-busca";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -40,6 +45,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_DESFAZER,
   ...ITENS_DUPLICAR_ELEMENTO,
   ...ITENS_ELEMENTOS_IRMAOS,
+  // S1 (modelo da zona Ser encontrado: mini-sites no modo documento)
+  ...ITENS_RASTREAMENTO,
+  ...ITENS_INDEXACAO,
+  ...ITENS_TITULO_NA_BUSCA,
+  ...ITENS_DESCRICAO_NA_BUSCA,
+  ...ITENS_NOINDEX,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

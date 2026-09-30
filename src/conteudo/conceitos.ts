@@ -556,6 +556,33 @@ const CATALOGO = {
     resumo: "O texto que diz o que um link ou botão faz para quem usa leitor de tela: o texto visível ou, se for só um ícone, um aria-label.",
     temas: ["acessibilidade", "interfaces"],
   },
+
+  // Zona Ser encontrado (opcional), S1: como o Google acha seu site
+  rastreamento: {
+    nome: "Rastreamento",
+    resumo: "O robô do buscador visita as páginas e segue os links de uma para outra, bem antes de alguém buscar.",
+    temas: ["presenca-digital"],
+  },
+  indexacao: {
+    nome: "Indexação",
+    resumo: "Guardar a página visitada no catálogo do buscador: na hora da busca, ele procura no catálogo, não no site.",
+    temas: ["presenca-digital"],
+  },
+  "titulo-na-busca": {
+    nome: "Título na busca",
+    resumo: "O texto do <title> vira o título azul do resultado; se for longo demais, a busca corta com reticências.",
+    temas: ["presenca-digital", "interfaces"],
+  },
+  "descricao-na-busca": {
+    nome: "Descrição na busca",
+    resumo: "A meta description é o convite embaixo do título no resultado; sem ela, a busca mostra um trecho qualquer da página.",
+    temas: ["presenca-digital"],
+  },
+  noindex: {
+    nome: "noindex",
+    resumo: "Uma meta no head que pede para a página ficar fora da busca: ela continua no ar para quem tem o link.",
+    temas: ["presenca-digital"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
