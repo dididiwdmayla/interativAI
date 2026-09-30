@@ -130,6 +130,12 @@
       "sites-ser-encontrado-u4-f2",
       "sites-ser-encontrado-u4-f3",
       "sites-ser-encontrado-u4-f4"
+    ],
+    "sites-ser-encontrado-u5": [
+      "sites-ser-encontrado-u5-f1",
+      "sites-ser-encontrado-u5-f2",
+      "sites-ser-encontrado-u5-f3",
+      "sites-ser-encontrado-u5-f4"
     ]
   },
   "fases": {
@@ -743,6 +749,32 @@
         "pedido-medido",
         "uma-visita-de-cada"
       ]
+    },
+    "sites-ser-encontrado-u5-f1": {
+      "objetivos": [
+        "primeiro-lugar",
+        "custo-por-clique",
+        "outra-palavra-chave"
+      ]
+    },
+    "sites-ser-encontrado-u5-f2": {
+      "objetivos": [
+        "orcamento-acabou",
+        "comecar-pequeno"
+      ]
+    },
+    "sites-ser-encontrado-u5-f3": {
+      "objetivos": [
+        "diagnostico-da-pagina",
+        "melhorar-a-busca-da-pagina",
+        "alt-e-custo-por-cliente"
+      ]
+    },
+    "sites-ser-encontrado-u5-f4": {
+      "objetivos": [
+        "melhorar-a-pagina",
+        "a-conta-fecha"
+      ]
     }
   },
   "itensRevisao": [
@@ -991,6 +1023,18 @@
     "conversao-1",
     "conversao-2",
     "link-rastreavel-utm-1",
-    "link-rastreavel-utm-2"
+    "link-rastreavel-utm-2",
+    "leilao-de-anuncio-1",
+    "leilao-de-anuncio-2",
+    "custo-por-clique-1",
+    "custo-por-clique-2",
+    "palavra-chave-de-anuncio-1",
+    "palavra-chave-de-anuncio-2",
+    "orcamento-diario-1",
+    "orcamento-diario-2",
+    "pagina-de-destino-1",
+    "pagina-de-destino-2",
+    "indice-de-qualidade-1",
+    "indice-de-qualidade-2"
   ]
 }

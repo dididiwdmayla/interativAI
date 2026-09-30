@@ -109,7 +109,9 @@ export function PainelCampanha({ dados, estado, resultado, aoConfigurar, aoAbrir
             <>
               <section className="rounded-2xl border-2 border-borda bg-fundo p-3" data-leilao>
                 <h3 className="text-sm font-black text-texto">O leilão desta busca</h3>
-                <p className="text-xs text-texto-suave">A posição sai de lance vezes qualidade, não só do lance.</p>
+                <p className="text-xs text-texto-suave">
+                  Neste simulador simplificado, a posição sai de lance vezes qualidade. No Google de verdade, entram mais coisas.
+                </p>
                 <ol className="mt-2 flex flex-col gap-1.5">
                   {resultado.leilao.map((item) => (
                     <motion.li
@@ -144,7 +146,7 @@ export function PainelCampanha({ dados, estado, resultado, aoConfigurar, aoAbrir
               <section className="rounded-2xl border-2 border-borda bg-fundo p-3" data-dia-simulado>
                 <h3 className="text-sm font-black text-texto">O dia simulado</h3>
                 <p className="text-xs text-texto-suave" data-nota-pagina={resultado.notaPagina}>
-                  Página de destino: nota {resultado.notaPagina} de 100 (auditoria e busca), qualidade {resultado.qualidade.toFixed(1)} de 10,
+                  Página de destino: nota {resultado.notaPagina} de 100 (auditoria e busca), qualidade do simulador {resultado.qualidade.toFixed(1)} de 10,
                   conversão de {(resultado.taxaConversao * 100).toFixed(1)}%.
                 </p>
                 <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">

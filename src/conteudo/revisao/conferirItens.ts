@@ -3,6 +3,7 @@
  * mesmas das fases, rodadas sobre `faseDoItem`: ver
  * `checarItensDeRevisao` em src/conteudo/checagens.ts).
  */
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { ehIdConceito } from "../conceitos";
 import type { Fase, ItemRevisao } from "../tipos";
 
@@ -23,7 +24,7 @@ function normalizar(html: string): string {
 export function conferirItensDeRevisao(itens: readonly ItemRevisao[], fases: readonly Fase[]): string[] {
   const problemas: string[] = [];
   const vistos = new Set<string>();
-  const ensinados = new Set(fases.flatMap((fase) => (fase.tipo === "pratica" ? fase.conceitos : [])));
+  const ensinados = new Set(fases.flatMap((fase) => (temObjetivos(fase) ? fase.conceitos : [])));
   const corpos = new Map(fases.map((fase) => [normalizar(fase.siteAlvo.body), fase.id]));
   const urls = new Map(fases.map((fase) => [fase.siteAlvo.url, fase.id]));
   const porConceito = new Map<string, number>();
@@ -35,7 +36,7 @@ export function conferirItensDeRevisao(itens: readonly ItemRevisao[], fases: rea
     if (!ehIdConceito(item.conceito)) {
       problemas.push(`${onde}: o conceito "${item.conceito}" não existe em src/conteudo/conceitos.ts`);
     } else if (!ensinados.has(item.conceito)) {
-      problemas.push(`${onde}: nenhuma fase ensina "${item.conceito}" (conceitos de uma fase de prática), então ele nunca entra na revisão`);
+      problemas.push(`${onde}: nenhuma fase ensina "${item.conceito}" (conceitos de uma fase de prática ou de simulador de campanha), então ele nunca entra na revisão`);
     }
     porConceito.set(item.conceito, (porConceito.get(item.conceito) ?? 0) + 1);
     if (item.tipo === "acao" && !item.validador) problemas.push(`${onde}: item de ação precisa de validador`);

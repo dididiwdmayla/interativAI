@@ -128,6 +128,12 @@ import { ITENS_SEARCH_CONSOLE } from "./search-console";
 import { ITENS_EVENTO_DE_MEDICAO } from "./evento-de-medicao";
 import { ITENS_CONVERSAO } from "./conversao";
 import { ITENS_LINK_RASTREAVEL_UTM } from "./link-rastreavel-utm";
+import { ITENS_LEILAO_DE_ANUNCIO } from "./leilao-de-anuncio";
+import { ITENS_CUSTO_POR_CLIQUE } from "./custo-por-clique";
+import { ITENS_PALAVRA_CHAVE_DE_ANUNCIO } from "./palavra-chave-de-anuncio";
+import { ITENS_ORCAMENTO_DIARIO } from "./orcamento-diario";
+import { ITENS_PAGINA_DE_DESTINO } from "./pagina-de-destino";
+import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -264,6 +270,13 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_EVENTO_DE_MEDICAO,
   ...ITENS_CONVERSAO,
   ...ITENS_LINK_RASTREAVEL_UTM,
+  // S5 (Anúncio pago por dentro)
+  ...ITENS_LEILAO_DE_ANUNCIO,
+  ...ITENS_CUSTO_POR_CLIQUE,
+  ...ITENS_PALAVRA_CHAVE_DE_ANUNCIO,
+  ...ITENS_ORCAMENTO_DIARIO,
+  ...ITENS_PAGINA_DE_DESTINO,
+  ...ITENS_INDICE_DE_QUALIDADE,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

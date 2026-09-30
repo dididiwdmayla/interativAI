@@ -210,6 +210,49 @@ export const PLATAFORMAS_MARKETING: readonly PlataformaMarketing[] = [
     ],
     fontes: ["support.google.com/webmasters/answer/34592?hl=pt-BR"],
   },
+  {
+    id: "google-ads",
+    nome: "Google Ads (como o anúncio é classificado)",
+    paraQue: "A plataforma de anúncios do Google: o anúncio aparece na busca e o dono paga quando alguém clica.",
+    endereco: "support.google.com/google-ads",
+    verificadoEm: "2026-09-30",
+    usadaEm: ["sites-ser-encontrado-u5"],
+    passos: [],
+    fatos: [
+      {
+        id: "classificacao-do-anuncio",
+        titulo: "O que decide a posição do anúncio",
+        detalhe:
+          "A classificação do anúncio é definida pelo lance, pela qualidade do anúncio e da página de destino, pelos limites mínimos de qualidade, pela concorrência do leilão, pelo contexto da pesquisa (termos, local, dispositivo, horário) e pelos recursos do anúncio (como sitelinks).",
+      },
+      {
+        id: "custo-por-clique",
+        titulo: "Custo por clique",
+        detalhe: "Você nem sempre paga o lance máximo: o custo real costuma ficar abaixo dele. Anúncios de qualidade mais alta costumam pagar menos por clique.",
+      },
+      {
+        id: "indice-de-qualidade",
+        titulo: "Índice de qualidade",
+        detalhe:
+          "Vai de 1 a 10, por palavra-chave. É uma ferramenta de diagnóstico e não é usado no leilão. Compara você com outros anunciantes da mesma palavra-chave nos últimos 90 dias, em três componentes, cada um acima da média, na média ou abaixo da média: taxa de cliques esperada, relevância do anúncio e experiência na página de destino.",
+      },
+      {
+        id: "conversao",
+        titulo: "Conversão",
+        detalhe: "Uma ação importante depois do clique (compra, ligação, cadastro).",
+      },
+      {
+        id: "tipos-de-correspondencia",
+        titulo: "Tipos de correspondência de palavra-chave",
+        detalhe: "Ampla, de frase e exata.",
+      },
+    ],
+    fontes: [
+      "support.google.com/google-ads/answer/6167118?hl=pt-BR",
+      "support.google.com/google-ads/answer/1722122?hl=pt-BR",
+      "business.google.com/br/resources/articles/how-to-setup-google-ads-a-checklist",
+    ],
+  },
 ];
 
 /** "conferido em 30/09/2026", para a tela. */

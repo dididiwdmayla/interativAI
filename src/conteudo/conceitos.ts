@@ -666,6 +666,37 @@ const CATALOGO = {
     resumo: "Um link com utm_source, utm_medium e utm_campaign no fim, que diz à medição de onde a visita veio; a página não muda.",
     temas: ["presenca-digital", "dados"],
   },
+  // Zona Ser encontrado (opcional), S5: anúncio pago por dentro
+  "leilao-de-anuncio": {
+    nome: "Leilão do anúncio",
+    resumo: "A disputa que decide quem aparece quando alguém busca: o lance conta, mas não sozinho (qualidade, concorrência e contexto também).",
+    temas: ["presenca-digital", "desempenho"],
+  },
+  "custo-por-clique": {
+    nome: "Custo por clique",
+    resumo: "O que o anunciante paga por cada clique no anúncio: o lance é o máximo, e o custo real costuma ficar abaixo dele.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "palavra-chave-de-anuncio": {
+    nome: "Palavra-chave do anúncio",
+    resumo: "O termo que a pessoa digita na busca e que o anunciante escolhe para o anúncio poder aparecer; há correspondência ampla, de frase e exata.",
+    temas: ["presenca-digital"],
+  },
+  "orcamento-diario": {
+    nome: "Orçamento diário",
+    resumo: "O teto do que o anúncio gasta por dia: quando a verba do dia acaba, o anúncio deixa de aparecer.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "pagina-de-destino": {
+    nome: "Página de destino",
+    resumo: "A página onde a pessoa cai depois de clicar no anúncio: decide quantos cliques viram clientes, e uma página melhor barateia o cliente.",
+    temas: ["presenca-digital", "desempenho"],
+  },
+  "indice-de-qualidade": {
+    nome: "Índice de qualidade",
+    resumo: "Uma nota de 1 a 10, por palavra-chave, que só serve de diagnóstico do anúncio e da página: não entra no leilão.",
+    temas: ["presenca-digital", "dados"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
