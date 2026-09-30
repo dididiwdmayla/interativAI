@@ -315,36 +315,412 @@ unidade-modelo.
 
 ## Ilha 2: Lógica (JavaScript puro)
 
-Id no currículo: `logica`. Unidades planejadas por zona
-(`logica-<zona>-u<n>`), a detalhar quando o motor existir.
+Id no currículo: `logica`. Unidades `logica-<zona>-u<n>`, detalhadas na
+rodada 17 (motor da Lógica, parte A).
 
-**Requer motor:** Console interativo, execução de JS isolada e aba Fontes
-com depurador.
+**Princípio da ilha.** Aqui começa programar de verdade, e o coração do
+jogo continua o mesmo: ver a estrutura mudar em tempo real. Lógica não tem
+"tela de site", então a tela vira o **palco da memória**: cada variável é
+uma caixinha com nome, valor e tipo; uma lista é uma fileira de vagões
+numerados; um objeto é uma ficha de chave e valor. Tudo muda ao vivo quando
+o código roda, e a **linha do tempo** rebobina a execução passo a passo.
+Tudo que o jogador aprende funciona no Console do F12 de verdade.
 
-Zonas (na ordem do mapa):
+**Ferramentas (parte A, rodada 17):** aba Console (fiel ao Chrome: resposta
+de cada expressão, `undefined` depois de declarações, histórico com a seta
+para cima, Shift+Enter para várias linhas, limpar), o Snippet (editor de
+programas maiores com Executar e Ctrl+Enter; no Chrome fica em Fontes >
+Snippets), o palco da memória, a linha do tempo e o tipo de fase
+`circuito-logico`. Validadores de código: `valorVariavel`, `saida`,
+`semErro`, `erroDoTipo`, `usouSintaxe` e `funcaoPassa` (guia, seção 25).
 
-1. Primeiros comandos (`primeiros-comandos`): console, valores,
-   variáveis, tipos.
-2. Resolvendo problemas (`resolvendo-problemas`): decompor um problema
-   em passos pequenos (u1) e pseudocódigo (u2).
-3. Decisões (`decisoes`): comparações, booleanos, if/else (u1) e
-   **portões lógicos** (u2, `logica-decisoes-u2`, ideia aprovada na rodada
-   12): antes de escrever `if` com `&&`, `||` e `!`, o jogador monta
-   portões lógicos (E, OU, NÃO) arrastando e ligando peças para fazer uma
-   saída acontecer. Exemplo: "a porta da padaria só abre se tiver cliente
-   E a loja estiver aberta". Depois, o mesmo circuito aparece como código.
-   **Requer motor:** `circuito-logico`, além do motor da Lógica.
-4. Repetição (`repeticao`): for, while.
-5. Funções (`funcoes`).
-6. Listas e objetos (`listas-e-objetos`).
-7. Depuração (`depuracao`): ler erros, breakpoints.
-8. Estruturas de dados (`estruturas-de-dados`): listas e dicionários
-   (u1), pilhas e filas (u2, com o desfazer como exemplo), árvores (u3:
-   o DOM é uma árvore, a mesma da aba Elementos).
-9. Algoritmos essenciais (`algoritmos-essenciais`): buscar (u1), ordenar
-   (u2), recursão (u3) e a noção de desempenho (u4, "Por que isso
-   trava?": por que um programa que voa com dez itens trava com um
-   milhão, sem fórmula).
+**Ler erro desde o começo.** Todo erro aparece em vermelho com a mensagem
+original do navegador e, embaixo, a explicação em linguagem de leigo e a
+linha certa. Cada zona tem pelo menos um momento de "o que esse erro quer
+dizer?"; a zona Depuração só formaliza.
+
+**Missões de campo desta ilha:** "abra o Console de qualquer site e faça X"
+(o Console roda JavaScript em qualquer página, sem mexer nela). Cada zona
+sugere a dela abaixo.
+
+**Ordem das zonas (ajustada na rodada 17, com o porquê):**
+
+1. Primeiros comandos, 2. Decisões, 3. Repetição, 4. Funções, 5. Listas e
+   objetos: as ferramentas da linguagem, cada uma usando a anterior.
+6. **Resolvendo problemas** saiu do 2º lugar para depois de Listas e
+   objetos: decompor e testar com exemplos só tem graça quando já dá para
+   escrever o programa inteiro (variáveis, if, repetição, funções e
+   listas). Antes disso, os "problemas" seriam de uma linha.
+7. **Depuração** veio antes de Algoritmos (o ponto de partida a punha no
+   fim): o depurador (pontos de parada, passo a passo) é justamente a
+   ferramenta para entender busca binária e recursão. Ler mensagem de erro
+   (u1) não precisa de motor novo e já aparece aos poucos desde a zona 1.
+8. Algoritmos essenciais e 9. Estruturas de dados (a árvore precisa de
+   recursão para ser percorrida).
+10. **Programa de verdade**: o projeto-ponte, a saída da ilha.
+
+**Onde falta motor (parte B):** `ordenar-passos` (Resolvendo problemas
+u1 a u3), `depurador-fontes` (Depuração u2 e u3), `visualizador-arvore`
+(Estruturas de dados u3) e `projeto-ponte-js` (Programa de verdade). As
+fichas estão em `src/curriculo/motores.ts`.
+
+### Zona Primeiros comandos (`primeiros-comandos`)
+
+Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
+(`3 * 4.5 + 2 * 7`), guardar em uma variável e perguntar o `typeof` dela.
+
+#### U1. O Console calcula — `logica-primeiros-comandos-u1` (unidade-modelo)
+
+- **Meta:** usar o Console como calculadora e guardar os resultados em
+  variáveis com nomes bons.
+- **Conceitos:** Console (ler, rodar, responder); operações `+ - * / %`;
+  ordem das operações e parênteses; `let` (caixinha que muda); `const`
+  (caixinha que não muda); nomes bons (camelCase, sem acento, dizem o que
+  guardam); `undefined` como resposta de uma declaração.
+- **Micro-passos:** a conta da padaria no Console (guiado) e depois a do
+  troco (sozinho); previsão "o que o Console responde para `2 + 3 * 4`?";
+  guardar o total em `let total` e ver a caixinha surgir no palco; mudar o
+  valor e ver a caixinha piscar; `const` e o erro de trocar o valor dela
+  (ler o erro); previsão "o que aparece depois de `let preco = 5`?"
+  (`undefined`).
+- **Desafio:** a conta do mercadinho do bairro (contexto novo): guardar
+  preços e quantidades em variáveis e calcular o total e o troco, sem passo
+  a passo.
+- **Revisa:** da Ilha Sites, o F12 e as abas (onde o Console mora).
+- **Confusões:** "o `=` é igual da matemática" (é guardar: a caixinha
+  recebe); "`undefined` é erro" (é o Console dizendo que a linha não tem
+  valor para mostrar); "`const` é constante matemática" (é só uma caixinha
+  que não troca de valor).
+
+#### U2. Textos — `logica-primeiros-comandos-u2`
+
+- **Meta:** escrever textos entre aspas, juntar textos e montar frases com
+  valores dentro.
+- **Conceitos:** string; aspas simples, duplas e crase; juntar com `+`;
+  template literal (`` `Olá, ${nome}` ``); `.length`; `console.log`.
+- **Micro-passos:** o nome do cliente entre aspas; juntar nome e
+  sobrenome (e o espaço que falta); a frase do pedido com template;
+  previsão "o que o Console responde para `'oi' + 'tchau'`?".
+- **Desafio:** a mensagem de confirmação do pedido de uma floricultura,
+  montada com template.
+- **Revisa:** variáveis (U1).
+- **Confusões:** "sem aspas também é texto" (sem aspas é nome de
+  variável: `ReferenceError`); "o `+` sempre soma".
+
+#### U3. Tipos — `logica-primeiros-comandos-u3`
+
+- **Meta:** descobrir o tipo de cada valor com `typeof` e entender por que
+  `"2" + 2` dá `"22"`.
+- **Conceitos:** tipos (number, string, boolean, undefined, null) e a cor
+  de cada um no palco; `typeof`; `"2" + 2` e `"2" * 2`; `Number()` e
+  `String()`; comentários (`//` e `/* */`).
+- **Micro-passos:** perguntar o `typeof` de cada caixinha; a conta que deu
+  "22" (o preço veio como texto) e o conserto com `Number`; comentar uma
+  linha para o computador pular; previsão "`'5' - 2` dá quanto?".
+- **Desafio:** a calculadora de gorjeta que recebe o valor como texto e
+  precisa somar certo.
+- **Revisa:** textos (U2), operações (U1).
+- **Confusões:** "`'2'` e `2` são a mesma coisa"; "comentário muda o
+  programa".
+
+### Zona Decisões (`decisoes`)
+
+Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
+`'10' === 10` e `'10' == 10` e explicar a diferença para alguém.
+
+#### U1. Verdadeiro ou falso — `logica-decisoes-u1`
+
+- **Meta:** fazer perguntas ao programa com comparações e receber `true`
+  ou `false`.
+- **Conceitos:** boolean; `>`, `<`, `>=`, `<=`; `===` e `!==`; `=` (guarda)
+  vs `===` (compara) vs `==` (compara convertendo, evitar).
+- **Micro-passos:** "o cliente tem idade para o combo?"; comparar textos;
+  previsão "`'10' === 10`?"; o bug do `=` no lugar de `===`.
+- **Desafio:** as regras de frete grátis de uma loja virtual, como
+  comparações.
+- **Revisa:** tipos (Primeiros comandos U3).
+- **Confusões:** "`=` compara"; "`==` e `===` são iguais".
+
+#### U2. Portões lógicos — `logica-decisoes-u2`
+
+- **Motor:** `circuito-logico` (rodada 17), mais a Lógica.
+- **Meta:** montar portões E, OU e NÃO para uma saída acontecer e ver o
+  mesmo circuito virar código com `&&`, `||` e `!`.
+- **Conceitos:** E (as duas), OU (pelo menos uma), NÃO (inverte); tabela
+  verdade; `&&`, `||`, `!`.
+- **Micro-passos:** "a porta da padaria só abre se tiver cliente E a loja
+  estiver aberta" (circuito, guiado); o alarme que toca se a janela OU a
+  porta abrir (sozinho); a luz que acende quando NÃO tem sol; "Ver como
+  código" e a mesma expressão rodando no Console; previsão "com as duas
+  chaves desligadas, o OU acende?".
+- **Desafio:** a catraca do metrô (bilhete E (não bloqueado)), montada no
+  circuito e depois escrita como código.
+- **Revisa:** comparações (U1).
+- **Confusões:** "OU é um ou outro, nunca os dois" (no código, os dois
+  também valem); "a ordem das entradas muda o resultado".
+
+#### U3. Se, senão — `logica-decisoes-u3`
+
+- **Meta:** fazer o programa escolher um caminho com `if`, `else if` e
+  `else`.
+- **Conceitos:** `if`; bloco `{ }`; `else`; `else if` e a ordem das
+  perguntas; condições com `&&` e `||` (revisa U2).
+- **Micro-passos:** a mensagem de "loja aberta" ou "fechada"; faixas de
+  preço com `else if` (e o bug da ordem trocada); a linha do tempo mostrando
+  qual caminho rodou; previsão "qual mensagem aparece se a nota for 7?".
+- **Desafio:** o classificador de pedidos de uma lanchonete (pequeno,
+  médio, grande, ou "pedido inválido").
+- **Revisa:** portões (U2), comparações (U1).
+- **Confusões:** "o `else if` testa tudo" (para no primeiro verdadeiro);
+  "ponto e vírgula depois do `if (...)`".
+
+#### U4. Verdadeiro disfarçado — `logica-decisoes-u4`
+
+- **Meta:** prever quando um valor que não é booleano conta como verdadeiro
+  ou falso num `if`.
+- **Conceitos:** falsy (`0`, `''`, `null`, `undefined`, `NaN`, `false`);
+  truthy (todo o resto, até `'0'` e `[]`); `!!valor`.
+- **Micro-passos:** o campo de nome vazio; o estoque zero que some;
+  previsão "`if ('0')` entra?".
+- **Desafio:** a validação do formulário de cadastro de uma academia.
+- **Revisa:** if/else (U3), tipos.
+- **Confusões:** "texto `'0'` é falso"; "lista vazia é falsa".
+
+### Zona Repetição (`repeticao`)
+
+Missão de campo: no Console de qualquer site, escrever um `for` que
+mostra a tabuada do 7.
+
+#### U1. Enquanto for verdade — `logica-repeticao-u1`
+
+- **Meta:** repetir uma tarefa com `while`, contando as voltas, e
+  reconhecer um loop que nunca para.
+- **Conceitos:** `while`; condição de parada; contador (`i = i + 1`, `i++`);
+  loop infinito e a proteção do jogo (limite de passos e de tempo, com
+  mensagem amigável; no Chrome de verdade, a aba trava).
+- **Micro-passos:** a contagem regressiva do forno; a linha do tempo
+  mostrando cada volta; o loop sem `i++` e a mensagem da proteção;
+  previsão "quantas vezes aparece 'assando'?".
+- **Desafio:** a fila de senhas de uma farmácia até acabar.
+- **Revisa:** comparações, if.
+- **Confusões:** "o loop para sozinho"; "o `while` testa só uma vez".
+
+#### U2. for e for...of — `logica-repeticao-u2`
+
+- **Meta:** repetir um número certo de vezes com `for` e passar por cada
+  item com `for...of`.
+- **Conceitos:** as três partes do `for`; `for...of` numa lista e num
+  texto; `break` (só apresentação).
+- **Micro-passos:** a tabuada; as letras de um nome; previsão "o `for (let
+  i = 0; i < 3; i++)` roda quantas vezes?".
+- **Desafio:** as etiquetas numeradas de uma gráfica.
+- **Revisa:** while (U1), textos.
+- **Confusões:** "o `i` começa em 1"; "o `<=` e o `<` dão no mesmo".
+
+#### U3. Contar e somar — `logica-repeticao-u3`
+
+- **Meta:** usar contadores e acumuladores para contar, somar e achar o
+  maior valor.
+- **Conceitos:** acumulador (`total += preco`); contador condicional;
+  maior e menor; média.
+- **Micro-passos:** o total das vendas do dia; quantos pedidos passaram de
+  R$ 50; a maior venda; previsão "o total começa em quanto?".
+- **Desafio:** o fechamento do caixa de uma sorveteria.
+- **Revisa:** for (U2), if.
+- **Confusões:** "declarar o total dentro do loop" (zera a cada volta).
+
+### Zona Funções (`funcoes`)
+
+Missão de campo: no Console de qualquer site, criar a função
+`dobro(n)` e chamar com três números.
+
+#### U1. Criar e chamar — `logica-funcoes-u1`
+
+- **Meta:** guardar um passo a passo numa função e usar de novo quando
+  quiser.
+- **Conceitos:** `function nome() { }`; chamar com `()`; a função sem
+  chamar não faz nada; a moldura da função no palco.
+- **Micro-passos:** a função `saudar()`; chamar duas vezes; previsão "o
+  que aparece se você só declarar a função?".
+- **Desafio:** as mensagens de abertura e fechamento de uma loja.
+- **Revisa:** console.log, textos.
+- **Confusões:** "escrever a função já roda"; "`saudar` e `saudar()` são a
+  mesma coisa".
+
+#### U2. Parâmetros e retorno — `logica-funcoes-u2`
+
+- **Meta:** dar valores para a função trabalhar e receber a resposta de
+  volta com `return`.
+- **Conceitos:** parâmetro e argumento; `return`; `return` vs
+  `console.log` (a confusão principal); validado com `funcaoPassa`.
+- **Micro-passos:** `precoComDesconto(preco)`; a função que só mostra e a
+  que devolve (o `undefined` que aparece quando falta o `return`);
+  previsão "o que `total = somar(2, 3)` guarda se a função só fizer
+  console.log?".
+- **Desafio:** as funções da calculadora de frete de uma loja.
+- **Revisa:** funções (U1), if.
+- **Confusões:** "mostrar é devolver"; "o nome do parâmetro precisa ser o
+  da variável".
+
+#### U3. Escopo — `logica-funcoes-u3`
+
+- **Meta:** saber onde cada variável existe e por que a de dentro da função
+  some quando ela termina.
+- **Conceitos:** escopo global e de função; escopo de bloco (`let` dentro
+  do `if`); a moldura que some no palco.
+- **Micro-passos:** a variável de dentro que "não existe" lá fora
+  (`ReferenceError`); duas variáveis com o mesmo nome; previsão.
+- **Desafio:** consertar o contador de visitas que sempre zera.
+- **Revisa:** parâmetros e retorno (U2).
+- **Confusões:** "variável é global sempre".
+
+#### U4. Arrow functions — `logica-funcoes-u4`
+
+- **Meta:** escrever funções curtas com a seta `=>` e reconhecer as duas
+  formas no código dos outros.
+- **Conceitos:** `const dobro = (n) => n * 2`; retorno implícito; chaves e
+  `return` explícito.
+- **Micro-passos:** reescrever uma função como arrow; a arrow com chaves
+  que esqueceu o `return`; previsão.
+- **Desafio:** o conversor de medidas de uma receita.
+- **Revisa:** parâmetros e retorno.
+- **Confusões:** "arrow é outra coisa, não é função".
+
+### Zona Listas e objetos (`listas-e-objetos`)
+
+Missão de campo: no Console de qualquer site, criar a lista de compras,
+dar `push` num item e perguntar o `length`.
+
+#### U1. Listas — `logica-listas-e-objetos-u1`
+
+- **Meta:** guardar vários valores numa lista, pegar cada um pelo índice e
+  pôr e tirar itens.
+- **Conceitos:** array; índice começando em 0; `length`; `push`, `pop`; os
+  vagões no palco; duas variáveis apontando para a mesma lista (a seta).
+- **Micro-passos:** a fila de pedidos; o primeiro é `[0]`; o último é
+  `[length - 1]`; previsão "`lista[3]` numa lista de 3 itens?"
+  (`undefined`).
+- **Desafio:** a playlist de uma festa.
+- **Revisa:** variáveis, for...of.
+- **Confusões:** "o primeiro é o 1"; "copiar a variável copia a lista".
+
+#### U2. Percorrer listas — `logica-listas-e-objetos-u2`
+
+- **Meta:** passar por todos os itens de uma lista e transformar, filtrar e
+  achar itens.
+- **Conceitos:** `for...of` (revisa); `map`, `filter`, `find` (introdução,
+  com arrow).
+- **Micro-passos:** os preços com aumento (`map`); os produtos baratos
+  (`filter`); o primeiro esgotado (`find`); previsão.
+- **Desafio:** os resultados de uma votação da turma.
+- **Revisa:** arrow functions, for.
+- **Confusões:** "o `map` muda a lista original".
+
+#### U3. Objetos — `logica-listas-e-objetos-u3`
+
+- **Meta:** descrever uma coisa com chaves e valores, e ler e mudar cada
+  campo.
+- **Conceitos:** objeto `{ chave: valor }`; `obj.chave` e `obj['chave']`;
+  mudar e acrescentar campo; a ficha no palco.
+- **Micro-passos:** a ficha do produto; mudar o preço; a chave que não
+  existe (`undefined`); previsão.
+- **Desafio:** o cadastro de um pet no pet shop.
+- **Revisa:** tipos, listas.
+- **Confusões:** "objeto é a mesma coisa que lista".
+
+#### U4. Listas de objetos — `logica-listas-e-objetos-u4`
+
+- **Meta:** organizar o cardápio de uma padaria como dados e responder
+  perguntas sobre ele.
+- **Conceitos:** lista de objetos; percorrer e somar um campo; filtrar por
+  campo; desestruturação simples (`const { nome, preco } = item`).
+- **Micro-passos:** o cardápio da padaria (a mesma do site da Ilha Sites,
+  agora como dados); o mais caro; os sem glúten; previsão.
+- **Desafio:** o pedido de uma pizzaria com o total calculado.
+- **Revisa:** map/filter, objetos.
+- **Confusões:** "`item.preco` muda o cardápio inteiro".
+
+### Zona Resolvendo problemas (`resolvendo-problemas`)
+
+Missão de campo: escolher um problema do seu dia (a divisão da conta do
+bar) e escrever o pseudocódigo antes de abrir o Console.
+
+- **U1. Decompor um problema** (`logica-resolvendo-problemas-u1`, requer
+  `ordenar-passos`): quebrar "fazer o pedido da festa" em passos pequenos.
+  Confusão: "programador sabe a resposta antes de começar".
+- **U2. Pseudocódigo** (`logica-resolvendo-problemas-u2`, requer
+  `ordenar-passos`): o passo a passo em português com cartões, depois
+  cada cartão virando uma linha de código.
+- **U3. Ordenar os passos** (`logica-resolvendo-problemas-u3`, requer
+  `ordenar-passos`): pôr linhas na ordem e ver o que quebra (usar antes de
+  declarar, somar antes de ler).
+- **U4. Testar com exemplos** (`logica-resolvendo-problemas-u4`): escolher
+  exemplos que provam que a função funciona, inclusive os esquisitos
+  (lista vazia, zero, negativo); validado com `funcaoPassa`. Desafio: a
+  função de troco de uma cantina. Confusão: "funcionou com um exemplo,
+  está certo".
+
+### Zona Depuração (`depuracao`)
+
+Missão de campo: abrir o Console de um site qualquer, procurar uma
+mensagem vermelha e tentar entender o que ela diz.
+
+- **U1. Ler a mensagem de erro** (`logica-depuracao-u1`): o nome do erro
+  (`ReferenceError`, `TypeError`, `SyntaxError`), a mensagem e a linha;
+  o dicionário de erros de iniciante; validadores `erroDoTipo` e
+  `semErro`. Desafio: um programa com três erros para consertar na ordem
+  em que aparecem. Confusões: "erro vermelho é que estraguei o
+  computador"; "a linha do erro é sempre onde está o problema".
+- **U2. Pontos de parada** (`logica-depuracao-u2`, requer
+  `depurador-fontes`): parar numa linha e olhar os valores.
+- **U3. Passo a passo** (`logica-depuracao-u3`, requer
+  `depurador-fontes`): próxima linha, entrar e sair de função, observar
+  variáveis.
+
+### Zona Algoritmos essenciais (`algoritmos-essenciais`)
+
+Missão de campo: contar quantas comparações a busca binária faz para
+achar um número entre 1 e 1000 (no Console, com um contador).
+
+- **U1. Buscar** (`logica-algoritmos-essenciais-u1`): busca linear e
+  binária, com os vagões acendendo no palco. Confusão: "a binária serve
+  para qualquer lista" (só na ordenada).
+- **U2. Ordenar** (`logica-algoritmos-essenciais-u2`): ordenação vendo cada
+  troca nos vagões (seleção e bolha), e o `sort` pronto (e a pegadinha do
+  `sort` com números).
+- **U3. Recursão** (`logica-algoritmos-essenciais-u3`): a função que chama
+  ela mesma, cada chamada como uma moldura nova no palco; o caso base.
+  Confusão: "recursão é loop infinito".
+- **U4. Por que isso trava?** (`logica-algoritmos-essenciais-u4`): contar
+  passos com 10, 100 e 1000 itens (o rastro conta), sem fórmula; o limite
+  de passos do jogo como exemplo.
+
+### Zona Estruturas de dados (`estruturas-de-dados`)
+
+Missão de campo: no Console, simular o desfazer de um editor com uma
+pilha (`push` a cada letra, `pop` no desfazer).
+
+- **U1. Pilhas e filas** (`logica-estruturas-de-dados-u1`): pilha (o
+  desfazer do painel Elementos) e fila (a fila de impressão), com `push`,
+  `pop` e `shift`.
+- **U2. Dicionários** (`logica-estruturas-de-dados-u2`): `Map` (`set`,
+  `get`, `has`), quando usar no lugar de lista (achar sem percorrer).
+- **U3. Árvores** (`logica-estruturas-de-dados-u3`, requer
+  `visualizador-arvore`): nós e filhos, percorrer, e o DOM da aba Elementos
+  como árvore.
+
+### Zona Programa de verdade (`programa-de-verdade`)
+
+- **U1. Meu primeiro programa** (`logica-programa-de-verdade-u1`, requer
+  `projeto-ponte-js`): o projeto-ponte da ilha. **Formato (decisão da
+  rodada 17):** um snippet que roda no Chrome de verdade (Fontes >
+  Snippets), em qualquer página, sem instalar nada. O jogador escreve
+  sozinho um programa de lógica pura que resolve um problema dele (a
+  divisão da conta, a lista de compras com total, o sorteio de amigo
+  secreto), confere com exemplos no jogo (`funcaoPassa`) e leva para o
+  Chrome com o guia. Por que não Node: instalar e usar o terminal é
+  assunto do Ofício; o Console e os Snippets já estão em todo computador
+  com Chrome, e a ilha inteira foi ensinada neles.
 
 ### Motores planejados
 
@@ -361,6 +737,9 @@ existe e continua travada por um `requerMotor` que nomeia o tipo.
   `logica-decisoes-u2` (Portões lógicos), `origens-museu-u6` (Por baixo
   do capô: somador e memória) e na futura trilha Automação industrial
   (Comandos elétricos e CLP e Ladder). Entra junto com o motor da Lógica.
+- **`ordenar-passos`**, **`depurador-fontes`**, **`visualizador-arvore`** e
+  **`projeto-ponte-js`**: a parte B do motor da Lógica (fichas em
+  `src/curriculo/motores.ts`).
 
 ---
 
