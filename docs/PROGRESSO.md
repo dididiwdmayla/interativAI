@@ -44,3 +44,15 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
 - `docs/MAPA-CURRICULAR.md`: princípio da ilha (palco da memória), missão de
   campo por zona e as unidades com meta, conceitos, micro-passos, desafio,
   revisa e confusões.
+
+### Etapa 2: executor instrumentado
+
+- `src/motor/executor/`: `instrumentar.ts` (acorn, ganchos no texto, sem
+  mudar as linhas; `sintaxesUsadas` para o validador `usouSintaxe`),
+  `nucleo.ts` (ganchos, rastro, memória com referências, console, teste de
+  funções), `formatar.ts` (texto no formato do Chrome), `erros.ts`
+  (dicionário de erros de iniciante), `node.ts` (vm) e
+  `executor.worker.ts` + `sessaoNavegador.ts` (Web Worker com reserva de
+  tempo). Decisão e detalhes no `PROJETO.md`, "Executor de JavaScript".
+- Dependência nova: `acorn` (o astring foi avaliado e ficou de fora).
+- Testes: `testes/conteudo/executor.test.ts`, 59 casos.

@@ -316,6 +316,65 @@ src/
   continuam com o menu de sempre. (Dois cliques no nome da tag, no
   Chrome, renomeiam a tag: é o `renomear-tag`.)
 
+### Executor de JavaScript (Ilha Lógica, rodada 17)
+
+Em `src/motor/executor/`. O código do jogador roda isolado e gera o RASTRO
+da execução: um passo por comando, com a linha, a memória (quadros de
+chamada, escopos, variáveis e o monte de objetos por referência), a
+resposta da última expressão, as saídas do console e o erro.
+
+- **Decisão: instrumentar o código, com acorn, inserindo os ganchos no
+  texto** (sem regerar o código). Avaliadas: (1) acorn + astring (parser +
+  gerador) e (2) um interpretador passo a passo. O interpretador clássico
+  (JS-Interpreter) só entende ES5 (sem let, const, arrow, template), e os
+  que entendem JS moderno não andam passo a passo; interpretar também
+  deixaria o código centenas de vezes mais lento e com diferenças sutis do
+  motor de verdade. A instrumentação roda no motor de JavaScript do próprio
+  navegador (a mensagem de erro é a mesma do Chrome). Das duas formas de
+  instrumentar, regerar com astring muda o layout do código e exigiria
+  mapa de fontes para a linha do erro; inserir no texto pelas posições do
+  acorn não acrescenta quebra de linha, então a linha N do instrumentado é
+  a linha N do jogador. Só o acorn entrou (mantido, 8.18 de jul/2026, sem
+  dependências, roda igual no navegador e no Node); o astring ficou de fora.
+- **Ganchos** (`instrumentar.ts`, comentário do topo): passo antes de cada
+  comando, moldura de função com um leitor das variáveis (criado DENTRO do
+  try que embrulha o corpo, para enxergar as let e const), escopo de bloco,
+  retorno, local do erro, globais e a const do Console.
+- **Modo do Console** (REPL do Chrome, que aceita declarar de novo let,
+  const e class em entradas separadas desde o Chrome 80 e 92): as
+  declarações do nível de cima viram `var` no global; a const continua
+  protegida (`__r.k` lança o mesmo TypeError do navegador); a mesma
+  variável duas vezes na mesma entrada continua erro. O Snippet usa a mesma
+  memória do Console, como no Chrome (Fontes > Snippets roda na página).
+- **Proteção contra loop infinito**: limite de passos (100 mil) e de tempo
+  (1,5 s) conferidos pelos ganchos, com a parada "grudada" (um try/catch do
+  jogador não engole); reserva de 4 s no hospedeiro (o worker é encerrado e
+  as entradas boas rodam de novo em silêncio; no Node, o timeout do vm).
+- **Determinístico**: `Math.random` com semente e `Date` parado em
+  5/1/2026 15h UTC (`CODIGO_PREPARO`).
+- **Isolamento no navegador**: `executor.worker.ts` (Web Worker de módulo,
+  sem página, sem localStorage; rede, armazenamento, timers, outros
+  workers e o canal de mensagens apagados do global e dos protótipos antes
+  do primeiro código; `import()` recusado na leitura). Um worker por fase
+  (`SessaoNavegador`, `sessaoNavegador.ts`), pedidos em fila. **No Node**
+  (`node.ts`): um contexto `vm` por sessão, síncrono, para o
+  `testar:conteudo` e os testes (não é barreira de segurança, e nem
+  precisa: só roda conteúdo do projeto).
+- **Formato do Chrome** (`formatar.ts`, conferido no devtools-frontend):
+  resposta com texto entre aspas simples, `console.log` com texto primeiro
+  sem aspas, `(3) [1, 2, 3]`, `{nome: 'Ana'}`, `{…}`, `Array(3)`, `ƒ`,
+  `Map(1) {'a' => 1}`, até 5 campos na prévia.
+- **Erros** (`erros.ts`): a mensagem original do motor vem primeiro
+  ("Uncaught TypeError: ...") e embaixo a explicação de leigo com uma dica
+  em forma de pergunta; padrões do V8, do SpiderMonkey e do
+  JavaScriptCore. A linha é a do comando que estava rodando no quadro mais
+  de dentro (gancho `__r.c` no catch que embrulha cada função).
+- Não roda (ainda): async/await, geradores, timers (`setTimeout`), `with`
+  e `import()`; a entrada recebe o erro "Ainda não roda aqui".
+- Testes: `testes/conteudo/executor.test.ts` (escopos, loop infinito,
+  erros, saída, determinismo, modo do Console, funções e 23 programas
+  comparados com a execução sem ganchos).
+
 ### Motor de fases
 
 - Fases são **dados 100% declarativos** (`src/conteudo/`), o motor é
