@@ -45,6 +45,37 @@ import { ITENS_ESTRUTURA_DO_DOCUMENTO } from "./estrutura-do-documento";
 import { ITENS_HEAD_VS_BODY } from "./head-vs-body";
 import { ITENS_TITLE } from "./title";
 import { ITENS_META_CHARSET } from "./meta-charset";
+import { ITENS_O_QUE_E_CSS } from "./o-que-e-css";
+import { ITENS_REGRA_E_DECLARACAO } from "./regra-e-declaracao";
+import { ITENS_COR_DO_TEXTO } from "./cor-do-texto";
+import { ITENS_COR_DE_FUNDO } from "./cor-de-fundo";
+import { ITENS_COR_POR_NOME } from "./cor-por-nome";
+import { ITENS_LIGAR_DESLIGAR_DECLARACAO } from "./ligar-desligar-declaracao";
+import { ITENS_TAMANHO_DA_LETRA } from "./tamanho-da-letra";
+import { ITENS_UNIDADE_REM } from "./unidade-rem";
+import { ITENS_FAMILIA_DA_FONTE } from "./familia-da-fonte";
+import { ITENS_ALINHAMENTO_DO_TEXTO } from "./alinhamento-do-texto";
+import { ITENS_PESO_DA_FONTE } from "./peso-da-fonte";
+import { ITENS_COR_HEXADECIMAL } from "./cor-hexadecimal";
+import { ITENS_REGRA_NOVA } from "./regra-nova";
+import { ITENS_SELETOR_DE_TAG } from "./seletor-de-tag";
+import { ITENS_SELETOR_DE_CLASSE } from "./seletor-de-classe";
+import { ITENS_SELETOR_DE_ID } from "./seletor-de-id";
+import { ITENS_SELETOR_DESCENDENTE } from "./seletor-descendente";
+import { ITENS_MODELO_DE_CAIXA } from "./modelo-de-caixa";
+import { ITENS_PADDING_CSS } from "./padding-css";
+import { ITENS_BORDER_CSS } from "./border-css";
+import { ITENS_MARGIN_CSS } from "./margin-css";
+import { ITENS_BOX_SIZING } from "./box-sizing";
+import { ITENS_CASCATA_CSS } from "./cascata-css";
+import { ITENS_ORDEM_DAS_REGRAS } from "./ordem-das-regras";
+import { ITENS_ESPECIFICIDADE_CSS } from "./especificidade-css";
+import { ITENS_HERANCA_CSS } from "./heranca-css";
+import { ITENS_IMPORTANTE_CSS } from "./importante-css";
+import { ITENS_VARIAVEL_CSS } from "./variavel-css";
+import { ITENS_ESCOPO_DE_VARIAVEL } from "./escopo-de-variavel";
+import { ITENS_CONTRASTE_DE_COR } from "./contraste-de-cor";
+import { ITENS_SALVAR_COMO_MEU_TEMA } from "./salvar-como-meu-tema";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -92,6 +123,38 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_HEAD_VS_BODY,
   ...ITENS_TITLE,
   ...ITENS_META_CHARSET,
+  // E1 a E5 (zona Estilos)
+  ...ITENS_O_QUE_E_CSS,
+  ...ITENS_REGRA_E_DECLARACAO,
+  ...ITENS_COR_DO_TEXTO,
+  ...ITENS_COR_DE_FUNDO,
+  ...ITENS_COR_POR_NOME,
+  ...ITENS_LIGAR_DESLIGAR_DECLARACAO,
+  ...ITENS_TAMANHO_DA_LETRA,
+  ...ITENS_UNIDADE_REM,
+  ...ITENS_FAMILIA_DA_FONTE,
+  ...ITENS_ALINHAMENTO_DO_TEXTO,
+  ...ITENS_PESO_DA_FONTE,
+  ...ITENS_COR_HEXADECIMAL,
+  ...ITENS_REGRA_NOVA,
+  ...ITENS_SELETOR_DE_TAG,
+  ...ITENS_SELETOR_DE_CLASSE,
+  ...ITENS_SELETOR_DE_ID,
+  ...ITENS_SELETOR_DESCENDENTE,
+  ...ITENS_MODELO_DE_CAIXA,
+  ...ITENS_PADDING_CSS,
+  ...ITENS_BORDER_CSS,
+  ...ITENS_MARGIN_CSS,
+  ...ITENS_BOX_SIZING,
+  ...ITENS_CASCATA_CSS,
+  ...ITENS_ORDEM_DAS_REGRAS,
+  ...ITENS_ESPECIFICIDADE_CSS,
+  ...ITENS_HERANCA_CSS,
+  ...ITENS_IMPORTANTE_CSS,
+  ...ITENS_VARIAVEL_CSS,
+  ...ITENS_ESCOPO_DE_VARIAVEL,
+  ...ITENS_CONTRASTE_DE_COR,
+  ...ITENS_SALVAR_COMO_MEU_TEMA,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
