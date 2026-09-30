@@ -75,8 +75,10 @@ completa; no fim, `bateria:conteudo` (verde).
   previsão e na conclusão; o que o Google considera vem do arquivo
   (`google-ads`); o Índice de qualidade só aparece como diagnóstico, em três
   partes, e a "qualidade" da tela é chamada de "do simulador". A lição central
-  (página melhor barateia o cliente) sai dos números: nota 39, R$ 66 por
-  cliente; com title e descrição, R$ 22; com o alt, R$ 18. O painel Campanha
+  (página melhor barateia o cliente) sai dos números do motor: com a página
+  fraca o cliente custa uns R$ 66; com title e descrição, uns R$ 22; com o alt
+  da foto, uns R$ 18 (os limites de cada objetivo estão conferidos pelo
+  `testar:conteudo`). O painel Campanha
   deixou de dizer que a posição sai de lance vezes qualidade sem ressalva.
 - **Testes de navegador:** `ser-encontrado-zona.mjs [layout] [unidade]`, com a
   tabela de passos em `ser-encontrado-passos.mjs` (previsões, Me ajuda até a
@@ -97,8 +99,8 @@ completa; no fim, `bateria:conteudo` (verde).
 - Afirmações fora do ANEXO, só de linguagem: JSON com erro "não consegue ler o
   bloco", avaliação comprada "é falsa e queima a confiança", loading lazy
   (HTML padrão). Nenhum nome de menu ou passo de plataforma veio de memória.
-- Em duas frases sobre o Google Ads, "conferido em 30/09/2026" indica a data
-  do ANEXO, e os tipos de correspondência aparecem só pelos nomes.
+- Os tipos de correspondência de palavra-chave aparecem só pelos nomes (ampla,
+  de frase e exata), como no ANEXO, sem definição de memória.
 
 ### Riscos
 
