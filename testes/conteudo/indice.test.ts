@@ -3,6 +3,7 @@ import { FASES } from "@/conteudo";
 import { CONCEITOS } from "@/conteudo/conceitos";
 import { montarIndice } from "@/conteudo/indice";
 import type { Fase } from "@/conteudo/tipos";
+import { temObjetivos } from "@/motor/tiposDeFase";
 import { semProblemas } from "./ajuda";
 
 describe("montarIndice()", () => {
@@ -12,7 +13,7 @@ describe("montarIndice()", () => {
     const usados = new Set(
       FASES.flatMap((fase) => [
         ...fase.conceitos,
-        ...(fase.tipo === "pratica" ? (fase.pratica ?? []) : []),
+        ...(temObjetivos(fase) ? (fase.pratica ?? []) : []),
         ...fase.revisa,
         ...fase.prerequisitos,
       ]),
@@ -41,12 +42,12 @@ describe("montarIndice()", () => {
       const conferir = (nome: string, atual: string[], esperada: string[]) => {
         if (atual.join("|") !== esperada.join("|")) problemas.push(`"${id}" ${nome}: ${atual.join(", ")} (esperado ${esperada.join(", ")})`);
       };
-      conferir("ensinam", entrada.ensinam, esperado((fase) => fase.tipo === "pratica" && fase.conceitos.includes(id)));
+      conferir("ensinam", entrada.ensinam, esperado((fase) => temObjetivos(fase) && fase.conceitos.includes(id)));
       conferir(
         "praticam",
         entrada.praticam,
         esperado((fase) =>
-          fase.tipo !== "pratica" ? fase.conceitos.includes(id) : (fase.pratica ?? []).includes(id),
+          !temObjetivos(fase) ? fase.conceitos.includes(id) : (fase.pratica ?? []).includes(id),
         ),
       );
       conferir("revisam", entrada.revisam, esperado((fase) => fase.revisa.includes(id)));

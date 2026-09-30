@@ -1138,8 +1138,10 @@ da S1 (mini-sites no modo documento).
     Calculado), então o modelo de caixa se resolve pelas propriedades.
   - Imagem do mini-site é sempre `data:` (um SVG de retângulo colorido):
     um `src="foto.jpg"` gera 404 no console e derruba o teste de navegador.
-  - **Gire a posição da resposta certa** nas previsões (nenhuma checagem
-    acusa `correta` sempre igual). Nas ações de variável, use só
+  - **Gire a posição da resposta certa** nas previsões: a regra
+    `posicao-da-correta` do `testar:conteudo` acusa 2 ou mais previsões da
+    mesma unidade (objetivos) ou do mesmo conceito (itens) com o mesmo
+    `correta`. Nas ações de variável, use só
     `definirPropriedade` no `:root` (sem `selecionar`); `grid-template-areas`
     se valida com `declaracao`, não `valorEfetivo`.
   - Conceito que só vive numa maquete que o item não aceita (o Meu tema,
@@ -1147,6 +1149,13 @@ da S1 (mini-sites no modo documento).
     `index.html`) fica só com previsões, com o motivo no comentário.
   - Para conferir no navegador: `node testes/revisao-zonas.mjs [layout]
     [zona]` (seção "Navegador" do `testes/README.md`).
+  - Para jogar UM item, sem esperar a fila: `/lab/revisao` (fora da
+    navegação) lista todos por zona e conceito e abre qualquer um
+    (`?item=<id>`), como a revisão joga, sem mexer no progresso.
+  - Um conceito ensinado por fase do tipo `simulador-campanha` também
+    conta como ensinado (a regra usa `temObjetivos`). Conceito que vive
+    fora do jogo (Analytics, Search Console, Índice de qualidade) fica só
+    com previsões, com o motivo no comentário do arquivo.
 
 ## 20. Zona opcional
 
@@ -1187,6 +1196,16 @@ Bancada da Busca (`/lab/fases?fase=lab-motor-u1-f6`).
   negócio local válido e a página indexável, o Resultado mostra o cartão
   do negócio no mapa. Validador `dadosEstruturados` (`tipoSchema`,
   `campos`, com ponto: `"address.streetAddress"`).
+- A lista de subtipos reconhecidos mora em `TIPOS_DE_NEGOCIO_LOCAL`
+  (`src/motor/busca.ts`) e confere com os subtipos comuns do arquivo de
+  plataformas (`dados-estruturados-schema`); `testes/conteudo/busca.test.ts`
+  trava isso. `tipoSchema` exato (`"Bakery"`) só passa com aquele `@type`;
+  `"LocalBusiness"` aceita qualquer subtipo da lista. Uma unidade que use
+  um subtipo novo acrescenta na lista (é dado, não motor).
+- Para o jogador consertar o JSON, dê um `id` ao `<script>` e use, na
+  solução, `definirTexto` nele com o JSON inteiro; no jogo, o editor de
+  código. O editor recua o conteúdo do head (teste de navegador: o trecho
+  a trocar aceita espaços no começo de cada linha).
 
 ## 22. Medição simulada
 
@@ -1204,6 +1223,11 @@ Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`.
   `evento`) e `linkRastreavel` (`seletor`, `utm` com os valores pedidos).
   Ações: `clicarNaPrevia` (`seletor`, o clique de verdade) e
   `simularVisita` (`utm`).
+- Padrão da S4: `adicionarAtributo data-evento` e `clicarNaPrevia` no
+  mesmo objetivo (`atributo` + `eventoMedido`, dentro de `todos`); o link
+  rastreável monta `https://<url do site>/?utm_source=...` (a solução usa
+  `definirAtributo href` com essa string). Não cite nome de menu de
+  Analytics nem de Search Console: são conceitos.
 
 ## 23. Simulador de campanha
 
@@ -1226,6 +1250,22 @@ Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`
   `palavraChave`, `lance`). Confira os números em
   `testes/conteudo/campanha.test.ts` antes de escrever o objetivo: o
   estado inicial de cada objetivo não pode já passar.
+- **É simplificação, e o texto diz.** Lance vezes qualidade é o modelo do
+  simulador; no Google de verdade a classificação do anúncio vem do lance,
+  da qualidade do anúncio e da página de destino, dos limites mínimos de
+  qualidade, da concorrência, do contexto da pesquisa e dos recursos do
+  anúncio (arquivo de plataformas, `google-ads`). O Índice de qualidade
+  (1 a 10, por palavra-chave) é só diagnóstico e NUNCA é multiplicado no
+  leilão; a "qualidade" da tela é do simulador.
+- **Manhas do modelo** (S5): acima do mínimo, subir o lance não muda o
+  custo do 1º lugar (o custo é o mínimo para ficar na frente); a
+  palavra-chave só muda o volume de buscas; o que barateia o cliente é a
+  página. Explore os números com `simularCampanha` (página ruim e página
+  boa) antes de escrever os objetivos.
+- **Sem desafio do tipo `desafio`:** os validadores `simulacao` só existem
+  neste tipo de fase. A última fase do simulador faz o papel do desafio
+  (só de sozinho, `conceitos` vazio) e a unidade fica sem
+  `meta.desafioId` (sem meta com antes e depois).
 
 ## 24. Plataformas de marketing (arquivo com data)
 
@@ -1236,3 +1276,9 @@ Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`
 - Escreva os passos na produção da unidade, conferidos na época, nunca de
   memória. As fases ensinam o conceito e o que o programador faz; o
   clique a clique de cada plataforma fica no arquivo.
+- Cada plataforma tem `passos` (o caminho, na ordem), `fatos` (regras,
+  limites, boas práticas) e `fontes` (de onde foi conferido), e `usadaEm`
+  (as unidades que a citam). Não há tela que liste isso: a fase da unidade
+  cita o caminho geral em falas e mostra o "conferido em <data>" (fala ou
+  missão de campo). A regra `conferido-em-nas-fases` confere que a data da
+  fase é a do arquivo; ao atualizar uma plataforma, troque a data nos dois.

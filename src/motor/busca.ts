@@ -318,7 +318,9 @@ export function lerJsonComLinha(texto: string): LeituraJson {
  * LocalBusiness e subtipos comuns da schema.org (hierarquia de
  * schema.org/LocalBusiness: FoodEstablishment, Store, HealthAndBeautyBusiness,
  * AutomotiveBusiness...). A lista é curta de propósito: os que um pequeno
- * negócio de bairro usa.
+ * negócio de bairro usa. Confere com os subtipos comuns de
+ * src/conteudo/plataformas-marketing.ts (dados-estruturados-schema,
+ * conferido em 30/09/2026); testes/conteudo/busca.test.ts trava isso.
  */
 export const TIPOS_DE_NEGOCIO_LOCAL: readonly string[] = [
   "LocalBusiness",
@@ -328,6 +330,7 @@ export const TIPOS_DE_NEGOCIO_LOCAL: readonly string[] = [
   "CafeOrCoffeeShop",
   "BarOrPub",
   "IceCreamShop",
+  "FastFoodRestaurant",
   "Store",
   "ClothingStore",
   "BookStore",
@@ -336,10 +339,22 @@ export const TIPOS_DE_NEGOCIO_LOCAL: readonly string[] = [
   "HealthAndBeautyBusiness",
   "BeautySalon",
   "HairSalon",
+  "NailSalon",
+  "DaySpa",
+  "TattooParlor",
+  "HomeAndConstructionBusiness",
+  "Plumber",
+  "Electrician",
+  "RoofingContractor",
+  "HousePainter",
   "AutomotiveBusiness",
   "AutoRepair",
+  "AutoWash",
+  "AutoDealer",
   "Dentist",
   "ProfessionalService",
+  "LegalService",
+  "RealEstateAgent",
 ];
 
 /** Obrigatórios para o negócio local (documentação de dados estruturados do Google). */

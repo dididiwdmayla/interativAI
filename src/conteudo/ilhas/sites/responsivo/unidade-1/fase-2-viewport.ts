@@ -63,8 +63,8 @@ export const FASE_R1_F2: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: 'Se eu acrescentar <meta name="viewport" content="width=device-width, initial-scale=1"> no head, o que muda na prévia?',
-        opcoes: ["Nada, é só um detalhe técnico", "A página passa a desenhar na largura real do celular, sem precisar encolher tudo", "A página fica mais rápida de carregar"],
-        correta: 1,
+        opcoes: ["Nada, é só um detalhe técnico", "A página fica mais rápida de carregar", "A página passa a desenhar na largura real do celular, sem precisar encolher tudo"],
+        correta: 2,
         explicacao: "device-width diz para o navegador usar a largura REAL da tela (390px), em vez dos 980px de simulação. Texto e botões voltam ao tamanho certo.",
       },
       enunciado: {
@@ -83,7 +83,7 @@ export const FASE_R1_F2: FasePratica = {
       },
       falaAoConcluir: { texto: "Olha só a diferença! Texto e botões voltaram ao tamanho certo, e o aviso de simulação sumiu.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "inserirHTML", seletor: "head", posicao: "fim", html: '<meta name="viewport" content="width=device-width, initial-scale=1">' },
       ],
     },

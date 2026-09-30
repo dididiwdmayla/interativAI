@@ -46,8 +46,8 @@ export const FASE_U6_F2: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: 'O aviso está com os acentos trocados. O que acontece se você escrever <meta charset="utf-8"> no head?',
-        opcoes: ["Nada muda", "Os acentos ficam certos", "A página fica menor"],
-        correta: 1,
+        opcoes: ["Nada muda", "A página fica menor", "Os acentos ficam certos"],
+        correta: 2,
         explicacao: "O meta charset diz ao navegador como ler as letras da página (UTF-8): os acentos voltam ao normal.",
       },
       enunciado: {
@@ -66,7 +66,7 @@ export const FASE_U6_F2: FasePratica = {
       },
       falaAoConcluir: { texto: "Os acentos voltaram! Sem o meta charset, o navegador pode ler as letras erradas.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "inserirHTML", seletor: "head", posicao: "inicio", html: '<meta charset="utf-8">' },
       ],
     },

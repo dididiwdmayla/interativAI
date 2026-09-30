@@ -112,6 +112,28 @@ import { ITENS_ROTULO_ACESSIVEL } from "./rotulo-acessivel";
 import { ITENS_CSS_EXTERNO } from "./css-externo";
 import { ITENS_INDEX_HTML } from "./index-html";
 import { ITENS_PUBLICAR_SITE } from "./publicar-site";
+import { ITENS_H1_DA_PAGINA } from "./h1-da-pagina";
+import { ITENS_TEXTO_QUE_RESPONDE } from "./texto-que-responde";
+import { ITENS_ENCHIMENTO_DE_PALAVRA_CHAVE } from "./enchimento-de-palavra-chave";
+import { ITENS_TEXTO_DE_LINK } from "./texto-de-link";
+import { ITENS_VELOCIDADE_DA_PAGINA } from "./velocidade-da-pagina";
+import { ITENS_IMAGEM_PREGUICOSA } from "./imagem-preguicosa";
+import { ITENS_PERFIL_DA_EMPRESA } from "./perfil-da-empresa";
+import { ITENS_NOME_ENDERECO_TELEFONE } from "./nome-endereco-telefone";
+import { ITENS_AVALIACOES_DO_CLIENTE } from "./avaliacoes-do-cliente";
+import { ITENS_DADOS_ESTRUTURADOS } from "./dados-estruturados";
+import { ITENS_LOCAL_BUSINESS } from "./local-business";
+import { ITENS_ANALYTICS } from "./analytics";
+import { ITENS_SEARCH_CONSOLE } from "./search-console";
+import { ITENS_EVENTO_DE_MEDICAO } from "./evento-de-medicao";
+import { ITENS_CONVERSAO } from "./conversao";
+import { ITENS_LINK_RASTREAVEL_UTM } from "./link-rastreavel-utm";
+import { ITENS_LEILAO_DE_ANUNCIO } from "./leilao-de-anuncio";
+import { ITENS_CUSTO_POR_CLIQUE } from "./custo-por-clique";
+import { ITENS_PALAVRA_CHAVE_DE_ANUNCIO } from "./palavra-chave-de-anuncio";
+import { ITENS_ORCAMENTO_DIARIO } from "./orcamento-diario";
+import { ITENS_PAGINA_DE_DESTINO } from "./pagina-de-destino";
+import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
@@ -229,6 +251,32 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_CSS_EXTERNO,
   ...ITENS_INDEX_HTML,
   ...ITENS_PUBLICAR_SITE,
+  // S2 (SEO na página)
+  ...ITENS_H1_DA_PAGINA,
+  ...ITENS_TEXTO_QUE_RESPONDE,
+  ...ITENS_ENCHIMENTO_DE_PALAVRA_CHAVE,
+  ...ITENS_TEXTO_DE_LINK,
+  ...ITENS_VELOCIDADE_DA_PAGINA,
+  ...ITENS_IMAGEM_PREGUICOSA,
+  // S3 (Seu negócio no mapa)
+  ...ITENS_PERFIL_DA_EMPRESA,
+  ...ITENS_NOME_ENDERECO_TELEFONE,
+  ...ITENS_AVALIACOES_DO_CLIENTE,
+  ...ITENS_DADOS_ESTRUTURADOS,
+  ...ITENS_LOCAL_BUSINESS,
+  // S4 (Medir quem chega)
+  ...ITENS_ANALYTICS,
+  ...ITENS_SEARCH_CONSOLE,
+  ...ITENS_EVENTO_DE_MEDICAO,
+  ...ITENS_CONVERSAO,
+  ...ITENS_LINK_RASTREAVEL_UTM,
+  // S5 (Anúncio pago por dentro)
+  ...ITENS_LEILAO_DE_ANUNCIO,
+  ...ITENS_CUSTO_POR_CLIQUE,
+  ...ITENS_PALAVRA_CHAVE_DE_ANUNCIO,
+  ...ITENS_ORCAMENTO_DIARIO,
+  ...ITENS_PAGINA_DE_DESTINO,
+  ...ITENS_INDICE_DE_QUALIDADE,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

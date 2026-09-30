@@ -57,8 +57,8 @@ export const FASE_E5_F3: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "Antes de salvar, o jogo confere o contraste do texto com o fundo. Se algum par ficar fraco demais para ler, o que acontece?",
-        opcoes: ["Não deixa salvar de jeito nenhum", "Avisa quais pares ficaram fracos, mas deixa salvar assim mesmo, se você quiser", "Troca a cor sozinho para uma que funcione"],
-        correta: 1,
+        opcoes: ["Não deixa salvar de jeito nenhum", "Troca a cor sozinho para uma que funcione", "Avisa quais pares ficaram fracos, mas deixa salvar assim mesmo, se você quiser"],
+        correta: 2,
         explicacao: "O jogo AVISA (não impede): você decide se ajusta a cor ou salva assim mesmo. É a mesma ideia do Lighthouse: apontar o problema, não travar o trabalho.",
       },
       enunciado: {
@@ -74,7 +74,7 @@ export const FASE_E5_F3: FasePratica = {
         solucao: { fala: "Salvei o Meu tema: essas cores agora ficam disponíveis no seletor de temas.", acoes: [{ tipo: "salvarTema" }] },
       },
       falaAoConcluir: { texto: "Salvo! O Meu tema já aparece no seletor de temas, e vale no jogo inteiro, não só nesta fase.", expressao: "comemorando" },
-      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 1 }, { tipo: "salvarTema" }],
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 2 }, { tipo: "salvarTema" }],
     },
     {
       id: "trocar-e-salvar-de-novo",

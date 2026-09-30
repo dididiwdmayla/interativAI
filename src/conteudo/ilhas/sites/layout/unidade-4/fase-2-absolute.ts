@@ -64,11 +64,11 @@ export const FASE_L4_F2: FasePratica = {
       previsao: {
         pergunta: "Se você der position: absolute; top: 8px; right: 8px ao selo, em relação a QUEM ele vai se posicionar?",
         opcoes: [
-          "Em relação ao card (o ancestral mais próximo com position diferente de static)",
           "Sempre em relação à tela inteira, não importa onde ele esteja",
+          "Em relação ao card (o ancestral mais próximo com position diferente de static)",
           "Em relação ao body, sempre",
         ],
-        correta: 0,
+        correta: 1,
         explicacao: "absolute se ancora no ancestral mais PRÓXIMO que tem position diferente de static. Sem nenhum, aí sim seria a página toda.",
       },
       enunciado: {
@@ -101,7 +101,7 @@ export const FASE_L4_F2: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "responderPrevisao", opcao: 1 },
         { tipo: "definirPropriedade", seletorRegra: ".selo", propriedade: "position", valor: "absolute" },
         { tipo: "definirPropriedade", seletorRegra: ".selo", propriedade: "top", valor: "8px" },
         { tipo: "definirPropriedade", seletorRegra: ".selo", propriedade: "right", valor: "8px" },

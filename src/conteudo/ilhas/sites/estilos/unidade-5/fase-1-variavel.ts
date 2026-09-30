@@ -68,8 +68,8 @@ export const FASE_E5_F1: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "Se eu mudar --cor-destaque no :root, quantos lugares da maquete mudam?",
-        opcoes: ["Só um: cada peça tem a cor guardada nela mesma", "Todo lugar que tiver var(--cor-destaque) na regra dele", "Nenhum: variável só serve para o :root"],
-        correta: 1,
+        opcoes: ["Todo lugar que tiver var(--cor-destaque) na regra dele", "Só um: cada peça tem a cor guardada nela mesma", "Nenhum: variável só serve para o :root"],
+        correta: 0,
         explicacao: "Uma variável não é de uma peça só: TODA regra que escrever var(--cor-destaque) usa o mesmo valor. Mudou no :root, mudou em todas.",
       },
       enunciado: {
@@ -88,7 +88,7 @@ export const FASE_E5_F1: FasePratica = {
       },
       falaAoConcluir: { texto: "Isso! Não é a peça que guarda a cor: é a variável, e qualquer regra pode pedir ela com var().", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "definirPropriedade", seletorRegra: ":root", propriedade: "--cor-destaque", valor: "#b8860b" },
       ],
     },

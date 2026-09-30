@@ -48,14 +48,14 @@ export const ITENS_RASTREAMENTO: ItemRevisao[] = [
     modoDocumento: true,
     previsao: {
       pergunta: "O Zé trocou o preço da banana no site agora. Quando o resultado da busca mostra o preço novo?",
-      opcoes: ["Depois que o robô visitar a página de novo", "No mesmo segundo", "Nunca, o resultado não muda"],
-      correta: 0,
+      opcoes: ["No mesmo segundo", "Depois que o robô visitar a página de novo", "Nunca, o resultado não muda"],
+      correta: 1,
       explicacao: "A busca mostra o que guardou na última visita do robô. A mudança aparece depois que ele volta, o que pode levar dias.",
     },
     ajudas: {
       pergunta: "De onde a busca tira o texto que mostra: do site agora, ou de outro lugar?",
       dica: "Do catálogo, com o que o robô viu na última visita.",
     },
-    solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 0 }],
+    solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 1 }],
   },
 ];

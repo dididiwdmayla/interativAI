@@ -78,8 +78,8 @@ export const FASE_R2_F2: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "O CSS da Verde Vivo já é o do celular (uma coluna), sem nenhuma @media. Para a tela crescer e virar duas colunas, que tipo de condição faz mais sentido usar?",
-        opcoes: ["max-width (abaixo de uma largura)", "min-width (a partir de uma largura)", "Nenhuma: duas colunas têm que ser o padrão"],
-        correta: 1,
+        opcoes: ["min-width (a partir de uma largura)", "max-width (abaixo de uma largura)", "Nenhuma: duas colunas têm que ser o padrão"],
+        correta: 0,
         explicacao: "Mobile first é isso: o padrão já É o celular. Uma @media com min-width ACRESCENTA o layout maior só quando a tela CRESCE o bastante, sem tirar nada do celular.",
       },
       enunciado: {
@@ -104,7 +104,7 @@ export const FASE_R2_F2: FasePratica = {
       },
       falaAoConcluir: { texto: "O celular nunca perdeu nada: a tela grande é que GANHOU o layout extra, ao crescer.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "editarCss", posicao: "fim", texto: "\n@media (min-width: 700px) {\n  .produtos {\n    flex-direction: row;\n  }\n}\n" },
       ],
     },

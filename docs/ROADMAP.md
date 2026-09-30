@@ -282,16 +282,64 @@ núcleo comum.
     progresso semeado por zona (uma sessão por grupo de 5 conceitos),
     jogada nos três layouts.
 
+- **Rodada 16: a zona "Ser encontrado" (S2 a S5), a checagem de posição e o
+  `/lab/revisao`** (detalhe em `docs/PROGRESSO.md` e `docs/ATRITOS-FABRICA.md`,
+  "Rodada 7", um commit por unidade):
+  - **Etapa 0.** `testar:conteudo` acusa previsões da mesma unidade (ou do
+    mesmo conceito, na revisão) com a certa sempre na mesma posição (as 15
+    previsões antigas e as da S1 foram giradas; ids e conteúdo intactos).
+    Rota `/lab/revisao` (fora da navegação): lista os 258 itens de revisão por
+    zona e conceito e abre qualquer um direto (`?item=<id>`), jogado como a
+    Revisão do dia, sem mexer no progresso nem no agendamento.
+  - **S2 "SEO na página"** (4 fases + desafio Casa de Chá Lótus): h1, texto
+    que responde, enchimento de palavra-chave, texto de link, alt, velocidade
+    e imagem preguiçosa. **S3 "Seu negócio no mapa"** (4 + desafio Padaria Pão
+    de Mel): perfil da empresa, dados iguais, avaliações, JSON-LD e subtipos de
+    LocalBusiness. **S4 "Medir quem chega"** (3 + desafio Casa de Sucos
+    Vitamina): eventos e conversão (aba Medição), Search Console e Analytics
+    como conceitos, links com utm. **S5 "Anúncio pago por dentro"** (4 fases
+    do tipo simulador-campanha; a última é o desafio "mesma verba, mais
+    clientes", sem meta com antes e depois): leilão, custo por clique,
+    palavra-chave, orçamento, página de destino e Índice de qualidade.
+    22 conceitos novos (todos com temas, Presença digital em todos) e 44 itens
+    de revisão (registro: 258 itens).
+  - **Plataformas.** `src/conteudo/plataformas-marketing.ts` preenchido
+    (perfil da empresa, schema.org, Search Console e Google Ads), conferido em
+    30/09/2026, com `fatos` e `fontes`; regra nova `conferido-em-nas-fases`
+    (a unidade que cita a plataforma mostra o "conferido em" e nenhuma fase
+    mostra data que o arquivo não tem). A lista de subtipos de LocalBusiness do
+    validador (`src/motor/busca.ts`) ganhou os que o ANEXO cita e faltavam
+    (FastFoodRestaurant, NailSalon, DaySpa, TattooParlor,
+    HomeAndConstructionBusiness, Plumber, Electrician, RoofingContractor,
+    HousePainter, AutoWash, AutoDealer, LegalService e RealEstateAgent).
+  - **Simulação dita como simulação.** O texto da S5 diz que lance vezes
+    qualidade é simplificação e explica o que o Google considera; o Índice de
+    qualidade aparece só como diagnóstico. O painel Campanha deixou de afirmar
+    que "a posição sai de lance vezes qualidade" sem ressalva.
+  - **Testes.** `testes/ser-encontrado-zona.mjs [layout] [unidade]` (tabela em
+    `testes/ser-encontrado-passos.mjs`: S2 a S5 pelo mapa nos três layouts) e
+    `testes/lab-revisao.mjs`. Bateria de conteúdo verde no fim.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
 
-- **Checagem de `correta` repetida (rodada 15):** nada acusa previsões
-  com a resposta certa sempre na mesma posição; os itens novos foram
-  girados na escrita. Uma checagem por unidade ou lote de itens
-  (mais da metade com o mesmo `correta`) fecharia a porta.
+- **Tela dos passos das plataformas (rodada 16):** o
+  `plataformas-marketing.ts` (perfil da empresa, Search Console, Google Ads,
+  schema.org) só é lido pelo `testar:conteudo`; as fases carregam o "conferido
+  em" e o caminho geral em falas. Uma tela que liste os passos e fatos (com a
+  data) é trabalho de motor.
+- **Validador de texto livre (rodada 16):** respostas escritas (h1, texto que
+  responde, resposta a avaliação) só conferem "mudou" (`textoDiferenteDoInicial`)
+  ou igualdade. Um `textoContem` fecharia a porta de "qualquer coisa vale".
+- **Simulador sem antes e depois (rodada 16):** os validadores `simulacao` só
+  existem no tipo `simulador-campanha`, então o desafio da S5 não é do tipo
+  `desafio` e a unidade não tem meta com antes e depois.
+- **Gerador de itens (rodadas 15 e 16):** os 218 itens das duas rodadas
+  saíram de scripts locais, fora do repositório; promover um gerador à fábrica
+  segue em aberto.
 - **Itens de revisão de `salvar-como-meu-tema` e `index-html`:** só
   previsões (o Meu tema só existe na maquete do jogo; o `index.html` não
   tem gesto próprio). Se `ItemRevisao` um dia aceitar o site do jogo,
@@ -325,13 +373,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Sonnet: unidades S2 a S5 da zona Ser encontrado (com os itens de
-   revisão de cada uma, seção 19 do guia), seguindo as seções 20 a 24 (o
-   passo a passo das plataformas vai em
-   `src/conteudo/plataformas-marketing.ts`, conferido na época).
-2. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
+1. Opus: motor da Lógica (Console, execução de JS, depurador) com o motor
    `circuito-logico` (portões lógicos, `src/curriculo/motores.ts`).
-3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
+2. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
    de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
    Ofício), intercalados com conteúdo, e a trilha Automação industrial a
    partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha

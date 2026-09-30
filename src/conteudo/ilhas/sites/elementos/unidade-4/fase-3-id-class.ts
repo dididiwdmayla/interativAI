@@ -51,10 +51,10 @@ export const FASE_U4_F3: FasePratica = {
         pergunta: "Palpite: e se a gente desse o MESMO id pros três cards de integrante, em vez de uma class?",
         opcoes: [
           "Nada acontece, os três funcionam normalmente",
-          "O navegador só reconhece um id por vez, e quem busca por ele pode achar o errado",
           "A página para de funcionar totalmente",
+          "O navegador só reconhece um id por vez, e quem busca por ele pode achar o errado",
         ],
-        correta: 1,
+        correta: 2,
         explicacao: "Id deveria ser único. Com três iguais, quem busca por aquele id (como um seletor #id) só acha o primeiro, e o resto vira bagunça.",
       },
       enunciado: {
@@ -76,7 +76,7 @@ export const FASE_U4_F3: FasePratica = {
       },
       falaAoConcluir: { texto: "Isso! Class repete à vontade; id fica sozinho, um por página.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "definirAtributo", seletor: "#integrante-bruno", nome: "class", valor: "integrante" },
         { tipo: "definirAtributo", seletor: "#integrante-carla", nome: "class", valor: "integrante" },
       ],

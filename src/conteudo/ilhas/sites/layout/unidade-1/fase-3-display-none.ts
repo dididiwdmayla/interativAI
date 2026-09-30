@@ -50,10 +50,10 @@ export const FASE_L1_F3: FasePratica = {
           "O aviso de frete grátis (#aviso-frete) tem fundo verde. Se você usar display: none nele, em vez de Esconder, o que acontece com o espaço dele?",
         opcoes: [
           "O espaço continua reservado, só o fundo verde some",
-          "O elemento e o espaço dele somem juntos; o que vem depois sobe",
           "Fica exatamente igual ao Esconder",
+          "O elemento e o espaço dele somem juntos; o que vem depois sobe",
         ],
-        correta: 1,
+        correta: 2,
         explicacao:
           "Esconder (visibility: hidden) mantém o lugar reservado, como uma cadeira vazia. display: none fecha o espaço, como se a peça nunca tivesse existido.",
       },
@@ -76,7 +76,7 @@ export const FASE_L1_F3: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "definirPropriedade", seletorRegra: "#aviso-frete", propriedade: "display", valor: "none" },
       ],
     },

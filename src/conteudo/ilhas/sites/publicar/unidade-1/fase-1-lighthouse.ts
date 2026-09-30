@@ -53,8 +53,8 @@ export const FASE_P1_F1: FasePratica = {
       modo: "guiado",
       previsao: {
         pergunta: "A foto do consultório não tem alt. O que um leitor de tela faz com uma imagem sem alt?",
-        opcoes: ["Pula ela, sem avisar nada", "Lê só \"imagem\", sem dizer o que é", "Descreve a imagem sozinho, usando inteligência artificial"],
-        correta: 1,
+        opcoes: ["Pula ela, sem avisar nada", "Descreve a imagem sozinho, usando inteligência artificial", "Lê só \"imagem\", sem dizer o que é"],
+        correta: 2,
         explicacao: 'Sem alt, o leitor de tela só anuncia "imagem" (ou o nome do arquivo): quem ouve não sabe o que está vendo.',
       },
       enunciado: {
@@ -73,7 +73,7 @@ export const FASE_P1_F1: FasePratica = {
       },
       falaAoConcluir: { texto: "Descrição no lugar! É o mesmo alt que você já usava na zona Elementos, só que agora com o Lighthouse cobrando.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 2 },
         { tipo: "adicionarAtributo", seletor: ".foto-consultorio", nome: "alt", valor: "Sala de atendimento da clínica, com a cadeira odontológica" },
       ],
     },

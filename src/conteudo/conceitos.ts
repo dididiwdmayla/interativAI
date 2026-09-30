@@ -583,6 +583,120 @@ const CATALOGO = {
     resumo: "Uma meta no head que pede para a página ficar fora da busca: ela continua no ar para quem tem o link.",
     temas: ["presenca-digital"],
   },
+  // Zona Ser encontrado (opcional), S2: SEO na página
+  "h1-da-pagina": {
+    nome: "h1 da página",
+    resumo: "O título principal da página, um só, que diz do que ela trata: a busca e o leitor de tela se orientam por ele.",
+    temas: ["presenca-digital", "acessibilidade"],
+  },
+  "enchimento-de-palavra-chave": {
+    nome: "Enchimento de palavra-chave",
+    resumo: "Repetir a mesma palavra sem sentido para tentar subir na busca: só deixa o texto ruim de ler.",
+    temas: ["presenca-digital"],
+  },
+  "texto-que-responde": {
+    nome: "Texto que responde",
+    resumo: "Um texto que diz o que a pessoa foi buscar (preço, horário, como funciona), com as palavras que ela usaria.",
+    temas: ["presenca-digital"],
+  },
+  "texto-de-link": {
+    nome: "Texto de link",
+    resumo: "O texto do link diz para onde ele leva (\"Veja o cardápio\"), em vez de \"clique aqui\", que fora da frase não diz nada.",
+    temas: ["presenca-digital", "acessibilidade"],
+  },
+  "velocidade-da-pagina": {
+    nome: "Velocidade da página",
+    resumo: "Quanto a página demora para aparecer: foto pesada e muita coisa para baixar fazem a pessoa desistir antes de ver.",
+    temas: ["desempenho", "presenca-digital"],
+  },
+  "imagem-preguicosa": {
+    nome: "Imagem preguiçosa (lazy)",
+    resumo: "Com loading=\"lazy\" na img, a foto só baixa quando a pessoa rola até perto dela, e a página abre mais rápido.",
+    temas: ["desempenho"],
+  },
+  // Zona Ser encontrado (opcional), S3: seu negócio no mapa
+  "perfil-da-empresa": {
+    nome: "Perfil da Empresa no Google",
+    resumo: "A ficha do negócio no Google, com endereço, telefone, horário, fotos e avaliações: é o que faz ele aparecer na busca local e no mapa.",
+    temas: ["presenca-digital"],
+  },
+  "nome-endereco-telefone": {
+    nome: "Nome, endereço e telefone iguais",
+    resumo: "Os mesmos dados do negócio no site, no perfil e nas redes: dado diferente confunde o cliente e a busca.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "avaliacoes-do-cliente": {
+    nome: "Avaliações dos clientes",
+    resumo: "O que os clientes dizem do negócio: peça e responda com educação, nunca compre, porque avaliação comprada é falsa.",
+    temas: ["presenca-digital"],
+  },
+  "dados-estruturados": {
+    nome: "Dados estruturados (JSON-LD)",
+    resumo: "Um bloco de dados no head que descreve o negócio para a busca num formato que ela lê fácil; ajuda, mas não garante o cartão no mapa.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "local-business": {
+    nome: "LocalBusiness e subtipos",
+    resumo: "O tipo de dado que descreve um negócio local; use o subtipo mais específico que existir, como Bakery, Plumber ou Dentist.",
+    temas: ["presenca-digital", "dados"],
+  },
+  // Zona Ser encontrado (opcional), S4: medir quem chega
+  analytics: {
+    nome: "Analytics",
+    resumo: "Um programa de análise que o site carrega para contar visitas e eventos: mostra o que as pessoas fazem no site.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "search-console": {
+    nome: "Search Console",
+    resumo: "Ferramenta gratuita do Google que mostra como o site aparece na busca: pesquisas, cliques e problemas de indexação.",
+    temas: ["presenca-digital", "ferramentas"],
+  },
+  "evento-de-medicao": {
+    nome: "Evento de medição",
+    resumo: "O registro de que algo aconteceu no site, com um nome, como clique_whatsapp; no jogo, o data-evento da peça gera ele.",
+    temas: ["presenca-digital", "dados"],
+  },
+  conversao: {
+    nome: "Conversão",
+    resumo: "Uma ação importante depois do clique, como compra, ligação ou cadastro: é o que conta, mais do que a visita.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "link-rastreavel-utm": {
+    nome: "Link rastreável (utm)",
+    resumo: "Um link com utm_source, utm_medium e utm_campaign no fim, que diz à medição de onde a visita veio; a página não muda.",
+    temas: ["presenca-digital", "dados"],
+  },
+  // Zona Ser encontrado (opcional), S5: anúncio pago por dentro
+  "leilao-de-anuncio": {
+    nome: "Leilão do anúncio",
+    resumo: "A disputa que decide quem aparece quando alguém busca: o lance conta, mas não sozinho (qualidade, concorrência e contexto também).",
+    temas: ["presenca-digital", "desempenho"],
+  },
+  "custo-por-clique": {
+    nome: "Custo por clique",
+    resumo: "O que o anunciante paga por cada clique no anúncio: o lance é o máximo, e o custo real costuma ficar abaixo dele.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "palavra-chave-de-anuncio": {
+    nome: "Palavra-chave do anúncio",
+    resumo: "O termo que a pessoa digita na busca e que o anunciante escolhe para o anúncio poder aparecer; há correspondência ampla, de frase e exata.",
+    temas: ["presenca-digital"],
+  },
+  "orcamento-diario": {
+    nome: "Orçamento diário",
+    resumo: "O teto do que o anúncio gasta por dia: quando a verba do dia acaba, o anúncio deixa de aparecer.",
+    temas: ["presenca-digital", "dados"],
+  },
+  "pagina-de-destino": {
+    nome: "Página de destino",
+    resumo: "A página onde a pessoa cai depois de clicar no anúncio: decide quantos cliques viram clientes, e uma página melhor barateia o cliente.",
+    temas: ["presenca-digital", "desempenho"],
+  },
+  "indice-de-qualidade": {
+    nome: "Índice de qualidade",
+    resumo: "Uma nota de 1 a 10, por palavra-chave, que só serve de diagnóstico do anúncio e da página: não entra no leilão.",
+    temas: ["presenca-digital", "dados"],
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

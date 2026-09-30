@@ -43,11 +43,11 @@ export const FASE_E4_F2: FasePratica = {
       previsao: {
         pergunta: "O parágrafo .descricao não tem NENHUMA regra de color. De que cor o texto dele aparece?",
         opcoes: [
-          "Preto, o padrão do navegador quando não há regra",
           "Roxa (#3d348b), herdada do article que é o pai dele",
+          "Preto, o padrão do navegador quando não há regra",
           "Branca, porque fica sem nenhuma cor",
         ],
-        correta: 1,
+        correta: 0,
         explicacao: "color é uma propriedade herdável: sem regra própria, a peça usa a cor do ancestral mais perto que tiver uma.",
       },
       enunciado: {
@@ -69,7 +69,7 @@ export const FASE_E4_F2: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "selecionar", seletor: ".descricao" },
       ],
     },

@@ -46,11 +46,11 @@ export const FASE_L1_F2: FasePratica = {
       previsao: {
         pergunta: "A regra .preco já tem width: 60px, mas a caixa amarela do preço fica só do tamanho do texto. Por quê?",
         opcoes: [
-          "O width está escrito errado",
           "display: inline ignora width e height; só block e inline-block respeitam",
+          "O width está escrito errado",
           "O navegador não gosta de width em px",
         ],
-        correta: 1,
+        correta: 0,
         explicacao: "Elementos inline (o padrão de span) ignoram width e height. Para o width valer, a caixa precisa ser block ou inline-block.",
       },
       enunciado: {
@@ -72,7 +72,7 @@ export const FASE_L1_F2: FasePratica = {
         expressao: "comemorando",
       },
       solucaoDeTeste: [
-        { tipo: "responderPrevisao", opcao: 1 },
+        { tipo: "responderPrevisao", opcao: 0 },
         { tipo: "definirPropriedade", seletorRegra: ".preco", propriedade: "display", valor: "inline-block" },
       ],
     },

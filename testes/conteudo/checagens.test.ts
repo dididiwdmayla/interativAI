@@ -7,6 +7,8 @@ import { FASES, UNIDADES } from "@/conteudo";
 import { REGRAS_DE_FASE, REGRAS_GERAIS, type ContextoChecagem } from "@/conteudo/checagens";
 import { FASE_U1_F2 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-2";
 import { FASE_U1_F3 } from "@/conteudo/ilhas/sites/elementos/unidade-1/fase-3-desafio";
+import { conferirConferidoNasFases, conferirPosicaoDaCorreta } from "@/conteudo/checagens";
+import { conferirPlataformas, PLATAFORMAS_MARKETING } from "@/conteudo/plataformas-marketing";
 import { conferirPublicados, montarPublicados, PUBLICADOS } from "@/conteudo/publicados";
 import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 
@@ -234,5 +236,54 @@ describe("congelamento do conteúdo publicado", () => {
     const vazio = { unidades: {}, fases: {} };
     expect(conferirPublicados(vazio, CONTEXTO)).toEqual([]);
     expect(Object.keys(montarPublicados(CONTEXTO).fases)).toEqual(FASES.map((fase) => fase.id));
+  });
+});
+
+describe("posição da opção correta", () => {
+  it("acusa previsões da mesma unidade, ou do mesmo conceito na revisão, com a certa sempre na mesma posição", () => {
+    const previsao = (correta: number) => ({ pergunta: "?", opcoes: ["a", "b", "c"], correta, explicacao: "." });
+    const objetivo = (id: string, correta: number) => ({ ...FASE_U1_F2.objetivos[0], id, tipo: "previsao" as const, previsao: previsao(correta) });
+    const fase = (correta: number[]): FasePratica => ({ ...FASE_U1_F2, objetivos: correta.map((valor, indice) => objetivo(`o${indice}`, valor)) });
+    const unidade = UNIDADES.find((item) => item.id === FASE_U1_F2.unidadeId)!;
+    const mesma = conferirPosicaoDaCorreta([unidade], [fase([1, 1, 1])], []);
+    expect(mesma.join("\n")).toContain("todas com a certa na posição 1");
+    expect(conferirPosicaoDaCorreta([unidade], [fase([1, 0, 1])], [])).toEqual([]);
+    expect(conferirPosicaoDaCorreta([unidade], [fase([1])], [])).toEqual([]);
+
+    const item = (id: string, correta: number) => ({
+      id,
+      conceito: "elemento" as const,
+      tipo: "previsao" as const,
+      enunciado: { mouse: "x", toque: "x" },
+      siteAlvo: { body: "<p>x</p>" },
+      previsao: previsao(correta),
+      ajudas: { pergunta: "?", dica: "." },
+      solucaoDeTeste: [],
+    });
+    expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 0)]).join("\n")).toContain('o conceito "elemento"');
+    expect(conferirPosicaoDaCorreta([], [], [item("a", 0), item("b", 2)])).toEqual([]);
+  });
+});
+
+describe("arquivo de plataformas e o conferido em", () => {
+  it("o arquivo de verdade está em ordem", () => {
+    expect(conferirPlataformas(PLATAFORMAS_MARKETING)).toEqual([]);
+  });
+
+  it("acusa fontes ou passos e fatos que faltam, e data fora do formato", () => {
+    const base = PLATAFORMAS_MARKETING[0];
+    const problemas = conferirPlataformas([{ ...base, verificadoEm: "30/09/2026", passos: [], fatos: [], fontes: [] }]);
+    expect(problemas.join("\n")).toContain("AAAA-MM-DD");
+    expect(problemas.join("\n")).toContain("não tem passos nem fatos");
+    expect(problemas.join("\n")).toContain("fontes");
+  });
+
+  it("acusa unidade que não mostra o conferido em, e fase com data que o arquivo não tem", () => {
+    const base = PLATAFORMAS_MARKETING[0];
+    const outraData = { ...base, verificadoEm: "2026-10-15" };
+    const semRotulo = conferirConferidoNasFases([outraData], UNIDADES, FASES);
+    expect(semRotulo.join("\n")).toContain('nenhuma fase da unidade "sites-ser-encontrado-u3" mostra "conferido em 15/10/2026"');
+    expect(semRotulo.join("\n")).toContain("nenhuma plataforma da unidade tem essa data");
+    expect(conferirConferidoNasFases([{ ...base, usadaEm: ["sites-nao-existe"] }], UNIDADES, FASES).join("\n")).toContain("que não existe");
   });
 });
