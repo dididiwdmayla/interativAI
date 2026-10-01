@@ -95,7 +95,7 @@ const nucleo = new NucleoExecutor({
     }
   },
   agora: relogio,
-});
+}, { deterministico: new URL(globalThis.location.href).searchParams.get("executor-teste") === "1" });
 
 ouvir("message", (evento) => {
   const pedido = evento.data;

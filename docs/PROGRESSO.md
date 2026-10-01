@@ -147,3 +147,12 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
   Console no navegador verde em desktop, retrato e paisagem.
   Build e lint verdes; a primeira checagem ampla encontrou um problema
   na instrumentação de `let` sem valor, corrigido e conferido nos afetados.
+
+### Etapa 2: sorteio e relógio reais
+
+- Núcleo e Node usam os valores nativos por padrão. O preparo fixo é
+  pedido explicitamente pelo `testar:conteudo` e, no Playwright, pela URL
+  do worker. Não congela o relógio da página nem afeta o jogo normal.
+- Guia e arquitetura: validadores nunca dependem de sorteio nem de data.
+- 76 unitários afetados, Console nos três layouts (incluindo confirmação
+  da data fixa só no worker), build e lint verdes.

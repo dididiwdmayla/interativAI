@@ -13,7 +13,7 @@ import { literalJs, textoDaSaida, textoDoResultado, valorIgual } from "@/motor/e
 import { LIMITES, type PassoRastro, type ResultadoExecucao, type ValorMemoria } from "@/motor/executor/tipos";
 
 function rodar(codigo: string, origem: "console" | "snippet" = "snippet") {
-  return criarNucleoNode().executar(codigo, origem);
+  return criarNucleoNode({ deterministico: true }).executar(codigo, origem);
 }
 
 /** As variáveis de um passo, por quadro: { "Global": { x: "5" }, "soma": {...} }. */
@@ -355,6 +355,25 @@ describe("modo do Console (REPL do Chrome)", () => {
 });
 
 describe("determinismo e isolamento", () => {
+  it("sem opção de teste, Date mostra agora e o sorteio não reinicia com a mesma semente", () => {
+    const antes = Date.now();
+    const a = criarNucleoNode();
+    const b = criarNucleoNode();
+    const r = a.executar("[Date.now(), new Date().getTime()]", "console");
+    expect(r.erro).toBeNull();
+    if (r.resultado.t !== "array") throw new Error("esperava a lista de instantes");
+    for (const valor of r.resultado.itens) {
+      if (valor.t !== "number") throw new Error("esperava um instante numérico");
+      expect(Number(valor.v)).toBeGreaterThanOrEqual(antes);
+      expect(Number(valor.v)).toBeLessThanOrEqual(Date.now());
+    }
+    expect(a.executar("Math.random()", "console").resultado).not.toEqual(b.executar("Math.random()", "console").resultado);
+  });
+
+  it("o preparo fixo é uma opção explícita do hospedeiro de testes", () => {
+    const fixo = criarNucleoNode({ deterministico: true });
+    expect(fixo.executar("new Date().toISOString()", "console").resultado).toEqual({ t: "string", v: "2026-01-05T15:00:00.000Z" });
+  });
   it("o mesmo código dá o mesmo rastro (sorteio com semente, relógio parado)", () => {
     const codigo = "const n = Math.random();\nconst d = new Date().toISOString();\nconst agora = Date.now();\nconsole.log(n, d, agora);";
     const a = rodar(codigo);

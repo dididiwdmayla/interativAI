@@ -351,8 +351,10 @@ resposta da última expressão, as saídas do console e o erro.
   (1,5 s) conferidos pelos ganchos, com a parada "grudada" (um try/catch do
   jogador não engole); reserva de 4 s no hospedeiro (o worker é encerrado e
   as entradas boas rodam de novo em silêncio; no Node, o timeout do vm).
-- **Determinístico**: `Math.random` com semente e `Date` parado em
-  5/1/2026 15h UTC (`CODIGO_PREPARO`).
+- **Valores reais no jogo**: `Math.random` e `Date` nativos. Apenas os
+  hospedeiros de testes pedem `CODIGO_PREPARO` (semente fixa e instante
+  5/1/2026 15h UTC); no Playwright isso viaja na URL do worker, sem mudar
+  o relógio da página. Validadores nunca dependem de sorteio nem da data.
 - **Isolamento no navegador**: `executor.worker.ts` (Web Worker de módulo,
   sem página, sem localStorage; rede, armazenamento, timers, outros
   workers e o canal de mensagens apagados do global e dos protótipos antes

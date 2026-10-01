@@ -179,6 +179,11 @@ if (movel) await abrirBalao(pagina);
 await pagina.getByRole("button", { name: /Ver resultado|Próximo objetivo/ }).first().waitFor({ timeout: 8000 });
 conferir(true, `${MODO}: saida + semErro concluem o último objetivo`);
 
+// Só o executor recebe o relógio de teste; o jogo continua com a data real.
+await rodar("new Date().toISOString()");
+conferir((await ultimaLinha()).texto.includes("2026-01-05T15:00:00.000Z"), `${MODO}: worker usa a data fixa pedida pelo Playwright`);
+conferir(await pagina.evaluate(() => new Date().getUTCFullYear()) === new Date().getUTCFullYear(), `${MODO}: o relógio da página continua real`);
+
 const relevantes = errosRelevantes(erros);
 conferir(relevantes.length === 0, `${MODO}: console limpo (${relevantes.join(" | ")})`);
 await navegador.close();

@@ -5,8 +5,8 @@
  * no Node) entrega o objeto global do reino e a função que avalia código
  * nele (ver sessaoNavegador.ts, executor.worker.ts e node.ts).
  *
- * Determinístico: Math.random com semente fixa e Date parado num instante
- * fixo (CODIGO_PREPARO); o mesmo código dá o mesmo rastro.
+ * No jogo, Math.random e Date são nativos. O preparo determinístico
+ * (CODIGO_PREPARO) só entra quando o hospedeiro de testes pede.
  */
 import { instrumentar } from "./instrumentar";
 import { textoDaSaida, valorIgual } from "./formatar";
@@ -116,8 +116,8 @@ export class NucleoExecutor {
   private locaisDeErro = new WeakMap<object, Local>();
   private localPrimitivo: Local | null = null;
 
-  constructor(private readonly host: Hospedeiro) {
-    host.avaliar(CODIGO_PREPARO);
+  constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
+    if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
     this.intr = host.avaliar(
       "({ ReferenceError: ReferenceError, TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype })",
     ) as Intrinsecos;
