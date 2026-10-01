@@ -55,3 +55,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Branch e relatório final
+
+A branch principal é `claude/intelligent-pascal-5va93x`. Toda tarefa parte dela e volta por pull request.
+
+Formato obrigatório do relatório final, em PT-BR:
+- **O que foi feito** (por etapa);
+- **Decisões a conferir** (o que você decidiu sem regra clara);
+- **Riscos** (só os concretos);
+- **Próximo passo**.

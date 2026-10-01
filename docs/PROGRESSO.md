@@ -126,3 +126,11 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - Ajuste final de paridade do REPL: 82 unitários afetados e nove jornadas
   de Console, palco e Lógica verdes no build final (os três layouts).
 - Conteúdo publicado, currículo e dependências sem alterações.
+
+## Rodada 19: zona Primeiros comandos
+
+### Etapa 0
+
+- Base: `claude/intelligent-pascal-5va93x` (`3c4fbb0`); branch `codex/logica-primeiros-comandos`.
+- AGENTS e CLAUDE registram a branch principal e o formato obrigatório do relatório final.
+- Alteração documental; nenhuma mudança no motor ou conteúdo publicado.
