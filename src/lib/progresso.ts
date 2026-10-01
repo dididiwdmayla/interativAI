@@ -1,4 +1,5 @@
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
+import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
 import { type EstadoRevisao, lerEstadoRevisao, REVISAO_PADRAO } from "@/lib/estadoRevisao";
@@ -47,6 +48,8 @@ export type EstadoFaseSalvo = {
   programa: ProgramaSalvo | null;
   /** (Circuito lógico) O circuito montado na bancada. null nas outras fases. */
   circuito: Circuito | null;
+  /** (Ordenar passos) Onde está cada cartão. null nas outras fases (e em progresso antigo). */
+  ordenar?: EstadoOrdenar | null;
 };
 
 export type ProgramaSalvo = {
@@ -245,7 +248,15 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     reveres: ehNumero(valor.reveres) ? Math.max(0, Math.round(valor.reveres)) : 0,
     programa: lerProgramaSalvo(valor.programa),
     circuito: lerCircuitoSalvo(valor.circuito),
+    ordenar: lerOrdenarSalvo(valor.ordenar),
   };
+}
+
+function lerOrdenarSalvo(valor: unknown): EstadoOrdenar | null {
+  if (!ehObjeto(valor) || !ehObjeto(valor.listas)) return null;
+  const listas: Record<string, string[]> = {};
+  for (const [nome, lista] of Object.entries(valor.listas)) listas[nome] = [...new Set(listaDeTextos(lista))].slice(0, 50);
+  return { listas };
 }
 
 const TIPOS_DE_PECA = ["entrada", "saida", "e", "ou", "nao", "xou"];

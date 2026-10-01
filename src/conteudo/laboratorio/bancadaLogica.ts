@@ -8,7 +8,7 @@
  * casos) e `saida` com `semErro`.
  */
 import { SITE_DO_PROGRAMA } from "@/motor/programa";
-import type { Fase, FaseCircuitoLogico, FaseDesafio, FasePratica, Unidade } from "../tipos";
+import type { Fase, FaseCircuitoLogico, FaseDesafio, FaseOrdenarPassos, FasePratica, Unidade } from "../tipos";
 
 export const UNIDADE_BANCADA_LOGICA: Unidade = {
   id: "lab-logica-u1",
@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4", "lab-logica-u1-f5", "lab-logica-u1-f6", "lab-logica-u1-f7"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -540,4 +540,242 @@ export const FASE_DEMO_DEPURADOR: FasePratica = {
   falaFinal: { texto: "Pode continuar pondo pontos de parada e andando pelo programa.", expressao: "feliz" },
 };
 
-export const FASES_BANCADA_LOGICA: readonly Fase[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO, FASE_DEMO_DESAFIO_CIRCUITO, FASE_DEMO_DEPURADOR];
+/*
+ * Demonstração do ordenar passos (modelo para a zona Resolvendo problemas):
+ * - `depoisDe` diz de quem cada passo depende: ferver a água e pôr o filtro
+ *   não dependem um do outro, então as duas ordens valem (`ordemValida` não
+ *   decora uma ordem);
+ * - um cartão que sobra já começa no plano (`inicial`) e `semSobras` pede
+ *   para tirar;
+ * - `passoNoPlano` e `passoAntes` para objetivos menores.
+ */
+export const FASE_DEMO_ORDENAR: FaseOrdenarPassos = {
+  id: "lab-logica-u1-f5",
+  tipo: "ordenar-passos",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do ordenar passos",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["quadro-de-passos"],
+  apresentar: ["quadro-de-passos"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  ordenar: {
+    modo: "ordenar",
+    problema: "Passar um café no coador",
+    cartoes: [
+      { id: "ferver", texto: "Ferver a água" },
+      { id: "filtro", texto: "Pôr o filtro no suporte" },
+      { id: "po", texto: "Pôr o pó no filtro", depoisDe: ["filtro"] },
+      { id: "despejar", texto: "Despejar a água quente no pó", depoisDe: ["ferver", "po"] },
+      { id: "servir", texto: "Servir na xícara", depoisDe: ["despejar"] },
+      { id: "gelo", texto: "Pôr gelo na água", sobra: true },
+    ],
+    inicial: ["gelo"],
+  },
+  introducao: [{ texto: "Um programa é uma receita: passos na ordem certa. Vamos montar a do café.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "tirar-sobra",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Um cartão no plano não tem nada a ver com café. Tire ele (o x do cartão).", toque: "Um cartão no plano não tem nada a ver com café. Tire ele (o x do cartão)." },
+      validador: { tipo: "semSobras" },
+      ajudas: {
+        pergunta: "Qual desses passos ninguém faz para passar café?",
+        dica: "Gelo esfria a água: café passado precisa de água quente.",
+        linha: { alvo: "ordenar", passo: "gelo", fala: "Este aqui." },
+        solucao: { fala: "Tirei o gelo: ele sobra.", acoes: [{ tipo: "tirarPasso", passo: "gelo" }] },
+      },
+      falaAoConcluir: { texto: "Isso! Nem todo cartão entra no plano.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "tirarPasso", passo: "gelo" }],
+    },
+    {
+      id: "primeiro",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Dá para pôr o filtro antes de ferver a água?",
+        opcoes: ["Sim, tanto faz a ordem desses dois", "Não, a água sempre vem primeiro"],
+        correta: 0,
+        explicacao: "Um não depende do outro: as duas ordens funcionam. O que importa é a água estar quente antes de despejar.",
+      },
+      enunciado: { mouse: "Arraste Pôr o filtro no suporte para o plano.", toque: "Ponha Pôr o filtro no suporte no plano." },
+      validador: { tipo: "passoNoPlano", passo: "filtro" },
+      ajudas: {
+        pergunta: "Como um cartão vai para o plano?",
+        dica: "Arraste pela alça, ou toque nele e depois em Pôr aqui.",
+        linha: { alvo: "ordenar", passo: "filtro", fala: "Este cartão." },
+        solucao: { fala: "Pus o filtro no plano.", acoes: [{ tipo: "porPasso", passo: "filtro" }] },
+      },
+      falaAoConcluir: { texto: "Primeiro passo no plano.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 0 }, { tipo: "porPasso", passo: "filtro" }],
+    },
+    {
+      id: "completar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: { mouse: "Complete o plano: cada passo depois do que ele precisa.", toque: "Complete o plano: cada passo depois do que ele precisa." },
+      validador: { tipo: "ordemValida" },
+      ajudas: { pergunta: "O que precisa estar pronto antes de despejar a água?", dica: "A água quente e o pó no filtro. Servir é o último." },
+      falaAoConcluir: { texto: "Café passado! Repare: outras ordens também valeriam.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "porPasso", passo: "po" },
+        { tipo: "porPasso", passo: "ferver" },
+        { tipo: "porPasso", passo: "despejar" },
+        { tipo: "porPasso", passo: "servir" },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Quadro testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar mexendo no plano.", expressao: "feliz" },
+};
+
+/* Demonstração da variante agrupar: decompor um problema em passos grandes. */
+export const FASE_DEMO_AGRUPAR: FaseOrdenarPassos = {
+  id: "lab-logica-u1-f6",
+  tipo: "ordenar-passos",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do agrupar",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["quadro-de-passos"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  ordenar: {
+    modo: "agrupar",
+    problema: "Organizar uma festa de aniversário",
+    grupos: [
+      { id: "convidar", titulo: "Convidar" },
+      { id: "preparar", titulo: "Preparar" },
+      { id: "festejar", titulo: "Festejar" },
+    ],
+    cartoes: [
+      { id: "lista", texto: "Fazer a lista de convidados", grupo: "convidar" },
+      { id: "mensagem", texto: "Mandar a mensagem com a data", grupo: "convidar", depoisDe: ["lista"] },
+      { id: "bolo", texto: "Encomendar o bolo", grupo: "preparar" },
+      { id: "enfeitar", texto: "Enfeitar a sala", grupo: "preparar" },
+      { id: "parabens", texto: "Cantar parabéns", grupo: "festejar" },
+      { id: "cortar", texto: "Cortar o bolo", grupo: "festejar", depoisDe: ["parabens", "bolo"] },
+      { id: "imposto", texto: "Declarar o imposto de renda", sobra: true },
+    ],
+  },
+  introducao: [{ texto: "Problema grande se resolve em pedaços: primeiro os passos grandes, depois os pequenos dentro de cada um.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "um-no-lugar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Ponha Fazer a lista de convidados dentro de Convidar.", toque: "Ponha Fazer a lista de convidados dentro de Convidar." },
+      validador: { tipo: "passoNoPlano", passo: "lista", grupo: "convidar" },
+      ajudas: {
+        pergunta: "Em qual passo grande a lista de convidados entra?",
+        dica: "Antes de convidar alguém, você precisa saber quem.",
+        linha: { alvo: "ordenar", passo: "lista", fala: "Este cartão." },
+        solucao: { fala: "Pus a lista em Convidar.", acoes: [{ tipo: "porPasso", passo: "lista", grupo: "convidar" }] },
+      },
+      falaAoConcluir: { texto: "Isso: cada subpasso mora num passo grande.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "porPasso", passo: "lista", grupo: "convidar" }],
+    },
+    {
+      id: "decompor",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: { mouse: "Separe os outros subpassos. Um cartão não é da festa.", toque: "Separe os outros subpassos. Um cartão não é da festa." },
+      validador: { tipo: "ordemValida" },
+      ajudas: { pergunta: "O bolo precisa estar onde antes de ser cortado?", dica: "Encomendar é preparar; cortar é festejar, depois do parabéns." },
+      falaAoConcluir: { texto: "Festa decomposta: três passos grandes, cada um com os seus pequenos.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "porPasso", passo: "mensagem", grupo: "convidar" },
+        { tipo: "porPasso", passo: "enfeitar", grupo: "preparar" },
+        { tipo: "porPasso", passo: "bolo", grupo: "preparar" },
+        { tipo: "porPasso", passo: "parabens", grupo: "festejar" },
+        { tipo: "porPasso", passo: "cortar", grupo: "festejar" },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Agrupar testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar mexendo nos passos.", expressao: "feliz" },
+};
+
+/*
+ * Demonstração do plano de código (`rodar`): os cartões são linhas, o Rodar
+ * executa na ordem do plano (com a memória zerada) e os validadores de
+ * código conferem o resultado; a ordem errada dá o erro de verdade.
+ */
+export const FASE_DEMO_ORDENAR_CODIGO: FaseOrdenarPassos = {
+  id: "lab-logica-u1-f7",
+  tipo: "ordenar-passos",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do plano de código",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["quadro-de-passos"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: {},
+  ordenar: {
+    modo: "ordenar",
+    problema: "Mostrar o preço com desconto",
+    rodar: true,
+    cartoes: [
+      { id: "preco", texto: "let preco = 20;" },
+      { id: "desconto", texto: "let desconto = preco * 0.1;", depoisDe: ["preco"] },
+      { id: "total", texto: "let total = preco - desconto;", depoisDe: ["preco", "desconto"] },
+      { id: "mostrar", texto: "console.log(total);", depoisDe: ["total"] },
+      { id: "errado", texto: "console.log(totl);", sobra: true },
+    ],
+    inicial: ["mostrar", "preco"],
+  },
+  introducao: [{ texto: "Agora os cartões são linhas de código. O Rodar executa o plano na ordem: vamos ver o que quebra.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "quebrar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique em Rodar com o plano assim, e leia o erro.", toque: "Toque em Rodar com o plano assim, e leia o erro." },
+      validador: { tipo: "erroDoTipo", nome: "ReferenceError" },
+      ajudas: {
+        pergunta: "Dá para mostrar o total antes de ele existir?",
+        dica: "O Rodar executa de cima para baixo.",
+        linha: { alvo: "ferramenta", ferramenta: "quadro-de-passos", fala: "O Rodar mora no plano." },
+        solucao: { fala: "Rodei: total ainda não existia na primeira linha.", acoes: [{ tipo: "rodarPlano" }] },
+      },
+      falaAoConcluir: { texto: "ReferenceError: a linha 1 usou total antes de ele existir.", expressao: "curioso" },
+      solucaoDeTeste: [{ tipo: "rodarPlano" }],
+    },
+    {
+      id: "consertar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: { mouse: "Monte o plano na ordem que funciona e rode: tem que aparecer 18.", toque: "Monte o plano na ordem que funciona e rode: tem que aparecer 18." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "ordemValida" },
+          { tipo: "saida", igual: ["18"] },
+        ],
+      },
+      ajudas: { pergunta: "O que cada linha precisa que já exista?", dica: "preco, depois desconto, depois total, e só então mostrar." },
+      falaAoConcluir: { texto: "18! A mesma ideia do café: cada passo depois do que ele usa.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "porPasso", passo: "preco", posicao: 0 },
+        { tipo: "porPasso", passo: "desconto", posicao: 1 },
+        { tipo: "porPasso", passo: "total", posicao: 2 },
+        { tipo: "rodarPlano" },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Plano de código testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar trocando a ordem e rodando.", expressao: "feliz" },
+};
+
+export const FASES_BANCADA_LOGICA: readonly Fase[] = [
+  FASE_BANCADA_CONSOLE,
+  FASE_DEMO_CIRCUITO,
+  FASE_DEMO_DESAFIO_CIRCUITO,
+  FASE_DEMO_DEPURADOR,
+  FASE_DEMO_ORDENAR,
+  FASE_DEMO_AGRUPAR,
+  FASE_DEMO_ORDENAR_CODIGO,
+];

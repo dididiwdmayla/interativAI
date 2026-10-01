@@ -15,7 +15,10 @@ const { toque } = TAMANHOS[MODO];
 const movel = MODO !== "desktop";
 
 /** As demonstrações e as ferramentas que cada uma apresenta. */
-const GRUPOS = [{ fase: "lab-logica-u1-f4", esperar: "[data-fontes]", ferramentas: ["pontos-de-parada", "controles-depurador", "painel-escopo", "painel-observar", "pilha-de-chamadas"] }];
+const GRUPOS = [
+  { fase: "lab-logica-u1-f4", ferramentas: ["pontos-de-parada", "controles-depurador", "painel-escopo", "painel-observar", "pilha-de-chamadas"] },
+  { fase: "lab-logica-u1-f5", ferramentas: ["quadro-de-passos"] },
+];
 
 const todas = GRUPOS.flatMap((grupo) => grupo.ferramentas);
 const PROGRESSO = {

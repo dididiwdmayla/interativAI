@@ -40,6 +40,7 @@ import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
 import { IconeObservar } from "@/componentes/icones/IconeObservar";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
+import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -1040,6 +1041,27 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     experimente: {
       mouse: "Clique na Pilha de chamadas.",
       toque: "Toque na Pilha de chamadas.",
+    },
+    uso: "tocar",
+  },
+  // Ordenar passos (zona Resolvendo problemas): não é do Chrome, é como se planeja um programa.
+  "quadro-de-passos": {
+    id: "quadro-de-passos",
+    nome: "Quadro de passos",
+    Icone: IconeQuadroPassos,
+    alvo: seletorFerramenta("quadro-de-passos"),
+    oQueFaz: "Cartões com os passos de um problema: você arrasta cada um para o plano, na ordem em que eles têm que acontecer.",
+    praQueServe:
+      "Antes do código vem o plano. Às vezes dois passos podem trocar de lugar, às vezes um precisa do outro, e alguns cartões nem fazem parte da solução.",
+    comoUsarAqui: {
+      mouse: "Arraste um cartão pela alça até o plano, ou clique nele e depois no lugar do plano. As setas sobem e descem; o x tira do plano.",
+      toque: "Arraste um cartão pela alça até o plano, ou toque nele e depois no lugar do plano. As setas sobem e descem; o x tira do plano.",
+    },
+    noF12DeVerdade:
+      "não existe no F12: é o que programadores fazem no papel (ou num comentário) antes de escrever o código, e o que vira pseudocódigo.",
+    experimente: {
+      mouse: "Clique num cartão.",
+      toque: "Toque num cartão.",
     },
     uso: "tocar",
   },

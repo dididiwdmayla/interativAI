@@ -16,7 +16,7 @@
  */
 import type { DadosCircuito, Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
 
-export type TelaDaFase = "devtools" | "circuito";
+export type TelaDaFase = "devtools" | "circuito" | "ordenar";
 
 export type DefinicaoTipoFase = {
   nome: string;
@@ -51,11 +51,16 @@ export const TIPOS_DE_FASE: Record<TipoFase, DefinicaoTipoFase> = {
     descricao: "Portões E, OU e NÃO numa bancada: arrastar, ligar fios, alternar as entradas e ver a corrente acender, com a tabela verdade ao lado e o circuito escrito como código.",
     tela: "circuito",
   },
+  "ordenar-passos": {
+    nome: "Ordenar passos",
+    descricao: "Cartões com os passos de um problema para arrastar até o plano; vale qualquer ordem que respeite as dependências, com passos que sobram e a variante agrupar (subpassos dentro dos passos grandes).",
+    tela: "ordenar",
+  },
 };
 
 /** A fase tem objetivos em sequência (prática e simulador de campanha): o mesmo motor de objetivos. */
 export function temObjetivos(fase: Fase): fase is FaseComObjetivos {
-  return fase.tipo === "pratica" || fase.tipo === "simulador-campanha" || fase.tipo === "circuito-logico";
+  return fase.tipo === "pratica" || fase.tipo === "simulador-campanha" || fase.tipo === "circuito-logico" || fase.tipo === "ordenar-passos";
 }
 
 /**
@@ -71,7 +76,7 @@ export function circuitoDaFase(fase: Fase): DadosCircuito | null {
 
 /** A fase não tem página de site (programa ou circuito): a validação usa o documento vazio do começo. */
 export function semPagina(fase: Fase): boolean {
-  return fase.programa !== undefined || circuitoDaFase(fase) !== null;
+  return fase.programa !== undefined || circuitoDaFase(fase) !== null || fase.tipo === "ordenar-passos";
 }
 
 /** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */

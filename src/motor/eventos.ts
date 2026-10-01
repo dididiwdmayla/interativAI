@@ -79,7 +79,9 @@ export type EventoFase =
   /** (Depurador) Pôs uma expressão no painel Observar. */
   | { tipo: "adicionouObservacao"; expressao: string }
   /** (Depurador) Uma expressão do Observar foi avaliada num momento pausado (null: deu erro ou não existia ali). */
-  | { tipo: "observouValor"; expressao: string; valor: ValorExibido | null };
+  | { tipo: "observouValor"; expressao: string; valor: ValorExibido | null }
+  /** (Ordenar) Pôs, mudou de lugar ou tirou um cartão. `destino`: "plano", o id do grupo ou "fora". */
+  | { tipo: "moveuPasso"; passo: string; destino: string; posicao: number };
 
 /**
  * Para onde um link levaria:
@@ -131,4 +133,5 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "usouControleDepurador",
   "adicionouObservacao",
   "observouValor",
+  "moveuPasso",
 ];

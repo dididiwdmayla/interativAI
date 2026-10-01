@@ -75,6 +75,12 @@ export type PainelDasAcoes = {
     controlar: (controle: ControleDepurador) => boolean;
     observar: (expressao: string) => void;
   };
+  /** (Ordenar) O quadro de passos: só numa fase ordenar-passos. Devolve false se o cartão (ou o grupo) não existe. */
+  ordenar?: {
+    porPasso: (passo: string, posicao?: number, grupo?: string) => boolean;
+    tirarPasso: (passo: string) => boolean;
+    rodarPlano: () => boolean;
+  };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
@@ -168,6 +174,12 @@ export function descreverAcao(acao: Acao): string {
       return `controlarDepurador ${acao.controle}`;
     case "observar":
       return `observar ${JSON.stringify(acao.expressao)}`;
+    case "porPasso":
+      return `porPasso ${acao.passo}${acao.grupo ? ` em ${acao.grupo}` : ""}${acao.posicao !== undefined ? ` na posição ${acao.posicao}` : ""}`;
+    case "tirarPasso":
+      return `tirarPasso ${acao.passo}`;
+    case "rodarPlano":
+      return "rodarPlano";
   }
 }
 
@@ -445,6 +457,15 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       if (acao.tipo === "alternarPontoDeParada") depurador.alternarPontoDeParada(acao.linha);
       else if (acao.tipo === "observar") depurador.observar(acao.expressao);
       else if (!depurador.controlar(acao.controle)) throw new ErroAcao(`${acao.controle}: o depurador não está pausado (rode o Snippet com um ponto de parada antes)`);
+      return;
+    }
+    case "porPasso":
+    case "tirarPasso":
+    case "rodarPlano": {
+      const quadro = painel.ordenar;
+      if (!quadro) throw new ErroAcao(`${acao.tipo} só existe numa fase ordenar-passos`);
+      const deu = acao.tipo === "porPasso" ? quadro.porPasso(acao.passo, acao.posicao, acao.grupo) : acao.tipo === "tirarPasso" ? quadro.tirarPasso(acao.passo) : quadro.rodarPlano();
+      if (!deu) throw new ErroAcao(acao.tipo === "rodarPlano" ? "rodarPlano pede ordenar.rodar e programa na fase" : `não deu para ${descreverAcao(acao)} (cartão ou grupo que não existe?)`);
       return;
     }
   }

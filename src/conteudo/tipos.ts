@@ -22,6 +22,7 @@ import type { SintaxeJs } from "@/motor/executor/instrumentar";
 import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
+import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -299,6 +300,23 @@ export type Validador =
    * pelo menos `minimo` vezes (padrão 1) desde que o objetivo começou. Trava.
    */
   | { tipo: "usouControle"; controle: ControleDepurador; minimo?: number }
+  /*
+   * Ordenar passos (fase do tipo ordenar-passos): src/motor/ordenar/modelo.ts.
+   * Olham o quadro de agora (desfazer desmarca a parte de um desafio).
+   */
+  /**
+   * (Ordenar) O plano vale: todos os passos necessários estão nele, nenhum
+   * que sobra, cada subpasso no seu passo grande (agrupar) e cada passo
+   * depois dos que ele depende. QUALQUER ordem que respeite as dependências
+   * passa (não existe uma ordem decorada).
+   */
+  | { tipo: "ordemValida" }
+  /** (Ordenar) O cartão está no plano (em qualquer posição; no agrupar, com `grupo`, dentro desse passo grande). */
+  | { tipo: "passoNoPlano"; passo: string; grupo?: string }
+  /** (Ordenar) Os dois cartões estão no plano e `passo` vem antes de `antesDe`. */
+  | { tipo: "passoAntes"; passo: string; antesDe: string }
+  /** (Ordenar) Nenhum cartão que sobra (distração) está no plano. */
+  | { tipo: "semSobras" }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -439,7 +457,17 @@ export type Acao =
    * (Depurador) Põe a expressão no painel Observar. Gera `adicionouObservacao`
    * e, se estiver pausado, `observouValor`. Pede a ferramenta painel-observar.
    */
-  | { tipo: "observar"; expressao: string };
+  | { tipo: "observar"; expressao: string }
+  /**
+   * (Ordenar) Arrasta o cartão para o plano (ou, no agrupar, para o passo
+   * grande `grupo`), na `posicao` (a partir de 0; padrão: no fim). Se ele já
+   * está no plano, muda de lugar. Gera `moveuPasso`. Pede quadro-de-passos.
+   */
+  | { tipo: "porPasso"; passo: string; posicao?: number; grupo?: string }
+  /** (Ordenar) Tira o cartão do plano (volta para a pilha). Gera `moveuPasso`. */
+  | { tipo: "tirarPasso"; passo: string }
+  /** (Ordenar, com `rodar`) O botão Rodar: executa o código do plano, na ordem. Gera `executouCodigo`. */
+  | { tipo: "rodarPlano" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -462,7 +490,9 @@ export type AjudaLinha =
   /** (Código) Pisca a linha de digitar do Console. */
   | { alvo: "console"; fala: string }
   /** (Circuito) Pisca uma peça da bancada (ou, sem `peca`, a paleta de portões). */
-  | { alvo: "circuito"; peca?: string; fala: string };
+  | { alvo: "circuito"; peca?: string; fala: string }
+  /** (Ordenar) Pisca um cartão (onde ele estiver) ou, sem `passo`, o plano. */
+  | { alvo: "ordenar"; passo?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -756,15 +786,31 @@ export type FaseCircuitoLogico = FaseBase & {
   circuito: DadosCircuito;
 };
 
-/** Fases com objetivos em sequência (prática, simulador de campanha e circuito lógico). */
-export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico;
+/**
+ * Ordenar passos (zona Resolvendo problemas): objetivos como numa prática,
+ * num quadro com cartões de passos (em português ou em código) que o
+ * jogador arrasta para o plano. A validação é pelas dependências entre os
+ * passos (`depoisDe`): qualquer ordem que as respeite vale. Cartões que
+ * sobram são distrações. Variante `agrupar`: separar os subpassos dentro
+ * dos passos grandes. Com `ordenar.rodar` e `programa`, o plano roda como
+ * código. Use `siteAlvo: SITE_DO_PROGRAMA`. Ver o guia, seção 27.
+ */
+export type FaseOrdenarPassos = FaseBase & {
+  tipo: "ordenar-passos";
+  objetivos: Objetivo[];
+  pratica?: IdConceito[];
+  ordenar: DadosOrdenar;
+};
+
+/** Fases com objetivos em sequência (prática, simulador de campanha, circuito lógico e ordenar passos). */
+export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico | FaseOrdenarPassos;
 
 /**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha | FaseCircuitoLogico;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha | FaseCircuitoLogico | FaseOrdenarPassos;
 
 export type TipoFase = Fase["tipo"];
 

@@ -11,6 +11,7 @@ import { alvoDoElemento, raizDoCodigo } from "@/lib/caminhoElementos";
 import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { type EstadoFaseSalvo, type Progresso, type ProgramaSalvo, PROJETO_VAZIO } from "@/lib/progresso";
 import type { Circuito } from "@/motor/circuito/modelo";
+import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
 import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -68,7 +69,7 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa" | "circuito" | "ordenar">;
   /** (Fase de programa) Degrau 3: pisca linhas do Snippet ou a linha do Console; null apaga. */
   destacarNoPrograma?: (alvo: number[] | "console" | null) => void;
   /** (Fase de programa) O que rodou e o Snippet, para salvar junto com a fase. */
@@ -77,6 +78,10 @@ type Opcoes = {
   destacarNoCircuito?: (alvo: string | null) => void;
   /** (Circuito) O circuito de agora, para salvar junto com a fase. */
   circuitoSalvo?: Circuito | null;
+  /** (Ordenar) Degrau 3: pisca um cartão (ou o plano); null apaga. */
+  destacarNoOrdenar?: (alvo: string | null) => void;
+  /** (Ordenar) O quadro de agora, para salvar junto com a fase. */
+  ordenarSalvo?: EstadoOrdenar | null;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -114,6 +119,8 @@ export function useMotorFase({
   programaSalvo = null,
   destacarNoCircuito,
   circuitoSalvo = null,
+  destacarNoOrdenar,
+  ordenarSalvo = null,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -172,8 +179,9 @@ export function useMotorFase({
     destacarNoEstilos(null);
     destacarNoPrograma?.(null);
     destacarNoCircuito?.(null);
+    destacarNoOrdenar?.(null);
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, destacarNoCircuito, destacarNoEstilos, destacarNoPrograma, editorRef, limparDestaqueCss]);
+  }, [destacarNaArvore, destacarNoCircuito, destacarNoEstilos, destacarNoOrdenar, destacarNoPrograma, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
@@ -216,6 +224,7 @@ export function useMotorFase({
               reveres: atual.reveres,
               programa: programaSalvo,
               circuito: circuitoSalvo,
+              ordenar: ordenarSalvo,
             },
           },
           // Passou da meta: a da entrada da unidade não aparece de novo.
@@ -241,7 +250,7 @@ export function useMotorFase({
         };
       });
     },
-    [circuitoSalvo, cssAtual, fase, htmlAtual, modo, mostrarMeta, programaSalvo, projeto],
+    [circuitoSalvo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
   );
 
   useEffect(() => {
@@ -537,6 +546,8 @@ export function useMotorFase({
       destacarNoPrograma?.(linha.alvo === "snippet" ? linha.linhas : "console");
     } else if (linha.alvo === "circuito") {
       destacarNoCircuito?.(linha.peca ?? "paleta");
+    } else if (linha.alvo === "ordenar") {
+      destacarNoOrdenar?.(linha.passo ?? "plano");
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }

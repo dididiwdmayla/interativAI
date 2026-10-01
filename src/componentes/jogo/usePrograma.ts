@@ -175,7 +175,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
   );
 
   const rodar = useCallback(
-    async (codigo: string, origem: OrigemCodigo) => {
+    async (codigo: string, origem: OrigemCodigo, rotulo?: string) => {
       if (!sessao) return;
       if (origem === "console") {
         acrescentar([{ tipo: "entrada", codigo }]);
@@ -194,7 +194,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         }
       } else {
         depuracao.current?.encerrar();
-        acrescentar([{ tipo: "info", texto: `Rodou o snippet ${nomeSnippet}` }]);
+        acrescentar([{ tipo: "info", texto: rotulo ?? `Rodou o snippet ${nomeSnippet}` }]);
       }
       setOcupado((n) => n + 1);
       // Os testes de navegador esperam o programa terminar (data-pronto).
@@ -237,6 +237,24 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     aoUsarAtual.current?.("snippet");
     void rodar(snippetAtual.current, "snippet");
   }, [rodar]);
+
+  /**
+   * (Ordenar passos) Roda o código do plano, na ordem dos cartões, com a
+   * memória zerada (cada ordem roda do começo, para ver o que quebra).
+   */
+  const executarPlano = useCallback(
+    (codigo: string) => {
+      if (!sessao) return;
+      sessao.reiniciar();
+      setEntradas([]);
+      const preparo = fase.programa?.preparo;
+      void (async () => {
+        if (preparo) await sessao.restaurar([{ codigo: preparo, origem: "console" }]);
+        await rodar(codigo, "snippet", "Rodou o plano");
+      })();
+    },
+    [fase.programa?.preparo, rodar, sessao],
+  );
 
   const aoMudarSnippet = useCallback((texto: string) => {
     snippetAtual.current = texto;
@@ -292,6 +310,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     programaSalvo,
     executarNoConsole,
     executarSnippet,
+    executarPlano,
     definirSnippet,
     aoMudarSnippet,
     limparConsole,

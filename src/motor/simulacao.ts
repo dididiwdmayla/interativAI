@@ -38,6 +38,7 @@ import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/ti
 import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
+import * as quadro from "./ordenar/modelo";
 import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
 
 /**
@@ -73,7 +74,7 @@ export function criarSimulacao(fase: Fase) {
   };
 
   // Fase de programa: o executor síncrono (vm no Node, iframe no /lab e na meta), com a mesma lógica do jogo.
-  const executor = fase.programa ? criarNucleoSincrono() : null;
+  let executor = fase.programa ? criarNucleoSincrono() : null;
   let snippet = fase.programa?.snippet?.codigoInicial ?? "";
   let ultimaExecucao: ResultadoExecucao | null = null;
   const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
@@ -135,6 +136,10 @@ export function criarSimulacao(fase: Fase) {
     circuito = novo;
     return true;
   };
+
+  // Ordenar passos: as mesmas funções do modelo que o quadro da tela usa.
+  const dadosOrdenar = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+  let ordenar: quadro.EstadoOrdenar | null = dadosOrdenar ? quadro.estadoInicialOrdenar(dadosOrdenar) : null;
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -298,6 +303,33 @@ export function criarSimulacao(fase: Fase) {
             },
           }
         : undefined,
+    ordenar: dadosOrdenar
+      ? {
+          porPasso: (passo, posicao, grupo) => {
+            if (!ordenar) return false;
+            const destino = grupo ?? (dadosOrdenar.modo === "agrupar" ? (dadosOrdenar.cartoes.find((c) => c.id === passo)?.grupo ?? "") : quadro.LISTA_DO_PLANO);
+            const novo = quadro.porPasso(dadosOrdenar, ordenar, passo, destino, posicao);
+            if (!novo) return false;
+            ordenar = novo;
+            eventos.push({ tipo: "moveuPasso", passo, destino, posicao: quadro.ondeEsta(novo, passo)?.posicao ?? 0 });
+            return true;
+          },
+          tirarPasso: (passo) => {
+            if (!ordenar || !dadosOrdenar.cartoes.some((c) => c.id === passo)) return false;
+            ordenar = quadro.tirarPasso(ordenar, passo);
+            eventos.push({ tipo: "moveuPasso", passo, destino: "fora", posicao: 0 });
+            return true;
+          },
+          rodarPlano: () => {
+            if (!ordenar || !dadosOrdenar.rodar || !executor) return false;
+            // Cada ordem roda com a memória zerada, como na tela.
+            executor = criarNucleoSincrono();
+            if (fase.programa?.preparo) executor?.executar(fase.programa.preparo, "console", { gravar: false });
+            rodarCodigo(quadro.codigoDoPlano(dadosOrdenar, ordenar), "snippet");
+            return true;
+          },
+        }
+      : undefined,
     responderPrevisao: (opcao) => {
       respostaPrevisao = opcao;
       eventos.push({ tipo: "respondeuPrevisao", opcao, acertou: previsaoAtual?.correta === opcao });
@@ -317,6 +349,7 @@ export function criarSimulacao(fase: Fase) {
       campanha: campanhaDaFase ? { dados: campanhaDaFase, estado: campanha } : undefined,
       programa: fase.programa ? estadoPrograma : undefined,
       circuito: circuito ?? undefined,
+      ordenar: dadosOrdenar && ordenar ? { dados: dadosOrdenar, estado: ordenar } : undefined,
     };
   };
 
@@ -344,6 +377,8 @@ export function criarSimulacao(fase: Fase) {
     programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null, pausa: sessao?.pausa ?? null, depurador }),
     /** (Circuito) O circuito agora. */
     circuito: () => circuito,
+    /** (Ordenar) Onde está cada cartão agora. */
+    ordenar: () => ordenar,
   };
 }
 

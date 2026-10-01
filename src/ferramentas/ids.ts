@@ -59,6 +59,8 @@ export const IDS_FERRAMENTAS = [
   "painel-escopo",
   "painel-observar",
   "pilha-de-chamadas",
+  // Ordenar passos (zona Resolvendo problemas)
+  "quadro-de-passos",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

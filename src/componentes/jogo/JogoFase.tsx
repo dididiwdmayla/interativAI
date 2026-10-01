@@ -51,6 +51,9 @@ import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
 import { useDepurador } from "./useDepurador";
+import { useOrdenar } from "./useOrdenar";
+import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
+import { ordemDoPlano } from "@/motor/ordenar/modelo";
 import { type AbaDepurador, AvisoPausado, BarraControlesDepurador, PainelDepurador } from "@/componentes/painel/fontes/PainelDepurador";
 import { FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { useCircuito } from "./useCircuito";
@@ -323,6 +326,8 @@ export function JogoFase({
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   // Fase de circuito lógico: a bancada (o circuito é a fonte única de verdade dela).
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
+  // Fase de ordenar passos: o quadro (os cartões e o plano).
+  const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
   // Linha do tempo: o passo escolhido vale só para a execução em que foi escolhido (uma nova volta ao fim).
   const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
@@ -743,6 +748,7 @@ export function JogoFase({
       depurador: depurador.ativo
         ? { alternarPontoDeParada: depurador.alternarPontoDeParada, controlar: depurador.controlar, observar: depurador.observar }
         : undefined,
+      ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
       circuito: circuito.ativo
         ? {
             adicionarPortao: circuito.adicionarPortao,
@@ -754,6 +760,10 @@ export function JogoFase({
         : undefined,
     }),
     [
+      ordenar.ativo,
+      ordenar.porPasso,
+      ordenar.tirarPasso,
+      ordenar.rodarPlano,
       depurador.ativo,
       depurador.alternarPontoDeParada,
       depurador.controlar,
@@ -878,11 +888,13 @@ export function JogoFase({
     [depurador.salvo, programa.programaSalvo],
   );
   const { circuitoAgora } = circuito;
+  const { ordenarAgora } = ordenar;
   const extraValidacao = useCallback(() => {
     const doSimulador = {
       ...(dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {}),
       ...(fase.programa ? { programa: { ...estadoDoPrograma(), ...(depuradorAtivo ? { depurador: estadoDoDepurador() } : {}) } } : {}),
       ...(circuitoAgora() ? { circuito: circuitoAgora() ?? undefined } : {}),
+      ...(ordenarAgora() ? { ordenar: ordenarAgora() ?? undefined } : {}),
     };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
@@ -892,7 +904,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento]);
+  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -928,6 +940,8 @@ export function JogoFase({
     programaSalvo,
     destacarNoCircuito: circuito.setDestaque,
     circuitoSalvo: circuito.circuito,
+    destacarNoOrdenar: ordenar.setDestaque,
+    ordenarSalvo: ordenar.estado,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -1172,7 +1186,20 @@ export function JogoFase({
     degrau: estado.degrau,
     htmlAtual,
     cssAtual,
-    obterPrograma: circuito.ativo
+    obterPrograma: ordenar.ativo
+      ? () => {
+          const quadro = ordenar.ordenarAgora();
+          if (!quadro) return null;
+          const texto = (id: string) => quadro.dados.cartoes.find((c) => c.id === id)?.texto ?? id;
+          const plano = ordemDoPlano(quadro.dados, quadro.estado).map((id, i) => `${i + 1}. ${texto(id)}`).join("\n");
+          const doCodigo = quadro.dados.rodar ? programa.contextoTutor() : null;
+          return {
+            codigo: `// O plano de "${quadro.dados.problema}", na ordem do jogador\n${plano || "(vazio)"}`,
+            erro: doCodigo?.erro ?? "",
+            variaveis: doCodigo?.variaveis ?? "",
+          };
+        }
+      : circuito.ativo
       ? () => {
           const atual = circuito.circuitoAgora();
           if (!atual) return null;
@@ -2067,7 +2094,11 @@ export function JogoFase({
             else refazer();
           }}
         >
-          {circuito.ativo && circuito.circuito && !fase.programa ? (
+          {ordenar.ativo ? (
+            <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+              <PilhaDeCartoes quadro={ordenar} toque={toque} />
+            </AlvoFerramenta>
+          ) : circuito.ativo && circuito.circuito && !fase.programa ? (
             painelTabelaVerdade
           ) : circuito.ativo && circuito.circuito ? (
             // Ponte circuito/Console (desafio com circuito e programa): a tabela em cima e o Console embaixo.
@@ -2107,12 +2138,16 @@ export function JogoFase({
           />
         )}
         <section
-          aria-label={circuito.ativo ? "Bancada do circuito" : fase.programa ? "Palco da memória" : "Tela do site"}
+          aria-label={ordenar.ativo ? "Plano de passos" : circuito.ativo ? "Bancada do circuito" : fase.programa ? "Palco da memória" : "Tela do site"}
           data-previa
           className={`flex min-h-0 min-w-0 flex-col ${classesTela}`}
           style={layout === "retrato" ? { flexBasis: `${proporcaoPrevia * 100}%` } : undefined}
         >
-          {circuito.ativo && circuito.circuito ? (
+          {ordenar.ativo ? (
+            <AlvoFerramenta ids={["quadro-de-passos"]} className="flex min-h-0 flex-1 flex-col">
+              <PlanoDePassos quadro={ordenar} linhas={programa.linhas} ocupado={programa.ocupado} toque={toque} />
+            </AlvoFerramenta>
+          ) : circuito.ativo && circuito.circuito ? (
             <AlvoFerramenta
               ids={["circuito"]}
               marcador="circuito"

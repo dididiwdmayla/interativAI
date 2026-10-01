@@ -13,6 +13,7 @@
  */
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
+import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -595,6 +596,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         "projeto-ponte": "o projeto não tem requisitos",
         "simulador-campanha": "o simulador não tem objetivos",
         "circuito-logico": "o circuito não tem objetivos",
+        "ordenar-passos": "o quadro não tem objetivos",
       }[fase.tipo];
       return [
         ...(ids.length === 0 ? [vazio] : []),
@@ -940,6 +942,8 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         problemas.push("fase de programa usa siteAlvo: SITE_DO_PROGRAMA (sem página: a tela é o palco da memória)");
       }
       if (fase.modoDocumento) problemas.push("fase de programa não usa modoDocumento");
+      // Ordenar passos com `rodar`: o plano roda como código, na tela do quadro (sem Console nem palco).
+      if (fase.tipo === "ordenar-passos") return problemas;
       if (!fase.usaFerramentas.includes("console")) problemas.push('fase de programa pede "console" em usaFerramentas (o Console sempre aparece)');
       // Na ponte circuito/Console (desafio com circuito e programa), a tela é a bancada: não há palco.
       const ponte = circuitoDaFase(fase) !== null;
@@ -1056,6 +1060,80 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         const doDepurador = acoes.find((acao) => acao.tipo === "alternarPontoDeParada" || acao.tipo === "controlarDepurador" || acao.tipo === "observar");
         if (doDepurador && !ligado) problemas.push(`${onde}: a ação ${doDepurador.tipo} só vale numa fase com o depurador`);
       }
+      return problemas;
+    },
+  },
+  {
+    id: "ordenar-passos",
+    nome: "ordenar passos: cartões com ids e textos válidos, dependências sem ciclo, e validadores e ações do quadro só nele",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const dados = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+      const ids = new Set(dados?.cartoes.map((c) => c.id) ?? []);
+      const grupos = new Set(dados ? destinosDo(dados) : []);
+      const deQuadro = new Set(["ordemValida", "passoNoPlano", "passoAntes", "semSobras"]);
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (deQuadro.has(item.tipo) && !dados) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase ordenar-passos`);
+          if (dados && "seletor" in item) problemas.push(`${onde}: fase de ordenar passos não tem página; o validador ${item.tipo} olha a página`);
+          if (!dados) continue;
+          if (item.tipo === "passoNoPlano" && !ids.has(item.passo)) problemas.push(`${onde}: passoNoPlano cita o cartão "${item.passo}", que não existe`);
+          if (item.tipo === "passoNoPlano" && item.grupo !== undefined && !grupos.has(item.grupo)) problemas.push(`${onde}: passoNoPlano cita o grupo "${item.grupo}", que não existe`);
+          if (item.tipo === "passoAntes") for (const id of [item.passo, item.antesDe]) if (!ids.has(id)) problemas.push(`${onde}: passoAntes cita o cartão "${id}", que não existe`);
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        for (const acao of acoes) {
+          if ((acao.tipo === "porPasso" || acao.tipo === "tirarPasso" || acao.tipo === "rodarPlano") && !dados) problemas.push(`${onde}: a ação ${acao.tipo} só vale numa fase ordenar-passos`);
+          if (!dados) continue;
+          if ((acao.tipo === "porPasso" || acao.tipo === "tirarPasso") && !ids.has(acao.passo)) problemas.push(`${onde}: ${acao.tipo} cita o cartão "${acao.passo}", que não existe`);
+          if (acao.tipo === "porPasso" && acao.grupo !== undefined && !grupos.has(acao.grupo)) problemas.push(`${onde}: porPasso cita o grupo "${acao.grupo}", que não existe`);
+          if (acao.tipo === "rodarPlano" && !dados.rodar) problemas.push(`${onde}: rodarPlano pede ordenar.rodar`);
+        }
+      }
+      if (!dados) return problemas;
+      const cartoes = dados.cartoes;
+      problemas.push(...repetidos(cartoes.map((c) => c.id)).map((id) => `cartão com id repetido: "${id}"`));
+      for (const c of cartoes) {
+        if (!KEBAB.test(c.id)) problemas.push(`o cartão "${c.id}" não está em kebab-case`);
+        if (!c.texto.trim() || c.texto.length > 80) problemas.push(`o cartão "${c.id}" tem texto com ${c.texto.length} caracteres (de 1 a 80)`);
+        for (const d of c.depoisDe ?? []) {
+          if (!ids.has(d)) problemas.push(`o cartão "${c.id}" depende de "${d}", que não existe`);
+          else if (d === c.id) problemas.push(`o cartão "${c.id}" depende dele mesmo`);
+          else if (cartoes.find((x) => x.id === d)?.sobra) problemas.push(`o cartão "${c.id}" depende de "${d}", que sobra (distração)`);
+        }
+        if (c.sobra && c.depoisDe?.length) problemas.push(`o cartão "${c.id}" sobra: não tem dependências`);
+        if (dados.modo === "ordenar" && c.grupo !== undefined) problemas.push(`o cartão "${c.id}" tem grupo, mas o quadro é de ordenar (use modo "agrupar")`);
+        if (dados.modo === "agrupar" && !c.sobra && (c.grupo === undefined || !grupos.has(c.grupo))) problemas.push(`o cartão "${c.id}" precisa de um grupo que exista`);
+        if (dados.modo === "agrupar" && c.grupo !== undefined) {
+          const meu = [...grupos].indexOf(c.grupo);
+          for (const d of c.depoisDe ?? []) {
+            const outro = cartoes.find((x) => x.id === d)?.grupo;
+            if (outro !== undefined && [...grupos].indexOf(outro) > meu) problemas.push(`o cartão "${c.id}" depende de "${d}", que mora num passo grande depois do dele`);
+          }
+        }
+        if (dados.rodar && c.codigo !== undefined && !c.codigo.trim()) problemas.push(`o cartão "${c.id}" tem codigo vazio`);
+      }
+      if (cartoes.length < 3) problemas.push("o quadro precisa de pelo menos 3 cartões");
+      if (cartoes.length > 12) problemas.push(`o quadro tem ${cartoes.length} cartões (no máximo 12: mais que isso não cabe no celular)`);
+      if (!cartoes.some((c) => !c.sobra)) problemas.push("nenhum cartão faz parte do plano");
+      if (umaOrdemValida(dados) === null) problemas.push("as dependências formam um ciclo: nenhuma ordem vale");
+      if (dados.modo === "agrupar" && (dados.grupos ?? []).length < 2) problemas.push("o agrupar precisa de pelo menos 2 passos grandes");
+      if (dados.modo === "agrupar") problemas.push(...repetidos((dados.grupos ?? []).map((g) => g.id)).map((id) => `grupo com id repetido: "${id}"`));
+      if (dados.modo === "ordenar" && dados.grupos?.length) problemas.push('grupos só valem no modo "agrupar"');
+      if (!dados.problema.trim() || dados.problema.length > 60) problemas.push(`o problema tem ${dados.problema.length} caracteres (de 1 a 60)`);
+      for (const id of dados.inicial ?? []) if (!ids.has(id)) problemas.push(`inicial cita o cartão "${id}", que não existe`);
+      if (dados.rodar && !fase.programa) problemas.push("ordenar.rodar pede programa na fase (o plano roda como código)");
+      if (fase.programa && !dados.rodar) problemas.push("fase de ordenar passos com programa precisa de ordenar.rodar");
+      if (fase.programa?.snippet) problemas.push("fase de ordenar passos não tem Snippet (o plano é o programa)");
+      if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase de ordenar passos usa siteAlvo: SITE_DO_PROGRAMA (sem página)");
+      if (!fase.usaFerramentas.includes("quadro-de-passos")) problemas.push('fase de ordenar passos pede "quadro-de-passos" em usaFerramentas');
+      objetivosDe(fase).forEach((objetivo, indice) => {
+        if (objetivo.modo !== "guiado") return;
+        const { linha } = objetivo.ajudas;
+        if (linha.alvo !== "ordenar" && linha.alvo !== "ferramenta") problemas.push(`${nomeObjetivo(objetivo, indice)}: fase de ordenar passos aponta o quadro (alvo ordenar)`);
+        if (linha.alvo === "ordenar" && linha.passo !== undefined && !ids.has(linha.passo)) problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta o cartão "${linha.passo}", que não existe`);
+      });
       return problemas;
     },
   },

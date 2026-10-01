@@ -22,6 +22,7 @@ import { NOME_DO_PORTAO, portoesUsados, tabelaVerdade, type Circuito } from "./c
 import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlobal } from "./programa";
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
+import { conferirOrdem, type DadosOrdenar, type EstadoOrdenar, ondeEsta } from "./ordenar/modelo";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -46,6 +47,8 @@ export type ContextoValidacao = {
   programa?: EstadoPrograma;
   /** (Circuito lógico) O circuito de agora. */
   circuito?: Circuito;
+  /** (Ordenar passos) Os dados do quadro e onde está cada cartão agora. */
+  ordenar?: { dados: DadosOrdenar; estado: EstadoOrdenar };
 };
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
@@ -219,6 +222,14 @@ export function descreverValidador(validador: Validador): string {
       return `o Observar tem ${validador.expressao}${validador.valor !== undefined ? ` e ela mostrou ${textoDoEsperado(validador.valor)} pausado` : ""}`;
     case "usouControle":
       return `usou ${DADOS_DO_CONTROLE[validador.controle].nome} pelo menos ${validador.minimo ?? 1} vez(es)`;
+    case "ordemValida":
+      return "o plano vale (todos os passos, nenhum que sobra, dependências respeitadas)";
+    case "passoNoPlano":
+      return `o passo ${validador.passo} está no plano${validador.grupo ? ` dentro de ${validador.grupo}` : ""}`;
+    case "passoAntes":
+      return `${validador.passo} vem antes de ${validador.antesDe} no plano`;
+    case "semSobras":
+      return "nenhum passo que sobra está no plano";
     case "todos":
       return "todos estes";
     case "algum":
@@ -533,6 +544,30 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     case "usouControle": {
       const vezes = contexto.eventos.filter((evento) => evento.tipo === "usouControleDepurador" && evento.controle === validador.controle).length;
       return { passou: vezes >= (validador.minimo ?? 1), descricao, detalhe: `usou ${vezes} vez(es)` };
+    }
+    case "ordemValida": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const conferencia = conferirOrdem(contexto.ordenar.dados, contexto.ordenar.estado);
+      return { passou: conferencia.valida, descricao, detalhe: conferencia.valida ? "o plano vale" : conferencia.motivo };
+    }
+    case "passoNoPlano": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const onde = ondeEsta(contexto.ordenar.estado, validador.passo);
+      const passou = onde !== null && (validador.grupo === undefined || onde.destino === validador.grupo);
+      return { passou, descricao, detalhe: onde ? `está em ${onde.destino}, posição ${onde.posicao + 1}` : "está fora do plano" };
+    }
+    case "passoAntes": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const { dados, estado } = contexto.ordenar;
+      const ordem = [...(dados.modo === "agrupar" ? (dados.grupos ?? []).map((g) => g.id) : ["plano"])].flatMap((d) => estado.listas[d] ?? []);
+      const a = ordem.indexOf(validador.passo);
+      const b = ordem.indexOf(validador.antesDe);
+      return { passou: a >= 0 && b >= 0 && a < b, descricao, detalhe: a < 0 || b < 0 ? "algum dos dois está fora do plano" : `posições ${a + 1} e ${b + 1}` };
+    }
+    case "semSobras": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const sobrando = conferirOrdem(contexto.ordenar.dados, contexto.ordenar.estado).sobrando;
+      return { passou: sobrando.length === 0, descricao, detalhe: sobrando.length ? `sobrando: ${sobrando.join(", ")}` : "nenhum" };
     }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
