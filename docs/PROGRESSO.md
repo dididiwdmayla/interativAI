@@ -5,7 +5,7 @@ cota (`CLAUDE.md`): este arquivo guarda só a rodada mais recente; as
 antigas ficam em `docs/arquivo/`. Status consolidado: `docs/ROADMAP.md`
 (fonte única).
 
-**Resumo das rodadas 1 a 18:** a fábrica de conteúdo declarativo e o
+**Resumo das rodadas 1 a 19:** a fábrica de conteúdo declarativo e o
 `testar:conteudo`; o congelamento (`publicar:conteudo`); o painel Estilos
 dentro de Elementos com o motor de cascata próprio (especificidade,
 `!important`, herança, atalhos, variáveis CSS e `@media`); o modo
@@ -19,48 +19,59 @@ opcional Ser encontrado (S1), a aba Busca, a Medição e o simulador de
 campanha; os itens de revisão de U3 a P2 (174 itens) com a
 `bateria:conteudo`; e a zona Ser encontrado (S2 a S5) com o `/lab/revisao`;
 o executor, Console, palco da memória, circuito
-lógico e a unidade-modelo da Ilha Lógica; e as correções de Console, relógio, sorteio, apresentação, circuito e jornadas da rodada 18. Detalhe em
+lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio, sorteio, apresentação, circuito e jornadas da rodada 18; e a zona Primeiros comandos (U2 Textos e U3 Tipos, rodada 19). Detalhe em
 `docs/arquivo/PROGRESSO-rodadas-1-a-11.md`,
 `docs/arquivo/PROGRESSO-rodada-12.md`,
 `docs/arquivo/PROGRESSO-rodada-13.md`,
 `docs/arquivo/PROGRESSO-rodada-14.md`,
 `docs/arquivo/PROGRESSO-rodada-15.md`,
 `docs/arquivo/PROGRESSO-rodada-16.md` e
-`docs/arquivo/PROGRESSO-rodada-17.md` e
-`docs/arquivo/PROGRESSO-rodada-18.md`.
+`docs/arquivo/PROGRESSO-rodada-17.md`,
+`docs/arquivo/PROGRESSO-rodada-18.md` e
+`docs/arquivo/PROGRESSO-rodada-19.md`.
 
-## Rodada 19: zona Primeiros comandos
+## Rodada 20: zona Decisões
 
 ### Etapa 0
 
-- Base: `claude/intelligent-pascal-5va93x` (`3c4fbb0`); branch `codex/logica-primeiros-comandos`.
-- AGENTS e CLAUDE registram a branch principal e o formato obrigatório do relatório final.
-- Alteração documental; nenhuma mudança no motor ou conteúdo publicado.
+- Base: `claude/intelligent-pascal-5va93x` (`627d6a3`, merge da zona Primeiros comandos); branch de trabalho `ccr-75a17a2f-rz2lkf`.
+- Rodada 19 arquivada; ATRITOS arquivado e reaberto com a rodada 9.
 
-### U2: Textos
+### U1: Verdadeiro ou falso
 
-- Cinco fases: aspas e erro real, junção e espaço, template, tamanho e saída, desafio na floricultura.
-- Seis conceitos novos com temas e doze itens de revisão (ação e previsão), em situações próprias.
-- Cada habilidade tem prática guiada e sozinha na mesma fase; variáveis e undefined entram em revisa.
-- Validação por resultados; sintaxe só para crases/template, que são a habilidade pedida.
-- `testar:conteudo`: checagens da U2 verdes após corrigir o comprimento da confirmação para 39.
-- Jornada pelo mapa verde em desktop, retrato e paisagem, incluindo negativas (sem espaço; concatenação no lugar de template), meta e desafio; console limpo.
-- `publicar:conteudo`, build e lint verdes. IDs congelados junto com a unidade.
+- Seis fases: perguntas de sim ou não (`>` e `<`, booleano no palco); fronteira `>`/`>=`; `===` e `!==` (inclui `'10' === 10` e maiúscula); `=` contra `===` (bug provocado de propósito e consertado); `==` que converte; desafio do frete grátis na papelaria virtual.
+- Seis conceitos novos com temas e doze itens de revisão (ação e previsão, situações próprias). `igualdade-estrita`, `variavel-let`, `typeof-js`, `tipo-js`, `coercao-js` entram em `revisa`.
+- Guiado e sozinho da mesma habilidade na mesma fase; uma previsão por fase (opção certa varia de posição); `usouSintaxe` só como reforço (`comparacao`, `igualdade-estrita`, `igualdade-solta`).
+- Negativas de jornada: `>` no lugar de `>=`, `=` no lugar de `===` e `===` no lugar de `==` não concluem o objetivo.
+- `testar:conteudo` verde (33 arquivos, 9.413 testes). Jornada pelo mapa verde em desktop, retrato e paisagem (`testes/decisoes.mjs`, passos em `testes/decisoes-jornadas.json`); console limpo. `publicar:conteudo`, build e lint verdes.
 
-### U3: Tipos
+### U2: Portões lógicos (a ponte circuito → código)
 
-- Seis fases: tipos e typeof; guardar versus comparar; coerção do +, * e -; Number e String; comentários; desafio da gorjeta num café.
-- Sete conceitos novos com temas e quatorze itens de revisão. As cinco categorias aparecem no palco; typeof null é explicado como peculiaridade histórica.
-- Introdução mínima ao === nesta unidade, para atender à confusão explicitamente pedida no prompt; valor/tipo e ausência de alteração da variável são conferidos. A zona Decisões aprofunda comparações.
-- Comentário explicativo não altera a expressão; comentar código executável pode alterar o resultado, pois desativa esse trecho. A linha do tempo mostra a soma e ignora a linha comentada.
-- `testar:conteudo`: 33 arquivos, 9.035 testes verdes (inclui U2 e os 26 novos itens de revisão).
-- Jornada pelo mapa verde em desktop, retrato e paisagem, com tipos no palco, negativa de soma textual, meta, desafio e linha do tempo; console limpo.
-- `publicar:conteudo`, build e lint verdes; IDs congelados junto com a unidade. Sem alteração de motor ou dependências.
+- Seis fases: E (porta da padaria), OU (alarme), NÃO (luz da rua), "Do circuito ao Console" (`&&`, `||`, `!` no Console, misturando comparações da U1), catraca do metrô (ordem do E e do OU, com os mesmos portões em ordens diferentes) e desafio da catraca da academia, só no Console.
+- Cada fase de circuito traz 3 chaves e 2 ou 3 saídas: o guiado monta a primeira saída, o sozinho monta a seguinte (outras chaves, mesma habilidade). `circuitoTabela` confere todas as 8 linhas; `usouPortao` com `minimo` garante o portão pedido.
+- "Ver como código" vem depois de montar (o circuito mostra o código `temCliente && lojaAberta`) e só então a decisão é escrita no Console, na fase 4.
+- Confusões atacadas: OU aceita as duas ligadas (previsão), OU com tudo desligado, ordem do E e do OU (parênteses mudam o resultado) e `!`.
+- Seis conceitos novos (portao-e, tabela-verdade, portao-ou, portao-nao, operadores-logicos, ordem-e-ou) com temas e doze itens de revisão (em Console; o item de tabela verdade é só de previsão).
+- `testar:conteudo` verde (9.791 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com toque real no circuito (zoom e arrasto com dois dedos), apresentação de circuito e tabela verdade, negativas e console limpo.
+
+### U3: Se, senão
+
+- Cinco fases, todas no Console (programas de várias linhas entram como texto colado): if e bloco; else e o ponto e vírgula depois do `if (...)`; else if e a ordem das perguntas (inclui o bug da ordem trocada e a previsão da nota 7); condições com `&&` e `||` (inclui a ordem do E e do OU com e sem parênteses); desafio do classificador de pedidos da lanchonete.
+- Cinco conceitos novos com temas e dez itens de revisão; `portao-e`, `portao-ou`, `operadores-logicos`, `ordem-e-ou` e `limite-da-comparacao` entram em `revisa`.
+- A saída (`saida igual`) prova qual caminho rodou (nunca os dois); o bug do `;` é provado pela caixinha `avisos` (estado), não pela saída, para o conserto poder ser refeito. No desafio, cada faixa usa mensagem própria (`saida` trava no checklist).
+- `usouSintaxe: else` só vale para `else` final: um `else if` sem `else` não conta (itens e fases escritos de acordo).
+- `testar:conteudo` verde (10.106 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com negativas (if sem if, ordem trocada, E/OU sem parênteses); console limpo.
+
+### U4: Verdadeiro disfarçado
+
+- Quatro fases: os seis falsos (`''`, `0`, `null`, `undefined`, `NaN`, `false`) com o if; o resto é verdadeiro (`'0'`, `'false'`, `[]`) e o conserto com `.length`; `!!valor` como pergunta direta; desafio do cadastro da academia (nome, telefone vazio, plano `'0'`, lista de modalidades vazia, idade 0).
+- Três conceitos novos com temas e seis itens de revisão; `if-js`, `else-js`, `operadores-logicos`, `typeof-js` e `comparacao-js` entram em `revisa`.
+- Previsões: estoque 0, `NaN`, texto `'0'` e `!!lista`. Negativas de jornada: console.log sem if, `if (carrinho)` no lugar de `carrinho.length > 0` e guardar `pontos` sem `!!` não concluem.
+- `testar:conteudo` verde (10.316 testes). Jornada pelo mapa verde em desktop, retrato e paisagem; console limpo.
 
 ### Fechamento
 
-- `npm run bateria:conteudo`, uma vez no build de produção: mapa, explorar, publicar e revisão verdes. Sem bateria de motor, conforme economia de cota.
-- ROADMAP marca a zona Primeiros comandos completa; Próximo: zona Decisões, depois Opus: Ilha Lógica, parte B. Currículo documental marca U2/U3 prontas.
-- Rodada curta no ATRITOS; rodadas anteriores de ATRITOS e PROGRESSO arquivadas.
-- Limitação concreta: jornadas em Chromium 133, porque o download do navegador atual chegou vazio.
-- PR para `claude/intelligent-pascal-5va93x`; nenhuma escrita na branch principal.
+- `npm run bateria:conteudo`, uma vez, no build de produção: mapa, explorar, publicar e revisão verdes. Sem bateria de motor (a rodada não mexe no motor).
+- ROADMAP: zona Decisões em Feito; Próximo passa a ter a parte B da Ilha Lógica em primeiro; pendências da zona registradas. Mapa: U1 a U4 marcadas como prontas.
+- ATRITOS: rodada 9 curta. Rodada 19 do PROGRESSO e rodada 8 do ATRITOS arquivadas na Etapa 0.
+- Contagem final: 21 fases, 20 conceitos, 40 itens de revisão (340 no registro).

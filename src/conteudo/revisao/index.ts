@@ -1,3 +1,23 @@
+import { ITENS_DUPLA_NEGACAO } from "./dupla-negacao";
+import { ITENS_TRUTHY_JS } from "./truthy-js";
+import { ITENS_FALSY_JS } from "./falsy-js";
+import { ITENS_CONDICAO_COMPOSTA } from "./condicao-composta";
+import { ITENS_ELSE_IF_JS } from "./else-if-js";
+import { ITENS_ELSE_JS } from "./else-js";
+import { ITENS_BLOCO_JS } from "./bloco-js";
+import { ITENS_IF_JS } from "./if-js";
+import { ITENS_ORDEM_E_OU } from "./ordem-e-ou";
+import { ITENS_OPERADORES_LOGICOS } from "./operadores-logicos";
+import { ITENS_PORTAO_NAO } from "./portao-nao";
+import { ITENS_PORTAO_OU } from "./portao-ou";
+import { ITENS_TABELA_VERDADE } from "./tabela-verdade";
+import { ITENS_PORTAO_E } from "./portao-e";
+import { ITENS_IGUALDADE_SOLTA } from "./igualdade-solta";
+import { ITENS_ATRIBUIR_OU_COMPARAR } from "./atribuir-ou-comparar";
+import { ITENS_DIFERENTE_ESTRITO } from "./diferente-estrito";
+import { ITENS_LIMITE_DA_COMPARACAO } from "./limite-da-comparacao";
+import { ITENS_COMPARACAO_JS } from "./comparacao-js";
+import { ITENS_BOOLEANO_JS } from "./booleano-js";
 import { ITENS_COMENTARIO_JS } from "./comentario-js";
 import { ITENS_CONVERSAO_STRING } from "./conversao-string";
 import { ITENS_CONVERSAO_NUMBER } from "./conversao-number";
@@ -320,6 +340,26 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_CONVERSAO_NUMBER,
   ...ITENS_CONVERSAO_STRING,
   ...ITENS_COMENTARIO_JS,
+  ...ITENS_BOOLEANO_JS,
+  ...ITENS_COMPARACAO_JS,
+  ...ITENS_LIMITE_DA_COMPARACAO,
+  ...ITENS_DIFERENTE_ESTRITO,
+  ...ITENS_ATRIBUIR_OU_COMPARAR,
+  ...ITENS_IGUALDADE_SOLTA,
+  ...ITENS_PORTAO_E,
+  ...ITENS_TABELA_VERDADE,
+  ...ITENS_PORTAO_OU,
+  ...ITENS_PORTAO_NAO,
+  ...ITENS_OPERADORES_LOGICOS,
+  ...ITENS_ORDEM_E_OU,
+  ...ITENS_IF_JS,
+  ...ITENS_BLOCO_JS,
+  ...ITENS_ELSE_JS,
+  ...ITENS_ELSE_IF_JS,
+  ...ITENS_CONDICAO_COMPOSTA,
+  ...ITENS_FALSY_JS,
+  ...ITENS_TRUTHY_JS,
+  ...ITENS_DUPLA_NEGACAO,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

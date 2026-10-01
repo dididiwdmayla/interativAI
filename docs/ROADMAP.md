@@ -389,11 +389,49 @@ núcleo comum.
     publicar:conteudo, build e lint verdes. Bateria de conteúdo em produção
     verde (mapa, explorar, publicar e revisão). Sem mudança no motor.
 
+- **Rodada 20: zona Decisões completa (U1 a U4)**:
+  - **U1 "Verdadeiro ou falso"** (6 fases): comparações e booleano, a
+    fronteira `>`/`>=`, `===` e `!==`, `=` contra `===` (bug provocado e
+    consertado), `==` que converte e desafio do frete grátis.
+  - **U2 "Portões lógicos"** (6 fases, a ponte): circuito E, OU e NÃO com
+    "Ver como código", depois `&&`, `||` e `!` no Console, a ordem do E e do
+    OU na catraca do metrô e desafio da catraca da academia no Console.
+    Primeira unidade com fases `circuito-logico` no mapa.
+  - **U3 "Se, senão"** (5 fases): if, bloco, else (e o `;` depois do if),
+    else if e a ordem, condições com `&&`/`||` e desafio do classificador.
+  - **U4 "Verdadeiro disfarçado"** (4 fases): falsos, verdadeiros que
+    enganam (`'0'`, `[]`), `!!valor` e desafio do cadastro da academia.
+  - 21 fases novas, 20 conceitos com temas e 40 itens de revisão (340
+    registrados). Guiado/sozinho na mesma fase, previsões, `revisa` com
+    Primeiros comandos, desafios em contexto novo e missões de campo no
+    Console real. Sem mudança no motor.
+  - Jornadas pelo mapa nos três layouts (`testes/decisoes.mjs`, passos em
+    `testes/decisoes-jornadas.json`), 10.316 testes, publicar:conteudo,
+    build, lint e `bateria:conteudo` em produção verdes.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
+
+- **Zona Decisões (rodada 20), para depois:**
+  - O desafio da U2 (catraca) mistura circuito e código no mapa, mas o tipo
+    `desafio` não aceita circuito e a fase de programa recusa `circuito`:
+    a catraca montada no circuito é a fase 5 (prática) e o desafio, só no
+    Console, é a catraca da academia. Um desafio com as duas bancadas é
+    trabalho de motor.
+  - `usouSintaxe: "else"` só reconhece um `else` final; um `else if` sem
+    `else` não conta (hoje não há sintaxe `else-if`).
+  - O Console fecha chaves sozinho ao digitar `{` (como o Chrome): quem
+    digita um `if` linha a linha no Console fica com chaves a mais. Os
+    testes colam o código; vale uma fala sobre isso na primeira fase com
+    `if` ou um ajuste do editor.
+  - Fases de circuito têm 3 chaves e até 3 saídas (8 linhas na tabela): a
+    tabela e a bancada em retrato ficam apertadas; revisar o visual com
+    jogadores.
+  - A jornada de U2 depende do id automático dos portões (`e1`, `ou1`,
+    `nao1`), que o motor atribui; se o esquema mudar, ajustar o JSON.
 
 - **Lógica, parte A (rodada 17), para depois:**
   - Numa fase de programa a aba Elementos aparece trancada (não há
@@ -453,11 +491,10 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Decisões da Ilha Lógica (guia, seção 25; portões lógicos em
-   `logica-decisoes-u2`, com o `circuito-logico`).
-2. Opus: Ilha Lógica, parte B (Fontes com depurador, ordenar passos,
+1. Opus: Ilha Lógica, parte B (Fontes com depurador, ordenar passos,
    visualizador de árvore), que libera Resolvendo problemas, Depuração u2
-   e u3 e Estruturas de dados u3.
+   e u3 e Estruturas de dados u3. A zona Repetição (while e for) não pede
+   motor novo e pode vir antes ou em paralelo.
 3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
    de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
    Ofício), intercalados com conteúdo, e a trilha Automação industrial a

@@ -1,0 +1,964 @@
+{
+ "1": {
+  "caixaDepois": "freteGratis",
+  "passos": [
+   [
+    [
+     "maior-guiado",
+     "idade > idadeMinima"
+    ],
+    [
+     "menor-previsao",
+     "idade < idadeMinima"
+    ],
+    [
+     "guardar-resposta",
+     "let podeComprar = idade > idadeMinima"
+    ],
+    [
+     "tipo-da-resposta",
+     "typeof podeComprar"
+    ]
+   ],
+   [
+    [
+     "maior-na-fronteira",
+     "idade > idadeMinima"
+    ],
+    [
+     "maior-ou-igual",
+     "idade >= idadeMinima"
+    ],
+    [
+     "menor-ou-igual-previsao",
+     "idade <= 12"
+    ],
+    [
+     "guardar-entrada",
+     "let entraNoCombo = idade >= idadeMinima"
+    ],
+    [
+     "mudar-o-limite",
+     "idadeMinima = 13\nidade >= idadeMinima"
+    ]
+   ],
+   [
+    [
+     "igual-guiado",
+     "digitado === senha"
+    ],
+    [
+     "diferente-guiado",
+     "digitado !== senha"
+    ],
+    [
+     "texto-contra-numero",
+     "'10' === 10"
+    ],
+    [
+     "diferente-sozinho",
+     "\"10\" !== 10"
+    ],
+    [
+     "maiuscula-conta",
+     "\"Sim\" === \"sim\""
+    ]
+   ],
+   [
+    [
+     "igual-guarda",
+     "idade = 18"
+    ],
+    [
+     "consertar",
+     [
+      "idade = 17",
+      "idade === 18"
+     ]
+    ],
+    [
+     "perguntar-sem-mudar",
+     "idade === idadeMinima"
+    ],
+    [
+     "guardar-de-proposito",
+     [
+      "idadeMinima = 21",
+      "idade >= idadeMinima"
+     ]
+    ]
+   ],
+   [
+    [
+     "solto-guiado",
+     "quantidade == 10"
+    ],
+    [
+     "solto-sozinho",
+     "\"7\" == 7"
+    ],
+    [
+     "solto-esquisito",
+     "'' == 0"
+    ],
+    [
+     "estrito-guiado",
+     "quantidade === 10"
+    ],
+    [
+     "estrito-sozinho",
+     "quantidade === \"10\""
+    ]
+   ]
+  ],
+  "negativas": {
+   "maior-ou-igual": "idade > idadeMinima",
+   "perguntar-sem-mudar": [
+    "idade = idadeMinima",
+    "idade = 17"
+   ],
+   "solto-guiado": "quantidade === 10"
+  },
+  "caixinhas": {
+   "guardar-resposta": {
+    "podeComprar": [
+     "data-tipo",
+     "booleano"
+    ]
+   },
+   "igual-guarda": {
+    "idade": [
+     "data-tipo",
+     "numero"
+    ]
+   }
+  },
+  "desafio": [
+   "let freteGratis = valorCompra >= 100",
+   "let cupomValido = cupom === \"FRETE10\"",
+   "let temEstoque = estoque >= pedido",
+   "let ehExato = valorCompra === 100",
+   "typeof freteGratis",
+   "let mesmoTipo = quantidadeTexto === pedido"
+  ]
+ },
+ "2": {
+  "apresentacoes": {
+   "1": [
+    [
+     "circuito",
+     [
+      [
+       "chave",
+       "troco"
+      ]
+     ]
+    ],
+    [
+     "tabela-verdade",
+     [
+      [
+       "codigo"
+      ]
+     ]
+    ]
+   ]
+  },
+  "passos": [
+   [
+    [
+     "porta-com-e",
+     {
+      "ops": [
+       [
+        "portao",
+        "e"
+       ],
+       [
+        "fio",
+        "cliente",
+        "e1",
+        0
+       ],
+       [
+        "fio",
+        "aberta",
+        "e1",
+        1
+       ],
+       [
+        "fio",
+        "e1",
+        "porta",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "testar-e",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "cliente",
+        false
+       ],
+       [
+        "ajustar",
+        "aberta",
+        false
+       ],
+       [
+        "chave",
+        "aberta"
+       ],
+       [
+        "acesa",
+        "porta",
+        false
+       ]
+      ]
+     }
+    ],
+    [
+     "ver-codigo-e",
+     {
+      "ops": [
+       [
+        "codigo"
+       ],
+       [
+        "codigoContem",
+        "const portaAbre = temCliente && lojaAberta;"
+       ]
+      ]
+     }
+    ],
+    [
+     "caixa-com-e",
+     {
+      "ops": [
+       [
+        "portao",
+        "e"
+       ],
+       [
+        "fio",
+        "aberta",
+        "e2",
+        0
+       ],
+       [
+        "fio",
+        "troco",
+        "e2",
+        1
+       ],
+       [
+        "fio",
+        "e2",
+        "caixa",
+        0
+       ],
+       [
+        "ajustar",
+        "aberta",
+        true
+       ],
+       [
+        "ajustar",
+        "troco",
+        true
+       ],
+       [
+        "acesa",
+        "caixa",
+        true
+       ]
+      ]
+     }
+    ]
+   ],
+   [
+    [
+     "alarme-com-ou",
+     {
+      "ops": [
+       [
+        "portao",
+        "ou"
+       ],
+       [
+        "fio",
+        "janela",
+        "ou1",
+        0
+       ],
+       [
+        "fio",
+        "porta",
+        "ou1",
+        1
+       ],
+       [
+        "fio",
+        "ou1",
+        "alarme",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "testar-ou-desligado",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "janela",
+        false
+       ],
+       [
+        "ajustar",
+        "porta",
+        false
+       ],
+       [
+        "ajustar",
+        "fundos",
+        false
+       ],
+       [
+        "acesa",
+        "alarme",
+        false
+       ],
+       [
+        "chave",
+        "janela"
+       ],
+       [
+        "acesa",
+        "alarme",
+        true
+       ]
+      ]
+     }
+    ],
+    [
+     "testar-ou-duas",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "janela",
+        true
+       ],
+       [
+        "ajustar",
+        "porta",
+        false
+       ],
+       [
+        "chave",
+        "porta"
+       ],
+       [
+        "acesa",
+        "alarme",
+        true
+       ]
+      ]
+     }
+    ],
+    [
+     "aviso-com-ou",
+     {
+      "ops": [
+       [
+        "portao",
+        "ou"
+       ],
+       [
+        "fio",
+        "fundos",
+        "ou2",
+        0
+       ],
+       [
+        "fio",
+        "janela",
+        "ou2",
+        1
+       ],
+       [
+        "fio",
+        "ou2",
+        "aviso",
+        0
+       ]
+      ]
+     }
+    ]
+   ],
+   [
+    [
+     "luz-com-nao",
+     {
+      "ops": [
+       [
+        "portao",
+        "nao"
+       ],
+       [
+        "fio",
+        "sol",
+        "nao1",
+        0
+       ],
+       [
+        "fio",
+        "nao1",
+        "rua",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "testar-nao",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "sol",
+        false
+       ],
+       [
+        "acesa",
+        "rua",
+        true
+       ],
+       [
+        "chave",
+        "sol"
+       ],
+       [
+        "acesa",
+        "rua",
+        false
+       ]
+      ]
+     }
+    ],
+    [
+     "ver-codigo-nao",
+     {
+      "ops": [
+       [
+        "codigo"
+       ],
+       [
+        "codigoContem",
+        "!temSol"
+       ]
+      ]
+     }
+    ],
+    [
+     "aviso-com-nao",
+     {
+      "ops": [
+       [
+        "portao",
+        "nao"
+       ],
+       [
+        "fio",
+        "fechada",
+        "nao2",
+        0
+       ],
+       [
+        "fio",
+        "nao2",
+        "avisoPorta",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "salao-com-e-nao",
+     {
+      "ops": [
+       [
+        "portao",
+        "nao"
+       ],
+       [
+        "fio",
+        "sol",
+        "nao3",
+        0
+       ],
+       [
+        "portao",
+        "e"
+       ],
+       [
+        "fio",
+        "gente",
+        "e1",
+        0
+       ],
+       [
+        "fio",
+        "nao3",
+        "e1",
+        1
+       ],
+       [
+        "fio",
+        "e1",
+        "salao",
+        0
+       ],
+       [
+        "ajustar",
+        "gente",
+        true
+       ],
+       [
+        "ajustar",
+        "sol",
+        false
+       ],
+       [
+        "acesa",
+        "salao",
+        true
+       ]
+      ]
+     }
+    ]
+   ],
+   [
+    [
+     "e-no-console",
+     "temCliente && lojaAberta"
+    ],
+    [
+     "ou-previsao",
+     "temCliente || lojaAberta"
+    ],
+    [
+     "nao-no-console",
+     "!lojaAberta"
+    ],
+    [
+     "e-sozinho",
+     "let podeComprar = temCliente && idade >= 18"
+    ],
+    [
+     "ou-sozinho",
+     "let alarmeToca = janelaAberta || portaAberta"
+    ],
+    [
+     "nao-sozinho",
+     "let lojaFechada = !lojaAberta"
+    ]
+   ],
+   [
+    [
+     "catraca-simples",
+     {
+      "ops": [
+       [
+        "portao",
+        "nao"
+       ],
+       [
+        "fio",
+        "bloqueado",
+        "nao1",
+        0
+       ],
+       [
+        "portao",
+        "e"
+       ],
+       [
+        "fio",
+        "bilhete",
+        "e1",
+        0
+       ],
+       [
+        "fio",
+        "nao1",
+        "e1",
+        1
+       ],
+       [
+        "fio",
+        "e1",
+        "catraca",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "codigo-catraca",
+     {
+      "ops": [
+       [
+        "codigo"
+       ],
+       [
+        "codigoContem",
+        "temBilhete && !bilheteBloqueado"
+       ]
+      ]
+     }
+    ],
+    [
+     "idoso-sem-bilhete",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "bilhete",
+        false
+       ],
+       [
+        "ajustar",
+        "idoso",
+        false
+       ],
+       [
+        "ajustar",
+        "bloqueado",
+        false
+       ],
+       [
+        "chave",
+        "idoso"
+       ],
+       [
+        "acesa",
+        "catraca",
+        false
+       ]
+      ]
+     }
+    ],
+    [
+     "ou-antes-do-e",
+     {
+      "ops": [
+       [
+        "portao",
+        "ou"
+       ],
+       [
+        "fio",
+        "bilhete",
+        "ou1",
+        0
+       ],
+       [
+        "fio",
+        "idoso",
+        "ou1",
+        1
+       ],
+       [
+        "fio",
+        "ou1",
+        "e1",
+        0
+       ],
+       [
+        "acesa",
+        "catraca",
+        true
+       ]
+      ]
+     }
+    ],
+    [
+     "e-antes-do-ou",
+     {
+      "ops": [
+       [
+        "portao",
+        "e"
+       ],
+       [
+        "fio",
+        "bilhete",
+        "e2",
+        0
+       ],
+       [
+        "fio",
+        "nao1",
+        "e2",
+        1
+       ],
+       [
+        "portao",
+        "ou"
+       ],
+       [
+        "fio",
+        "idoso",
+        "ou2",
+        0
+       ],
+       [
+        "fio",
+        "e2",
+        "ou2",
+        1
+       ],
+       [
+        "fio",
+        "ou2",
+        "fila",
+        0
+       ]
+      ]
+     }
+    ],
+    [
+     "ordem-previsao",
+     {
+      "ops": [
+       [
+        "ajustar",
+        "idoso",
+        true
+       ],
+       [
+        "ajustar",
+        "bloqueado",
+        false
+       ],
+       [
+        "chave",
+        "bloqueado"
+       ],
+       [
+        "acesa",
+        "fila",
+        true
+       ],
+       [
+        "acesa",
+        "catraca",
+        false
+       ]
+      ]
+     }
+    ]
+   ]
+  ],
+  "desafio": [
+   "let podeEntrar = planoAtivo && exameEmDia",
+   "let entradaLiberada = ehVisitante || planoAtivo",
+   "let semExame = !exameEmDia",
+   "let catraca = (planoAtivo || ehVisitante) && horarioPermitido",
+   "let liberou = planoAtivo || ehVisitante && !horarioPermitido"
+  ]
+ },
+ "3": {
+  "passos": [
+   [
+    [
+     "if-guiado",
+     "if (lojaAberta) {\n  console.log(\"Aberto!\")\n}"
+    ],
+    [
+     "if-previsao",
+     "lojaAberta = false\nif (lojaAberta) {\n  console.log(\"Aberto!\")\n}"
+    ],
+    [
+     "bloco-guiado",
+     "if (estoque === 0) {\n  console.log(\"Sem estoque\")\n  console.log(\"Volte amanhã\")\n}"
+    ],
+    [
+     "if-sozinho",
+     "if (!lojaAberta) {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "bloco-sozinho",
+     "if (estoque === 0) {\n  console.log(\"Esgotado\")\n  console.log(\"Reposição na sexta\")\n}"
+    ]
+   ],
+   [
+    [
+     "else-guiado",
+     "if (lojaAberta) {\n  console.log(\"Aberto!\")\n} else {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "else-previsao",
+     "lojaAberta = false\nif (lojaAberta) {\n  console.log(\"Aberto!\")\n} else {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "else-sozinho",
+     "if (estoque > 0) {\n  console.log(\"Tem estoque\")\n} else {\n  console.log(\"Sem estoque\")\n}"
+    ],
+    [
+     "ponto-e-virgula",
+     "if (estoque < 5); { avisos = avisos + 1 }"
+    ],
+    [
+     "consertar-ponto-e-virgula",
+     "avisos = 0\nif (estoque < 5) {\n  avisos = avisos + 1\n}"
+    ]
+   ],
+   [
+    [
+     "faixas-guiado",
+     "if (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "nota-sete",
+     "nota = 7\nif (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "ordem-trocada",
+     "nota = 9\nif (nota >= 5) {\n  console.log(\"Regular\")\n} else if (nota >= 9) {\n  console.log(\"Excelente\")\n}"
+    ],
+    [
+     "ordem-sozinho",
+     "if (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else if (nota >= 5) {\n  console.log(\"Regular\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "frete-sozinho",
+     "if (valorCompra >= 200) {\n  console.log(\"Frete grátis\")\n} else if (valorCompra >= 100) {\n  console.log(\"Frete 10\")\n} else {\n  console.log(\"Frete 20\")\n}"
+    ]
+   ],
+   [
+    [
+     "e-guiado",
+     "if (temCarteirinha && livroDisponivel) {\n  console.log(\"Emprestado\")\n} else {\n  console.log(\"Indisponível\")\n}"
+    ],
+    [
+     "e-previsao",
+     "livroDisponivel = true\nif (temCarteirinha && livroDisponivel) {\n  console.log(\"Emprestado\")\n} else {\n  console.log(\"Indisponível\")\n}"
+    ],
+    [
+     "ou-guiado",
+     "idade = 70\nif (idade < 12 || idade >= 60) {\n  console.log(\"Desconto\")\n} else {\n  console.log(\"Preço normal\")\n}"
+    ],
+    [
+     "ou-sozinho",
+     "diasAtraso = 3\nif (diasAtraso > 0 || livroDanificado) {\n  console.log(\"Cobrar taxa\")\n}"
+    ],
+    [
+     "ordem-previsao",
+     "let socio = true\nlet convidado = false\nlet pagou = false\nif (socio || convidado && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+    ],
+    [
+     "parenteses-sozinho",
+     "if ((socio || convidado) && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+    ]
+   ]
+  ],
+  "negativas": {
+   "if-guiado": "console.log(\"Aberto!\")",
+   "ordem-sozinho": "if (nota >= 5) {\n  console.log(\"Regular\")\n} else if (nota >= 9) {\n  console.log(\"Excelente\")\n}",
+   "parenteses-sozinho": "if (socio || convidado && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+  },
+  "desafio": [
+   "let itens = 2\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 4\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 8\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 0\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}"
+  ]
+ },
+ "4": {
+  "passos": [
+   [
+    [
+     "vazio-guiado",
+     "if (nome) {\n  console.log(\"Olá\")\n} else {\n  console.log(\"Preencha o nome\")\n}"
+    ],
+    [
+     "zero-previsao",
+     "if (estoque) {\n  console.log(\"Tem\")\n} else {\n  console.log(\"Acabou\")\n}"
+    ],
+    [
+     "null-sozinho",
+     "if (cupom) {\n  console.log(\"Tem cupom\")\n} else {\n  console.log(\"Sem cupom\")\n}"
+    ],
+    [
+     "undefined-sozinho",
+     "if (endereco) {\n  console.log(\"Com endereço\")\n} else {\n  console.log(\"Sem endereço\")\n}"
+    ],
+    [
+     "nan-previsao",
+     "if (conta) {\n  console.log(\"Valor\")\n} else {\n  console.log(\"Sem valor\")\n}"
+    ]
+   ],
+   [
+    [
+     "zero-texto",
+     "if (quantidade) {\n  console.log(\"Entrou\")\n} else {\n  console.log(\"Não entrou\")\n}"
+    ],
+    [
+     "lista-vazia",
+     "if (carrinho) {\n  console.log(\"Tem carrinho\")\n} else {\n  console.log(\"Sem carrinho\")\n}"
+    ],
+    [
+     "texto-false",
+     "if (aviso) {\n  console.log(\"Verdadeiro\")\n} else {\n  console.log(\"Falso\")\n}"
+    ],
+    [
+     "lista-length",
+     "if (carrinho.length > 0) {\n  console.log(\"Tem itens\")\n} else {\n  console.log(\"Carrinho vazio\")\n}"
+    ]
+   ],
+   [
+    [
+     "dupla-falso",
+     "!!nome"
+    ],
+    [
+     "dupla-verdadeiro",
+     "!!codigo"
+    ],
+    [
+     "dupla-lista",
+     "!!lista"
+    ],
+    [
+     "guardar-booleano",
+     "let temPontos = !!pontos"
+    ],
+    [
+     "tipo-do-dupla",
+     "typeof !!pontos"
+    ]
+   ]
+  ],
+  "negativas": {
+   "vazio-guiado": "console.log(\"Preencha o nome\")",
+   "lista-length": "if (carrinho) {\n  console.log(\"Tem itens\")\n} else {\n  console.log(\"Carrinho vazio\")\n}",
+   "guardar-booleano": "let temPontos = pontos"
+  },
+  "desafio": [
+   "let nomeOk = !!nome",
+   "let telefoneOk = !!telefone",
+   "let planoOk = !!plano",
+   "let escolheuModalidade = modalidades.length > 0",
+   "if (!telefone) {\n  console.log(\"Telefone obrigatório\")\n}",
+   "if (!idade) {\n  console.log(\"Idade inválida\")\n}"
+  ]
+ }
+}

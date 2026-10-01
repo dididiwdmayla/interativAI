@@ -431,7 +431,7 @@ Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
 Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 `'10' === 10` e `'10' == 10` e explicar a diferença para alguém.
 
-#### U1. Verdadeiro ou falso — `logica-decisoes-u1`
+#### U1. Verdadeiro ou falso (pronta) — `logica-decisoes-u1`
 
 - **Meta:** fazer perguntas ao programa com comparações e receber `true`
   ou `false`.
@@ -444,7 +444,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Revisa:** tipos (Primeiros comandos U3).
 - **Confusões:** "`=` compara"; "`==` e `===` são iguais".
 
-#### U2. Portões lógicos — `logica-decisoes-u2`
+#### U2. Portões lógicos (pronta) — `logica-decisoes-u2`
 
 - **Motor:** `circuito-logico` (rodada 17), mais a Lógica.
 - **Meta:** montar portões E, OU e NÃO para uma saída acontecer e ver o
@@ -462,7 +462,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Confusões:** "OU é um ou outro, nunca os dois" (no código, os dois
   também valem); "a ordem das entradas muda o resultado".
 
-#### U3. Se, senão — `logica-decisoes-u3`
+#### U3. Se, senão (pronta) — `logica-decisoes-u3`
 
 - **Meta:** fazer o programa escolher um caminho com `if`, `else if` e
   `else`.
@@ -477,7 +477,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Confusões:** "o `else if` testa tudo" (para no primeiro verdadeiro);
   "ponto e vírgula depois do `if (...)`".
 
-#### U4. Verdadeiro disfarçado — `logica-decisoes-u4`
+#### U4. Verdadeiro disfarçado (pronta) — `logica-decisoes-u4`
 
 - **Meta:** prever quando um valor que não é booleano conta como verdadeiro
   ou falso num `if`.

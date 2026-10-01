@@ -840,6 +840,106 @@ const CATALOGO = {
     "ferramentas"
   ]
 },
+  "booleano-js": {
+  "nome": "Verdadeiro ou falso",
+  "resumo": "Um valor com só duas opções, true (verdadeiro) ou false (falso): é o que uma pergunta do código devolve.",
+  "temas": ["logica","dados"]
+},
+  "comparacao-js": {
+  "nome": "Comparar com > e <",
+  "resumo": "Os sinais > e < perguntam se um valor é maior ou menor que outro, e o Console responde true ou false.",
+  "temas": ["logica"]
+},
+  "limite-da-comparacao": {
+  "nome": "Maior ou igual (>= e <=)",
+  "resumo": "Com >= e <=, o valor que está exatamente no limite também conta; com > e <, ele fica de fora.",
+  "temas": ["logica"]
+},
+  "diferente-estrito": {
+  "nome": "Diferente com !==",
+  "resumo": "O !== pergunta se dois valores são diferentes em valor ou em tipo: é o contrário do ===.",
+  "temas": ["logica"]
+},
+  "atribuir-ou-comparar": {
+  "nome": "Guardar não é comparar",
+  "resumo": "Um = guarda um valor numa caixinha e a muda; três === perguntam se dois valores são iguais, sem mudar nada.",
+  "temas": ["logica"]
+},
+  "igualdade-solta": {
+  "nome": "Igualdade solta ==",
+  "resumo": "O == compara convertendo os tipos antes ('10' == 10 dá true): por isso quase sempre se usa o ===.",
+  "temas": ["logica"]
+},
+  "portao-e": {
+  "nome": "Portão E",
+  "resumo": "Só acende quando as duas entradas estão ligadas; no código se escreve && (true && true é true).",
+  "temas": ["logica","fundamentos"]
+},
+  "tabela-verdade": {
+  "nome": "Tabela verdade",
+  "resumo": "Uma tabela que lista todos os jeitos de ligar as chaves e mostra, em cada um, se a saída acende.",
+  "temas": ["logica","fundamentos"]
+},
+  "portao-ou": {
+  "nome": "Portão OU",
+  "resumo": "Acende quando pelo menos uma entrada está ligada (as duas também valem); no código se escreve ||.",
+  "temas": ["logica","fundamentos"]
+},
+  "portao-nao": {
+  "nome": "Portão NÃO",
+  "resumo": "Inverte o valor: o que era ligado vira desligado e o contrário; no código é o ponto de exclamação (!).",
+  "temas": ["logica","fundamentos"]
+},
+  "operadores-logicos": {
+  "nome": "&&, || e !",
+  "resumo": "Os operadores do código que fazem o papel dos portões: && é o E, || é o OU e ! é o NÃO.",
+  "temas": ["logica"]
+},
+  "ordem-e-ou": {
+  "nome": "Ordem do E e do OU",
+  "resumo": "O E é calculado antes do OU, e os parênteses mudam quem vai primeiro: a mesma conta pode dar resultados diferentes.",
+  "temas": ["logica"]
+},
+  "if-js": {
+  "nome": "Se (if)",
+  "resumo": "O if roda um trecho de código só quando a condição entre parênteses é true; se for false, o trecho é pulado.",
+  "temas": ["logica"]
+},
+  "bloco-js": {
+  "nome": "Bloco entre chaves",
+  "resumo": "As chaves { } agrupam várias linhas num único bloco, que roda inteiro ou não roda.",
+  "temas": ["logica"]
+},
+  "else-js": {
+  "nome": "Senão (else)",
+  "resumo": "O else é o plano B do if: roda quando a condição é false, e nunca junto com o bloco do if.",
+  "temas": ["logica"]
+},
+  "else-if-js": {
+  "nome": "Else if e a ordem",
+  "resumo": "O else if encadeia mais uma pergunta; o programa para na primeira true, então a ordem das perguntas muda o resultado.",
+  "temas": ["logica"]
+},
+  "condicao-composta": {
+  "nome": "Condição com && e ||",
+  "resumo": "Dentro do if dá para juntar condições: && exige todas, || aceita qualquer uma, e parênteses decidem quem vai primeiro.",
+  "temas": ["logica"]
+},
+  "falsy-js": {
+  "nome": "Valores falsos",
+  "resumo": "No if, estes valores contam como falsos: false, 0, texto vazio, null, undefined e NaN.",
+  "temas": ["logica","dados"]
+},
+  "truthy-js": {
+  "nome": "Valores verdadeiros",
+  "resumo": "Todo valor que não é falso conta como verdadeiro no if, até o texto '0', o texto 'false' e a lista vazia.",
+  "temas": ["logica","dados"]
+},
+  "dupla-negacao": {
+  "nome": "!!valor",
+  "resumo": "Dois ! seguidos transformam qualquer valor em true ou false, do jeito que o if o enxerga.",
+  "temas": ["logica","dados"]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

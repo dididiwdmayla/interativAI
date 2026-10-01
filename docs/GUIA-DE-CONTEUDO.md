@@ -1371,6 +1371,13 @@ olham a memória de agora.
   Console responde se...?" combina com ele.
 - `usouSintaxe` sozinho não prova nada; combine com um validador de
   resultado (`todos`). Exemplo: `valorVariavel` + `usouSintaxe: "let"`.
+- `usouSintaxe: "else"` só vale para um `else` final: um `else if` sem
+  `else` não conta (use `if` nesse caso). Para provar qual caminho de um
+  if/else rodou, prefira `saida` com `igual` (nunca os dois); para provar
+  um bug que pode ser refeito (como o `;` depois do `if`), prefira o
+  estado (`valorVariavel`).
+- Programas de várias linhas no Console: o editor fecha `}` ao digitar `{`;
+  nos testes de navegador o código entra como texto colado.
 - Para o erro: `erroDoTipo` no objetivo que faz o erro acontecer, e a fala
   ao concluir explica a mensagem (a primeira palavra diz o tipo, o resto
   diz o motivo).

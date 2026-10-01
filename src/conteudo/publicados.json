@@ -157,6 +157,35 @@
       "logica-primeiros-comandos-u3-f4",
       "logica-primeiros-comandos-u3-f5",
       "logica-primeiros-comandos-u3-f6"
+    ],
+    "logica-decisoes-u1": [
+      "logica-decisoes-u1-f1",
+      "logica-decisoes-u1-f2",
+      "logica-decisoes-u1-f3",
+      "logica-decisoes-u1-f4",
+      "logica-decisoes-u1-f5",
+      "logica-decisoes-u1-f6"
+    ],
+    "logica-decisoes-u2": [
+      "logica-decisoes-u2-f1",
+      "logica-decisoes-u2-f2",
+      "logica-decisoes-u2-f3",
+      "logica-decisoes-u2-f4",
+      "logica-decisoes-u2-f5",
+      "logica-decisoes-u2-f6"
+    ],
+    "logica-decisoes-u3": [
+      "logica-decisoes-u3-f1",
+      "logica-decisoes-u3-f2",
+      "logica-decisoes-u3-f3",
+      "logica-decisoes-u3-f4",
+      "logica-decisoes-u3-f5"
+    ],
+    "logica-decisoes-u4": [
+      "logica-decisoes-u4-f1",
+      "logica-decisoes-u4-f2",
+      "logica-decisoes-u4-f3",
+      "logica-decisoes-u4-f4"
     ]
   },
   "fases": {
@@ -923,6 +952,194 @@
         "tipo",
         "recibo"
       ]
+    },
+    "logica-decisoes-u1-f1": {
+      "objetivos": [
+        "maior-guiado",
+        "menor-previsao",
+        "guardar-resposta",
+        "tipo-da-resposta"
+      ]
+    },
+    "logica-decisoes-u1-f2": {
+      "objetivos": [
+        "maior-na-fronteira",
+        "maior-ou-igual",
+        "menor-ou-igual-previsao",
+        "guardar-entrada",
+        "mudar-o-limite"
+      ]
+    },
+    "logica-decisoes-u1-f3": {
+      "objetivos": [
+        "igual-guiado",
+        "diferente-guiado",
+        "texto-contra-numero",
+        "diferente-sozinho",
+        "maiuscula-conta"
+      ]
+    },
+    "logica-decisoes-u1-f4": {
+      "objetivos": [
+        "igual-guarda",
+        "consertar",
+        "perguntar-sem-mudar",
+        "guardar-de-proposito"
+      ]
+    },
+    "logica-decisoes-u1-f5": {
+      "objetivos": [
+        "solto-guiado",
+        "solto-sozinho",
+        "solto-esquisito",
+        "estrito-guiado",
+        "estrito-sozinho"
+      ]
+    },
+    "logica-decisoes-u1-f6": {
+      "partes": [
+        "frete",
+        "cupom",
+        "estoque",
+        "exato",
+        "tipo",
+        "texto"
+      ]
+    },
+    "logica-decisoes-u2-f1": {
+      "objetivos": [
+        "porta-com-e",
+        "testar-e",
+        "ver-codigo-e",
+        "caixa-com-e"
+      ]
+    },
+    "logica-decisoes-u2-f2": {
+      "objetivos": [
+        "alarme-com-ou",
+        "testar-ou-desligado",
+        "testar-ou-duas",
+        "aviso-com-ou"
+      ]
+    },
+    "logica-decisoes-u2-f3": {
+      "objetivos": [
+        "luz-com-nao",
+        "testar-nao",
+        "ver-codigo-nao",
+        "aviso-com-nao",
+        "salao-com-e-nao"
+      ]
+    },
+    "logica-decisoes-u2-f4": {
+      "objetivos": [
+        "e-no-console",
+        "ou-previsao",
+        "nao-no-console",
+        "e-sozinho",
+        "ou-sozinho",
+        "nao-sozinho"
+      ]
+    },
+    "logica-decisoes-u2-f5": {
+      "objetivos": [
+        "catraca-simples",
+        "codigo-catraca",
+        "idoso-sem-bilhete",
+        "ou-antes-do-e",
+        "e-antes-do-ou",
+        "ordem-previsao"
+      ]
+    },
+    "logica-decisoes-u2-f6": {
+      "partes": [
+        "pode-entrar",
+        "liberada",
+        "sem-exame",
+        "catraca",
+        "sem-parenteses"
+      ]
+    },
+    "logica-decisoes-u3-f1": {
+      "objetivos": [
+        "if-guiado",
+        "if-previsao",
+        "bloco-guiado",
+        "if-sozinho",
+        "bloco-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f2": {
+      "objetivos": [
+        "else-guiado",
+        "else-previsao",
+        "else-sozinho",
+        "ponto-e-virgula",
+        "consertar-ponto-e-virgula"
+      ]
+    },
+    "logica-decisoes-u3-f3": {
+      "objetivos": [
+        "faixas-guiado",
+        "nota-sete",
+        "ordem-trocada",
+        "ordem-sozinho",
+        "frete-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f4": {
+      "objetivos": [
+        "e-guiado",
+        "e-previsao",
+        "ou-guiado",
+        "ou-sozinho",
+        "ordem-previsao",
+        "parenteses-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f5": {
+      "partes": [
+        "pequeno",
+        "medio",
+        "grande",
+        "invalido"
+      ]
+    },
+    "logica-decisoes-u4-f1": {
+      "objetivos": [
+        "vazio-guiado",
+        "zero-previsao",
+        "null-sozinho",
+        "undefined-sozinho",
+        "nan-previsao"
+      ]
+    },
+    "logica-decisoes-u4-f2": {
+      "objetivos": [
+        "zero-texto",
+        "lista-vazia",
+        "texto-false",
+        "lista-length"
+      ]
+    },
+    "logica-decisoes-u4-f3": {
+      "objetivos": [
+        "dupla-falso",
+        "dupla-verdadeiro",
+        "dupla-lista",
+        "guardar-booleano",
+        "tipo-do-dupla"
+      ]
+    },
+    "logica-decisoes-u4-f4": {
+      "partes": [
+        "nome-ok",
+        "telefone-ok",
+        "plano-ok",
+        "modalidade",
+        "telefone-obrigatorio",
+        "idade-invalida"
+      ]
     }
   },
   "itensRevisao": [
@@ -1225,6 +1442,46 @@
     "conversao-string-1",
     "conversao-string-2",
     "comentario-js-1",
-    "comentario-js-2"
+    "comentario-js-2",
+    "booleano-js-1",
+    "booleano-js-2",
+    "comparacao-js-1",
+    "comparacao-js-2",
+    "limite-da-comparacao-1",
+    "limite-da-comparacao-2",
+    "diferente-estrito-1",
+    "diferente-estrito-2",
+    "atribuir-ou-comparar-1",
+    "atribuir-ou-comparar-2",
+    "igualdade-solta-1",
+    "igualdade-solta-2",
+    "portao-e-1",
+    "portao-e-2",
+    "tabela-verdade-1",
+    "tabela-verdade-2",
+    "portao-ou-1",
+    "portao-ou-2",
+    "portao-nao-1",
+    "portao-nao-2",
+    "operadores-logicos-1",
+    "operadores-logicos-2",
+    "ordem-e-ou-1",
+    "ordem-e-ou-2",
+    "if-js-1",
+    "if-js-2",
+    "bloco-js-1",
+    "bloco-js-2",
+    "else-js-1",
+    "else-js-2",
+    "else-if-js-1",
+    "else-if-js-2",
+    "condicao-composta-1",
+    "condicao-composta-2",
+    "falsy-js-1",
+    "falsy-js-2",
+    "truthy-js-1",
+    "truthy-js-2",
+    "dupla-negacao-1",
+    "dupla-negacao-2"
   ]
 }
