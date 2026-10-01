@@ -512,8 +512,8 @@ mostra a tabuada do 7.
 
 - **Meta:** repetir um número certo de vezes com `for` e passar por cada
   item com `for...of`.
-- **Conceitos:** as três partes do `for`; `for...of` numa lista e num
-  texto; `break` (só apresentação).
+- **Conceitos:** as três partes do `for`; `for...of` nas letras de um
+  texto (listas ficam para Listas e objetos); `break` (só apresentação).
 - **Micro-passos:** a tabuada; as letras de um nome; previsão "o `for (let
   i = 0; i < 3; i++)` roda quantas vezes?".
 - **Desafio:** as etiquetas numeradas de uma gráfica.

@@ -409,24 +409,40 @@ núcleo comum.
     `testes/decisoes-jornadas.json`), 10.316 testes, publicar:conteudo,
     build, lint e `bateria:conteudo` em produção verdes.
 
+- **Rodada 21: zona Repetição completa (U1 a U3)**:
+  - **U1 "Enquanto for verdade"**: forno, condição de parada, contador,
+    fronteira `<` / `<=`, loop infinito com proteção e conserto; desafio
+    da fila de senhas da farmácia.
+  - **U2 "for e for...of"**: três partes do for, tabuada, letras de textos,
+    primeira apresentação de break com if; desafio das etiquetas da gráfica.
+  - **U3 "Contar e somar"**: acumulador, contador condicional, maior/menor
+    e média; desafio do caixa da sorveteria. Confusões sobre zerar dentro
+    do laço e usar o contador final como quantidade atacadas diretamente.
+  - 13 fases, 11 conceitos com temas e 22 itens de revisão (362 no registro).
+    Snippet para programas, Console para testes rápidos; palco e linha do
+    tempo em todas as fases, guiado/sozinho, previsões, revisa e missões
+    de campo no Console real. Sem alteração no motor.
+  - 11.051 testes; jornadas pelo mapa nos três layouts, com negativas,
+    leitura das caixinhas ao rebobinar e console limpo; publicar:conteudo,
+    build, lint e bateria:conteudo em produção verdes. Um commit por unidade.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
 
+- **Ilha Lógica, parte B — incluir no trabalho de motor:**
+  - Fechamento automático de chaves no Console: conferir a digitação linha
+    a linha e avançar por cima do `}` já inserido. A U1 de Repetição explica
+    esse comportamento numa fala curta; o editor não foi alterado.
+  - `usouSintaxe` reconhecendo `else if`: hoje `else` só conta quando há
+    um else final; não existe a opção de sintaxe `else-if`.
+  - Tipo `desafio` aceitando circuito, inclusive a ponte circuito/Console.
+    Hoje o desafio recusa circuito e a fase de programa também. A catraca
+    montada da U2 de Decisões continua numa prática, com o desafio no Console.
+
 - **Zona Decisões (rodada 20), para depois:**
-  - O desafio da U2 (catraca) mistura circuito e código no mapa, mas o tipo
-    `desafio` não aceita circuito e a fase de programa recusa `circuito`:
-    a catraca montada no circuito é a fase 5 (prática) e o desafio, só no
-    Console, é a catraca da academia. Um desafio com as duas bancadas é
-    trabalho de motor.
-  - `usouSintaxe: "else"` só reconhece um `else` final; um `else if` sem
-    `else` não conta (hoje não há sintaxe `else-if`).
-  - O Console fecha chaves sozinho ao digitar `{` (como o Chrome): quem
-    digita um `if` linha a linha no Console fica com chaves a mais. Os
-    testes colam o código; vale uma fala sobre isso na primeira fase com
-    `if` ou um ajuste do editor.
   - Fases de circuito têm 3 chaves e até 3 saídas (8 linhas na tabela): a
     tabela e a bancada em retrato ficam apertadas; revisar o visual com
     jogadores.
@@ -493,9 +509,9 @@ núcleo comum.
 
 1. Opus: Ilha Lógica, parte B (Fontes com depurador, ordenar passos,
    visualizador de árvore), que libera Resolvendo problemas, Depuração u2
-   e u3 e Estruturas de dados u3. A zona Repetição (while e for) não pede
-   motor novo e pode vir antes ou em paralelo.
-3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
+   e u3 e Estruturas de dados u3. Incluir as três pendências da parte B:
+   chaves do Console, usouSintaxe para else if e desafio com circuito.
+2. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
    de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
    Ofício), intercalados com conteúdo, e a trilha Automação industrial a
    partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha

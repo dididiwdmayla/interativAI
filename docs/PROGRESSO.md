@@ -26,3 +26,12 @@ Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRE
 - Bugs explícitos: declarar soma dentro reinicia a caixinha; menor começando em 0 inventa um mínimo; pedido passa da última volta e não serve como quantidade na média.
 - Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho por habilidade; palco e linha do tempo nas cinco fases.
 - Verificado: 11.051 testes, jornada pelo mapa nos três layouts com console limpo, rastro de soma/contagem/mínimo/quantidade e negativas dos quatro bugs; publicar:conteudo, build e lint verdes.
+
+### Fechamento
+
+- `npm run bateria:conteudo` no build de produção: mapa, explorar, publicar e revisão verdes. Uma execução; sem bateria de motor.
+- ROADMAP: U1 a U3 em Feito; Próximo é Opus, Ilha Lógica parte B, com as pendências de fechamento automático de chaves no Console, usouSintaxe para else if e desafio aceitando circuito.
+- ATRITOS: rodada 10 curta. Currículo em documentação marcado como pronto; for...of descrito só em textos nesta zona.
+- Total: 13 fases, 11 conceitos com temas e 22 itens de revisão (362 no registro). Sem tocar conteúdo anterior nem motor.
+- Decisões a conferir: contador declarado no topo para permanecer visível no fim (for completo também aparece); vendas geradas pelo pedido, sem arrays; extremos iniciados na primeira venda real.
+- Riscos concretos: Console/else if/circuito continuam com as limitações já registradas da parte B. A cobertura móvel das jornadas é emulação Chromium 133, não ensaio em aparelhos físicos.
