@@ -92,8 +92,12 @@ describe("currículo em dados", () => {
     }
   });
 
-  it("portões lógicos: o circuito-logico está pronto (Decisões u2 logo depois da u1); a parte B da Lógica segue planejada", () => {
-    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual(["ordenar-passos", "depurador-fontes", "visualizador-arvore", "projeto-ponte-js"]);
+  it("portões lógicos e a parte B da Lógica prontos: só o projeto-ponte-js segue planejado", () => {
+    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual(["projeto-ponte-js"]);
+    for (const id of ["logica-resolvendo-problemas-u1", "logica-resolvendo-problemas-u3", "logica-depuracao-u2", "logica-depuracao-u3", "logica-estruturas-de-dados-u3"]) {
+      expect(localNoCurriculo(id)?.unidade.requerMotor, id).toBeUndefined();
+    }
+    expect(localNoCurriculo("logica-programa-de-verdade-u1")?.unidade.requerMotor).toContain("projeto-ponte-js");
     expect(localNoCurriculo("logica-decisoes-u2")?.indice).toBe(1);
     expect(localNoCurriculo("logica-decisoes-u2")?.unidade.requerMotor).toBeUndefined();
     expect(localNoCurriculo("origens-museu-u6")?.unidade.requerMotor).not.toContain("circuito-logico");
@@ -158,8 +162,8 @@ describe("checagens do currículo (sabotagens)", () => {
       ilhasFuturas: ["atlantida"],
     };
     const problemas = conferirMotoresPlanejados([quebrado, quebrado], CURRICULO, ILHAS_FUTURAS, TRILHAS).join("\n");
-    expect(problemas).toContain('motor planejado com id repetido: "ordenar-passos"');
-    expect(problemas).toContain(`a unidade "${U1.id}" usa o motor planejado "ordenar-passos", mas o requerMotor dela (ou da zona) não cita`);
+    expect(problemas).toContain(`motor planejado com id repetido: "${quebrado.id}"`);
+    expect(problemas).toContain(`a unidade "${U1.id}" usa o motor planejado "${quebrado.id}", mas o requerMotor dela (ou da zona) não cita`);
     expect(problemas).toContain('cita a unidade "sites-inventada-u9", que não está no currículo');
     expect(problemas).toContain('cita a trilha "culinaria", que não existe');
     expect(problemas).toContain('cita a ilha futura "atlantida", que não existe');

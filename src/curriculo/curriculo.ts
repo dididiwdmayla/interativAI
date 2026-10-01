@@ -9,10 +9,7 @@
  */
 import type { IlhaCurriculo } from "./tipos";
 
-/** Parte B do motor da Lógica (planejados em src/curriculo/motores.ts). */
-const MOTOR_ORDENAR_PASSOS = "atividade ordenar-passos (arrastar os passos de um programa para a ordem certa)";
-const MOTOR_DEPURADOR = "depurador-fontes: aba Fontes com depurador (pontos de parada, passo a passo e variáveis observadas)";
-const MOTOR_ARVORE = "visualizador-arvore (desenhar e percorrer uma árvore de dados)";
+/** O que falta do motor da Lógica (planejado em src/curriculo/motores.ts). */
 const MOTOR_PROJETO_JS =
   "projeto-ponte-js: projeto-ponte de JavaScript (levar o programa para Fontes > Snippets do Chrome, com o guia passo a passo)";
 const MOTOR_PAGINAS_VIVAS = "JS do jogador rodando no site-alvo e aba Aplicação";
@@ -429,21 +426,18 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Decompor um problema",
             meta: "Quebrar um problema grande em passos pequenos, que dá para resolver um de cada vez.",
             temas: ["logica"],
-            requerMotor: MOTOR_ORDENAR_PASSOS,
           },
           {
             id: "logica-resolvendo-problemas-u2",
             titulo: "Pseudocódigo",
             meta: "Escrever o passo a passo em português antes de escrever o código.",
             temas: ["logica"],
-            requerMotor: MOTOR_ORDENAR_PASSOS,
           },
           {
             id: "logica-resolvendo-problemas-u3",
             titulo: "Ordenar os passos",
             meta: "Pôr os passos de um programa na ordem certa e ver o que quebra quando a ordem muda.",
             temas: ["logica"],
-            requerMotor: MOTOR_ORDENAR_PASSOS,
           },
           {
             id: "logica-resolvendo-problemas-u4",
@@ -469,14 +463,12 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Pontos de parada",
             meta: "Parar o programa numa linha com um ponto de parada, na aba Fontes, e olhar o que está acontecendo.",
             temas: ["logica", "ferramentas"],
-            requerMotor: MOTOR_DEPURADOR,
           },
           {
             id: "logica-depuracao-u3",
             titulo: "Passo a passo",
             meta: "Andar uma linha de cada vez, observar as variáveis e achar onde o valor fica errado.",
             temas: ["logica", "ferramentas"],
-            requerMotor: MOTOR_DEPURADOR,
           },
         ],
       },
@@ -533,7 +525,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Árvores",
             meta: "Percorrer uma árvore e perceber que o DOM, a árvore de elementos do F12, é uma delas.",
             temas: ["dados", "logica"],
-            requerMotor: MOTOR_ARVORE,
           },
         ],
       },

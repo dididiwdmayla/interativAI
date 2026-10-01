@@ -64,6 +64,12 @@ function ferramentas({ pagina, cdp }) {
       for (let i = 1; i <= 10; i++) {
         await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x1 + ((x2 - x1) * i) / 10, y: y1 + ((y2 - y1) * i) / 10, id: 1 }] });
       }
+      // O dedo para em cima do destino antes de soltar, como uma pessoa. Soltando em
+      // movimento, o Chrome lê um "fling" e engole o próximo toque (para parar o fling).
+      for (let i = 0; i < 3; i++) {
+        await pagina.waitForTimeout(60);
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x2, y: y2, id: 1 }] });
+      }
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     }
     await esperarPronto(pagina);

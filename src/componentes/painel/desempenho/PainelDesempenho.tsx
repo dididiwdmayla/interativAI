@@ -232,8 +232,8 @@ export function PainelDesempenho({ config, medicoes, ocupado, aoMedir, aoAbrirCa
     <div className="flex h-full min-h-0 flex-col bg-superficie" data-painel-desempenho>
       <p className="flex shrink-0 items-start gap-1.5 border-b-2 border-borda bg-painel px-3 py-2 text-xs font-bold leading-snug text-texto-suave">
         <IconeGraficoPassos className="mt-0.5 shrink-0 text-primaria" tamanho={16} />
-        Passos x tamanho: o jogo roda a sua função com listas de vários tamanhos e conta os passos (cada linha executada é um passo). A aba
-        Desempenho do Chrome mede tempo; contar passos mostra o crescimento sem depender da velocidade do computador.
+        Passos x tamanho: o jogo roda a sua função com listas de vários tamanhos e conta os passos. O Desempenho do Chrome mede tempo; passos
+        não dependem do computador.
       </p>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3">
         <AlvoFerramenta ids={["grafico-passos"]} marcador="grafico-passos" aoAbrirCard={aoAbrirCard} classeMarcador="right-1 top-1">

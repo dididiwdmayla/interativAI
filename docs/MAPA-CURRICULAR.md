@@ -362,10 +362,12 @@ sugere a dela abaixo.
    recursão para ser percorrida).
 10. **Programa de verdade**: o projeto-ponte, a saída da ilha.
 
-**Onde falta motor (parte B):** `ordenar-passos` (Resolvendo problemas
-u1 a u3), `depurador-fontes` (Depuração u2 e u3), `visualizador-arvore`
-(Estruturas de dados u3) e `projeto-ponte-js` (Programa de verdade). As
-fichas estão em `src/curriculo/motores.ts`.
+**Onde falta motor:** só o `projeto-ponte-js` (Programa de verdade), com
+a ficha em `src/curriculo/motores.ts`. A parte B ficou pronta na rodada
+22: ordenar passos (Resolvendo problemas), depurador da aba Fontes
+(Depuração) e estruturas no palco, com "Ver como árvore" e o gráfico de
+passos (Estruturas de dados e Algoritmos essenciais). Ver o guia de
+conteúdo, seções 26 a 28.
 
 ### Zona Primeiros comandos (`primeiros-comandos`)
 
@@ -648,14 +650,14 @@ dar `push` num item e perguntar o `length`.
 Missão de campo: escolher um problema do seu dia (a divisão da conta do
 bar) e escrever o pseudocódigo antes de abrir o Console.
 
-- **U1. Decompor um problema** (`logica-resolvendo-problemas-u1`, requer
+- **U1. Decompor um problema** (`logica-resolvendo-problemas-u1`, fase
   `ordenar-passos`): quebrar "fazer o pedido da festa" em passos pequenos.
   Confusão: "programador sabe a resposta antes de começar".
-- **U2. Pseudocódigo** (`logica-resolvendo-problemas-u2`, requer
-  `ordenar-passos`): o passo a passo em português com cartões, depois
+- **U2. Pseudocódigo** (`logica-resolvendo-problemas-u2`, fase
+  `ordenar-passos`, variante agrupar): o passo a passo em português com cartões, depois
   cada cartão virando uma linha de código.
-- **U3. Ordenar os passos** (`logica-resolvendo-problemas-u3`, requer
-  `ordenar-passos`): pôr linhas na ordem e ver o que quebra (usar antes de
+- **U3. Ordenar os passos** (`logica-resolvendo-problemas-u3`, fase
+  `ordenar-passos` com `rodar`): pôr linhas na ordem e ver o que quebra (usar antes de
   declarar, somar antes de ler).
 - **U4. Testar com exemplos** (`logica-resolvendo-problemas-u4`): escolher
   exemplos que provam que a função funciona, inclusive os esquisitos
@@ -674,10 +676,10 @@ mensagem vermelha e tentar entender o que ela diz.
   `semErro`. Desafio: um programa com três erros para consertar na ordem
   em que aparecem. Confusões: "erro vermelho é que estraguei o
   computador"; "a linha do erro é sempre onde está o problema".
-- **U2. Pontos de parada** (`logica-depuracao-u2`, requer
-  `depurador-fontes`): parar numa linha e olhar os valores.
-- **U3. Passo a passo** (`logica-depuracao-u3`, requer
-  `depurador-fontes`): próxima linha, entrar e sair de função, observar
+- **U2. Pontos de parada** (`logica-depuracao-u2`, depurador da aba
+  Fontes): parar numa linha e olhar os valores.
+- **U3. Passo a passo** (`logica-depuracao-u3`, depurador da aba
+  Fontes): próxima linha, entrar e sair de função, observar
   variáveis.
 
 ### Zona Algoritmos essenciais (`algoritmos-essenciais`)
@@ -695,7 +697,8 @@ achar um número entre 1 e 1000 (no Console, com um contador).
   ela mesma, cada chamada como uma moldura nova no palco; o caso base.
   Confusão: "recursão é loop infinito".
 - **U4. Por que isso trava?** (`logica-algoritmos-essenciais-u4`): contar
-  passos com 10, 100 e 1000 itens (o rastro conta), sem fórmula; o limite
+  passos com 10, 100 e 1000 itens (o contador de passos e o gráfico passos
+  x tamanho da aba Desempenho; `passosNoMaximo`), sem fórmula; o limite
   de passos do jogo como exemplo.
 
 ### Zona Estruturas de dados (`estruturas-de-dados`)
@@ -705,11 +708,12 @@ pilha (`push` a cada letra, `pop` no desfazer).
 
 - **U1. Pilhas e filas** (`logica-estruturas-de-dados-u1`): pilha (o
   desfazer do painel Elementos) e fila (a fila de impressão), com `push`,
-  `pop` e `shift`.
+  `pop` e `shift` (os vagões entram e saem pelo lado certo no palco;
+  `formaDaEstrutura`).
 - **U2. Dicionários** (`logica-estruturas-de-dados-u2`): `Map` (`set`,
   `get`, `has`), quando usar no lugar de lista (achar sem percorrer).
-- **U3. Árvores** (`logica-estruturas-de-dados-u3`, requer
-  `visualizador-arvore`): nós e filhos, percorrer, e o DOM da aba Elementos
+- **U3. Árvores** (`logica-estruturas-de-dados-u3`, "Ver como árvore"
+  no palco, `arvore-palco`): nós e filhos, percorrer, e o DOM da aba Elementos
   como árvore.
 
 ### Zona Programa de verdade (`programa-de-verdade`)
@@ -737,8 +741,11 @@ existe e continua travada por um `requerMotor` que nomeia o tipo.
   `logica-decisoes-u2`, a `origens-museu-u6` (somador e memória com
   realimentação) e a futura trilha Automação industrial. Demonstração em
   `/lab/fases?fase=lab-logica-u1-f2`.
-- **`ordenar-passos`**, **`depurador-fontes`**, **`visualizador-arvore`** e
-  **`projeto-ponte-js`**: a parte B do motor da Lógica (fichas em
+- **`ordenar-passos`** (tipo de fase), **`depurador-fontes`** (aba Fontes)
+  e **`visualizador-arvore`** ("Ver como árvore" no palco): **prontos na
+  rodada 22**, com demonstrações em `/lab/fases?fase=lab-logica-u1-f4` a
+  `f9`.
+- **`projeto-ponte-js`**: o que falta da Lógica (ficha em
   `src/curriculo/motores.ts`).
 
 ---
