@@ -85,5 +85,86 @@
         ]
       }
     }
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "tabuada-guiado",
+          "let i = 0\nfor (i = 1; i <= 3; i++) {\n  console.log(7 * i)\n}"
+        ],
+        [
+          "for-prever",
+          "for (let i = 0; i < 3; i++) {\n  console.log(i)\n}"
+        ],
+        [
+          "tabuada-sozinho",
+          "let i = 0\nfor (i = 1; i <= 4; i++) {\n  console.log(9 * i)\n}"
+        ]
+      ],
+      [
+        [
+          "letras-guiado",
+          "let voltas = 0\nfor (let letra of \"LUA\") {\n  console.log(letra)\n  voltas++\n}"
+        ],
+        [
+          "letras-prever",
+          "for (let letra of \"RIO\") {\n  console.log(letra)\n}"
+        ],
+        [
+          "letras-sozinho",
+          "let voltas = 0\nfor (let letra of \"SOL\") {\n  console.log(letra)\n  voltas++\n}"
+        ]
+      ],
+      [
+        [
+          "break-guiado",
+          "let voltas = 0\nfor (let letra of \"MARTE\") {\n  if (letra === \"R\") { break }\n  console.log(letra)\n  voltas++\n}\nconsole.log(\"Busca encerrada\")"
+        ],
+        [
+          "break-prever",
+          "for (let letra of \"VIDA\") {\n  console.log(letra)\n  if (letra === \"I\") { break }\n}"
+        ],
+        [
+          "break-sozinho",
+          "let voltas = 0\nfor (let letra of \"CASA\") {\n  if (letra === \"S\") { break }\n  console.log(letra)\n  voltas++\n}\nconsole.log(\"Busca encerrada\")"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let etiqueta = 0\nfor (etiqueta = 1; etiqueta <= 4; etiqueta++) {\n  console.log(\"Etiqueta \" + etiqueta)\n}",
+      "let inicial = \"\"\nfor (let letra of \"GRAFICA\") {\n  inicial = letra\n  console.log(\"Inicial \" + letra)\n  break\n}"
+    ],
+    "negativas": {
+      "tabuada-sozinho": "let i = 0\nfor (i = 1; i < 4; i++) { console.log(9 * i) }",
+      "break-sozinho": "let voltas = 0\nfor (let letra of \"CASA\") { console.log(letra); voltas++ }\nconsole.log(\"Busca encerrada\")"
+    },
+    "linhaDoTempo": {
+      "tabuada-guiado": {
+        "variavel": "i",
+        "valores": [
+          "4",
+          "3",
+          "2",
+          "1"
+        ]
+      },
+      "letras-guiado": {
+        "variavel": "letra",
+        "valores": [
+          "'A'",
+          "'U'",
+          "'L'"
+        ]
+      },
+      "break-guiado": {
+        "variavel": "voltas",
+        "valores": [
+          "2",
+          "1",
+          "0"
+        ]
+      }
+    }
   }
 }

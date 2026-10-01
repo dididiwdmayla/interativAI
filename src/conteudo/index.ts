@@ -34,6 +34,7 @@ import { FASES_UNIDADE_DECISOES_U2, UNIDADE_DECISOES_U2 } from "./ilhas/logica/d
 import { FASES_UNIDADE_DECISOES_U3, UNIDADE_DECISOES_U3 } from "./ilhas/logica/decisoes/unidade-3/unidade";
 import { FASES_UNIDADE_DECISOES_U4, UNIDADE_DECISOES_U4 } from "./ilhas/logica/decisoes/unidade-4/unidade";
 import { FASES_UNIDADE_REPETICAO_U1, UNIDADE_REPETICAO_U1 } from "./ilhas/logica/repeticao/unidade-1/unidade";
+import { FASES_UNIDADE_REPETICAO_U2, UNIDADE_REPETICAO_U2 } from "./ilhas/logica/repeticao/unidade-2/unidade";
 import type { Fase, Unidade } from "./tipos";
 
 export const UNIDADES: readonly Unidade[] = [
@@ -69,6 +70,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_DECISOES_U3,
   UNIDADE_DECISOES_U4,
   UNIDADE_REPETICAO_U1,
+  UNIDADE_REPETICAO_U2,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -105,6 +107,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_DECISOES_U3,
   ...FASES_UNIDADE_DECISOES_U4,
   ...FASES_UNIDADE_REPETICAO_U1,
+  ...FASES_UNIDADE_REPETICAO_U2,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

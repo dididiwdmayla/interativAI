@@ -45,7 +45,7 @@ const progresso = {
 const J = JSON.parse(readFileSync(new URL("./repeticao-jornadas.json", import.meta.url), "utf8"))[numero];
 const { passos: PASSOS, desafio: DESAFIO, negativas: NEGATIVAS = {}, caixinhas: CAIXINHAS = {}, caixaDepois: CAIXA_DEPOIS, linhaDoTempo: TEMPO = {} } = J;
 
-const { navegador, contexto, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso, rota: "/", esperar: "[data-mapa=mundo]" });
+const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso, rota: "/", esperar: "[data-mapa=mundo]" });
 const assentar = () => esperarPronto(pagina, 20000);
 async function tocar(localizador) {
   await localizador.scrollIntoViewIfNeeded();

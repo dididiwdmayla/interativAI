@@ -508,7 +508,7 @@ mostra a tabuada do 7.
 - **Revisa:** comparações, if.
 - **Confusões:** "o loop para sozinho"; "o `while` testa só uma vez".
 
-#### U2. for e for...of — `logica-repeticao-u2`
+#### U2. for e for...of (pronta) — `logica-repeticao-u2`
 
 - **Meta:** repetir um número certo de vezes com `for` e passar por cada
   item com `for...of`.

@@ -1,3 +1,6 @@
+import { ITENS_BREAK_JS } from "./break-js";
+import { ITENS_FOR_OF_JS } from "./for-of-js";
+import { ITENS_FOR_JS } from "./for-js";
 import { ITENS_LOOP_INFINITO } from "./loop-infinito";
 import { ITENS_CONTADOR_JS } from "./contador-js";
 import { ITENS_CONDICAO_DE_PARADA } from "./condicao-de-parada";
@@ -368,6 +371,9 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_CONDICAO_DE_PARADA,
   ...ITENS_CONTADOR_JS,
   ...ITENS_LOOP_INFINITO,
+  ...ITENS_FOR_JS,
+  ...ITENS_FOR_OF_JS,
+  ...ITENS_BREAK_JS,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

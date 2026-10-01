@@ -192,6 +192,12 @@
       "logica-repeticao-u1-f2",
       "logica-repeticao-u1-f3",
       "logica-repeticao-u1-f4"
+    ],
+    "logica-repeticao-u2": [
+      "logica-repeticao-u2-f1",
+      "logica-repeticao-u2-f2",
+      "logica-repeticao-u2-f3",
+      "logica-repeticao-u2-f4"
     ]
   },
   "fases": {
@@ -1174,6 +1180,33 @@
         "senhas",
         "fila-zerada"
       ]
+    },
+    "logica-repeticao-u2-f1": {
+      "objetivos": [
+        "tabuada-guiado",
+        "for-prever",
+        "tabuada-sozinho"
+      ]
+    },
+    "logica-repeticao-u2-f2": {
+      "objetivos": [
+        "letras-guiado",
+        "letras-prever",
+        "letras-sozinho"
+      ]
+    },
+    "logica-repeticao-u2-f3": {
+      "objetivos": [
+        "break-guiado",
+        "break-prever",
+        "break-sozinho"
+      ]
+    },
+    "logica-repeticao-u2-f4": {
+      "partes": [
+        "etiquetas",
+        "inicial"
+      ]
     }
   },
   "itensRevisao": [
@@ -1524,6 +1557,12 @@
     "contador-js-1",
     "contador-js-2",
     "loop-infinito-1",
-    "loop-infinito-2"
+    "loop-infinito-2",
+    "for-js-1",
+    "for-js-2",
+    "for-of-js-1",
+    "for-of-js-2",
+    "break-js-1",
+    "break-js-2"
   ]
 }

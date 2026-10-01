@@ -969,6 +969,28 @@ const CATALOGO = {
     "logica"
   ]
 },
+
+  "for-js": {
+  "nome": "Laço for",
+  "resumo": "Junta início, condição e atualização, separados por ponto e vírgula, para repetir um bloco.",
+  "temas": [
+    "logica"
+  ]
+},
+  "for-of-js": {
+  "nome": "for...of em textos",
+  "resumo": "Entrega uma letra por volta, na ordem do texto, até ele acabar.",
+  "temas": [
+    "logica"
+  ]
+},
+  "break-js": {
+  "nome": "Saída com break",
+  "resumo": "Sai do laço atual imediatamente; o programa continua depois do bloco.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

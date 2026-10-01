@@ -11,3 +11,10 @@ Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRE
 - Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho na mesma fase; if dentro do loop e no encerramento. Palco e linha do tempo em todas as fases.
 - Os testes de jornada percorrem o rastro pelos botões reais, conferindo os valores do contador. Negativas: fronteira errada e loop ainda sem incremento.
 - Verificado: 10.568 testes (checagem afetada refeita após separar as partes), jornada pelo mapa em desktop/retrato/paisagem com console limpo; publicar:conteudo, build e lint verdes.
+
+### U2: for e for...of
+
+- Quatro fases: três partes do for na tabuada; uma letra por volta no for...of; primeira apresentação do break com if; desafio das etiquetas de uma gráfica.
+- Só textos no for...of, sem arrays nem funções. Contador no topo na tabuada; letra local conferida no rastro durante as voltas.
+- Três conceitos com temas e seis itens de revisão. Previsões sobre número de voltas, terceira letra e posição do break.
+- Verificado: 10.778 testes (checagem afetada refeita após encurtar a fala do desafio), jornada pelo mapa nos três layouts com console limpo, negativas e rastro; publicar:conteudo, build e lint verdes, sem avisos.
