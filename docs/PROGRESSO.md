@@ -68,3 +68,10 @@ lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio,
 - Três conceitos novos com temas e seis itens de revisão; `if-js`, `else-js`, `operadores-logicos`, `typeof-js` e `comparacao-js` entram em `revisa`.
 - Previsões: estoque 0, `NaN`, texto `'0'` e `!!lista`. Negativas de jornada: console.log sem if, `if (carrinho)` no lugar de `carrinho.length > 0` e guardar `pontos` sem `!!` não concluem.
 - `testar:conteudo` verde (10.316 testes). Jornada pelo mapa verde em desktop, retrato e paisagem; console limpo.
+
+### Fechamento
+
+- `npm run bateria:conteudo`, uma vez, no build de produção: mapa, explorar, publicar e revisão verdes. Sem bateria de motor (a rodada não mexe no motor).
+- ROADMAP: zona Decisões em Feito; Próximo passa a ter a parte B da Ilha Lógica em primeiro; pendências da zona registradas. Mapa: U1 a U4 marcadas como prontas.
+- ATRITOS: rodada 9 curta. Rodada 19 do PROGRESSO e rodada 8 do ATRITOS arquivadas na Etapa 0.
+- Contagem final: 21 fases, 20 conceitos, 40 itens de revisão (340 no registro).
