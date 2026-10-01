@@ -126,3 +126,24 @@ Um commit por etapa. Prompt de motor: bateria completa uma vez, no fim.
   Páginas vivas. `ferramentas-novas.mjs` tocava a árvore com o cartão da
   apresentação ainda deslizando; `passarApresentacao` agora espera o
   cartão parar.
+
+## Rodada 18: correções antes do conteúdo da Lógica
+
+Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
+`main` não existe neste repositório. Branch nova, sem push na principal.
+
+### Etapa 0: instruções do Codex
+
+- AGENTS remete ao CLAUDE e resume as regras; removida a referência inversa
+  para não formar ciclo. Preparo do Playwright e restrição do apt registrados.
+
+### Etapa 1: zona morta no Console
+
+- Let/const do topo dão ReferenceError antes da declaração, incluindo
+  typeof, atribuição, autorreferência e leitura numa função chamada antes.
+  O dicionário existente explica "Usou antes de criar". Redeclaração em
+  outra entrada continua válida. Registro por declarador mantém `let a=1,b=a+2`.
+- Unitários afetados: 80 casos de executor, programa e palco verdes.
+  Console no navegador verde em desktop, retrato e paisagem.
+  Build e lint verdes; a primeira checagem ampla encontrou um problema
+  na instrumentação de `let` sem valor, corrigido e conferido nos afetados.

@@ -26,11 +26,11 @@
  * nível de cima viram `var` (propriedades do global, que sobrevivem entre
  * entradas e podem ser declaradas de novo). A const continua sem poder
  * trocar de valor: toda atribuição a um nome global passa por `__r.k`, que
- * lança o mesmo TypeError do navegador. Diferença que sobra: no nível de
- * cima, usar uma variável antes do `let` dá undefined em vez do
- * ReferenceError (a zona morta), o que as fases evitam.
+ * lança o mesmo TypeError do navegador. `__r.t` marca a zona morta das
+ * declarações do topo e `__r.l` confere leituras (inclusive typeof). Cada
+ * declarador inicializado sai da zona morta em `__r.d`.
  */
-import { parse, type AnyNode, type Comment, type Program, type Statement, type Pattern, type Node as NoAcorn } from "acorn";
+import { parse, tokenizer, type AnyNode, type Comment, type Program, type Statement, type Pattern, type Node as NoAcorn } from "acorn";
 import type { TipoDeclaracao } from "./tipos";
 
 export type SintaxeJs =
@@ -294,6 +294,9 @@ class Instrumentador {
     const funcoes = topo.flatMap((c) => (c.type === "FunctionDeclaration" && c.id ? [[c.id.name, "funcao"] as Declaracao] : []));
     if (funcoes.length) this.inserir(0, `__r.d(${texto(funcoes)});`, false, -1);
 
+    const lexicos = lexicosDaLista(topo, false).filter(([, tipo]) => tipo !== "funcao");
+    if (lexicos.length) this.inserir(0, `__r.t(${texto(lexicos.map(([nome]) => nome))});`, false, -1);
+
     let ultimaExpressao = -1;
     for (let i = topo.length - 1; i >= 0; i -= 1) {
       const c = topo[i];
@@ -311,15 +314,19 @@ class Instrumentador {
         this.inserir(comando.start, this.passo(comando), false, prof);
       }
       if (comando.type === "VariableDeclaration") {
-        const decl: Declaracao[] = comando.declarations.flatMap((d) =>
-          nomesDoPadrao(d.id).map((n) => [n, comando.kind === "const" ? "const" : comando.kind === "let" ? "let" : "var"] as Declaracao),
-        );
+        const tipo = comando.kind as "const" | "let" | "var";
         if (comando.kind !== "var") this.inserir(comando.start, "var", false, prof + 0.5, comando.kind.length);
-        for (const d of comando.declarations) {
-          if (!d.init && d.id.type === "Identifier") this.inserir(d.id.end, " = undefined", false, prof + 0.5);
-        }
+        comando.declarations.forEach((d, indice) => {
+          const semValor = !d.init && d.id.type === "Identifier" ? " = undefined" : "";
+          const decl = nomesDoPadrao(d.id).map((nome) => [nome, tipo]);
+          this.inserir(d.end, `${semValor};__r.d(${texto(decl)});`, true, prof);
+          const seguinte = comando.declarations[indice + 1];
+          if (seguinte) {
+            const virgula = d.end + tokenizer(this.fonte.slice(d.end, seguinte.start), OPCOES_ACORN).getToken().start;
+            this.inserir(virgula, "var ", false, prof, 1);
+          }
+        });
         this.comando(comando, prof);
-        this.inserir(comando.end, `;__r.d(${texto(decl)});`, true, prof);
         return;
       }
       if (comando.type === "ClassDeclaration" && comando.id) {
@@ -516,7 +523,7 @@ class Instrumentador {
     this.fontes[id] = this.fonte.slice(no.start, no.end);
     const entrar = `try{__r.f(${texto(id)},${texto(nome)},${texto(decl)},${leitor(decl)});`;
     const sair = "}catch(__e){__r.c(__e);throw __e}finally{__r.s()}";
-    this.abrirEscopo(decl.map(([n]) => n));
+    this.abrirEscopo([...decl.map(([n]) => n), ...(no.type === "FunctionExpression" && no.id ? [no.id.name] : [])]);
     for (const p of no.params) this.qualquer(p, prof + 1);
     if (no.body.type === "BlockStatement") {
       if (no.body.body.length === 0) this.inserir(no.body.start + 1, entrar + sair, false, prof);
@@ -545,11 +552,39 @@ class Instrumentador {
       this.comando(no, prof);
       return;
     }
-    this.expressao(no, prof);
+    // Em um padrão, só defaults e chaves computadas são expressões.
+    if (no.type === "Identifier") return;
+    if (no.type === "AssignmentPattern") {
+      this.qualquer(no.left, prof + 1);
+      this.expressao(no.right, prof + 1);
+      return;
+    }
+    if (no.type === "Property") {
+      if (no.computed) this.expressao(no.key, prof + 1);
+      this.qualquer(no.value, prof + 1);
+      return;
+    }
+    for (const filho of filhos(no)) this.qualquer(filho, prof + 1);
   }
 
   private expressao(no: AnyNode, prof: number, nomeSugerido?: string) {
     switch (no.type) {
+      case "Identifier":
+        if (!this.ehLocal(no.name)) {
+          this.inserir(no.start, `(__r.l(${texto(no.name)}),`, false, prof);
+          this.inserir(no.end, ")", true, prof);
+        }
+        return;
+      case "MemberExpression":
+        this.expressao(no.object, prof + 1);
+        if (no.computed) this.expressao(no.property, prof + 1);
+        return;
+      case "UnaryExpression":
+        if (no.operator === "typeof" && no.argument.type === "Identifier" && !this.ehLocal(no.argument.name)) {
+          this.inserir(no.start, `(__r.l(${texto(no.argument.name)}),`, false, prof);
+          this.inserir(no.end, ")", true, prof);
+        } else this.expressao(no.argument, prof + 1);
+        return;
       case "FunctionExpression":
       case "ArrowFunctionExpression":
         this.funcao(no, prof, no.type === "FunctionExpression" && no.id ? no.id.name : (nomeSugerido ?? "(anônima)"));
@@ -574,7 +609,14 @@ class Instrumentador {
           this.inserir(no.start, `(__r.k(${texto(no.left.name)}),`, false, prof);
           this.inserir(no.end, ")", true, prof);
         }
-        this.expressao(no.left, prof + 1);
+        if (no.left.type === "ObjectPattern" || no.left.type === "ArrayPattern") {
+          const nomes = nomesDoPadrao(no.left).filter((nome) => !this.ehLocal(nome));
+          if (nomes.length) {
+            this.inserir(no.start, `(${nomes.map((nome) => `__r.k(${texto(nome)})`).join(",")},`, false, prof);
+            this.inserir(no.end, ")", true, prof);
+          }
+          this.qualquer(no.left, prof + 1);
+        } else if (no.left.type !== "Identifier") this.expressao(no.left, prof + 1);
         this.expressao(no.right, prof + 1, no.left.type === "Identifier" ? no.left.name : undefined);
         return;
       case "UpdateExpression":
@@ -582,10 +624,11 @@ class Instrumentador {
           this.inserir(no.start, `(__r.k(${texto(no.argument.name)}),`, false, prof);
           this.inserir(no.end, ")", true, prof);
         }
-        this.expressao(no.argument, prof + 1);
+        if (no.argument.type !== "Identifier") this.expressao(no.argument, prof + 1);
         return;
       case "Property":
         if (no.key.type !== "Identifier" || no.computed) this.expressao(no.key, prof + 1);
+        if (no.shorthand && no.value.type === "Identifier" && !this.ehLocal(no.value.name)) this.inserir(no.value.start, `${no.value.name}:`, false, prof);
         this.expressao(no.value, prof + 1, no.key.type === "Identifier" ? no.key.name : undefined);
         return;
       default:

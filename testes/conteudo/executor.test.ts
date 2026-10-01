@@ -291,6 +291,31 @@ describe("console e respostas no formato do Chrome", () => {
 });
 
 describe("modo do Console (REPL do Chrome)", () => {
+  it.each(["let", "const"])("%s do topo dá ReferenceError antes da declaração", (tipo) => {
+    for (const codigo of [
+      `x; ${tipo} x = 1`, `typeof x; ${tipo} x = 1`,
+      `${tipo} x = x + 1`, `x = 2; ${tipo} x = 1`,
+      `function ler() { return x } ler(); ${tipo} x = 1`,
+    ]) {
+      const r = rodar(codigo, "console");
+      expect(r.erro, codigo).toMatchObject({ nome: "ReferenceError", mensagem: "Cannot access 'x' before initialization" });
+      expect(explicarErro(r.erro!).titulo).toBe("Usou antes de criar");
+    }
+    const nucleo = criarNucleoNode();
+    nucleo.executar(`${tipo} x = 8`, "console");
+    expect(nucleo.executar(`x; ${tipo} x = 9`, "console").erro).toBeNull();
+    expect(nucleo.executar(`${tipo} x = x + 1; x`, "console").resultado).toEqual({ t: "number", v: "10" });
+    expect(nucleo.executar(`${tipo} x = 9; x`, "console").resultado).toEqual({ t: "number", v: "9" });
+  });
+
+  it("cada declarador sai da zona morta ao inicializar e nomes locais não são globais", () => {
+    expect(rodar("let a = 1, b = a + 2; ({a, b})", "console").erro).toBeNull();
+    expect(rodar("function f(x) { return x } f(3); let x = 1", "console").erro).toBeNull();
+    expect(rodar("let a = 1 /*, no comentário */, b = a + 2; b", "console").resultado).toEqual({ t: "number", v: "3" });
+    expect(rodar("let a; [a] = [2]; a", "console").resultado).toEqual({ t: "number", v: "2" });
+    expect(rodar("const f = function x() { return typeof x }; f(); let x = 1", "console").erro).toBeNull();
+    expect(rodar("typeof desconhecida", "console").resultado).toEqual({ t: "string", v: "undefined" });
+  });
   it("variáveis continuam entre entradas e let, const e class podem ser declaradas de novo", () => {
     const nucleo = criarNucleoNode();
     nucleo.executar("let x = 1", "console");
