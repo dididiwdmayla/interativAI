@@ -165,3 +165,16 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - Regressão em retrato pausa a transição real no meio, confere o hit-test
   e toca a árvore durante o deslize. Entrou na bateria. Esse teste,
   `ferramentas-novas.mjs` (desktop/retrato), build e lint verdes.
+
+### Etapa 4: navegar pelo circuito no retrato
+
+- Zoom por pinça e botões, ajustar à tela e arrasto do fundo (um dedo ou
+  dois) movem a câmera, preservando a geometria e os estados do circuito.
+- Alvos de corpo, portas e fios mantêm pelo menos 44 px na escala atual,
+  inclusive em aparelhos com mouse e toque. Portas ampliadas encaminham
+  gestos no miolo ao corpo da peça. Navegar conserva o fio em montagem.
+- Controles respondem ao pointerup no toque, sem duplicar o click: o
+  Chromium deste ambiente omitia um click após pinça.
+- Modelo: 9 unitários verdes. Jornada nos três layouts; retrato com seis
+  portões extras, medidas dos alvos, dois dedos reais (CDP), zoom, pan e
+  enquadramento recuperado. Build e lint verdes.
