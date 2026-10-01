@@ -21,6 +21,8 @@ import type { IdConceito } from "./conceitos";
 import type { SintaxeJs } from "@/motor/executor/instrumentar";
 import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
+import type { ControleDepurador } from "@/motor/depurador";
+import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -276,6 +278,64 @@ export type Validador =
   | { tipo: "circuitoTabela"; esperado: { entradas: Record<string, boolean>; saida: boolean | Record<string, boolean> }[] }
   /** (Circuito) Pelo menos `minimo` (padrão 1) portões desse tipo com a saída ligada em alguma coisa. */
   | { tipo: "usouPortao"; portao: TipoPortao; minimo?: number }
+  /*
+   * Depurador da aba Fontes (fase com programa.snippet e alguma ferramenta
+   * do depurador): src/motor/depurador.ts. Ver o guia, seção 26.
+   */
+  /** (Depurador) Tem um ponto de parada nesta linha do Snippet (a partir de 1) agora. Olha o estado de agora. */
+  | { tipo: "pontoDeParada"; linha: number }
+  /**
+   * (Depurador) O depurador pausou nesta linha desde que o objetivo começou
+   * (ponto de parada, `debugger;` ou um controle). Trava no checklist.
+   */
+  | { tipo: "pausouNaLinha"; linha: number }
+  /**
+   * (Depurador) A expressão está no painel Observar (espaços não contam).
+   * Com `valor`, ela mostrou esse valor num momento pausado desde que o
+   * objetivo começou (trava, como `evento`).
+   */
+  | { tipo: "observou"; expressao: string; valor?: ValorEsperado }
+  /**
+   * (Depurador) Usou o controle (retomar, passar-por-cima, entrar, sair)
+   * pelo menos `minimo` vezes (padrão 1) desde que o objetivo começou. Trava.
+   */
+  | { tipo: "usouControle"; controle: ControleDepurador; minimo?: number }
+  /*
+   * Ordenar passos (fase do tipo ordenar-passos): src/motor/ordenar/modelo.ts.
+   * Olham o quadro de agora (desfazer desmarca a parte de um desafio).
+   */
+  /**
+   * (Ordenar) O plano vale: todos os passos necessários estão nele, nenhum
+   * que sobra, cada subpasso no seu passo grande (agrupar) e cada passo
+   * depois dos que ele depende. QUALQUER ordem que respeite as dependências
+   * passa (não existe uma ordem decorada).
+   */
+  | { tipo: "ordemValida" }
+  /** (Ordenar) O cartão está no plano (em qualquer posição; no agrupar, com `grupo`, dentro desse passo grande). */
+  | { tipo: "passoNoPlano"; passo: string; grupo?: string }
+  /** (Ordenar) Os dois cartões estão no plano e `passo` vem antes de `antesDe`. */
+  | { tipo: "passoAntes"; passo: string; antesDe: string }
+  /** (Ordenar) Nenhum cartão que sobra (distração) está no plano. */
+  | { tipo: "semSobras" }
+  /*
+   * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
+   * src/motor/desempenho.ts. Ver o guia, seção 28.
+   */
+  /**
+   * (Desempenho) Sem `tamanho`: a última execução desde que o objetivo
+   * começou deu no máximo `valor` passos (trava). Com `tamanho`: a função
+   * (`funcao`, padrão a primeira de `programa.desempenho.funcoes`), rodando
+   * com uma lista desse tamanho, dá no máximo `valor` passos (medida de
+   * novo a cada execução, como o funcaoPassa).
+   */
+  | { tipo: "passosNoMaximo"; valor: number; tamanho?: number; funcao?: string }
+  /**
+   * (Estruturas) A variável global `nome` foi usada como pilha (entra e sai
+   * pelo mesmo lado: push e pop) ou como fila (entra por um lado e sai pelo
+   * outro: push e shift) desde que o objetivo começou (trava); ou é uma
+   * árvore agora (um objeto com filhos objetos).
+   */
+  | { tipo: "formaDaEstrutura"; nome: string; forma: "pilha" | "fila" | "arvore" }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -398,7 +458,39 @@ export type Acao =
   /** (Circuito) Tira uma peça da bancada (a que veio pronta na fase não sai). */
   | { tipo: "apagarPeca"; id: string }
   /** (Circuito) O botão "Ver como código". */
-  | { tipo: "verComoCodigo" };
+  | { tipo: "verComoCodigo" }
+  /**
+   * (Depurador) Clica no número da linha do Snippet: liga ou desliga o ponto
+   * de parada (numa linha sem código, ele escorrega para a próxima, como no
+   * Chrome). Gera `alternouPontoDeParada`. Pede a ferramenta pontos-de-parada.
+   */
+  | { tipo: "alternarPontoDeParada"; linha: number }
+  /**
+   * (Depurador) Um controle com o programa pausado: retomar (F8),
+   * passar-por-cima (F10), entrar (F11) ou sair (Shift+F11). Gera
+   * `usouControleDepurador` e `pausouNoDepurador` (ou, se o programa
+   * terminou, `executouCodigo`). Pede a ferramenta controles-depurador.
+   */
+  | { tipo: "controlarDepurador"; controle: ControleDepurador }
+  /**
+   * (Depurador) Põe a expressão no painel Observar. Gera `adicionouObservacao`
+   * e, se estiver pausado, `observouValor`. Pede a ferramenta painel-observar.
+   */
+  | { tipo: "observar"; expressao: string }
+  /**
+   * (Ordenar) Arrasta o cartão para o plano (ou, no agrupar, para o passo
+   * grande `grupo`), na `posicao` (a partir de 0; padrão: no fim). Se ele já
+   * está no plano, muda de lugar. Gera `moveuPasso`. Pede quadro-de-passos.
+   */
+  | { tipo: "porPasso"; passo: string; posicao?: number; grupo?: string }
+  /** (Ordenar) Tira o cartão do plano (volta para a pilha). Gera `moveuPasso`. */
+  | { tipo: "tirarPasso"; passo: string }
+  /** (Ordenar, com `rodar`) O botão Rodar: executa o código do plano, na ordem. Gera `executouCodigo`. */
+  | { tipo: "rodarPlano" }
+  /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
+  | { tipo: "verComoArvore"; nome: string }
+  /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
+  | { tipo: "medirDesempenho" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -421,7 +513,9 @@ export type AjudaLinha =
   /** (Código) Pisca a linha de digitar do Console. */
   | { alvo: "console"; fala: string }
   /** (Circuito) Pisca uma peça da bancada (ou, sem `peca`, a paleta de portões). */
-  | { alvo: "circuito"; peca?: string; fala: string };
+  | { alvo: "circuito"; peca?: string; fala: string }
+  /** (Ordenar) Pisca um cartão (onde ele estiver) ou, sem `passo`, o plano. */
+  | { alvo: "ordenar"; passo?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -555,6 +649,18 @@ export type BancadaPrograma = {
    * para a memória já começar com algo (ex.: a lista de preços do desafio).
    */
   preparo?: string;
+  /**
+   * (Desempenho) O gráfico passos x tamanho da aba Desempenho: as funções
+   * globais do jogador medidas (até 2, uma linha cada), com os argumentos
+   * ("$lista" vira a lista do tamanho; "$tamanho", o número; padrão
+   * ["$lista"]), os tamanhos (padrão 10, 100, 500 e 1000) e como a lista é
+   * gerada (padrão crescente: 1, 2, 3...). Pede a ferramenta grafico-passos.
+   */
+  desempenho?: {
+    funcoes: { nome: string; args?: ValorEsperado[] }[];
+    tamanhos?: number[];
+    lista?: "crescente" | "decrescente" | "embaralhada";
+  };
 };
 
 /** Sub-painéis da aba Elementos, como no Chrome (Styles e Computed). */
@@ -636,8 +742,14 @@ export type FasePratica = FaseBase & {
   pratica?: IdConceito[];
 };
 
-/** Desafio: sem passo a passo, só o checklist das partes. */
-export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[] };
+/**
+ * Desafio: sem passo a passo, só o checklist das partes. Com `circuito`, a
+ * bancada do circuito lógico é a tela (validadores circuitoTabela e
+ * usouPortao nas partes); com `circuito` e `programa` juntos, é a ponte
+ * circuito/Console: a bancada na tela e, no painel, a tabela verdade em
+ * cima e o Console embaixo.
+ */
+export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
 
 /**
  * Um requisito do projeto-ponte: marca sozinho quando o validador passa
@@ -709,15 +821,31 @@ export type FaseCircuitoLogico = FaseBase & {
   circuito: DadosCircuito;
 };
 
-/** Fases com objetivos em sequência (prática, simulador de campanha e circuito lógico). */
-export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico;
+/**
+ * Ordenar passos (zona Resolvendo problemas): objetivos como numa prática,
+ * num quadro com cartões de passos (em português ou em código) que o
+ * jogador arrasta para o plano. A validação é pelas dependências entre os
+ * passos (`depoisDe`): qualquer ordem que as respeite vale. Cartões que
+ * sobram são distrações. Variante `agrupar`: separar os subpassos dentro
+ * dos passos grandes. Com `ordenar.rodar` e `programa`, o plano roda como
+ * código. Use `siteAlvo: SITE_DO_PROGRAMA`. Ver o guia, seção 27.
+ */
+export type FaseOrdenarPassos = FaseBase & {
+  tipo: "ordenar-passos";
+  objetivos: Objetivo[];
+  pratica?: IdConceito[];
+  ordenar: DadosOrdenar;
+};
+
+/** Fases com objetivos em sequência (prática, simulador de campanha, circuito lógico e ordenar passos). */
+export type FaseComObjetivos = FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico | FaseOrdenarPassos;
 
 /**
  * Registro extensível de tipos de fase (ver src/motor/tiposDeFase.ts).
  * Tipos futuros ("linha-do-tempo", "comparador", "diagrama-rede") entram
  * aqui como novas variantes.
  */
-export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha | FaseCircuitoLogico;
+export type Fase = FasePratica | FaseDesafio | FaseProjetoPonte | FaseSimuladorCampanha | FaseCircuitoLogico | FaseOrdenarPassos;
 
 export type TipoFase = Fase["tipo"];
 

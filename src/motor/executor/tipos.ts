@@ -58,8 +58,12 @@ export type EscopoMemoria = {
   variaveis: VariavelMemoria[];
 };
 
-/** Um quadro por chamada de função em andamento (o global é o primeiro). */
-export type QuadroMemoria = { nome: string; chamada: number; escopos: EscopoMemoria[] };
+/**
+ * Um quadro por chamada de função em andamento (o global é o primeiro).
+ * `linha`: onde o quadro está agora (no de cima, a linha que vai rodar; nos
+ * de baixo, a linha que chamou a função), para a Pilha de chamadas.
+ */
+export type QuadroMemoria = { nome: string; chamada: number; escopos: EscopoMemoria[]; linha?: number | null };
 
 export type FotoMemoria = { quadros: QuadroMemoria[]; monte: Record<string, ObjetoMemoria> };
 
@@ -74,6 +78,14 @@ export type PassoRastro = {
   saidas: number;
   /** No passo de retorno: o valor devolvido e a função. */
   retorno?: { funcao: string; valor: ValorMemoria };
+  /** O comando deste passo é a instrução `debugger;` (o depurador pausa aqui). */
+  depurador?: true;
+  /**
+   * As posições de lista que a linha ANTERIOR leu (lista[i]), pelo id da
+   * lista no monte: o palco acende esses vagões ("leu"), para ver busca e
+   * ordenação acontecendo.
+   */
+  leituras?: { id: number; indice: number }[];
 };
 
 export type NivelSaida = "log" | "info" | "warn" | "error" | "debug";
@@ -124,6 +136,12 @@ export type ResultadoExecucao = {
   sintaxes: SintaxeJs[];
 };
 
+/** O valor de uma expressão do painel Observar, avaliada numa foto da memória (o momento pausado). */
+export type ResultadoAvaliacao = { expressao: string; valor: ValorExibido } | { expressao: string; erro: string };
+
+/** Uma medição do gráfico de desempenho: a função rodando com uma lista daquele tamanho. */
+export type MedicaoPassos = { funcao: string; tamanho: number; passos: number; passouDoLimite: boolean; erro: string | null };
+
 /** Valor esperado num caso de teste de função (JSON). */
 export type ValorEsperado = null | boolean | number | string | ValorEsperado[] | { [chave: string]: ValorEsperado };
 
@@ -161,4 +179,10 @@ export const LIMITES = {
   itens: 100,
   /** Saídas do console guardadas. */
   saidas: 500,
+  /** Passos de uma medição do gráfico de desempenho (mais que isso: "travaria"). */
+  passosMedicao: 2_000_000,
+  /** Tempo de uma medição, em milissegundos. */
+  tempoMedicaoMs: 3_000,
+  /** Leituras de lista guardadas por passo. */
+  leiturasPorPasso: 8,
 } as const;

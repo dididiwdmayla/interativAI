@@ -8,12 +8,14 @@
  * moldura. O que é novo surge e o que mudou pisca (comparando com o passo
  * anterior). As regras do desenho estão em src/motor/palco.ts.
  */
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { textoPrevia } from "@/motor/executor/formatar";
+import { objetosDoQuadroDeCima } from "@/motor/estruturas";
+import { ContextoPalco } from "./contextoPalco";
 import type { ErroExecucao, FotoMemoria, PassoRastro } from "@/motor/executor/tipos";
 import { mudancasDoPalco, planoDoPalco, type VariavelPalco } from "@/motor/palco";
 import { memoriaParaExibido } from "@/motor/programa";
-import { QuadroPalco } from "./QuadroPalco";
+import { type ArvoresDoPalco, QuadroPalco } from "./QuadroPalco";
 
 type Props = {
   foto: FotoMemoria | null;
@@ -21,11 +23,15 @@ type Props = {
   /** O passo mostrado (a faixa de retorno ou de erro na moldura). */
   passo: PassoRastro | null;
   erro: ErroExecucao | null;
+  /** (Ferramenta arvore-palco) As variáveis vistas como árvore. */
+  arvores?: ArvoresDoPalco;
+  /** (Ferramenta contador-passos) A linha de cima com o contador, já embrulhada. */
+  contador?: ReactNode;
 };
 
 type Seta = { id: string; d: string };
 
-export function PalcoMemoria({ foto, anterior, passo, erro }: Props) {
+export function PalcoMemoria({ foto, anterior, passo, erro, arvores = null, contador = null }: Props) {
   const plano = useMemo(() => planoDoPalco(foto), [foto]);
   const planoAnterior = useMemo(() => (anterior ? planoDoPalco(anterior) : null), [anterior]);
   const { novas, mudaram } = useMemo(() => mudancasDoPalco(plano, planoAnterior), [plano, planoAnterior]);
@@ -72,45 +78,58 @@ export function PalcoMemoria({ foto, anterior, passo, erro }: Props) {
       ? { texto: `devolve ${textoPrevia(memoriaParaExibido(passo.retorno.valor, foto.monte), true)}`, tom: "retorno" as const }
       : null;
   const vazio = plano.quadros.every((quadro) => quadro.escopos.every((escopo) => escopo.variaveis.length === 0));
+  // As leituras da linha anterior (vagões que acendem) e os objetos da função de agora (o nó aceso na árvore).
+  const contexto = useMemo(() => {
+    const leituras = new Map<number, Set<number>>();
+    for (const { id, indice } of passo?.leituras ?? []) {
+      if (!leituras.has(id)) leituras.set(id, new Set());
+      leituras.get(id)?.add(indice);
+    }
+    return { leituras, visitados: objetosDoQuadroDeCima(foto) };
+  }, [foto, passo]);
 
   return (
-    <div className="relative min-h-0 flex-1 overflow-auto bg-codigo-fundo" data-palco data-setas={setas.length}>
-      <div ref={conteudo} className="relative flex min-h-full flex-col gap-3 p-3">
-        {!foto || (vazio && plano.quadros.length <= 1) ? (
-          <p className="m-auto max-w-72 text-center text-sm text-texto-suave" data-palco-vazio>
-            A memória está vazia. Crie uma variável (let preco = 5) e ela aparece aqui como uma caixinha.
-          </p>
-        ) : (
-          plano.quadros.map((quadro, i) => (
-            <QuadroPalco
-              key={quadro.chave}
-              quadro={quadro}
-              anteriores={anteriores}
-              novas={novas}
-              mudaram={mudaram}
-              ativo={i === topo}
-              faixa={i === topo && i > 0 ? faixaDoTopo : null}
-            />
-          ))
-        )}
-        {erro && passo?.tipo === "erro" && (
-          <p className="rounded-xl border-2 border-erro bg-js-erro-fundo px-3 py-1.5 text-sm font-bold text-erro" data-palco-erro>
-            O programa parou{erro.linha !== null ? ` na linha ${erro.linha}` : ""}: {erro.nome || "erro"}
-          </p>
-        )}
-        {setas.length > 0 && (
-          <svg className="pointer-events-none absolute left-0 top-0" width={tamanho.largura} height={tamanho.altura} aria-hidden="true">
-            <defs>
-              <marker id="ponta-da-seta-palco" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--cor-js-objeto)" />
-              </marker>
-            </defs>
-            {setas.map((seta) => (
-              <path key={seta.id} d={seta.d} fill="none" stroke="var(--cor-js-objeto)" strokeWidth={2.5} strokeDasharray="5 4" markerEnd="url(#ponta-da-seta-palco)" data-seta-palco />
-            ))}
-          </svg>
-        )}
+    <ContextoPalco.Provider value={contexto}>
+      <div className="relative min-h-0 flex-1 overflow-auto bg-codigo-fundo" data-palco data-setas={setas.length}>
+        {contador && <div className="sticky top-0 z-10 flex px-3 pt-2">{contador}</div>}
+        <div ref={conteudo} className="relative flex min-h-full flex-col gap-3 p-3">
+          {!foto || (vazio && plano.quadros.length <= 1) ? (
+            <p className="m-auto max-w-72 text-center text-sm text-texto-suave" data-palco-vazio>
+              A memória está vazia. Crie uma variável (let preco = 5) e ela aparece aqui como uma caixinha.
+            </p>
+          ) : (
+            plano.quadros.map((quadro, i) => (
+              <QuadroPalco
+                key={quadro.chave}
+                quadro={quadro}
+                anteriores={anteriores}
+                novas={novas}
+                mudaram={mudaram}
+                ativo={i === topo}
+                faixa={i === topo && i > 0 ? faixaDoTopo : null}
+                arvores={arvores}
+              />
+            ))
+          )}
+          {erro && passo?.tipo === "erro" && (
+            <p className="rounded-xl border-2 border-erro bg-js-erro-fundo px-3 py-1.5 text-sm font-bold text-erro" data-palco-erro>
+              O programa parou{erro.linha !== null ? ` na linha ${erro.linha}` : ""}: {erro.nome || "erro"}
+            </p>
+          )}
+          {setas.length > 0 && (
+            <svg className="pointer-events-none absolute left-0 top-0" width={tamanho.largura} height={tamanho.altura} aria-hidden="true">
+              <defs>
+                <marker id="ponta-da-seta-palco" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--cor-js-objeto)" />
+                </marker>
+              </defs>
+              {setas.map((seta) => (
+                <path key={seta.id} d={seta.d} fill="none" stroke="var(--cor-js-objeto)" strokeWidth={2.5} strokeDasharray="5 4" markerEnd="url(#ponta-da-seta-palco)" data-seta-palco />
+              ))}
+            </svg>
+          )}
+        </div>
       </div>
-    </div>
+    </ContextoPalco.Provider>
   );
 }

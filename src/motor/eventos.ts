@@ -1,5 +1,7 @@
 import type { Utm } from "./medicao";
 import type { ResumoExecucao } from "./programa";
+import type { ControleDepurador, MotivoPausa } from "./depurador";
+import type { MedicaoPassos, ValorExibido } from "./executor/tipos";
 
 /**
  * De onde veio uma seleção.
@@ -67,7 +69,23 @@ export type EventoFase =
   /** (Circuito) Ligou ou desligou uma entrada. */
   | { tipo: "alternouEntrada"; entrada: string; ligada: boolean }
   /** (Circuito) Abriu o "Ver como código". */
-  | { tipo: "viuCodigoDoCircuito" };
+  | { tipo: "viuCodigoDoCircuito" }
+  /** (Depurador) Ligou ou desligou um ponto de parada (a linha já escorregada para a que tem código). */
+  | { tipo: "alternouPontoDeParada"; linha: number; ativo: boolean }
+  /** (Depurador) O programa pausou nesta linha (ponto de parada, debugger; ou um passo dos controles). */
+  | { tipo: "pausouNoDepurador"; linha: number; motivo: MotivoPausa }
+  /** (Depurador) Usou um controle (retomar, passar por cima, entrar, sair). */
+  | { tipo: "usouControleDepurador"; controle: ControleDepurador }
+  /** (Depurador) Pôs uma expressão no painel Observar. */
+  | { tipo: "adicionouObservacao"; expressao: string }
+  /** (Depurador) Uma expressão do Observar foi avaliada num momento pausado (null: deu erro ou não existia ali). */
+  | { tipo: "observouValor"; expressao: string; valor: ValorExibido | null }
+  /** (Ordenar) Pôs, mudou de lugar ou tirou um cartão. `destino`: "plano", o id do grupo ou "fora". */
+  | { tipo: "moveuPasso"; passo: string; destino: string; posicao: number }
+  /** (Estruturas) Abriu o "Ver como árvore" da variável. */
+  | { tipo: "viuComoArvore"; nome: string }
+  /** (Desempenho) Mediu o gráfico passos x tamanho. */
+  | { tipo: "mediuDesempenho"; medicoes: MedicaoPassos[] };
 
 /**
  * Para onde um link levaria:
@@ -114,4 +132,12 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "mudouCircuito",
   "alternouEntrada",
   "viuCodigoDoCircuito",
+  "alternouPontoDeParada",
+  "pausouNoDepurador",
+  "usouControleDepurador",
+  "adicionouObservacao",
+  "observouValor",
+  "moveuPasso",
+  "viuComoArvore",
+  "mediuDesempenho",
 ];

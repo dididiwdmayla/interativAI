@@ -50,6 +50,13 @@ import { PainelFontes } from "@/componentes/painel/fontes/PainelFontes";
 import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
+import { useDepurador } from "./useDepurador";
+import { useEstruturas } from "./useEstruturas";
+import { useOrdenar } from "./useOrdenar";
+import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
+import { ordemDoPlano } from "@/motor/ordenar/modelo";
+import { type AbaDepurador, AvisoPausado, BarraControlesDepurador, PainelDepurador } from "@/componentes/painel/fontes/PainelDepurador";
+import { FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { useCircuito } from "./useCircuito";
 import { BancadaCircuito } from "@/componentes/circuito/BancadaCircuito";
 import { PainelTabelaVerdade } from "@/componentes/circuito/PainelTabelaVerdade";
@@ -93,6 +100,7 @@ import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditor
 import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
 import { PainelBusca, type SubAbaBusca } from "@/componentes/painel/busca/PainelBusca";
 import { type LinhaMedicao, PainelMedicao } from "@/componentes/painel/medicao/PainelMedicao";
+import { ContadorPassos, PainelDesempenho } from "@/componentes/painel/desempenho/PainelDesempenho";
 import { PainelCampanha } from "@/componentes/painel/campanha/PainelCampanha";
 import { type EstadoCampanha, estadoInicialDaCampanha, simularCampanha } from "@/motor/campanha";
 import { eventoDoClique, type Utm } from "@/motor/medicao";
@@ -195,7 +203,8 @@ const FERRAMENTAS_DA_MEDICAO: readonly IdFerramenta[] = ["medicao", "link-rastre
 /** Elementos abre sempre; Lighthouse, Busca, Medição e Campanha, nas fases com as ferramentas delas. */
 function abasDaFase(fase: Fase): Aba[] {
   // Fase de programa (Ilha Lógica): o Console e, com o Snippet, a aba Fontes. Não há página para Elementos.
-  if (fase.programa) return fase.programa.snippet ? ["console", "fontes"] : ["console"];
+  // Com o gráfico passos x tamanho, também a Desempenho.
+  if (fase.programa) return [...(fase.programa.snippet ? (["console", "fontes"] as const) : (["console"] as const)), ...(fase.programa.desempenho ? (["desempenho"] as const) : [])];
   const abas: Aba[] = ["elementos"];
   if (fase.usaFerramentas.includes("lighthouse")) abas.push("lighthouse");
   if (FERRAMENTAS_DA_BUSCA.some((id) => fase.usaFerramentas.includes(id))) abas.push("busca");
@@ -315,15 +324,23 @@ export function JogoFase({
   const [aba, setAba] = useState<Aba>(() => (faseDaProp.programa ? "console" : "elementos"));
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
+  // O depurador da aba Fontes (pontos de parada, controles, Escopo, Observar e Pilha de chamadas).
+  const depurador = useDepurador({ fase, barramento, programa, editorRef: programa.editorSnippetRef, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   // Fase de circuito lógico: a bancada (o circuito é a fonte única de verdade dela).
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
+  // Fase de ordenar passos: o quadro (os cartões e o plano).
+  const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso });
+  // Estruturas e desempenho: ver como árvore, o contador de passos e o gráfico da aba Desempenho.
+  const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
   // Linha do tempo: o passo escolhido vale só para a execução em que foi escolhido (uma nova volta ao fim).
   const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
   const [escolhaDePasso, setEscolhaDePasso] = useState<{ de: typeof programa.ultimo; indice: number } | null>(null);
   const passosDoRastro = programa.ultimo?.passos ?? [];
-  const passoEscolhido = escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null;
+  // Pausado no depurador: o palco mostra o passo da pausa.
+  const pausaNoPalco = depurador.sessao && depurador.sessao.resultado === programa.ultimo ? depurador.sessao.pausa.indice : null;
+  const passoEscolhido = pausaNoPalco ?? (escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null);
   const indicePasso = passoEscolhido ?? passosDoRastro.length - 1;
   const passoNoPalco = passosDoRastro[indicePasso] ?? null;
   const fotoNoPalco = passoNoPalco?.memoria ?? programa.ultimo?.memoriaFinal ?? null;
@@ -353,6 +370,10 @@ export function JogoFase({
     [editorSnippetRef],
   );
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
+  /** Apresentação de uma ferramenta do depurador no celular: o que a aba Fontes mostra. */
+  const [pedidoFontes, setPedidoFontes] = useState<{ mostrar: "cima" | "depurador" | "baixo"; aba: AbaDepurador | null; vez: number } | null>(null);
+  /** Ponte circuito/Console no celular: a tabela verdade ou o Console. */
+  const [ladoDaPonte, setLadoDaPonte] = useState<"cima" | "baixo">("baixo");
   const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
   /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
   const paineis = fase.paineisElementos ?? [];
@@ -729,6 +750,14 @@ export function JogoFase({
       programa: fase.programa
         ? { executarNoConsole: programa.executarNoConsole, definirSnippet: programa.definirSnippet, executarSnippet: programa.executarSnippet }
         : undefined,
+      depurador: depurador.ativo
+        ? { alternarPontoDeParada: depurador.alternarPontoDeParada, controlar: depurador.controlar, observar: depurador.observar }
+        : undefined,
+      ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
+      estruturas:
+        estruturas.comArvore || estruturas.comGrafico
+          ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
+          : undefined,
       circuito: circuito.ativo
         ? {
             adicionarPortao: circuito.adicionarPortao,
@@ -740,6 +769,18 @@ export function JogoFase({
         : undefined,
     }),
     [
+      estruturas.comArvore,
+      estruturas.comGrafico,
+      estruturas.verComoArvore,
+      estruturas.medir,
+      ordenar.ativo,
+      ordenar.porPasso,
+      ordenar.tirarPasso,
+      ordenar.rodarPlano,
+      depurador.ativo,
+      depurador.alternarPontoDeParada,
+      depurador.controlar,
+      depurador.observar,
       circuito.ativo,
       circuito.adicionarPortao,
       circuito.ligarFio,
@@ -853,12 +894,20 @@ export function JogoFase({
     [alturaDeDesenho, larguraDeDesenho],
   );
   const { estadoValidacao: estadoDoPrograma } = programa;
+  const { estadoValidacao: estadoDoDepurador, ativo: depuradorAtivo } = depurador;
+  // O que fica salvo do programa: as entradas, o Snippet e, com o depurador, os pontos e o Observar.
+  const programaSalvo = useMemo(
+    () => (programa.programaSalvo && depurador.salvo ? { ...programa.programaSalvo, ...depurador.salvo } : programa.programaSalvo),
+    [depurador.salvo, programa.programaSalvo],
+  );
   const { circuitoAgora } = circuito;
+  const { ordenarAgora } = ordenar;
   const extraValidacao = useCallback(() => {
     const doSimulador = {
       ...(dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {}),
-      ...(fase.programa ? { programa: estadoDoPrograma() } : {}),
+      ...(fase.programa ? { programa: { ...estadoDoPrograma(), ...(depuradorAtivo ? { depurador: estadoDoDepurador() } : {}) } } : {}),
       ...(circuitoAgora() ? { circuito: circuitoAgora() ?? undefined } : {}),
+      ...(ordenarAgora() ? { ordenar: ordenarAgora() ?? undefined } : {}),
     };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
@@ -868,7 +917,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [circuitoAgora, comDispositivo, dadosCampanha, estadoDoPrograma, fase.programa, obterDocumento]);
+  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -901,9 +950,11 @@ export function JogoFase({
     toque,
     extraValidacao,
     destacarNoPrograma,
-    programaSalvo: programa.programaSalvo,
+    programaSalvo,
     destacarNoCircuito: circuito.setDestaque,
     circuitoSalvo: circuito.circuito,
+    destacarNoOrdenar: ordenar.setDestaque,
+    ordenarSalvo: ordenar.estado,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -1022,12 +1073,20 @@ export function JogoFase({
             ? "medicao"
             : ferramenta.id === "simulador-campanha"
               ? "campanha"
-              : ferramenta.id === "snippet"
+              : ferramenta.id === "snippet" || FERRAMENTAS_DO_DEPURADOR.includes(ferramenta.id)
                 ? "fontes"
-                : fase.programa
+                : ferramenta.id === "grafico-passos"
+                  ? "desempenho"
+                  : fase.programa
                   ? "console"
                   : "elementos",
     );
+    // No celular, o painel do depurador apresentado fica à vista (o botão Depurador e a aba dele).
+    if (movel && FERRAMENTAS_DO_DEPURADOR.includes(ferramenta.id)) {
+      const abaDoPainel: Partial<Record<IdFerramenta, AbaDepurador>> = { "painel-escopo": "escopo", "painel-observar": "observar", "pilha-de-chamadas": "pilha" };
+      const abaPedida = abaDoPainel[ferramenta.id] ?? null;
+      setPedidoFontes((anterior) => ({ mostrar: abaPedida ? "depurador" : "cima", aba: abaPedida, vez: (anterior?.vez ?? 0) + 1 }));
+    }
     if (ferramenta.id === "resultado-busca") setSubAbaBusca("resultado");
     if (ferramenta.id === "dados-estruturados") setSubAbaBusca("dados");
     // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
@@ -1142,16 +1201,37 @@ export function JogoFase({
     degrau: estado.degrau,
     htmlAtual,
     cssAtual,
-    obterPrograma: circuito.ativo
+    obterPrograma: ordenar.ativo
+      ? () => {
+          const quadro = ordenar.ordenarAgora();
+          if (!quadro) return null;
+          const texto = (id: string) => quadro.dados.cartoes.find((c) => c.id === id)?.texto ?? id;
+          const plano = ordemDoPlano(quadro.dados, quadro.estado).map((id, i) => `${i + 1}. ${texto(id)}`).join("\n");
+          const doCodigo = quadro.dados.rodar ? programa.contextoTutor() : null;
+          return {
+            codigo: `// O plano de "${quadro.dados.problema}", na ordem do jogador\n${plano || "(vazio)"}`,
+            erro: doCodigo?.erro ?? "",
+            variaveis: doCodigo?.variaveis ?? "",
+          };
+        }
+      : circuito.ativo
       ? () => {
           const atual = circuito.circuitoAgora();
           if (!atual) return null;
-          return {
+          const doCircuito = {
             codigo: `// O circuito da bancada, escrito como código\n${circuitoComoCodigo(atual)}`,
             erro: "",
             variaveis: entradasDo(atual)
               .map((peca) => `${peca.nome ?? peca.id} = ${peca.ligada ? "true" : "false"}`)
               .join("; "),
+          };
+          // Ponte circuito/Console: o tutor vê os dois.
+          const doConsole = programa.contextoTutor();
+          if (!doConsole) return doCircuito;
+          return {
+            codigo: [doCircuito.codigo, doConsole.codigo].filter(Boolean).join("\n\n"),
+            erro: doConsole.erro,
+            variaveis: [doCircuito.variaveis, doConsole.variaveis].filter(Boolean).join("; "),
           };
         }
       : programa.contextoTutor,
@@ -1552,97 +1632,23 @@ export function JogoFase({
           ? "desafio"
           : "projeto";
 
-  return (
-    <div
-      className="flex h-dvh flex-col overflow-hidden"
-      data-layout={layout}
-      data-jogo-fase={fase.id}
-      data-etapa={estado.etapa}
-      data-objetivo-atual={objetivoAtualId}
-      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
-      data-pronto={pronta ? "sim" : "nao"}
-      data-roteiro={estado.roteiro ?? "nenhum"}
-      style={movel && viewport.altura ? { height: viewport.altura } : undefined}
-    >
-      {movel ? (
-        <BarraSuperiorMovel
-          titulo={barra?.tituloMovel ?? `Unidade ${local.unidade.numero} › ${rotuloFase}`}
-          estrelas={semEstrelas ? null : estado.estrelas}
-          fina={layout === "paisagem"}
-          inicio={botaoMapa}
-          acaoFixa={botaoVoltar}
-          menu={
-            <>
-              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !semExtras && <BotaoGlossario noMenu />}
-              <SeletorTema />
-              <div data-manter-menu className="border-t-2 border-borda pt-2">
-                <AjustesSom />
-              </div>
-              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
-            </>
-          }
-        />
-      ) : (
-        <BarraSuperior
-          caminho={barra?.caminho ?? [local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
-          estrelas={semEstrelas ? null : estado.estrelas}
-          logo={<Mascote tamanho={34} />}
-          acoes={
-            <>
-              {botaoVoltar}
-              {botaoMapa}
-              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !semExtras && <BotaoGlossario />}
-              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
-            </>
-          }
-        />
-      )}
-      {layout === "retrato" && !viewport.tecladoAberto && (
-        <BarraObjetivosMovel
-          objetivos={objetivosNaTela}
-          concluidos={estado.concluidos}
-          ativo={objetivoAtivo}
-          checklist={
-            itensChecklist && checklist
-              ? {
-                  total: itensChecklist.length,
-                  resumo:
-                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
-                  lista: checklist,
-                }
-              : undefined
-          }
-        />
-      )}
-      <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
-        <section
-          aria-label="Painel"
-          className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}
-          onKeyDown={(evento) => {
-            const atalho = atalhoHistorico(evento);
-            if (!atalho || evento.defaultPrevented || focoTemDesfazerProprio(evento.target)) return;
-            evento.preventDefault();
-            if (atalho === "desfazer") desfazer();
-            else refazer();
-          }}
-        >
-          {circuito.ativo && circuito.circuito ? (
-            <AlvoFerramenta ids={["tabela-verdade"]} marcador="tabela-verdade" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
-              <PainelTabelaVerdade
-                circuito={circuito.circuito}
-                tabela={circuito.tabela}
-                testadas={circuito.testadas}
-                mostrarCodigo={circuito.mostrarCodigo}
-                aoAlternarCodigo={() => {
-                  tocarEfeito("clique");
-                  circuito.alternarCodigo();
-                }}
-                alvoBotao={(botao) => botao}
-              />
-            </AlvoFerramenta>
-          ) : (
+  const painelTabelaVerdade = circuito.ativo && circuito.circuito ? (
+    <AlvoFerramenta ids={["tabela-verdade"]} marcador="tabela-verdade" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+      <PainelTabelaVerdade
+        circuito={circuito.circuito}
+        tabela={circuito.tabela}
+        testadas={circuito.testadas}
+        mostrarCodigo={circuito.mostrarCodigo}
+        aoAlternarCodigo={() => {
+          tocarEfeito("clique");
+          circuito.alternarCodigo();
+        }}
+        alvoBotao={(botao) => botao}
+      />
+    </AlvoFerramenta>
+  ) : null;
+
+  const painelDevtools = (
           <AlvoFerramenta
             ids={["painel"]}
             marcador="painel"
@@ -1760,6 +1766,47 @@ export function JogoFase({
                     movel={movel}
                     ocupado={programa.ocupado}
                     aoFocar={aoFocarEditor}
+                    depurador={
+                      depurador.ativo && depurador.opcoesEditor
+                        ? {
+                            painel: (
+                              <PainelDepurador
+                                depurador={depurador}
+                                nomeSnippet={programa.nomeSnippet}
+                                codigo={programa.programaSalvo?.snippet ?? programa.snippetInicial}
+                                emAbas={movel}
+                                toque={toque}
+                                aoAbrirCard={abrirCard}
+                                abaPedida={pedidoFontes?.aba ? { aba: pedidoFontes.aba, vez: pedidoFontes.vez } : null}
+                              />
+                            ),
+                            pedido: pedidoFontes ? { mostrar: pedidoFontes.mostrar, vez: pedidoFontes.vez } : null,
+                            barra: <BarraControlesDepurador pausado={depurador.sessao !== null} aoControlar={depurador.controlar} grande aoAbrirCard={abrirCard} />,
+                            opcoesEditor: depurador.opcoesEditor,
+                            pausado: depurador.sessao !== null,
+                            aoPontoNoCursor: () => depurador.alternarPontoDeParada(programa.editorSnippetRef.current?.linhaDoCursor() ?? 1),
+                            alvoEditor: (editor) => (
+                              <AlvoFerramenta ids={["pontos-de-parada"]} marcador="pontos-de-parada" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                                {editor}
+                              </AlvoFerramenta>
+                            ),
+                          }
+                        : undefined
+                    }
+                  />
+                </div>
+              )}
+              {fase.programa?.desempenho && (
+                <div className={aba === "desempenho" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelDesempenho
+                    config={fase.programa.desempenho}
+                    medicoes={estruturas.medicoes}
+                    ocupado={programa.ocupado}
+                    aoMedir={() => {
+                      tocarEfeito("clique");
+                      estruturas.medir();
+                    }}
+                    aoAbrirCard={abrirCard}
                   />
                 </div>
               )}
@@ -1998,6 +2045,111 @@ export function JogoFase({
               </div>
             </Painel>
           </AlvoFerramenta>
+  );
+
+  return (
+    <div
+      className="flex h-dvh flex-col overflow-hidden"
+      data-layout={layout}
+      data-jogo-fase={fase.id}
+      data-etapa={estado.etapa}
+      data-objetivo-atual={objetivoAtualId}
+      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
+      data-pronto={pronta ? "sim" : "nao"}
+      data-roteiro={estado.roteiro ?? "nenhum"}
+      style={movel && viewport.altura ? { height: viewport.altura } : undefined}
+    >
+      {movel ? (
+        <BarraSuperiorMovel
+          titulo={barra?.tituloMovel ?? `Unidade ${local.unidade.numero} › ${rotuloFase}`}
+          estrelas={semEstrelas ? null : estado.estrelas}
+          fina={layout === "paisagem"}
+          inicio={botaoMapa}
+          acaoFixa={botaoVoltar}
+          menu={
+            <>
+              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !semExtras && <BotaoGlossario noMenu />}
+              <SeletorTema />
+              <div data-manter-menu className="border-t-2 border-borda pt-2">
+                <AjustesSom />
+              </div>
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
+            </>
+          }
+        />
+      ) : (
+        <BarraSuperior
+          caminho={barra?.caminho ?? [local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
+          estrelas={semEstrelas ? null : estado.estrelas}
+          logo={<Mascote tamanho={34} />}
+          acoes={
+            <>
+              {botaoVoltar}
+              {botaoMapa}
+              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !semExtras && <BotaoGlossario />}
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
+            </>
+          }
+        />
+      )}
+      {layout === "retrato" && !viewport.tecladoAberto && (
+        <BarraObjetivosMovel
+          objetivos={objetivosNaTela}
+          concluidos={estado.concluidos}
+          ativo={objetivoAtivo}
+          checklist={
+            itensChecklist && checklist
+              ? {
+                  total: itensChecklist.length,
+                  resumo:
+                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
+                  lista: checklist,
+                }
+              : undefined
+          }
+        />
+      )}
+      <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
+        <section
+          aria-label="Painel"
+          className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}
+          onKeyDown={(evento) => {
+            const atalho = atalhoHistorico(evento);
+            if (!atalho || evento.defaultPrevented || focoTemDesfazerProprio(evento.target)) return;
+            evento.preventDefault();
+            if (atalho === "desfazer") desfazer();
+            else refazer();
+          }}
+        >
+          {ordenar.ativo ? (
+            <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+              <PilhaDeCartoes quadro={ordenar} toque={toque} />
+            </AlvoFerramenta>
+          ) : circuito.ativo && circuito.circuito && !fase.programa ? (
+            painelTabelaVerdade
+          ) : circuito.ativo && circuito.circuito ? (
+            // Ponte circuito/Console (desafio com circuito e programa): a tabela em cima e o Console embaixo.
+            <div className="flex min-h-0 flex-1 flex-col gap-2" data-ponte-circuito-console>
+              {movel && (
+                <SeletorSegmentado
+                  rotulo="Mostrar no painel"
+                  opcoes={[
+                    { id: "cima", rotulo: "Tabela verdade" },
+                    { id: "baixo", rotulo: "Console" },
+                  ]}
+                  valor={ladoDaPonte}
+                  aoTrocar={setLadoDaPonte}
+                  className="w-full shrink-0"
+                />
+              )}
+              <div className="min-h-0 flex-1">
+                <PainelDividido rotulo="Redimensionar a tabela verdade e o Console" proporcaoInicial={0.42} mostrar={movel ? ladoDaPonte : "ambas"} cima={painelTabelaVerdade} baixo={painelDevtools} />
+              </div>
+            </div>
+          ) : (
+            painelDevtools
           )}
         </section>
         {layout === "retrato" && (
@@ -2015,12 +2167,16 @@ export function JogoFase({
           />
         )}
         <section
-          aria-label={circuito.ativo ? "Bancada do circuito" : fase.programa ? "Palco da memória" : "Tela do site"}
+          aria-label={ordenar.ativo ? "Plano de passos" : circuito.ativo ? "Bancada do circuito" : fase.programa ? "Palco da memória" : "Tela do site"}
           data-previa
           className={`flex min-h-0 min-w-0 flex-col ${classesTela}`}
           style={layout === "retrato" ? { flexBasis: `${proporcaoPrevia * 100}%` } : undefined}
         >
-          {circuito.ativo && circuito.circuito ? (
+          {ordenar.ativo ? (
+            <AlvoFerramenta ids={["quadro-de-passos"]} className="flex min-h-0 flex-1 flex-col">
+              <PlanoDePassos quadro={ordenar} linhas={programa.linhas} ocupado={programa.ocupado} toque={toque} />
+            </AlvoFerramenta>
+          ) : circuito.ativo && circuito.circuito ? (
             <AlvoFerramenta
               ids={["circuito"]}
               marcador="circuito"
@@ -2059,8 +2215,22 @@ export function JogoFase({
               classeMarcador="right-3 top-3"
               className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
             >
-              <PalcoMemoria foto={fotoNoPalco} anterior={fotoAnteriorNoPalco} passo={passoNoPalco} erro={programa.ultimo?.erro ?? null} />
-              {comLinhaDoTempo && (
+              <PalcoMemoria
+                foto={fotoNoPalco}
+                anterior={fotoAnteriorNoPalco}
+                passo={passoNoPalco}
+                erro={programa.ultimo?.erro ?? null}
+                arvores={estruturas.arvores}
+                contador={
+                  estruturas.contador && (
+                    <AlvoFerramenta ids={["contador-passos"]} marcador="contador-passos" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
+                      <ContadorPassos passos={estruturas.contador.passos} />
+                    </AlvoFerramenta>
+                  )
+                }
+              />
+              {depurador.ativo && <AvisoPausado depurador={depurador} />}
+              {comLinhaDoTempo && pausaNoPalco === null && (
                 <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
                   <LinhaDoTempo
                     passos={passosDoRastro}

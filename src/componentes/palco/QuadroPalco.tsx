@@ -1,7 +1,11 @@
 "use client";
 
+import { temFormaDeArvore } from "@/motor/estruturas";
 import type { EscopoPalco, QuadroPalco as Quadro, VariavelPalco } from "@/motor/palco";
 import { CaixinhaPalco } from "./CaixinhaPalco";
+
+/** (Ferramenta arvore-palco) As variáveis vistas como árvore, pelo nome. */
+export type ArvoresDoPalco = { abertas: ReadonlySet<string>; aoAlternar: (nome: string) => void } | null;
 
 type Props = {
   quadro: Quadro;
@@ -13,9 +17,10 @@ type Props = {
   faixa?: { texto: string; tom: "retorno" | "erro" } | null;
   /** É o quadro mais de dentro (a função que está rodando agora). */
   ativo: boolean;
+  arvores?: ArvoresDoPalco;
 };
 
-function Variaveis({ escopo, anteriores, novas, mudaram }: { escopo: EscopoPalco } & Pick<Props, "anteriores" | "novas" | "mudaram">) {
+function Variaveis({ escopo, anteriores, novas, mudaram, arvores = null }: { escopo: EscopoPalco } & Pick<Props, "anteriores" | "novas" | "mudaram" | "arvores">) {
   return (
     <div className="flex flex-wrap items-start gap-2">
       {escopo.variaveis.map((variavel) => (
@@ -25,6 +30,7 @@ function Variaveis({ escopo, anteriores, novas, mudaram }: { escopo: EscopoPalco
           anterior={anteriores.get(variavel.chave) ?? null}
           nova={novas.has(variavel.chave)}
           mudou={mudaram.has(variavel.chave)}
+          arvore={arvores && temFormaDeArvore(variavel.valor) ? { ativa: arvores.abertas.has(variavel.nome), aoAlternar: () => arvores.aoAlternar(variavel.nome) } : null}
         />
       ))}
     </div>
@@ -32,7 +38,7 @@ function Variaveis({ escopo, anteriores, novas, mudaram }: { escopo: EscopoPalco
 }
 
 /** Uma moldura de memória: a global, ou a de uma função enquanto ela roda (com os blocos dentro). */
-export function QuadroPalco({ quadro, anteriores, novas, mudaram, faixa = null, ativo }: Props) {
+export function QuadroPalco({ quadro, anteriores, novas, mudaram, faixa = null, ativo, arvores = null }: Props) {
   const global = quadro.chamada === 0;
   const [principal, ...blocos] = quadro.escopos;
   const vazio = quadro.escopos.every((escopo) => escopo.variaveis.length === 0);
@@ -57,12 +63,12 @@ export function QuadroPalco({ quadro, anteriores, novas, mudaram, faixa = null, 
         )}
       </header>
       {vazio && <p className="text-xs text-texto-suave">{global ? "Nenhuma variável ainda." : "Sem variáveis."}</p>}
-      {principal && <Variaveis escopo={principal} anteriores={anteriores} novas={novas} mudaram={mudaram} />}
+      {principal && <Variaveis escopo={principal} anteriores={anteriores} novas={novas} mudaram={mudaram} arvores={arvores} />}
       {blocos.map((bloco) =>
         bloco.variaveis.length === 0 ? null : (
           <div key={bloco.id} className="flex flex-col gap-1.5 rounded-xl border-2 border-dashed border-borda p-2" data-bloco-palco={bloco.id}>
             <span className="text-[10px] font-bold uppercase tracking-wide text-texto-suave">dentro do bloco</span>
-            <Variaveis escopo={bloco} anteriores={anteriores} novas={novas} mudaram={mudaram} />
+            <Variaveis escopo={bloco} anteriores={anteriores} novas={novas} mudaram={mudaram} arvores={arvores} />
           </div>
         ),
       )}

@@ -184,6 +184,32 @@ await rodar("new Date().toISOString()");
 conferir((await ultimaLinha()).texto.includes("2026-01-05T15:00:00.000Z"), `${MODO}: worker usa a data fixa pedida pelo Playwright`);
 conferir(await pagina.evaluate(() => new Date().getUTCFullYear()) === new Date().getUTCFullYear(), `${MODO}: o relógio da página continua real`);
 
+// ---------------------------------------------------------------- 6. um if digitado linha a linha
+// A chave fecha sozinha, Enter entre { e } abre um bloco indentado e o } digitado passa por cima
+// do que o Console já fechou (no toque, { e } vêm da barra de símbolos, como o jogador faria).
+if (movel) await fecharBalao(pagina);
+await entrada.click();
+await pagina.keyboard.type("let nota = 8");
+await pagina.keyboard.press("Enter");
+await esperarPronto(pagina);
+const simbolo = (texto) => consoleVisivel.locator("[data-barra-simbolos] button", { hasText: texto }).first();
+const chave = async (texto) => {
+  if (toque) await simbolo(texto).tap();
+  else await pagina.keyboard.type(texto);
+};
+await pagina.keyboard.type("if (nota >= 7) ");
+await chave("{");
+await pagina.keyboard.press("Enter");
+await pagina.keyboard.type("console.log('passou')");
+await pagina.keyboard.press("Enter");
+await chave("}");
+const digitado = await entrada.evaluate((no) => no.cmTile?.view?.state.doc.toString() ?? no.innerText);
+conferir(digitado === "if (nota >= 7) {\n  console.log('passou')\n}", `${MODO}: if linha a linha sem chave duplicada (${JSON.stringify(digitado)})`);
+await pagina.keyboard.press("Enter");
+await esperarPronto(pagina);
+const saidaDoIf = consoleVisivel.locator("[data-linha-console='saida-log']").last();
+conferir((await saidaDoIf.getAttribute("data-texto")) === "passou", `${MODO}: Enter no fim roda o if digitado`);
+
 const relevantes = errosRelevantes(erros);
 conferir(relevantes.length === 0, `${MODO}: console limpo (${relevantes.join(" | ")})`);
 await navegador.close();

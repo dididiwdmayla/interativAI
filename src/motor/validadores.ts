@@ -21,6 +21,10 @@ import type { EventoFase } from "./eventos";
 import { NOME_DO_PORTAO, portoesUsados, tabelaVerdade, type Circuito } from "./circuito/modelo";
 import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlobal } from "./programa";
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
+import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
+import { conferirOrdem, type DadosOrdenar, type EstadoOrdenar, ondeEsta } from "./ordenar/modelo";
+import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
+import { chaveMedicao, textoDePassos } from "./desempenho";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -45,6 +49,8 @@ export type ContextoValidacao = {
   programa?: EstadoPrograma;
   /** (Circuito lógico) O circuito de agora. */
   circuito?: Circuito;
+  /** (Ordenar passos) Os dados do quadro e onde está cada cartão agora. */
+  ordenar?: { dados: DadosOrdenar; estado: EstadoOrdenar };
 };
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
@@ -210,6 +216,28 @@ export function descreverValidador(validador: Validador): string {
       return `o circuito dá a tabela verdade pedida (${validador.esperado.length} linha(s))`;
     case "usouPortao":
       return `usou pelo menos ${validador.minimo ?? 1} portão ${NOME_DO_PORTAO[validador.portao]} ligado`;
+    case "pontoDeParada":
+      return `tem ponto de parada na linha ${validador.linha}`;
+    case "pausouNaLinha":
+      return `o depurador pausou na linha ${validador.linha}`;
+    case "observou":
+      return `o Observar tem ${validador.expressao}${validador.valor !== undefined ? ` e ela mostrou ${textoDoEsperado(validador.valor)} pausado` : ""}`;
+    case "usouControle":
+      return `usou ${DADOS_DO_CONTROLE[validador.controle].nome} pelo menos ${validador.minimo ?? 1} vez(es)`;
+    case "ordemValida":
+      return "o plano vale (todos os passos, nenhum que sobra, dependências respeitadas)";
+    case "passoNoPlano":
+      return `o passo ${validador.passo} está no plano${validador.grupo ? ` dentro de ${validador.grupo}` : ""}`;
+    case "passoAntes":
+      return `${validador.passo} vem antes de ${validador.antesDe} no plano`;
+    case "semSobras":
+      return "nenhum passo que sobra está no plano";
+    case "passosNoMaximo":
+      return validador.tamanho === undefined
+        ? `a última execução deu no máximo ${validador.valor} passos`
+        : `${validador.funcao ?? "a função medida"} dá no máximo ${validador.valor} passos com ${validador.tamanho} itens`;
+    case "formaDaEstrutura":
+      return `${validador.nome} é ${validador.forma === "arvore" ? "uma árvore" : `usada como ${validador.forma}`}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -474,7 +502,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou: teste.passou, descricao, detalhe };
     }
     case "circuitoTabela": {
-      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase com circuito" };
       const tabela = tabelaVerdade(contexto.circuito);
       const erradas: string[] = [];
       for (const linha of validador.esperado) {
@@ -499,9 +527,84 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou: erradas.length === 0, descricao, detalhe: erradas.length ? erradas.slice(0, 4).join("; ") : "todas as linhas batem" };
     }
     case "usouPortao": {
-      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase com circuito" };
       const usados = portoesUsados(contexto.circuito, validador.portao);
       return { passou: usados >= (validador.minimo ?? 1), descricao, detalhe: `${usados} ligado(s)` };
+    }
+    case "pontoDeParada": {
+      const pontos = contexto.programa?.depurador?.pontos ?? [];
+      return { passou: pontos.includes(validador.linha), descricao, detalhe: pontos.length ? `pontos nas linhas ${pontos.join(", ")}` : "nenhum ponto de parada" };
+    }
+    case "pausouNaLinha": {
+      const linhas = contexto.eventos.flatMap((evento) => (evento.tipo === "pausouNoDepurador" ? [evento.linha] : []));
+      return { passou: linhas.includes(validador.linha), descricao, detalhe: linhas.length ? `pausou nas linhas ${linhas.join(", ")}` : "não pausou" };
+    }
+    case "observou": {
+      const alvo = normalizarExpressao(validador.expressao);
+      const lista = contexto.programa?.depurador?.observacoes ?? [];
+      const naLista = lista.some((expressao) => normalizarExpressao(expressao) === alvo);
+      if (validador.valor === undefined) return { passou: naLista, descricao, detalhe: lista.length ? `Observar: ${lista.join(", ")}` : "o Observar está vazio" };
+      const vistos = contexto.eventos.flatMap((evento) => (evento.tipo === "observouValor" && normalizarExpressao(evento.expressao) === alvo ? [evento.valor] : []));
+      const esperado = validador.valor;
+      const passou = vistos.some((valor) => valor !== null && valorIgual(valor, esperado));
+      return { passou, descricao, detalhe: vistos.length ? `mostrou ${vistos.map((v) => (v ? textoPrevia(v) : "<indisponível>")).join(", ")}` : "não foi vista pausada" };
+    }
+    case "usouControle": {
+      const vezes = contexto.eventos.filter((evento) => evento.tipo === "usouControleDepurador" && evento.controle === validador.controle).length;
+      return { passou: vezes >= (validador.minimo ?? 1), descricao, detalhe: `usou ${vezes} vez(es)` };
+    }
+    case "ordemValida": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const conferencia = conferirOrdem(contexto.ordenar.dados, contexto.ordenar.estado);
+      return { passou: conferencia.valida, descricao, detalhe: conferencia.valida ? "o plano vale" : conferencia.motivo };
+    }
+    case "passoNoPlano": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const onde = ondeEsta(contexto.ordenar.estado, validador.passo);
+      const passou = onde !== null && (validador.grupo === undefined || onde.destino === validador.grupo);
+      return { passou, descricao, detalhe: onde ? `está em ${onde.destino}, posição ${onde.posicao + 1}` : "está fora do plano" };
+    }
+    case "passoAntes": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const { dados, estado } = contexto.ordenar;
+      const ordem = [...(dados.modo === "agrupar" ? (dados.grupos ?? []).map((g) => g.id) : ["plano"])].flatMap((d) => estado.listas[d] ?? []);
+      const a = ordem.indexOf(validador.passo);
+      const b = ordem.indexOf(validador.antesDe);
+      return { passou: a >= 0 && b >= 0 && a < b, descricao, detalhe: a < 0 || b < 0 ? "algum dos dois está fora do plano" : `posições ${a + 1} e ${b + 1}` };
+    }
+    case "semSobras": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };
+      const sobrando = conferirOrdem(contexto.ordenar.dados, contexto.ordenar.estado).sobrando;
+      return { passou: sobrando.length === 0, descricao, detalhe: sobrando.length ? `sobrando: ${sobrando.join(", ")}` : "nenhum" };
+    }
+    case "passosNoMaximo": {
+      if (validador.tamanho === undefined) {
+        const execucoes = execucoesDoObjetivo(contexto);
+        const ultima = execucoes[execucoes.length - 1];
+        if (!ultima) return { passou: false, descricao, detalhe: "nada rodou desde o começo do objetivo" };
+        return { passou: !ultima.erro && ultima.totalPassos <= validador.valor, descricao, detalhe: `${textoDePassos(ultima.totalPassos)} passos${ultima.erro ? `, com ${ultima.erro.nome || "erro"}` : ""}` };
+      }
+      const medicao = contexto.programa?.medicoes?.[chaveMedicao(validador.funcao ?? "", validador.tamanho)];
+      if (!medicao) return { passou: false, descricao, detalhe: "ainda não mediu (nada rodou ou a função não existe)" };
+      if (medicao.erro) return { passou: false, descricao, detalhe: medicao.erro };
+      return {
+        passou: !medicao.passouDoLimite && medicao.passos <= validador.valor,
+        descricao,
+        detalhe: medicao.passouDoLimite ? `passou de ${textoDePassos(medicao.passos)} passos (travaria)` : `${textoDePassos(medicao.passos)} passos`,
+      };
+    }
+    case "formaDaEstrutura": {
+      if (validador.forma === "arvore") {
+        const passou = ehArvore(contexto.programa?.memoria ?? null, validador.nome);
+        return { passou, descricao, detalhe: passou ? "objeto com filhos objetos" : `${validador.nome} não é um objeto com filhos objetos` };
+      }
+      const contagem = somarContagens(execucoesDoObjetivo(contexto).flatMap((execucao) => (execucao.estruturas[validador.nome] ? [execucao.estruturas[validador.nome]] : [])));
+      const forma = formaPelasContagens(contagem);
+      return {
+        passou: forma === validador.forma,
+        descricao,
+        detalhe: `entrou ${contagem.entraramFim} no fim e ${contagem.entraramInicio} no começo; saiu ${contagem.sairamFim} do fim e ${contagem.sairamInicio} do começo`,
+      };
     }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
@@ -647,7 +750,15 @@ export function validadorTravado(validador: Validador): boolean {
     case "semErro":
     case "erroDoTipo":
     case "usouSintaxe":
+    case "pausouNaLinha":
+    case "usouControle":
       return true;
+    case "passosNoMaximo":
+      return validador.tamanho === undefined;
+    case "formaDaEstrutura":
+      return validador.forma !== "arvore";
+    case "observou":
+      return validador.valor !== undefined;
     case "todos":
     case "algum":
       return validador.validadores.some(validadorTravado);

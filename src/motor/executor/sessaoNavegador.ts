@@ -7,11 +7,25 @@
  * estava antes da entrada que travou).
  */
 import type { PedidoExecutor, RespostaExecutor } from "./mensagens";
-import { LIMITES, type CasoFuncao, type OrigemCodigo, type ResultadoExecucao, type ResultadoTesteFuncao } from "./tipos";
+import {
+  LIMITES,
+  type CasoFuncao,
+  type FotoMemoria,
+  type MedicaoPassos,
+  type OrigemCodigo,
+  type ResultadoAvaliacao,
+  type ResultadoExecucao,
+  type ResultadoTesteFuncao,
+  type ValorEsperado,
+} from "./tipos";
 
 export interface SessaoExecutor {
   executar(codigo: string, origem: OrigemCodigo): Promise<ResultadoExecucao>;
   testarFuncao(nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao>;
+  /** O depurador pausado: avalia expressões na memória de um passo (sem mudar o programa). */
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]>;
+  /** O gráfico de desempenho: uma chamada de cada vez (cada uma com o tempo reserva dela). */
+  medirPassos(nome: string, chamadas: { tamanho: number; args: ValorEsperado[] }[]): Promise<MedicaoPassos[]>;
   /** Roda de novo, em silêncio, o que já tinha rodado (a memória volta como estava). */
   restaurar(entradas: { codigo: string; origem: OrigemCodigo }[]): Promise<void>;
   /** Começa do zero (memória vazia). */
@@ -98,6 +112,31 @@ export class SessaoNavegador implements SessaoExecutor {
       await this.recuperar();
       const erro = { tipo: "limite-tempo" as const, nome: "Parada do jogo", mensagem: "A função demorou demais e o jogo parou ela.", linha: null, coluna: null };
       return { nome, existe: true, passou: false, casos: casos.map((c) => ({ args: c.args, esperado: c.esperado, obtido: null, erro, passou: false })) };
+    });
+  }
+
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> {
+    return this.emFila(async () => {
+      if (!expressoes.length) return [];
+      const resposta = await this.enviar({ tipo: "avaliarNaFoto", expressoes, foto, quadro }, LIMITES.reservaMs);
+      if (resposta?.tipo === "avaliarNaFoto") return resposta.resultados;
+      await this.recuperar();
+      return expressoes.map((expressao) => ({ expressao, erro: "A expressão demorou demais e o jogo parou ela." }));
+    });
+  }
+
+  medirPassos(nome: string, chamadas: { tamanho: number; args: ValorEsperado[] }[]): Promise<MedicaoPassos[]> {
+    return this.emFila(async () => {
+      const medicoes: MedicaoPassos[] = [];
+      for (const chamada of chamadas) {
+        const resposta = await this.enviar({ tipo: "medirPassos", nome, chamadas: [chamada] }, LIMITES.reservaMs + LIMITES.tempoMedicaoMs);
+        if (resposta?.tipo === "medirPassos") medicoes.push(...resposta.medicoes);
+        else {
+          await this.recuperar();
+          medicoes.push({ funcao: nome, tamanho: chamada.tamanho, passos: LIMITES.passosMedicao, passouDoLimite: true, erro: null });
+        }
+      }
+      return medicoes;
     });
   }
 

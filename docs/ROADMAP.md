@@ -426,21 +426,50 @@ núcleo comum.
     leitura das caixinhas ao rebobinar e console limpo; publicar:conteudo,
     build, lint e bateria:conteudo em produção verdes. Um commit por unidade.
 
+- **Rodada 22: Ilha Lógica, parte B (motor)**:
+  - **Console e pendências da parte A:** o `}` fechado pelo Console passa
+    por cima, Enter entre chaves abre o bloco, `usouSintaxe` separa `else`
+    de `else-if`, `desafio` aceita circuito (com a ponte circuito/Console)
+    e o palco mostra o escopo de bloco (some quando o bloco termina).
+  - **Aba Fontes com depurador:** pontos de parada no número da linha e
+    `debugger;`, pausa antes da linha com o palco do momento, Retomar,
+    Passar por cima, Entrar e Sair com os atalhos do Chrome, painéis
+    Escopo, Observar e Pilha de chamadas, valor no hover; no celular,
+    barra de controles embaixo e painéis em abas. Validadores
+    `pontoDeParada`, `pausouNaLinha`, `observou`, `usouControle`.
+  - **Ordenar passos:** tipo de fase `ordenar-passos` com cartões,
+    dependências (qualquer ordem válida passa), distrações, agrupar e
+    plano de código que roda; mouse e toque.
+  - **Estruturas e desempenho no palco:** vagões pelo lado certo, leitura
+    e troca acesas, "Ver como árvore" com a ponte para Elementos,
+    contador de passos e aba Desempenho com o gráfico passos x tamanho.
+    Validadores `passosNoMaximo` e `formaDaEstrutura`.
+  - Demonstrações `/lab/fases?fase=lab-logica-u1-f3` a `f9`, guia (seções
+    26 a 28), zonas Resolvendo problemas, Depuração e Estruturas de dados
+    liberadas (só o `projeto-ponte-js` segue planejado).
+  - 12.614 testes unitários, lint, build e a bateria completa no build
+    de produção verdes (o arrasto com o dedo do `ordenar.mjs` agora para
+    no destino antes de soltar). Conteúdo publicado sem mudança.
+
 ### Em andamento
 
 (nada no momento)
 
 ### Pendências
 
-- **Ilha Lógica, parte B — incluir no trabalho de motor:**
-  - Fechamento automático de chaves no Console: conferir a digitação linha
-    a linha e avançar por cima do `}` já inserido. A U1 de Repetição explica
-    esse comportamento numa fala curta; o editor não foi alterado.
-  - `usouSintaxe` reconhecendo `else if`: hoje `else` só conta quando há
-    um else final; não existe a opção de sintaxe `else-if`.
-  - Tipo `desafio` aceitando circuito, inclusive a ponte circuito/Console.
-    Hoje o desafio recusa circuito e a fase de programa também. A catraca
-    montada da U2 de Decisões continua numa prática, com o desafio no Console.
+- **Lógica, parte B (rodada 22), para depois:**
+  - O depurador anda pelo rastro, que guarda até 1.000 fotos da memória:
+    num programa mais longo, as pausas depois disso não acontecem.
+  - O palco ainda não mostra as variáveis declaradas dentro de um `case`
+    do `switch` (o escopo de bloco cobre if, for, while e for...of).
+  - A troca com variável auxiliar aparece como duas escritas que piscam;
+    só a troca numa linha (desestruturação) acende "trocou".
+  - No celular, a aba Desempenho fica depois das abas trancadas (Elementos
+    e Rede) e pede rolar a barra de abas; as medições do gráfico não são
+    salvas no progresso (Medir de novo depois de recarregar).
+  - developer.chrome.com está bloqueado pela política de rede do ambiente
+    (os fatos do Chrome foram conferidos pela busca); vale reconferir os
+    textos de atalhos e painéis quando o acesso for liberado.
 
 - **Zona Decisões (rodada 20), para depois:**
   - Fases de circuito têm 3 chaves e até 3 saídas (8 linhas na tabela): a
@@ -507,13 +536,14 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: Ilha Lógica, parte B (Fontes com depurador, ordenar passos,
-   visualizador de árvore), que libera Resolvendo problemas, Depuração u2
-   e u3 e Estruturas de dados u3. Incluir as três pendências da parte B:
-   chaves do Console, usouSintaxe para else if e desafio com circuito.
-2. Depois: motores das outras ilhas (Origens: linha do tempo, comparador
-   de linguagens, diagrama; Páginas vivas; Rede e Servidor; IA ao vivo;
-   Ofício), intercalados com conteúdo, e a trilha Automação industrial a
+1. Conteúdo da Lógica, nas zonas, nesta ordem: Funções, Listas e
+   objetos, Resolvendo problemas, Algoritmos essenciais, Estruturas de
+   dados, Depuração e o projeto-ponte da Lógica (que pede o motor
+   `projeto-ponte-js`).
+2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
+   comparador de linguagens e diagrama).
+3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
+   ao vivo; Ofício), intercalados com conteúdo, e a trilha Automação industrial a
    partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha
    nova" no `PROJETO.md`).
 

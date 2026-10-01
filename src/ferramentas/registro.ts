@@ -35,6 +35,15 @@ import { IconePalcoMemoria } from "@/componentes/icones/IconePalcoMemoria";
 import { IconeSnippet } from "@/componentes/icones/IconeSnippet";
 import { IconeCircuito } from "@/componentes/icones/IconeCircuito";
 import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
+import { IconeControlesDepurador } from "@/componentes/icones/IconeControlesDepurador";
+import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
+import { IconeObservar } from "@/componentes/icones/IconeObservar";
+import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
+import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
+import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
+import { IconeArvorePalco } from "@/componentes/icones/IconeArvorePalco";
+import { IconeContadorPassos } from "@/componentes/icones/IconeContadorPassos";
+import { IconeGraficoPassos } from "@/componentes/icones/IconeGraficoPassos";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -933,6 +942,182 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       mouse: "Clique em Ver como código.",
       toque: "Toque em Ver como código.",
     },
+    uso: "sinal",
+  },
+  // Depurador da aba Fontes (Ilha Lógica, parte B). Nomes, gestos e atalhos conferidos na
+  // documentação do Chrome (developer.chrome.com: "Pause your code with breakpoints",
+  // "JavaScript debugging reference" e "Keyboard shortcuts").
+  "pontos-de-parada": {
+    id: "pontos-de-parada",
+    nome: "Ponto de parada",
+    Icone: IconePontoDeParada,
+    alvo: seletorFerramenta("pontos-de-parada"),
+    oQueFaz: "Marca uma linha do programa para ele parar ali, antes de rodar essa linha. A instrução debugger; no código faz o mesmo.",
+    praQueServe:
+      "O programa roda rápido demais para ver. Parado numa linha, dá para olhar cada variável naquele momento e descobrir onde o valor começa a ficar errado.",
+    comoUsarAqui: {
+      mouse: "Clique no número da linha, na aba Fontes: ele fica com uma etiqueta. Clique de novo para tirar. Ctrl+B marca a linha do cursor.",
+      toque: "Toque no número da linha, na aba Fontes: ele fica com uma etiqueta. Toque de novo para tirar.",
+    },
+    noF12DeVerdade:
+      "na aba Fontes (Sources), clique no número da linha: aparece um marcador azul. Ctrl+B (Cmd+B no Mac) marca a linha do cursor, e debugger; no código pausa do mesmo jeito.",
+    experimente: {
+      mouse: "Clique no número de uma linha do Snippet.",
+      toque: "Toque no número de uma linha do Snippet.",
+    },
+    uso: "sinal",
+  },
+  "controles-depurador": {
+    id: "controles-depurador",
+    nome: "Controles do depurador",
+    Icone: IconeControlesDepurador,
+    alvo: seletorFerramenta("controles-depurador"),
+    oQueFaz: "Com o programa pausado, andam com ele: Retomar, Passar por cima, Entrar na função e Sair da função.",
+    praQueServe:
+      "Passar por cima vai para a próxima linha; Entrar na função segue para dentro da função chamada; Sair volta para quem chamou; Retomar corre até o próximo ponto de parada.",
+    comoUsarAqui: {
+      mouse: "Use os botões em cima dos painéis do depurador: F8 retoma, F10 passa por cima, F11 entra e Shift+F11 sai (ou Ctrl+\\, Ctrl+', Ctrl+; e Ctrl+Shift+;).",
+      toque: "Use os botões da barra embaixo da aba Fontes, ou os de cima do palco, enquanto o programa está pausado.",
+    },
+    noF12DeVerdade:
+      "ficam no alto da barra lateral da aba Fontes: Retomar (F8 ou Ctrl+\\), Passar por cima (F10 ou Ctrl+'), Entrar (F11 ou Ctrl+;) e Sair (Shift+F11 ou Ctrl+Shift+;). No Mac, Cmd no lugar de Ctrl.",
+    experimente: {
+      mouse: "Clique na barra dos controles.",
+      toque: "Toque na barra dos controles.",
+    },
+    uso: "tocar",
+  },
+  "painel-escopo": {
+    id: "painel-escopo",
+    nome: "Painel Escopo",
+    Icone: IconeEscopo,
+    alvo: seletorFerramenta("painel-escopo"),
+    oQueFaz: "Com o programa pausado, lista as variáveis daquele momento: Local (da função), Bloco, Script e Global.",
+    praQueServe:
+      "Mostra que cada variável mora num lugar: o i do for só existe dentro do laço, e a variável de dentro da função some quando ela termina.",
+    comoUsarAqui: {
+      mouse: "Pause o programa num ponto de parada e olhe o painel Escopo. Os valores batem com as caixinhas do palco.",
+      toque: "Pause o programa num ponto de parada e abra a aba Escopo do depurador. Os valores batem com as caixinhas do palco.",
+    },
+    noF12DeVerdade:
+      "é o painel Scope da barra lateral da aba Fontes, com as seções Local, Block, Script e Global (no Chrome, Global também mostra tudo o que a página tem).",
+    experimente: {
+      mouse: "Clique no painel Escopo.",
+      toque: "Toque no painel Escopo.",
+    },
+    uso: "tocar",
+  },
+  "painel-observar": {
+    id: "painel-observar",
+    nome: "Painel Observar",
+    Icone: IconeObservar,
+    alvo: seletorFerramenta("painel-observar"),
+    oQueFaz: "Guarda expressões que você quer acompanhar, como total ou preco * 2, e mostra o valor delas a cada pausa.",
+    praQueServe:
+      "Em vez de procurar a variável toda vez, ela fica de olho para você: a cada passo, o valor da expressão aparece atualizado.",
+    comoUsarAqui: {
+      mouse: "No painel Observar, escreva a expressão no campo e aperte Enter. O x tira a expressão.",
+      toque: "Na aba Observar do depurador, escreva a expressão e toque em Adicionar. O x tira a expressão.",
+    },
+    noF12DeVerdade:
+      "é o painel Watch da aba Fontes: clique no + (Add watch expression), escreva e aperte Enter. Expressão que não existe naquele momento aparece como não disponível.",
+    experimente: {
+      mouse: "Clique no painel Observar.",
+      toque: "Toque no painel Observar.",
+    },
+    uso: "tocar",
+  },
+  "pilha-de-chamadas": {
+    id: "pilha-de-chamadas",
+    nome: "Pilha de chamadas",
+    Icone: IconePilhaChamadas,
+    alvo: seletorFerramenta("pilha-de-chamadas"),
+    oQueFaz: "Com o programa pausado, mostra as funções abertas: a de cima é a que roda agora, e embaixo dela, quem chamou.",
+    praQueServe:
+      "Responde \"como cheguei aqui?\": se a função dobro está em cima e o código de fora embaixo, foi a linha de fora que chamou dobro.",
+    comoUsarAqui: {
+      mouse: "Pause dentro de uma função e olhe a pilha. Clique numa linha da pilha para ver o Escopo e a linha daquela função.",
+      toque: "Pause dentro de uma função e abra a aba Pilha do depurador. Toque numa linha da pilha para ver o Escopo daquela função.",
+    },
+    noF12DeVerdade:
+      "é o painel Call Stack da aba Fontes. O código de cima de um snippet aparece como (anonymous), com o nome do snippet e a linha.",
+    experimente: {
+      mouse: "Clique na Pilha de chamadas.",
+      toque: "Toque na Pilha de chamadas.",
+    },
+    uso: "tocar",
+  },
+  // Ordenar passos (zona Resolvendo problemas): não é do Chrome, é como se planeja um programa.
+  "quadro-de-passos": {
+    id: "quadro-de-passos",
+    nome: "Quadro de passos",
+    Icone: IconeQuadroPassos,
+    alvo: seletorFerramenta("quadro-de-passos"),
+    oQueFaz: "Cartões com os passos de um problema: você arrasta cada um para o plano, na ordem em que eles têm que acontecer.",
+    praQueServe:
+      "Antes do código vem o plano. Às vezes dois passos podem trocar de lugar, às vezes um precisa do outro, e alguns cartões nem fazem parte da solução.",
+    comoUsarAqui: {
+      mouse: "Arraste um cartão pela alça até o plano, ou clique nele e depois no lugar do plano. As setas sobem e descem; o x tira do plano.",
+      toque: "Arraste um cartão pela alça até o plano, ou toque nele e depois no lugar do plano. As setas sobem e descem; o x tira do plano.",
+    },
+    noF12DeVerdade:
+      "não existe no F12: é o que programadores fazem no papel (ou num comentário) antes de escrever o código, e o que vira pseudocódigo.",
+    experimente: {
+      mouse: "Clique num cartão.",
+      toque: "Toque num cartão.",
+    },
+    uso: "tocar",
+  },
+  // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais).
+  "contador-passos": {
+    id: "contador-passos",
+    nome: "Contador de passos",
+    Icone: IconeContadorPassos,
+    alvo: seletorFerramenta("contador-passos"),
+    oQueFaz: "Conta quantos passos o programa deu: cada comando que rodou, inclusive cada volta de um laço.",
+    praQueServe:
+      "Dois programas podem dar a mesma resposta e um deles dar muito mais passos. É o primeiro jeito de comparar quem é mais rápido, sem cronômetro.",
+    comoUsarAqui: {
+      mouse: "Rode o programa e olhe o número no canto do palco.",
+      toque: "Rode o programa e olhe o número no canto do palco.",
+    },
+    noF12DeVerdade:
+      "o Chrome mede em milissegundos, não em passos: a aba Desempenho (Performance) grava o que a página fez, e console.time e console.timeEnd cronometram um trecho no Console.",
+    experimente: { mouse: "Clique no contador.", toque: "Toque no contador." },
+    uso: "tocar",
+  },
+  "grafico-passos": {
+    id: "grafico-passos",
+    nome: "Gráfico de passos",
+    Icone: IconeGraficoPassos,
+    alvo: seletorFerramenta("grafico-passos"),
+    oQueFaz: "Roda a mesma função com listas de tamanhos diferentes e desenha quantos passos ela deu em cada uma.",
+    praQueServe:
+      "Com 10 itens tudo parece rápido. O gráfico mostra o que acontece quando a lista cresce: se os passos crescem junto (reta) ou disparam (curva), que é o que trava com um milhão de itens.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Desempenho e clique em Medir. Cada linha é uma função; passe o mouse num ponto para ver o número.",
+      toque: "Abra a aba Desempenho e toque em Medir. Cada linha é uma função; toque num ponto para ver o número.",
+    },
+    noF12DeVerdade:
+      "o mais perto é a aba Desempenho (Performance) do Chrome, que grava o tempo de cada coisa. O gráfico daqui conta passos, que não mudam de um computador para o outro.",
+    experimente: { mouse: "Clique em Medir.", toque: "Toque em Medir." },
+    uso: "sinal",
+  },
+  "arvore-palco": {
+    id: "arvore-palco",
+    nome: "Ver como árvore",
+    Icone: IconeArvorePalco,
+    alvo: seletorFerramenta("arvore-palco"),
+    oQueFaz: "Desenha um objeto com filhos como uma árvore: cada objeto é um nó, ligado aos filhos dele.",
+    praQueServe:
+      "Objeto dentro de objeto fica difícil de ler em fichas. Como árvore, dá para ver quem é filho de quem e o caminho até cada nó. É a mesma ideia da árvore de Elementos do F12.",
+    comoUsarAqui: {
+      mouse: "Clique em Ver como árvore na caixinha do objeto. Clique de novo para voltar às fichas.",
+      toque: "Toque em Ver como árvore na caixinha do objeto. Toque de novo para voltar às fichas.",
+    },
+    noF12DeVerdade:
+      "a aba Elementos mostra a árvore da página (o DOM): o <html> tem o <head> e o <body> como filhos, e assim por diante. Uma árvore de dados no seu programa funciona igual.",
+    experimente: { mouse: "Clique em Ver como árvore.", toque: "Toque em Ver como árvore." },
     uso: "sinal",
   },
 };

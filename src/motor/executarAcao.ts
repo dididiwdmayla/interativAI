@@ -13,6 +13,7 @@ import { temClasseEsconder } from "@/lib/esconder";
 import type { OrigemSelecao } from "./eventos";
 import type { Utm } from "./medicao";
 import type { TipoPortao } from "./circuito/modelo";
+import type { ControleDepurador } from "./depurador";
 import { origemDaVia } from "./nucleoPainel";
 
 /** O que o executor precisa do painel. */
@@ -57,13 +58,33 @@ export type PainelDasAcoes = {
     definirSnippet: (codigo: string) => void;
     executarSnippet: () => void;
   };
-  /** (Circuito) A bancada: só existe numa fase circuito-logico. Devolve false se não deu (peça que não existe). */
+  /** (Circuito) A bancada: só existe numa fase circuito-logico ou num desafio com circuito. Devolve false se não deu (peça que não existe). */
   circuito?: {
     adicionarPortao: (portao: TipoPortao, id: string, lugar?: { x: number; y: number }) => boolean;
     ligarFio: (de: string, para: string, porta: number) => boolean;
     alternarEntrada: (entrada: string, ligada?: boolean) => boolean;
     apagarPeca: (id: string) => boolean;
     verComoCodigo: () => void;
+  };
+  /**
+   * (Depurador) Pontos de parada, controles e o painel Observar: só numa fase
+   * com o depurador. `controlar` devolve false se o programa não está pausado.
+   */
+  depurador?: {
+    alternarPontoDeParada: (linha: number) => void;
+    controlar: (controle: ControleDepurador) => boolean;
+    observar: (expressao: string) => void;
+  };
+  /** (Ordenar) O quadro de passos: só numa fase ordenar-passos. Devolve false se o cartão (ou o grupo) não existe. */
+  ordenar?: {
+    porPasso: (passo: string, posicao?: number, grupo?: string) => boolean;
+    tirarPasso: (passo: string) => boolean;
+    rodarPlano: () => boolean;
+  };
+  /** (Estruturas e desempenho) Ver como árvore e o Medir da aba Desempenho: só nas fases com as ferramentas. */
+  estruturas?: {
+    verComoArvore?: (nome: string) => boolean;
+    medirDesempenho?: () => boolean;
   };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
@@ -152,6 +173,22 @@ export function descreverAcao(acao: Acao): string {
       return `apagarPeca ${acao.id}`;
     case "verComoCodigo":
       return "verComoCodigo";
+    case "alternarPontoDeParada":
+      return `alternarPontoDeParada linha ${acao.linha}`;
+    case "controlarDepurador":
+      return `controlarDepurador ${acao.controle}`;
+    case "observar":
+      return `observar ${JSON.stringify(acao.expressao)}`;
+    case "porPasso":
+      return `porPasso ${acao.passo}${acao.grupo ? ` em ${acao.grupo}` : ""}${acao.posicao !== undefined ? ` na posição ${acao.posicao}` : ""}`;
+    case "tirarPasso":
+      return `tirarPasso ${acao.passo}`;
+    case "rodarPlano":
+      return "rodarPlano";
+    case "verComoArvore":
+      return `verComoArvore ${acao.nome}`;
+    case "medirDesempenho":
+      return "medirDesempenho";
   }
 }
 
@@ -411,7 +448,7 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "apagarPeca":
     case "verComoCodigo": {
       const bancada = painel.circuito;
-      if (!bancada) throw new ErroAcao(`${acao.tipo} só existe numa fase circuito-logico`);
+      if (!bancada) throw new ErroAcao(`${acao.tipo} só existe numa fase com circuito (circuito-logico ou desafio com circuito)`);
       let deu = true;
       if (acao.tipo === "adicionarPortao") deu = bancada.adicionarPortao(acao.portao, acao.id, acao.x !== undefined && acao.y !== undefined ? { x: acao.x, y: acao.y } : undefined);
       else if (acao.tipo === "ligarFio") deu = bancada.ligarFio(acao.de, acao.para, acao.porta ?? 0);
@@ -419,6 +456,37 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       else if (acao.tipo === "apagarPeca") deu = bancada.apagarPeca(acao.id);
       else bancada.verComoCodigo();
       if (!deu) throw new ErroAcao(`não deu para ${descreverAcao(acao)} (peça ou porta que não existe?)`);
+      return;
+    }
+    case "alternarPontoDeParada":
+    case "controlarDepurador":
+    case "observar": {
+      const depurador = painel.depurador;
+      if (!depurador) throw new ErroAcao(`${acao.tipo} só existe numa fase com o depurador (programa.snippet e as ferramentas do depurador)`);
+      if (acao.tipo === "alternarPontoDeParada") depurador.alternarPontoDeParada(acao.linha);
+      else if (acao.tipo === "observar") depurador.observar(acao.expressao);
+      else if (!depurador.controlar(acao.controle)) throw new ErroAcao(`${acao.controle}: o depurador não está pausado (rode o Snippet com um ponto de parada antes)`);
+      return;
+    }
+    case "porPasso":
+    case "tirarPasso":
+    case "rodarPlano": {
+      const quadro = painel.ordenar;
+      if (!quadro) throw new ErroAcao(`${acao.tipo} só existe numa fase ordenar-passos`);
+      const deu = acao.tipo === "porPasso" ? quadro.porPasso(acao.passo, acao.posicao, acao.grupo) : acao.tipo === "tirarPasso" ? quadro.tirarPasso(acao.passo) : quadro.rodarPlano();
+      if (!deu) throw new ErroAcao(acao.tipo === "rodarPlano" ? "rodarPlano pede ordenar.rodar e programa na fase" : `não deu para ${descreverAcao(acao)} (cartão ou grupo que não existe?)`);
+      return;
+    }
+    case "verComoArvore": {
+      const ver = painel.estruturas?.verComoArvore;
+      if (!ver) throw new ErroAcao("verComoArvore pede a ferramenta arvore-palco em usaFerramentas");
+      if (!ver(acao.nome)) throw new ErroAcao(`${acao.nome} não é (ainda) um objeto com filhos objetos para ver como árvore`);
+      return;
+    }
+    case "medirDesempenho": {
+      const medir = painel.estruturas?.medirDesempenho;
+      if (!medir) throw new ErroAcao("medirDesempenho pede a ferramenta grafico-passos e programa.desempenho");
+      if (!medir()) throw new ErroAcao("não deu para medir (a fase não tem programa.desempenho?)");
       return;
     }
   }

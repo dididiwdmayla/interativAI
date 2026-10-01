@@ -1292,7 +1292,10 @@ Modelo: a demonstração do `/lab/fases?fase=lab-motor-u1-f7`
 Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
 `src/conteudo/ilhas/logica/primeiros-comandos/unidade-1/`). As bancadas
 `/lab/fases?fase=lab-logica-u1-f1` (Console, Snippet, palco) e
-`lab-logica-u1-f2` (circuito) mostram tudo ao vivo.
+`lab-logica-u1-f2` (circuito) mostram tudo ao vivo. As outras
+demonstrações da Bancada da Lógica: `f3` (desafio com circuito e ponte
+circuito/Console), `f4` (depurador, seção 26), `f5` a `f7` (ordenar
+passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28).
 
 ### 25.1 O executor
 
@@ -1330,8 +1333,13 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
   `"palco-memoria"`; `"linha-do-tempo"` e `"snippet"` quando a fase usar.
 - `programa.snippet` (`codigoInicial`, `nome`) põe o editor de Fontes >
   Snippets com Executar, para programas de várias linhas. Sem ele, o
-  jogador escreve várias linhas no Console com Shift+Enter (no toque, o
-  botão de nova linha da barra de símbolos).
+  jogador escreve várias linhas no Console, como no Chrome: `{` fecha
+  sozinha; Enter com o cursor no meio (entre `{` e `}`) ou com o código
+  incompleto pula linha e indenta; com o cursor no fim e o código completo,
+  roda. Digitar o `}` que o Console já fechou passa por cima dele (não
+  duplica). Shift+Enter sempre pula linha e Ctrl+Enter (Cmd+Enter) roda de
+  qualquer jeito. No toque vale o mesmo, com a tecla Enter do teclado, a
+  barra de símbolos (que digita `{` e `}` como o teclado) e o botão Rodar.
 - `programa.preparo`: código que roda escondido quando a fase abre, para a
   memória já começar com algo (a lista do desafio, por exemplo).
 - A linha de ajuda aponta `{ alvo: "console", fala }` ou
@@ -1371,13 +1379,17 @@ olham a memória de agora.
   Console responde se...?" combina com ele.
 - `usouSintaxe` sozinho não prova nada; combine com um validador de
   resultado (`todos`). Exemplo: `valorVariavel` + `usouSintaxe: "let"`.
-- `usouSintaxe: "else"` só vale para um `else` final: um `else if` sem
-  `else` não conta (use `if` nesse caso). Para provar qual caminho de um
-  if/else rodou, prefira `saida` com `igual` (nunca os dois); para provar
-  um bug que pode ser refeito (como o `;` depois do `if`), prefira o
-  estado (`valorVariavel`).
-- Programas de várias linhas no Console: o editor fecha `}` ao digitar `{`;
-  nos testes de navegador o código entra como texto colado.
+- `else` e `else if` são sintaxes separadas: `usouSintaxe: "else"` é o
+  `else` final (o "senão" sem condição) e `usouSintaxe: "else-if"` é o
+  `else if`. Uma cadeia `if / else if / else` conta as três; um `if` dentro
+  do bloco de um `else` não é `else if` (conta `else`). Para provar qual
+  caminho de um if/else rodou, prefira `saida` com `igual` (nunca os dois);
+  para provar um bug que pode ser refeito (como o `;` depois do `if`),
+  prefira o estado (`valorVariavel`).
+- Programas de várias linhas no Console: o editor fecha `}` ao digitar `{`
+  e o `}` digitado passa por cima dele (25.2); nos testes de navegador o
+  código entra como texto colado, ou digitado linha a linha
+  (`testes/console.mjs`).
 - Para o erro: `erroDoTipo` no objetivo que faz o erro acontecer, e a fala
   ao concluir explica a mensagem (a primeira palavra diz o tipo, o resto
   diz o motivo).
@@ -1400,6 +1412,12 @@ olham a memória de agora.
   outra variável aponta a MESMA lista, ela vira uma seta até lá (é assim
   que o jogo ensina referência). Cada chamada de função abre um quadro
   próprio, que some quando ela devolve.
+- Escopo de bloco, como no JavaScript de verdade: `let` e `const` de
+  dentro de um bloco (o `i` do `for`, a variável de dentro do `if`, do
+  `while` ou do `for...of`) aparecem numa caixa tracejada "dentro do
+  bloco" e somem do palco quando o bloco termina. Dentro de função, o
+  bloco fica dentro do quadro dela. (O `switch` ainda não mostra as
+  variáveis declaradas nos `case`.)
 - A linha do tempo (`"linha-do-tempo"`) deixa voltar e avançar a última
   execução passo a passo. Cada passo mostra a memória ANTES da linha
   marcada rodar, como o depurador do Chrome pausado nela. Com três linhas
@@ -1442,6 +1460,16 @@ olham a memória de agora.
   arrastar da saída até a entrada.
 - Ferramentas: `"circuito"` e `"tabela-verdade"`. Primeira unidade que usa:
   `logica-decisoes-u2` (portões lógicos, logo depois do if).
+- **Desafio com circuito:** um `desafio` aceita o campo `circuito` (o mesmo
+  `DadosCircuito`); as partes usam `circuitoTabela` e `usouPortao` e as
+  soluções, as ações da bancada. A meta mostra a bancada antes e depois.
+  Com `circuito` e `programa` juntos é a **ponte circuito/Console**: a
+  bancada é a tela e o painel tem a tabela verdade em cima e o Console
+  embaixo (no celular, um seletor "Tabela verdade | Console"); as partes
+  misturam validadores de circuito e de código (`valorVariavel`,
+  `usouSintaxe`...). Na ponte não há palco: `usaFerramentas` leva
+  `circuito`, `tabela-verdade` e `console`, sem `palco-memoria` nem
+  `linha-do-tempo`. Modelo: `/lab/fases?fase=lab-logica-u1-f3`.
 
 ### 25.8 A unidade-modelo
 
@@ -1460,3 +1488,127 @@ Console no lugar do painel Elementos:
 - Teste de navegador: `testes/logica.mjs` (a jornada pelo mapa, com
   recarga no meio da fase 2).
 
+## 26. Depurador da aba Fontes
+
+Modelo: `/lab/fases?fase=lab-logica-u1-f4` (desconto.js). Zona que usa:
+Depuração. O motor mora em `src/motor/depurador.ts`.
+
+- **Quando existe:** fase de programa com `programa.snippet` e alguma das
+  ferramentas `"pontos-de-parada"`, `"controles-depurador"`,
+  `"painel-escopo"`, `"painel-observar"` e `"pilha-de-chamadas"` (a regra
+  `depurador` confere). O Snippet ganha os números de linha clicáveis e,
+  embaixo (no celular, no botão Depurador da aba Fontes), os painéis
+  Escopo, Observar, Pilha de chamadas e Pontos de parada.
+- **Como no Chrome** (Sources): clicar no número da linha põe ou tira o
+  ponto de parada (Ctrl+B / Cmd+B na linha do cursor); `debugger;` no
+  código pausa do mesmo jeito. Executar pausa ANTES da linha marcada
+  rodar: aparece "Pausado no depurador", a linha acende, o palco mostra a
+  memória daquele momento e o Snippet fica só de leitura. Ponto numa linha
+  sem código (chave, comentário) vale para a próxima linha com código.
+- **Controles:** Retomar (F8), Passar por cima (F10), Entrar na função
+  (F11) e Sair da função (Shift+F11), com os atalhos de Ctrl (Cmd no Mac)
+  do Chrome. No celular, numa barra grande embaixo.
+- **Painéis:** Escopo (Local, Bloco, Script e Global, como no Chrome),
+  Observar (expressões avaliadas no momento pausado, numa cópia: observar
+  não muda o programa) e Pilha de chamadas (a de cima é a que roda agora).
+  Com o mouse parado em cima de uma variável, o valor aparece. O Console,
+  pausado, responde no momento pausado.
+- **Validadores:** `pontoDeParada` (`linha`: tem ponto ali agora),
+  `pausouNaLinha` (`linha`: pausou ali desde o começo do objetivo, trava),
+  `observou` (`expressao`, e com `valor`, mostrou esse valor numa pausa,
+  trava) e `usouControle` (`controle`: `retomar`, `passar-por-cima`,
+  `entrar`, `sair`; `minimo`, trava). Para provar que o jogador entendeu
+  o momento, combine o controle com o que ele mostra (`todos` com
+  `usouControle` e `observou` com `valor`, como no modelo).
+- **Ações:** `alternarPontoDeParada` (`linha`), `controlarDepurador`
+  (`controle`) e `observar` (`expressao`). Eventos:
+  `alternouPontoDeParada`, `pausouNoDepurador`, `usouControleDepurador`,
+  `adicionouObservacao` e `observouValor`.
+- **Previsão casa bem:** "na primeira pausa na linha 8, quanto vale
+  total?" (resposta: o valor de ANTES da linha). É a confusão número um.
+- **Limite:** o depurador anda pelo rastro da execução, que guarda até
+  1.000 fotos da memória; num programa mais longo que isso, as pausas
+  depois da milésima foto não acontecem (o aviso "rastro cortado" da linha
+  do tempo vale aqui também). Programas de depuração devem ser curtos.
+
+## 27. Ordenar passos
+
+Modelos: `/lab/fases?fase=lab-logica-u1-f5` (café: dependências e
+distração), `f6` (agrupar) e `f7` (plano de código que roda). Zona que
+usa: Resolvendo problemas. O motor mora em `src/motor/ordenar/modelo.ts`.
+
+- **Tipo de fase**, não objetivo: `tipo: "ordenar-passos"`
+  (`FaseOrdenarPassos`), com objetivos como numa prática, `siteAlvo:
+  SITE_DO_PROGRAMA`, a ferramenta `"quadro-de-passos"` e o campo
+  `ordenar` (`DadosOrdenar`). Decidido assim porque o quadro é a tela
+  inteira da fase (como a bancada do circuito), não um painel a mais.
+- **Cartões** (`cartoes`): `id` em kebab-case, `texto` (até 80
+  caracteres), `depoisDe` (os ids que precisam vir antes), `sobra: true`
+  (distração: tem que ficar fora) e, no agrupar, `grupo`. `inicial` põe
+  cartões já no plano (bom para uma distração que o jogador precisa tirar).
+- **Validação pelas dependências:** `ordemValida` aceita QUALQUER ordem
+  que respeite os `depoisDe` (nunca uma ordem decorada). Escreva só as
+  dependências de verdade: se ferver a água e pôr o filtro não dependem
+  um do outro, as duas ordens valem. A checagem recusa ciclo, dependência
+  que não existe e dependência numa distração.
+- **Agrupar** (`modo: "agrupar"` com `grupos`): os passos grandes já estão
+  no quadro e cada subpasso vai dentro do seu. Dependência entre grupos
+  segue a ordem dos grupos.
+- **Plano que roda** (`rodar: true` com `programa`): cada cartão é uma
+  linha de código (`codigo`, ou o `texto`), e Rodar executa o plano na
+  ordem, com memória nova. Os validadores de código (`saida`,
+  `valorVariavel`, `semErro`...) valem; a ordem errada dá o erro de
+  verdade (usar antes de criar).
+- **Validadores:** `ordemValida`, `passoNoPlano` (`passo`, `grupo`),
+  `passoAntes` (`passo`, `antesDe`) e `semSobras`. **Ações:** `porPasso`
+  (`passo`, `posicao`, `grupo`), `tirarPasso` e `rodarPlano`. Evento:
+  `moveuPasso`.
+- **Mouse e toque:** arrastar pela alça (o cartão segue o dedo ou o
+  mouse); ou tocar no cartão e depois em "Pôr aqui"; setas para subir e
+  descer. A linha de ajuda aponta a ferramenta `quadro-de-passos`.
+
+## 28. Estruturas e desempenho
+
+Modelos: `/lab/fases?fase=lab-logica-u1-f8` (pilha, fila, árvore e o
+bolha.js) e `f9` (contador e gráfico de passos). Zonas que usam:
+Estruturas de dados e Algoritmos essenciais. Motor:
+`src/motor/estruturas.ts` e `src/motor/desempenho.ts`.
+
+- **Palco de listas (sempre ligado):** o vagão que entra pelo fim (push)
+  chega pela direita e o que sai pelo fim (pop) sai pela direita; pelo
+  começo (unshift, shift), pela esquerda. Andando pela linha do tempo ou
+  pelo depurador, o vagão que a linha anterior LEU acende ("2 leu") e
+  uma troca de duas posições numa linha só (`[a[i], a[j]] = [a[j],
+  a[i]]`) acende os dois ("trocou"). Com uma variável auxiliar, a troca
+  vira duas escritas, e cada vagão escrito pisca no seu passo.
+- **Ver como árvore** (`"arvore-palco"`): a caixinha de um objeto com
+  filhos objetos (ou listas de objetos) ganha o botão "Ver como árvore". O
+  rótulo de cada nó é o campo `nome` (ou `valor`, `texto`, `titulo`...);
+  dentro de uma função, o nó que ela está olhando fica aceso (o percurso
+  acontecendo). Embaixo, a ponte para a árvore de Elementos do F12.
+- **Contador de passos** (`"contador-passos"`): no canto do palco, os
+  passos da última execução (cada linha executada, inclusive cada volta
+  de laço).
+- **Gráfico passos x tamanho** (`"grafico-passos"` com
+  `programa.desempenho`): a aba Desempenho (simulação: a do Chrome mede
+  tempo) roda cada função com listas de vários tamanhos e desenha uma
+  linha por função. `desempenho`: `funcoes` (1 ou 2, `{ nome, args? }`;
+  nos `args`, `"$lista"` vira a lista do tamanho e `"$tamanho"`, o
+  número; sem `args`, a função recebe só a lista), `tamanhos` (2 a 6,
+  crescentes, até 5000; padrão 10, 100, 500 e 1000) e `lista`
+  (`crescente`, `decrescente` ou `embaralhada`, sempre a mesma). Acima de
+  2 milhões de passos a medida para e o ponto diz "travaria".
+- **Validadores:** `passosNoMaximo` sem `tamanho` (a última execução do
+  objetivo deu no máximo `valor` passos; pede `contador-passos`) e com
+  `tamanho` (a função, `funcao` ou a primeira do `desempenho`, com a lista
+  desse tamanho, medida de novo a cada execução: o jogador melhora o
+  algoritmo, não decora). `formaDaEstrutura` (`nome`, `forma`): `pilha`
+  (entrou e saiu pelo mesmo lado) ou `fila` (entrou por um, saiu pelo
+  outro), contando as execuções do objetivo, ou `arvore` (agora é um
+  objeto com filhos objetos; pede `arvore-palco`).
+- **Ações:** `verComoArvore` (`nome`) e `medirDesempenho`. Eventos:
+  `viuComoArvore` e `mediuDesempenho` (use `{ tipo: "evento", evento:
+  "mediuDesempenho" }` para o objetivo de medir).
+- **Previsão casa bem:** "se a lista ficar 50 vezes maior, os passos
+  crescem quanto?". O gráfico responde: a reta cresce junto, a curva
+  dispara.

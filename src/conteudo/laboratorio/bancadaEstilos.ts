@@ -11,7 +11,7 @@
  * progresso e não é publicada. As checagens da fábrica rodam nela mesmo
  * assim (testes/conteudo/css.test.ts), para ela não apodrecer.
  */
-import type { FaseCircuitoLogico, FasePratica, FaseSimuladorCampanha, Unidade } from "../tipos";
+import type { Fase, FasePratica, Unidade } from "../tipos";
 import { FASE_BANCADA_BUSCA } from "./bancadaBusca";
 import { FASE_DEMO_CAMPANHA } from "./demoCampanha";
 import { FASE_BANCADA_DOCUMENTO } from "./bancadaDocumento";
@@ -190,7 +190,7 @@ export const FASE_BANCADA_ESTILOS: FasePratica = {
 };
 
 /** Fases de laboratório, na ordem em que aparecem no /lab/fases. */
-export const FASES_LABORATORIO: readonly (FasePratica | FaseSimuladorCampanha | FaseCircuitoLogico)[] = [
+export const FASES_LABORATORIO: readonly Fase[] = [
   FASE_BANCADA_ESTILOS,
   FASE_BANCADA_DOCUMENTO,
   FASE_BANCADA_VARIAVEIS,

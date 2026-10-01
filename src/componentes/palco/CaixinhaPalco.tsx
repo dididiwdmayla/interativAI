@@ -1,10 +1,18 @@
 "use client";
 
 import { NOME_DO_TIPO, tipoDoNo, type VariavelPalco } from "@/motor/palco";
+import { ArvorePalco } from "./ArvorePalco";
 import { COR_DO_TIPO } from "./coresDoTipo";
 import { ValorPalco } from "./ValorPalco";
 
-type Props = { variavel: VariavelPalco; anterior: VariavelPalco | null; nova: boolean; mudou: boolean };
+type Props = {
+  variavel: VariavelPalco;
+  anterior: VariavelPalco | null;
+  nova: boolean;
+  mudou: boolean;
+  /** (Ferramenta arvore-palco) O objeto tem filhos objetos: o botão "Ver como árvore". */
+  arvore?: { ativa: boolean; aoAlternar: () => void } | null;
+};
 
 const ROTULO_DECLARACAO: Record<VariavelPalco["declaracao"], string> = {
   let: "let",
@@ -16,7 +24,7 @@ const ROTULO_DECLARACAO: Record<VariavelPalco["declaracao"], string> = {
 };
 
 /** Uma variável: a etiqueta com o nome, a caixinha com o valor e a plaquinha do tipo. */
-export function CaixinhaPalco({ variavel, anterior, nova, mudou }: Props) {
+export function CaixinhaPalco({ variavel, anterior, nova, mudou, arvore = null }: Props) {
   const tipo = tipoDoNo(variavel.valor);
   const cor = COR_DO_TIPO[tipo];
   const animacao = nova ? "palco-surgir" : mudou ? "palco-piscar" : "";
@@ -33,10 +41,23 @@ export function CaixinhaPalco({ variavel, anterior, nova, mudou }: Props) {
         <span className="min-w-0 truncate font-mono text-sm font-black text-texto">{variavel.nome}</span>
         <span className="text-[10px] font-bold uppercase tracking-wide text-texto-suave">{ROTULO_DECLARACAO[variavel.declaracao]}</span>
         <span className="flex-1" />
+        {arvore && (
+          <span data-ferramenta="arvore-palco" className="inline-flex">
+            <button
+              type="button"
+              onClick={arvore.aoAlternar}
+              aria-pressed={arvore.ativa}
+              className="rounded-full border-2 border-js-objeto px-1.5 text-[10px] font-black text-js-objeto hover:bg-hover pointer-coarse:min-h-9 pointer-coarse:px-2.5"
+              data-ver-como-arvore={variavel.nome}
+            >
+              {arvore.ativa ? "Ver como fichas" : "Ver como árvore"}
+            </button>
+          </span>
+        )}
         <span className={`rounded-full border px-1.5 text-[10px] font-bold ${cor.texto} ${cor.borda}`}>{NOME_DO_TIPO[tipo]}</span>
       </div>
       <div className="min-w-0 px-2 py-1.5">
-        <ValorPalco no={variavel.valor} anterior={anterior?.valor ?? null} />
+        {arvore?.ativa ? <ArvorePalco no={variavel.valor} /> : <ValorPalco no={variavel.valor} anterior={anterior?.valor ?? null} />}
       </div>
     </div>
   );

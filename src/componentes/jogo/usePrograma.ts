@@ -16,8 +16,9 @@ import type { Barramento } from "@/motor/barramento";
 import { textoDoErro } from "@/motor/executor/erros";
 import { textoPrevia } from "@/motor/executor/formatar";
 import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
-import type { ErroExecucao, OrigemCodigo, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
-import { chaveFuncaoPassa, type EstadoPrograma, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
+import type { ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
+import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
+import { chamadasDaMedicao } from "@/motor/desempenho";
 
 export type LinhaConsole =
   | { id: number; tipo: "entrada"; codigo: string }
@@ -32,6 +33,21 @@ type LinhaSemId = DistribuirLinha<LinhaConsole>;
 /** Linhas guardadas no Console (as mais antigas saem). */
 const MAXIMO_LINHAS = 400;
 
+/**
+ * Os ganchos do depurador (useDepurador) na sessão: o Snippet que pausa
+ * fica "segurado" (as saídas do console aparecem aos poucos e o
+ * `executouCodigo` só sai quando o programa termina) e o Console, pausado,
+ * responde no momento da pausa.
+ */
+export type GanchosDepuracao = {
+  /** O Snippet rodou no Worker: true se o depurador pausou (o resultado fica segurado). */
+  pausar: (resultado: ResultadoExecucao) => boolean;
+  /** O Console com o depurador pausado: a resposta no momento da pausa (null: não está pausado). */
+  responderNaPausa: (codigo: string) => Promise<ResultadoAvaliacao> | null;
+  /** Antes de rodar algo novo, a pausa de agora termina (o programa segurado conclui). */
+  encerrar: () => void;
+};
+
 type Opcoes = {
   fase: Fase;
   barramento: Barramento;
@@ -41,7 +57,18 @@ type Opcoes = {
   aoUsar?: (ferramenta: "console" | "snippet") => void;
 };
 
+/** "ReferenceError: x is not defined" vira o erro do Console (nome e mensagem). */
+function erroDeTexto(texto: string): ErroExecucao {
+  const achado = /^([A-Za-z]*Error): ([\s\S]*)$/.exec(texto);
+  return { tipo: "execucao", nome: achado?.[1] ?? "", mensagem: achado?.[2] ?? texto, linha: null, coluna: null };
+}
+
 export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
+  /** (Depurador) Os ganchos, preenchidos pelo useDepurador (definirDepuracao). */
+  const depuracao = useRef<GanchosDepuracao | null>(null);
+  const definirDepuracao = useCallback((ganchos: GanchosDepuracao | null) => {
+    depuracao.current = ganchos;
+  }, []);
   const ativo = fase.programa !== undefined;
   const nomeSnippet = fase.programa?.snippet?.nome ?? "programa.js";
   const [sessao] = useState(() => (ativo ? new SessaoNavegador() : null));
@@ -66,6 +93,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
   const estado = useRef<EstadoPrograma>({ memoria: null, testes: {} });
   const proximoId = useRef(1);
   const testes = useMemo(() => (ativo ? testesDeFuncaoDaFase(fase) : []), [ativo, fase]);
+  const medicoesPedidas = useMemo(() => (ativo ? medicoesDaFase(fase) : []), [ativo, fase]);
   const aoUsarAtual = useRef(aoUsar);
   useEffect(() => {
     aoUsarAtual.current = aoUsar;
@@ -85,10 +113,32 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       if (!sessao) return;
       const novos: EstadoPrograma["testes"] = {};
       for (const teste of testes) novos[chaveFuncaoPassa(teste)] = await sessao.testarFuncao(teste.nome, teste.casos);
-      estado.current = { memoria: resultado.memoriaFinal, testes: novos };
+      // passosNoMaximo com tamanho: a função medida de novo a cada execução, como o funcaoPassa.
+      const medicoes: Record<string, MedicaoPassos> = {};
+      for (const pedida of medicoesPedidas) {
+        const [medicao] = await sessao.medirPassos(pedida.funcao, [{ tamanho: pedida.tamanho, args: pedida.args }]);
+        if (medicao) medicoes[pedida.chave] = medicao;
+      }
+      estado.current = { memoria: resultado.memoriaFinal, testes: novos, ...(medicoesPedidas.length ? { medicoes } : {}) };
     },
-    [sessao, testes],
+    [medicoesPedidas, sessao, testes],
   );
+
+  /** (Desempenho) O gráfico: cada função da fase com as listas de cada tamanho. */
+  const medirDesempenho = useCallback(async (): Promise<MedicaoPassos[]> => {
+    const config = fase.programa?.desempenho;
+    if (!sessao || !config) return [];
+    const encerrar = comecarPendencia();
+    setOcupado((n) => n + 1);
+    try {
+      const todas: MedicaoPassos[] = [];
+      for (const funcao of config.funcoes) todas.push(...(await sessao.medirPassos(funcao.nome, chamadasDaMedicao(config, funcao))));
+      return todas;
+    } finally {
+      setOcupado((n) => n - 1);
+      encerrar();
+    }
+  }, [fase.programa?.desempenho, sessao]);
 
   // Abertura: o preparo da fase e o que já tinha rodado voltam em silêncio.
   useEffect(() => {
@@ -118,39 +168,84 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
 
   useEffect(() => () => sessao?.encerrar(), [sessao]);
 
+  /** As saídas do console de `de` até `ate` (console.clear() apaga o que tinha antes, como no Chrome). */
+  const mostrarSaidas = useCallback(
+    (resultado: ResultadoExecucao, de: number, ate: number) => {
+      const trecho = resultado.saidas.slice(de, ate);
+      const ultimoLimpar = trecho.map((s) => Boolean(s.limpar)).lastIndexOf(true);
+      const saidas = ultimoLimpar >= 0 ? trecho.slice(ultimoLimpar) : trecho;
+      if (!saidas.length) return;
+      acrescentar(
+        saidas.map((saida) => (saida.limpar ? { tipo: "info", texto: "O console foi limpo" } : { tipo: "saida", saida })),
+        ultimoLimpar >= 0,
+      );
+    },
+    [acrescentar],
+  );
+
+  /** O fim de uma execução: o resto das saídas, o erro ou a resposta, a memória dos validadores e o evento. */
+  const concluir = useCallback(
+    async (resultado: ResultadoExecucao, jaMostradas = 0) => {
+      await atualizarEstado(resultado);
+      mostrarSaidas(resultado, jaMostradas, resultado.saidas.length);
+      const novas: LinhaSemId[] = [];
+      if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem: resultado.origem });
+      else if (resultado.origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
+      acrescentar(novas);
+      mostrarResultado(resultado);
+      barramento.emitir({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+    },
+    [acrescentar, atualizarEstado, barramento, mostrarResultado, mostrarSaidas],
+  );
+
   const rodar = useCallback(
-    async (codigo: string, origem: OrigemCodigo) => {
+    async (codigo: string, origem: OrigemCodigo, rotulo?: string) => {
       if (!sessao) return;
       if (origem === "console") {
         acrescentar([{ tipo: "entrada", codigo }]);
         setHistorico((atual) => (atual[atual.length - 1] === codigo ? atual : [...atual, codigo].slice(-100)));
+        // Pausado no depurador: o Console responde no momento da pausa, como no Chrome.
+        const naPausa = depuracao.current?.responderNaPausa(codigo) ?? null;
+        if (naPausa) {
+          const encerrar = comecarPendencia();
+          try {
+            const resposta = await naPausa;
+            acrescentar(["valor" in resposta ? { tipo: "resposta", valor: resposta.valor } : { tipo: "erro", erro: erroDeTexto(resposta.erro), origem }]);
+          } finally {
+            encerrar();
+          }
+          return;
+        }
       } else {
-        acrescentar([{ tipo: "info", texto: `Rodou o snippet ${nomeSnippet}` }]);
+        depuracao.current?.encerrar();
+        acrescentar([{ tipo: "info", texto: rotulo ?? `Rodou o snippet ${nomeSnippet}` }]);
       }
       setOcupado((n) => n + 1);
       // Os testes de navegador esperam o programa terminar (data-pronto).
       const encerrar = comecarPendencia();
       try {
         const resultado = await sessao.executar(codigo, origem);
-        await atualizarEstado(resultado);
-        // console.clear() apaga o que tinha antes, como no Chrome.
-        const ultimoLimpar = resultado.saidas.map((s) => Boolean(s.limpar)).lastIndexOf(true);
-        const saidas = ultimoLimpar >= 0 ? resultado.saidas.slice(ultimoLimpar) : resultado.saidas;
-        const novas: LinhaSemId[] = saidas.map((saida) => (saida.limpar ? { tipo: "info", texto: "O console foi limpo" } : { tipo: "saida", saida }));
-        if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem });
-        else if (origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
-        acrescentar(novas, ultimoLimpar >= 0);
-        mostrarResultado(resultado);
         if (!resultado.erro || resultado.erro.tipo === "execucao") {
           setEntradas((atuais) => [...atuais, { codigo, origem: origem === "snippet" ? ("snippet" as const) : ("console" as const) }].slice(-MAXIMO_ENTRADAS_SALVAS));
         }
-        barramento.emitir({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+        // O depurador pausou: o palco mostra o passo da pausa e o resto sai quando o programa terminar.
+        if (origem === "snippet" && depuracao.current?.pausar(resultado)) {
+          mostrarResultado(resultado);
+          return;
+        }
+        await concluir(resultado);
       } finally {
         setOcupado((n) => n - 1);
         encerrar();
       }
     },
-    [acrescentar, atualizarEstado, barramento, mostrarResultado, nomeSnippet, sessao],
+    [acrescentar, concluir, mostrarResultado, nomeSnippet, sessao],
+  );
+
+  /** (Depurador) As expressões do Observar numa foto da memória, no Worker. */
+  const avaliarNaFoto = useCallback(
+    async (expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> => (sessao ? sessao.avaliarNaFoto(expressoes, foto, quadro) : []),
+    [sessao],
   );
 
   const executarNoConsole = useCallback(
@@ -166,6 +261,24 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     aoUsarAtual.current?.("snippet");
     void rodar(snippetAtual.current, "snippet");
   }, [rodar]);
+
+  /**
+   * (Ordenar passos) Roda o código do plano, na ordem dos cartões, com a
+   * memória zerada (cada ordem roda do começo, para ver o que quebra).
+   */
+  const executarPlano = useCallback(
+    (codigo: string) => {
+      if (!sessao) return;
+      sessao.reiniciar();
+      setEntradas([]);
+      const preparo = fase.programa?.preparo;
+      void (async () => {
+        if (preparo) await sessao.restaurar([{ codigo: preparo, origem: "console" }]);
+        await rodar(codigo, "snippet", "Rodou o plano");
+      })();
+    },
+    [fase.programa?.preparo, rodar, sessao],
+  );
 
   const aoMudarSnippet = useCallback((texto: string) => {
     snippetAtual.current = texto;
@@ -221,11 +334,17 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     programaSalvo,
     executarNoConsole,
     executarSnippet,
+    executarPlano,
     definirSnippet,
     aoMudarSnippet,
     limparConsole,
     estadoValidacao,
     contextoTutor,
+    mostrarSaidas,
+    concluir,
+    avaliarNaFoto,
+    definirDepuracao,
+    medirDesempenho,
   };
 }
 

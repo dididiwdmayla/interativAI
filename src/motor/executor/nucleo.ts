@@ -8,7 +8,7 @@
  * No jogo, Math.random e Date são nativos. O preparo determinístico
  * (CODIGO_PREPARO) só entra quando o hospedeiro de testes pede.
  */
-import { instrumentar } from "./instrumentar";
+import { analisarCodigo, instrumentar } from "./instrumentar";
 import { textoDaSaida, valorIgual } from "./formatar";
 import {
   LIMITES,
@@ -16,7 +16,9 @@ import {
   type ErroExecucao,
   type EscopoMemoria,
   type FotoMemoria,
+  type MedicaoPassos,
   type NivelSaida,
+  type ResultadoAvaliacao,
   type ObjetoMemoria,
   type OrigemCodigo,
   type PassoRastro,
@@ -24,6 +26,7 @@ import {
   type ResultadoTesteFuncao,
   type SaidaConsole,
   type TipoDeclaracao,
+  type ValorEsperado,
   type ValorExibido,
   type ValorMemoria,
 } from "./tipos";
@@ -80,6 +83,12 @@ type Intrinsecos = {
   JSON: { parse(texto: string): unknown };
   toString: (this: unknown) => string;
   funcaoPrototipo: { toString: (this: unknown) => string };
+  Array: new () => unknown[];
+  Object: new () => Record<string, unknown>;
+  Map: new () => Map<unknown, unknown>;
+  Set: new () => Set<unknown>;
+  Date: new (texto: string) => Date;
+  Function: new (...partes: string[]) => (...args: unknown[]) => unknown;
 };
 
 type EscopoVivo = { id: string; tipo: "funcao" | "bloco"; decl: [string, TipoDeclaracao][]; ler: (k: number) => unknown };
@@ -115,11 +124,15 @@ export class NucleoExecutor {
   private resposta: unknown = undefined;
   private locaisDeErro = new WeakMap<object, Local>();
   private localPrimitivo: Local | null = null;
+  /** Leituras de lista (lista[i]) desde o último passo: vão no passo seguinte. */
+  private leituras: { id: number; indice: number }[] = [];
+  private limitePassos: number = LIMITES.passos;
+  private limiteTempo: number = LIMITES.tempoMs;
 
   constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
     if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
     this.intr = host.avaliar(
-      "({ ReferenceError: ReferenceError, TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype })",
+      "({ ReferenceError: ReferenceError, TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype, Array: Array, Object: Object, Map: Map, Set: Set, Date: Date, Function: Function })",
     ) as Intrinsecos;
     this.instalar();
   }
@@ -131,8 +144,8 @@ export class NucleoExecutor {
 
   private instalar() {
     const ganchos = {
-      p: (linha: number, coluna: number) => {
-        this.passo(linha, coluna);
+      p: (linha: number, coluna: number, depurador?: number) => {
+        this.passo(linha, coluna, depurador === 1);
       },
       // f e b empilham ANTES de conferir a parada: rodam dentro do try, e o finally desempilha.
       f: (id: string, nome: string, decl: [string, TipoDeclaracao][], ler: (k: number) => unknown) => {
@@ -185,6 +198,13 @@ export class NucleoExecutor {
         this.resposta = valor;
         return valor;
       },
+      li: (objeto: unknown, chave: unknown) => {
+        if (this.gravando && Array.isArray(objeto) && this.leituras.length < LIMITES.leiturasPorPasso) {
+          const indice = typeof chave === "number" ? chave : Number(chave);
+          if (Number.isInteger(indice) && indice >= 0) this.leituras.push({ id: this.idDe(objeto), indice });
+        }
+        return (objeto as Record<PropertyKey, unknown>)[chave as PropertyKey];
+      },
     };
     Object.freeze(ganchos);
     Object.defineProperty(this.host.global, "__r", { value: ganchos, writable: false, configurable: false, enumerable: false });
@@ -230,24 +250,33 @@ export class NucleoExecutor {
     if (this.parado) throw PARADA;
   }
 
-  private passo(linha: number, coluna: number) {
+  private passo(linha: number, coluna: number, depurador = false) {
     this.conferirParada();
     this.total += 1;
     const topo = this.topo();
     topo.linha = linha;
     topo.coluna = coluna;
-    if (this.total > LIMITES.passos) {
+    if (this.total > this.limitePassos) {
       this.parado = { tipo: "limite-passos", local: { linha, coluna } };
       throw PARADA;
     }
-    if ((this.total & 127) === 0 && this.host.agora() - this.inicio > LIMITES.tempoMs) {
+    if ((this.total & 127) === 0 && this.host.agora() - this.inicio > this.limiteTempo) {
       this.parado = { tipo: "limite-tempo", local: { linha, coluna } };
       throw PARADA;
     }
     if (!this.gravando) return;
     if (this.passos.length < LIMITES.fotos) {
-      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length });
+      const leituras = this.tirarLeituras();
+      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length, ...(depurador ? { depurador: true as const } : {}), ...(leituras ? { leituras } : {}) });
     } else this.cortado = true;
+  }
+
+  /** As leituras desde o último passo (e zera a lista). */
+  private tirarLeituras(): { id: number; indice: number }[] | undefined {
+    if (!this.leituras.length) return undefined;
+    const lidas = this.leituras;
+    this.leituras = [];
+    return lidas;
   }
 
   private retorno(valor: unknown) {
@@ -484,7 +513,7 @@ export class NucleoExecutor {
         }
         escopos.push({ id: escopo.id, tipo: escopo.tipo, variaveis });
       }
-      return { nome: quadro.nome, chamada: quadro.chamada, escopos };
+      return { nome: quadro.nome, chamada: quadro.chamada, escopos, linha: quadro.linha };
     });
     return { quadros, monte };
   }
@@ -503,6 +532,9 @@ export class NucleoExecutor {
     this.resposta = undefined;
     this.locaisDeErro = new WeakMap();
     this.localPrimitivo = null;
+    this.leituras = [];
+    this.limitePassos = LIMITES.passos;
+    this.limiteTempo = LIMITES.tempoMs;
   }
 
   private descreverErro(erro: unknown): ErroExecucao {
@@ -593,7 +625,8 @@ export class NucleoExecutor {
     this.pilha[0].escopos.length = 0;
     const memoriaFinal = this.fotografar();
     if (gravar) {
-      this.passos.push({ linha: erro?.linha ?? null, coluna: erro?.coluna ?? null, tipo: erro ? "erro" : "fim", memoria: memoriaFinal, saidas: this.saidas.length });
+      const leituras = this.tirarLeituras();
+      this.passos.push({ linha: erro?.linha ?? null, coluna: erro?.coluna ?? null, tipo: erro ? "erro" : "fim", memoria: memoriaFinal, saidas: this.saidas.length, ...(leituras ? { leituras } : {}) });
     }
     return {
       origem,
@@ -608,6 +641,153 @@ export class NucleoExecutor {
       globais: this.listaDeGlobais(),
       sintaxes: inst.sintaxes,
     };
+  }
+
+  /**
+   * Mede quantos passos a função global `nome` dá com cada chamada (o
+   * gráfico passos x tamanho): sem rastro, com um limite bem maior que o
+   * de uma execução. `chamadas`: os argumentos (JSON) de cada medição.
+   */
+  medirPassos(nome: string, chamadas: readonly { tamanho: number; args: ValorEsperado[] }[]): MedicaoPassos[] {
+    const funcao = this.globais.has(nome) || nome in this.host.global ? this.ler(this.host.global, nome) : undefined;
+    return chamadas.map(({ tamanho, args }) => {
+      if (typeof funcao !== "function") return { funcao: nome, tamanho, passos: 0, passouDoLimite: false, erro: `não existe função ${nome}` };
+      this.comecar(false);
+      this.limitePassos = LIMITES.passosMedicao;
+      this.limiteTempo = LIMITES.tempoMedicaoMs;
+      let erro: string | null = null;
+      try {
+        const reais = this.intr.JSON.parse(JSON.stringify(args)) as unknown[];
+        (funcao as (...a: unknown[]) => unknown)(...reais);
+      } catch (e) {
+        if (!this.parado) {
+          const descrito = this.descreverErro(e);
+          erro = descrito.nome ? `${descrito.nome}: ${descrito.mensagem}` : descrito.mensagem;
+        }
+      }
+      const passouDoLimite = this.parado !== null;
+      const passos = this.total;
+      this.pilha.length = 1;
+      this.comecar(false);
+      return { funcao: nome, tamanho, passos: Math.min(passos, LIMITES.passosMedicao), passouDoLimite, erro };
+    });
+  }
+
+  /**
+   * Avalia expressões numa foto da memória (o painel Observar e o Console do
+   * depurador pausado): as variáveis valem o que valiam naquele passo, no
+   * quadro `quadro` (0 = o global). As globais que ainda não existiam ali dão
+   * ReferenceError, como no Chrome. Roda numa cópia: nada muda no programa.
+   */
+  avaliarNaFoto(expressoes: readonly string[], foto: FotoMemoria, quadro: number): ResultadoAvaliacao[] {
+    const valores = new Map<string, unknown>();
+    const feitos = new Map<number, unknown>();
+    const criar = (valor: ValorMemoria): unknown => {
+      switch (valor.t) {
+        case "undefined":
+          return undefined;
+        case "null":
+          return null;
+        case "boolean":
+          return valor.v;
+        case "number":
+          return Number(valor.v);
+        case "string":
+          return valor.v;
+        case "bigint":
+          return BigInt(valor.v);
+        case "symbol":
+          return Symbol(valor.v.replace(/^Symbol\((.*)\)$/, "$1"));
+        case "funcao": {
+          const viva = this.ler(this.host.global, valor.nome);
+          if (typeof viva === "function") return viva;
+          return new this.intr.Function(`return function ${/^[A-Za-z_$][\w$]*$/.test(valor.nome) ? valor.nome : ""}() {}`)();
+        }
+        case "ref":
+          break;
+      }
+      if (feitos.has(valor.id)) return feitos.get(valor.id);
+      const objeto = foto.monte[String(valor.id)];
+      if (!objeto) return undefined;
+      switch (objeto.t) {
+        case "array": {
+          const lista = new this.intr.Array();
+          feitos.set(valor.id, lista);
+          for (const item of objeto.itens) lista.push(criar(item));
+          lista.length = objeto.tamanho;
+          return lista;
+        }
+        case "objeto": {
+          const registro = new this.intr.Object();
+          feitos.set(valor.id, registro);
+          for (const [chave, v] of objeto.entradas) registro[chave] = criar(v);
+          return registro;
+        }
+        case "map": {
+          const mapa = new this.intr.Map();
+          feitos.set(valor.id, mapa);
+          for (const [k, v] of objeto.entradas) mapa.set(criar(k), criar(v));
+          return mapa;
+        }
+        case "set": {
+          const conjunto = new this.intr.Set();
+          feitos.set(valor.id, conjunto);
+          for (const item of objeto.itens) conjunto.add(criar(item));
+          return conjunto;
+        }
+        case "erro": {
+          const erro = new this.intr.Error(objeto.mensagem);
+          erro.name = objeto.nome;
+          feitos.set(valor.id, erro);
+          return erro;
+        }
+        case "data": {
+          const data = new this.intr.Date(objeto.texto);
+          feitos.set(valor.id, data);
+          return data;
+        }
+      }
+    };
+    // De fora para dentro: o global, depois os escopos do quadro escolhido (a de dentro vence).
+    const global = foto.quadros[0]?.escopos.find((escopo) => escopo.tipo === "global");
+    const escolhido = foto.quadros[Math.max(0, Math.min(quadro, foto.quadros.length - 1))];
+    const escopos = [...(global ? [global] : []), ...(escolhido?.escopos.filter((escopo) => escopo.tipo !== "global") ?? [])];
+    for (const escopo of escopos) for (const variavel of escopo.variaveis) valores.set(variavel.nome, criar(variavel.valor));
+    const indisponiveis = new Set([...this.globais.keys()].filter((nome) => !valores.has(nome)));
+    const ReferenceErrorDoReino = this.intr.ReferenceError;
+    const escopo = new Proxy(Object.create(null) as object, {
+      has: (_alvo, nome) => typeof nome === "string" && (valores.has(nome) || indisponiveis.has(nome)),
+      get: (_alvo, nome) => {
+        if (typeof nome !== "string") return undefined;
+        if (indisponiveis.has(nome)) throw new ReferenceErrorDoReino(`${nome} is not defined`);
+        return valores.get(nome);
+      },
+      set: (_alvo, nome, valor) => {
+        if (typeof nome === "string") {
+          valores.set(nome, valor);
+          indisponiveis.delete(nome);
+        }
+        return true;
+      },
+    });
+    return expressoes.map((expressao) => {
+      const lido = analisarCodigo(`(${expressao}\n)`);
+      if (!expressao.trim() || !lido.ok || lido.programa.body.length !== 1 || lido.programa.body[0].type !== "ExpressionStatement") {
+        return { expressao, erro: "SyntaxError: não é uma expressão" };
+      }
+      this.comecar(false);
+      try {
+        const avaliar = new this.intr.Function("__escopo", `with (__escopo) { return (${expressao}\n); }`);
+        const valor = avaliar(escopo);
+        if (this.parado) return { expressao, erro: this.descreverErro(PARADA).mensagem };
+        return { expressao, valor: this.paraExibido(valor, LIMITES.profundidade) };
+      } catch (e) {
+        const erro = this.descreverErro(e);
+        return { expressao, erro: erro.nome ? `${erro.nome}: ${erro.mensagem}` : erro.mensagem };
+      } finally {
+        this.pilha.length = 1;
+      }
+    });
   }
 
   /**

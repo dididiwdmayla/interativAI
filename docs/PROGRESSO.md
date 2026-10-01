@@ -1,37 +1,53 @@
 # Progresso
 
-Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRESSO-rodada-20.md`. Status consolidado: `docs/ROADMAP.md`.
+Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRESSO-rodada-21.md`. Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 21: zona Repetição
+## Rodada 22: Ilha Lógica, parte B (motor)
 
-### U1: Enquanto for verdade
+Um commit por etapa. Fidelidade ao Chrome conferida em developer.chrome.com pela busca (o site direto está bloqueado pela política de rede do ambiente): ponto de parada no número da linha e `debugger;`, pausa antes da linha, F8, F10, F11 e Shift+F11 (e os atalhos de Ctrl/Cmd), Ctrl+B, painéis Scope, Watch e Call Stack.
 
-- Quatro fases: forno com while e condição de parada; contador e fronteira < / <=; loop infinito provocado no jogo, proteção e conserto; desafio da fila da farmácia.
-- Snippet apresentado no primeiro objetivo. Fala curta explica as chaves automáticas do Console e o avanço por cima do fechamento. Console usado para a comparação rápida.
-- Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho na mesma fase; if dentro do loop e no encerramento. Palco e linha do tempo em todas as fases.
-- Os testes de jornada percorrem o rastro pelos botões reais, conferindo os valores do contador. Negativas: fronteira errada e loop ainda sem incremento.
-- Verificado: 10.568 testes (checagem afetada refeita após separar as partes), jornada pelo mapa em desktop/retrato/paisagem com console limpo; publicar:conteudo, build e lint verdes.
+### Etapa 1: pendências de motor
 
-### U2: for e for...of
+- Console: o `}` que o próprio Console fechou passa por cima (não duplica); Enter entre `{` e `}` abre o bloco indentado; Enter só roda com o código completo e o cursor no fim; Shift+Enter pula linha e Ctrl+Enter roda sempre. A barra de símbolos do toque digita como o teclado (`src/componentes/painel/console/digitacaoConsole.ts`).
+- `usouSintaxe`: `else` é o else final e `else-if` é o `else if` (id em kebab-case, como as outras sintaxes). Documentado no guia (25.3).
+- Desafio com `circuito`: partes com `circuitoTabela` e `usouPortao`, meta com a bancada antes e depois. Com `programa` junto, a ponte circuito/Console (bancada como tela; tabela verdade e Console no painel; no celular, um seletor).
+- Palco: `let`/`const` de dentro de um bloco aparecem numa caixa "dentro do bloco" e somem quando o bloco termina.
+- Testes: unitários do Console, do else-if, do escopo de bloco e do desafio com circuito; `testes/console.mjs` digita um if linha a linha (desktop e toque); `testes/ponte-circuito.mjs` nova.
 
-- Quatro fases: três partes do for na tabuada; uma letra por volta no for...of; primeira apresentação do break com if; desafio das etiquetas de uma gráfica.
-- Só textos no for...of, sem arrays nem funções. Contador no topo na tabuada; letra local conferida no rastro durante as voltas.
-- Três conceitos com temas e seis itens de revisão. Previsões sobre número de voltas, terceira letra e posição do break.
-- Verificado: 10.778 testes (checagem afetada refeita após encurtar a fala do desafio), jornada pelo mapa nos três layouts com console limpo, negativas e rastro; publicar:conteudo, build e lint verdes, sem avisos.
+### Etapa 2: aba Fontes com depurador
 
-### U3: Contar e somar
+- O depurador anda pelo rastro do executor (memória antes de cada linha): pontos de parada no número da linha e `debugger;`, "Pausado no depurador", linha acesa, palco do momento, Snippet só de leitura na pausa, valor no hover, Console respondendo no momento pausado.
+- Controles Retomar, Passar por cima, Entrar e Sair, com os atalhos do Chrome; painéis Escopo, Observar e Pilha de chamadas. No celular: barra de controles grande embaixo e painéis em abas.
+- Validadores `pontoDeParada`, `pausouNaLinha`, `observou` (com `valor`) e `usouControle`; ações e eventos; 5 ferramentas com apresentação; demonstração `lab-logica-u1-f4`.
+- Testes: `depurador.test.ts`, `testes/depurador.mjs` e `testes/apresentacoes-logica.mjs`.
 
-- Cinco fases: acumulador (Cantina Sol), contador condicional, maior/menor, média e fechamento do caixa da Sorveteria Nuvem.
-- Sem arrays nem funções: preços gerados pelo número do pedido. if dentro do loop revisa Decisões; contas e caixinhas revisam Primeiros comandos.
-- Bugs explícitos: declarar soma dentro reinicia a caixinha; menor começando em 0 inventa um mínimo; pedido passa da última volta e não serve como quantidade na média.
-- Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho por habilidade; palco e linha do tempo nas cinco fases.
-- Verificado: 11.051 testes, jornada pelo mapa nos três layouts com console limpo, rastro de soma/contagem/mínimo/quantidade e negativas dos quatro bugs; publicar:conteudo, build e lint verdes.
+### Etapa 3: ordenar passos
 
-### Fechamento
+- Tipo de fase `ordenar-passos` (o quadro é a tela inteira, como a bancada do circuito). Cartões com `depoisDe`, distrações (`sobra`), `inicial`, variante agrupar e plano de código que roda (`rodar`).
+- Validação pelas dependências (qualquer ordem que as respeite); `ordemValida`, `passoNoPlano`, `passoAntes`, `semSobras`; arrastar pela alça (mouse e dedo), tocar e "Pôr aqui", setas.
+- Demonstrações `f5` (café), `f6` (agrupar) e `f7` (plano de código). Testes: `ordenar.test.ts` (todas as permutações) e `testes/ordenar.mjs`.
 
-- `npm run bateria:conteudo` no build de produção: mapa, explorar, publicar e revisão verdes. Uma execução; sem bateria de motor.
-- ROADMAP: U1 a U3 em Feito; Próximo é Opus, Ilha Lógica parte B, com as pendências de fechamento automático de chaves no Console, usouSintaxe para else if e desafio aceitando circuito.
-- ATRITOS: rodada 10 curta. Currículo em documentação marcado como pronto; for...of descrito só em textos nesta zona.
-- Total: 13 fases, 11 conceitos com temas e 22 itens de revisão (362 no registro). Sem tocar conteúdo anterior nem motor.
-- Decisões a conferir: contador declarado no topo para permanecer visível no fim (for completo também aparece); vendas geradas pelo pedido, sem arrays; extremos iniciados na primeira venda real.
-- Riscos concretos: Console/else if/circuito continuam com as limitações já registradas da parte B. A cobertura móvel das jornadas é emulação Chromium 133, não ensaio em aparelhos físicos.
+### Etapa 4: palco para estruturas e desempenho
+
+- Vagões entrando e saindo pelo lado certo (push/pop pela direita, unshift/shift pela esquerda); a leitura acende o vagão ("2 leu") e a troca numa linha só acende os dois ("trocou"). Leituras gravadas pela instrumentação (`__r.li`), sem contar o lado esquerdo de atribuições.
+- "Ver como árvore" para objetos com filhos objetos, com o nó da função de agora aceso e a ponte para a árvore de Elementos.
+- Contador de passos no palco e aba Desempenho (simulação) com o gráfico passos x tamanho: Medir, legenda, valor no fim de cada linha, detalhe ao passar o mouse ou tocar, tabela e "travaria" acima de 2 milhões de passos. Cores das duas séries validadas para daltonismo nos três temas (`--cor-grafico-1` e `--cor-grafico-2`).
+- Validadores `passosNoMaximo` (com e sem `tamanho`) e `formaDaEstrutura` (`forma`: pilha, fila ou árvore); ações `verComoArvore` e `medirDesempenho`; checagem `estruturas-desempenho`.
+- Demonstrações `f8` (pilha, fila, árvore e bolha.js) e `f9` (a lenta quadrática dispara a 125 mil passos com 500 itens; a rápida linear fica em 1.003). Testes: `estruturas.test.ts` e `testes/estruturas.mjs`.
+
+### Etapa 5: fechamento
+
+- Revisão de retrato e paisagem das peças novas: aviso da aba Desempenho encurtado; gráfico rola dentro da aba e árvore rola na horizontal.
+- Guia: seções 26 (depurador), 27 (ordenar passos) e 28 (estruturas e desempenho); 25 aponta as demonstrações.
+- Currículo: sem `requerMotor` em Resolvendo problemas u1 a u3, Depuração u2 e u3 e Estruturas de dados u3; `MOTORES_PLANEJADOS` só com `projeto-ponte-js`; MAPA-CURRICULAR atualizado.
+- Verificado: 12.614 testes unitários, lint e build verdes. Bateria completa no build de produção (100 arquivos, 3 em paralelo): 99 verdes; o `ordenar.mjs paisagem` falhou porque o arrasto sintético pelo CDP soltava o dedo em movimento, o Chrome lia um "fling" e engolia o toque seguinte (no avatar do computadorzinho). O teste agora para o dedo no destino antes de soltar, como uma pessoa; reconferido nos três layouts no build de produção.
+
+### Decisões a conferir
+
+- `else-if` em kebab-case (não `elseIf`), seguindo os ids de sintaxe existentes.
+- Ordenar passos como tipo de fase, não objetivo.
+- `formaDaEstrutura` usa a chave `forma` (o `tipo` do prompt colidia com o discriminante); `passosNoMaximo` ganhou `funcao` opcional.
+- O depurador é replay do rastro: até 1.000 fotos de memória; Snippet só de leitura enquanto pausado; Observar avalia numa cópia.
+- A troca acende como "trocou" só quando acontece numa linha (desestruturação); com variável auxiliar são duas escritas que piscam.
+- A aba se chama Desempenho, como a Performance do Chrome, com aviso de que a daqui conta passos e a do Chrome mede tempo.
+- O contador mostra "Nenhum passo ainda" até a primeira execução de verdade (a abertura roda um código vazio).

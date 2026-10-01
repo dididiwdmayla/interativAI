@@ -53,6 +53,18 @@ export const IDS_FERRAMENTAS = [
   // Circuito lógico (a bancada e a tabela verdade com "ver como código")
   "circuito",
   "tabela-verdade",
+  // Depurador da aba Fontes (Ilha Lógica, parte B)
+  "pontos-de-parada",
+  "controles-depurador",
+  "painel-escopo",
+  "painel-observar",
+  "pilha-de-chamadas",
+  // Ordenar passos (zona Resolvendo problemas)
+  "quadro-de-passos",
+  // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais)
+  "contador-passos",
+  "grafico-passos",
+  "arvore-palco",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];
