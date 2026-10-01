@@ -13,6 +13,7 @@ import { temClasseEsconder } from "@/lib/esconder";
 import type { OrigemSelecao } from "./eventos";
 import type { Utm } from "./medicao";
 import type { TipoPortao } from "./circuito/modelo";
+import type { ControleDepurador } from "./depurador";
 import { origemDaVia } from "./nucleoPainel";
 
 /** O que o executor precisa do painel. */
@@ -64,6 +65,15 @@ export type PainelDasAcoes = {
     alternarEntrada: (entrada: string, ligada?: boolean) => boolean;
     apagarPeca: (id: string) => boolean;
     verComoCodigo: () => void;
+  };
+  /**
+   * (Depurador) Pontos de parada, controles e o painel Observar: só numa fase
+   * com o depurador. `controlar` devolve false se o programa não está pausado.
+   */
+  depurador?: {
+    alternarPontoDeParada: (linha: number) => void;
+    controlar: (controle: ControleDepurador) => boolean;
+    observar: (expressao: string) => void;
   };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
@@ -152,6 +162,12 @@ export function descreverAcao(acao: Acao): string {
       return `apagarPeca ${acao.id}`;
     case "verComoCodigo":
       return "verComoCodigo";
+    case "alternarPontoDeParada":
+      return `alternarPontoDeParada linha ${acao.linha}`;
+    case "controlarDepurador":
+      return `controlarDepurador ${acao.controle}`;
+    case "observar":
+      return `observar ${JSON.stringify(acao.expressao)}`;
   }
 }
 
@@ -419,6 +435,16 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       else if (acao.tipo === "apagarPeca") deu = bancada.apagarPeca(acao.id);
       else bancada.verComoCodigo();
       if (!deu) throw new ErroAcao(`não deu para ${descreverAcao(acao)} (peça ou porta que não existe?)`);
+      return;
+    }
+    case "alternarPontoDeParada":
+    case "controlarDepurador":
+    case "observar": {
+      const depurador = painel.depurador;
+      if (!depurador) throw new ErroAcao(`${acao.tipo} só existe numa fase com o depurador (programa.snippet e as ferramentas do depurador)`);
+      if (acao.tipo === "alternarPontoDeParada") depurador.alternarPontoDeParada(acao.linha);
+      else if (acao.tipo === "observar") depurador.observar(acao.expressao);
+      else if (!depurador.controlar(acao.controle)) throw new ErroAcao(`${acao.controle}: o depurador não está pausado (rode o Snippet com um ponto de parada antes)`);
       return;
     }
   }

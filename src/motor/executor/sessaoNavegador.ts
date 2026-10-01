@@ -7,11 +7,13 @@
  * estava antes da entrada que travou).
  */
 import type { PedidoExecutor, RespostaExecutor } from "./mensagens";
-import { LIMITES, type CasoFuncao, type OrigemCodigo, type ResultadoExecucao, type ResultadoTesteFuncao } from "./tipos";
+import { LIMITES, type CasoFuncao, type FotoMemoria, type OrigemCodigo, type ResultadoAvaliacao, type ResultadoExecucao, type ResultadoTesteFuncao } from "./tipos";
 
 export interface SessaoExecutor {
   executar(codigo: string, origem: OrigemCodigo): Promise<ResultadoExecucao>;
   testarFuncao(nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao>;
+  /** O depurador pausado: avalia expressões na memória de um passo (sem mudar o programa). */
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]>;
   /** Roda de novo, em silêncio, o que já tinha rodado (a memória volta como estava). */
   restaurar(entradas: { codigo: string; origem: OrigemCodigo }[]): Promise<void>;
   /** Começa do zero (memória vazia). */
@@ -98,6 +100,16 @@ export class SessaoNavegador implements SessaoExecutor {
       await this.recuperar();
       const erro = { tipo: "limite-tempo" as const, nome: "Parada do jogo", mensagem: "A função demorou demais e o jogo parou ela.", linha: null, coluna: null };
       return { nome, existe: true, passou: false, casos: casos.map((c) => ({ args: c.args, esperado: c.esperado, obtido: null, erro, passou: false })) };
+    });
+  }
+
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> {
+    return this.emFila(async () => {
+      if (!expressoes.length) return [];
+      const resposta = await this.enviar({ tipo: "avaliarNaFoto", expressoes, foto, quadro }, LIMITES.reservaMs);
+      if (resposta?.tipo === "avaliarNaFoto") return resposta.resultados;
+      await this.recuperar();
+      return expressoes.map((expressao) => ({ expressao, erro: "A expressão demorou demais e o jogo parou ela." }));
     });
   }
 

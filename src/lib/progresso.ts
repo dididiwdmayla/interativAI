@@ -52,6 +52,10 @@ export type EstadoFaseSalvo = {
 export type ProgramaSalvo = {
   entradas: { codigo: string; origem: "console" | "snippet" }[];
   snippet: string | null;
+  /** (Depurador) Os pontos de parada (linhas do Snippet), como o Chrome guarda. */
+  pontos?: number[];
+  /** (Depurador) As expressões do painel Observar. */
+  observacoes?: string[];
 };
 
 /** Quantas entradas do Console e do Snippet ficam guardadas por fase. */
@@ -279,7 +283,14 @@ function lerProgramaSalvo(valor: unknown): ProgramaSalvo | null {
           : [],
       )
     : [];
-  return { entradas: entradas.slice(-MAXIMO_ENTRADAS_SALVAS), snippet: typeof valor.snippet === "string" ? valor.snippet : null };
+  const pontos = Array.isArray(valor.pontos) ? [...new Set(valor.pontos.filter((n): n is number => Number.isInteger(n) && (n as number) >= 1))].slice(0, 200) : [];
+  const observacoes = listaDeTextos(valor.observacoes).filter((texto) => texto.length <= 200).slice(0, 30);
+  return {
+    entradas: entradas.slice(-MAXIMO_ENTRADAS_SALVAS),
+    snippet: typeof valor.snippet === "string" ? valor.snippet : null,
+    ...(pontos.length ? { pontos } : {}),
+    ...(observacoes.length ? { observacoes } : {}),
+  };
 }
 
 function lerProjeto(valor: unknown): ProjetoSalvo | null {

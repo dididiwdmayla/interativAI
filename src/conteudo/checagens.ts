@@ -12,6 +12,7 @@
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
+import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -1017,6 +1018,44 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         if (linha.alvo !== "circuito" && linha.alvo !== "ferramenta") problemas.push(`${nomeObjetivo(objetivo, indice)}: fase de circuito aponta a bancada (alvo circuito)`);
         if (linha.alvo === "circuito" && linha.peca && !inicial.pecas.some((p) => p.id === linha.peca)) problemas.push(`${nomeObjetivo(objetivo, indice)}: a linha aponta a peça "${linha.peca}", que não vem na bancada`);
       });
+      return problemas;
+    },
+  },
+  {
+    id: "depurador",
+    nome: "depurador da aba Fontes: validadores e ações só numa fase com o Snippet e as ferramentas do depurador",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const ligado = faseComDepurador(fase);
+      const temFerramenta = FERRAMENTAS_DO_DEPURADOR.some((id) => fase.usaFerramentas.includes(id));
+      if (temFerramenta && !fase.programa?.snippet) problemas.push("as ferramentas do depurador moram na aba Fontes: a fase precisa de programa.snippet");
+      const pede: Partial<Record<Validador["tipo"], IdFerramenta>> = {
+        pontoDeParada: "pontos-de-parada",
+        observou: "painel-observar",
+        usouControle: "controles-depurador",
+      };
+      const linhasDoSnippet = (fase.programa?.snippet?.codigoInicial ?? "").split("\n").length;
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo !== "pontoDeParada" && item.tipo !== "pausouNaLinha" && item.tipo !== "observou" && item.tipo !== "usouControle") continue;
+          if (!ligado) {
+            problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase com o depurador (programa.snippet e uma ferramenta do depurador)`);
+            continue;
+          }
+          const ferramenta = pede[item.tipo];
+          if (ferramenta && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`${onde}: o validador ${item.tipo} pede "${ferramenta}" em usaFerramentas`);
+          if ((item.tipo === "pontoDeParada" || item.tipo === "pausouNaLinha") && (!Number.isInteger(item.linha) || item.linha < 1)) {
+            problemas.push(`${onde}: ${item.tipo} com linha ${item.linha} (as linhas do Snippet começam em 1)`);
+          }
+          if (item.tipo === "pontoDeParada" && item.linha > Math.max(linhasDoSnippet, 1) + 40) problemas.push(`${onde}: pontoDeParada na linha ${item.linha}, longe demais do Snippet`);
+          if (item.tipo === "observou" && !item.expressao.trim()) problemas.push(`${onde}: observou sem expressão`);
+          if (item.tipo === "usouControle" && !CONTROLES_DEPURADOR.includes(item.controle)) problemas.push(`${onde}: usouControle com controle "${item.controle}"`);
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        const doDepurador = acoes.find((acao) => acao.tipo === "alternarPontoDeParada" || acao.tipo === "controlarDepurador" || acao.tipo === "observar");
+        if (doDepurador && !ligado) problemas.push(`${onde}: a ação ${doDepurador.tipo} só vale numa fase com o depurador`);
+      }
       return problemas;
     },
   },

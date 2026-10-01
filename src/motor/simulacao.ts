@@ -38,6 +38,7 @@ import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/ti
 import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
+import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
 
 /**
  * O documento inicial da fase, solto (fora da tela): o head fixo com o
@@ -77,13 +78,53 @@ export function criarSimulacao(fase: Fase) {
   let ultimaExecucao: ResultadoExecucao | null = null;
   const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
   const testesDaFase = fase.programa ? testesDeFuncaoDaFase(fase) : [];
-  const rodarCodigo = (codigo: string, origem: OrigemCodigo, registrar = true) => {
+  // Depurador da aba Fontes: as mesmas pausas da tela, sobre o rastro (src/motor/depurador.ts).
+  const comDepurador = faseComDepurador(fase);
+  const depurador = { pontos: [] as number[], observacoes: [] as string[] };
+  if (comDepurador) estadoPrograma.depurador = depurador;
+  let sessao: { resultado: ResultadoExecucao; pausa: PausaDepurador } | null = null;
+  const concluir = (resultado: ResultadoExecucao, registrar: boolean) => {
     if (!executor) return;
-    const resultado = executor.executar(codigo, origem);
     ultimaExecucao = resultado;
     estadoPrograma.memoria = resultado.memoriaFinal;
     for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
     if (registrar) eventos.push({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+  };
+  /** As expressões do Observar no momento pausado (o quadro de cima). */
+  const observarNaPausa = (expressoes: readonly string[]) => {
+    if (!executor || !sessao) return;
+    const memoria = sessao.resultado.passos[sessao.pausa.indice].memoria;
+    for (const r of executor.avaliarNaFoto(expressoes, memoria, memoria.quadros.length - 1)) {
+      eventos.push({ tipo: "observouValor", expressao: r.expressao, valor: "valor" in r ? r.valor : null });
+    }
+  };
+  const anunciarPausa = () => {
+    if (!sessao) return;
+    eventos.push({ tipo: "pausouNoDepurador", linha: sessao.pausa.linha, motivo: sessao.pausa.motivo });
+    observarNaPausa(depurador.observacoes);
+  };
+  const terminarSessao = () => {
+    if (!sessao) return;
+    const { resultado } = sessao;
+    sessao = null;
+    concluir(resultado, true);
+  };
+  const rodarCodigo = (codigo: string, origem: OrigemCodigo, registrar = true) => {
+    if (!executor) return;
+    // Pausado: o Console responde no momento da pausa (sem mudar o programa).
+    if (sessao && origem === "console") {
+      observarNaPausa([codigo]);
+      return;
+    }
+    terminarSessao();
+    const resultado = executor.executar(codigo, origem);
+    const pausa = comDepurador && origem === "snippet" && registrar ? primeiraPausa(resultado.passos, depurador.pontos) : null;
+    if (pausa) {
+      sessao = { resultado, pausa };
+      anunciarPausa();
+      return;
+    }
+    concluir(resultado, registrar);
   };
   if (fase.programa?.preparo) rodarCodigo(fase.programa.preparo, "console", false);
 
@@ -198,6 +239,32 @@ export function criarSimulacao(fase: Fase) {
           executarSnippet: () => rodarCodigo(snippet, "snippet"),
         }
       : undefined,
+    depurador: comDepurador
+      ? {
+          alternarPontoDeParada: (linha) => {
+            const alvo = linhaDoPontoDeParada(snippet, linha);
+            depurador.pontos = alternarPonto(depurador.pontos, alvo);
+            eventos.push({ tipo: "alternouPontoDeParada", linha: alvo, ativo: depurador.pontos.includes(alvo) });
+          },
+          controlar: (controle) => {
+            if (!sessao) return false;
+            eventos.push({ tipo: "usouControleDepurador", controle });
+            const proxima = proximaPausa(sessao.resultado.passos, sessao.pausa.indice, controle, depurador.pontos);
+            if (proxima) {
+              sessao.pausa = proxima;
+              anunciarPausa();
+            } else terminarSessao();
+            return true;
+          },
+          observar: (expressao) => {
+            const limpa = expressao.trim();
+            if (!limpa) return;
+            if (!depurador.observacoes.some((e) => normalizarExpressao(e) === normalizarExpressao(limpa))) depurador.observacoes = [...depurador.observacoes, limpa];
+            eventos.push({ tipo: "adicionouObservacao", expressao: limpa });
+            observarNaPausa([limpa]);
+          },
+        }
+      : undefined,
     circuito:
       circuito !== null
         ? {
@@ -273,8 +340,8 @@ export function criarSimulacao(fase: Fase) {
     /** O texto do editor: o body ou, no modo documento, o documento inteiro. */
     htmlAtual: () => (fase.modoDocumento ? serializarDocumentoInteiro(documento) : documento.body.innerHTML),
     cssAtual: () => lerCssDoDocumento(documento),
-    /** (Fase de programa) A última execução e o texto do Snippet agora. */
-    programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null }),
+    /** (Fase de programa) A última execução e o texto do Snippet agora; com o depurador, a pausa de agora. */
+    programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null, pausa: sessao?.pausa ?? null, depurador }),
     /** (Circuito) O circuito agora. */
     circuito: () => circuito,
   };

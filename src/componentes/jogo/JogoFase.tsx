@@ -50,6 +50,9 @@ import { PainelFontes } from "@/componentes/painel/fontes/PainelFontes";
 import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
+import { useDepurador } from "./useDepurador";
+import { type AbaDepurador, AvisoPausado, BarraControlesDepurador, PainelDepurador } from "@/componentes/painel/fontes/PainelDepurador";
+import { FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { useCircuito } from "./useCircuito";
 import { BancadaCircuito } from "@/componentes/circuito/BancadaCircuito";
 import { PainelTabelaVerdade } from "@/componentes/circuito/PainelTabelaVerdade";
@@ -315,6 +318,8 @@ export function JogoFase({
   const [aba, setAba] = useState<Aba>(() => (faseDaProp.programa ? "console" : "elementos"));
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
+  // O depurador da aba Fontes (pontos de parada, controles, Escopo, Observar e Pilha de chamadas).
+  const depurador = useDepurador({ fase, barramento, programa, editorRef: programa.editorSnippetRef, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   // Fase de circuito lógico: a bancada (o circuito é a fonte única de verdade dela).
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
@@ -323,7 +328,9 @@ export function JogoFase({
   const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
   const [escolhaDePasso, setEscolhaDePasso] = useState<{ de: typeof programa.ultimo; indice: number } | null>(null);
   const passosDoRastro = programa.ultimo?.passos ?? [];
-  const passoEscolhido = escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null;
+  // Pausado no depurador: o palco mostra o passo da pausa.
+  const pausaNoPalco = depurador.sessao && depurador.sessao.resultado === programa.ultimo ? depurador.sessao.pausa.indice : null;
+  const passoEscolhido = pausaNoPalco ?? (escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null);
   const indicePasso = passoEscolhido ?? passosDoRastro.length - 1;
   const passoNoPalco = passosDoRastro[indicePasso] ?? null;
   const fotoNoPalco = passoNoPalco?.memoria ?? programa.ultimo?.memoriaFinal ?? null;
@@ -353,6 +360,8 @@ export function JogoFase({
     [editorSnippetRef],
   );
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
+  /** Apresentação de uma ferramenta do depurador no celular: o que a aba Fontes mostra. */
+  const [pedidoFontes, setPedidoFontes] = useState<{ mostrar: "cima" | "depurador" | "baixo"; aba: AbaDepurador | null; vez: number } | null>(null);
   /** Ponte circuito/Console no celular: a tabela verdade ou o Console. */
   const [ladoDaPonte, setLadoDaPonte] = useState<"cima" | "baixo">("baixo");
   const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
@@ -731,6 +740,9 @@ export function JogoFase({
       programa: fase.programa
         ? { executarNoConsole: programa.executarNoConsole, definirSnippet: programa.definirSnippet, executarSnippet: programa.executarSnippet }
         : undefined,
+      depurador: depurador.ativo
+        ? { alternarPontoDeParada: depurador.alternarPontoDeParada, controlar: depurador.controlar, observar: depurador.observar }
+        : undefined,
       circuito: circuito.ativo
         ? {
             adicionarPortao: circuito.adicionarPortao,
@@ -742,6 +754,10 @@ export function JogoFase({
         : undefined,
     }),
     [
+      depurador.ativo,
+      depurador.alternarPontoDeParada,
+      depurador.controlar,
+      depurador.observar,
       circuito.ativo,
       circuito.adicionarPortao,
       circuito.ligarFio,
@@ -855,11 +871,17 @@ export function JogoFase({
     [alturaDeDesenho, larguraDeDesenho],
   );
   const { estadoValidacao: estadoDoPrograma } = programa;
+  const { estadoValidacao: estadoDoDepurador, ativo: depuradorAtivo } = depurador;
+  // O que fica salvo do programa: as entradas, o Snippet e, com o depurador, os pontos e o Observar.
+  const programaSalvo = useMemo(
+    () => (programa.programaSalvo && depurador.salvo ? { ...programa.programaSalvo, ...depurador.salvo } : programa.programaSalvo),
+    [depurador.salvo, programa.programaSalvo],
+  );
   const { circuitoAgora } = circuito;
   const extraValidacao = useCallback(() => {
     const doSimulador = {
       ...(dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {}),
-      ...(fase.programa ? { programa: estadoDoPrograma() } : {}),
+      ...(fase.programa ? { programa: { ...estadoDoPrograma(), ...(depuradorAtivo ? { depurador: estadoDoDepurador() } : {}) } } : {}),
       ...(circuitoAgora() ? { circuito: circuitoAgora() ?? undefined } : {}),
     };
     if (!comDispositivo) return doSimulador;
@@ -870,7 +892,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [circuitoAgora, comDispositivo, dadosCampanha, estadoDoPrograma, fase.programa, obterDocumento]);
+  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -903,7 +925,7 @@ export function JogoFase({
     toque,
     extraValidacao,
     destacarNoPrograma,
-    programaSalvo: programa.programaSalvo,
+    programaSalvo,
     destacarNoCircuito: circuito.setDestaque,
     circuitoSalvo: circuito.circuito,
   });
@@ -1024,12 +1046,18 @@ export function JogoFase({
             ? "medicao"
             : ferramenta.id === "simulador-campanha"
               ? "campanha"
-              : ferramenta.id === "snippet"
+              : ferramenta.id === "snippet" || FERRAMENTAS_DO_DEPURADOR.includes(ferramenta.id)
                 ? "fontes"
                 : fase.programa
                   ? "console"
                   : "elementos",
     );
+    // No celular, o painel do depurador apresentado fica à vista (o botão Depurador e a aba dele).
+    if (movel && FERRAMENTAS_DO_DEPURADOR.includes(ferramenta.id)) {
+      const abaDoPainel: Partial<Record<IdFerramenta, AbaDepurador>> = { "painel-escopo": "escopo", "painel-observar": "observar", "pilha-de-chamadas": "pilha" };
+      const abaPedida = abaDoPainel[ferramenta.id] ?? null;
+      setPedidoFontes((anterior) => ({ mostrar: abaPedida ? "depurador" : "cima", aba: abaPedida, vez: (anterior?.vez ?? 0) + 1 }));
+    }
     if (ferramenta.id === "resultado-busca") setSubAbaBusca("resultado");
     if (ferramenta.id === "dados-estruturados") setSubAbaBusca("dados");
     // O botão de girar mora na barra de dispositivo: ela aparece, em silêncio (sem evento).
@@ -1696,6 +1724,33 @@ export function JogoFase({
                     movel={movel}
                     ocupado={programa.ocupado}
                     aoFocar={aoFocarEditor}
+                    depurador={
+                      depurador.ativo && depurador.opcoesEditor
+                        ? {
+                            painel: (
+                              <PainelDepurador
+                                depurador={depurador}
+                                nomeSnippet={programa.nomeSnippet}
+                                codigo={programa.programaSalvo?.snippet ?? programa.snippetInicial}
+                                emAbas={movel}
+                                toque={toque}
+                                aoAbrirCard={abrirCard}
+                                abaPedida={pedidoFontes?.aba ? { aba: pedidoFontes.aba, vez: pedidoFontes.vez } : null}
+                              />
+                            ),
+                            pedido: pedidoFontes ? { mostrar: pedidoFontes.mostrar, vez: pedidoFontes.vez } : null,
+                            barra: <BarraControlesDepurador pausado={depurador.sessao !== null} aoControlar={depurador.controlar} grande aoAbrirCard={abrirCard} />,
+                            opcoesEditor: depurador.opcoesEditor,
+                            pausado: depurador.sessao !== null,
+                            aoPontoNoCursor: () => depurador.alternarPontoDeParada(programa.editorSnippetRef.current?.linhaDoCursor() ?? 1),
+                            alvoEditor: (editor) => (
+                              <AlvoFerramenta ids={["pontos-de-parada"]} marcador="pontos-de-parada" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                                {editor}
+                              </AlvoFerramenta>
+                            ),
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               )}
@@ -2097,7 +2152,8 @@ export function JogoFase({
               className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
             >
               <PalcoMemoria foto={fotoNoPalco} anterior={fotoAnteriorNoPalco} passo={passoNoPalco} erro={programa.ultimo?.erro ?? null} />
-              {comLinhaDoTempo && (
+              {depurador.ativo && <AvisoPausado depurador={depurador} />}
+              {comLinhaDoTempo && pausaNoPalco === null && (
                 <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
                   <LinhaDoTempo
                     passos={passosDoRastro}

@@ -24,6 +24,7 @@ import { definirTrechoSelecionado, destaqueTrecho } from "./destaqueTrecho";
 import { alvoNaPosicao, trechoDoAlvo } from "./mapaElementos";
 import { calcularTrocaMinima } from "./diferencaTexto";
 import { temaEditor } from "./temaEditor";
+import { compartimentoLeitura, definirPausa, definirPontos, extensoesDepurador, type OpcoesDepuradorEditor, somenteLeitura } from "./extensoesDepurador";
 
 export type ApiEditor = {
   /** Troca o texto vindo de fora (árvore, solução). Não dispara aoMudar. */
@@ -43,6 +44,12 @@ export type ApiEditor = {
   irParaPosicao: (posicao: number, opcoes?: { focar?: boolean }) => void;
   /** Escreve no lugar do cursor, como se o jogador digitasse (a barra de símbolos do celular). */
   inserirNoCursor: (texto: string) => void;
+  /** (Depurador) Troca os pontos de parada (linhas de 1 em diante). */
+  definirPontosDeParada: (linhas: readonly number[]) => void;
+  /** (Depurador) Acende a linha pausada (e a do quadro escolhido na Pilha de chamadas) e rola até ela; null apaga. */
+  definirPausa: (linha: number | null, doQuadro?: number | null) => void;
+  /** A linha do cursor (de 1 em diante): Ctrl+B põe o ponto de parada nela. */
+  linhaDoCursor: () => number;
 };
 
 type Props = {
@@ -58,6 +65,10 @@ type Props = {
   aoMoverCursorPosicao?: (posicao: number) => void;
   /** O editor ganhou foco (o teclado virtual vai abrir no celular). */
   aoFocar?: () => void;
+  /** (Snippet) Liga o depurador: pontos de parada no número da linha, linha pausada e valor no hover. Lido ao montar. */
+  depurador?: OpcoesDepuradorEditor;
+  /** Só para ler (o depurador pausado). */
+  somenteLeitura?: boolean;
   ref?: Ref<ApiEditor>;
 };
 
@@ -75,8 +86,15 @@ export function EditorCodigo({
   aoMoverCursor,
   aoMoverCursorPosicao,
   aoFocar,
+  depurador,
+  somenteLeitura: leitura = false,
   ref,
 }: Props) {
+  const depuradorRef = useRef<OpcoesDepuradorEditor | null>(depurador ?? null);
+  const comDepuradorRef = useRef(depurador !== undefined);
+  useEffect(() => {
+    depuradorRef.current = depurador ?? null;
+  }, [depurador]);
   const hospedeiro = useRef<HTMLDivElement>(null);
   const visao = useRef<EditorView | null>(null);
   const aoMudarAtual = useRef(aoMudar);
@@ -111,7 +129,8 @@ export function EditorCodigo({
       state: EditorState.create({
         doc: textoInicialRef.current,
         extensions: [
-          lineNumbers(),
+          comDepuradorRef.current ? extensoesDepurador(depuradorRef) : lineNumbers(),
+          compartimentoLeitura.of(somenteLeitura(false)),
           highlightActiveLineGutter(),
           highlightActiveLine(),
           history(),
@@ -170,6 +189,10 @@ export function EditorCodigo({
       effects: compartimentoQuebra.reconfigure(quebrarLinhas ? EditorView.lineWrapping : []),
     });
   }, [quebrarLinhas, compartimentoQuebra]);
+
+  useEffect(() => {
+    visao.current?.dispatch({ effects: compartimentoLeitura.reconfigure(somenteLeitura(leitura)) });
+  }, [leitura]);
 
   useImperativeHandle(
     ref,
@@ -240,6 +263,22 @@ export function EditorCodigo({
         if (!view) return;
         view.dispatch(view.state.replaceSelection(texto));
         view.focus();
+      },
+      definirPontosDeParada(linhas) {
+        const view = visao.current;
+        if (!view || !comDepuradorRef.current) return;
+        view.dispatch({ effects: definirPontos.of(linhas), annotations: origemExterna.of(true) });
+      },
+      definirPausa(linha, doQuadro = null) {
+        const view = visao.current;
+        if (!view || !comDepuradorRef.current) return;
+        const alvo = doQuadro ?? linha;
+        const rolar = alvo !== null && alvo >= 1 && alvo <= view.state.doc.lines ? [EditorView.scrollIntoView(view.state.doc.line(alvo).from, { y: "nearest", yMargin: 40 })] : [];
+        view.dispatch({ effects: [definirPausa.of({ linha, doQuadro }), ...rolar], annotations: origemExterna.of(true) });
+      },
+      linhaDoCursor() {
+        const view = visao.current;
+        return view ? view.state.doc.lineAt(view.state.selection.main.head).number : 1;
       },
     }),
     [],

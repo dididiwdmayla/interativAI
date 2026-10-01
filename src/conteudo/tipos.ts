@@ -21,6 +21,7 @@ import type { IdConceito } from "./conceitos";
 import type { SintaxeJs } from "@/motor/executor/instrumentar";
 import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
+import type { ControleDepurador } from "@/motor/depurador";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -276,6 +277,28 @@ export type Validador =
   | { tipo: "circuitoTabela"; esperado: { entradas: Record<string, boolean>; saida: boolean | Record<string, boolean> }[] }
   /** (Circuito) Pelo menos `minimo` (padrão 1) portões desse tipo com a saída ligada em alguma coisa. */
   | { tipo: "usouPortao"; portao: TipoPortao; minimo?: number }
+  /*
+   * Depurador da aba Fontes (fase com programa.snippet e alguma ferramenta
+   * do depurador): src/motor/depurador.ts. Ver o guia, seção 26.
+   */
+  /** (Depurador) Tem um ponto de parada nesta linha do Snippet (a partir de 1) agora. Olha o estado de agora. */
+  | { tipo: "pontoDeParada"; linha: number }
+  /**
+   * (Depurador) O depurador pausou nesta linha desde que o objetivo começou
+   * (ponto de parada, `debugger;` ou um controle). Trava no checklist.
+   */
+  | { tipo: "pausouNaLinha"; linha: number }
+  /**
+   * (Depurador) A expressão está no painel Observar (espaços não contam).
+   * Com `valor`, ela mostrou esse valor num momento pausado desde que o
+   * objetivo começou (trava, como `evento`).
+   */
+  | { tipo: "observou"; expressao: string; valor?: ValorEsperado }
+  /**
+   * (Depurador) Usou o controle (retomar, passar-por-cima, entrar, sair)
+   * pelo menos `minimo` vezes (padrão 1) desde que o objetivo começou. Trava.
+   */
+  | { tipo: "usouControle"; controle: ControleDepurador; minimo?: number }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -398,7 +421,25 @@ export type Acao =
   /** (Circuito) Tira uma peça da bancada (a que veio pronta na fase não sai). */
   | { tipo: "apagarPeca"; id: string }
   /** (Circuito) O botão "Ver como código". */
-  | { tipo: "verComoCodigo" };
+  | { tipo: "verComoCodigo" }
+  /**
+   * (Depurador) Clica no número da linha do Snippet: liga ou desliga o ponto
+   * de parada (numa linha sem código, ele escorrega para a próxima, como no
+   * Chrome). Gera `alternouPontoDeParada`. Pede a ferramenta pontos-de-parada.
+   */
+  | { tipo: "alternarPontoDeParada"; linha: number }
+  /**
+   * (Depurador) Um controle com o programa pausado: retomar (F8),
+   * passar-por-cima (F10), entrar (F11) ou sair (Shift+F11). Gera
+   * `usouControleDepurador` e `pausouNoDepurador` (ou, se o programa
+   * terminou, `executouCodigo`). Pede a ferramenta controles-depurador.
+   */
+  | { tipo: "controlarDepurador"; controle: ControleDepurador }
+  /**
+   * (Depurador) Põe a expressão no painel Observar. Gera `adicionouObservacao`
+   * e, se estiver pausado, `observouValor`. Pede a ferramenta painel-observar.
+   */
+  | { tipo: "observar"; expressao: string };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */

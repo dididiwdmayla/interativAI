@@ -37,6 +37,8 @@ export type EstadoPrograma = {
   memoria: FotoMemoria | null;
   /** Resultado de cada `funcaoPassa` da fase, pela chave (`chaveFuncaoPassa`). */
   testes: Record<string, ResultadoTesteFuncao>;
+  /** (Depurador) Os pontos de parada (linhas do Snippet) e as expressões do painel Observar de agora. */
+  depurador?: { pontos: readonly number[]; observacoes: readonly string[] };
 };
 
 export function faseDePrograma(fase: Fase): boolean {

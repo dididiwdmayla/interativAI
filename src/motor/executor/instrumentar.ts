@@ -7,7 +7,9 @@
  *
  * Ganchos (o objeto global `__r`, ver runtime.ts):
  * - `__r.p(linha, coluna)` antes de cada comando: um passo do rastro, e a
- *   proteção contra loop infinito (todo corpo de laço ganha pelo menos um);
+ *   proteção contra loop infinito (todo corpo de laço ganha pelo menos um).
+ *   Na instrução `debugger;`, `__r.p(linha, coluna, 1)` marca o passo (o
+ *   depurador do jogo pausa nele) e a palavra some do código que roda;
  * - `__r.f(...)` / `__r.s()` na entrada e na saída de cada função (a moldura
  *   da chamada no palco), com um leitor das variáveis dela. O leitor nasce
  *   DENTRO do try que embrulha o corpo: as let e const do corpo moram nesse
@@ -70,6 +72,7 @@ export type SintaxeJs =
   | "throw"
   | "comentario"
   | "console-log"
+  | "debugger"
   | `metodo:${string}`;
 
 export type ErroDeSintaxe = { mensagem: string; linha: number; coluna: number };
@@ -265,7 +268,8 @@ class Instrumentador {
   }
 
   private passo(no: NoAcorn): string {
-    return `__r.p(${no.loc?.start.line ?? 0},${(no.loc?.start.column ?? 0) + 1});`;
+    const marca = no.type === "DebuggerStatement" ? ",1" : "";
+    return `__r.p(${no.loc?.start.line ?? 0},${(no.loc?.start.column ?? 0) + 1}${marca});`;
   }
 
   aplicar(): string {
@@ -485,6 +489,10 @@ class Instrumentador {
         return;
       case "WithStatement":
         this.naoSuporta(no, "with não roda aqui.");
+        return;
+      case "DebuggerStatement":
+        // O depurador é o do jogo (o passo marcado): a palavra vira espaços, sem mudar colunas.
+        this.inserir(no.start, `;${" ".repeat("debugger".length - 1)}`, false, prof + 0.5, "debugger".length);
         return;
       default:
         return;
@@ -724,6 +732,9 @@ export function sintaxesDoPrograma(programa: Program, fonte: string): SintaxeJs[
         break;
       case "TryStatement":
         achadas.add("try");
+        break;
+      case "DebuggerStatement":
+        achadas.add("debugger");
         break;
       case "ThrowStatement":
         achadas.add("throw");

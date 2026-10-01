@@ -136,4 +136,20 @@ describe("meta da unidade: uma vez só na entrada, sempre no desafio", () => {
     expect(lido.fasesEmAndamento.antiga.programa).toBeNull();
     expect(lido.fasesEmAndamento.logica.programa).toEqual({ entradas: [{ codigo: "let x = 1", origem: "console" }], snippet: "// oi" });
   });
+
+  it("depurador: os pontos de parada e o Observar voltam (lixo fica de fora)", () => {
+    const lido = normalizarProgresso({
+      versao: 2,
+      fasesEmAndamento: {
+        fontes: {
+          objetivoAtual: 0,
+          htmlAtual: "",
+          estrelas: 3,
+          introducaoVista: true,
+          programa: { entradas: [], snippet: "let a = 1;", pontos: [3, 3, 0, 1.5, "2", 8], observacoes: ["total", 5, "a * 2"] },
+        },
+      },
+    });
+    expect(lido.fasesEmAndamento.fontes.programa).toEqual({ entradas: [], snippet: "let a = 1;", pontos: [3, 8], observacoes: ["total", "a * 2"] });
+  });
 });

@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -381,4 +381,163 @@ export const FASE_DEMO_DESAFIO_CIRCUITO: FaseDesafio = {
   falaFinal: { texto: "Pode continuar mexendo na bancada e no Console.", expressao: "feliz" },
 };
 
-export const FASES_BANCADA_LOGICA: readonly Fase[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO, FASE_DEMO_DESAFIO_CIRCUITO];
+/*
+ * Demonstração do depurador da aba Fontes (modelo para a zona Depuração):
+ * - `pontoDeParada` (estado) e a ação alternarPontoDeParada (clicar no
+ *   número da linha);
+ * - `pausouNaLinha` depois de Executar (o programa pausa ANTES da linha);
+ * - `observou` sem valor (a expressão está no Observar) e com valor (ela
+ *   mostrou esse valor numa pausa);
+ * - `usouControle` com os controles do Chrome (passar por cima, entrar,
+ *   sair e retomar), e a Pilha de chamadas dentro da função.
+ */
+const SNIPPET_DEPURADOR = [
+  "function comDesconto(preco) {",
+  "  const desconto = preco * 0.1;",
+  "  return preco - desconto;",
+  "}",
+  "let total = 0;",
+  "const precos = [20, 30, 50];",
+  "for (const preco of precos) {",
+  "  total = total + comDesconto(preco);",
+  "}",
+  "console.log(total);",
+].join("\n");
+
+export const FASE_DEMO_DEPURADOR: FasePratica = {
+  id: "lab-logica-u1-f4",
+  tipo: "pratica",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do depurador",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "pontos-de-parada", "controles-depurador", "painel-escopo", "painel-observar", "pilha-de-chamadas"],
+  apresentar: ["snippet"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: { snippet: { codigoInicial: SNIPPET_DEPURADOR, nome: "desconto.js" } },
+  introducao: [{ texto: "O caixa dá 10% de desconto em cada preço. Vamos parar o programa no meio e olhar a memória.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "ponto",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique no número da linha 8 para pôr um ponto de parada.", toque: "Toque no número da linha 8 para pôr um ponto de parada." },
+      validador: { tipo: "pontoDeParada", linha: 8 },
+      apresentar: ["pontos-de-parada"],
+      ajudas: {
+        pergunta: "Onde o Chrome marca a linha em que o programa deve parar?",
+        dica: "No número da linha, do lado esquerdo do código.",
+        linha: { alvo: "snippet", linhas: [8], fala: "Esta linha soma cada preço com desconto." },
+        solucao: { fala: "Cliquei no número 8: a etiqueta é o ponto de parada.", acoes: [{ tipo: "alternarPontoDeParada", linha: 8 }] },
+      },
+      falaAoConcluir: { texto: "Ponto de parada na linha 8. Agora o programa vai parar ali.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "alternarPontoDeParada", linha: 8 }],
+    },
+    {
+      id: "pausar",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Na primeira pausa na linha 8, quanto vale total?",
+        opcoes: ["0", "18", "90"],
+        correta: 0,
+        explicacao: "O depurador pausa ANTES de a linha rodar: a primeira soma ainda não aconteceu, então total vale 0.",
+      },
+      enunciado: { mouse: "Clique em Executar: o programa pausa na linha 8.", toque: "Toque em Executar: o programa pausa na linha 8." },
+      validador: { tipo: "pausouNaLinha", linha: 8 },
+      apresentar: ["painel-escopo"],
+      ajudas: {
+        pergunta: "O que faz o programa começar a rodar?",
+        dica: "O botão Executar, em cima do Snippet (Ctrl+Enter).",
+        linha: { alvo: "ferramenta", ferramenta: "snippet", fala: "O Executar mora aqui." },
+        solucao: { fala: "Executei: ele parou na linha 8, antes de somar.", acoes: [{ tipo: "executarSnippet" }] },
+      },
+      falaAoConcluir: { texto: "Pausado no depurador! O Escopo e o palco mostram a memória deste momento.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 0 }, { tipo: "executarSnippet" }],
+    },
+    {
+      id: "observar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "No painel Observar, adicione a expressão total.", toque: "Na aba Observar, adicione a expressão total." },
+      validador: { tipo: "observou", expressao: "total" },
+      apresentar: ["painel-observar"],
+      ajudas: {
+        pergunta: "Onde dá para deixar uma variável sempre à vista?",
+        dica: "No painel Observar: escreva total no campo e confirme.",
+        linha: { alvo: "ferramenta", ferramenta: "painel-observar", fala: "Escreva aqui." },
+        solucao: { fala: "Pus total no Observar.", acoes: [{ tipo: "observar", expressao: "total" }] },
+      },
+      falaAoConcluir: { texto: "Agora total aparece a cada pausa, sem procurar.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "observar", expressao: "total" }],
+    },
+    {
+      id: "passar-por-cima",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique em Passar por cima até total mostrar 18 no Observar.", toque: "Toque em Passar por cima até total mostrar 18 no Observar." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "usouControle", controle: "passar-por-cima" },
+          { tipo: "observou", expressao: "total", valor: 18 },
+        ],
+      },
+      apresentar: ["controles-depurador"],
+      ajudas: {
+        pergunta: "Qual controle vai para a próxima linha sem entrar na função?",
+        dica: "Passar por cima (F10).",
+        linha: { alvo: "ferramenta", ferramenta: "controles-depurador", fala: "É a seta que pula a bolinha." },
+        solucao: { fala: "Passei por cima: a função rodou inteira e total virou 18.", acoes: [{ tipo: "controlarDepurador", controle: "passar-por-cima" }] },
+      },
+      falaAoConcluir: { texto: "18: 20 menos o desconto de 2. Uma volta do laço inteira.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "controlarDepurador", controle: "passar-por-cima" }],
+    },
+    {
+      id: "entrar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique em Entrar na função e olhe a Pilha de chamadas.", toque: "Toque em Entrar na função e olhe a Pilha de chamadas." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "usouControle", controle: "entrar" },
+          { tipo: "pausouNaLinha", linha: 2 },
+        ],
+      },
+      apresentar: ["pilha-de-chamadas"],
+      ajudas: {
+        pergunta: "Qual controle segue para dentro da função comDesconto?",
+        dica: "Entrar na função (F11).",
+        linha: { alvo: "ferramenta", ferramenta: "controles-depurador", fala: "É a seta que desce." },
+        solucao: { fala: "Entrei: agora a pilha tem comDesconto em cima.", acoes: [{ tipo: "controlarDepurador", controle: "entrar" }] },
+      },
+      falaAoConcluir: { texto: "comDesconto em cima, o código de fora embaixo: foi a linha 8 que chamou.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "controlarDepurador", controle: "entrar" }],
+    },
+    {
+      id: "terminar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: { mouse: "Saia da função e retome até o programa mostrar o total no Console.", toque: "Saia da função e retome até o programa mostrar o total no Console." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "usouControle", controle: "sair" },
+          { tipo: "saida", contem: "90" },
+        ],
+      },
+      ajudas: { pergunta: "Qual controle volta para quem chamou, e qual corre até o fim?", dica: "Sair da função (Shift+F11) e depois Retomar (F8), quantas vezes precisar." },
+      falaAoConcluir: { texto: "90: o programa terminou e mostrou o total.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "controlarDepurador", controle: "sair" },
+        { tipo: "controlarDepurador", controle: "retomar" },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Depurador testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar pondo pontos de parada e andando pelo programa.", expressao: "feliz" },
+};
+
+export const FASES_BANCADA_LOGICA: readonly Fase[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO, FASE_DEMO_DESAFIO_CIRCUITO, FASE_DEMO_DEPURADOR];

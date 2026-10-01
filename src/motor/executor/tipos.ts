@@ -58,8 +58,12 @@ export type EscopoMemoria = {
   variaveis: VariavelMemoria[];
 };
 
-/** Um quadro por chamada de função em andamento (o global é o primeiro). */
-export type QuadroMemoria = { nome: string; chamada: number; escopos: EscopoMemoria[] };
+/**
+ * Um quadro por chamada de função em andamento (o global é o primeiro).
+ * `linha`: onde o quadro está agora (no de cima, a linha que vai rodar; nos
+ * de baixo, a linha que chamou a função), para a Pilha de chamadas.
+ */
+export type QuadroMemoria = { nome: string; chamada: number; escopos: EscopoMemoria[]; linha?: number | null };
 
 export type FotoMemoria = { quadros: QuadroMemoria[]; monte: Record<string, ObjetoMemoria> };
 
@@ -74,6 +78,8 @@ export type PassoRastro = {
   saidas: number;
   /** No passo de retorno: o valor devolvido e a função. */
   retorno?: { funcao: string; valor: ValorMemoria };
+  /** O comando deste passo é a instrução `debugger;` (o depurador pausa aqui). */
+  depurador?: true;
 };
 
 export type NivelSaida = "log" | "info" | "warn" | "error" | "debug";
@@ -123,6 +129,9 @@ export type ResultadoExecucao = {
   /** O que o código usa (if, for, arrow...), lido da árvore: validador `usouSintaxe`. */
   sintaxes: SintaxeJs[];
 };
+
+/** O valor de uma expressão do painel Observar, avaliada numa foto da memória (o momento pausado). */
+export type ResultadoAvaliacao = { expressao: string; valor: ValorExibido } | { expressao: string; erro: string };
 
 /** Valor esperado num caso de teste de função (JSON). */
 export type ValorEsperado = null | boolean | number | string | ValorEsperado[] | { [chave: string]: ValorEsperado };

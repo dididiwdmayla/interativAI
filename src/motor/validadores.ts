@@ -21,6 +21,7 @@ import type { EventoFase } from "./eventos";
 import { NOME_DO_PORTAO, portoesUsados, tabelaVerdade, type Circuito } from "./circuito/modelo";
 import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlobal } from "./programa";
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
+import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -210,6 +211,14 @@ export function descreverValidador(validador: Validador): string {
       return `o circuito dá a tabela verdade pedida (${validador.esperado.length} linha(s))`;
     case "usouPortao":
       return `usou pelo menos ${validador.minimo ?? 1} portão ${NOME_DO_PORTAO[validador.portao]} ligado`;
+    case "pontoDeParada":
+      return `tem ponto de parada na linha ${validador.linha}`;
+    case "pausouNaLinha":
+      return `o depurador pausou na linha ${validador.linha}`;
+    case "observou":
+      return `o Observar tem ${validador.expressao}${validador.valor !== undefined ? ` e ela mostrou ${textoDoEsperado(validador.valor)} pausado` : ""}`;
+    case "usouControle":
+      return `usou ${DADOS_DO_CONTROLE[validador.controle].nome} pelo menos ${validador.minimo ?? 1} vez(es)`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -503,6 +512,28 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const usados = portoesUsados(contexto.circuito, validador.portao);
       return { passou: usados >= (validador.minimo ?? 1), descricao, detalhe: `${usados} ligado(s)` };
     }
+    case "pontoDeParada": {
+      const pontos = contexto.programa?.depurador?.pontos ?? [];
+      return { passou: pontos.includes(validador.linha), descricao, detalhe: pontos.length ? `pontos nas linhas ${pontos.join(", ")}` : "nenhum ponto de parada" };
+    }
+    case "pausouNaLinha": {
+      const linhas = contexto.eventos.flatMap((evento) => (evento.tipo === "pausouNoDepurador" ? [evento.linha] : []));
+      return { passou: linhas.includes(validador.linha), descricao, detalhe: linhas.length ? `pausou nas linhas ${linhas.join(", ")}` : "não pausou" };
+    }
+    case "observou": {
+      const alvo = normalizarExpressao(validador.expressao);
+      const lista = contexto.programa?.depurador?.observacoes ?? [];
+      const naLista = lista.some((expressao) => normalizarExpressao(expressao) === alvo);
+      if (validador.valor === undefined) return { passou: naLista, descricao, detalhe: lista.length ? `Observar: ${lista.join(", ")}` : "o Observar está vazio" };
+      const vistos = contexto.eventos.flatMap((evento) => (evento.tipo === "observouValor" && normalizarExpressao(evento.expressao) === alvo ? [evento.valor] : []));
+      const esperado = validador.valor;
+      const passou = vistos.some((valor) => valor !== null && valorIgual(valor, esperado));
+      return { passou, descricao, detalhe: vistos.length ? `mostrou ${vistos.map((v) => (v ? textoPrevia(v) : "<indisponível>")).join(", ")}` : "não foi vista pausada" };
+    }
+    case "usouControle": {
+      const vezes = contexto.eventos.filter((evento) => evento.tipo === "usouControleDepurador" && evento.controle === validador.controle).length;
+      return { passou: vezes >= (validador.minimo ?? 1), descricao, detalhe: `usou ${vezes} vez(es)` };
+    }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
       const resultado = simularCampanha(contexto.campanha.dados, contexto.campanha.estado, documento);
@@ -647,7 +678,11 @@ export function validadorTravado(validador: Validador): boolean {
     case "semErro":
     case "erroDoTipo":
     case "usouSintaxe":
+    case "pausouNaLinha":
+    case "usouControle":
       return true;
+    case "observou":
+      return validador.valor !== undefined;
     case "todos":
     case "algum":
       return validador.validadores.some(validadorTravado);

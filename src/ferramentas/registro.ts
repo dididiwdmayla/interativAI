@@ -35,6 +35,11 @@ import { IconePalcoMemoria } from "@/componentes/icones/IconePalcoMemoria";
 import { IconeSnippet } from "@/componentes/icones/IconeSnippet";
 import { IconeCircuito } from "@/componentes/icones/IconeCircuito";
 import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
+import { IconeControlesDepurador } from "@/componentes/icones/IconeControlesDepurador";
+import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
+import { IconeObservar } from "@/componentes/icones/IconeObservar";
+import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
+import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -934,6 +939,109 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque em Ver como código.",
     },
     uso: "sinal",
+  },
+  // Depurador da aba Fontes (Ilha Lógica, parte B). Nomes, gestos e atalhos conferidos na
+  // documentação do Chrome (developer.chrome.com: "Pause your code with breakpoints",
+  // "JavaScript debugging reference" e "Keyboard shortcuts").
+  "pontos-de-parada": {
+    id: "pontos-de-parada",
+    nome: "Ponto de parada",
+    Icone: IconePontoDeParada,
+    alvo: seletorFerramenta("pontos-de-parada"),
+    oQueFaz: "Marca uma linha do programa para ele parar ali, antes de rodar essa linha. A instrução debugger; no código faz o mesmo.",
+    praQueServe:
+      "O programa roda rápido demais para ver. Parado numa linha, dá para olhar cada variável naquele momento e descobrir onde o valor começa a ficar errado.",
+    comoUsarAqui: {
+      mouse: "Clique no número da linha, na aba Fontes: ele fica com uma etiqueta. Clique de novo para tirar. Ctrl+B marca a linha do cursor.",
+      toque: "Toque no número da linha, na aba Fontes: ele fica com uma etiqueta. Toque de novo para tirar.",
+    },
+    noF12DeVerdade:
+      "na aba Fontes (Sources), clique no número da linha: aparece um marcador azul. Ctrl+B (Cmd+B no Mac) marca a linha do cursor, e debugger; no código pausa do mesmo jeito.",
+    experimente: {
+      mouse: "Clique no número de uma linha do Snippet.",
+      toque: "Toque no número de uma linha do Snippet.",
+    },
+    uso: "sinal",
+  },
+  "controles-depurador": {
+    id: "controles-depurador",
+    nome: "Controles do depurador",
+    Icone: IconeControlesDepurador,
+    alvo: seletorFerramenta("controles-depurador"),
+    oQueFaz: "Com o programa pausado, andam com ele: Retomar, Passar por cima, Entrar na função e Sair da função.",
+    praQueServe:
+      "Passar por cima vai para a próxima linha; Entrar na função segue para dentro da função chamada; Sair volta para quem chamou; Retomar corre até o próximo ponto de parada.",
+    comoUsarAqui: {
+      mouse: "Use os botões em cima dos painéis do depurador: F8 retoma, F10 passa por cima, F11 entra e Shift+F11 sai (ou Ctrl+\\, Ctrl+', Ctrl+; e Ctrl+Shift+;).",
+      toque: "Use os botões da barra embaixo da aba Fontes, ou os de cima do palco, enquanto o programa está pausado.",
+    },
+    noF12DeVerdade:
+      "ficam no alto da barra lateral da aba Fontes: Retomar (F8 ou Ctrl+\\), Passar por cima (F10 ou Ctrl+'), Entrar (F11 ou Ctrl+;) e Sair (Shift+F11 ou Ctrl+Shift+;). No Mac, Cmd no lugar de Ctrl.",
+    experimente: {
+      mouse: "Clique na barra dos controles.",
+      toque: "Toque na barra dos controles.",
+    },
+    uso: "tocar",
+  },
+  "painel-escopo": {
+    id: "painel-escopo",
+    nome: "Painel Escopo",
+    Icone: IconeEscopo,
+    alvo: seletorFerramenta("painel-escopo"),
+    oQueFaz: "Com o programa pausado, lista as variáveis daquele momento: Local (da função), Bloco, Script e Global.",
+    praQueServe:
+      "Mostra que cada variável mora num lugar: o i do for só existe dentro do laço, e a variável de dentro da função some quando ela termina.",
+    comoUsarAqui: {
+      mouse: "Pause o programa num ponto de parada e olhe o painel Escopo. Os valores batem com as caixinhas do palco.",
+      toque: "Pause o programa num ponto de parada e abra a aba Escopo do depurador. Os valores batem com as caixinhas do palco.",
+    },
+    noF12DeVerdade:
+      "é o painel Scope da barra lateral da aba Fontes, com as seções Local, Block, Script e Global (no Chrome, Global também mostra tudo o que a página tem).",
+    experimente: {
+      mouse: "Clique no painel Escopo.",
+      toque: "Toque no painel Escopo.",
+    },
+    uso: "tocar",
+  },
+  "painel-observar": {
+    id: "painel-observar",
+    nome: "Painel Observar",
+    Icone: IconeObservar,
+    alvo: seletorFerramenta("painel-observar"),
+    oQueFaz: "Guarda expressões que você quer acompanhar, como total ou preco * 2, e mostra o valor delas a cada pausa.",
+    praQueServe:
+      "Em vez de procurar a variável toda vez, ela fica de olho para você: a cada passo, o valor da expressão aparece atualizado.",
+    comoUsarAqui: {
+      mouse: "No painel Observar, escreva a expressão no campo e aperte Enter. O x tira a expressão.",
+      toque: "Na aba Observar do depurador, escreva a expressão e toque em Adicionar. O x tira a expressão.",
+    },
+    noF12DeVerdade:
+      "é o painel Watch da aba Fontes: clique no + (Add watch expression), escreva e aperte Enter. Expressão que não existe naquele momento aparece como não disponível.",
+    experimente: {
+      mouse: "Clique no painel Observar.",
+      toque: "Toque no painel Observar.",
+    },
+    uso: "tocar",
+  },
+  "pilha-de-chamadas": {
+    id: "pilha-de-chamadas",
+    nome: "Pilha de chamadas",
+    Icone: IconePilhaChamadas,
+    alvo: seletorFerramenta("pilha-de-chamadas"),
+    oQueFaz: "Com o programa pausado, mostra as funções abertas: a de cima é a que roda agora, e embaixo dela, quem chamou.",
+    praQueServe:
+      "Responde \"como cheguei aqui?\": se a função dobro está em cima e o código de fora embaixo, foi a linha de fora que chamou dobro.",
+    comoUsarAqui: {
+      mouse: "Pause dentro de uma função e olhe a pilha. Clique numa linha da pilha para ver o Escopo e a linha daquela função.",
+      toque: "Pause dentro de uma função e abra a aba Pilha do depurador. Toque numa linha da pilha para ver o Escopo daquela função.",
+    },
+    noF12DeVerdade:
+      "é o painel Call Stack da aba Fontes. O código de cima de um snippet aparece como (anonymous), com o nome do snippet e a linha.",
+    experimente: {
+      mouse: "Clique na Pilha de chamadas.",
+      toque: "Toque na Pilha de chamadas.",
+    },
+    uso: "tocar",
   },
 };
 

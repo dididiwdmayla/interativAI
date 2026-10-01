@@ -74,5 +74,11 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "circuito";
     case "verComoCodigo":
       return "tabela-verdade";
+    case "alternarPontoDeParada":
+      return "pontos-de-parada";
+    case "controlarDepurador":
+      return "controles-depurador";
+    case "observar":
+      return "painel-observar";
   }
 }

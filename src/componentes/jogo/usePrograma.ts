@@ -16,7 +16,7 @@ import type { Barramento } from "@/motor/barramento";
 import { textoDoErro } from "@/motor/executor/erros";
 import { textoPrevia } from "@/motor/executor/formatar";
 import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
-import type { ErroExecucao, OrigemCodigo, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
+import type { ErroExecucao, FotoMemoria, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
 
 export type LinhaConsole =
@@ -32,6 +32,21 @@ type LinhaSemId = DistribuirLinha<LinhaConsole>;
 /** Linhas guardadas no Console (as mais antigas saem). */
 const MAXIMO_LINHAS = 400;
 
+/**
+ * Os ganchos do depurador (useDepurador) na sessão: o Snippet que pausa
+ * fica "segurado" (as saídas do console aparecem aos poucos e o
+ * `executouCodigo` só sai quando o programa termina) e o Console, pausado,
+ * responde no momento da pausa.
+ */
+export type GanchosDepuracao = {
+  /** O Snippet rodou no Worker: true se o depurador pausou (o resultado fica segurado). */
+  pausar: (resultado: ResultadoExecucao) => boolean;
+  /** O Console com o depurador pausado: a resposta no momento da pausa (null: não está pausado). */
+  responderNaPausa: (codigo: string) => Promise<ResultadoAvaliacao> | null;
+  /** Antes de rodar algo novo, a pausa de agora termina (o programa segurado conclui). */
+  encerrar: () => void;
+};
+
 type Opcoes = {
   fase: Fase;
   barramento: Barramento;
@@ -41,7 +56,18 @@ type Opcoes = {
   aoUsar?: (ferramenta: "console" | "snippet") => void;
 };
 
+/** "ReferenceError: x is not defined" vira o erro do Console (nome e mensagem). */
+function erroDeTexto(texto: string): ErroExecucao {
+  const achado = /^([A-Za-z]*Error): ([\s\S]*)$/.exec(texto);
+  return { tipo: "execucao", nome: achado?.[1] ?? "", mensagem: achado?.[2] ?? texto, linha: null, coluna: null };
+}
+
 export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
+  /** (Depurador) Os ganchos, preenchidos pelo useDepurador (definirDepuracao). */
+  const depuracao = useRef<GanchosDepuracao | null>(null);
+  const definirDepuracao = useCallback((ganchos: GanchosDepuracao | null) => {
+    depuracao.current = ganchos;
+  }, []);
   const ativo = fase.programa !== undefined;
   const nomeSnippet = fase.programa?.snippet?.nome ?? "programa.js";
   const [sessao] = useState(() => (ativo ? new SessaoNavegador() : null));
@@ -118,13 +144,56 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
 
   useEffect(() => () => sessao?.encerrar(), [sessao]);
 
+  /** As saídas do console de `de` até `ate` (console.clear() apaga o que tinha antes, como no Chrome). */
+  const mostrarSaidas = useCallback(
+    (resultado: ResultadoExecucao, de: number, ate: number) => {
+      const trecho = resultado.saidas.slice(de, ate);
+      const ultimoLimpar = trecho.map((s) => Boolean(s.limpar)).lastIndexOf(true);
+      const saidas = ultimoLimpar >= 0 ? trecho.slice(ultimoLimpar) : trecho;
+      if (!saidas.length) return;
+      acrescentar(
+        saidas.map((saida) => (saida.limpar ? { tipo: "info", texto: "O console foi limpo" } : { tipo: "saida", saida })),
+        ultimoLimpar >= 0,
+      );
+    },
+    [acrescentar],
+  );
+
+  /** O fim de uma execução: o resto das saídas, o erro ou a resposta, a memória dos validadores e o evento. */
+  const concluir = useCallback(
+    async (resultado: ResultadoExecucao, jaMostradas = 0) => {
+      await atualizarEstado(resultado);
+      mostrarSaidas(resultado, jaMostradas, resultado.saidas.length);
+      const novas: LinhaSemId[] = [];
+      if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem: resultado.origem });
+      else if (resultado.origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
+      acrescentar(novas);
+      mostrarResultado(resultado);
+      barramento.emitir({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+    },
+    [acrescentar, atualizarEstado, barramento, mostrarResultado, mostrarSaidas],
+  );
+
   const rodar = useCallback(
     async (codigo: string, origem: OrigemCodigo) => {
       if (!sessao) return;
       if (origem === "console") {
         acrescentar([{ tipo: "entrada", codigo }]);
         setHistorico((atual) => (atual[atual.length - 1] === codigo ? atual : [...atual, codigo].slice(-100)));
+        // Pausado no depurador: o Console responde no momento da pausa, como no Chrome.
+        const naPausa = depuracao.current?.responderNaPausa(codigo) ?? null;
+        if (naPausa) {
+          const encerrar = comecarPendencia();
+          try {
+            const resposta = await naPausa;
+            acrescentar(["valor" in resposta ? { tipo: "resposta", valor: resposta.valor } : { tipo: "erro", erro: erroDeTexto(resposta.erro), origem }]);
+          } finally {
+            encerrar();
+          }
+          return;
+        }
       } else {
+        depuracao.current?.encerrar();
         acrescentar([{ tipo: "info", texto: `Rodou o snippet ${nomeSnippet}` }]);
       }
       setOcupado((n) => n + 1);
@@ -132,25 +201,27 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       const encerrar = comecarPendencia();
       try {
         const resultado = await sessao.executar(codigo, origem);
-        await atualizarEstado(resultado);
-        // console.clear() apaga o que tinha antes, como no Chrome.
-        const ultimoLimpar = resultado.saidas.map((s) => Boolean(s.limpar)).lastIndexOf(true);
-        const saidas = ultimoLimpar >= 0 ? resultado.saidas.slice(ultimoLimpar) : resultado.saidas;
-        const novas: LinhaSemId[] = saidas.map((saida) => (saida.limpar ? { tipo: "info", texto: "O console foi limpo" } : { tipo: "saida", saida }));
-        if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem });
-        else if (origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
-        acrescentar(novas, ultimoLimpar >= 0);
-        mostrarResultado(resultado);
         if (!resultado.erro || resultado.erro.tipo === "execucao") {
           setEntradas((atuais) => [...atuais, { codigo, origem: origem === "snippet" ? ("snippet" as const) : ("console" as const) }].slice(-MAXIMO_ENTRADAS_SALVAS));
         }
-        barramento.emitir({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
+        // O depurador pausou: o palco mostra o passo da pausa e o resto sai quando o programa terminar.
+        if (origem === "snippet" && depuracao.current?.pausar(resultado)) {
+          mostrarResultado(resultado);
+          return;
+        }
+        await concluir(resultado);
       } finally {
         setOcupado((n) => n - 1);
         encerrar();
       }
     },
-    [acrescentar, atualizarEstado, barramento, mostrarResultado, nomeSnippet, sessao],
+    [acrescentar, concluir, mostrarResultado, nomeSnippet, sessao],
+  );
+
+  /** (Depurador) As expressões do Observar numa foto da memória, no Worker. */
+  const avaliarNaFoto = useCallback(
+    async (expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> => (sessao ? sessao.avaliarNaFoto(expressoes, foto, quadro) : []),
+    [sessao],
   );
 
   const executarNoConsole = useCallback(
@@ -226,6 +297,10 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     limparConsole,
     estadoValidacao,
     contextoTutor,
+    mostrarSaidas,
+    concluir,
+    avaliarNaFoto,
+    definirDepuracao,
   };
 }
 
