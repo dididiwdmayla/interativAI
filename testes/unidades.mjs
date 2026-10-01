@@ -21,6 +21,7 @@ import {
   fecharBalao as fecharBalaoDaPagina,
   passarApresentacao,
   selecionarNo,
+  opcaoDaPrevisao,
 } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -566,7 +567,7 @@ await proximoObjetivo("U2F1 objetivo 1 (trilha)");
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
 conferir((await pagina.getByRole("button", { name: /^Me ajuda/ }).count()) === 0, "previsão: sem Me ajuda antes do palpite");
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 conferir(true, "previsão: acertou e mostra a explicação");
 await mostrarPainel("Árvore");
@@ -598,7 +599,7 @@ await proximoObjetivo("U2F2 objetivo 1 (esconder)");
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
 conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "a apresentação do apagar espera o palpite");
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina, { acertar: false }));
 await pagina.locator('[data-previsao-respondida="errou"]').waitFor();
 conferir(true, "previsão errada mostra a certa e a explicação");
 const noticiasAntes = (await iframe.locator("#noticias").boundingBox()).y;
@@ -697,10 +698,10 @@ await conversar(3);
 await apresentacao("renomear-tag", () => renomearTag("#titulo-principal", "h1"));
 await proximoObjetivo("U3F1 objetivo 1 (renomear tag)");
 
-// Previsão: acerta o palpite (índice 1) e confirma renomeando o h5 para h2.
+// Previsão: acerta o palpite pelo dado `correta` e confirma renomeando o h5 para h2.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 conferir(true, "U3F1: previsão sobre o nível do título acertou");
 await renomearTag("#passos-titulo", "h2");
@@ -728,7 +729,7 @@ await conversar(3);
 // Previsão: b vira strong, sem mudar o visual.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await renomearTag("#aviso .destaque-importante", "strong");
 await proximoObjetivo("U3F2 objetivo 1 (previsão strong)");
@@ -752,7 +753,7 @@ await proximoObjetivo("U3F3 objetivo 1 (trilha + numerar)");
 // Previsão: duplicar um item de materiais não pede números.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await acaoNoNo("#materiais li", "duplicar");
 await editarTexto("#materiais li:nth-child(2)", "Regador pequeno");
@@ -808,7 +809,7 @@ await proximoObjetivo("U4F1 objetivo 1 (href quebrado)");
 // Previsão: acerta o palpite e escreve target="_blank" pelo código (o atributo ainda não existe).
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 conferir(true, "U4F1: previsão sobre target acertou");
 await acrescentarAtributoPeloCodigo("link-ingressos", 'id="link-ingressos"', ' target="_blank"');
@@ -824,7 +825,7 @@ await conclusaoEProxima("U4F1");
 await conversar(3);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await acrescentarAtributoPeloCodigo("foto-coral", 'id="foto-coral"', ' alt="Coral Vozes da Vila cantando em um palco de igreja"');
 await proximoObjetivo("U4F2 objetivo 1 (previsão alt)");
@@ -837,7 +838,7 @@ await conclusaoEProxima("U4F2");
 await conversar(3);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(2));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await acrescentarAtributoPeloCodigo("integrante-bruno", "<article", ' class="integrante"');
 await acrescentarAtributoPeloCodigo("integrante-carla", "<article", ' class="integrante"');
@@ -887,7 +888,7 @@ await metaDaUnidade("U5 começo");
 await conversar(3);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await clicarLinhaCodigo("Consertamos bicicletas");
 await pagina.keyboard.press("End");
@@ -912,7 +913,7 @@ await proximoObjetivo("U5F2 objetivo 1 (section)");
 
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await renomearTag("#servico-revisao", "article");
 await proximoObjetivo("U5F2 objetivo 2 (previsão article)");
@@ -982,7 +983,7 @@ await proximoObjetivo("U6F1 objetivo 1 (h1 no body)");
 // Previsão: escrever no head não faz o texto aparecer na tela.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await digitarNoDocumento("<head>", "<title>Feira de Talentos</title>");
 conferir((await pagina.locator("[data-titulo-aba]").innerText()) === "Feira de Talentos", "a aba mudou com o title");
@@ -1008,7 +1009,7 @@ await conversar(2);
 conferir((await iframe.locator("p").first().textContent()) !== "Inscrições até sexta-feira!", "os acentos chegam quebrados sem o meta charset (simulação)");
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(2));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await digitarNoDocumento("<head>", '<meta charset="utf-8">');
 await pagina.waitForFunction(() => document.querySelector("[data-titulo-aba]") && !document.querySelector("[data-aviso-acentos]"));
@@ -1150,7 +1151,7 @@ await proximoObjetivo("E1F1 objetivo 2 (cor do h1)");
 // Previsão: desligar não apaga a peça. A caixinha é apresentada depois do palpite, já no footer.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await apresentacao("ligar-desligar-declaracao", async () => {
   await mostrarEstilos();
@@ -1184,7 +1185,7 @@ await proximoObjetivo("E1F2 objetivo 1 (setas)");
 
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos(".descricao");
 await trocarValorNoPainel(".descricao", "font-size", "1rem");
@@ -1209,7 +1210,7 @@ await conclusaoEProxima("E1F2");
 await conversar(2);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos("h2");
 await trocarValorNoPainel("h2", "color", "#ff0000");
@@ -1300,7 +1301,7 @@ await proximoObjetivo("E2F1 objetivo 1 (seletor de tag)");
 
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos(".autor");
 await trocarValorNoPainel(".autor", "color", "#555555");
@@ -1316,7 +1317,7 @@ await conclusaoEProxima("E2F1");
 await conversar(2);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos("#livro-mais-vendido");
 await tocar(pagina.locator("[data-nova-regra]"));
@@ -1421,7 +1422,7 @@ await conclusaoEProxima("E3F1");
 await conversar(1);
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos(".bolo");
 await acrescentarNoPainel(".bolo", "margin-bottom", "16px");
@@ -1482,7 +1483,7 @@ await conversar(2);
 // Previsão: #topo (mais específico) vence h1, mesmo vindo antes no arquivo.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos("h1");
 await proximoObjetivo("E4F1 objetivo 1 (previsão de especificidade, #topo vence)");
@@ -1500,7 +1501,7 @@ await conversar(1);
 // Previsão: sem regra própria, .descricao herda o roxo do article.instrumento.
 await abrirBalao();
 await pagina.locator("[data-previsao]").waitFor();
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await selecionarParaEstilos(".descricao");
 await proximoObjetivo("E4F2 objetivo 1 (previsão de herança)");

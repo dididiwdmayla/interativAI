@@ -12,6 +12,7 @@ Este resumo não substitui as regras completas:
   layout; no fim da etapa, o afetado nos três layouts; bateria completa
   uma vez no fim de prompts de motor. Depois de uma falha, repita só o
   afetado. Use saída resumida.
+- Se o prompt alterar qualquer coisa numa unidade já publicada, inclusive a ordem das opções, rode as jornadas dessas unidades.
 - Zero emojis e zero símbolos que viram emoji. Expressividade por SVG.
 - Cores só por tokens de `src/tema/tokens.css` (a exceção existente são
   os sites-alvo fictícios, conforme `docs/PROJETO.md`).

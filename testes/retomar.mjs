@@ -2,7 +2,7 @@
 // esbarrão, o computadorzinho esbarra de novo e o Desfazer continua valendo.
 // Também confere o custo das soluções. A fase abre direto pelo endereço
 // (/fase/sites-elementos-u2-f2), sem introdução vista.
-import { abrir, conferir, errosRelevantes, esperarPronto, progressoComFase } from "./util.mjs";
+import { abrir, conferir, errosRelevantes, esperarPronto, progressoComFase, opcaoDaPrevisao } from "./util.mjs";
 const TODAS = ["painel","previa","me-ajuda","tutor","arvore","inspecionar","editar-duplo-clique","editor","sincronia","trilha","esconder","apagar","desfazer","duplicar"];
 const concl = ["sites-elementos-u1-f1","sites-elementos-u2-f1"];
 const { navegador, pagina, erros } = await abrir({
@@ -15,7 +15,7 @@ conferir((await iframe.locator("#popup-cookies").count()) === 1, "o endereço ab
 for (let i = 0; i < 3; i++) { await pagina.getByRole("button", { name: /^(Continuar|Vamos lá!)$/ }).first().click(); await esperarPronto(pagina); }
 for (const previsao of [false, true]) {
   await esperarPronto(pagina);
-  if (previsao) { await pagina.locator("[data-previsao] button").nth(1).click(); await esperarPronto(pagina); }
+  if (previsao) { await (await opcaoDaPrevisao(pagina)).click(); await esperarPronto(pagina); }
   for (let d = 0; d < 4; d++) { await pagina.getByRole("button", { name: /^Me ajuda\. Próxima/ }).click(); await esperarPronto(pagina); }
   await pagina.getByRole("button", { name: "Sim, mostrar a solução" }).click();
   await pagina.getByRole("button", { name: "Próximo objetivo" }).click();

@@ -4,7 +4,7 @@
 // (fios e porta acendendo), a tabela verdade marcando as linhas testadas, o
 // "Ver como código" batendo com a tabela e o NÃO trocando um fio. Mouse e toque.
 // Uso: node testes/circuito.mjs [desktop|retrato|paisagem]
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -117,7 +117,7 @@ await naConversa(/Próximo objetivo/);
 // ---------------------------------------------------------------- 2. previsão e chaves
 await esperarObjetivo("testar");
 if (movel) await abrirBalao(pagina);
-const opcao = pagina.locator("[data-previsao] button").nth(1);
+const opcao = await opcaoDaPrevisao(pagina);
 if (toque) await opcao.tap();
 else await opcao.click();
 await esperarPronto(pagina);

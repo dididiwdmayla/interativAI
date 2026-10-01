@@ -178,3 +178,14 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - Modelo: 9 unitários verdes. Jornada nos três layouts; retrato com seis
   portões extras, medidas dos alvos, dois dedos reais (CDP), zoom, pan e
   enquadramento recuperado. Build e lint verdes.
+
+### Etapa 5: previsões respondidas pelos dados
+
+- Helper comum lê `correta` da fase/objetivo ou do item de revisão real,
+  incluindo as bancadas do laboratório. Jornadas de erro escolhem uma
+  opção diferente da correta sem fixar posição. Atualizadas todas as
+  jornadas, inclusive S2 a S5 e revisão por zona. Conteúdo publicado intacto.
+- CLAUDE e AGENTS exigem jornadas das unidades publicadas afetadas, mesmo
+  quando a alteração for só a ordem das opções.
+- Unidades, Layout, S2 a S5 e revisão Elementos passaram no desktop;
+  cobertura dos três layouts e bateria geral registrada no fechamento.

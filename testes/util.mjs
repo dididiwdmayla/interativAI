@@ -16,6 +16,7 @@ function carregarPlaywright() {
   }
 }
 const { chromium } = carregarPlaywright();
+export { opcaoDaPrevisao } from "./previsoes.mjs";
 
 export const URL_JOGO = process.env.URL_JOGO ?? "http://localhost:3000";
 

@@ -6,7 +6,7 @@
 // o agendamento gravado no progresso. Depois, o porto em dia e o treino livre.
 // Uso: node testes/revisao.mjs [desktop|retrato|paisagem]
 import { PUBLICADAS } from "./curriculo.mjs";
-import { abaDaArvore, abrir, abrirBalao, acaoDaBarra, chaveDoSeletor, conferir, errosRelevantes, esperarPronto, fecharBalao, selecionarNo } from "./util.mjs";
+import { abaDaArvore, abrir, abrirBalao, acaoDaBarra, chaveDoSeletor, conferir, errosRelevantes, esperarPronto, fecharBalao, selecionarNo, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -119,7 +119,7 @@ await proximo("selecionar");
 await item("elemento-pai-2");
 await abrirBalao(pagina);
 conferir((await pagina.getByRole("button", { name: /^Me ajuda/ }).count()) === 0, `${MODO}: sem Me ajuda antes do palpite`);
-await tocar(pagina.locator("[data-previsao] button").nth(1));
+await tocar(await opcaoDaPrevisao(pagina, { acertar: false }));
 await pagina.locator('[data-previsao-respondida="errou"]').waitFor();
 await proximo("previsao");
 

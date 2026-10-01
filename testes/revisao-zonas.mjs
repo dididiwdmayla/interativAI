@@ -11,7 +11,7 @@
 //   zona: elementos | estilos | layout | responsivo | publicar (padrão: todas)
 import { readdirSync, readFileSync } from "node:fs";
 import { PUBLICADAS } from "./curriculo.mjs";
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const ZONA = process.argv[3];
@@ -128,7 +128,7 @@ for (const [g, grupo] of grupos.entries()) {
     if (movel) await abrirBalao(pagina);
     const previsao = pagina.locator("[data-previsao] button");
     if ((await previsao.count()) > 0) {
-      await tocar(previsao.nth(1));
+      await tocar(await opcaoDaPrevisao(pagina));
       await pagina.locator("[data-previsao-respondida]").waitFor();
       await abrirBalao(pagina);
       const proximo = pagina.getByRole("button", { name: /^Próximo$/ }).first();

@@ -1,6 +1,6 @@
 // Os passos de cada unidade da zona "Ser encontrado" para o roteiro
 // `ser-encontrado-zona.mjs`: uma lista por fase, com um objeto por objetivo
-// ({ id, passos }). Passos: { previsao: <opção> }, { editar: [[de, para]] }
+// ({ id, passos }). Passos: { previsao: true }, { editar: [[de, para]] }
 // (troca um trecho do código), { ajuda: true } (o Me ajuda até a solução) e
 // { fazer: async (contexto) => ... } para o que é próprio da unidade.
 // `ferramentasNovas`: o que a unidade apresenta (o resto vem como já visto).
@@ -94,20 +94,20 @@ export const PASSOS = {
     fases: [
       // F1: o h1
       [
-        { id: "nome-vira-h1", passos: [{ previsao: 1 }, { ajuda: true }] },
+        { id: "nome-vira-h1", passos: [{ previsao: true }, { ajuda: true }] },
         { id: "um-h1-so", passos: [trocar('<h1 id="promo">Promoção de inverno</h1>', '<h2 id="promo">Promoção de inverno</h2>')] },
       ],
       // F2: texto que responde e enchimento
       [
         {
           id: "resposta-com-preco",
-          passos: [{ previsao: 2 }, trocar("Aqui você encontra tudo o que precisa para o seu vidro.", "Box de banheiro a partir de R$ 480, instalado em 3 dias.")],
+          passos: [{ previsao: true }, trocar("Aqui você encontra tudo o que precisa para o seu vidro.", "Box de banheiro a partir de R$ 480, instalado em 3 dias.")],
         },
         { id: "resposta-com-horario", passos: [trocar("Atendemos em horário comercial.", "Abrimos de segunda a sexta, das 8h às 18h.")] },
         {
           id: "apagar-enchimento",
           passos: [
-            { previsao: 0 },
+            { previsao: true },
             trocar('<p id="enchimento-topo" class="enchimento">vidraçaria barata, vidraçaria em Campinas, vidraçaria 24 horas, vidraçaria perto de mim, vidraçaria boa e barata</p>', ""),
           ],
         },
@@ -118,7 +118,7 @@ export const PASSOS = {
       ],
       // F3: links e fotos
       [
-        { id: "trocar-clique-aqui", passos: [{ previsao: 1 }, trocar(">clique aqui<", ">Veja o catálogo completo<")] },
+        { id: "trocar-clique-aqui", passos: [{ previsao: true }, trocar(">clique aqui<", ">Veja o catálogo completo<")] },
         { id: "trocar-saiba-mais", passos: [trocar(">saiba mais<", ">Conheça o clube de leitura<")] },
         {
           id: "alt-nas-fotos",
@@ -127,7 +127,7 @@ export const PASSOS = {
       ],
       // F4: velocidade
       [
-        { id: "foto-de-baixo-preguicosa", passos: [{ previsao: 2 }, trocar('<img id="foto-1"', '<img loading="lazy" id="foto-1"')] },
+        { id: "foto-de-baixo-preguicosa", passos: [{ previsao: true }, trocar('<img id="foto-1"', '<img loading="lazy" id="foto-1"')] },
         {
           id: "galeria-toda-menos-a-capa",
           passos: [trocar('<img id="foto-2"', '<img loading="lazy" id="foto-2"'), trocar('<img id="foto-3"', '<img loading="lazy" id="foto-3"')],
@@ -155,12 +155,12 @@ export const PASSOS = {
     fases: [
       // F1: os mesmos dados em todo lugar
       [
-        { id: "telefone-igual", passos: [{ previsao: 0 }, trocar('<span id="tel-rodape">(21) 3555-0124</span>', '<span id="tel-rodape">(21) 3555-0142</span>')] },
+        { id: "telefone-igual", passos: [{ previsao: true }, trocar('<span id="tel-rodape">(21) 3555-0124</span>', '<span id="tel-rodape">(21) 3555-0142</span>')] },
         { id: "endereco-igual", passos: [trocar('<p id="endereco-contato">Rua das Acácias, 54, Niterói</p>', '<p id="endereco-contato">Rua das Acácias, 45, Niterói</p>')] },
       ],
       // F2: avaliações
       [
-        { id: "responder-avaliacao-ruim", passos: [{ previsao: 2 }, { ajuda: true }] },
+        { id: "responder-avaliacao-ruim", passos: [{ previsao: true }, { ajuda: true }] },
         {
           id: "agradecer-avaliacao",
           passos: [trocar('<p class="resposta-dono" id="resposta-3">Sem resposta do restaurante.</p>', '<p class="resposta-dono" id="resposta-3">Que bom que gostou da feijoada! Anotamos a sobremesa.</p>')],
@@ -170,7 +170,7 @@ export const PASSOS = {
       [
         {
           id: "consertar-o-json",
-          passos: [{ previsao: 1 }, apresentar("dados-estruturados", '[data-ferramenta~="dados-estruturados"]'), trocar('"(27) 3555-0188",\n}', '"(27) 3555-0188"\n}')],
+          passos: [{ previsao: true }, apresentar("dados-estruturados", '[data-ferramenta~="dados-estruturados"]'), trocar('"(27) 3555-0188",\n}', '"(27) 3555-0188"\n}')],
         },
         {
           id: "acrescentar-endereco",
@@ -186,7 +186,7 @@ export const PASSOS = {
       [
         {
           id: "sorveteria-especifica",
-          passos: [{ previsao: 0 }, trocar('"@type": "LocalBusiness",\n  "name": "Sorveteria Gelato Bello"', '"@type": "IceCreamShop",\n  "name": "Sorveteria Gelato Bello"')],
+          passos: [{ previsao: true }, trocar('"@type": "LocalBusiness",\n  "name": "Sorveteria Gelato Bello"', '"@type": "IceCreamShop",\n  "name": "Sorveteria Gelato Bello"')],
         },
         { id: "encanador-especifico", passos: [trocar('"@type": "LocalBusiness",\n  "name": "Hidráulica Seu Nilo"', '"@type": "Plumber",\n  "name": "Hidráulica Seu Nilo"')] },
       ],
@@ -212,7 +212,7 @@ export const PASSOS = {
         {
           id: "medir-whatsapp",
           passos: [
-            { previsao: 1 },
+            { previsao: true },
             apresentar("medicao", '[data-ferramenta~="medicao"]'),
             clicarNaPrevia("#pedir-whatsapp"),
           ],
@@ -228,7 +228,7 @@ export const PASSOS = {
       ],
       // F2: o que a busca vê do seu site
       [
-        { id: "voltar-para-a-busca", passos: [{ previsao: 2 }, trocar('<meta name="robots" content="noindex">', "")] },
+        { id: "voltar-para-a-busca", passos: [{ previsao: true }, trocar('<meta name="robots" content="noindex">', "")] },
         { id: "title-com-a-pesquisa", passos: [trocar("<title>Loja Vale Verde | Início</title>", "<title>Loja Vale Verde | Vasos de cerâmica em Goiânia</title>")] },
       ],
       // F3: links rastreáveis (apresenta o construtor de link)
@@ -236,7 +236,7 @@ export const PASSOS = {
         {
           id: "link-do-instagram",
           passos: [
-            { previsao: 0 },
+            { previsao: true },
             apresentar("link-rastreavel", '[data-ferramenta~="link-rastreavel"]'),
             linkRastreavel("#link-insta", ["instagram", "social", "natal"]),
           ],
@@ -264,23 +264,23 @@ export const PASSOS = {
       [
         {
           id: "primeiro-lugar",
-          passos: [{ previsao: 1 }, apresentar("simulador-campanha", '[data-ferramenta~="simulador-campanha"]'), campanha({ lance: 4 })],
+          passos: [{ previsao: true }, apresentar("simulador-campanha", '[data-ferramenta~="simulador-campanha"]'), campanha({ lance: 4 })],
         },
-        { id: "custo-por-clique", passos: [{ previsao: 2 }, campanha({ lance: 2.8 })] },
+        { id: "custo-por-clique", passos: [{ previsao: true }, campanha({ lance: 2.8 })] },
         { id: "outra-palavra-chave", passos: [campanha({ palavra: "pizzaria-no-cambui" })] },
       ],
       // F2: verba e palavras-chave
       [
-        { id: "orcamento-acabou", passos: [{ previsao: 0 }, campanha({ orcamento: 150 })] },
+        { id: "orcamento-acabou", passos: [{ previsao: true }, campanha({ orcamento: 150 })] },
         { id: "comecar-pequeno", passos: [campanha({ palavra: "oculos-de-sol" })] },
       ],
       // F3: a página que decide
       [
-        { id: "diagnostico-da-pagina", passos: [{ previsao: 1 }, analisar] },
+        { id: "diagnostico-da-pagina", passos: [{ previsao: true }, analisar] },
         {
           id: "melhorar-a-busca-da-pagina",
           passos: [
-            { previsao: 2 },
+            { previsao: true },
             trocar(
               '<meta name="viewport" content="width=device-width, initial-scale=1">',
               '<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Doceria Casa de Bolo | Bolos de pote e doces em Recife</title>\n<meta name="description" content="Bolos de pote e doces para festa feitos por encomenda em Recife. Peça pelo WhatsApp e receba o orçamento na hora.">',
