@@ -1064,6 +1064,61 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     },
   },
   {
+    id: "estruturas-desempenho",
+    nome: "estruturas e desempenho: passosNoMaximo, formaDaEstrutura, ver como árvore e o gráfico passos x tamanho só numa fase de programa, com as ferramentas",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      const programa = fase.programa;
+      const config = programa?.desempenho;
+      const usa = (id: IdFerramenta) => fase.usaFerramentas.includes(id);
+      const nomeDeFuncao = /^[A-Za-z_$][\w$]*$/;
+      for (const id of ["contador-passos", "grafico-passos", "arvore-palco"] as const) {
+        if (usa(id) && !programa) problemas.push(`a ferramenta ${id} mora no palco ou na aba Desempenho: a fase precisa de programa`);
+      }
+      if (usa("grafico-passos") && programa && !config) problemas.push("a ferramenta grafico-passos pede programa.desempenho (as funções e os tamanhos)");
+      if (config) {
+        if (!usa("grafico-passos")) problemas.push("programa.desempenho pede a ferramenta grafico-passos em usaFerramentas");
+        if (config.funcoes.length < 1 || config.funcoes.length > 2) problemas.push(`programa.desempenho com ${config.funcoes.length} funções (de 1 a 2: o gráfico tem duas cores)`);
+        problemas.push(...repetidos(config.funcoes.map((f) => f.nome)).map((nome) => `programa.desempenho repete a função "${nome}"`));
+        for (const f of config.funcoes) if (!nomeDeFuncao.test(f.nome)) problemas.push(`programa.desempenho: "${f.nome}" não é um nome de função`);
+        const tamanhos = config.tamanhos ?? [];
+        if (config.tamanhos && (tamanhos.length < 2 || tamanhos.length > 6)) problemas.push(`programa.desempenho com ${tamanhos.length} tamanhos (de 2 a 6)`);
+        if (tamanhos.some((t, i) => !Number.isInteger(t) || t < 1 || t > 5000 || (i > 0 && t <= tamanhos[i - 1]))) problemas.push("programa.desempenho: tamanhos inteiros de 1 a 5000, em ordem crescente");
+      }
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo !== "passosNoMaximo" && item.tipo !== "formaDaEstrutura") continue;
+          if (!programa) {
+            problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa`);
+            continue;
+          }
+          if (item.tipo === "passosNoMaximo") {
+            if (!Number.isInteger(item.valor) || item.valor < 1) problemas.push(`${onde}: passosNoMaximo com valor ${item.valor} (um inteiro a partir de 1)`);
+            if (item.tamanho === undefined) {
+              if (!usa("contador-passos")) problemas.push(`${onde}: passosNoMaximo sem tamanho conta a execução: pede "contador-passos" em usaFerramentas (o jogador precisa ver o número)`);
+              if (item.funcao !== undefined) problemas.push(`${onde}: passosNoMaximo com funcao precisa de tamanho`);
+            } else {
+              if (!config) problemas.push(`${onde}: passosNoMaximo com tamanho mede uma função do programa.desempenho, que a fase não tem`);
+              else if (item.funcao !== undefined && !config.funcoes.some((f) => f.nome === item.funcao)) problemas.push(`${onde}: passosNoMaximo mede "${item.funcao}", que não está em programa.desempenho`);
+              if (!Number.isInteger(item.tamanho) || item.tamanho < 1 || item.tamanho > 5000) problemas.push(`${onde}: passosNoMaximo com tamanho ${item.tamanho} (de 1 a 5000)`);
+            }
+          }
+          if (item.tipo === "formaDaEstrutura") {
+            if (!nomeDeFuncao.test(item.nome)) problemas.push(`${onde}: formaDaEstrutura com nome "${item.nome}", que não é um nome de variável`);
+            if (item.forma === "arvore" && !usa("arvore-palco")) problemas.push(`${onde}: formaDaEstrutura arvore pede "arvore-palco" em usaFerramentas (o jogador vê a árvore)`);
+          }
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        for (const acao of acoes) {
+          if (acao.tipo === "verComoArvore" && !nomeDeFuncao.test(acao.nome)) problemas.push(`${onde}: verComoArvore com nome "${acao.nome}", que não é um nome de variável`);
+          if (acao.tipo === "medirDesempenho" && !config) problemas.push(`${onde}: medirDesempenho pede programa.desempenho`);
+        }
+      }
+      return problemas;
+    },
+  },
+  {
     id: "ordenar-passos",
     nome: "ordenar passos: cartões com ids e textos válidos, dependências sem ciclo, e validadores e ações do quadro só nele",
     checar: (fase) => {

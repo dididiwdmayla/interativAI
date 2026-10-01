@@ -16,8 +16,9 @@ import type { Barramento } from "@/motor/barramento";
 import { textoDoErro } from "@/motor/executor/erros";
 import { textoPrevia } from "@/motor/executor/formatar";
 import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
-import type { ErroExecucao, FotoMemoria, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
-import { chaveFuncaoPassa, type EstadoPrograma, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
+import type { ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
+import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
+import { chamadasDaMedicao } from "@/motor/desempenho";
 
 export type LinhaConsole =
   | { id: number; tipo: "entrada"; codigo: string }
@@ -92,6 +93,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
   const estado = useRef<EstadoPrograma>({ memoria: null, testes: {} });
   const proximoId = useRef(1);
   const testes = useMemo(() => (ativo ? testesDeFuncaoDaFase(fase) : []), [ativo, fase]);
+  const medicoesPedidas = useMemo(() => (ativo ? medicoesDaFase(fase) : []), [ativo, fase]);
   const aoUsarAtual = useRef(aoUsar);
   useEffect(() => {
     aoUsarAtual.current = aoUsar;
@@ -111,10 +113,32 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       if (!sessao) return;
       const novos: EstadoPrograma["testes"] = {};
       for (const teste of testes) novos[chaveFuncaoPassa(teste)] = await sessao.testarFuncao(teste.nome, teste.casos);
-      estado.current = { memoria: resultado.memoriaFinal, testes: novos };
+      // passosNoMaximo com tamanho: a função medida de novo a cada execução, como o funcaoPassa.
+      const medicoes: Record<string, MedicaoPassos> = {};
+      for (const pedida of medicoesPedidas) {
+        const [medicao] = await sessao.medirPassos(pedida.funcao, [{ tamanho: pedida.tamanho, args: pedida.args }]);
+        if (medicao) medicoes[pedida.chave] = medicao;
+      }
+      estado.current = { memoria: resultado.memoriaFinal, testes: novos, ...(medicoesPedidas.length ? { medicoes } : {}) };
     },
-    [sessao, testes],
+    [medicoesPedidas, sessao, testes],
   );
+
+  /** (Desempenho) O gráfico: cada função da fase com as listas de cada tamanho. */
+  const medirDesempenho = useCallback(async (): Promise<MedicaoPassos[]> => {
+    const config = fase.programa?.desempenho;
+    if (!sessao || !config) return [];
+    const encerrar = comecarPendencia();
+    setOcupado((n) => n + 1);
+    try {
+      const todas: MedicaoPassos[] = [];
+      for (const funcao of config.funcoes) todas.push(...(await sessao.medirPassos(funcao.nome, chamadasDaMedicao(config, funcao))));
+      return todas;
+    } finally {
+      setOcupado((n) => n - 1);
+      encerrar();
+    }
+  }, [fase.programa?.desempenho, sessao]);
 
   // Abertura: o preparo da fase e o que já tinha rodado voltam em silêncio.
   useEffect(() => {
@@ -320,6 +344,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     concluir,
     avaliarNaFoto,
     definirDepuracao,
+    medirDesempenho,
   };
 }
 

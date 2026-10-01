@@ -23,6 +23,8 @@ import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlo
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
 import { conferirOrdem, type DadosOrdenar, type EstadoOrdenar, ondeEsta } from "./ordenar/modelo";
+import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
+import { chaveMedicao, textoDePassos } from "./desempenho";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -230,6 +232,12 @@ export function descreverValidador(validador: Validador): string {
       return `${validador.passo} vem antes de ${validador.antesDe} no plano`;
     case "semSobras":
       return "nenhum passo que sobra está no plano";
+    case "passosNoMaximo":
+      return validador.tamanho === undefined
+        ? `a última execução deu no máximo ${validador.valor} passos`
+        : `${validador.funcao ?? "a função medida"} dá no máximo ${validador.valor} passos com ${validador.tamanho} itens`;
+    case "formaDaEstrutura":
+      return `${validador.nome} é ${validador.forma === "arvore" ? "uma árvore" : `usada como ${validador.forma}`}`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -569,6 +577,35 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const sobrando = conferirOrdem(contexto.ordenar.dados, contexto.ordenar.estado).sobrando;
       return { passou: sobrando.length === 0, descricao, detalhe: sobrando.length ? `sobrando: ${sobrando.join(", ")}` : "nenhum" };
     }
+    case "passosNoMaximo": {
+      if (validador.tamanho === undefined) {
+        const execucoes = execucoesDoObjetivo(contexto);
+        const ultima = execucoes[execucoes.length - 1];
+        if (!ultima) return { passou: false, descricao, detalhe: "nada rodou desde o começo do objetivo" };
+        return { passou: !ultima.erro && ultima.totalPassos <= validador.valor, descricao, detalhe: `${textoDePassos(ultima.totalPassos)} passos${ultima.erro ? `, com ${ultima.erro.nome || "erro"}` : ""}` };
+      }
+      const medicao = contexto.programa?.medicoes?.[chaveMedicao(validador.funcao ?? "", validador.tamanho)];
+      if (!medicao) return { passou: false, descricao, detalhe: "ainda não mediu (nada rodou ou a função não existe)" };
+      if (medicao.erro) return { passou: false, descricao, detalhe: medicao.erro };
+      return {
+        passou: !medicao.passouDoLimite && medicao.passos <= validador.valor,
+        descricao,
+        detalhe: medicao.passouDoLimite ? `passou de ${textoDePassos(medicao.passos)} passos (travaria)` : `${textoDePassos(medicao.passos)} passos`,
+      };
+    }
+    case "formaDaEstrutura": {
+      if (validador.forma === "arvore") {
+        const passou = ehArvore(contexto.programa?.memoria ?? null, validador.nome);
+        return { passou, descricao, detalhe: passou ? "objeto com filhos objetos" : `${validador.nome} não é um objeto com filhos objetos` };
+      }
+      const contagem = somarContagens(execucoesDoObjetivo(contexto).flatMap((execucao) => (execucao.estruturas[validador.nome] ? [execucao.estruturas[validador.nome]] : [])));
+      const forma = formaPelasContagens(contagem);
+      return {
+        passou: forma === validador.forma,
+        descricao,
+        detalhe: `entrou ${contagem.entraramFim} no fim e ${contagem.entraramInicio} no começo; saiu ${contagem.sairamFim} do fim e ${contagem.sairamInicio} do começo`,
+      };
+    }
     case "simulacao": {
       if (!contexto.campanha) return { passou: false, descricao, detalhe: "só numa fase simulador-campanha" };
       const resultado = simularCampanha(contexto.campanha.dados, contexto.campanha.estado, documento);
@@ -716,6 +753,10 @@ export function validadorTravado(validador: Validador): boolean {
     case "pausouNaLinha":
     case "usouControle":
       return true;
+    case "passosNoMaximo":
+      return validador.tamanho === undefined;
+    case "formaDaEstrutura":
+      return validador.forma !== "arvore";
     case "observou":
       return validador.valor !== undefined;
     case "todos":

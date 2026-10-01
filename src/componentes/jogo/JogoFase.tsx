@@ -51,6 +51,7 @@ import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
 import { useDepurador } from "./useDepurador";
+import { useEstruturas } from "./useEstruturas";
 import { useOrdenar } from "./useOrdenar";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
 import { ordemDoPlano } from "@/motor/ordenar/modelo";
@@ -99,6 +100,7 @@ import { auditar, REGRAS_AUDITORIA, type IdRegraAuditoria, type ResultadoAuditor
 import { PainelLighthouse } from "@/componentes/painel/lighthouse/PainelLighthouse";
 import { PainelBusca, type SubAbaBusca } from "@/componentes/painel/busca/PainelBusca";
 import { type LinhaMedicao, PainelMedicao } from "@/componentes/painel/medicao/PainelMedicao";
+import { ContadorPassos, PainelDesempenho } from "@/componentes/painel/desempenho/PainelDesempenho";
 import { PainelCampanha } from "@/componentes/painel/campanha/PainelCampanha";
 import { type EstadoCampanha, estadoInicialDaCampanha, simularCampanha } from "@/motor/campanha";
 import { eventoDoClique, type Utm } from "@/motor/medicao";
@@ -201,7 +203,8 @@ const FERRAMENTAS_DA_MEDICAO: readonly IdFerramenta[] = ["medicao", "link-rastre
 /** Elementos abre sempre; Lighthouse, Busca, Medição e Campanha, nas fases com as ferramentas delas. */
 function abasDaFase(fase: Fase): Aba[] {
   // Fase de programa (Ilha Lógica): o Console e, com o Snippet, a aba Fontes. Não há página para Elementos.
-  if (fase.programa) return fase.programa.snippet ? ["console", "fontes"] : ["console"];
+  // Com o gráfico passos x tamanho, também a Desempenho.
+  if (fase.programa) return [...(fase.programa.snippet ? (["console", "fontes"] as const) : (["console"] as const)), ...(fase.programa.desempenho ? (["desempenho"] as const) : [])];
   const abas: Aba[] = ["elementos"];
   if (fase.usaFerramentas.includes("lighthouse")) abas.push("lighthouse");
   if (FERRAMENTAS_DA_BUSCA.some((id) => fase.usaFerramentas.includes(id))) abas.push("busca");
@@ -328,6 +331,8 @@ export function JogoFase({
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
   // Fase de ordenar passos: o quadro (os cartões e o plano).
   const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso });
+  // Estruturas e desempenho: ver como árvore, o contador de passos e o gráfico da aba Desempenho.
+  const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
   // Linha do tempo: o passo escolhido vale só para a execução em que foi escolhido (uma nova volta ao fim).
   const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
@@ -749,6 +754,10 @@ export function JogoFase({
         ? { alternarPontoDeParada: depurador.alternarPontoDeParada, controlar: depurador.controlar, observar: depurador.observar }
         : undefined,
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
+      estruturas:
+        estruturas.comArvore || estruturas.comGrafico
+          ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
+          : undefined,
       circuito: circuito.ativo
         ? {
             adicionarPortao: circuito.adicionarPortao,
@@ -760,6 +769,10 @@ export function JogoFase({
         : undefined,
     }),
     [
+      estruturas.comArvore,
+      estruturas.comGrafico,
+      estruturas.verComoArvore,
+      estruturas.medir,
       ordenar.ativo,
       ordenar.porPasso,
       ordenar.tirarPasso,
@@ -1062,7 +1075,9 @@ export function JogoFase({
               ? "campanha"
               : ferramenta.id === "snippet" || FERRAMENTAS_DO_DEPURADOR.includes(ferramenta.id)
                 ? "fontes"
-                : fase.programa
+                : ferramenta.id === "grafico-passos"
+                  ? "desempenho"
+                  : fase.programa
                   ? "console"
                   : "elementos",
     );
@@ -1781,6 +1796,20 @@ export function JogoFase({
                   />
                 </div>
               )}
+              {fase.programa?.desempenho && (
+                <div className={aba === "desempenho" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+                  <PainelDesempenho
+                    config={fase.programa.desempenho}
+                    medicoes={estruturas.medicoes}
+                    ocupado={programa.ocupado}
+                    aoMedir={() => {
+                      tocarEfeito("clique");
+                      estruturas.medir();
+                    }}
+                    aoAbrirCard={abrirCard}
+                  />
+                </div>
+              )}
               {ferramentasMedicao.length > 0 && (
                 <div className={aba === "medicao" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
                   <PainelMedicao
@@ -2186,7 +2215,20 @@ export function JogoFase({
               classeMarcador="right-3 top-3"
               className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
             >
-              <PalcoMemoria foto={fotoNoPalco} anterior={fotoAnteriorNoPalco} passo={passoNoPalco} erro={programa.ultimo?.erro ?? null} />
+              <PalcoMemoria
+                foto={fotoNoPalco}
+                anterior={fotoAnteriorNoPalco}
+                passo={passoNoPalco}
+                erro={programa.ultimo?.erro ?? null}
+                arvores={estruturas.arvores}
+                contador={
+                  estruturas.contador && (
+                    <AlvoFerramenta ids={["contador-passos"]} marcador="contador-passos" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
+                      <ContadorPassos passos={estruturas.contador.passos} />
+                    </AlvoFerramenta>
+                  )
+                }
+              />
               {depurador.ativo && <AvisoPausado depurador={depurador} />}
               {comLinhaDoTempo && pausaNoPalco === null && (
                 <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">

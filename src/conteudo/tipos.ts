@@ -317,6 +317,25 @@ export type Validador =
   | { tipo: "passoAntes"; passo: string; antesDe: string }
   /** (Ordenar) Nenhum cartão que sobra (distração) está no plano. */
   | { tipo: "semSobras" }
+  /*
+   * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
+   * src/motor/desempenho.ts. Ver o guia, seção 28.
+   */
+  /**
+   * (Desempenho) Sem `tamanho`: a última execução desde que o objetivo
+   * começou deu no máximo `valor` passos (trava). Com `tamanho`: a função
+   * (`funcao`, padrão a primeira de `programa.desempenho.funcoes`), rodando
+   * com uma lista desse tamanho, dá no máximo `valor` passos (medida de
+   * novo a cada execução, como o funcaoPassa).
+   */
+  | { tipo: "passosNoMaximo"; valor: number; tamanho?: number; funcao?: string }
+  /**
+   * (Estruturas) A variável global `nome` foi usada como pilha (entra e sai
+   * pelo mesmo lado: push e pop) ou como fila (entra por um lado e sai pelo
+   * outro: push e shift) desde que o objetivo começou (trava); ou é uma
+   * árvore agora (um objeto com filhos objetos).
+   */
+  | { tipo: "formaDaEstrutura"; nome: string; forma: "pilha" | "fila" | "arvore" }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -467,7 +486,11 @@ export type Acao =
   /** (Ordenar) Tira o cartão do plano (volta para a pilha). Gera `moveuPasso`. */
   | { tipo: "tirarPasso"; passo: string }
   /** (Ordenar, com `rodar`) O botão Rodar: executa o código do plano, na ordem. Gera `executouCodigo`. */
-  | { tipo: "rodarPlano" };
+  | { tipo: "rodarPlano" }
+  /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
+  | { tipo: "verComoArvore"; nome: string }
+  /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
+  | { tipo: "medirDesempenho" };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -626,6 +649,18 @@ export type BancadaPrograma = {
    * para a memória já começar com algo (ex.: a lista de preços do desafio).
    */
   preparo?: string;
+  /**
+   * (Desempenho) O gráfico passos x tamanho da aba Desempenho: as funções
+   * globais do jogador medidas (até 2, uma linha cada), com os argumentos
+   * ("$lista" vira a lista do tamanho; "$tamanho", o número; padrão
+   * ["$lista"]), os tamanhos (padrão 10, 100, 500 e 1000) e como a lista é
+   * gerada (padrão crescente: 1, 2, 3...). Pede a ferramenta grafico-passos.
+   */
+  desempenho?: {
+    funcoes: { nome: string; args?: ValorEsperado[] }[];
+    tamanhos?: number[];
+    lista?: "crescente" | "decrescente" | "embaralhada";
+  };
 };
 
 /** Sub-painéis da aba Elementos, como no Chrome (Styles e Computed). */

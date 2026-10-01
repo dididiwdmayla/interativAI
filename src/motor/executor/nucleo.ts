@@ -16,6 +16,7 @@ import {
   type ErroExecucao,
   type EscopoMemoria,
   type FotoMemoria,
+  type MedicaoPassos,
   type NivelSaida,
   type ResultadoAvaliacao,
   type ObjetoMemoria,
@@ -25,6 +26,7 @@ import {
   type ResultadoTesteFuncao,
   type SaidaConsole,
   type TipoDeclaracao,
+  type ValorEsperado,
   type ValorExibido,
   type ValorMemoria,
 } from "./tipos";
@@ -122,6 +124,10 @@ export class NucleoExecutor {
   private resposta: unknown = undefined;
   private locaisDeErro = new WeakMap<object, Local>();
   private localPrimitivo: Local | null = null;
+  /** Leituras de lista (lista[i]) desde o último passo: vão no passo seguinte. */
+  private leituras: { id: number; indice: number }[] = [];
+  private limitePassos: number = LIMITES.passos;
+  private limiteTempo: number = LIMITES.tempoMs;
 
   constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
     if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
@@ -192,6 +198,13 @@ export class NucleoExecutor {
         this.resposta = valor;
         return valor;
       },
+      li: (objeto: unknown, chave: unknown) => {
+        if (this.gravando && Array.isArray(objeto) && this.leituras.length < LIMITES.leiturasPorPasso) {
+          const indice = typeof chave === "number" ? chave : Number(chave);
+          if (Number.isInteger(indice) && indice >= 0) this.leituras.push({ id: this.idDe(objeto), indice });
+        }
+        return (objeto as Record<PropertyKey, unknown>)[chave as PropertyKey];
+      },
     };
     Object.freeze(ganchos);
     Object.defineProperty(this.host.global, "__r", { value: ganchos, writable: false, configurable: false, enumerable: false });
@@ -243,18 +256,27 @@ export class NucleoExecutor {
     const topo = this.topo();
     topo.linha = linha;
     topo.coluna = coluna;
-    if (this.total > LIMITES.passos) {
+    if (this.total > this.limitePassos) {
       this.parado = { tipo: "limite-passos", local: { linha, coluna } };
       throw PARADA;
     }
-    if ((this.total & 127) === 0 && this.host.agora() - this.inicio > LIMITES.tempoMs) {
+    if ((this.total & 127) === 0 && this.host.agora() - this.inicio > this.limiteTempo) {
       this.parado = { tipo: "limite-tempo", local: { linha, coluna } };
       throw PARADA;
     }
     if (!this.gravando) return;
     if (this.passos.length < LIMITES.fotos) {
-      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length, ...(depurador ? { depurador: true as const } : {}) });
+      const leituras = this.tirarLeituras();
+      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length, ...(depurador ? { depurador: true as const } : {}), ...(leituras ? { leituras } : {}) });
     } else this.cortado = true;
+  }
+
+  /** As leituras desde o último passo (e zera a lista). */
+  private tirarLeituras(): { id: number; indice: number }[] | undefined {
+    if (!this.leituras.length) return undefined;
+    const lidas = this.leituras;
+    this.leituras = [];
+    return lidas;
   }
 
   private retorno(valor: unknown) {
@@ -510,6 +532,9 @@ export class NucleoExecutor {
     this.resposta = undefined;
     this.locaisDeErro = new WeakMap();
     this.localPrimitivo = null;
+    this.leituras = [];
+    this.limitePassos = LIMITES.passos;
+    this.limiteTempo = LIMITES.tempoMs;
   }
 
   private descreverErro(erro: unknown): ErroExecucao {
@@ -600,7 +625,8 @@ export class NucleoExecutor {
     this.pilha[0].escopos.length = 0;
     const memoriaFinal = this.fotografar();
     if (gravar) {
-      this.passos.push({ linha: erro?.linha ?? null, coluna: erro?.coluna ?? null, tipo: erro ? "erro" : "fim", memoria: memoriaFinal, saidas: this.saidas.length });
+      const leituras = this.tirarLeituras();
+      this.passos.push({ linha: erro?.linha ?? null, coluna: erro?.coluna ?? null, tipo: erro ? "erro" : "fim", memoria: memoriaFinal, saidas: this.saidas.length, ...(leituras ? { leituras } : {}) });
     }
     return {
       origem,
@@ -615,6 +641,36 @@ export class NucleoExecutor {
       globais: this.listaDeGlobais(),
       sintaxes: inst.sintaxes,
     };
+  }
+
+  /**
+   * Mede quantos passos a função global `nome` dá com cada chamada (o
+   * gráfico passos x tamanho): sem rastro, com um limite bem maior que o
+   * de uma execução. `chamadas`: os argumentos (JSON) de cada medição.
+   */
+  medirPassos(nome: string, chamadas: readonly { tamanho: number; args: ValorEsperado[] }[]): MedicaoPassos[] {
+    const funcao = this.globais.has(nome) || nome in this.host.global ? this.ler(this.host.global, nome) : undefined;
+    return chamadas.map(({ tamanho, args }) => {
+      if (typeof funcao !== "function") return { funcao: nome, tamanho, passos: 0, passouDoLimite: false, erro: `não existe função ${nome}` };
+      this.comecar(false);
+      this.limitePassos = LIMITES.passosMedicao;
+      this.limiteTempo = LIMITES.tempoMedicaoMs;
+      let erro: string | null = null;
+      try {
+        const reais = this.intr.JSON.parse(JSON.stringify(args)) as unknown[];
+        (funcao as (...a: unknown[]) => unknown)(...reais);
+      } catch (e) {
+        if (!this.parado) {
+          const descrito = this.descreverErro(e);
+          erro = descrito.nome ? `${descrito.nome}: ${descrito.mensagem}` : descrito.mensagem;
+        }
+      }
+      const passouDoLimite = this.parado !== null;
+      const passos = this.total;
+      this.pilha.length = 1;
+      this.comecar(false);
+      return { funcao: nome, tamanho, passos: Math.min(passos, LIMITES.passosMedicao), passouDoLimite, erro };
+    });
   }
 
   /**

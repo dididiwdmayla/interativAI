@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4", "lab-logica-u1-f5", "lab-logica-u1-f6", "lab-logica-u1-f7"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4", "lab-logica-u1-f5", "lab-logica-u1-f6", "lab-logica-u1-f7", "lab-logica-u1-f8", "lab-logica-u1-f9"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -770,6 +770,287 @@ export const FASE_DEMO_ORDENAR_CODIGO: FaseOrdenarPassos = {
   falaFinal: { texto: "Pode continuar trocando a ordem e rodando.", expressao: "feliz" },
 };
 
+/*
+ * Demonstração de estruturas no palco (modelo para a zona Estruturas de
+ * dados):
+ * - push e pop: o vagão entra e sai pelo FIM (a direita); shift e unshift,
+ *   pelo COMEÇO. `formaDaEstrutura` com forma "pilha" ou "fila" confere o
+ *   lado pelas execuções do objetivo (não pelo texto do código);
+ * - "Ver como árvore" (ferramenta arvore-palco) na caixinha de um objeto
+ *   com filhos objetos, com a ponte para a árvore de Elementos;
+ * - o bolha.js com a linha do tempo: o vagão lido acende e a troca pisca.
+ *   A troca acende como "trocou" quando acontece numa linha só (a troca por
+ *   desestruturação); com uma variável guardada, são duas escritas, e cada
+ *   vagão escrito pisca no seu passo.
+ */
+const SNIPPET_BOLHA = [
+  "const cartas = [4, 2, 3, 1];",
+  "for (let volta = 0; volta < cartas.length; volta++) {",
+  "  for (let i = 0; i < cartas.length - 1; i++) {",
+  "    if (cartas[i] > cartas[i + 1]) {",
+  "      [cartas[i], cartas[i + 1]] = [cartas[i + 1], cartas[i]];",
+  "    }",
+  "  }",
+  "}",
+  "console.log(cartas);",
+].join("\n");
+
+export const FASE_DEMO_ESTRUTURAS: FasePratica = {
+  id: "lab-logica-u1-f8",
+  tipo: "pratica",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração de pilha, fila e árvore",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "linha-do-tempo", "arvore-palco"],
+  apresentar: ["console", "palco-memoria"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: {
+    preparo: [
+      'const pilha = ["prato 1", "prato 2"];',
+      'const fila = ["Ana", "Bia"];',
+      'const pasta = { nome: "site", filhos: [{ nome: "index.html" }, { nome: "fotos", filhos: [{ nome: "praia.jpg" }, { nome: "bolo.jpg" }] }] };',
+    ].join("\n"),
+    snippet: { codigoInicial: SNIPPET_BOLHA, nome: "bolha.js" },
+  },
+  introducao: [{ texto: "Uma pilha de pratos, uma fila de padaria e uma pasta com arquivos. Cada uma guarda coisas de um jeito.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "pilha",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: {
+        mouse: 'No Console, empilhe com pilha.push("prato 3") e depois tire o de cima com pilha.pop().',
+        toque: 'No Console, empilhe com pilha.push("prato 3") e depois tire o de cima com pilha.pop().',
+      },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "formaDaEstrutura", nome: "pilha", forma: "pilha" },
+          { tipo: "valorVariavel", nome: "pilha", valor: ["prato 1", "prato 2"] },
+        ],
+      },
+      ajudas: {
+        pergunta: "Numa pilha de pratos, de onde sai o próximo prato?",
+        dica: "Do mesmo lado em que o último entrou: push põe no fim e pop tira do fim.",
+        linha: { alvo: "console", fala: "Um comando de cada vez, aqui." },
+        solucao: {
+          fala: "Empilhei e desempilhei: o vagão entrou e saiu pela direita.",
+          acoes: [
+            { tipo: "executarNoConsole", codigo: 'pilha.push("prato 3")' },
+            { tipo: "executarNoConsole", codigo: "pilha.pop()" },
+          ],
+        },
+      },
+      falaAoConcluir: { texto: "Pilha: o último que entra é o primeiro que sai, sempre pelo mesmo lado.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "executarNoConsole", codigo: 'pilha.push("prato 3")' },
+        { tipo: "executarNoConsole", codigo: "pilha.pop()" },
+      ],
+    },
+    {
+      id: "fila",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: 'Na fila ["Ana", "Bia", "Caio"], quem fila.shift() tira?',
+        opcoes: ["Ana", "Caio"],
+        correta: 0,
+        explicacao: "shift tira do começo: na fila, quem chegou primeiro é atendido primeiro.",
+      },
+      enunciado: {
+        mouse: 'Chegou o Caio: fila.push("Caio"). Depois atenda a primeira da fila com fila.shift().',
+        toque: 'Chegou o Caio: fila.push("Caio"). Depois atenda a primeira da fila com fila.shift().',
+      },
+      validador: { tipo: "formaDaEstrutura", nome: "fila", forma: "fila" },
+      ajudas: {
+        pergunta: "Na fila da padaria, quem chega vai para onde, e quem é atendido sai de onde?",
+        dica: "Entra no fim (push) e sai do começo (shift).",
+        linha: { alvo: "console", fala: "Primeiro o push, depois o shift." },
+        solucao: {
+          fala: "O Caio entrou pela direita e a Ana saiu pela esquerda.",
+          acoes: [
+            { tipo: "executarNoConsole", codigo: 'fila.push("Caio")' },
+            { tipo: "executarNoConsole", codigo: "fila.shift()" },
+          ],
+        },
+      },
+      falaAoConcluir: { texto: "Fila: entra por um lado e sai pelo outro.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "executarNoConsole", codigo: 'fila.push("Caio")' },
+        { tipo: "executarNoConsole", codigo: "fila.shift()" },
+      ],
+    },
+    {
+      id: "arvore",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Clique em Ver como árvore na caixinha pasta.", toque: "Toque em Ver como árvore na caixinha pasta." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "formaDaEstrutura", nome: "pasta", forma: "arvore" },
+          { tipo: "evento", evento: "viuComoArvore" },
+        ],
+      },
+      apresentar: ["arvore-palco"],
+      ajudas: {
+        pergunta: "Objeto dentro de objeto fica mais fácil de ler de que jeito?",
+        dica: "Como árvore: o botão Ver como árvore fica na caixinha da pasta.",
+        linha: { alvo: "ferramenta", ferramenta: "arvore-palco", fala: "Este botão." },
+        solucao: { fala: "A pasta virou árvore: site em cima, os filhos embaixo.", acoes: [{ tipo: "verComoArvore", nome: "pasta" }] },
+      },
+      falaAoConcluir: { texto: "Igual à árvore de Elementos: cada nó tem os seus filhos.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "verComoArvore", nome: "pasta" }],
+    },
+    {
+      id: "bolha",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: {
+        mouse: "Execute o bolha.js na aba Fontes e ande pela linha do tempo: o vagão lido acende e a troca pisca.",
+        toque: "Execute o bolha.js na aba Fontes e ande pela linha do tempo: o vagão lido acende e a troca pisca.",
+      },
+      validador: { tipo: "valorVariavel", nome: "cartas", valor: [1, 2, 3, 4] },
+      apresentar: ["linha-do-tempo"],
+      ajudas: { pergunta: "O que o programa compara em cada volta?", dica: "Duas cartas vizinhas: se a da esquerda é maior, elas trocam." },
+      falaAoConcluir: { texto: "1, 2, 3, 4: a maior foi andando para o fim a cada volta.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "executarSnippet" }],
+    },
+  ],
+  conclusao: [{ texto: "Estruturas testadas.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar empilhando, enfileirando e andando na linha do tempo.", expressao: "feliz" },
+};
+
+/*
+ * Demonstração do gráfico de passos (modelo para a zona Algoritmos
+ * essenciais):
+ * - o contador de passos (contador-passos) e `passosNoMaximo` sem tamanho:
+ *   a última execução;
+ * - a aba Desempenho (grafico-passos com `programa.desempenho`): as duas
+ *   funções com listas de 10 a 500 itens. A lenta compara cada par (os
+ *   passos disparam: curva) e a rápida anota o que já viu (reta deitada);
+ * - `passosNoMaximo` com tamanho e funcao: a função medida com a lista
+ *   daquele tamanho a cada execução (melhorar o algoritmo, não decorar).
+ */
+const SNIPPET_DESEMPENHO = [
+  "function temRepetidoLento(lista) {",
+  "  for (let i = 0; i < lista.length; i++) {",
+  "    for (let j = i + 1; j < lista.length; j++) {",
+  "      if (lista[i] === lista[j]) return true;",
+  "    }",
+  "  }",
+  "  return false;",
+  "}",
+  "",
+  "function temRepetidoRapido(lista) {",
+  "  const vistos = {};",
+  "  for (const item of lista) {",
+  "    if (vistos[item]) return true;",
+  "    vistos[item] = true;",
+  "  }",
+  "  return false;",
+  "}",
+  "",
+  "const notas = [7, 9, 4, 9];",
+  "console.log(temRepetidoLento(notas), temRepetidoRapido(notas));",
+].join("\n");
+
+const SNIPPET_DESEMPENHO_MELHOR = SNIPPET_DESEMPENHO.replace(
+  [
+    "function temRepetidoLento(lista) {",
+    "  for (let i = 0; i < lista.length; i++) {",
+    "    for (let j = i + 1; j < lista.length; j++) {",
+    "      if (lista[i] === lista[j]) return true;",
+    "    }",
+    "  }",
+    "  return false;",
+    "}",
+  ].join("\n"),
+  ["function temRepetidoLento(lista) {", "  return temRepetidoRapido(lista);", "}"].join("\n"),
+);
+
+export const FASE_DEMO_DESEMPENHO: FasePratica = {
+  id: "lab-logica-u1-f9",
+  tipo: "pratica",
+  unidadeId: "lab-logica-u1",
+  titulo: "Demonstração do gráfico de passos",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "contador-passos", "grafico-passos"],
+  apresentar: ["snippet"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: {
+    snippet: { codigoInicial: SNIPPET_DESEMPENHO, nome: "repetidos.js" },
+    desempenho: { funcoes: [{ nome: "temRepetidoLento" }, { nome: "temRepetidoRapido" }], tamanhos: [10, 100, 250, 500] },
+  },
+  introducao: [{ texto: "Duas funções que respondem a mesma coisa: a lista tem número repetido? Vamos ver quem dá menos passos.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "contar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Execute o repetidos.js e olhe o contador de passos no palco.", toque: "Execute o repetidos.js e olhe o contador de passos no palco." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "saida", contem: "true true" },
+          { tipo: "passosNoMaximo", valor: 100 },
+        ],
+      },
+      apresentar: ["contador-passos"],
+      ajudas: {
+        pergunta: "O que faz o programa rodar?",
+        dica: "O botão Executar, em cima do Snippet.",
+        linha: { alvo: "ferramenta", ferramenta: "snippet", fala: "O Executar mora aqui." },
+        solucao: { fala: "Executei: as duas acharam o 9 repetido.", acoes: [{ tipo: "executarSnippet" }] },
+      },
+      falaAoConcluir: { texto: "Com 4 notas, poucos passos. E com 500?", expressao: "curioso" },
+      solucaoDeTeste: [{ tipo: "executarSnippet" }],
+    },
+    {
+      id: "medir",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Se a lista ficar 50 vezes maior, os passos da temRepetidoLento crescem quanto?",
+        opcoes: ["Umas 50 vezes", "Bem mais que 50 vezes"],
+        correta: 1,
+        explicacao: "Ela compara cada número com todos os outros: a lista 50 vezes maior dá uns 2.500 vezes mais comparações.",
+      },
+      enunciado: { mouse: "Na aba Desempenho, clique em Medir.", toque: "Na aba Desempenho, toque em Medir." },
+      validador: { tipo: "evento", evento: "mediuDesempenho" },
+      apresentar: ["grafico-passos"],
+      ajudas: {
+        pergunta: "Onde o jogo roda as funções com listas de vários tamanhos?",
+        dica: "Na aba Desempenho, no botão Medir.",
+        linha: { alvo: "ferramenta", ferramenta: "grafico-passos", fala: "Aqui." },
+        solucao: { fala: "Medi: a lenta virou uma curva que dispara, a rápida uma reta deitada.", acoes: [{ tipo: "medirDesempenho" }] },
+      },
+      falaAoConcluir: { texto: "A curva é a lenta: a cada item novo, ela compara com todos os outros.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 1 }, { tipo: "medirDesempenho" }],
+    },
+    {
+      id: "melhorar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: {
+        mouse: "Mude a temRepetidoLento para dar no máximo 2.000 passos com 500 itens e execute.",
+        toque: "Mude a temRepetidoLento para dar no máximo 2.000 passos com 500 itens e execute.",
+      },
+      validador: { tipo: "passosNoMaximo", valor: 2000, tamanho: 500, funcao: "temRepetidoLento" },
+      ajudas: { pergunta: "Qual das duas já faz isso com poucos passos?", dica: "A temRepetidoRapido: a lenta pode usar o mesmo jeito (ou chamar a rápida)." },
+      falaAoConcluir: { texto: "Agora as duas são retas: o jeito de pensar mudou o tamanho do trabalho.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "definirSnippet", codigo: SNIPPET_DESEMPENHO_MELHOR }, { tipo: "executarSnippet" }],
+    },
+  ],
+  conclusao: [{ texto: "Gráfico de passos testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode continuar mudando as funções e medindo de novo.", expressao: "feliz" },
+};
+
 export const FASES_BANCADA_LOGICA: readonly Fase[] = [
   FASE_BANCADA_CONSOLE,
   FASE_DEMO_CIRCUITO,
@@ -778,4 +1059,6 @@ export const FASES_BANCADA_LOGICA: readonly Fase[] = [
   FASE_DEMO_ORDENAR,
   FASE_DEMO_AGRUPAR,
   FASE_DEMO_ORDENAR_CODIGO,
+  FASE_DEMO_ESTRUTURAS,
+  FASE_DEMO_DESEMPENHO,
 ];

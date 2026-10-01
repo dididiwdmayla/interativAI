@@ -41,6 +41,9 @@ import { IconeObservar } from "@/componentes/icones/IconeObservar";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
+import { IconeArvorePalco } from "@/componentes/icones/IconeArvorePalco";
+import { IconeContadorPassos } from "@/componentes/icones/IconeContadorPassos";
+import { IconeGraficoPassos } from "@/componentes/icones/IconeGraficoPassos";
 import { IconeLinkRastreavel } from "@/componentes/icones/IconeLinkRastreavel";
 import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
@@ -1064,6 +1067,58 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque num cartão.",
     },
     uso: "tocar",
+  },
+  // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais).
+  "contador-passos": {
+    id: "contador-passos",
+    nome: "Contador de passos",
+    Icone: IconeContadorPassos,
+    alvo: seletorFerramenta("contador-passos"),
+    oQueFaz: "Conta quantos passos o programa deu: cada comando que rodou, inclusive cada volta de um laço.",
+    praQueServe:
+      "Dois programas podem dar a mesma resposta e um deles dar muito mais passos. É o primeiro jeito de comparar quem é mais rápido, sem cronômetro.",
+    comoUsarAqui: {
+      mouse: "Rode o programa e olhe o número no canto do palco.",
+      toque: "Rode o programa e olhe o número no canto do palco.",
+    },
+    noF12DeVerdade:
+      "o Chrome mede em milissegundos, não em passos: a aba Desempenho (Performance) grava o que a página fez, e console.time e console.timeEnd cronometram um trecho no Console.",
+    experimente: { mouse: "Clique no contador.", toque: "Toque no contador." },
+    uso: "tocar",
+  },
+  "grafico-passos": {
+    id: "grafico-passos",
+    nome: "Gráfico de passos",
+    Icone: IconeGraficoPassos,
+    alvo: seletorFerramenta("grafico-passos"),
+    oQueFaz: "Roda a mesma função com listas de tamanhos diferentes e desenha quantos passos ela deu em cada uma.",
+    praQueServe:
+      "Com 10 itens tudo parece rápido. O gráfico mostra o que acontece quando a lista cresce: se os passos crescem junto (reta) ou disparam (curva), que é o que trava com um milhão de itens.",
+    comoUsarAqui: {
+      mouse: "Abra a aba Desempenho e clique em Medir. Cada linha é uma função; passe o mouse num ponto para ver o número.",
+      toque: "Abra a aba Desempenho e toque em Medir. Cada linha é uma função; toque num ponto para ver o número.",
+    },
+    noF12DeVerdade:
+      "o mais perto é a aba Desempenho (Performance) do Chrome, que grava o tempo de cada coisa. O gráfico daqui conta passos, que não mudam de um computador para o outro.",
+    experimente: { mouse: "Clique em Medir.", toque: "Toque em Medir." },
+    uso: "sinal",
+  },
+  "arvore-palco": {
+    id: "arvore-palco",
+    nome: "Ver como árvore",
+    Icone: IconeArvorePalco,
+    alvo: seletorFerramenta("arvore-palco"),
+    oQueFaz: "Desenha um objeto com filhos como uma árvore: cada objeto é um nó, ligado aos filhos dele.",
+    praQueServe:
+      "Objeto dentro de objeto fica difícil de ler em fichas. Como árvore, dá para ver quem é filho de quem e o caminho até cada nó. É a mesma ideia da árvore de Elementos do F12.",
+    comoUsarAqui: {
+      mouse: "Clique em Ver como árvore na caixinha do objeto. Clique de novo para voltar às fichas.",
+      toque: "Toque em Ver como árvore na caixinha do objeto. Toque de novo para voltar às fichas.",
+    },
+    noF12DeVerdade:
+      "a aba Elementos mostra a árvore da página (o DOM): o <html> tem o <head> e o <body> como filhos, e assim por diante. Uma árvore de dados no seu programa funciona igual.",
+    experimente: { mouse: "Clique em Ver como árvore.", toque: "Toque em Ver como árvore." },
+    uso: "sinal",
   },
 };
 

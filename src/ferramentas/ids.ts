@@ -61,6 +61,10 @@ export const IDS_FERRAMENTAS = [
   "pilha-de-chamadas",
   // Ordenar passos (zona Resolvendo problemas)
   "quadro-de-passos",
+  // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais)
+  "contador-passos",
+  "grafico-passos",
+  "arvore-palco",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

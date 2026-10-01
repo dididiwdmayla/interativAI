@@ -1,7 +1,7 @@
 import type { Utm } from "./medicao";
 import type { ResumoExecucao } from "./programa";
 import type { ControleDepurador, MotivoPausa } from "./depurador";
-import type { ValorExibido } from "./executor/tipos";
+import type { MedicaoPassos, ValorExibido } from "./executor/tipos";
 
 /**
  * De onde veio uma seleção.
@@ -81,7 +81,11 @@ export type EventoFase =
   /** (Depurador) Uma expressão do Observar foi avaliada num momento pausado (null: deu erro ou não existia ali). */
   | { tipo: "observouValor"; expressao: string; valor: ValorExibido | null }
   /** (Ordenar) Pôs, mudou de lugar ou tirou um cartão. `destino`: "plano", o id do grupo ou "fora". */
-  | { tipo: "moveuPasso"; passo: string; destino: string; posicao: number };
+  | { tipo: "moveuPasso"; passo: string; destino: string; posicao: number }
+  /** (Estruturas) Abriu o "Ver como árvore" da variável. */
+  | { tipo: "viuComoArvore"; nome: string }
+  /** (Desempenho) Mediu o gráfico passos x tamanho. */
+  | { tipo: "mediuDesempenho"; medicoes: MedicaoPassos[] };
 
 /**
  * Para onde um link levaria:
@@ -134,4 +138,6 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "adicionouObservacao",
   "observouValor",
   "moveuPasso",
+  "viuComoArvore",
+  "mediuDesempenho",
 ];

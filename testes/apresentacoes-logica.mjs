@@ -18,6 +18,8 @@ const movel = MODO !== "desktop";
 const GRUPOS = [
   { fase: "lab-logica-u1-f4", ferramentas: ["pontos-de-parada", "controles-depurador", "painel-escopo", "painel-observar", "pilha-de-chamadas"] },
   { fase: "lab-logica-u1-f5", ferramentas: ["quadro-de-passos"] },
+  { fase: "lab-logica-u1-f8", ferramentas: ["arvore-palco"] },
+  { fase: "lab-logica-u1-f9", ferramentas: ["contador-passos", "grafico-passos"] },
 ];
 
 const todas = GRUPOS.flatMap((grupo) => grupo.ferramentas);

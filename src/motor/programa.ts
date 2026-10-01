@@ -6,7 +6,9 @@
  */
 import type { Fase, SiteAlvo, Validador } from "@/conteudo/tipos";
 import type { SintaxeJs } from "./executor/instrumentar";
-import type { ErroExecucao, FotoMemoria, OrigemCodigo, ResultadoExecucao, ResultadoTesteFuncao, ValorExibido, ValorMemoria } from "./executor/tipos";
+import type { ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoExecucao, ResultadoTesteFuncao, ValorEsperado, ValorExibido, ValorMemoria } from "./executor/tipos";
+import { type ContagemEstrutura, contarEstruturas } from "./estruturas";
+import { chamadasDaMedicao, chaveMedicao } from "./desempenho";
 
 /**
  * O site-alvo de uma fase de programa: não tem página (a tela é o palco da
@@ -29,6 +31,10 @@ export type ResumoExecucao = {
   sintaxes: SintaxeJs[];
   /** A resposta do Console (a última expressão), só nas entradas do Console que não deram erro. */
   resposta: ValorExibido | null;
+  /** Quantos passos o programa deu (o contador do palco e o validador passosNoMaximo). */
+  totalPassos: number;
+  /** Por lista global: quantos itens entraram e saíram por cada lado (pilha ou fila). */
+  estruturas: Record<string, ContagemEstrutura>;
 };
 
 /** O que os validadores de código olham além dos eventos. */
@@ -39,6 +45,8 @@ export type EstadoPrograma = {
   testes: Record<string, ResultadoTesteFuncao>;
   /** (Depurador) Os pontos de parada (linhas do Snippet) e as expressões do painel Observar de agora. */
   depurador?: { pontos: readonly number[]; observacoes: readonly string[] };
+  /** (Desempenho) As medições dos `passosNoMaximo` com tamanho, pela chave (`chaveMedicao`). */
+  medicoes?: Record<string, MedicaoPassos>;
 };
 
 export function faseDePrograma(fase: Fase): boolean {
@@ -53,7 +61,31 @@ export function resumirExecucao(resultado: ResultadoExecucao): ResumoExecucao {
     erro: resultado.erro ? { tipo: resultado.erro.tipo, nome: resultado.erro.nome, mensagem: resultado.erro.mensagem, linha: resultado.erro.linha } : null,
     sintaxes: resultado.sintaxes,
     resposta: resultado.origem === "console" && !resultado.erro ? resultado.resultado : null,
+    totalPassos: resultado.totalPassos,
+    estruturas: contarEstruturas(resultado.passos, resultado.memoriaFinal),
   };
+}
+
+/**
+ * As medições que os `passosNoMaximo` com tamanho da fase pedem: a função
+ * (a do validador, ou a primeira do `programa.desempenho`) e o tamanho, com
+ * os argumentos que o gráfico usaria.
+ */
+export function medicoesDaFase(fase: Fase): { chave: string; funcao: string; tamanho: number; args: ValorEsperado[] }[] {
+  const config = fase.programa?.desempenho;
+  const raizes: Validador[] =
+    fase.tipo === "desafio" ? fase.partes.map((p) => p.validador) : fase.tipo === "projeto-ponte" ? fase.requisitos.map((r) => r.validador) : fase.objetivos.map((o) => o.validador);
+  const pedidas = new Map<string, { chave: string; funcao: string; tamanho: number; args: ValorEsperado[] }>();
+  for (const v of raizes.flatMap(validadoresDentro)) {
+    if (v.tipo !== "passosNoMaximo" || v.tamanho === undefined || !config) continue;
+    const funcao = config.funcoes.find((f) => f.nome === (v.funcao ?? config.funcoes[0]?.nome));
+    if (!funcao) continue;
+    const [chamada] = chamadasDaMedicao(config, funcao, [v.tamanho]);
+    // A chave é a do validador: sem `funcao`, a primeira do desempenho ("" na chave).
+    const chave = chaveMedicao(v.funcao ?? "", v.tamanho);
+    pedidas.set(chave, { chave, funcao: funcao.nome, tamanho: v.tamanho, args: chamada.args });
+  }
+  return [...pedidas.values()];
 }
 
 export function chaveFuncaoPassa(validador: Extract<Validador, { tipo: "funcaoPassa" }>): string {

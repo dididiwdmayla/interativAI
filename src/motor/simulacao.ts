@@ -35,7 +35,9 @@ import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 import { criarNucleoSincrono } from "./executor/fabrica";
 import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
-import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import { chamadasDaMedicao } from "./desempenho";
+import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
 import * as quadro from "./ordenar/modelo";
@@ -84,11 +86,17 @@ export function criarSimulacao(fase: Fase) {
   const depurador = { pontos: [] as number[], observacoes: [] as string[] };
   if (comDepurador) estadoPrograma.depurador = depurador;
   let sessao: { resultado: ResultadoExecucao; pausa: PausaDepurador } | null = null;
+  const medicoesPedidas = fase.programa ? medicoesDaFase(fase) : [];
   const concluir = (resultado: ResultadoExecucao, registrar: boolean) => {
     if (!executor) return;
     ultimaExecucao = resultado;
     estadoPrograma.memoria = resultado.memoriaFinal;
     for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
+    if (medicoesPedidas.length) {
+      const medicoes: NonNullable<EstadoPrograma["medicoes"]> = {};
+      for (const pedida of medicoesPedidas) medicoes[pedida.chave] = executor.medirPassos(pedida.funcao, [{ tamanho: pedida.tamanho, args: pedida.args }])[0];
+      estadoPrograma.medicoes = medicoes;
+    }
     if (registrar) eventos.push({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
   };
   /** As expressões do Observar no momento pausado (o quadro de cima). */
@@ -328,6 +336,27 @@ export function criarSimulacao(fase: Fase) {
             rodarCodigo(quadro.codigoDoPlano(dadosOrdenar, ordenar), "snippet");
             return true;
           },
+        }
+      : undefined,
+    estruturas: fase.programa
+      ? {
+          verComoArvore: fase.usaFerramentas.includes("arvore-palco")
+            ? (nome) => {
+                if (!ehArvore(estadoPrograma.memoria, nome)) return false;
+                eventos.push({ tipo: "viuComoArvore", nome });
+                return true;
+              }
+            : undefined,
+          medirDesempenho:
+            fase.usaFerramentas.includes("grafico-passos") && fase.programa.desempenho
+              ? () => {
+                  const config = fase.programa?.desempenho;
+                  if (!config || !executor) return false;
+                  const medicoes = config.funcoes.flatMap((funcao) => executor?.medirPassos(funcao.nome, chamadasDaMedicao(config, funcao)) ?? []);
+                  eventos.push({ tipo: "mediuDesempenho", medicoes });
+                  return true;
+                }
+              : undefined,
         }
       : undefined,
     responderPrevisao: (opcao) => {

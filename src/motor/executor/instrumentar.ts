@@ -21,7 +21,12 @@
  * - `__r.d([...])` registra as globais e `__r.k(nome)` protege as const
  *   globais, no modo do Console (abaixo);
  * - `__r.res(valor)` guarda o valor da última expressão (a resposta do
- *   Console).
+ *   Console);
+ * - `__r.li(objeto, chave)` no lugar de `objeto[chave]` (leitura com
+ *   colchetes, fora de atribuição, de chamada e de cadeia opcional): guarda
+ *   que a linha leu aquela posição da lista (o palco acende o vagão, para
+ *   ver busca e ordenação acontecendo). Os colchetes viram vírgula e
+ *   parêntese no mesmo lugar: as colunas e as linhas não mudam.
  *
  * Modo do Console (REPL do Chrome, que aceita declarar de novo let, const e
  * class em entradas separadas, desde o Chrome 80 e 92): as declarações do
@@ -241,6 +246,8 @@ class Instrumentador {
   private contadorEscopo = 0;
   /** Nomes declarados nos escopos locais abertos (para saber se um nome é global). */
   private pilhaNomes: Set<string>[] = [];
+  /** Dentro de uma cadeia opcional (a?.b[i]): a leitura com colchetes não é embrulhada. */
+  private dentroDeCadeia = 0;
   naoSuportado: { mensagem: string; linha: number; coluna: number } | null = null;
   /** Texto original de cada função, pelo id do escopo (o toString mostra este, não o instrumentado). */
   readonly fontes: Record<string, string> = {};
@@ -554,6 +561,26 @@ class Instrumentador {
     this.fecharEscopo();
   }
 
+  /** As partes de um membro (objeto e chave), sem embrulhar a leitura (alvo de atribuição, chamada, delete). */
+  private membro(no: AnyNode & { type: "MemberExpression" }, prof: number) {
+    if (no.object.type !== "Super") this.expressao(no.object, prof + 1);
+    if (no.computed) this.expressao(no.property, prof + 1);
+  }
+
+  /** `objeto[chave]` lido vira `__r.li(objeto, chave)` (os colchetes viram vírgula e parêntese no mesmo lugar). */
+  private leituraComColchetes(no: AnyNode & { type: "MemberExpression" }, prof: number) {
+    const embrulhar = no.computed && !no.optional && this.dentroDeCadeia === 0 && no.object.type !== "Super";
+    const abre = embrulhar ? this.fonte.indexOf("[", no.object.end) : -1;
+    if (!embrulhar || abre < 0 || abre >= no.property.start || this.fonte[no.end - 1] !== "]") {
+      this.membro(no, prof);
+      return;
+    }
+    this.inserir(no.start, "__r.li(", false, prof);
+    this.inserir(abre, ",", true, prof, 1);
+    this.inserir(no.end - 1, ")", true, prof, 1);
+    this.membro(no, prof);
+  }
+
   /** Um nó qualquer (padrão, declaração na cabeça do for...): procura expressões dentro. */
   private qualquer(no: AnyNode, prof: number) {
     if (no.type === "VariableDeclaration") {
@@ -584,14 +611,26 @@ class Instrumentador {
         }
         return;
       case "MemberExpression":
-        this.expressao(no.object, prof + 1);
-        if (no.computed) this.expressao(no.property, prof + 1);
+        this.leituraComColchetes(no, prof);
+        return;
+      case "ChainExpression":
+        this.dentroDeCadeia += 1;
+        this.expressao(no.expression, prof + 1);
+        this.dentroDeCadeia -= 1;
+        return;
+      case "CallExpression":
+      case "NewExpression":
+        // Quem é chamado (lista[i]()) não é embrulhado: o this da chamada continua o mesmo.
+        if (no.callee.type === "MemberExpression") this.membro(no.callee, prof + 1);
+        else this.expressao(no.callee, prof + 1);
+        for (const argumento of no.arguments) this.expressao(argumento, prof + 1);
         return;
       case "UnaryExpression":
         if (no.operator === "typeof" && no.argument.type === "Identifier" && !this.ehLocal(no.argument.name)) {
           this.inserir(no.start, `(__r.l(${texto(no.argument.name)}),`, false, prof);
           this.inserir(no.end, ")", true, prof);
-        } else this.expressao(no.argument, prof + 1);
+        } else if (no.operator === "delete" && no.argument.type === "MemberExpression") this.membro(no.argument, prof + 1);
+        else this.expressao(no.argument, prof + 1);
         return;
       case "FunctionExpression":
       case "ArrowFunctionExpression":
@@ -624,7 +663,8 @@ class Instrumentador {
             this.inserir(no.end, ")", true, prof);
           }
           this.qualquer(no.left, prof + 1);
-        } else if (no.left.type !== "Identifier") this.expressao(no.left, prof + 1);
+        } else if (no.left.type === "MemberExpression") this.membro(no.left, prof + 1);
+        else if (no.left.type !== "Identifier") this.expressao(no.left, prof + 1);
         this.expressao(no.right, prof + 1, no.left.type === "Identifier" ? no.left.name : undefined);
         return;
       case "UpdateExpression":
@@ -632,7 +672,8 @@ class Instrumentador {
           this.inserir(no.start, `(__r.k(${texto(no.argument.name)}),`, false, prof);
           this.inserir(no.end, ")", true, prof);
         }
-        if (no.argument.type !== "Identifier") this.expressao(no.argument, prof + 1);
+        if (no.argument.type === "MemberExpression") this.membro(no.argument, prof + 1);
+        else if (no.argument.type !== "Identifier") this.expressao(no.argument, prof + 1);
         return;
       case "Property":
         if (no.key.type !== "Identifier" || no.computed) this.expressao(no.key, prof + 1);

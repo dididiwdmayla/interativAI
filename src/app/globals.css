@@ -52,6 +52,8 @@
   --color-js-nulo: var(--cor-js-nulo);
   --color-js-funcao: var(--cor-js-funcao);
   --color-js-objeto: var(--cor-js-objeto);
+  --color-grafico-1: var(--cor-grafico-1);
+  --color-grafico-2: var(--cor-grafico-2);
   --color-js-erro-fundo: var(--cor-js-erro-fundo);
   --color-js-aviso-fundo: var(--cor-js-aviso-fundo);
   --color-circuito-fundo: var(--cor-circuito-fundo);
@@ -202,6 +204,94 @@ body {
 
 .palco-piscar {
   animation: palco-piscar 0.9s ease-out;
+}
+
+/*
+ * Pilha e fila no palco: o vagão entra e sai pelo lado certo (push e pop
+ * pela direita, unshift e shift pela esquerda), e a troca da ordenação
+ * balança os dois vagões trocados.
+ */
+@keyframes palco-entrar-direita {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes palco-entrar-esquerda {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes palco-sair-direita {
+  from {
+    opacity: 1;
+    transform: none;
+    max-width: 6rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(28px);
+    max-width: 0;
+  }
+}
+
+@keyframes palco-sair-esquerda {
+  from {
+    opacity: 1;
+    transform: none;
+    max-width: 6rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-28px);
+    max-width: 0;
+  }
+}
+
+@keyframes palco-trocar {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+  60% {
+    transform: translateY(2px) rotate(2deg);
+  }
+}
+
+.palco-entrar-direita {
+  animation: palco-entrar-direita 0.5s ease-out both;
+}
+
+.palco-entrar-esquerda {
+  animation: palco-entrar-esquerda 0.5s ease-out both;
+}
+
+.palco-sair-direita {
+  animation: palco-sair-direita 0.6s ease-in forwards;
+  overflow: hidden;
+}
+
+.palco-sair-esquerda {
+  animation: palco-sair-esquerda 0.6s ease-in forwards;
+  overflow: hidden;
+}
+
+.palco-trocar {
+  animation: palco-trocar 0.7s ease-in-out;
 }
 
 /* Circuito lógico: a corrente andando nos fios acesos. */

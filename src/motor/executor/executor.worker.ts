@@ -105,6 +105,8 @@ ouvir("message", (evento) => {
       resposta = { id: pedido.id, tipo: "executar", resultado: nucleo.executar(pedido.codigo, pedido.origem) };
     } else if (pedido.tipo === "testarFuncao") {
       resposta = { id: pedido.id, tipo: "testarFuncao", resultado: nucleo.testarFuncao(pedido.nome, pedido.casos) };
+    } else if (pedido.tipo === "medirPassos") {
+      resposta = { id: pedido.id, tipo: "medirPassos", medicoes: nucleo.medirPassos(pedido.nome, pedido.chamadas) };
     } else if (pedido.tipo === "avaliarNaFoto") {
       resposta = { id: pedido.id, tipo: "avaliarNaFoto", resultados: nucleo.avaliarNaFoto(pedido.expressoes, pedido.foto, pedido.quadro) };
     } else {

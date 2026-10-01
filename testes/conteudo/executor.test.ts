@@ -103,6 +103,13 @@ describe("o código instrumentado faz o mesmo que o original", () => {
     "let w = 0;\nfor (let i = 0; i < 3; i++) { const d = i * 2; w += d; }\nw",
     "const x = 5, y = x + 1;\nx * y",
     "let a = 1\nlet b = 2\na + b",
+    // Leituras com colchetes (o palco acende o vagão): o resultado não muda.
+    "const l = [3, 1, 2];\nfor (let i = 0; i < l.length - 1; i++) {\n  if (l[i] > l[i + 1]) [l[i], l[i + 1]] = [l[i + 1], l[i]];\n}\nl.join(',')",
+    "const o = { a: 1, f() { return this.a } };\nconst k = 'f';\no[k]() + o['a'] + [10, 20][1]",
+    "const m = [[1, 2], [3, 4]];\nm[1][0] + m [ 0 ] [ 1 ]",
+    "const p = null;\nconst q = { r: [7] };\n(p?.[0] ?? 5) + q?.r[0] + (q.r?.[0] ?? 0)",
+    "const z = [1, 2, 3];\nz[0]++;\nz[1] += 5;\ndelete z[2];\nz.length + z[0] + z[1]",
+    "const s = 'texto';\nlet n = 0;\nfor (let i = 0; i < s.length; i++) if (s[i] === 't') n++;\nn",
   ];
   for (const programa of PROGRAMAS) {
     it(programa.split("\n")[0], () => {
@@ -468,5 +475,43 @@ describe("teste de funções (funcaoPassa)", () => {
     expect(nucleo.testarFuncao("pares", [{ args: [[1, 2, 3, 4]], esperado: [2, 4] }]).passou).toBe(true);
     expect(nucleo.testarFuncao("ficha", [{ args: ["Ana"], esperado: { total: 0.3, nome: "Ana" } }]).passou).toBe(true);
     expect(valorIgual({ t: "array", itens: [], tamanho: 0 }, [1])).toBe(false);
+  });
+});
+
+describe("leituras de lista no rastro (o palco acende o vagão)", () => {
+  it("a linha que lê lista[i] deixa a leitura no passo seguinte, pelo id da lista", () => {
+    const r = rodar("const l = [4, 8, 15];\nlet maior = l[0];\nif (l[2] > maior) maior = l[2];\nmaior");
+    const lista = r.memoriaFinal.quadros[0].escopos[0].variaveis.find((v) => v.nome === "l")?.valor;
+    if (lista?.t !== "ref") throw new Error("a lista devia ser referência");
+    const depoisDaLinha2 = r.passos.find((p) => p.linha === 3)!;
+    expect(depoisDaLinha2.leituras).toEqual([{ id: lista.id, indice: 0 }]);
+    // A condição do if leu l[2] (vai no passo do corpo); o corpo leu de novo (vai no passo da linha 4).
+    const daLinha3 = r.passos.filter((p) => p.linha === 3);
+    expect(daLinha3[1].leituras).toEqual([{ id: lista.id, indice: 2 }]);
+    expect(r.passos.find((p) => p.linha === 4)?.leituras).toEqual([{ id: lista.id, indice: 2 }]);
+  });
+
+  it("chamada, atribuição e delete com colchetes não viram leitura", () => {
+    const r = rodar("const l = [1, 2];\nl[0] = 5;\nl['push'](3);\ndelete l[1];\nl.length");
+    expect(r.passos.every((p) => !p.leituras)).toBe(true);
+    expect(r.resultado).toEqual({ t: "number", v: "3" });
+  });
+});
+
+describe("medição de passos (gráfico de desempenho)", () => {
+  it("a mesma função com listas maiores: linear cresce junto, quadrática dispara", () => {
+    const nucleo = criarNucleoNode({ deterministico: true });
+    nucleo.executar(
+      "function buscar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i] === alvo) return i;\n  }\n  return -1;\n}\nfunction repetido(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = 0; j < lista.length; j++) {\n      if (i !== j && lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}",
+      "snippet",
+    );
+    const lista = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
+    const linear = nucleo.medirPassos("buscar", [10, 100, 1000].map((tamanho) => ({ tamanho, args: [lista(tamanho), -1] })));
+    const quadratica = nucleo.medirPassos("repetido", [10, 100, 1000].map((tamanho) => ({ tamanho, args: [lista(tamanho)] })));
+    expect(linear.map((m) => m.passos)).toEqual([12, 102, 1002]);
+    expect(quadratica[1].passos / quadratica[0].passos).toBeGreaterThan(80);
+    expect(quadratica[2].passos).toBeGreaterThan(1_000_000);
+    expect(quadratica.every((m) => !m.passouDoLimite && m.erro === null)).toBe(true);
+    expect(nucleo.medirPassos("naoExiste", [{ tamanho: 1, args: [] }])[0].erro).toBe("não existe função naoExiste");
   });
 });

@@ -84,5 +84,9 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "tirarPasso":
     case "rodarPlano":
       return "quadro-de-passos";
+    case "verComoArvore":
+      return "arvore-palco";
+    case "medirDesempenho":
+      return "grafico-passos";
   }
 }

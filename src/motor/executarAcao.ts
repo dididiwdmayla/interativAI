@@ -81,6 +81,11 @@ export type PainelDasAcoes = {
     tirarPasso: (passo: string) => boolean;
     rodarPlano: () => boolean;
   };
+  /** (Estruturas e desempenho) Ver como árvore e o Medir da aba Desempenho: só nas fases com as ferramentas. */
+  estruturas?: {
+    verComoArvore?: (nome: string) => boolean;
+    medirDesempenho?: () => boolean;
+  };
   /** (Modo dispositivo) A barra de dispositivo: só existe numa fase com a ferramenta modo-dispositivo. */
   dispositivo?: {
     trocar: (modelo: Extract<Acao, { tipo: "trocarDispositivo" }>["modelo"], largura?: number) => void;
@@ -180,6 +185,10 @@ export function descreverAcao(acao: Acao): string {
       return `tirarPasso ${acao.passo}`;
     case "rodarPlano":
       return "rodarPlano";
+    case "verComoArvore":
+      return `verComoArvore ${acao.nome}`;
+    case "medirDesempenho":
+      return "medirDesempenho";
   }
 }
 
@@ -466,6 +475,18 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       if (!quadro) throw new ErroAcao(`${acao.tipo} só existe numa fase ordenar-passos`);
       const deu = acao.tipo === "porPasso" ? quadro.porPasso(acao.passo, acao.posicao, acao.grupo) : acao.tipo === "tirarPasso" ? quadro.tirarPasso(acao.passo) : quadro.rodarPlano();
       if (!deu) throw new ErroAcao(acao.tipo === "rodarPlano" ? "rodarPlano pede ordenar.rodar e programa na fase" : `não deu para ${descreverAcao(acao)} (cartão ou grupo que não existe?)`);
+      return;
+    }
+    case "verComoArvore": {
+      const ver = painel.estruturas?.verComoArvore;
+      if (!ver) throw new ErroAcao("verComoArvore pede a ferramenta arvore-palco em usaFerramentas");
+      if (!ver(acao.nome)) throw new ErroAcao(`${acao.nome} não é (ainda) um objeto com filhos objetos para ver como árvore`);
+      return;
+    }
+    case "medirDesempenho": {
+      const medir = painel.estruturas?.medirDesempenho;
+      if (!medir) throw new ErroAcao("medirDesempenho pede a ferramenta grafico-passos e programa.desempenho");
+      if (!medir()) throw new ErroAcao("não deu para medir (a fase não tem programa.desempenho?)");
       return;
     }
   }

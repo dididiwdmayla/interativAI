@@ -80,6 +80,12 @@ export type PassoRastro = {
   retorno?: { funcao: string; valor: ValorMemoria };
   /** O comando deste passo é a instrução `debugger;` (o depurador pausa aqui). */
   depurador?: true;
+  /**
+   * As posições de lista que a linha ANTERIOR leu (lista[i]), pelo id da
+   * lista no monte: o palco acende esses vagões ("leu"), para ver busca e
+   * ordenação acontecendo.
+   */
+  leituras?: { id: number; indice: number }[];
 };
 
 export type NivelSaida = "log" | "info" | "warn" | "error" | "debug";
@@ -133,6 +139,9 @@ export type ResultadoExecucao = {
 /** O valor de uma expressão do painel Observar, avaliada numa foto da memória (o momento pausado). */
 export type ResultadoAvaliacao = { expressao: string; valor: ValorExibido } | { expressao: string; erro: string };
 
+/** Uma medição do gráfico de desempenho: a função rodando com uma lista daquele tamanho. */
+export type MedicaoPassos = { funcao: string; tamanho: number; passos: number; passouDoLimite: boolean; erro: string | null };
+
 /** Valor esperado num caso de teste de função (JSON). */
 export type ValorEsperado = null | boolean | number | string | ValorEsperado[] | { [chave: string]: ValorEsperado };
 
@@ -170,4 +179,10 @@ export const LIMITES = {
   itens: 100,
   /** Saídas do console guardadas. */
   saidas: 500,
+  /** Passos de uma medição do gráfico de desempenho (mais que isso: "travaria"). */
+  passosMedicao: 2_000_000,
+  /** Tempo de uma medição, em milissegundos. */
+  tempoMedicaoMs: 3_000,
+  /** Leituras de lista guardadas por passo. */
+  leiturasPorPasso: 8,
 } as const;

@@ -98,6 +98,10 @@
   --cor-fio-desligado: #b9a6c9;
   --cor-fio-ligado: #f59e0b;
   --cor-lampada-acesa: #ffd23f;
+
+  /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
+  --cor-grafico-1: #4f5fe8;
+  --cor-grafico-2: #d6337f;
 }
 
 [data-theme="fliperama"] {
@@ -178,6 +182,10 @@
   --cor-fio-desligado: #4b4390;
   --cor-fio-ligado: #faf45a;
   --cor-lampada-acesa: #faf45a;
+
+  /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
+  --cor-grafico-1: #3987e5;
+  --cor-grafico-2: #e0449a;
 }
 
 [data-theme="segredo"] {
@@ -258,4 +266,8 @@
   --cor-fio-desligado: #2f5c48;
   --cor-fio-ligado: #3dff8f;
   --cor-lampada-acesa: #d9ff5c;
+
+  /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
+  --cor-grafico-1: #3987e5;
+  --cor-grafico-2: #d95926;
 }
