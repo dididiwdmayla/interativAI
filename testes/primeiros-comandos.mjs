@@ -105,9 +105,17 @@ const PASSOS_U2 = [
   [["tamanho-guiado", '"Lia Costa".length'], ["tamanho-sozinho", 'let tamanhoEtiqueta = "Pizza pronta".length'], ["log-guiado", 'console.log("Pedido recebido")'], ["log-previsao", 'console.log("Saiu para entrega")'], ["log-sozinho", 'console.log("Retirada liberada")']],
 ];
 const DESAFIO_U2 = ['let cliente = "Bia"\nlet quantidade = 3\nlet minutos = 40', 'let mensagem = `${cliente}, seus ${quantidade} vasos chegam em ${minutos} minutos.`', 'let tamanhoMensagem = mensagem.length', 'console.log(mensagem)'];
-// U3 acrescentada no commit da unidade.
-const PASSOS = PASSOS_U2;
-const DESAFIO = DESAFIO_U2;
+const PASSOS_U3 = [
+  [["tipo-numero", 'typeof numero'], ["tipo-texto", 'typeof codigo'], ["tipo-booleano", 'typeof aberta'], ["tipo-undefined", 'typeof pendente'], ["null-previsao", 'typeof reserva'], ["tipo-proprio", 'let vagas = 12\nlet tipoVagas = typeof vagas']],
+  [["comparar-guiado", 'codigo === 2'], ["comparar-sozinho", 'codigo === "2"'], ["guardar-previsao", 'codigo = 2'], ["comparar-apos-troca", 'codigo === "2"']],
+  [["mais-texto", '"2" + 2'], ["mais-sozinho", '"10" + 3'], ["vezes-guiado", '"2" * 2'], ["menos-previsao", "'5' - 2"], ["vezes-sozinho", '"7" * 3']],
+  [["total-guiado", 'let total = Number(precoTexto) + taxa'], ["total-sozinho", 'let outroTotal = Number(valorTexto) + extra'], ["string-guiado", 'let totalTexto = String(total)'], ["string-previsao", 'typeof String(8)'], ["string-sozinho", 'let reciboTexto = String(outroTotal)']],
+  [["comentario-guiado", 'let saldo = 10\n// saldo = 999\nsaldo = saldo + 2'], ["comentario-previsao", '3 + 4 // conta das vagas'], ["bloco-guiado", 'let caixa = 6\n/* caixa = 900 */\ncaixa = caixa + 1'], ["comentario-sozinho", 'let estoque = 8\n/*\nestoque = 500\n*/\nestoque = estoque + 3']],
+];
+const DESAFIO_U3 = ['let contaTexto = "80"\nlet percentual = 10', 'let conta = Number(contaTexto)', 'let gorjeta = conta * percentual / 100', 'let total = conta + gorjeta', 'typeof total', 'let totalTexto = String(total)\nconsole.log("Total: R$ " + totalTexto)'];
+
+const PASSOS = numero === 2 ? PASSOS_U2 : PASSOS_U3;
+const DESAFIO = numero === 2 ? DESAFIO_U2 : DESAFIO_U3;
 
 const ilha = pagina.locator('[data-ilha="logica"]').first();
 conferir((await ilha.getAttribute("data-estado")) === "disponivel", `${MODO}: Lógica disponível`);
@@ -151,12 +159,18 @@ for (const [f, passos] of PASSOS.entries()) {
       conferir(!(await pagina.getByRole("button", { name: "Próximo objetivo", exact: true }).isVisible()), `${MODO}: soma que concatena não passa`);
     }
     await rodar(codigo);
+    if (id === "tipo-numero") {
+      for (const [nome, tipo] of [["numero", "numero"], ["codigo", "texto"], ["aberta", "booleano"], ["pendente", "undefined"], ["reserva", "null"]]) {
+        conferir((await caixinha(nome).getAttribute("data-tipo")) === tipo, `${MODO}: ${nome} mostra tipo ${tipo} no palco`);
+      }
+    }
+    if (id === "guardar-previsao") conferir((await caixinha("codigo").getAttribute("data-tipo")) === "numero", `${MODO}: = troca o tipo guardado; === não troca`);
     if (id === "aspas-esquecidas") conferir((await pagina.locator("[data-console]:visible [data-linha-console='erro']").last().getAttribute("data-erro")) === "ReferenceError", `${MODO}: aspas esquecidas dão erro real`);
     if (id === "comentario-sozinho") {
       if (movel) await fecharBalao(pagina);
       await tocar(pagina.locator("[data-passo-anterior]"));
       conferir((await caixinha("estoque").innerText()).includes("8"), `${MODO}: linha do tempo mostra estoque antes da soma`);
-      await tocar(pagina.locator("[data-passo-seguinte]"));
+      await tocar(pagina.locator("[data-passo-proximo]"));
     }
     if (i < passos.length - 1) await naConversa("Próximo objetivo");
   }

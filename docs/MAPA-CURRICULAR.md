@@ -410,7 +410,7 @@ Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
 - **Confusões:** "sem aspas também é texto" (sem aspas é nome de
   variável: `ReferenceError`); "o `+` sempre soma".
 
-#### U3. Tipos — `logica-primeiros-comandos-u3`
+#### U3. Tipos (pronta) — `logica-primeiros-comandos-u3`
 
 - **Meta:** descobrir o tipo de cada valor com `typeof` e entender por que
   `"2" + 2` dá `"22"`.

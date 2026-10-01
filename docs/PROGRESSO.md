@@ -144,3 +144,13 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - `testar:conteudo`: checagens da U2 verdes após corrigir o comprimento da confirmação para 39.
 - Jornada pelo mapa verde em desktop, retrato e paisagem, incluindo negativas (sem espaço; concatenação no lugar de template), meta e desafio; console limpo.
 - `publicar:conteudo`, build e lint verdes. IDs congelados junto com a unidade.
+
+### U3: Tipos
+
+- Seis fases: tipos e typeof; guardar versus comparar; coerção do +, * e -; Number e String; comentários; desafio da gorjeta num café.
+- Sete conceitos novos com temas e quatorze itens de revisão. As cinco categorias aparecem no palco; typeof null é explicado como peculiaridade histórica.
+- Introdução mínima ao === nesta unidade, para atender à confusão explicitamente pedida no prompt; valor/tipo e ausência de alteração da variável são conferidos. A zona Decisões aprofunda comparações.
+- Comentário explicativo não altera a expressão; comentar código executável pode alterar o resultado, pois desativa esse trecho. A linha do tempo mostra a soma e ignora a linha comentada.
+- `testar:conteudo`: 33 arquivos, 9.035 testes verdes (inclui U2 e os 26 novos itens de revisão).
+- Jornada pelo mapa verde em desktop, retrato e paisagem, com tipos no palco, negativa de soma textual, meta, desafio e linha do tempo; console limpo.
+- `publicar:conteudo`, build e lint verdes; IDs congelados junto com a unidade. Sem alteração de motor ou dependências.

@@ -149,6 +149,14 @@
       "logica-primeiros-comandos-u2-f3",
       "logica-primeiros-comandos-u2-f4",
       "logica-primeiros-comandos-u2-f5"
+    ],
+    "logica-primeiros-comandos-u3": [
+      "logica-primeiros-comandos-u3-f1",
+      "logica-primeiros-comandos-u3-f2",
+      "logica-primeiros-comandos-u3-f3",
+      "logica-primeiros-comandos-u3-f4",
+      "logica-primeiros-comandos-u3-f5",
+      "logica-primeiros-comandos-u3-f6"
     ]
   },
   "fases": {
@@ -861,6 +869,60 @@
         "tamanho",
         "mostrar"
       ]
+    },
+    "logica-primeiros-comandos-u3-f1": {
+      "objetivos": [
+        "tipo-numero",
+        "tipo-texto",
+        "tipo-booleano",
+        "tipo-undefined",
+        "null-previsao",
+        "tipo-proprio"
+      ]
+    },
+    "logica-primeiros-comandos-u3-f2": {
+      "objetivos": [
+        "comparar-guiado",
+        "comparar-sozinho",
+        "guardar-previsao",
+        "comparar-apos-troca"
+      ]
+    },
+    "logica-primeiros-comandos-u3-f3": {
+      "objetivos": [
+        "mais-texto",
+        "mais-sozinho",
+        "vezes-guiado",
+        "menos-previsao",
+        "vezes-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u3-f4": {
+      "objetivos": [
+        "total-guiado",
+        "total-sozinho",
+        "string-guiado",
+        "string-previsao",
+        "string-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u3-f5": {
+      "objetivos": [
+        "comentario-guiado",
+        "comentario-previsao",
+        "bloco-guiado",
+        "comentario-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u3-f6": {
+      "partes": [
+        "entrada",
+        "converter",
+        "gorjeta",
+        "total",
+        "tipo",
+        "recibo"
+      ]
     }
   },
   "itensRevisao": [
@@ -1149,6 +1211,20 @@
     "length-texto-1",
     "length-texto-2",
     "console-log-1",
-    "console-log-2"
+    "console-log-2",
+    "tipo-js-1",
+    "tipo-js-2",
+    "typeof-js-1",
+    "typeof-js-2",
+    "igualdade-estrita-1",
+    "igualdade-estrita-2",
+    "coercao-js-1",
+    "coercao-js-2",
+    "conversao-number-1",
+    "conversao-number-2",
+    "conversao-string-1",
+    "conversao-string-2",
+    "comentario-js-1",
+    "comentario-js-2"
   ]
 }

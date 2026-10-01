@@ -784,6 +784,62 @@ const CATALOGO = {
     "ferramentas"
   ]
 },
+  "tipo-js": {
+  "nome": "Tipo do valor",
+  "resumo": "Número, texto, booleano, undefined e null representam coisas diferentes, mesmo quando parecem iguais.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "typeof-js": {
+  "nome": "Perguntar o tipo",
+  "resumo": "typeof devolve um texto com o nome do tipo do valor, como number ou string.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "igualdade-estrita": {
+  "nome": "Comparar com ===",
+  "resumo": "O === compara valor e tipo e responde true ou false, sem guardar nada nas variáveis.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "coercao-js": {
+  "nome": "Conversão automática",
+  "resumo": "Algumas operações convertem tipos sozinhas: + com texto junta, enquanto * e - tentam usar números.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "conversao-number": {
+  "nome": "Converter com Number",
+  "resumo": "Number(texto) tenta transformar texto numérico em número antes de fazer a conta.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "conversao-string": {
+  "nome": "Converter com String",
+  "resumo": "String(valor) transforma um valor em texto, útil para montar uma mensagem.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "comentario-js": {
+  "nome": "Comentário no código",
+  "resumo": "O computador ignora o trecho entre // e o fim da linha, ou entre /* e */; o resto continua executando.",
+  "temas": [
+    "logica",
+    "ferramentas"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

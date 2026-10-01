@@ -1,3 +1,10 @@
+import { ITENS_COMENTARIO_JS } from "./comentario-js";
+import { ITENS_CONVERSAO_STRING } from "./conversao-string";
+import { ITENS_CONVERSAO_NUMBER } from "./conversao-number";
+import { ITENS_COERCAO_JS } from "./coercao-js";
+import { ITENS_IGUALDADE_ESTRITA } from "./igualdade-estrita";
+import { ITENS_TYPEOF_JS } from "./typeof-js";
+import { ITENS_TIPO_JS } from "./tipo-js";
 import { ITENS_CONSOLE_LOG } from "./console-log";
 import { ITENS_LENGTH_TEXTO } from "./length-texto";
 import { ITENS_TEMPLATE_LITERAL } from "./template-literal";
@@ -306,6 +313,13 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_TEMPLATE_LITERAL,
   ...ITENS_LENGTH_TEXTO,
   ...ITENS_CONSOLE_LOG,
+  ...ITENS_TIPO_JS,
+  ...ITENS_TYPEOF_JS,
+  ...ITENS_IGUALDADE_ESTRITA,
+  ...ITENS_COERCAO_JS,
+  ...ITENS_CONVERSAO_NUMBER,
+  ...ITENS_CONVERSAO_STRING,
+  ...ITENS_COMENTARIO_JS,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
