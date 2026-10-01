@@ -774,5 +774,112 @@
    "let catraca = (planoAtivo || ehVisitante) && horarioPermitido",
    "let liberou = planoAtivo || ehVisitante && !horarioPermitido"
   ]
+ },
+ "3": {
+  "passos": [
+   [
+    [
+     "if-guiado",
+     "if (lojaAberta) {\n  console.log(\"Aberto!\")\n}"
+    ],
+    [
+     "if-previsao",
+     "lojaAberta = false\nif (lojaAberta) {\n  console.log(\"Aberto!\")\n}"
+    ],
+    [
+     "bloco-guiado",
+     "if (estoque === 0) {\n  console.log(\"Sem estoque\")\n  console.log(\"Volte amanhã\")\n}"
+    ],
+    [
+     "if-sozinho",
+     "if (!lojaAberta) {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "bloco-sozinho",
+     "if (estoque === 0) {\n  console.log(\"Esgotado\")\n  console.log(\"Reposição na sexta\")\n}"
+    ]
+   ],
+   [
+    [
+     "else-guiado",
+     "if (lojaAberta) {\n  console.log(\"Aberto!\")\n} else {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "else-previsao",
+     "lojaAberta = false\nif (lojaAberta) {\n  console.log(\"Aberto!\")\n} else {\n  console.log(\"Fechado\")\n}"
+    ],
+    [
+     "else-sozinho",
+     "if (estoque > 0) {\n  console.log(\"Tem estoque\")\n} else {\n  console.log(\"Sem estoque\")\n}"
+    ],
+    [
+     "ponto-e-virgula",
+     "if (estoque < 5); { avisos = avisos + 1 }"
+    ],
+    [
+     "consertar-ponto-e-virgula",
+     "avisos = 0\nif (estoque < 5) {\n  avisos = avisos + 1\n}"
+    ]
+   ],
+   [
+    [
+     "faixas-guiado",
+     "if (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "nota-sete",
+     "nota = 7\nif (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "ordem-trocada",
+     "nota = 9\nif (nota >= 5) {\n  console.log(\"Regular\")\n} else if (nota >= 9) {\n  console.log(\"Excelente\")\n}"
+    ],
+    [
+     "ordem-sozinho",
+     "if (nota >= 9) {\n  console.log(\"Excelente\")\n} else if (nota >= 7) {\n  console.log(\"Bom\")\n} else if (nota >= 5) {\n  console.log(\"Regular\")\n} else {\n  console.log(\"Recuperação\")\n}"
+    ],
+    [
+     "frete-sozinho",
+     "if (valorCompra >= 200) {\n  console.log(\"Frete grátis\")\n} else if (valorCompra >= 100) {\n  console.log(\"Frete 10\")\n} else {\n  console.log(\"Frete 20\")\n}"
+    ]
+   ],
+   [
+    [
+     "e-guiado",
+     "if (temCarteirinha && livroDisponivel) {\n  console.log(\"Emprestado\")\n} else {\n  console.log(\"Indisponível\")\n}"
+    ],
+    [
+     "e-previsao",
+     "livroDisponivel = true\nif (temCarteirinha && livroDisponivel) {\n  console.log(\"Emprestado\")\n} else {\n  console.log(\"Indisponível\")\n}"
+    ],
+    [
+     "ou-guiado",
+     "idade = 70\nif (idade < 12 || idade >= 60) {\n  console.log(\"Desconto\")\n} else {\n  console.log(\"Preço normal\")\n}"
+    ],
+    [
+     "ou-sozinho",
+     "diasAtraso = 3\nif (diasAtraso > 0 || livroDanificado) {\n  console.log(\"Cobrar taxa\")\n}"
+    ],
+    [
+     "ordem-previsao",
+     "let socio = true\nlet convidado = false\nlet pagou = false\nif (socio || convidado && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+    ],
+    [
+     "parenteses-sozinho",
+     "if ((socio || convidado) && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+    ]
+   ]
+  ],
+  "negativas": {
+   "if-guiado": "console.log(\"Aberto!\")",
+   "ordem-sozinho": "if (nota >= 5) {\n  console.log(\"Regular\")\n} else if (nota >= 9) {\n  console.log(\"Excelente\")\n}",
+   "parenteses-sozinho": "if (socio || convidado && pagou) {\n  console.log(\"Entra\")\n} else {\n  console.log(\"Não entra\")\n}"
+  },
+  "desafio": [
+   "let itens = 2\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 4\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 8\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
+   "let itens = 0\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}"
+  ]
  }
 }

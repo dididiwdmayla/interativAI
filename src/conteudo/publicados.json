@@ -173,6 +173,13 @@
       "logica-decisoes-u2-f4",
       "logica-decisoes-u2-f5",
       "logica-decisoes-u2-f6"
+    ],
+    "logica-decisoes-u3": [
+      "logica-decisoes-u3-f1",
+      "logica-decisoes-u3-f2",
+      "logica-decisoes-u3-f3",
+      "logica-decisoes-u3-f4",
+      "logica-decisoes-u3-f5"
     ]
   },
   "fases": {
@@ -1046,6 +1053,51 @@
         "catraca",
         "sem-parenteses"
       ]
+    },
+    "logica-decisoes-u3-f1": {
+      "objetivos": [
+        "if-guiado",
+        "if-previsao",
+        "bloco-guiado",
+        "if-sozinho",
+        "bloco-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f2": {
+      "objetivos": [
+        "else-guiado",
+        "else-previsao",
+        "else-sozinho",
+        "ponto-e-virgula",
+        "consertar-ponto-e-virgula"
+      ]
+    },
+    "logica-decisoes-u3-f3": {
+      "objetivos": [
+        "faixas-guiado",
+        "nota-sete",
+        "ordem-trocada",
+        "ordem-sozinho",
+        "frete-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f4": {
+      "objetivos": [
+        "e-guiado",
+        "e-previsao",
+        "ou-guiado",
+        "ou-sozinho",
+        "ordem-previsao",
+        "parenteses-sozinho"
+      ]
+    },
+    "logica-decisoes-u3-f5": {
+      "partes": [
+        "pequeno",
+        "medio",
+        "grande",
+        "invalido"
+      ]
     }
   },
   "itensRevisao": [
@@ -1372,6 +1424,16 @@
     "operadores-logicos-1",
     "operadores-logicos-2",
     "ordem-e-ou-1",
-    "ordem-e-ou-2"
+    "ordem-e-ou-2",
+    "if-js-1",
+    "if-js-2",
+    "bloco-js-1",
+    "bloco-js-2",
+    "else-js-1",
+    "else-js-2",
+    "else-if-js-1",
+    "else-if-js-2",
+    "condicao-composta-1",
+    "condicao-composta-2"
   ]
 }

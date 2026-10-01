@@ -462,7 +462,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Confusões:** "OU é um ou outro, nunca os dois" (no código, os dois
   também valem); "a ordem das entradas muda o resultado".
 
-#### U3. Se, senão — `logica-decisoes-u3`
+#### U3. Se, senão (pronta) — `logica-decisoes-u3`
 
 - **Meta:** fazer o programa escolher um caminho com `if`, `else if` e
   `else`.

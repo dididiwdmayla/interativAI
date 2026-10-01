@@ -53,3 +53,11 @@ lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio,
 - Confusões atacadas: OU aceita as duas ligadas (previsão), OU com tudo desligado, ordem do E e do OU (parênteses mudam o resultado) e `!`.
 - Seis conceitos novos (portao-e, tabela-verdade, portao-ou, portao-nao, operadores-logicos, ordem-e-ou) com temas e doze itens de revisão (em Console; o item de tabela verdade é só de previsão).
 - `testar:conteudo` verde (9.791 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com toque real no circuito (zoom e arrasto com dois dedos), apresentação de circuito e tabela verdade, negativas e console limpo.
+
+### U3: Se, senão
+
+- Cinco fases, todas no Console (programas de várias linhas entram como texto colado): if e bloco; else e o ponto e vírgula depois do `if (...)`; else if e a ordem das perguntas (inclui o bug da ordem trocada e a previsão da nota 7); condições com `&&` e `||` (inclui a ordem do E e do OU com e sem parênteses); desafio do classificador de pedidos da lanchonete.
+- Cinco conceitos novos com temas e dez itens de revisão; `portao-e`, `portao-ou`, `operadores-logicos`, `ordem-e-ou` e `limite-da-comparacao` entram em `revisa`.
+- A saída (`saida igual`) prova qual caminho rodou (nunca os dois); o bug do `;` é provado pela caixinha `avisos` (estado), não pela saída, para o conserto poder ser refeito. No desafio, cada faixa usa mensagem própria (`saida` trava no checklist).
+- `usouSintaxe: else` só vale para `else` final: um `else if` sem `else` não conta (itens e fases escritos de acordo).
+- `testar:conteudo` verde (10.106 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com negativas (if sem if, ordem trocada, E/OU sem parênteses); console limpo.

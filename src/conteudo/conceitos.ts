@@ -900,6 +900,31 @@ const CATALOGO = {
   "resumo": "O E é calculado antes do OU, e os parênteses mudam quem vai primeiro: a mesma conta pode dar resultados diferentes.",
   "temas": ["logica"]
 },
+  "if-js": {
+  "nome": "Se (if)",
+  "resumo": "O if roda um trecho de código só quando a condição entre parênteses é true; se for false, o trecho é pulado.",
+  "temas": ["logica"]
+},
+  "bloco-js": {
+  "nome": "Bloco entre chaves",
+  "resumo": "As chaves { } agrupam várias linhas num único bloco, que roda inteiro ou não roda.",
+  "temas": ["logica"]
+},
+  "else-js": {
+  "nome": "Senão (else)",
+  "resumo": "O else é o plano B do if: roda quando a condição é false, e nunca junto com o bloco do if.",
+  "temas": ["logica"]
+},
+  "else-if-js": {
+  "nome": "Else if e a ordem",
+  "resumo": "O else if encadeia mais uma pergunta; o programa para na primeira true, então a ordem das perguntas muda o resultado.",
+  "temas": ["logica"]
+},
+  "condicao-composta": {
+  "nome": "Condição com && e ||",
+  "resumo": "Dentro do if dá para juntar condições: && exige todas, || aceita qualquer uma, e parênteses decidem quem vai primeiro.",
+  "temas": ["logica"]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

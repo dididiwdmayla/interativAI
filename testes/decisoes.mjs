@@ -74,18 +74,13 @@ const esperarObjetivo = (id) =>
   pagina.waitForFunction((alvo) => document.querySelector("[data-jogo-fase]")?.getAttribute("data-objetivo-atual") === alvo, id, { timeout: 10000 });
 const caixinha = (nome) => pagina.locator(`[data-palco] [data-caixinha="${nome}"]`);
 
-/** Escreve e roda no Console (no toque, o botão Rodar; várias linhas vão como texto colado). */
+/** Escreve e roda no Console (no toque, o botão Rodar). */
 async function rodar(codigo) {
   if (movel) await fecharBalao(pagina);
   const entrada = pagina.locator("[data-console]:visible [data-entrada-console]").first();
   await entrada.click();
-  if (!toque && codigo.includes("\n")) {
-    const linhas = codigo.split("\n");
-    for (const [i, linha] of linhas.entries()) {
-      await pagina.keyboard.type(linha);
-      if (i < linhas.length - 1) await pagina.keyboard.press("Shift+Enter");
-    }
-  } else await pagina.keyboard.insertText(codigo);
+  // Várias linhas entram como texto colado: o editor fecha chaves sozinho quando se digita "{" (como o Chrome).
+  await pagina.keyboard.insertText(codigo);
   if (toque) await pagina.locator("[data-console]:visible [data-rodar-console]").first().tap();
   else await pagina.keyboard.press("Enter");
   await assentar();

@@ -1,3 +1,8 @@
+import { ITENS_CONDICAO_COMPOSTA } from "./condicao-composta";
+import { ITENS_ELSE_IF_JS } from "./else-if-js";
+import { ITENS_ELSE_JS } from "./else-js";
+import { ITENS_BLOCO_JS } from "./bloco-js";
+import { ITENS_IF_JS } from "./if-js";
 import { ITENS_ORDEM_E_OU } from "./ordem-e-ou";
 import { ITENS_OPERADORES_LOGICOS } from "./operadores-logicos";
 import { ITENS_PORTAO_NAO } from "./portao-nao";
@@ -344,6 +349,11 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_PORTAO_NAO,
   ...ITENS_OPERADORES_LOGICOS,
   ...ITENS_ORDEM_E_OU,
+  ...ITENS_IF_JS,
+  ...ITENS_BLOCO_JS,
+  ...ITENS_ELSE_JS,
+  ...ITENS_ELSE_IF_JS,
+  ...ITENS_CONDICAO_COMPOSTA,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
