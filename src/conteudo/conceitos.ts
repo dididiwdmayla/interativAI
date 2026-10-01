@@ -840,6 +840,36 @@ const CATALOGO = {
     "ferramentas"
   ]
 },
+  "booleano-js": {
+  "nome": "Verdadeiro ou falso",
+  "resumo": "Um valor com só duas opções, true (verdadeiro) ou false (falso): é o que uma pergunta do código devolve.",
+  "temas": ["logica","dados"]
+},
+  "comparacao-js": {
+  "nome": "Comparar com > e <",
+  "resumo": "Os sinais > e < perguntam se um valor é maior ou menor que outro, e o Console responde true ou false.",
+  "temas": ["logica"]
+},
+  "limite-da-comparacao": {
+  "nome": "Maior ou igual (>= e <=)",
+  "resumo": "Com >= e <=, o valor que está exatamente no limite também conta; com > e <, ele fica de fora.",
+  "temas": ["logica"]
+},
+  "diferente-estrito": {
+  "nome": "Diferente com !==",
+  "resumo": "O !== pergunta se dois valores são diferentes em valor ou em tipo: é o contrário do ===.",
+  "temas": ["logica"]
+},
+  "atribuir-ou-comparar": {
+  "nome": "Guardar não é comparar",
+  "resumo": "Um = guarda um valor numa caixinha e a muda; três === perguntam se dois valores são iguais, sem mudar nada.",
+  "temas": ["logica"]
+},
+  "igualdade-solta": {
+  "nome": "Igualdade solta ==",
+  "resumo": "O == compara convertendo os tipos antes ('10' == 10 dá true): por isso quase sempre se usa o ===.",
+  "temas": ["logica"]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

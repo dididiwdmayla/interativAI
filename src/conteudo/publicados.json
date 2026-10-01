@@ -157,6 +157,14 @@
       "logica-primeiros-comandos-u3-f4",
       "logica-primeiros-comandos-u3-f5",
       "logica-primeiros-comandos-u3-f6"
+    ],
+    "logica-decisoes-u1": [
+      "logica-decisoes-u1-f1",
+      "logica-decisoes-u1-f2",
+      "logica-decisoes-u1-f3",
+      "logica-decisoes-u1-f4",
+      "logica-decisoes-u1-f5",
+      "logica-decisoes-u1-f6"
     ]
   },
   "fases": {
@@ -923,6 +931,59 @@
         "tipo",
         "recibo"
       ]
+    },
+    "logica-decisoes-u1-f1": {
+      "objetivos": [
+        "maior-guiado",
+        "menor-previsao",
+        "guardar-resposta",
+        "tipo-da-resposta"
+      ]
+    },
+    "logica-decisoes-u1-f2": {
+      "objetivos": [
+        "maior-na-fronteira",
+        "maior-ou-igual",
+        "menor-ou-igual-previsao",
+        "guardar-entrada",
+        "mudar-o-limite"
+      ]
+    },
+    "logica-decisoes-u1-f3": {
+      "objetivos": [
+        "igual-guiado",
+        "diferente-guiado",
+        "texto-contra-numero",
+        "diferente-sozinho",
+        "maiuscula-conta"
+      ]
+    },
+    "logica-decisoes-u1-f4": {
+      "objetivos": [
+        "igual-guarda",
+        "consertar",
+        "perguntar-sem-mudar",
+        "guardar-de-proposito"
+      ]
+    },
+    "logica-decisoes-u1-f5": {
+      "objetivos": [
+        "solto-guiado",
+        "solto-sozinho",
+        "solto-esquisito",
+        "estrito-guiado",
+        "estrito-sozinho"
+      ]
+    },
+    "logica-decisoes-u1-f6": {
+      "partes": [
+        "frete",
+        "cupom",
+        "estoque",
+        "exato",
+        "tipo",
+        "texto"
+      ]
     }
   },
   "itensRevisao": [
@@ -1225,6 +1286,18 @@
     "conversao-string-1",
     "conversao-string-2",
     "comentario-js-1",
-    "comentario-js-2"
+    "comentario-js-2",
+    "booleano-js-1",
+    "booleano-js-2",
+    "comparacao-js-1",
+    "comparacao-js-2",
+    "limite-da-comparacao-1",
+    "limite-da-comparacao-2",
+    "diferente-estrito-1",
+    "diferente-estrito-2",
+    "atribuir-ou-comparar-1",
+    "atribuir-ou-comparar-2",
+    "igualdade-solta-1",
+    "igualdade-solta-2"
   ]
 }

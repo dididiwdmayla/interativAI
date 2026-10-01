@@ -1,0 +1,29 @@
+{
+  "1": {
+    "caixaDepois": "freteGratis",
+    "passos": [
+      [["maior-guiado", "idade > idadeMinima"], ["menor-previsao", "idade < idadeMinima"], ["guardar-resposta", "let podeComprar = idade > idadeMinima"], ["tipo-da-resposta", "typeof podeComprar"]],
+      [["maior-na-fronteira", "idade > idadeMinima"], ["maior-ou-igual", "idade >= idadeMinima"], ["menor-ou-igual-previsao", "idade <= 12"], ["guardar-entrada", "let entraNoCombo = idade >= idadeMinima"], ["mudar-o-limite", "idadeMinima = 13\nidade >= idadeMinima"]],
+      [["igual-guiado", "digitado === senha"], ["diferente-guiado", "digitado !== senha"], ["texto-contra-numero", "'10' === 10"], ["diferente-sozinho", "\"10\" !== 10"], ["maiuscula-conta", "\"Sim\" === \"sim\""]],
+      [["igual-guarda", "idade = 18"], ["consertar", ["idade = 17", "idade === 18"]], ["perguntar-sem-mudar", "idade === idadeMinima"], ["guardar-de-proposito", ["idadeMinima = 21", "idade >= idadeMinima"]]],
+      [["solto-guiado", "quantidade == 10"], ["solto-sozinho", "\"7\" == 7"], ["solto-esquisito", "'' == 0"], ["estrito-guiado", "quantidade === 10"], ["estrito-sozinho", "quantidade === \"10\""]]
+    ],
+    "negativas": {
+      "maior-ou-igual": "idade > idadeMinima",
+      "perguntar-sem-mudar": ["idade = idadeMinima", "idade = 17"],
+      "solto-guiado": "quantidade === 10"
+    },
+    "caixinhas": {
+      "guardar-resposta": { "podeComprar": ["data-tipo", "booleano"] },
+      "igual-guarda": { "idade": ["data-tipo", "numero"] }
+    },
+    "desafio": [
+      "let freteGratis = valorCompra >= 100",
+      "let cupomValido = cupom === \"FRETE10\"",
+      "let temEstoque = estoque >= pedido",
+      "let ehExato = valorCompra === 100",
+      "typeof freteGratis",
+      "let mesmoTipo = quantidadeTexto === pedido"
+    ]
+  }
+}

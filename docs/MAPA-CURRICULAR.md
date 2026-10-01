@@ -431,7 +431,7 @@ Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
 Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 `'10' === 10` e `'10' == 10` e explicar a diferença para alguém.
 
-#### U1. Verdadeiro ou falso — `logica-decisoes-u1`
+#### U1. Verdadeiro ou falso (pronta) — `logica-decisoes-u1`
 
 - **Meta:** fazer perguntas ao programa com comparações e receber `true`
   ou `false`.

@@ -1,3 +1,9 @@
+import { ITENS_IGUALDADE_SOLTA } from "./igualdade-solta";
+import { ITENS_ATRIBUIR_OU_COMPARAR } from "./atribuir-ou-comparar";
+import { ITENS_DIFERENTE_ESTRITO } from "./diferente-estrito";
+import { ITENS_LIMITE_DA_COMPARACAO } from "./limite-da-comparacao";
+import { ITENS_COMPARACAO_JS } from "./comparacao-js";
+import { ITENS_BOOLEANO_JS } from "./booleano-js";
 import { ITENS_COMENTARIO_JS } from "./comentario-js";
 import { ITENS_CONVERSAO_STRING } from "./conversao-string";
 import { ITENS_CONVERSAO_NUMBER } from "./conversao-number";
@@ -320,6 +326,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_CONVERSAO_NUMBER,
   ...ITENS_CONVERSAO_STRING,
   ...ITENS_COMENTARIO_JS,
+  ...ITENS_BOOLEANO_JS,
+  ...ITENS_COMPARACAO_JS,
+  ...ITENS_LIMITE_DA_COMPARACAO,
+  ...ITENS_DIFERENTE_ESTRITO,
+  ...ITENS_ATRIBUIR_OU_COMPARAR,
+  ...ITENS_IGUALDADE_SOLTA,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

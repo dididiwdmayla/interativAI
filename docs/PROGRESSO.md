@@ -36,3 +36,11 @@ lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio,
 
 - Base: `claude/intelligent-pascal-5va93x` (`627d6a3`, merge da zona Primeiros comandos); branch de trabalho `ccr-75a17a2f-rz2lkf`.
 - Rodada 19 arquivada; ATRITOS arquivado e reaberto com a rodada 9.
+
+### U1: Verdadeiro ou falso
+
+- Seis fases: perguntas de sim ou não (`>` e `<`, booleano no palco); fronteira `>`/`>=`; `===` e `!==` (inclui `'10' === 10` e maiúscula); `=` contra `===` (bug provocado de propósito e consertado); `==` que converte; desafio do frete grátis na papelaria virtual.
+- Seis conceitos novos com temas e doze itens de revisão (ação e previsão, situações próprias). `igualdade-estrita`, `variavel-let`, `typeof-js`, `tipo-js`, `coercao-js` entram em `revisa`.
+- Guiado e sozinho da mesma habilidade na mesma fase; uma previsão por fase (opção certa varia de posição); `usouSintaxe` só como reforço (`comparacao`, `igualdade-estrita`, `igualdade-solta`).
+- Negativas de jornada: `>` no lugar de `>=`, `=` no lugar de `===` e `===` no lugar de `==` não concluem o objetivo.
+- `testar:conteudo` verde (33 arquivos, 9.413 testes). Jornada pelo mapa verde em desktop, retrato e paisagem (`testes/decisoes.mjs`, passos em `testes/decisoes-jornadas.json`); console limpo. `publicar:conteudo`, build e lint verdes.
