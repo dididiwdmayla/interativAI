@@ -8,7 +8,7 @@
 // Uso: node testes/ser-encontrado.mjs [desktop|retrato|paisagem]
 import { readFileSync } from "node:fs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS } from "./curriculo.mjs";
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, pularMeta } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, pularMeta, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -113,7 +113,7 @@ conferir(await pularMeta(pagina), `${MODO}: a S1 abre com a meta (antes e depois
 await introducao();
 await esperarObjetivo("titulo-com-nome");
 if (movel) await abrirBalao(pagina);
-await tocar(pagina.locator("[data-previsao] button").nth(0));
+await tocar(await opcaoDaPrevisao(pagina));
 await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
 await assentar();
 await passarApresentacao(pagina, "resultado-busca", async () => {

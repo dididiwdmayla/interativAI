@@ -13,7 +13,7 @@ import { literalJs, textoDaSaida, textoDoResultado, valorIgual } from "@/motor/e
 import { LIMITES, type PassoRastro, type ResultadoExecucao, type ValorMemoria } from "@/motor/executor/tipos";
 
 function rodar(codigo: string, origem: "console" | "snippet" = "snippet") {
-  return criarNucleoNode().executar(codigo, origem);
+  return criarNucleoNode({ deterministico: true }).executar(codigo, origem);
 }
 
 /** As variáveis de um passo, por quadro: { "Global": { x: "5" }, "soma": {...} }. */
@@ -291,6 +291,31 @@ describe("console e respostas no formato do Chrome", () => {
 });
 
 describe("modo do Console (REPL do Chrome)", () => {
+  it.each(["let", "const"])("%s do topo dá ReferenceError antes da declaração", (tipo) => {
+    for (const codigo of [
+      `x; ${tipo} x = 1`, `typeof x; ${tipo} x = 1`,
+      `${tipo} x = x + 1`, `x = 2; ${tipo} x = 1`,
+      `function ler() { return x } ler(); ${tipo} x = 1`,
+    ]) {
+      const r = rodar(codigo, "console");
+      expect(r.erro, codigo).toMatchObject({ nome: "ReferenceError", mensagem: "Cannot access 'x' before initialization" });
+      expect(explicarErro(r.erro!).titulo).toBe("Usou antes de criar");
+    }
+    const nucleo = criarNucleoNode();
+    nucleo.executar(`${tipo} x = 8`, "console");
+    expect(nucleo.executar(`x; ${tipo} x = 9`, "console").erro).toBeNull();
+    expect(nucleo.executar(`${tipo} x = x + 1; x`, "console").resultado).toEqual({ t: "number", v: "10" });
+    expect(nucleo.executar(`${tipo} x = 9; x`, "console").resultado).toEqual({ t: "number", v: "9" });
+  });
+
+  it("cada declarador sai da zona morta ao inicializar e nomes locais não são globais", () => {
+    expect(rodar("let a = 1, b = a + 2; ({a, b})", "console").erro).toBeNull();
+    expect(rodar("function f(x) { return x } f(3); let x = 1", "console").erro).toBeNull();
+    expect(rodar("let a = 1 /*, no comentário */, b = a + 2; b", "console").resultado).toEqual({ t: "number", v: "3" });
+    expect(rodar("let a; [a] = [2]; a", "console").resultado).toEqual({ t: "number", v: "2" });
+    expect(rodar("const f = function x() { return typeof x }; f(); let x = 1", "console").erro).toBeNull();
+    expect(rodar("typeof desconhecida", "console").resultado).toEqual({ t: "string", v: "undefined" });
+  });
   it("variáveis continuam entre entradas e let, const e class podem ser declaradas de novo", () => {
     const nucleo = criarNucleoNode();
     nucleo.executar("let x = 1", "console");
@@ -330,6 +355,25 @@ describe("modo do Console (REPL do Chrome)", () => {
 });
 
 describe("determinismo e isolamento", () => {
+  it("sem opção de teste, Date mostra agora e o sorteio não reinicia com a mesma semente", () => {
+    const antes = Date.now();
+    const a = criarNucleoNode();
+    const b = criarNucleoNode();
+    const r = a.executar("[Date.now(), new Date().getTime()]", "console");
+    expect(r.erro).toBeNull();
+    if (r.resultado.t !== "array") throw new Error("esperava a lista de instantes");
+    for (const valor of r.resultado.itens) {
+      if (valor.t !== "number") throw new Error("esperava um instante numérico");
+      expect(Number(valor.v)).toBeGreaterThanOrEqual(antes);
+      expect(Number(valor.v)).toBeLessThanOrEqual(Date.now());
+    }
+    expect(a.executar("Math.random()", "console").resultado).not.toEqual(b.executar("Math.random()", "console").resultado);
+  });
+
+  it("o preparo fixo é uma opção explícita do hospedeiro de testes", () => {
+    const fixo = criarNucleoNode({ deterministico: true });
+    expect(fixo.executar("new Date().toISOString()", "console").resultado).toEqual({ t: "string", v: "2026-01-05T15:00:00.000Z" });
+  });
   it("o mesmo código dá o mesmo rastro (sorteio com semente, relógio parado)", () => {
     const codigo = "const n = Math.random();\nconst d = new Date().toISOString();\nconst agora = Date.now();\nconsole.log(n, d, agora);";
     const a = rodar(codigo);

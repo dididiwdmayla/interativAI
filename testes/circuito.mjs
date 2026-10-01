@@ -4,7 +4,7 @@
 // (fios e porta acendendo), a tabela verdade marcando as linhas testadas, o
 // "Ver como código" batendo com a tabela e o NÃO trocando um fio. Mouse e toque.
 // Uso: node testes/circuito.mjs [desktop|retrato|paisagem]
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -15,15 +15,43 @@ const TAMANHOS = {
 const { toque } = TAMANHOS[MODO];
 const movel = MODO !== "desktop";
 
-const { navegador, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: "/lab/fases?fase=lab-logica-u1-f2", esperar: "[data-bancada-circuito]" });
+const { navegador, contexto, pagina, erros } = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: "/lab/fases?fase=lab-logica-u1-f2", esperar: "[data-bancada-circuito]" });
 const recolher = pagina.getByRole("button", { name: "Recolher o lab" });
 if (await recolher.isVisible().catch(() => false)) await (toque ? recolher.tap() : recolher.click());
 await esperarPronto(pagina, 30000);
+const cdpToque = toque ? await contexto.newCDPSession(pagina) : null;
+if (cdpToque) await cdpToque.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 2 });
 
 async function tocar(localizador, opcoes = {}) {
   if (movel) await fecharBalao(pagina);
   await localizador.scrollIntoViewIfNeeded();
-  if (toque) await localizador.tap(opcoes);
+  if (toque && await localizador.evaluate(el => el instanceof SVGElement)) {
+    // Um jogador amplia e navega até a peça antes de tocar. Dois dedos
+    // também arrastam o enquadramento, sem alterar peças sob os dedos.
+    const area = pagina.getByRole("application", { name: "Bancada do circuito" });
+    while (parseInt(await pagina.locator('[data-zoom-circuito]').innerText()) < 150) {
+      await pagina.getByRole("button", { name: "Aumentar zoom do circuito" }).tap();
+    }
+    const cdp = cdpToque;
+    for (let i = 0; i < 20; i++) {
+      const a = await area.boundingBox();
+      const caixa = await localizador.boundingBox();
+      const pos = opcoes.position ?? { x: caixa.width / 2, y: caixa.height / 2 };
+      const x = caixa.x + pos.x, y = caixa.y + pos.y;
+      if (x > a.x + 25 && x < a.x + a.width - 25 && y > a.y + 25 && y < a.y + a.height - 25) {
+        await pagina.touchscreen.tap(x, y);
+        break;
+      }
+      const mx = a.x + a.width / 2, my = a.y + a.height / 2;
+      const dx = Math.max(-a.width / 4, Math.min(a.width / 4, mx - x));
+      const dy = Math.max(-a.height / 4, Math.min(a.height / 4, my - y));
+      const dedos = [{ x: mx - 20, y: my, id: 1 }, { x: mx + 20, y: my, id: 2 }];
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: dedos });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: dedos.map(p => ({...p, x:p.x+dx, y:p.y+dy})) });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await esperarPronto(pagina);
+    }
+  } else if (toque) await localizador.tap(opcoes);
   else await localizador.click(opcoes);
   await esperarPronto(pagina);
 }
@@ -89,7 +117,7 @@ await naConversa(/Próximo objetivo/);
 // ---------------------------------------------------------------- 2. previsão e chaves
 await esperarObjetivo("testar");
 if (movel) await abrirBalao(pagina);
-const opcao = pagina.locator("[data-previsao] button").nth(1);
+const opcao = await opcaoDaPrevisao(pagina);
 if (toque) await opcao.tap();
 else await opcao.click();
 await esperarPronto(pagina);
@@ -118,6 +146,69 @@ await ligar("nao1", "e1", 0);
 conferir((await pagina.locator("[data-codigo-circuito] pre").innerText()).trim() === "const portaAbre = !temCliente && lojaAberta;", `${MODO}: o código acompanha: !temCliente && lojaAberta`);
 conferir(await objetivoConcluido(), `${MODO}: com o NÃO, a porta abre para a faxina`);
 
+// ---------------------------------------------------------------- navegação da bancada cheia
+if (MODO === "retrato") {
+  for (let i = 0; i < 6; i++) await tocar(pagina.locator("[data-portao-paleta='ou']"));
+  await tocar(pagina.getByRole("button", { name: "Ajustar à tela", exact: true }));
+  const area = pagina.getByRole("application", { name: "Bancada do circuito" });
+  const quadro = () => area.getAttribute("viewBox");
+  const ajustar = await quadro();
+  const alvosGrandes = async () => {
+    const pequenos = await pagina.locator('[data-alvo-corpo], [data-alvo-porta]').evaluateAll(els => els.flatMap(el => {
+      const r = el.getBoundingClientRect();
+      return r.width >= 43.9 && r.height >= 43.9 ? [] : [{ peca: el.closest('[data-peca]')?.getAttribute('data-peca'), largura: r.width, altura: r.height, matriz: el.getScreenCTM()?.a }];
+    }));
+    if (pequenos.length) console.log('Alvos menores que 44 px:', pequenos);
+    return pequenos.length === 0;
+  };
+  conferir(await alvosGrandes(), "retrato: alvos de peças e portas têm 44 px com muitos portões ajustados à tela");
+  await tocar(pagina.getByRole("button", { name: "Aumentar zoom do circuito" }));
+  conferir(Math.abs(Number((await quadro()).split(" ")[2]) - Number(ajustar.split(" ")[2]) / 1.25) < 0.01, "retrato: um toque no botão + amplia uma vez");
+  conferir(await alvosGrandes(), "retrato: alvos mantêm 44 px ao ampliar");
+  await tocar(pagina.getByRole("button", { name: "Diminuir zoom do circuito" }));
+  conferir(Math.abs(Number((await quadro()).split(" ")[2]) - Number(ajustar.split(" ")[2])) < 0.01, "retrato: botão de menos desfaz a ampliação");
+
+  // CDP envia dois dedos reais: a pinça começa sobre uma peça, não a move
+  // nem alterna a chave, e conserva o ponto sob o meio dos dedos.
+  const cdp = cdpToque;
+  const corpoCliente = await pagina.locator('[data-corpo-peca="cliente"]').boundingBox();
+  const caixaArea = await area.boundingBox();
+  const x = corpoCliente.x + corpoCliente.width / 2;
+  const y = corpoCliente.y + corpoCliente.height / 2;
+  const segundo = Math.min(caixaArea.x + caixaArea.width - 15, x + 100);
+  const antesPinca = await quadro();
+  const valorAntes = await acesa("cliente");
+  const posicoesAntes = await pagina.locator('[data-peca]').evaluateAll(els => els.map(el => el.getAttribute('data-posicao-peca')));
+  const pontos = (deslocamento) => [
+    { x, y, id: 1 },
+    { x: segundo + deslocamento, y: y + deslocamento / 2, id: 2 },
+  ];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pontos(0) });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: pontos(50) });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await esperarPronto(pagina);
+  conferir(Number((await quadro()).split(" ")[2]) < Number(antesPinca.split(" ")[2]), "retrato: pinça amplia a bancada");
+  conferir(await acesa("cliente") === valorAntes, "retrato: pinça sobre uma chave não a alterna");
+  conferir(await alvosGrandes(), "retrato: alvos mantêm 44 px após pinça");
+  await tocar(pagina.getByRole("button", { name: "Ajustar à tela", exact: true }));
+  await pagina.waitForFunction(esperado => document.querySelector('svg[data-puxando]')?.getAttribute('viewBox') === esperado, ajustar, { timeout: 5000 });
+  const posicoesDepois = await pagina.locator('[data-peca]').evaluateAll(els => els.map(el => el.getAttribute('data-posicao-peca')));
+  conferir(JSON.stringify(posicoesAntes) === JSON.stringify(posicoesDepois), `retrato: pinça não move peças (${posicoesAntes} / ${posicoesDepois})`);
+  conferir(await quadro() === ajustar, `retrato: ajustar recupera o enquadramento de todas as peças (${ajustar} / ${await quadro()})`);
+  // Arrasto no fundo livre: move só a câmera.
+  const inicio = { x: caixaArea.x + caixaArea.width / 2, y: caixaArea.y + caixaArea.height - 15, id: 1 };
+  const geometriaAntes = await pagina.locator('[data-peca]').evaluateAll(els => els.map(el => [el.getAttribute('data-posicao-peca'), el.getAttribute('data-acesa')]));
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [inicio] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{...inicio, x: inicio.x + 45, y: inicio.y - 10}] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await esperarPronto(pagina);
+  conferir(await quadro() !== ajustar, "retrato: arrastar o fundo move a área do circuito");
+  const geometriaDepois = await pagina.locator('[data-peca]').evaluateAll(els => els.map(el => [el.getAttribute('data-posicao-peca'), el.getAttribute('data-acesa')]));
+  conferir(JSON.stringify(geometriaAntes) === JSON.stringify(geometriaDepois), "retrato: navegar não altera o circuito");
+  await tocar(pagina.getByRole("button", { name: "Ajustar à tela", exact: true }));
+}
+
+if (cdpToque) await cdpToque.detach();
 const relevantes = errosRelevantes(erros);
 conferir(relevantes.length === 0, `${MODO}: console limpo (${relevantes.join(" | ")})`);
 await navegador.close();

@@ -5,8 +5,8 @@
  * no Node) entrega o objeto global do reino e a função que avalia código
  * nele (ver sessaoNavegador.ts, executor.worker.ts e node.ts).
  *
- * Determinístico: Math.random com semente fixa e Date parado num instante
- * fixo (CODIGO_PREPARO); o mesmo código dá o mesmo rastro.
+ * No jogo, Math.random e Date são nativos. O preparo determinístico
+ * (CODIGO_PREPARO) só entra quando o hospedeiro de testes pede.
  */
 import { instrumentar } from "./instrumentar";
 import { textoDaSaida, valorIgual } from "./formatar";
@@ -74,6 +74,7 @@ export type Hospedeiro = {
 };
 
 type Intrinsecos = {
+  ReferenceError: new (mensagem: string) => Error;
   TypeError: new (mensagem: string) => Error;
   Error: new (mensagem: string) => Error;
   JSON: { parse(texto: string): unknown };
@@ -94,6 +95,7 @@ function numeroTexto(n: number): string {
 
 export class NucleoExecutor {
   private readonly intr: Intrinsecos;
+  private readonly naoInicializadas = new Set<string>();
   private readonly globais = new Map<string, TipoDeclaracao>();
   private readonly fontes = new Map<string, string>();
   private entradas = 0;
@@ -114,10 +116,10 @@ export class NucleoExecutor {
   private locaisDeErro = new WeakMap<object, Local>();
   private localPrimitivo: Local | null = null;
 
-  constructor(private readonly host: Hospedeiro) {
-    host.avaliar(CODIGO_PREPARO);
+  constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
+    if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
     this.intr = host.avaliar(
-      "({ TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype })",
+      "({ ReferenceError: ReferenceError, TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype })",
     ) as Intrinsecos;
     this.instalar();
   }
@@ -161,10 +163,22 @@ export class NucleoExecutor {
           if (!this.locaisDeErro.has(erro as object)) this.locaisDeErro.set(erro as object, local);
         } else if (!this.localPrimitivo) this.localPrimitivo = local;
       },
+      t: (nomes: string[]) => {
+        // O REPL do Chrome reutiliza uma ligação já inicializada: em outra
+        // entrada, `let x = x + 1` pode ler o valor antigo de x.
+        for (const nome of nomes) if (!this.globais.has(nome)) this.naoInicializadas.add(nome);
+      },
+      l: (nome: string) => {
+        if (this.naoInicializadas.has(nome)) throw new this.intr.ReferenceError(`Cannot access '${nome}' before initialization`);
+      },
       d: (decl: [string, TipoDeclaracao][]) => {
-        for (const [nome, tipo] of decl) this.globais.set(nome, tipo);
+        for (const [nome, tipo] of decl) {
+          this.naoInicializadas.delete(nome);
+          this.globais.set(nome, tipo);
+        }
       },
       k: (nome: string) => {
+        ganchos.l(nome);
         if (this.globais.get(nome) === "const") throw new this.intr.TypeError("Assignment to constant variable.");
       },
       res: (valor: unknown) => {
@@ -452,7 +466,7 @@ export class NucleoExecutor {
       const escopos: EscopoMemoria[] = [];
       if (indice === 0) {
         const variaveis = [...this.globais]
-          .filter(([nome]) => nome in this.host.global)
+          .filter(([nome]) => !this.naoInicializadas.has(nome) && nome in this.host.global)
           .map(([nome, declaracao]) => ({ nome, declaracao, valor: this.paraMemoria(this.ler(this.host.global, nome), monte, conta) }));
         escopos.push({ id: "global", tipo: "global", variaveis });
       }

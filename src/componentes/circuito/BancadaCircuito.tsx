@@ -7,9 +7,10 @@
  * bolinha da direita de uma peça e depois numa bolinha da esquerda de
  * outra liga o fio. Os fios acesos mostram a corrente andando.
  */
-import { type PointerEvent, useMemo, useRef, useState } from "react";
+import { type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { ALTURA_BANCADA, type Circuito, fioChave, LARGURA_BANCADA, NOME_DO_PORTAO, type TipoPortao } from "@/motor/circuito/modelo";
 import { caminhoDoFio, geometriaDa } from "./geometria";
+import { BotaoNavegacaoCircuito } from "./BotaoNavegacaoCircuito";
 import { PecaCircuito } from "./PecaCircuito";
 
 type Props = {
@@ -29,6 +30,17 @@ type Props = {
 };
 
 type Arrasto = { id: string; inicio: { x: number; y: number }; origem: { x: number; y: number }; andou: boolean };
+type Quadro = { x: number; y: number; largura: number; altura: number };
+type PontoTela = { clientX: number; clientY: number };
+type Navegacao =
+  | { tipo: "arrastar"; inicio: PontoTela; quadro: Quadro; escala: number }
+  | { tipo: "pinca"; distancia: number; ancora: { x: number; y: number }; quadro: Quadro; escala: number };
+const lerQuadro = (texto: string): Quadro => {
+  const [x, y, largura, altura] = texto.split(" ").map(Number);
+  return { x, y, largura, altura };
+};
+const distancia = (a: PontoTela, b: PontoTela) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+const meio = (a: PontoTela, b: PontoTela): PontoTela => ({ clientX: (a.clientX + b.clientX) / 2, clientY: (a.clientY + b.clientY) / 2 });
 type Escolha = { tipo: "peca"; id: string } | { tipo: "fio"; para: string; porta: number } | null;
 
 export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaque, aoAdicionar, aoLigar, aoAlternar, aoMover, aoApagarPeca, aoApagarFio }: Props) {
@@ -47,7 +59,30 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
     const y1 = Math.min(ALTURA_BANCADA, Math.max(...caixas.map((c) => c.peca.y + c.g.altura)) + 24);
     return `${x0} ${y0} ${Math.max(300, x1 - x0)} ${Math.max(200, y1 - y0)}`;
   }, [circuito.pecas]);
-  const [quadroFixo, setQuadroFixo] = useState<string | null>(null);
+  const [camera, setCamera] = useState<Quadro | null>(null);
+  const [tamanho, setTamanho] = useState({ largura: LARGURA_BANCADA, altura: ALTURA_BANCADA });
+  const pontos = useRef(new Map<number, PontoTela>());
+  const navegacao = useRef<Navegacao | null>(null);
+  const ignorarClick = useRef(false);
+  const quadro = camera ?? lerQuadro(enquadramento);
+  const escala = Math.min(tamanho.largura / quadro.largura, tamanho.altura / quadro.altura);
+  useEffect(() => {
+    const elemento = svg.current;
+    if (!elemento) return;
+    const observador = new ResizeObserver(() => {
+      const caixa = elemento.getBoundingClientRect();
+      setTamanho({ largura: Math.max(1, caixa.width), altura: Math.max(1, caixa.height) });
+    });
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, []);
+
+  const ampliar = (fator: number) => {
+    const fatorReal = Math.max(0.15, Math.min(4, escala * fator)) / escala;
+    const largura = quadro.largura / fatorReal;
+    const altura = quadro.altura / fatorReal;
+    setCamera({ x: quadro.x + (quadro.largura - largura) / 2, y: quadro.y + (quadro.altura - altura) / 2, largura, altura });
+  };
 
   const pontoNaBancada = (evento: { clientX: number; clientY: number }) => {
     const matriz = svg.current?.getScreenCTM();
@@ -58,14 +93,52 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
 
   const apertarCorpo = (id: string) => (evento: PointerEvent<SVGGElement>) => {
     const peca = porId.get(id);
-    if (!peca) return;
+    if (!peca || pontos.current.size > 1) return;
     evento.stopPropagation();
     svg.current?.setPointerCapture(evento.pointerId);
     arrasto.current = { id, inicio: pontoNaBancada(evento), origem: { x: peca.x, y: peca.y }, andou: false };
-    setQuadroFixo(enquadramento);
+    setCamera(quadro);
+  };
+
+  const apertarArea = (evento: PointerEvent<SVGSVGElement>) => {
+    if (evento.button !== 0) return;
+    if (pontos.current.size === 0) ignorarClick.current = false;
+    pontos.current.set(evento.pointerId, evento);
+    if (pontos.current.size >= 2) {
+      const [a, b] = [...pontos.current.values()];
+      arrasto.current = null;
+      navegacao.current = { tipo: "pinca", distancia: Math.max(1, distancia(a, b)), ancora: pontoNaBancada(meio(a, b)), quadro, escala };
+      for (const id of pontos.current.keys()) svg.current?.setPointerCapture(id);
+      ignorarClick.current = true;
+    }
+  };
+  const comecarArrastoArea = (evento: PointerEvent<SVGSVGElement>) => {
+    if (evento.target !== svg.current || pontos.current.size > 1) return;
+    svg.current?.setPointerCapture(evento.pointerId);
+    navegacao.current = { tipo: "arrastar", inicio: evento, quadro, escala };
   };
 
   const mover = (evento: PointerEvent<SVGSVGElement>) => {
+    if (pontos.current.has(evento.pointerId)) pontos.current.set(evento.pointerId, evento);
+    const gesto = navegacao.current;
+    if (gesto?.tipo === "pinca" && pontos.current.size >= 2) {
+      const [a, b] = [...pontos.current.values()];
+      const fator = Math.max(0.15, Math.min(4, gesto.escala * distancia(a, b) / gesto.distancia)) / gesto.escala;
+      const largura = gesto.quadro.largura / fator;
+      const altura = gesto.quadro.altura / fator;
+      const caixa = svg.current!.getBoundingClientRect();
+      const centro = meio(a, b);
+      const novaEscala = gesto.escala * fator;
+      setCamera({ largura, altura, x: gesto.ancora.x - largura / 2 - (centro.clientX - caixa.x - caixa.width / 2) / novaEscala, y: gesto.ancora.y - altura / 2 - (centro.clientY - caixa.y - caixa.height / 2) / novaEscala });
+      return;
+    }
+    if (gesto?.tipo === "arrastar") {
+      const dx = evento.clientX - gesto.inicio.clientX;
+      const dy = evento.clientY - gesto.inicio.clientY;
+      if (Math.hypot(dx, dy) > 6) ignorarClick.current = true;
+      setCamera({ ...gesto.quadro, x: gesto.quadro.x - dx / gesto.escala, y: gesto.quadro.y - dy / gesto.escala });
+      return;
+    }
     const atual = arrasto.current;
     if (!atual) return;
     const agora = pontoNaBancada(evento);
@@ -73,13 +146,19 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
     const dy = agora.y - atual.inicio.y;
     if (!atual.andou && Math.hypot(dx, dy) < 6) return;
     atual.andou = true;
+    ignorarClick.current = true;
     aoMover(atual.id, atual.origem.x + dx, atual.origem.y + dy);
   };
 
   const soltar = (evento: PointerEvent<SVGSVGElement>) => {
     const atual = arrasto.current;
     arrasto.current = null;
-    setQuadroFixo(null);
+    pontos.current.delete(evento.pointerId);
+    if (navegacao.current) {
+      // Até todos os dedos saírem, não transforma o fim de uma pinça em toque.
+      if (!pontos.current.size) navegacao.current = null;
+      return;
+    }
     if (!atual || atual.andou) return;
     const peca = porId.get(atual.id);
     if (!peca) return;
@@ -107,7 +186,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
 
   const pecaEscolhida = escolha?.tipo === "peca" ? porId.get(escolha.id) : undefined;
   const botaoPaleta =
-    "inline-flex h-9 min-w-9 items-center justify-center gap-1 rounded-xl border-2 border-borda bg-superficie px-2.5 text-sm font-black text-texto hover:border-primaria hover:text-primaria pointer-coarse:h-11 pointer-coarse:min-w-11";
+    "inline-flex min-h-11 min-w-11 touch-manipulation items-center justify-center gap-1 rounded-xl border-2 border-borda bg-superficie px-2.5 text-sm font-black text-texto hover:border-primaria hover:text-primaria pointer-coarse:h-11 pointer-coarse:min-w-11";
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-circuito-fundo" data-bancada-circuito>
@@ -150,25 +229,37 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
           </button>
         )}
       </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-1.5 px-2 py-1" aria-label="Navegação do circuito">
+        <BotaoNavegacaoCircuito className={botaoPaleta} rotulo="Aumentar zoom do circuito" aoAtivar={() => ampliar(1.25)}>+</BotaoNavegacaoCircuito>
+        <BotaoNavegacaoCircuito className={botaoPaleta} rotulo="Diminuir zoom do circuito" aoAtivar={() => ampliar(0.8)}>−</BotaoNavegacaoCircuito>
+        <BotaoNavegacaoCircuito className={botaoPaleta} rotulo="Ajustar à tela" aoAtivar={() => setCamera(null)} />
+        <span className="text-xs font-bold text-texto-suave" aria-live="polite" data-zoom-circuito>{Math.round(escala * 100)}%</span>
+      </div>
       <p className={`shrink-0 px-2 py-0.5 text-xs ${puxando ? "font-bold text-primaria" : "text-texto-suave"} ${toque ? "truncate" : ""}`} data-dica-bancada>
         {puxando
           ? toque
             ? "Agora toque na outra peça (perto da bolinha da esquerda)."
             : "Clique numa bolinha da esquerda de outra peça para ligar o fio."
           : toque
-            ? "Fio: toque na bolinha da direita e depois na outra peça."
+            ? "Fio: direita e depois outra peça. Pinça amplia; arraste o fundo para mover."
             : "Clique na bolinha da direita de uma peça para puxar um fio. Clique numa chave para ligar."}
       </p>
       <svg
         ref={svg}
-        viewBox={quadroFixo ?? enquadramento}
+        viewBox={`${quadro.x} ${quadro.y} ${quadro.largura} ${quadro.altura}`}
         preserveAspectRatio="xMidYMid meet"
         className="min-h-0 w-full flex-1 touch-none select-none"
+        onPointerDownCapture={apertarArea}
+        onPointerDown={comecarArrastoArea}
         onPointerMove={mover}
+        onClickCapture={(evento) => {
+          if (ignorarClick.current) { evento.preventDefault(); evento.stopPropagation(); }
+        }}
         onPointerUp={soltar}
-        onPointerCancel={() => {
+        onPointerCancel={(evento) => {
           arrasto.current = null;
-          setQuadroFixo(null);
+          pontos.current.delete(evento.pointerId);
+          if (!pontos.current.size) navegacao.current = null;
         }}
         onClick={(evento) => {
           if (evento.target === svg.current) {
@@ -197,7 +288,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
           const escolhido = escolha?.tipo === "fio" && escolha.para === fio.para && escolha.porta === fio.porta;
           return (
             <g key={fioChave(fio)} onClick={() => setEscolha({ tipo: "fio", para: fio.para, porta: fio.porta })} data-fio={fioChave(fio)} data-fio-aceso={aceso ? "sim" : "nao"}>
-              <path d={d} stroke="transparent" strokeWidth={toque ? 22 : 14} fill="none" style={{ cursor: "pointer" }} />
+              <path d={d} stroke="transparent" strokeWidth={Math.max(14, 44 / escala)} fill="none" style={{ cursor: "pointer" }} />
               <path d={d} stroke={escolhido ? "var(--cor-primaria)" : aceso ? "var(--cor-fio-ligado)" : "var(--cor-fio-desligado)"} strokeWidth={aceso ? 5 : 3.5} fill="none" strokeLinecap="round" />
               {aceso && <path d={d} stroke="var(--cor-superficie)" strokeWidth={2} fill="none" strokeDasharray="4 14" className="corrente-no-fio" pointerEvents="none" />}
             </g>
@@ -211,7 +302,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
             selecionada={escolha?.tipo === "peca" && escolha.id === peca.id}
             destacada={destaque === peca.id}
             puxando={puxando === peca.id}
-            toque={toque}
+            escala={escala}
             aoApertarCorpo={apertarCorpo(peca.id)}
             aoTocarSaida={() => {
               setEscolha(null);

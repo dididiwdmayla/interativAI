@@ -16,4 +16,4 @@ const TEXTO_TOKENS = readFileSync(resolve(process.cwd(), "src/tema/tokens.css"),
 definirLeitorDeTokens((tema) => tokensDoTextoCss(TEXTO_TOKENS, tema));
 
 // Fases de programa (Ilha Lógica): o executor síncrono do Node (vm), o mesmo núcleo do Web Worker do jogo.
-definirFabricaDeNucleo(criarNucleoNode);
+definirFabricaDeNucleo(() => criarNucleoNode({ deterministico: true }));

@@ -6,7 +6,7 @@
 // mensagens para a página), a aba Fontes com o Snippet (Executar e
 // Ctrl+Enter) e o funcaoPassa. No toque: o botão Rodar e a barra de símbolos.
 // Uso: node testes/console.mjs [desktop|retrato|paisagem]
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -84,7 +84,7 @@ conferir((await objetivoAtual()) === "conta", `${MODO}: começa na previsão da 
 // A previsão mora no balão (no celular, com ele aberto).
 if (movel) await abrirBalao(pagina);
 await pagina.locator("[data-previsao]").waitFor();
-const opcao = pagina.locator("[data-previsao] button").nth(1);
+const opcao = await opcaoDaPrevisao(pagina);
 if (toque) await opcao.tap();
 else await opcao.click();
 await esperarPronto(pagina);
@@ -178,6 +178,11 @@ conferir((await saida.getAttribute("data-texto")) === "Pronto!", `${MODO}: conso
 if (movel) await abrirBalao(pagina);
 await pagina.getByRole("button", { name: /Ver resultado|Próximo objetivo/ }).first().waitFor({ timeout: 8000 });
 conferir(true, `${MODO}: saida + semErro concluem o último objetivo`);
+
+// Só o executor recebe o relógio de teste; o jogo continua com a data real.
+await rodar("new Date().toISOString()");
+conferir((await ultimaLinha()).texto.includes("2026-01-05T15:00:00.000Z"), `${MODO}: worker usa a data fixa pedida pelo Playwright`);
+conferir(await pagina.evaluate(() => new Date().getUTCFullYear()) === new Date().getUTCFullYear(), `${MODO}: o relógio da página continua real`);
 
 const relevantes = errosRelevantes(erros);
 conferir(relevantes.length === 0, `${MODO}: console limpo (${relevantes.join(" | ")})`);

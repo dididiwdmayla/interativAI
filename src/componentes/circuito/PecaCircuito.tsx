@@ -17,7 +17,8 @@ type Props = {
   destacada: boolean;
   /** A saída desta peça está esperando o fio (o jogador tocou nela). */
   puxando: boolean;
-  toque: boolean;
+  /** Pixels por unidade da bancada: alvos de toque mantêm 44 px em qualquer zoom. */
+  escala: number;
   aoApertarCorpo: (evento: PointerEvent<SVGGElement>) => void;
   aoTocarSaida: () => void;
   aoTocarEntrada: (porta: number) => void;
@@ -30,16 +31,30 @@ const FORMA: Record<"e" | "ou" | "nao" | "xou", string> = {
   xou: "M 12 3 Q 38 3 62 25 Q 38 47 12 47 Q 24 25 12 3 Z",
 };
 
-export function PecaCircuito({ peca, acesa, selecionada, destacada, puxando, toque, aoApertarCorpo, aoTocarSaida, aoTocarEntrada }: Props) {
+export function PecaCircuito({ peca, acesa, selecionada, destacada, puxando, escala, aoApertarCorpo, aoTocarSaida, aoTocarEntrada }: Props) {
   const g = geometriaDa(peca);
-  // As duas bolinhas de entrada de um portão ficam a 30 de distância: a área de toque não passa de 14.
-  // No toque, o alvo grande é o corpo da peça (com um fio puxado, tocar nele liga na bolinha mais perto).
-  const raio = toque ? 14 : 12;
-  const raioSaida = toque ? 15 : 13;
+  // Alvos são centrados nas bolinhas. As duas entradas se afastam no eixo
+  // vertical quando necessário, para não sobrepor seus retângulos de toque.
+  // O corpo também recebe fios, escolhendo a entrada mais perto do dedo.
+  const alvo = Math.max(24, 44 / escala);
+  const larguraCorpo = Math.max(g.largura, alvo);
+  const alturaCorpo = Math.max(g.altura, alvo);
   const contorno = selecionada ? "var(--cor-primaria)" : "var(--cor-texto)";
   const rotulo = peca.rotulo ?? peca.nome ?? peca.id;
+  // No zoom de visão geral, a área ampliada de uma porta pode cruzar o
+  // corpo. Um toque no miolo continua sendo um gesto de mover/escolher a
+  // peça; tocar na bolinha (ou para fora dela) continua puxando/ligando fio.
+  const noMiolo = (evento: { clientX: number; clientY: number; currentTarget: SVGGElement }) => {
+    const matriz = evento.currentTarget.ownerSVGElement?.getScreenCTM();
+    if (!matriz) return false;
+    const p = new DOMPoint(evento.clientX, evento.clientY).matrixTransform(matriz.inverse());
+    return p.x > peca.x + 12 && p.x < peca.x + g.largura - 12 && p.y > peca.y && p.y < peca.y + g.altura;
+  };
+  const apertarPorta = (evento: PointerEvent<SVGGElement>) => {
+    if (noMiolo(evento)) aoApertarCorpo(evento);
+  };
   return (
-    <g data-peca={peca.id} data-tipo-peca={peca.tipo} data-acesa={acesa ? "sim" : "nao"}>
+    <g data-posicao-peca={`${peca.x},${peca.y}`} data-peca={peca.id} data-tipo-peca={peca.tipo} data-acesa={acesa ? "sim" : "nao"}>
       {destacada && (
         <rect x={peca.x - 8} y={peca.y - 8} width={g.largura + 16} height={g.altura + 16} rx={14} fill="none" stroke="var(--cor-destaque)" strokeWidth={4} className="animate-pulse" />
       )}
@@ -56,7 +71,7 @@ export function PecaCircuito({ peca, acesa, selecionada, destacada, puxando, toq
         }
         data-corpo-peca={peca.id}
       >
-        <rect x={peca.x} y={peca.y} width={g.largura} height={g.altura} rx={10} fill="transparent" />
+        <rect x={peca.x + (g.largura - larguraCorpo) / 2} y={peca.y + (g.altura - alturaCorpo) / 2} width={larguraCorpo} height={alturaCorpo} rx={10} fill="transparent" data-alvo-corpo />
         {peca.tipo === "entrada" && (
           <>
             <rect x={peca.x} y={peca.y} width={g.largura} height={g.altura} rx={10} fill="var(--cor-superficie)" stroke={contorno} strokeWidth={2} />
@@ -107,14 +122,14 @@ export function PecaCircuito({ peca, acesa, selecionada, destacada, puxando, toq
         )}
       </g>
       {g.entradas.map((ponto, porta) => (
-        <g key={porta} onClick={() => aoTocarEntrada(porta)} style={{ cursor: "crosshair" }} data-porta-entrada={`${peca.id}:${porta}`}>
-          <circle cx={ponto.x} cy={ponto.y} r={raio} fill="transparent" />
+        <g key={porta} onPointerDown={apertarPorta} onClick={(evento) => { if (!noMiolo(evento)) aoTocarEntrada(porta); }} style={{ cursor: "crosshair" }} data-porta-entrada={`${peca.id}:${porta}`}>
+          <rect x={ponto.x - alvo / 2} y={ponto.y - alvo / 2 + (g.entradas.length === 2 ? (porta === 0 ? -1 : 1) * Math.max(0, alvo / 2 - 15) : 0)} width={alvo} height={alvo} fill="transparent" data-alvo-porta />
           <circle cx={ponto.x} cy={ponto.y} r={5.5} fill="var(--cor-superficie)" stroke="var(--cor-texto)" strokeWidth={2} />
         </g>
       ))}
       {g.saida && (
-        <g onClick={aoTocarSaida} style={{ cursor: "crosshair" }} data-porta-saida={peca.id}>
-          <circle cx={g.saida.x} cy={g.saida.y} r={raioSaida} fill="transparent" />
+        <g onPointerDown={apertarPorta} onClick={(evento) => { if (!noMiolo(evento)) aoTocarSaida(); }} style={{ cursor: "crosshair" }} data-porta-saida={peca.id}>
+          <rect x={g.saida.x - alvo / 2} y={g.saida.y - alvo / 2} width={alvo} height={alvo} fill="transparent" data-alvo-porta />
           <circle
             cx={g.saida.x}
             cy={g.saida.y}

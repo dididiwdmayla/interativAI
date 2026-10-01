@@ -1302,13 +1302,18 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
   console.log, erro, memória passo a passo).
 - Limites: 100 mil passos e 1,5 s por execução. Laço infinito para com a
   explicação "Loop que nunca termina?" e o jogo não trava.
-- Previsível de propósito: `Math.random` tem semente fixa e a data é
-  sempre 5 de janeiro de 2026, 15h (UTC). Escreva objetivos que não
-  dependam disso; se depender, confira o valor em
-  `testes/conteudo/executor.test.ts`.
+- No jogo, `Math.random()` sorteia de verdade e `new Date()`/`Date.now()`
+  usam a data real. Semente e instante fixos (5 de janeiro de 2026, 15h UTC)
+  existem apenas nos testes (`testar:conteudo` e Playwright), por opção
+  explícita do hospedeiro. **Validadores nunca dependem de um valor
+  aleatório nem da data**: valide a relação, a faixa ou a estrutura do
+  resultado, e não um sorteio específico nem o dia de hoje.
 - O Console guarda a memória entre entradas, como o do Chrome: `let` e
   `const` do topo continuam existindo, e redeclarar `let x` numa entrada
-  nova funciona (no Chrome também). Trocar uma `const` dá `TypeError:
+  nova funciona (no Chrome também), inclusive usar o valor anterior no
+  inicializador da redeclaração. Antes da primeira declaração, let/const
+  dão `ReferenceError`, explicado como "Usou antes de criar". Trocar uma
+  `const` dá `TypeError:
   Assignment to constant variable.`
 - Sem `setTimeout`, `fetch`, `async`/`await` de verdade nesta parte: ficam
   para a Ilha Rede e Servidor (Pendências no ROADMAP).

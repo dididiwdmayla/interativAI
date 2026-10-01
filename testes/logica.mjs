@@ -8,7 +8,7 @@
 // Uso: node testes/logica.mjs [desktop|retrato|paisagem]
 import { readFileSync } from "node:fs";
 import { PUBLICADAS, obrigatoriasProntasDaIlha } from "./curriculo.mjs";
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, opcaoDaPrevisao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -89,10 +89,10 @@ async function rodar(codigo) {
   else await pagina.keyboard.press("Enter");
   await assentar();
 }
-async function preverECumprir(opcao, codigo) {
+async function preverECumprir(codigo) {
   if (movel) await abrirBalao(pagina);
   await pagina.locator("[data-previsao]").waitFor();
-  await tocar(pagina.locator("[data-previsao] button").nth(opcao));
+  await tocar(await opcaoDaPrevisao(pagina));
   await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
   await rodar(codigo);
 }
@@ -135,7 +135,7 @@ await passarApresentacao(pagina, "palco-memoria", async () => {
 await passarApresentacao(pagina, "console", () => rodar("3 + 4"));
 await naConversa("Próximo objetivo");
 await esperarObjetivo("ordem-das-operacoes");
-await preverECumprir(1, "2 + 3 * 4");
+await preverECumprir("2 + 3 * 4");
 await naConversa("Próximo objetivo");
 await esperarObjetivo("conta-da-padaria");
 await rodar("3 * 0.80 + 2 * 4.50");
@@ -154,7 +154,7 @@ await rodar("let precoDoPao = 0.80");
 conferir((await caixinha("precoDoPao").getAttribute("data-declaracao")) === "let", `${MODO}: a caixinha precoDoPao nasce no palco, com let`);
 await naConversa("Próximo objetivo");
 await esperarObjetivo("o-undefined");
-await preverECumprir(2, "let quantidade = 3");
+await preverECumprir("let quantidade = 3");
 const ultimaResposta = await pagina.locator("[data-console]:visible [data-linha-console='resposta']").last().innerText();
 conferir(ultimaResposta.trim() === "undefined", `${MODO}: depois de let, o Console responde undefined`);
 await naConversa("Próximo objetivo");
@@ -184,7 +184,7 @@ await rodar("taxaDeEntrega = 7");
 conferir((await pagina.locator("[data-console]:visible [data-linha-console='erro']").last().getAttribute("data-erro")) === "TypeError", `${MODO}: o erro da const aparece`);
 await naConversa("Próximo objetivo");
 await esperarObjetivo("nome-bom");
-await preverECumprir(2, "let precoDoBolo = 18");
+await preverECumprir("let precoDoBolo = 18");
 await naConversa("Próximo objetivo");
 await passarApresentacao(pagina, "linha-do-tempo", async () => {
   if (movel) await fecharBalao(pagina);

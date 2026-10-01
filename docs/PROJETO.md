@@ -344,14 +344,17 @@ resposta da última expressão, as saídas do console e o erro.
   const e class em entradas separadas desde o Chrome 80 e 92): as
   declarações do nível de cima viram `var` no global; a const continua
   protegida (`__r.k` lança o mesmo TypeError do navegador); a mesma
-  variável duas vezes na mesma entrada continua erro. O Snippet usa a mesma
+  variável duas vezes na mesma entrada continua erro. `__r.t` e `__r.l`
+  preservam o ReferenceError antes da inicialização das let/const do topo. O Snippet usa a mesma
   memória do Console, como no Chrome (Fontes > Snippets roda na página).
 - **Proteção contra loop infinito**: limite de passos (100 mil) e de tempo
   (1,5 s) conferidos pelos ganchos, com a parada "grudada" (um try/catch do
   jogador não engole); reserva de 4 s no hospedeiro (o worker é encerrado e
   as entradas boas rodam de novo em silêncio; no Node, o timeout do vm).
-- **Determinístico**: `Math.random` com semente e `Date` parado em
-  5/1/2026 15h UTC (`CODIGO_PREPARO`).
+- **Valores reais no jogo**: `Math.random` e `Date` nativos. Apenas os
+  hospedeiros de testes pedem `CODIGO_PREPARO` (semente fixa e instante
+  5/1/2026 15h UTC); no Playwright isso viaja na URL do worker, sem mudar
+  o relógio da página. Validadores nunca dependem de sorteio nem da data.
 - **Isolamento no navegador**: `executor.worker.ts` (Web Worker de módulo,
   sem página, sem localStorage; rede, armazenamento, timers, outros
   workers e o canal de mensagens apagados do global e dos protótipos antes

@@ -9,7 +9,7 @@
 //   (sem unidade: todas as que a tabela conhece)
 import { readFileSync } from "node:fs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS, unidadesDaIlha } from "./curriculo.mjs";
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, pularMeta } from "./util.mjs";
+import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, passarApresentacao, pularMeta, opcaoDaPrevisao } from "./util.mjs";
 import { PASSOS } from "./ser-encontrado-passos.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -149,10 +149,10 @@ async function jogarUnidade(unidadeId) {
     for (const objetivo of Array.isArray(roteiroDaFase) ? roteiroDaFase : []) {
       await esperarObjetivo(objetivo.id);
       for (const passo of objetivo.passos) {
-        if (passo.previsao !== undefined) {
+        if (passo.previsao) {
           if (movel) await abrirBalao(pagina);
           await pagina.locator("[data-previsao]").waitFor();
-          await tocar(pagina.locator("[data-previsao] button").nth(passo.previsao));
+          await tocar(await opcaoDaPrevisao(pagina));
           await pagina.locator('[data-previsao-respondida="acertou"]').waitFor();
           await assentar();
         } else if (passo.editar) {

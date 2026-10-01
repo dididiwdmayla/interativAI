@@ -1,7 +1,7 @@
 # Roadmap
 
 Fonte única de status do projeto: o que foi feito, o que está em
-andamento e o que vem depois. **Todo prompt do Claude Code termina
+andamento e o que vem depois. **Todo prompt de implementação termina
 atualizando a seção Status deste arquivo.** O detalhe de cada rodada
 (etapas, decisões, testes) continua em `docs/PROGRESSO.md`.
 
@@ -331,7 +331,8 @@ núcleo comum.
   - **Executor** (`src/motor/executor/`): acorn inserindo ganchos no texto
     (linhas preservadas), modo do Console do Chrome (let e const de novo em
     entradas separadas, const protegida), limite de passos e de tempo (loop
-    infinito não trava), Math.random e Date previsíveis, Web Worker sem
+    infinito não trava), Math.random e Date reais no jogo e fixos apenas
+    nos testes, Web Worker sem
     rede nem página (vm no Node para os testes), formato e erros do Chrome
     com explicação de leigo.
   - **Console e Snippet** fiéis ao Chrome, fase de programa (`programa`,
@@ -356,6 +357,23 @@ núcleo comum.
     `circuito.test.ts`; navegador `console.mjs`, `palco.mjs`,
     `circuito.mjs` e `logica.mjs` (jornada pelo mapa) nos três layouts.
 
+- **Rodada 18: correções antes do conteúdo da Lógica** (detalhe em
+  `docs/PROGRESSO.md`, um commit por correção):
+  - AGENTS remete às regras integrais do CLAUDE, resume os cuidados do
+    projeto e registra o preparo do ambiente.
+  - Console: ReferenceError com explicação de leigo antes da primeira
+    declaração de let/const; redeclaração em outra entrada como no Chrome.
+  - Sorteio e relógio reais no jogo; determinismo explícito só nos testes.
+    O guia proíbe validadores dependentes de sorteio ou data específica.
+  - Cartão da apresentação ignora toque enquanto se move; regressão em
+    retrato e espera do helper preservada.
+  - Circuito: pinça, zoom por botões, ajustar à tela e arrastar a câmera;
+    alvos de pelo menos 44 px na escala atual, testados com muitos portões.
+  - Todas as jornadas respondem previsões pelo `correta` do conteúdo.
+    Regra de rodar jornadas das unidades publicadas afetadas no CLAUDE/AGENTS.
+  - 8.258 testes de conteúdo, lint, build e bateria completa (67 jornadas
+    em produção) verdes.
+
 ### Em andamento
 
 (nada no momento)
@@ -367,18 +385,8 @@ núcleo comum.
     página); talvez escondê-la.
   - No celular, o computadorzinho às vezes cobre parte da barra de
     símbolos do Console.
-  - Circuito em pé (retrato): peças pequenas com muitos portões; a
-    bancada enquadra, mas pode ficar apertado em fases grandes.
   - O executor não roda `setTimeout`, `async`/`await` e `fetch` (erro
     "Ainda não roda aqui"): ficam para a Ilha Rede e Servidor.
-  - No Console, usar uma `let` do topo antes de declarar dá `undefined` em
-    vez do ReferenceError do Chrome (efeito de virar `var`; no Snippet e
-    dentro de blocos e funções é igual ao Chrome).
-  - Apresentação no celular: no passo "Experimente" o cartão desliza até o
-    lugar (0,3 s); um toque na árvore durante o deslize pode ser engolido
-    pelo cartão (o click chega depois do touchstart). Os testes esperam o
-    cartão parar (`passarApresentacao`); no jogo, vale desligar os toques
-    no cartão enquanto ele se move.
   - As bancadas do `/lab` usam o conceito "elemento" como marcador; os
     conceitos `snippet-js`, `funcao-js` e `portao-logico` entram com as
     unidades que os ensinam.

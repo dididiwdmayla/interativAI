@@ -16,6 +16,7 @@ function carregarPlaywright() {
   }
 }
 const { chromium } = carregarPlaywright();
+export { opcaoDaPrevisao } from "./previsoes.mjs";
 
 export const URL_JOGO = process.env.URL_JOGO ?? "http://localhost:3000";
 
@@ -34,6 +35,18 @@ export async function abrir({ largura = 1440, altura = 900, toque = false, progr
     hasTouch: toque,
     isMobile: toque,
     deviceScaleFactor: 1,
+  });
+  // Só no Playwright: cada worker do executor (inclusive após recarga/timeout)
+  // recebe o preparo determinístico. A página do jogo mantém seu relógio real.
+  await contexto.addInitScript(() => {
+    const WorkerReal = window.Worker;
+    window.Worker = class extends WorkerReal {
+      constructor(url, opcoes) {
+        const alvo = new URL(url, location.href);
+        alvo.searchParams.set("executor-teste", "1");
+        super(alvo, opcoes);
+      }
+    };
   });
   const pagina = await contexto.newPage();
   const erros = [];

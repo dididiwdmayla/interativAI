@@ -9,7 +9,7 @@ import vm from "node:vm";
 import { NucleoExecutor } from "./nucleo";
 import { LIMITES } from "./tipos";
 
-export function criarNucleoNode(): NucleoExecutor {
+export function criarNucleoNode(opcoes: { deterministico?: boolean } = {}): NucleoExecutor {
   const contexto = vm.createContext({});
   return new NucleoExecutor({
     global: contexto as Record<string, unknown>,
@@ -24,5 +24,5 @@ export function criarNucleoNode(): NucleoExecutor {
     },
     agora: () => performance.now(),
     ehEstouroDeTempo: (erro) => typeof erro === "object" && erro !== null && (erro as { code?: unknown }).code === "ERR_SCRIPT_EXECUTION_TIMEOUT",
-  });
+  }, opcoes);
 }
