@@ -1,3 +1,6 @@
+import { ITENS_DUPLA_NEGACAO } from "./dupla-negacao";
+import { ITENS_TRUTHY_JS } from "./truthy-js";
+import { ITENS_FALSY_JS } from "./falsy-js";
 import { ITENS_CONDICAO_COMPOSTA } from "./condicao-composta";
 import { ITENS_ELSE_IF_JS } from "./else-if-js";
 import { ITENS_ELSE_JS } from "./else-js";
@@ -354,6 +357,9 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_ELSE_JS,
   ...ITENS_ELSE_IF_JS,
   ...ITENS_CONDICAO_COMPOSTA,
+  ...ITENS_FALSY_JS,
+  ...ITENS_TRUTHY_JS,
+  ...ITENS_DUPLA_NEGACAO,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

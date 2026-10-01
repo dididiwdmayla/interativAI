@@ -477,7 +477,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Confusões:** "o `else if` testa tudo" (para no primeiro verdadeiro);
   "ponto e vírgula depois do `if (...)`".
 
-#### U4. Verdadeiro disfarçado — `logica-decisoes-u4`
+#### U4. Verdadeiro disfarçado (pronta) — `logica-decisoes-u4`
 
 - **Meta:** prever quando um valor que não é booleano conta como verdadeiro
   ou falso num `if`.

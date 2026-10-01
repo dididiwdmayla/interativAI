@@ -925,6 +925,21 @@ const CATALOGO = {
   "resumo": "Dentro do if dá para juntar condições: && exige todas, || aceita qualquer uma, e parênteses decidem quem vai primeiro.",
   "temas": ["logica"]
 },
+  "falsy-js": {
+  "nome": "Valores falsos",
+  "resumo": "No if, estes valores contam como falsos: false, 0, texto vazio, null, undefined e NaN.",
+  "temas": ["logica","dados"]
+},
+  "truthy-js": {
+  "nome": "Valores verdadeiros",
+  "resumo": "Todo valor que não é falso conta como verdadeiro no if, até o texto '0', o texto 'false' e a lista vazia.",
+  "temas": ["logica","dados"]
+},
+  "dupla-negacao": {
+  "nome": "!!valor",
+  "resumo": "Dois ! seguidos transformam qualquer valor em true ou false, do jeito que o if o enxerga.",
+  "temas": ["logica","dados"]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

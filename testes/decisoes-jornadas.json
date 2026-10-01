@@ -881,5 +881,84 @@
    "let itens = 8\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}",
    "let itens = 0\nif (itens <= 0 || itens > 20) {\n  console.log(\"Pedido inválido\")\n} else if (itens <= 2) {\n  console.log(\"Pequeno\")\n} else if (itens <= 5) {\n  console.log(\"Médio\")\n} else if (itens >= 6 && itens <= 20) {\n  console.log(\"Grande\")\n}"
   ]
+ },
+ "4": {
+  "passos": [
+   [
+    [
+     "vazio-guiado",
+     "if (nome) {\n  console.log(\"Olá\")\n} else {\n  console.log(\"Preencha o nome\")\n}"
+    ],
+    [
+     "zero-previsao",
+     "if (estoque) {\n  console.log(\"Tem\")\n} else {\n  console.log(\"Acabou\")\n}"
+    ],
+    [
+     "null-sozinho",
+     "if (cupom) {\n  console.log(\"Tem cupom\")\n} else {\n  console.log(\"Sem cupom\")\n}"
+    ],
+    [
+     "undefined-sozinho",
+     "if (endereco) {\n  console.log(\"Com endereço\")\n} else {\n  console.log(\"Sem endereço\")\n}"
+    ],
+    [
+     "nan-previsao",
+     "if (conta) {\n  console.log(\"Valor\")\n} else {\n  console.log(\"Sem valor\")\n}"
+    ]
+   ],
+   [
+    [
+     "zero-texto",
+     "if (quantidade) {\n  console.log(\"Entrou\")\n} else {\n  console.log(\"Não entrou\")\n}"
+    ],
+    [
+     "lista-vazia",
+     "if (carrinho) {\n  console.log(\"Tem carrinho\")\n} else {\n  console.log(\"Sem carrinho\")\n}"
+    ],
+    [
+     "texto-false",
+     "if (aviso) {\n  console.log(\"Verdadeiro\")\n} else {\n  console.log(\"Falso\")\n}"
+    ],
+    [
+     "lista-length",
+     "if (carrinho.length > 0) {\n  console.log(\"Tem itens\")\n} else {\n  console.log(\"Carrinho vazio\")\n}"
+    ]
+   ],
+   [
+    [
+     "dupla-falso",
+     "!!nome"
+    ],
+    [
+     "dupla-verdadeiro",
+     "!!codigo"
+    ],
+    [
+     "dupla-lista",
+     "!!lista"
+    ],
+    [
+     "guardar-booleano",
+     "let temPontos = !!pontos"
+    ],
+    [
+     "tipo-do-dupla",
+     "typeof !!pontos"
+    ]
+   ]
+  ],
+  "negativas": {
+   "vazio-guiado": "console.log(\"Preencha o nome\")",
+   "lista-length": "if (carrinho) {\n  console.log(\"Tem itens\")\n} else {\n  console.log(\"Carrinho vazio\")\n}",
+   "guardar-booleano": "let temPontos = pontos"
+  },
+  "desafio": [
+   "let nomeOk = !!nome",
+   "let telefoneOk = !!telefone",
+   "let planoOk = !!plano",
+   "let escolheuModalidade = modalidades.length > 0",
+   "if (!telefone) {\n  console.log(\"Telefone obrigatório\")\n}",
+   "if (!idade) {\n  console.log(\"Idade inválida\")\n}"
+  ]
  }
 }

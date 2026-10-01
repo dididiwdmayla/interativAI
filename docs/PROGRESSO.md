@@ -61,3 +61,10 @@ lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio,
 - A saída (`saida igual`) prova qual caminho rodou (nunca os dois); o bug do `;` é provado pela caixinha `avisos` (estado), não pela saída, para o conserto poder ser refeito. No desafio, cada faixa usa mensagem própria (`saida` trava no checklist).
 - `usouSintaxe: else` só vale para `else` final: um `else if` sem `else` não conta (itens e fases escritos de acordo).
 - `testar:conteudo` verde (10.106 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com negativas (if sem if, ordem trocada, E/OU sem parênteses); console limpo.
+
+### U4: Verdadeiro disfarçado
+
+- Quatro fases: os seis falsos (`''`, `0`, `null`, `undefined`, `NaN`, `false`) com o if; o resto é verdadeiro (`'0'`, `'false'`, `[]`) e o conserto com `.length`; `!!valor` como pergunta direta; desafio do cadastro da academia (nome, telefone vazio, plano `'0'`, lista de modalidades vazia, idade 0).
+- Três conceitos novos com temas e seis itens de revisão; `if-js`, `else-js`, `operadores-logicos`, `typeof-js` e `comparacao-js` entram em `revisa`.
+- Previsões: estoque 0, `NaN`, texto `'0'` e `!!lista`. Negativas de jornada: console.log sem if, `if (carrinho)` no lugar de `carrinho.length > 0` e guardar `pontos` sem `!!` não concluem.
+- `testar:conteudo` verde (10.316 testes). Jornada pelo mapa verde em desktop, retrato e paisagem; console limpo.
