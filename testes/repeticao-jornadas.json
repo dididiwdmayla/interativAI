@@ -1,0 +1,89 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "forno-guiado",
+          "let minutos = 3\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ],
+        [
+          "forno-prever",
+          "let minutos = 5\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ],
+        [
+          "forno-sozinho",
+          "let minutos = 2\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ]
+      ],
+      [
+        [
+          "contador-guiado",
+          "let i = 1\nwhile (i <= 3) {\n  console.log(i)\n  i = i + 1\n}"
+        ],
+        [
+          "contador-prever",
+          "let i = 1\nwhile (i < 3) {\n  console.log(i)\n  i++\n}"
+        ],
+        [
+          "contador-sozinho",
+          "let i = 0\nwhile (i <= 3) {\n  console.log(i)\n  if (i === 3) { console.log(\"fim\") }\n  i++\n}"
+        ]
+      ],
+      [
+        [
+          "protecao-guiado",
+          "let i = 0\nwhile (i < 3) {\n  i = i\n}"
+        ],
+        [
+          "protecao-consertar",
+          "let i = 0\nwhile (i < 3) {\n  i++\n}\nconsole.log(i)"
+        ],
+        [
+          "protecao-prever",
+          "3 < 3"
+        ],
+        [
+          "protecao-sozinho",
+          "let segundos = 2\nwhile (segundos > 0) {\n  segundos--\n}\nif (segundos === 0) { console.log(\"Pronto\") }"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let senha = 1\nlet restantes = 3\nwhile (restantes > 0) {\n  console.log(\"Senha \" + senha)\n  senha++\n  restantes--\n}",
+      "let senha = 1\nlet restantes = 3\nwhile (restantes > 0) {\n  console.log(\"Senha \" + senha)\n  senha++\n  restantes--\n}\nif (restantes === 0) { console.log(\"Fila encerrada\") }"
+    ],
+    "negativas": {
+      "contador-prever": "let i = 1\nwhile (i <= 3) { console.log(i); i++ }",
+      "protecao-consertar": "let i = 0\nwhile (i < 3) {\n  i = i\n}"
+    },
+    "linhaDoTempo": {
+      "forno-guiado": {
+        "variavel": "minutos",
+        "valores": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "contador-guiado": {
+        "variavel": "i",
+        "valores": [
+          "4",
+          "3",
+          "2",
+          "1"
+        ]
+      },
+      "protecao-consertar": {
+        "variavel": "i",
+        "valores": [
+          "3",
+          "2",
+          "1",
+          "0"
+        ]
+      }
+    }
+  }
+}

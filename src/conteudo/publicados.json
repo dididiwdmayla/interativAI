@@ -186,6 +186,12 @@
       "logica-decisoes-u4-f2",
       "logica-decisoes-u4-f3",
       "logica-decisoes-u4-f4"
+    ],
+    "logica-repeticao-u1": [
+      "logica-repeticao-u1-f1",
+      "logica-repeticao-u1-f2",
+      "logica-repeticao-u1-f3",
+      "logica-repeticao-u1-f4"
     ]
   },
   "fases": {
@@ -1140,6 +1146,34 @@
         "telefone-obrigatorio",
         "idade-invalida"
       ]
+    },
+    "logica-repeticao-u1-f1": {
+      "objetivos": [
+        "forno-guiado",
+        "forno-prever",
+        "forno-sozinho"
+      ]
+    },
+    "logica-repeticao-u1-f2": {
+      "objetivos": [
+        "contador-guiado",
+        "contador-prever",
+        "contador-sozinho"
+      ]
+    },
+    "logica-repeticao-u1-f3": {
+      "objetivos": [
+        "protecao-guiado",
+        "protecao-consertar",
+        "protecao-prever",
+        "protecao-sozinho"
+      ]
+    },
+    "logica-repeticao-u1-f4": {
+      "partes": [
+        "senhas",
+        "fila-zerada"
+      ]
     }
   },
   "itensRevisao": [
@@ -1482,6 +1516,14 @@
     "truthy-js-1",
     "truthy-js-2",
     "dupla-negacao-1",
-    "dupla-negacao-2"
+    "dupla-negacao-2",
+    "while-js-1",
+    "while-js-2",
+    "condicao-de-parada-1",
+    "condicao-de-parada-2",
+    "contador-js-1",
+    "contador-js-2",
+    "loop-infinito-1",
+    "loop-infinito-2"
   ]
 }

@@ -220,3 +220,5 @@ que a árvore desenha, em todos os sites-alvo. Prefira seletores com
 jornada pelo mapa, com as unidades anteriores semeadas a partir de `publicados.json`.
 Confere meta em mini-palcos, prática, previsões, resultados incorretos que não passam e desafio.
 U3 também confere os tipos no palco e a linha do tempo do programa com comentários.
+
+- Repetição: `node testes/repeticao.mjs [desktop|retrato|paisagem] [logica-repeticao-u1|logica-repeticao-u2|logica-repeticao-u3]`. Jornada pelo mapa, Snippet, Console, previsões, negativas e valores do palco ao rebobinar.

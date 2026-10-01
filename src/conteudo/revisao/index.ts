@@ -1,3 +1,7 @@
+import { ITENS_LOOP_INFINITO } from "./loop-infinito";
+import { ITENS_CONTADOR_JS } from "./contador-js";
+import { ITENS_CONDICAO_DE_PARADA } from "./condicao-de-parada";
+import { ITENS_WHILE_JS } from "./while-js";
 import { ITENS_DUPLA_NEGACAO } from "./dupla-negacao";
 import { ITENS_TRUTHY_JS } from "./truthy-js";
 import { ITENS_FALSY_JS } from "./falsy-js";
@@ -360,6 +364,10 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_FALSY_JS,
   ...ITENS_TRUTHY_JS,
   ...ITENS_DUPLA_NEGACAO,
+  ...ITENS_WHILE_JS,
+  ...ITENS_CONDICAO_DE_PARADA,
+  ...ITENS_CONTADOR_JS,
+  ...ITENS_LOOP_INFINITO,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

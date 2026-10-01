@@ -494,7 +494,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 Missão de campo: no Console de qualquer site, escrever um `for` que
 mostra a tabuada do 7.
 
-#### U1. Enquanto for verdade — `logica-repeticao-u1`
+#### U1. Enquanto for verdade (pronta) — `logica-repeticao-u1`
 
 - **Meta:** repetir uma tarefa com `while`, contando as voltas, e
   reconhecer um loop que nunca para.

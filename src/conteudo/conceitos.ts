@@ -940,6 +940,35 @@ const CATALOGO = {
   "resumo": "Dois ! seguidos transformam qualquer valor em true ou false, do jeito que o if o enxerga.",
   "temas": ["logica","dados"]
 },
+
+  "while-js": {
+  "nome": "Enquanto (while)",
+  "resumo": "Testa a condição antes de cada volta e repete só o bloco enquanto ela for true.",
+  "temas": [
+    "logica"
+  ]
+},
+  "condicao-de-parada": {
+  "nome": "Condição de parada",
+  "resumo": "O laço termina quando a condição fica false; se já começa false, não há voltas.",
+  "temas": [
+    "logica"
+  ]
+},
+  "contador-js": {
+  "nome": "Contador",
+  "resumo": "Guarda o número da volta: i = i + 1 ou i++ aumenta um; i-- diminui um.",
+  "temas": [
+    "logica"
+  ]
+},
+  "loop-infinito": {
+  "nome": "Loop infinito e proteção",
+  "resumo": "Se a condição nunca fica falsa, o laço não termina. O jogo limita passos e tempo para proteger a aba.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
