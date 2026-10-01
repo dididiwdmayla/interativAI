@@ -870,6 +870,36 @@ const CATALOGO = {
   "resumo": "O == compara convertendo os tipos antes ('10' == 10 dá true): por isso quase sempre se usa o ===.",
   "temas": ["logica"]
 },
+  "portao-e": {
+  "nome": "Portão E",
+  "resumo": "Só acende quando as duas entradas estão ligadas; no código se escreve && (true && true é true).",
+  "temas": ["logica","fundamentos"]
+},
+  "tabela-verdade": {
+  "nome": "Tabela verdade",
+  "resumo": "Uma tabela que lista todos os jeitos de ligar as chaves e mostra, em cada um, se a saída acende.",
+  "temas": ["logica","fundamentos"]
+},
+  "portao-ou": {
+  "nome": "Portão OU",
+  "resumo": "Acende quando pelo menos uma entrada está ligada (as duas também valem); no código se escreve ||.",
+  "temas": ["logica","fundamentos"]
+},
+  "portao-nao": {
+  "nome": "Portão NÃO",
+  "resumo": "Inverte o valor: o que era ligado vira desligado e o contrário; no código é o ponto de exclamação (!).",
+  "temas": ["logica","fundamentos"]
+},
+  "operadores-logicos": {
+  "nome": "&&, || e !",
+  "resumo": "Os operadores do código que fazem o papel dos portões: && é o E, || é o OU e ! é o NÃO.",
+  "temas": ["logica"]
+},
+  "ordem-e-ou": {
+  "nome": "Ordem do E e do OU",
+  "resumo": "O E é calculado antes do OU, e os parênteses mudam quem vai primeiro: a mesma conta pode dar resultados diferentes.",
+  "temas": ["logica"]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

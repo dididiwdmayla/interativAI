@@ -165,6 +165,14 @@
       "logica-decisoes-u1-f4",
       "logica-decisoes-u1-f5",
       "logica-decisoes-u1-f6"
+    ],
+    "logica-decisoes-u2": [
+      "logica-decisoes-u2-f1",
+      "logica-decisoes-u2-f2",
+      "logica-decisoes-u2-f3",
+      "logica-decisoes-u2-f4",
+      "logica-decisoes-u2-f5",
+      "logica-decisoes-u2-f6"
     ]
   },
   "fases": {
@@ -984,6 +992,60 @@
         "tipo",
         "texto"
       ]
+    },
+    "logica-decisoes-u2-f1": {
+      "objetivos": [
+        "porta-com-e",
+        "testar-e",
+        "ver-codigo-e",
+        "caixa-com-e"
+      ]
+    },
+    "logica-decisoes-u2-f2": {
+      "objetivos": [
+        "alarme-com-ou",
+        "testar-ou-desligado",
+        "testar-ou-duas",
+        "aviso-com-ou"
+      ]
+    },
+    "logica-decisoes-u2-f3": {
+      "objetivos": [
+        "luz-com-nao",
+        "testar-nao",
+        "ver-codigo-nao",
+        "aviso-com-nao",
+        "salao-com-e-nao"
+      ]
+    },
+    "logica-decisoes-u2-f4": {
+      "objetivos": [
+        "e-no-console",
+        "ou-previsao",
+        "nao-no-console",
+        "e-sozinho",
+        "ou-sozinho",
+        "nao-sozinho"
+      ]
+    },
+    "logica-decisoes-u2-f5": {
+      "objetivos": [
+        "catraca-simples",
+        "codigo-catraca",
+        "idoso-sem-bilhete",
+        "ou-antes-do-e",
+        "e-antes-do-ou",
+        "ordem-previsao"
+      ]
+    },
+    "logica-decisoes-u2-f6": {
+      "partes": [
+        "pode-entrar",
+        "liberada",
+        "sem-exame",
+        "catraca",
+        "sem-parenteses"
+      ]
     }
   },
   "itensRevisao": [
@@ -1298,6 +1360,18 @@
     "atribuir-ou-comparar-1",
     "atribuir-ou-comparar-2",
     "igualdade-solta-1",
-    "igualdade-solta-2"
+    "igualdade-solta-2",
+    "portao-e-1",
+    "portao-e-2",
+    "tabela-verdade-1",
+    "tabela-verdade-2",
+    "portao-ou-1",
+    "portao-ou-2",
+    "portao-nao-1",
+    "portao-nao-2",
+    "operadores-logicos-1",
+    "operadores-logicos-2",
+    "ordem-e-ou-1",
+    "ordem-e-ou-2"
   ]
 }

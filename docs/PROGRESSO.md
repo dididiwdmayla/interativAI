@@ -44,3 +44,12 @@ lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio,
 - Guiado e sozinho da mesma habilidade na mesma fase; uma previsão por fase (opção certa varia de posição); `usouSintaxe` só como reforço (`comparacao`, `igualdade-estrita`, `igualdade-solta`).
 - Negativas de jornada: `>` no lugar de `>=`, `=` no lugar de `===` e `===` no lugar de `==` não concluem o objetivo.
 - `testar:conteudo` verde (33 arquivos, 9.413 testes). Jornada pelo mapa verde em desktop, retrato e paisagem (`testes/decisoes.mjs`, passos em `testes/decisoes-jornadas.json`); console limpo. `publicar:conteudo`, build e lint verdes.
+
+### U2: Portões lógicos (a ponte circuito → código)
+
+- Seis fases: E (porta da padaria), OU (alarme), NÃO (luz da rua), "Do circuito ao Console" (`&&`, `||`, `!` no Console, misturando comparações da U1), catraca do metrô (ordem do E e do OU, com os mesmos portões em ordens diferentes) e desafio da catraca da academia, só no Console.
+- Cada fase de circuito traz 3 chaves e 2 ou 3 saídas: o guiado monta a primeira saída, o sozinho monta a seguinte (outras chaves, mesma habilidade). `circuitoTabela` confere todas as 8 linhas; `usouPortao` com `minimo` garante o portão pedido.
+- "Ver como código" vem depois de montar (o circuito mostra o código `temCliente && lojaAberta`) e só então a decisão é escrita no Console, na fase 4.
+- Confusões atacadas: OU aceita as duas ligadas (previsão), OU com tudo desligado, ordem do E e do OU (parênteses mudam o resultado) e `!`.
+- Seis conceitos novos (portao-e, tabela-verdade, portao-ou, portao-nao, operadores-logicos, ordem-e-ou) com temas e doze itens de revisão (em Console; o item de tabela verdade é só de previsão).
+- `testar:conteudo` verde (9.791 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com toque real no circuito (zoom e arrasto com dois dedos), apresentação de circuito e tabela verdade, negativas e console limpo.

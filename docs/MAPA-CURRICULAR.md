@@ -444,7 +444,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 - **Revisa:** tipos (Primeiros comandos U3).
 - **Confusões:** "`=` compara"; "`==` e `===` são iguais".
 
-#### U2. Portões lógicos — `logica-decisoes-u2`
+#### U2. Portões lógicos (pronta) — `logica-decisoes-u2`
 
 - **Motor:** `circuito-logico` (rodada 17), mais a Lógica.
 - **Meta:** montar portões E, OU e NÃO para uma saída acontecer e ver o

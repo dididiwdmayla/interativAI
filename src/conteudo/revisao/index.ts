@@ -1,3 +1,9 @@
+import { ITENS_ORDEM_E_OU } from "./ordem-e-ou";
+import { ITENS_OPERADORES_LOGICOS } from "./operadores-logicos";
+import { ITENS_PORTAO_NAO } from "./portao-nao";
+import { ITENS_PORTAO_OU } from "./portao-ou";
+import { ITENS_TABELA_VERDADE } from "./tabela-verdade";
+import { ITENS_PORTAO_E } from "./portao-e";
 import { ITENS_IGUALDADE_SOLTA } from "./igualdade-solta";
 import { ITENS_ATRIBUIR_OU_COMPARAR } from "./atribuir-ou-comparar";
 import { ITENS_DIFERENTE_ESTRITO } from "./diferente-estrito";
@@ -332,6 +338,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_DIFERENTE_ESTRITO,
   ...ITENS_ATRIBUIR_OU_COMPARAR,
   ...ITENS_IGUALDADE_SOLTA,
+  ...ITENS_PORTAO_E,
+  ...ITENS_TABELA_VERDADE,
+  ...ITENS_PORTAO_OU,
+  ...ITENS_PORTAO_NAO,
+  ...ITENS_OPERADORES_LOGICOS,
+  ...ITENS_ORDEM_E_OU,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
