@@ -940,6 +940,90 @@ const CATALOGO = {
   "resumo": "Dois ! seguidos transformam qualquer valor em true ou false, do jeito que o if o enxerga.",
   "temas": ["logica","dados"]
 },
+
+  "while-js": {
+  "nome": "Enquanto (while)",
+  "resumo": "Testa a condição antes de cada volta e repete só o bloco enquanto ela for true.",
+  "temas": [
+    "logica"
+  ]
+},
+  "condicao-de-parada": {
+  "nome": "Condição de parada",
+  "resumo": "O laço termina quando a condição fica false; se já começa false, não há voltas.",
+  "temas": [
+    "logica"
+  ]
+},
+  "contador-js": {
+  "nome": "Contador",
+  "resumo": "Guarda o número da volta: i = i + 1 ou i++ aumenta um; i-- diminui um.",
+  "temas": [
+    "logica"
+  ]
+},
+  "loop-infinito": {
+  "nome": "Loop infinito e proteção",
+  "resumo": "Se a condição nunca fica falsa, o laço não termina. O jogo limita passos e tempo para proteger a aba.",
+  "temas": [
+    "logica"
+  ]
+},
+
+  "for-js": {
+  "nome": "Laço for",
+  "resumo": "Junta início, condição e atualização, separados por ponto e vírgula, para repetir um bloco.",
+  "temas": [
+    "logica"
+  ]
+},
+  "for-of-js": {
+  "nome": "for...of em textos",
+  "resumo": "Entrega uma letra por volta, na ordem do texto, até ele acabar.",
+  "temas": [
+    "logica"
+  ]
+},
+  "break-js": {
+  "nome": "Saída com break",
+  "resumo": "Sai do laço atual imediatamente; o programa continua depois do bloco.",
+  "temas": [
+    "logica"
+  ]
+},
+
+  "acumulador-js": {
+  "nome": "Acumulador",
+  "resumo": "Guarda a soma dos valores, começando fora do laço; total += preco acrescenta o preço ao total.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "contador-condicional": {
+  "nome": "Contador condicional",
+  "resumo": "Aumenta só quando um if passa: conta os casos que atendem à condição, não todos os casos.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "maior-menor-js": {
+  "nome": "Maior e menor",
+  "resumo": "Compara cada valor com os extremos guardados e só troca ao achar um maior ou menor; o início deve ser um valor real.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "media-js": {
+  "nome": "Média",
+  "resumo": "Divide a soma pela quantidade de valores, sem confundir a quantidade com o contador final da volta.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -1,0 +1,277 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "forno-guiado",
+          "let minutos = 3\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ],
+        [
+          "forno-prever",
+          "let minutos = 5\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ],
+        [
+          "forno-sozinho",
+          "let minutos = 2\nconsole.log(\"Ligar forno\")\nwhile (minutos > 0) {\n  console.log(\"assando\")\n  minutos = minutos - 1\n}\nconsole.log(\"Pronto\")"
+        ]
+      ],
+      [
+        [
+          "contador-guiado",
+          "let i = 1\nwhile (i <= 3) {\n  console.log(i)\n  i = i + 1\n}"
+        ],
+        [
+          "contador-prever",
+          "let i = 1\nwhile (i < 3) {\n  console.log(i)\n  i++\n}"
+        ],
+        [
+          "contador-sozinho",
+          "let i = 0\nwhile (i <= 3) {\n  console.log(i)\n  if (i === 3) { console.log(\"fim\") }\n  i++\n}"
+        ]
+      ],
+      [
+        [
+          "protecao-guiado",
+          "let i = 0\nwhile (i < 3) {\n  i = i\n}"
+        ],
+        [
+          "protecao-consertar",
+          "let i = 0\nwhile (i < 3) {\n  i++\n}\nconsole.log(i)"
+        ],
+        [
+          "protecao-prever",
+          "3 < 3"
+        ],
+        [
+          "protecao-sozinho",
+          "let segundos = 2\nwhile (segundos > 0) {\n  segundos--\n}\nif (segundos === 0) { console.log(\"Pronto\") }"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let senha = 1\nlet restantes = 3\nwhile (restantes > 0) {\n  console.log(\"Senha \" + senha)\n  senha++\n  restantes--\n}",
+      "let senha = 1\nlet restantes = 3\nwhile (restantes > 0) {\n  console.log(\"Senha \" + senha)\n  senha++\n  restantes--\n}\nif (restantes === 0) { console.log(\"Fila encerrada\") }"
+    ],
+    "negativas": {
+      "contador-prever": "let i = 1\nwhile (i <= 3) { console.log(i); i++ }",
+      "protecao-consertar": "let i = 0\nwhile (i < 3) {\n  i = i\n}"
+    },
+    "linhaDoTempo": {
+      "forno-guiado": {
+        "variavel": "minutos",
+        "valores": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "contador-guiado": {
+        "variavel": "i",
+        "valores": [
+          "4",
+          "3",
+          "2",
+          "1"
+        ]
+      },
+      "protecao-consertar": {
+        "variavel": "i",
+        "valores": [
+          "3",
+          "2",
+          "1",
+          "0"
+        ]
+      }
+    }
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "tabuada-guiado",
+          "let i = 0\nfor (i = 1; i <= 3; i++) {\n  console.log(7 * i)\n}"
+        ],
+        [
+          "for-prever",
+          "for (let i = 0; i < 3; i++) {\n  console.log(i)\n}"
+        ],
+        [
+          "tabuada-sozinho",
+          "let i = 0\nfor (i = 1; i <= 4; i++) {\n  console.log(9 * i)\n}"
+        ]
+      ],
+      [
+        [
+          "letras-guiado",
+          "let voltas = 0\nfor (let letra of \"LUA\") {\n  console.log(letra)\n  voltas++\n}"
+        ],
+        [
+          "letras-prever",
+          "for (let letra of \"RIO\") {\n  console.log(letra)\n}"
+        ],
+        [
+          "letras-sozinho",
+          "let voltas = 0\nfor (let letra of \"SOL\") {\n  console.log(letra)\n  voltas++\n}"
+        ]
+      ],
+      [
+        [
+          "break-guiado",
+          "let voltas = 0\nfor (let letra of \"MARTE\") {\n  if (letra === \"R\") { break }\n  console.log(letra)\n  voltas++\n}\nconsole.log(\"Busca encerrada\")"
+        ],
+        [
+          "break-prever",
+          "for (let letra of \"VIDA\") {\n  console.log(letra)\n  if (letra === \"I\") { break }\n}"
+        ],
+        [
+          "break-sozinho",
+          "let voltas = 0\nfor (let letra of \"CASA\") {\n  if (letra === \"S\") { break }\n  console.log(letra)\n  voltas++\n}\nconsole.log(\"Busca encerrada\")"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let etiqueta = 0\nfor (etiqueta = 1; etiqueta <= 4; etiqueta++) {\n  console.log(\"Etiqueta \" + etiqueta)\n}",
+      "let inicial = \"\"\nfor (let letra of \"GRAFICA\") {\n  inicial = letra\n  console.log(\"Inicial \" + letra)\n  break\n}"
+    ],
+    "negativas": {
+      "tabuada-sozinho": "let i = 0\nfor (i = 1; i < 4; i++) { console.log(9 * i) }",
+      "break-sozinho": "let voltas = 0\nfor (let letra of \"CASA\") { console.log(letra); voltas++ }\nconsole.log(\"Busca encerrada\")"
+    },
+    "linhaDoTempo": {
+      "tabuada-guiado": {
+        "variavel": "i",
+        "valores": [
+          "4",
+          "3",
+          "2",
+          "1"
+        ]
+      },
+      "letras-guiado": {
+        "variavel": "letra",
+        "valores": [
+          "'A'",
+          "'U'",
+          "'L'"
+        ]
+      },
+      "break-guiado": {
+        "variavel": "voltas",
+        "valores": [
+          "2",
+          "1",
+          "0"
+        ]
+      }
+    }
+  },
+  "3": {
+    "passos": [
+      [
+        [
+          "soma-guiado",
+          "let soma = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 20\n  soma += preco\n}"
+        ],
+        [
+          "soma-prever",
+          "let soma = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 20\n  soma += preco\n}"
+        ],
+        [
+          "soma-sozinho",
+          "let soma = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 4; pedido++) {\n  let preco = pedido * 10\n  soma += preco\n}"
+        ]
+      ],
+      [
+        [
+          "contar-guiado",
+          "let acimaDe50 = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 20\n  if (preco > 50) { acimaDe50++ }\n}"
+        ],
+        [
+          "contar-prever",
+          "let acimaDe50 = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 30\n  if (preco > 50) { acimaDe50++ }\n}"
+        ],
+        [
+          "contar-sozinho",
+          "let acimaDe50 = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 25\n  if (preco > 50) { acimaDe50++ }\n}"
+        ]
+      ],
+      [
+        [
+          "extremos-guiado",
+          "let maior = 60\nlet menor = 60\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = 80 - pedido * 20\n  if (preco > maior) { maior = preco }\n  if (preco < menor) { menor = preco }\n}"
+        ],
+        [
+          "extremos-prever",
+          "let maior = 60\nlet menor = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = 80 - pedido * 20\n  if (preco > maior) { maior = preco }\n  if (preco < menor) { menor = preco }\n}"
+        ],
+        [
+          "extremos-sozinho",
+          "let maior = 15\nlet menor = 15\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 15\n  if (preco > maior) { maior = preco }\n  if (preco < menor) { menor = preco }\n}"
+        ]
+      ],
+      [
+        [
+          "media-guiado",
+          "let soma = 0\nlet quantidade = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 20\n  soma += preco\n  quantidade++\n}\nlet media = soma / quantidade"
+        ],
+        [
+          "media-prever",
+          "120 / 3"
+        ],
+        [
+          "media-sozinho",
+          "let soma = 0\nlet quantidade = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 4; pedido++) {\n  let preco = pedido * 10\n  soma += preco\n  quantidade++\n}\nlet media = soma / quantidade\nif (quantidade === 4) { console.log(\"Fechado\") }"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let total = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 12\n  total += preco\n}",
+      "let grandes = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 12\n  if (preco > 20) { grandes++ }\n}",
+      "let maior = 12\nlet menor = 12\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 12\n  if (preco > maior) { maior = preco }\n  if (preco < menor) { menor = preco }\n}",
+      "let media = total / 3\nconsole.log(\"Caixa fechado\")"
+    ],
+    "negativas": {
+      "soma-sozinho": "let soma = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 4; pedido++) { soma = 0; soma += pedido * 10 }",
+      "contar-sozinho": "let acimaDe50 = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 25\n  if (preco >= 50) { acimaDe50++ }\n}",
+      "extremos-sozinho": "let maior = 0\nlet menor = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 3; pedido++) {\n  let preco = pedido * 15\n  if (preco > maior) { maior = preco }\n  if (preco < menor) { menor = preco }\n}",
+      "media-sozinho": "let soma = 0\nlet quantidade = 0\nlet pedido = 0\nfor (pedido = 1; pedido <= 4; pedido++) {\n  let preco = pedido * 10\n  soma += preco\n  quantidade++\n}\nlet media = soma / pedido\nif (quantidade === 4) { console.log(\"Fechado\") }"
+    },
+    "linhaDoTempo": {
+      "soma-guiado": {
+        "variavel": "soma",
+        "valores": [
+          "120",
+          "60",
+          "20",
+          "0"
+        ]
+      },
+      "contar-guiado": {
+        "variavel": "acimaDe50",
+        "valores": [
+          "1",
+          "0"
+        ]
+      },
+      "extremos-guiado": {
+        "variavel": "menor",
+        "valores": [
+          "20",
+          "40",
+          "60"
+        ]
+      },
+      "media-guiado": {
+        "variavel": "quantidade",
+        "valores": [
+          "3",
+          "2",
+          "1",
+          "0"
+        ]
+      }
+    }
+  }
+}

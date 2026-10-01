@@ -494,7 +494,7 @@ Missão de campo: no Console de qualquer site, perguntar `10 > 9`,
 Missão de campo: no Console de qualquer site, escrever um `for` que
 mostra a tabuada do 7.
 
-#### U1. Enquanto for verdade — `logica-repeticao-u1`
+#### U1. Enquanto for verdade (pronta) — `logica-repeticao-u1`
 
 - **Meta:** repetir uma tarefa com `while`, contando as voltas, e
   reconhecer um loop que nunca para.
@@ -508,19 +508,19 @@ mostra a tabuada do 7.
 - **Revisa:** comparações, if.
 - **Confusões:** "o loop para sozinho"; "o `while` testa só uma vez".
 
-#### U2. for e for...of — `logica-repeticao-u2`
+#### U2. for e for...of (pronta) — `logica-repeticao-u2`
 
 - **Meta:** repetir um número certo de vezes com `for` e passar por cada
   item com `for...of`.
-- **Conceitos:** as três partes do `for`; `for...of` numa lista e num
-  texto; `break` (só apresentação).
+- **Conceitos:** as três partes do `for`; `for...of` nas letras de um
+  texto (listas ficam para Listas e objetos); `break` (só apresentação).
 - **Micro-passos:** a tabuada; as letras de um nome; previsão "o `for (let
   i = 0; i < 3; i++)` roda quantas vezes?".
 - **Desafio:** as etiquetas numeradas de uma gráfica.
 - **Revisa:** while (U1), textos.
 - **Confusões:** "o `i` começa em 1"; "o `<=` e o `<` dão no mesmo".
 
-#### U3. Contar e somar — `logica-repeticao-u3`
+#### U3. Contar e somar (pronta) — `logica-repeticao-u3`
 
 - **Meta:** usar contadores e acumuladores para contar, somar e achar o
   maior valor.

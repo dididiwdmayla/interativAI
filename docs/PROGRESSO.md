@@ -1,77 +1,37 @@
 # Progresso
 
-Detalhe de cada rodada (etapas, decisões, testes). Regra de economia de
-cota (`CLAUDE.md`): este arquivo guarda só a rodada mais recente; as
-antigas ficam em `docs/arquivo/`. Status consolidado: `docs/ROADMAP.md`
-(fonte única).
+Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRESSO-rodada-20.md`. Status consolidado: `docs/ROADMAP.md`.
 
-**Resumo das rodadas 1 a 19:** a fábrica de conteúdo declarativo e o
-`testar:conteudo`; o congelamento (`publicar:conteudo`); o painel Estilos
-dentro de Elementos com o motor de cascata próprio (especificidade,
-`!important`, herança, atalhos, variáveis CSS e `@media`); o modo
-documento; a camada de trilhas, temas, profissões, glossário e áudio; a
-estabilidade da bateria nos três layouts; as zonas Elementos (U1 a U6),
-Estilos E1 a E4 e Layout (L1 a L4) completas; e os motores que faltavam
-para fechar a Ilha Sites (E5/Meu tema, modo dispositivo, painel
-Lighthouse, projeto-ponte, Levar pro mundo) com a P2 como unidade-modelo;
-a Ilha Sites completa (E5, R1, R2 e P1); e a Revisão do dia com a zona
-opcional Ser encontrado (S1), a aba Busca, a Medição e o simulador de
-campanha; os itens de revisão de U3 a P2 (174 itens) com a
-`bateria:conteudo`; e a zona Ser encontrado (S2 a S5) com o `/lab/revisao`;
-o executor, Console, palco da memória, circuito
-lógico e a unidade-modelo da Ilha Lógica; as correções de Console, relógio, sorteio, apresentação, circuito e jornadas da rodada 18; e a zona Primeiros comandos (U2 Textos e U3 Tipos, rodada 19). Detalhe em
-`docs/arquivo/PROGRESSO-rodadas-1-a-11.md`,
-`docs/arquivo/PROGRESSO-rodada-12.md`,
-`docs/arquivo/PROGRESSO-rodada-13.md`,
-`docs/arquivo/PROGRESSO-rodada-14.md`,
-`docs/arquivo/PROGRESSO-rodada-15.md`,
-`docs/arquivo/PROGRESSO-rodada-16.md` e
-`docs/arquivo/PROGRESSO-rodada-17.md`,
-`docs/arquivo/PROGRESSO-rodada-18.md` e
-`docs/arquivo/PROGRESSO-rodada-19.md`.
+## Rodada 21: zona Repetição
 
-## Rodada 20: zona Decisões
+### U1: Enquanto for verdade
 
-### Etapa 0
+- Quatro fases: forno com while e condição de parada; contador e fronteira < / <=; loop infinito provocado no jogo, proteção e conserto; desafio da fila da farmácia.
+- Snippet apresentado no primeiro objetivo. Fala curta explica as chaves automáticas do Console e o avanço por cima do fechamento. Console usado para a comparação rápida.
+- Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho na mesma fase; if dentro do loop e no encerramento. Palco e linha do tempo em todas as fases.
+- Os testes de jornada percorrem o rastro pelos botões reais, conferindo os valores do contador. Negativas: fronteira errada e loop ainda sem incremento.
+- Verificado: 10.568 testes (checagem afetada refeita após separar as partes), jornada pelo mapa em desktop/retrato/paisagem com console limpo; publicar:conteudo, build e lint verdes.
 
-- Base: `claude/intelligent-pascal-5va93x` (`627d6a3`, merge da zona Primeiros comandos); branch de trabalho `ccr-75a17a2f-rz2lkf`.
-- Rodada 19 arquivada; ATRITOS arquivado e reaberto com a rodada 9.
+### U2: for e for...of
 
-### U1: Verdadeiro ou falso
+- Quatro fases: três partes do for na tabuada; uma letra por volta no for...of; primeira apresentação do break com if; desafio das etiquetas de uma gráfica.
+- Só textos no for...of, sem arrays nem funções. Contador no topo na tabuada; letra local conferida no rastro durante as voltas.
+- Três conceitos com temas e seis itens de revisão. Previsões sobre número de voltas, terceira letra e posição do break.
+- Verificado: 10.778 testes (checagem afetada refeita após encurtar a fala do desafio), jornada pelo mapa nos três layouts com console limpo, negativas e rastro; publicar:conteudo, build e lint verdes, sem avisos.
 
-- Seis fases: perguntas de sim ou não (`>` e `<`, booleano no palco); fronteira `>`/`>=`; `===` e `!==` (inclui `'10' === 10` e maiúscula); `=` contra `===` (bug provocado de propósito e consertado); `==` que converte; desafio do frete grátis na papelaria virtual.
-- Seis conceitos novos com temas e doze itens de revisão (ação e previsão, situações próprias). `igualdade-estrita`, `variavel-let`, `typeof-js`, `tipo-js`, `coercao-js` entram em `revisa`.
-- Guiado e sozinho da mesma habilidade na mesma fase; uma previsão por fase (opção certa varia de posição); `usouSintaxe` só como reforço (`comparacao`, `igualdade-estrita`, `igualdade-solta`).
-- Negativas de jornada: `>` no lugar de `>=`, `=` no lugar de `===` e `===` no lugar de `==` não concluem o objetivo.
-- `testar:conteudo` verde (33 arquivos, 9.413 testes). Jornada pelo mapa verde em desktop, retrato e paisagem (`testes/decisoes.mjs`, passos em `testes/decisoes-jornadas.json`); console limpo. `publicar:conteudo`, build e lint verdes.
+### U3: Contar e somar
 
-### U2: Portões lógicos (a ponte circuito → código)
-
-- Seis fases: E (porta da padaria), OU (alarme), NÃO (luz da rua), "Do circuito ao Console" (`&&`, `||`, `!` no Console, misturando comparações da U1), catraca do metrô (ordem do E e do OU, com os mesmos portões em ordens diferentes) e desafio da catraca da academia, só no Console.
-- Cada fase de circuito traz 3 chaves e 2 ou 3 saídas: o guiado monta a primeira saída, o sozinho monta a seguinte (outras chaves, mesma habilidade). `circuitoTabela` confere todas as 8 linhas; `usouPortao` com `minimo` garante o portão pedido.
-- "Ver como código" vem depois de montar (o circuito mostra o código `temCliente && lojaAberta`) e só então a decisão é escrita no Console, na fase 4.
-- Confusões atacadas: OU aceita as duas ligadas (previsão), OU com tudo desligado, ordem do E e do OU (parênteses mudam o resultado) e `!`.
-- Seis conceitos novos (portao-e, tabela-verdade, portao-ou, portao-nao, operadores-logicos, ordem-e-ou) com temas e doze itens de revisão (em Console; o item de tabela verdade é só de previsão).
-- `testar:conteudo` verde (9.791 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com toque real no circuito (zoom e arrasto com dois dedos), apresentação de circuito e tabela verdade, negativas e console limpo.
-
-### U3: Se, senão
-
-- Cinco fases, todas no Console (programas de várias linhas entram como texto colado): if e bloco; else e o ponto e vírgula depois do `if (...)`; else if e a ordem das perguntas (inclui o bug da ordem trocada e a previsão da nota 7); condições com `&&` e `||` (inclui a ordem do E e do OU com e sem parênteses); desafio do classificador de pedidos da lanchonete.
-- Cinco conceitos novos com temas e dez itens de revisão; `portao-e`, `portao-ou`, `operadores-logicos`, `ordem-e-ou` e `limite-da-comparacao` entram em `revisa`.
-- A saída (`saida igual`) prova qual caminho rodou (nunca os dois); o bug do `;` é provado pela caixinha `avisos` (estado), não pela saída, para o conserto poder ser refeito. No desafio, cada faixa usa mensagem própria (`saida` trava no checklist).
-- `usouSintaxe: else` só vale para `else` final: um `else if` sem `else` não conta (itens e fases escritos de acordo).
-- `testar:conteudo` verde (10.106 testes). Jornada pelo mapa verde em desktop, retrato e paisagem, com negativas (if sem if, ordem trocada, E/OU sem parênteses); console limpo.
-
-### U4: Verdadeiro disfarçado
-
-- Quatro fases: os seis falsos (`''`, `0`, `null`, `undefined`, `NaN`, `false`) com o if; o resto é verdadeiro (`'0'`, `'false'`, `[]`) e o conserto com `.length`; `!!valor` como pergunta direta; desafio do cadastro da academia (nome, telefone vazio, plano `'0'`, lista de modalidades vazia, idade 0).
-- Três conceitos novos com temas e seis itens de revisão; `if-js`, `else-js`, `operadores-logicos`, `typeof-js` e `comparacao-js` entram em `revisa`.
-- Previsões: estoque 0, `NaN`, texto `'0'` e `!!lista`. Negativas de jornada: console.log sem if, `if (carrinho)` no lugar de `carrinho.length > 0` e guardar `pontos` sem `!!` não concluem.
-- `testar:conteudo` verde (10.316 testes). Jornada pelo mapa verde em desktop, retrato e paisagem; console limpo.
+- Cinco fases: acumulador (Cantina Sol), contador condicional, maior/menor, média e fechamento do caixa da Sorveteria Nuvem.
+- Sem arrays nem funções: preços gerados pelo número do pedido. if dentro do loop revisa Decisões; contas e caixinhas revisam Primeiros comandos.
+- Bugs explícitos: declarar soma dentro reinicia a caixinha; menor começando em 0 inventa um mínimo; pedido passa da última volta e não serve como quantidade na média.
+- Quatro conceitos com temas e oito itens de revisão. Guiado/sozinho por habilidade; palco e linha do tempo nas cinco fases.
+- Verificado: 11.051 testes, jornada pelo mapa nos três layouts com console limpo, rastro de soma/contagem/mínimo/quantidade e negativas dos quatro bugs; publicar:conteudo, build e lint verdes.
 
 ### Fechamento
 
-- `npm run bateria:conteudo`, uma vez, no build de produção: mapa, explorar, publicar e revisão verdes. Sem bateria de motor (a rodada não mexe no motor).
-- ROADMAP: zona Decisões em Feito; Próximo passa a ter a parte B da Ilha Lógica em primeiro; pendências da zona registradas. Mapa: U1 a U4 marcadas como prontas.
-- ATRITOS: rodada 9 curta. Rodada 19 do PROGRESSO e rodada 8 do ATRITOS arquivadas na Etapa 0.
-- Contagem final: 21 fases, 20 conceitos, 40 itens de revisão (340 no registro).
+- `npm run bateria:conteudo` no build de produção: mapa, explorar, publicar e revisão verdes. Uma execução; sem bateria de motor.
+- ROADMAP: U1 a U3 em Feito; Próximo é Opus, Ilha Lógica parte B, com as pendências de fechamento automático de chaves no Console, usouSintaxe para else if e desafio aceitando circuito.
+- ATRITOS: rodada 10 curta. Currículo em documentação marcado como pronto; for...of descrito só em textos nesta zona.
+- Total: 13 fases, 11 conceitos com temas e 22 itens de revisão (362 no registro). Sem tocar conteúdo anterior nem motor.
+- Decisões a conferir: contador declarado no topo para permanecer visível no fim (for completo também aparece); vendas geradas pelo pedido, sem arrays; extremos iniciados na primeira venda real.
+- Riscos concretos: Console/else if/circuito continuam com as limitações já registradas da parte B. A cobertura móvel das jornadas é emulação Chromium 133, não ensaio em aparelhos físicos.
