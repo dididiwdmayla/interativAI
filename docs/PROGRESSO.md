@@ -156,3 +156,12 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - Guia e arquitetura: validadores nunca dependem de sorteio nem de data.
 - 76 unitários afetados, Console nos três layouts (incluindo confirmação
   da data fixa só no worker), build e lint verdes.
+
+### Etapa 3: cartão ignora toque durante o deslize
+
+- O componente desliga o hit-test antes do paint de uma posição nova e
+  o restaura quando left/top chegam ao destino e a transição acaba.
+  A espera do helper `passarApresentacao` foi mantida.
+- Regressão em retrato pausa a transição real no meio, confere o hit-test
+  e toca a árvore durante o deslize. Entrou na bateria. Esse teste,
+  `ferramentas-novas.mjs` (desktop/retrato), build e lint verdes.

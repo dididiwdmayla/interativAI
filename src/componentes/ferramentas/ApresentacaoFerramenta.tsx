@@ -276,6 +276,27 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const areaDoCartao =
     areaLivre && areaLivre.altura <= window.innerHeight * LIMITE_AREA_LIVRE ? areaLivre : caixa;
   const posicao = posicionarCartao(areaDoCartao, tamanhoCartao.largura, tamanhoCartao.altura);
+  // Desliga o hit-test antes do primeiro paint de uma posição nova. A
+  // transição CSS pode começar depois do touchstart; esperar transitionrun
+  // deixaria um quadro em que o cartão ainda engole o click do alvo.
+  useLayoutEffect(() => {
+    const elemento = cartao.current;
+    if (!elemento) return;
+    let quadro = 0;
+    elemento.style.pointerEvents = "none";
+    elemento.dataset.cartaoMovendo = "sim";
+    const conferirPosicao = () => {
+      const estilo = getComputedStyle(elemento);
+      const noDestino = Math.abs(parseFloat(estilo.left) - posicao.x) < 0.5 && Math.abs(parseFloat(estilo.top) - posicao.y) < 0.5;
+      const deslizando = elemento.getAnimations().some((animacao) => animacao.playState === "running" && animacao instanceof CSSTransition && ["left", "top"].includes(animacao.transitionProperty));
+      if (noDestino && !deslizando) {
+        elemento.style.pointerEvents = "auto";
+        elemento.dataset.cartaoMovendo = "nao";
+      } else quadro = requestAnimationFrame(conferirPosicao);
+    };
+    quadro = requestAnimationFrame(conferirPosicao);
+    return () => cancelAnimationFrame(quadro);
+  }, [posicao.x, posicao.y]);
   const { Icone } = ferramenta;
 
   // O alvo (e as áreas extras do "Experimente") já foram medidos: os buracos do véu existem.

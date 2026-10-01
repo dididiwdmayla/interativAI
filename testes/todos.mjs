@@ -11,6 +11,7 @@ const TESTES = [
   ["fase-completa.mjs", "paisagem"],
   ["movel.mjs"],
   ["ferramentas-novas.mjs"],
+  ["apresentacao-movimento.mjs"],
   ["unidades.mjs", "desktop"],
   ["unidades.mjs", "retrato"],
   ["unidades.mjs", "paisagem"],
