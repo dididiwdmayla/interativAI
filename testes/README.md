@@ -213,3 +213,10 @@ que a árvore desenha, em todos os sites-alvo. Prefira seletores com
 âncoras do site (`#aviso`, `.cardapio li`); lembre que duplicar copia o
 `id`, então a cópia de `#noticia-praca` é achada por posição
 (`#noticias > .noticia:nth-child(2)`).
+
+### Primeiros comandos (Lógica U2 e U3)
+
+`node testes/primeiros-comandos.mjs [desktop|retrato|paisagem] [logica-primeiros-comandos-u2|logica-primeiros-comandos-u3]`:
+jornada pelo mapa, com as unidades anteriores semeadas a partir de `publicados.json`.
+Confere meta em mini-palcos, prática, previsões, resultados incorretos que não passam e desafio.
+U3 também confere os tipos no palco e a linha do tempo do programa com comentários.

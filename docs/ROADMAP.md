@@ -374,6 +374,21 @@ núcleo comum.
   - 8.258 testes de conteúdo, lint, build e bateria completa (67 jornadas
     em produção) verdes.
 
+- **Rodada 19: zona Primeiros comandos completa (U1 a U3)**:
+  - Etapa 0: AGENTS e CLAUDE registram `claude/intelligent-pascal-5va93x`
+    como branch principal e o formato obrigatório do relatório final.
+  - **U2 "Textos"** publicada: aspas e erro real, junção com espaço,
+    template, .length, console.log e desafio na floricultura.
+  - **U3 "Tipos"** publicada: tipos no palco, typeof (incluindo null),
+    coerção, Number/String, comentários e desafio da gorjeta num café.
+    Introdução mínima a `=` versus `===`, aprofundada na próxima zona.
+  - 11 fases novas, 13 conceitos com temas e 26 itens de revisão
+    (300 itens registrados). Guiado/sozinho, previsões, revisa e missões
+    de campo no Console real. Meta dos desafios com mini-palcos.
+  - Jornadas de U2 e U3 pelo mapa nos três layouts, 9.035 testes,
+    publicar:conteudo, build e lint verdes. Bateria de conteúdo em produção
+    verde (mapa, explorar, publicar e revisão). Sem mudança no motor.
+
 ### Em andamento
 
 (nada no momento)
@@ -438,10 +453,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Sonnet: zonas Primeiros comandos e Decisões da Ilha Lógica (a partir
-   da unidade-modelo `logica-primeiros-comandos-u1` e do guia, seção 25;
-   portões lógicos em `logica-decisoes-u2`, com o `circuito-logico`).
-2. Opus: Lógica, parte B (Fontes com depurador, ordenar passos,
+1. Zona Decisões da Ilha Lógica (guia, seção 25; portões lógicos em
+   `logica-decisoes-u2`, com o `circuito-logico`).
+2. Opus: Ilha Lógica, parte B (Fontes com depurador, ordenar passos,
    visualizador de árvore), que libera Resolvendo problemas, Depuração u2
    e u3 e Estruturas de dados u3.
 3. Depois: motores das outras ilhas (Origens: linha do tempo, comparador

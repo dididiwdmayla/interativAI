@@ -17,3 +17,13 @@ Antes de qualquer tarefa, leia `docs/PROJETO.md` (visão, regras, arquitetura),
 - Comando longo: espere com um único comando de espera em vez de consultar o andamento várias vezes.
 - Achados fora do escopo (ajuste visual pequeno, melhoria): registre em "Pendências" no ROADMAP. Corrija na hora só o que quebra teste ou funcionalidade.
 - Relatório final curto: o que foi feito, decisões a conferir e riscos. Sem narrar o processo.
+
+## Branch e relatório final
+
+A branch principal é `claude/intelligent-pascal-5va93x`. Toda tarefa parte dela e volta por pull request.
+
+Formato obrigatório do relatório final, em PT-BR:
+- **O que foi feito** (por etapa);
+- **Decisões a conferir** (o que você decidiu sem regra clara);
+- **Riscos** (só os concretos);
+- **Próximo passo**.
