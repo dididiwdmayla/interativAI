@@ -198,6 +198,13 @@
       "logica-repeticao-u2-f2",
       "logica-repeticao-u2-f3",
       "logica-repeticao-u2-f4"
+    ],
+    "logica-repeticao-u3": [
+      "logica-repeticao-u3-f1",
+      "logica-repeticao-u3-f2",
+      "logica-repeticao-u3-f3",
+      "logica-repeticao-u3-f4",
+      "logica-repeticao-u3-f5"
     ]
   },
   "fases": {
@@ -1207,6 +1214,42 @@
         "etiquetas",
         "inicial"
       ]
+    },
+    "logica-repeticao-u3-f1": {
+      "objetivos": [
+        "soma-guiado",
+        "soma-prever",
+        "soma-sozinho"
+      ]
+    },
+    "logica-repeticao-u3-f2": {
+      "objetivos": [
+        "contar-guiado",
+        "contar-prever",
+        "contar-sozinho"
+      ]
+    },
+    "logica-repeticao-u3-f3": {
+      "objetivos": [
+        "extremos-guiado",
+        "extremos-prever",
+        "extremos-sozinho"
+      ]
+    },
+    "logica-repeticao-u3-f4": {
+      "objetivos": [
+        "media-guiado",
+        "media-prever",
+        "media-sozinho"
+      ]
+    },
+    "logica-repeticao-u3-f5": {
+      "partes": [
+        "total",
+        "grandes",
+        "extremos",
+        "media"
+      ]
     }
   },
   "itensRevisao": [
@@ -1563,6 +1606,14 @@
     "for-of-js-1",
     "for-of-js-2",
     "break-js-1",
-    "break-js-2"
+    "break-js-2",
+    "acumulador-js-1",
+    "acumulador-js-2",
+    "contador-condicional-1",
+    "contador-condicional-2",
+    "maior-menor-js-1",
+    "maior-menor-js-2",
+    "media-js-1",
+    "media-js-2"
   ]
 }

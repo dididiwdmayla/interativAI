@@ -520,7 +520,7 @@ mostra a tabuada do 7.
 - **Revisa:** while (U1), textos.
 - **Confusões:** "o `i` começa em 1"; "o `<=` e o `<` dão no mesmo".
 
-#### U3. Contar e somar — `logica-repeticao-u3`
+#### U3. Contar e somar (pronta) — `logica-repeticao-u3`
 
 - **Meta:** usar contadores e acumuladores para contar, somar e achar o
   maior valor.

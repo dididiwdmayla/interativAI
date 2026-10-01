@@ -991,6 +991,39 @@ const CATALOGO = {
     "logica"
   ]
 },
+
+  "acumulador-js": {
+  "nome": "Acumulador",
+  "resumo": "Guarda a soma dos valores, começando fora do laço; total += preco acrescenta o preço ao total.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "contador-condicional": {
+  "nome": "Contador condicional",
+  "resumo": "Aumenta só quando um if passa: conta os casos que atendem à condição, não todos os casos.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "maior-menor-js": {
+  "nome": "Maior e menor",
+  "resumo": "Compara cada valor com os extremos guardados e só troca ao achar um maior ou menor; o início deve ser um valor real.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "media-js": {
+  "nome": "Média",
+  "resumo": "Divide a soma pela quantidade de valores, sem confundir a quantidade com o contador final da volta.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

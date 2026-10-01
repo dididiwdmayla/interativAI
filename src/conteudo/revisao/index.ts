@@ -1,3 +1,7 @@
+import { ITENS_MEDIA_JS } from "./media-js";
+import { ITENS_MAIOR_MENOR_JS } from "./maior-menor-js";
+import { ITENS_CONTADOR_CONDICIONAL } from "./contador-condicional";
+import { ITENS_ACUMULADOR_JS } from "./acumulador-js";
 import { ITENS_BREAK_JS } from "./break-js";
 import { ITENS_FOR_OF_JS } from "./for-of-js";
 import { ITENS_FOR_JS } from "./for-js";
@@ -374,6 +378,10 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_FOR_JS,
   ...ITENS_FOR_OF_JS,
   ...ITENS_BREAK_JS,
+  ...ITENS_ACUMULADOR_JS,
+  ...ITENS_CONTADOR_CONDICIONAL,
+  ...ITENS_MAIOR_MENOR_JS,
+  ...ITENS_MEDIA_JS,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */
