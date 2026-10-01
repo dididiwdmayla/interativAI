@@ -142,6 +142,13 @@
       "logica-primeiros-comandos-u1-f2",
       "logica-primeiros-comandos-u1-f3",
       "logica-primeiros-comandos-u1-f4"
+    ],
+    "logica-primeiros-comandos-u2": [
+      "logica-primeiros-comandos-u2-f1",
+      "logica-primeiros-comandos-u2-f2",
+      "logica-primeiros-comandos-u2-f3",
+      "logica-primeiros-comandos-u2-f4",
+      "logica-primeiros-comandos-u2-f5"
     ]
   },
   "fases": {
@@ -813,6 +820,47 @@
         "troco",
         "dividir-entre-irmaos"
       ]
+    },
+    "logica-primeiros-comandos-u2-f1": {
+      "objetivos": [
+        "nome-guiado",
+        "aspas-esquecidas",
+        "corrigir-aspas",
+        "crase-simples",
+        "crase-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u2-f2": {
+      "objetivos": [
+        "juntar-guiado",
+        "prever-juncao",
+        "espaco-guiado",
+        "juntar-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u2-f3": {
+      "objetivos": [
+        "template-guiado",
+        "aspas-nao-interpolam",
+        "template-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u2-f4": {
+      "objetivos": [
+        "tamanho-guiado",
+        "tamanho-sozinho",
+        "log-guiado",
+        "log-previsao",
+        "log-sozinho"
+      ]
+    },
+    "logica-primeiros-comandos-u2-f5": {
+      "partes": [
+        "dados",
+        "confirmacao",
+        "tamanho",
+        "mostrar"
+      ]
     }
   },
   "itensRevisao": [
@@ -1089,6 +1137,18 @@
     "ler-mensagem-de-erro-1",
     "ler-mensagem-de-erro-2",
     "nome-de-variavel-1",
-    "nome-de-variavel-2"
+    "nome-de-variavel-2",
+    "string-js-1",
+    "string-js-2",
+    "aspas-js-1",
+    "aspas-js-2",
+    "concatenacao-js-1",
+    "concatenacao-js-2",
+    "template-literal-1",
+    "template-literal-2",
+    "length-texto-1",
+    "length-texto-2",
+    "console-log-1",
+    "console-log-2"
   ]
 }

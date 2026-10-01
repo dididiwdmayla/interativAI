@@ -738,6 +738,52 @@ const CATALOGO = {
     resumo: "O erro vermelho diz o tipo do problema, o que aconteceu e a linha: ler com calma mostra por onde começar a consertar.",
     temas: ["logica", "ferramentas"],
   },
+  "string-js": {
+  "nome": "Texto (string)",
+  "resumo": "Um valor que guarda caracteres, como um nome ou uma mensagem, escrito entre aspas.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "aspas-js": {
+  "nome": "Aspas do texto",
+  "resumo": "Aspas simples, duplas ou crases delimitam o texto; sem elas, uma palavra é lida como nome de variável.",
+  "temas": [
+    "logica"
+  ]
+},
+  "concatenacao-js": {
+  "nome": "Juntar textos",
+  "resumo": "O + junta textos na ordem escrita, sem inventar espaços entre eles.",
+  "temas": [
+    "logica"
+  ]
+},
+  "template-literal": {
+  "nome": "Frase com valores",
+  "resumo": "Entre crases, ${nome} coloca o valor da variável dentro do texto.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "length-texto": {
+  "nome": "Tamanho do texto",
+  "resumo": "A propriedade .length informa o tamanho do texto, incluindo espaços.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+  "console-log": {
+  "nome": "Mostrar com console.log",
+  "resumo": "console.log mostra uma mensagem; a resposta da chamada no Console continua sendo undefined.",
+  "temas": [
+    "logica",
+    "ferramentas"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

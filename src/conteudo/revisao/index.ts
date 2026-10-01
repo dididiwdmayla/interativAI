@@ -1,3 +1,9 @@
+import { ITENS_CONSOLE_LOG } from "./console-log";
+import { ITENS_LENGTH_TEXTO } from "./length-texto";
+import { ITENS_TEMPLATE_LITERAL } from "./template-literal";
+import { ITENS_CONCATENACAO_JS } from "./concatenacao-js";
+import { ITENS_ASPAS_JS } from "./aspas-js";
+import { ITENS_STRING_JS } from "./string-js";
 /*
  * Registro dos itens da Revisão do dia: um arquivo por conceito
  * (src/conteudo/revisao/<conceito>.ts), cada um com pelo menos 2 variações.
@@ -294,6 +300,12 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_VARIAVEL_CONST,
   ...ITENS_LER_MENSAGEM_DE_ERRO,
   ...ITENS_NOME_DE_VARIAVEL,
+  ...ITENS_STRING_JS,
+  ...ITENS_ASPAS_JS,
+  ...ITENS_CONCATENACAO_JS,
+  ...ITENS_TEMPLATE_LITERAL,
+  ...ITENS_LENGTH_TEXTO,
+  ...ITENS_CONSOLE_LOG,
 ];
 
 /** Os itens de um conceito, na ordem do arquivo. */

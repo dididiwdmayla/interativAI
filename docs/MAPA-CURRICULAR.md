@@ -395,7 +395,7 @@ Missão de campo: abrir o Console de qualquer site e fazer a conta da feira
   valor para mostrar); "`const` é constante matemática" (é só uma caixinha
   que não troca de valor).
 
-#### U2. Textos — `logica-primeiros-comandos-u2`
+#### U2. Textos (pronta) — `logica-primeiros-comandos-u2`
 
 - **Meta:** escrever textos entre aspas, juntar textos e montar frases com
   valores dentro.

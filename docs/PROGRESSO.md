@@ -134,3 +134,13 @@ Base autorizada: `claude/intelligent-pascal-5va93x` (`77b8f09`), porque
 - Base: `claude/intelligent-pascal-5va93x` (`3c4fbb0`); branch `codex/logica-primeiros-comandos`.
 - AGENTS e CLAUDE registram a branch principal e o formato obrigatório do relatório final.
 - Alteração documental; nenhuma mudança no motor ou conteúdo publicado.
+
+### U2: Textos
+
+- Cinco fases: aspas e erro real, junção e espaço, template, tamanho e saída, desafio na floricultura.
+- Seis conceitos novos com temas e doze itens de revisão (ação e previsão), em situações próprias.
+- Cada habilidade tem prática guiada e sozinha na mesma fase; variáveis e undefined entram em revisa.
+- Validação por resultados; sintaxe só para crases/template, que são a habilidade pedida.
+- `testar:conteudo`: checagens da U2 verdes após corrigir o comprimento da confirmação para 39.
+- Jornada pelo mapa verde em desktop, retrato e paisagem, incluindo negativas (sem espaço; concatenação no lugar de template), meta e desafio; console limpo.
+- `publicar:conteudo`, build e lint verdes. IDs congelados junto com a unidade.

@@ -27,6 +27,7 @@ import { FASES_UNIDADE_S3, UNIDADE_S3 } from "./ilhas/sites/ser-encontrado/unida
 import { FASES_UNIDADE_S4, UNIDADE_S4 } from "./ilhas/sites/ser-encontrado/unidade-4/unidade";
 import { FASES_UNIDADE_S5, UNIDADE_S5 } from "./ilhas/sites/ser-encontrado/unidade-5/unidade";
 import { FASES_UNIDADE_LOGICA_U1, UNIDADE_LOGICA_U1 } from "./ilhas/logica/primeiros-comandos/unidade-1/unidade";
+import { FASES_UNIDADE_LOGICA_U2, UNIDADE_LOGICA_U2 } from "./ilhas/logica/primeiros-comandos/unidade-2/unidade";
 import type { Fase, Unidade } from "./tipos";
 
 export const UNIDADES: readonly Unidade[] = [
@@ -55,6 +56,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_S4,
   UNIDADE_S5,
   UNIDADE_LOGICA_U1,
+  UNIDADE_LOGICA_U2,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -84,6 +86,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_S4,
   ...FASES_UNIDADE_S5,
   ...FASES_UNIDADE_LOGICA_U1,
+  ...FASES_UNIDADE_LOGICA_U2,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];
