@@ -7,7 +7,8 @@ import { Botao } from "@/componentes/ui/Botao";
 import { Modal } from "@/componentes/ui/Modal";
 import type { FaseDesafio, Unidade } from "@/conteudo/tipos";
 import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
-import { estadoFinalDoDesafio, memoriasDoDesafio } from "@/motor/simulacao";
+import { circuitosDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio } from "@/motor/simulacao";
+import { MiniBancada } from "@/componentes/circuito/MiniBancada";
 import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 
 type Props = {
@@ -37,10 +38,14 @@ function MiniPalco({ foto, legenda }: { foto: ReturnType<typeof memoriasDoDesafi
 }
 
 export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Props) {
-  const deProgramas = desafio.programa !== undefined;
-  const depois = useMemo(() => (deProgramas ? { body: "", css: null } : estadoFinalDoDesafio(desafio)), [deProgramas, desafio]);
+  const deCircuito = desafio.circuito !== undefined;
+  const deProgramas = desafio.programa !== undefined && !deCircuito;
+  const semPagina = deProgramas || deCircuito;
+  const depois = useMemo(() => (semPagina ? { body: "", css: null } : estadoFinalDoDesafio(desafio)), [semPagina, desafio]);
   // Desafio de programa: o palco antes e depois (a memória que as soluções das partes deixam).
   const memorias = useMemo(() => (deProgramas && aberta ? memoriasDoDesafio(desafio) : null), [aberta, deProgramas, desafio]);
+  // Desafio com circuito (inclusive a ponte com o Console): a bancada antes e depois.
+  const circuitos = useMemo(() => (deCircuito && aberta ? circuitosDoDesafio(desafio) : null), [aberta, deCircuito, desafio]);
   const { head, body, titulo, css } = desafio.siteAlvo;
   const inteiro = desafio.modoDocumento === true;
   const antes = inteiro ? documentoInteiroInicial(head, body) : body;
@@ -56,14 +61,21 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
           <p className="text-xl font-black text-primaria">{noDesafio ? "Hora do desafio!" : unidade.titulo}</p>
           <p className="mt-1 text-[15px] font-bold leading-snug text-texto">
             {noDesafio
-              ? deProgramas
+              ? deCircuito
+                ? "Um problema novo e nenhum passo a passo. Deixe a bancada igualzinha ao depois, parte por parte."
+                : deProgramas
                 ? "Um problema novo e nenhum passo a passo. Deixe a memória igualzinha ao depois, parte por parte."
                 : "Um site novo e nenhum passo a passo. Deixe o antes igualzinho ao depois, parte por parte."
               : unidade.meta.enunciado}
           </p>
         </div>
       </div>
-      {deProgramas ? (
+      {deCircuito ? (
+        <div className="mt-4 flex gap-3">
+          <MiniBancada circuito={circuitos?.antes ?? null} legenda="Antes" />
+          <MiniBancada circuito={circuitos?.depois ?? null} legenda="Depois" />
+        </div>
+      ) : deProgramas ? (
         <div className="mt-4 flex gap-3">
           <MiniPalco foto={memorias?.antes ?? null} legenda="Antes" />
           <MiniPalco foto={memorias?.depois ?? null} legenda="Depois" />

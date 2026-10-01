@@ -636,8 +636,14 @@ export type FasePratica = FaseBase & {
   pratica?: IdConceito[];
 };
 
-/** Desafio: sem passo a passo, só o checklist das partes. */
-export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[] };
+/**
+ * Desafio: sem passo a passo, só o checklist das partes. Com `circuito`, a
+ * bancada do circuito lógico é a tela (validadores circuitoTabela e
+ * usouPortao nas partes); com `circuito` e `programa` juntos, é a ponte
+ * circuito/Console: a bancada na tela e, no painel, a tabela verdade em
+ * cima e o Console embaixo.
+ */
+export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
 
 /**
  * Um requisito do projeto-ponte: marca sozinho quando o validador passa

@@ -222,3 +222,8 @@ Confere meta em mini-palcos, prática, previsões, resultados incorretos que nã
 U3 também confere os tipos no palco e a linha do tempo do programa com comentários.
 
 - Repetição: `node testes/repeticao.mjs [desktop|retrato|paisagem] [logica-repeticao-u1|logica-repeticao-u2|logica-repeticao-u3]`. Jornada pelo mapa, Snippet, Console, previsões, negativas e valores do palco ao rebobinar.
+
+### Ilha Lógica, parte B (motor)
+
+- Console: `node testes/console.mjs [desktop|retrato|paisagem]` também digita um `if` linha a linha (a chave fecha sozinha, Enter entre `{` e `}` abre o bloco, o `}` passa por cima da chave fechada; no toque, `{` e `}` vêm da barra de símbolos).
+- Ponte circuito/Console: `node testes/ponte-circuito.mjs [desktop|retrato|paisagem]` (`/lab/fases?fase=lab-logica-u1-f3`): a bancada como tela, a tabela verdade e o Console no painel (no celular, o seletor), e o checklist marcando a parte do circuito e a do Console.

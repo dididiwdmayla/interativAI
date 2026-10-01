@@ -60,6 +60,21 @@ describe("instrumentação", () => {
     expect(sintaxesUsadas("const t = 'for (;;) { if }'")).not.toContain("for");
     expect(sintaxesUsadas("let a = 'http://x'")).not.toContain("comentario");
   });
+
+  it("else (o final) e else-if (else if) são sintaxes separadas", () => {
+    const soElseIf = sintaxesUsadas("if (n > 10) r = 'a';\nelse if (n > 5) r = 'b';");
+    expect(soElseIf).toContain("else-if");
+    expect(soElseIf).not.toContain("else");
+    const soElse = sintaxesUsadas("if (n > 10) { r = 'a' } else { r = 'b' }");
+    expect(soElse).toContain("else");
+    expect(soElse).not.toContain("else-if");
+    const cadeia = sintaxesUsadas("if (n > 10) r = 'a';\nelse if (n > 5) r = 'b';\nelse r = 'c';");
+    expect(cadeia).toEqual(expect.arrayContaining(["if", "else-if", "else"]));
+    // Um if dentro do bloco do else não é else if: é um else final.
+    const dentro = sintaxesUsadas("if (a) { x() } else { if (b) { y() } }");
+    expect(dentro).toContain("else");
+    expect(dentro).not.toContain("else-if");
+  });
 });
 
 describe("o código instrumentado faz o mesmo que o original", () => {
@@ -149,6 +164,28 @@ describe("rastro e escopos", () => {
     expect(vc).not.toEqual(va);
     if (va.t !== "ref") throw new Error("a lista devia ser referência");
     expect(r.memoriaFinal.monte[String(va.id)]).toEqual({ t: "array", tamanho: 3, itens: [1, 2, 3].map((n) => ({ t: "number", v: String(n) })) });
+  });
+
+  it("escopo de bloco: let e const de dentro do if, do while e do for somem quando o bloco termina", () => {
+    const r = rodar(
+      "let total = 0;\nif (total === 0) {\n  const aviso = 'zero';\n  total = 1;\n}\nlet n = 0;\nwhile (n < 2) {\n  let dobro = n * 2;\n  n++;\n}\nfor (const letra of 'ab') {\n  total++;\n}\ntotal",
+    );
+    const nomesNa = (linha: number) => Object.keys(variaveis(r.passos.find((p) => p.linha === linha)!).Global);
+    expect(nomesNa(4)).toContain("aviso");
+    expect(nomesNa(6)).not.toContain("aviso");
+    expect(nomesNa(9)).toContain("dobro");
+    expect(nomesNa(11)).not.toContain("dobro");
+    expect(nomesNa(12)).toContain("letra");
+    expect(Object.keys(variaveis(r.passos[r.passos.length - 1]).Global)).toEqual(["total", "n"]);
+  });
+
+  it("escopo de bloco dentro de função: o i do for sai do quadro da função quando o laço acaba", () => {
+    const r = rodar("function somar(lista) {\n  let s = 0;\n  for (let i = 0; i < lista.length; i++) {\n    s += lista[i];\n  }\n  return s;\n}\nsomar([1, 2]);");
+    const dentro = r.passos.find((p) => p.linha === 4)!;
+    expect(variaveis(dentro).somar).toMatchObject({ s: "0", i: "0" });
+    const depois = r.passos.find((p) => p.linha === 6 && p.tipo === "passo")!;
+    expect(variaveis(depois).somar).toEqual({ lista: "#" + (depois.memoria.quadros[1].escopos[0].variaveis[0].valor as { id: number }).id, s: "3" });
+    expect(depois.memoria.quadros[1].escopos.map((e) => e.tipo)).toEqual(["funcao"]);
   });
 
   it("let ainda não criada (zona morta) não aparece no quadro da função", () => {

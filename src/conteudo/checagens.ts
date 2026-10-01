@@ -11,7 +11,7 @@
  * - regras de simulação, que carregam o site da fase num Document solto e
  *   aplicam as soluções pelo mesmo núcleo que a interface usa.
  */
-import { temObjetivos } from "@/motor/tiposDeFase";
+import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -940,7 +940,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       }
       if (fase.modoDocumento) problemas.push("fase de programa não usa modoDocumento");
       if (!fase.usaFerramentas.includes("console")) problemas.push('fase de programa pede "console" em usaFerramentas (o Console sempre aparece)');
-      if (!fase.usaFerramentas.includes("palco-memoria")) problemas.push('fase de programa pede "palco-memoria" em usaFerramentas (o palco é a tela da fase)');
+      // Na ponte circuito/Console (desafio com circuito e programa), a tela é a bancada: não há palco.
+      const ponte = circuitoDaFase(fase) !== null;
+      if (!ponte && !fase.usaFerramentas.includes("palco-memoria")) problemas.push('fase de programa pede "palco-memoria" em usaFerramentas (o palco é a tela da fase)');
+      if (ponte && (fase.usaFerramentas.includes("palco-memoria") || fase.usaFerramentas.includes("linha-do-tempo"))) {
+        problemas.push("na ponte circuito/Console a tela é a bancada: tire palco-memoria e linha-do-tempo de usaFerramentas");
+      }
       const usaSnippet = [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)].some(({ acoes }) =>
         acoes.some((acao) => acao.tipo === "definirSnippet" || acao.tipo === "executarSnippet"),
       );
@@ -960,17 +965,18 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
   },
   {
     id: "circuito-logico",
-    nome: "fase de circuito: peças com ids e nomes válidos, sem página, e validadores e ações de circuito só nela",
+    nome: "fase com circuito (circuito-logico ou desafio com circuito): peças com ids e nomes válidos, sem página, e validadores e ações de circuito só nela",
     checar: (fase) => {
       const problemas: string[] = [];
       const deCircuito = new Set(["circuitoTabela", "usouPortao"]);
+      const dados = circuitoDaFase(fase);
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
-          if (deCircuito.has(item.tipo) && fase.tipo !== "circuito-logico") problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase circuito-logico`);
-          if (fase.tipo === "circuito-logico" && "seletor" in item) problemas.push(`${onde}: fase de circuito não tem página; o validador ${item.tipo} olha a página`);
-          if (item.tipo === "circuitoTabela" && fase.tipo === "circuito-logico") {
-            const entradas = new Set(fase.circuito.inicial.pecas.filter((p) => p.tipo === "entrada").map((p) => p.nome ?? p.id));
-            const saidas = fase.circuito.inicial.pecas.filter((p) => p.tipo === "saida").map((p) => p.nome ?? p.id);
+          if (deCircuito.has(item.tipo) && !dados) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase com circuito (circuito-logico ou desafio com circuito)`);
+          if (dados && "seletor" in item) problemas.push(`${onde}: fase de circuito não tem página; o validador ${item.tipo} olha a página`);
+          if (item.tipo === "circuitoTabela" && dados) {
+            const entradas = new Set(dados.inicial.pecas.filter((p) => p.tipo === "entrada").map((p) => p.nome ?? p.id));
+            const saidas = dados.inicial.pecas.filter((p) => p.tipo === "saida").map((p) => p.nome ?? p.id);
             if (item.esperado.length === 0) problemas.push(`${onde}: circuitoTabela sem linhas`);
             for (const linha of item.esperado) {
               for (const nome of Object.keys(linha.entradas)) if (!entradas.has(nome)) problemas.push(`${onde}: circuitoTabela cita a entrada "${nome}", que o circuito não tem`);
@@ -980,8 +986,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           }
         }
       }
-      if (fase.tipo !== "circuito-logico") return problemas;
-      const { inicial, paleta } = fase.circuito;
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        const deBancada = acoes.find((acao) => ["adicionarPortao", "ligarFio", "alternarEntrada", "apagarPeca", "verComoCodigo"].includes(acao.tipo));
+        if (deBancada && !dados) problemas.push(`${onde}: a ação ${deBancada.tipo} só vale numa fase com circuito`);
+      }
+      if (!dados) return problemas;
+      const { inicial, paleta } = dados;
       problemas.push(...repetidos(inicial.pecas.map((p) => p.id)).map((id) => `peça com id repetido: "${id}"`));
       const nomes = inicial.pecas.filter((p) => p.tipo === "entrada" || p.tipo === "saida").map((p) => p.nome ?? p.id);
       problemas.push(...repetidos(nomes).map((nome) => `entrada ou saída com nome repetido: "${nome}"`));
@@ -997,7 +1007,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase de circuito usa siteAlvo: SITE_DO_PROGRAMA (sem página)");
       if (!fase.usaFerramentas.includes("circuito")) problemas.push('fase de circuito pede "circuito" em usaFerramentas (a bancada)');
       if (!fase.usaFerramentas.includes("tabela-verdade")) problemas.push('fase de circuito pede "tabela-verdade" em usaFerramentas (sempre na tela)');
-      if (fase.programa) problemas.push("fase de circuito não tem programa (o Console é de outra fase)");
+      if (fase.programa && fase.tipo === "circuito-logico") problemas.push("fase de circuito não tem programa (o Console é de outra fase; a ponte circuito/Console é um desafio com circuito e programa)");
       for (const { onde, acoes } of acoesDoJogador(fase)) {
         for (const acao of acoes) if (acao.tipo === "adicionarPortao" && !paleta.includes(acao.portao)) problemas.push(`${onde}: o portão "${acao.portao}" não está na paleta`);
       }

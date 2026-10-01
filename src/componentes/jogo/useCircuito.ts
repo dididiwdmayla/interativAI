@@ -1,7 +1,7 @@
 "use client";
 
 /*
- * A bancada de uma fase circuito-logico: o circuito (fonte única de
+ * A bancada de uma fase circuito-logico (ou de um desafio com circuito): o circuito (fonte única de
  * verdade, como o body do site nas fases de página), a corrente simulada,
  * as linhas da tabela verdade já testadas e o "ver como código". As
  * mudanças passam pelo modelo (src/motor/circuito/modelo.ts), as mesmas
@@ -9,6 +9,7 @@
  */
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Fase } from "@/conteudo/tipos";
+import { circuitoDaFase } from "@/motor/tiposDeFase";
 import type { Barramento } from "@/motor/barramento";
 import * as bancada from "@/motor/circuito/modelo";
 import type { EventoFase } from "@/motor/eventos";
@@ -22,7 +23,7 @@ function comecar(circuito: bancada.Circuito): Estado {
 }
 
 export function useCircuito({ fase, barramento, salvo, aoUsar }: Opcoes) {
-  const dados = fase.tipo === "circuito-logico" ? fase.circuito : null;
+  const dados = circuitoDaFase(fase);
   const [estado, setEstado] = useState<Estado | null>(() => (dados ? comecar(salvo ?? dados.inicial) : null));
   /** O mesmo estado, lido na hora (as soluções fazem várias ações seguidas). */
   const atual = useRef(estado);

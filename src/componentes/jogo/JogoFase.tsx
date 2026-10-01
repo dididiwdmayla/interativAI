@@ -353,6 +353,8 @@ export function JogoFase({
     [editorSnippetRef],
   );
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
+  /** Ponte circuito/Console no celular: a tabela verdade ou o Console. */
+  const [ladoDaPonte, setLadoDaPonte] = useState<"cima" | "baixo">("baixo");
   const [segmento, setSegmento] = useState<"arvore" | "estilos" | "codigo">("arvore");
   /** Sub-painéis de Elementos liberados na fase (Estilos, Calculado). */
   const paineis = fase.paineisElementos ?? [];
@@ -1146,12 +1148,20 @@ export function JogoFase({
       ? () => {
           const atual = circuito.circuitoAgora();
           if (!atual) return null;
-          return {
+          const doCircuito = {
             codigo: `// O circuito da bancada, escrito como código\n${circuitoComoCodigo(atual)}`,
             erro: "",
             variaveis: entradasDo(atual)
               .map((peca) => `${peca.nome ?? peca.id} = ${peca.ligada ? "true" : "false"}`)
               .join("; "),
+          };
+          // Ponte circuito/Console: o tutor vê os dois.
+          const doConsole = programa.contextoTutor();
+          if (!doConsole) return doCircuito;
+          return {
+            codigo: [doCircuito.codigo, doConsole.codigo].filter(Boolean).join("\n\n"),
+            erro: doConsole.erro,
+            variaveis: [doCircuito.variaveis, doConsole.variaveis].filter(Boolean).join("; "),
           };
         }
       : programa.contextoTutor,
@@ -1552,97 +1562,23 @@ export function JogoFase({
           ? "desafio"
           : "projeto";
 
-  return (
-    <div
-      className="flex h-dvh flex-col overflow-hidden"
-      data-layout={layout}
-      data-jogo-fase={fase.id}
-      data-etapa={estado.etapa}
-      data-objetivo-atual={objetivoAtualId}
-      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
-      data-pronto={pronta ? "sim" : "nao"}
-      data-roteiro={estado.roteiro ?? "nenhum"}
-      style={movel && viewport.altura ? { height: viewport.altura } : undefined}
-    >
-      {movel ? (
-        <BarraSuperiorMovel
-          titulo={barra?.tituloMovel ?? `Unidade ${local.unidade.numero} › ${rotuloFase}`}
-          estrelas={semEstrelas ? null : estado.estrelas}
-          fina={layout === "paisagem"}
-          inicio={botaoMapa}
-          acaoFixa={botaoVoltar}
-          menu={
-            <>
-              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !semExtras && <BotaoGlossario noMenu />}
-              <SeletorTema />
-              <div data-manter-menu className="border-t-2 border-borda pt-2">
-                <AjustesSom />
-              </div>
-              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
-            </>
-          }
-        />
-      ) : (
-        <BarraSuperior
-          caminho={barra?.caminho ?? [local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
-          estrelas={semEstrelas ? null : estado.estrelas}
-          logo={<Mascote tamanho={34} />}
-          acoes={
-            <>
-              {botaoVoltar}
-              {botaoMapa}
-              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
-              {!lab && !semExtras && <BotaoGlossario />}
-              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
-            </>
-          }
-        />
-      )}
-      {layout === "retrato" && !viewport.tecladoAberto && (
-        <BarraObjetivosMovel
-          objetivos={objetivosNaTela}
-          concluidos={estado.concluidos}
-          ativo={objetivoAtivo}
-          checklist={
-            itensChecklist && checklist
-              ? {
-                  total: itensChecklist.length,
-                  resumo:
-                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
-                  lista: checklist,
-                }
-              : undefined
-          }
-        />
-      )}
-      <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
-        <section
-          aria-label="Painel"
-          className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}
-          onKeyDown={(evento) => {
-            const atalho = atalhoHistorico(evento);
-            if (!atalho || evento.defaultPrevented || focoTemDesfazerProprio(evento.target)) return;
-            evento.preventDefault();
-            if (atalho === "desfazer") desfazer();
-            else refazer();
-          }}
-        >
-          {circuito.ativo && circuito.circuito ? (
-            <AlvoFerramenta ids={["tabela-verdade"]} marcador="tabela-verdade" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
-              <PainelTabelaVerdade
-                circuito={circuito.circuito}
-                tabela={circuito.tabela}
-                testadas={circuito.testadas}
-                mostrarCodigo={circuito.mostrarCodigo}
-                aoAlternarCodigo={() => {
-                  tocarEfeito("clique");
-                  circuito.alternarCodigo();
-                }}
-                alvoBotao={(botao) => botao}
-              />
-            </AlvoFerramenta>
-          ) : (
+  const painelTabelaVerdade = circuito.ativo && circuito.circuito ? (
+    <AlvoFerramenta ids={["tabela-verdade"]} marcador="tabela-verdade" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+      <PainelTabelaVerdade
+        circuito={circuito.circuito}
+        tabela={circuito.tabela}
+        testadas={circuito.testadas}
+        mostrarCodigo={circuito.mostrarCodigo}
+        aoAlternarCodigo={() => {
+          tocarEfeito("clique");
+          circuito.alternarCodigo();
+        }}
+        alvoBotao={(botao) => botao}
+      />
+    </AlvoFerramenta>
+  ) : null;
+
+  const painelDevtools = (
           <AlvoFerramenta
             ids={["painel"]}
             marcador="painel"
@@ -1998,6 +1934,107 @@ export function JogoFase({
               </div>
             </Painel>
           </AlvoFerramenta>
+  );
+
+  return (
+    <div
+      className="flex h-dvh flex-col overflow-hidden"
+      data-layout={layout}
+      data-jogo-fase={fase.id}
+      data-etapa={estado.etapa}
+      data-objetivo-atual={objetivoAtualId}
+      data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
+      data-pronto={pronta ? "sim" : "nao"}
+      data-roteiro={estado.roteiro ?? "nenhum"}
+      style={movel && viewport.altura ? { height: viewport.altura } : undefined}
+    >
+      {movel ? (
+        <BarraSuperiorMovel
+          titulo={barra?.tituloMovel ?? `Unidade ${local.unidade.numero} › ${rotuloFase}`}
+          estrelas={semEstrelas ? null : estado.estrelas}
+          fina={layout === "paisagem"}
+          inicio={botaoMapa}
+          acaoFixa={botaoVoltar}
+          menu={
+            <>
+              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !semExtras && <BotaoGlossario noMenu />}
+              <SeletorTema />
+              <div data-manter-menu className="border-t-2 border-borda pt-2">
+                <AjustesSom />
+              </div>
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} noMenu />}
+            </>
+          }
+        />
+      ) : (
+        <BarraSuperior
+          caminho={barra?.caminho ?? [local.unidade.ilha, local.unidade.zona, `Unidade ${local.unidade.numero}`, rotuloFase]}
+          estrelas={semEstrelas ? null : estado.estrelas}
+          logo={<Mascote tamanho={34} />}
+          acoes={
+            <>
+              {botaoVoltar}
+              {botaoMapa}
+              <BotaoFerramentas aoAbrir={() => abrirCard(null)} />
+              {!lab && !semExtras && <BotaoGlossario />}
+              {!semExtras && <BotaoRecomecar aoRecomecar={aoRecomecar} />}
+            </>
+          }
+        />
+      )}
+      {layout === "retrato" && !viewport.tecladoAberto && (
+        <BarraObjetivosMovel
+          objetivos={objetivosNaTela}
+          concluidos={estado.concluidos}
+          ativo={objetivoAtivo}
+          checklist={
+            itensChecklist && checklist
+              ? {
+                  total: itensChecklist.length,
+                  resumo:
+                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
+                  lista: checklist,
+                }
+              : undefined
+          }
+        />
+      )}
+      <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
+        <section
+          aria-label="Painel"
+          className={`flex min-h-0 min-w-0 flex-col ${classesPainel}`}
+          onKeyDown={(evento) => {
+            const atalho = atalhoHistorico(evento);
+            if (!atalho || evento.defaultPrevented || focoTemDesfazerProprio(evento.target)) return;
+            evento.preventDefault();
+            if (atalho === "desfazer") desfazer();
+            else refazer();
+          }}
+        >
+          {circuito.ativo && circuito.circuito && !fase.programa ? (
+            painelTabelaVerdade
+          ) : circuito.ativo && circuito.circuito ? (
+            // Ponte circuito/Console (desafio com circuito e programa): a tabela em cima e o Console embaixo.
+            <div className="flex min-h-0 flex-1 flex-col gap-2" data-ponte-circuito-console>
+              {movel && (
+                <SeletorSegmentado
+                  rotulo="Mostrar no painel"
+                  opcoes={[
+                    { id: "cima", rotulo: "Tabela verdade" },
+                    { id: "baixo", rotulo: "Console" },
+                  ]}
+                  valor={ladoDaPonte}
+                  aoTrocar={setLadoDaPonte}
+                  className="w-full shrink-0"
+                />
+              )}
+              <div className="min-h-0 flex-1">
+                <PainelDividido rotulo="Redimensionar a tabela verdade e o Console" proporcaoInicial={0.42} mostrar={movel ? ladoDaPonte : "ambas"} cima={painelTabelaVerdade} baixo={painelDevtools} />
+              </div>
+            </div>
+          ) : (
+            painelDevtools
           )}
         </section>
         {layout === "retrato" && (

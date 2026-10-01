@@ -2,19 +2,23 @@
 
 /*
  * A linha de digitar do Console, como a do Chrome (developer.chrome.com,
- * Console reference): Enter roda, Shift+Enter pula linha, seta para cima na
- * primeira linha traz o comando anterior (e para baixo, na última, o
- * seguinte). Um CodeMirror sem números de linha, com JavaScript colorido.
+ * Console reference): Enter roda (com o cursor no fim e o código completo;
+ * senão pula linha e indenta), Ctrl+Enter roda de qualquer jeito,
+ * Shift+Enter pula linha, seta para cima na primeira linha traz o comando
+ * anterior (e para baixo, na última, o seguinte). As chaves fecham sozinhas
+ * e o `}` digitado passa por cima da chave já fechada (digitacaoConsole.ts).
+ * Um CodeMirror sem números de linha, com JavaScript colorido.
  */
 import { closeBrackets } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap, insertNewlineAndIndent } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
 import { bracketMatching } from "@codemirror/language";
-import { EditorState, Prec } from "@codemirror/state";
+import { EditorState, Prec, Transaction } from "@codemirror/state";
 import { drawSelection, EditorView, keymap, placeholder } from "@codemirror/view";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { tocarTecla } from "@/audio/motor";
 import { temaEditor } from "@/componentes/painel/editor/temaEditor";
+import { acaoDoEnter, digitarSimbolo, passarPorCimaDaChave } from "./digitacaoConsole";
 
 export type ApiEntradaConsole = {
   definirTexto: (texto: string) => void;
@@ -92,7 +96,8 @@ export function EntradaConsole({ historico, aoEnviar, aoFocar, desativada = fals
           placeholder(toqueInicial.current ? "Escreva um comando e toque em Rodar" : "Escreva um comando e aperte Enter"),
           Prec.highest(
             keymap.of([
-              { key: "Enter", run: enviar },
+              { key: "Enter", run: (v) => (acaoDoEnter(v.state) === "rodar" ? enviar(v) : insertNewlineAndIndent(v)) },
+              { key: "Mod-Enter", run: enviar },
               { key: "Shift-Enter", run: insertNewlineAndIndent },
               {
                 key: "ArrowUp",
@@ -125,6 +130,16 @@ export function EntradaConsole({ historico, aoEnviar, aoFocar, desativada = fals
             ]),
           ),
           keymap.of([...defaultKeymap, ...historyKeymap]),
+          // O `}` digitado passa por cima da chave que o Console fechou sozinho (antes do closeBrackets).
+          Prec.highest(
+            EditorView.inputHandler.of((v, de, ate, texto) => {
+              if (texto !== "}" || de !== ate || de !== v.state.selection.main.head) return false;
+              const porCima = passarPorCimaDaChave(v.state);
+              if (!porCima) return false;
+              v.dispatch(porCima);
+              return true;
+            }),
+          ),
           temaEditor,
           aparenciaEntrada,
           EditorView.contentAttributes.of({ "aria-label": "Linha de comando do Console", "data-entrada-console": "" }),
@@ -158,7 +173,10 @@ export function EntradaConsole({ historico, aoEnviar, aoFocar, desativada = fals
       inserir(texto) {
         const view = visao.current;
         if (!view) return;
-        view.dispatch(view.state.replaceSelection(texto));
+        // Como o teclado: { fecha sozinha e } passa por cima da chave fechada.
+        const digitado = digitarSimbolo(view.state, texto);
+        if (digitado instanceof Transaction) view.dispatch(digitado);
+        else view.dispatch(digitado);
         view.focus();
       },
       obterTexto() {

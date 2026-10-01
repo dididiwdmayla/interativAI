@@ -14,7 +14,7 @@
  * registre aqui com a tela que ele usa, ensine o Jogo a montar essa tela
  * e acrescente as checagens dele em src/conteudo/checagens.ts.
  */
-import type { Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
+import type { DadosCircuito, Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
 
 export type TelaDaFase = "devtools" | "circuito";
 
@@ -58,9 +58,20 @@ export function temObjetivos(fase: Fase): fase is FaseComObjetivos {
   return fase.tipo === "pratica" || fase.tipo === "simulador-campanha" || fase.tipo === "circuito-logico";
 }
 
+/**
+ * A bancada do circuito lógico da fase: a de uma fase circuito-logico ou a
+ * de um desafio com circuito (inclusive a ponte circuito/Console). Null nas
+ * outras.
+ */
+export function circuitoDaFase(fase: Fase): DadosCircuito | null {
+  if (fase.tipo === "circuito-logico") return fase.circuito;
+  if (fase.tipo === "desafio") return fase.circuito ?? null;
+  return null;
+}
+
 /** A fase não tem página de site (programa ou circuito): a validação usa o documento vazio do começo. */
 export function semPagina(fase: Fase): boolean {
-  return fase.programa !== undefined || fase.tipo === "circuito-logico";
+  return fase.programa !== undefined || circuitoDaFase(fase) !== null;
 }
 
 /** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */

@@ -8,7 +8,7 @@
  * casos) e `saida` com `semErro`.
  */
 import { SITE_DO_PROGRAMA } from "@/motor/programa";
-import type { FaseCircuitoLogico, FasePratica, Unidade } from "../tipos";
+import type { Fase, FaseCircuitoLogico, FaseDesafio, FasePratica, Unidade } from "../tipos";
 
 export const UNIDADE_BANCADA_LOGICA: Unidade = {
   id: "lab-logica-u1",
@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -306,4 +306,79 @@ export const FASE_DEMO_CIRCUITO: FaseCircuitoLogico = {
   falaFinal: { texto: "Pode continuar mexendo na bancada.", expressao: "feliz" },
 };
 
-export const FASES_BANCADA_LOGICA: readonly (FasePratica | FaseCircuitoLogico)[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO];
+/*
+ * Desafio com circuito, na ponte circuito/Console (modelo para um desafio
+ * de portões lógicos): a bancada é a tela e o painel tem a tabela verdade
+ * em cima e o Console embaixo. As partes misturam validadores de circuito
+ * (circuitoTabela, usouPortao) com os de código (valorVariavel,
+ * usouSintaxe). Sem palco: a tela é a bancada.
+ */
+export const FASE_DEMO_DESAFIO_CIRCUITO: FaseDesafio = {
+  id: "lab-logica-u1-f3",
+  tipo: "desafio",
+  unidadeId: "lab-logica-u1",
+  titulo: "Catraca na bancada e no Console",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["circuito", "tabela-verdade", "console"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: { preparo: "const temCartao = true;\nconst catracaLivre = false;" },
+  circuito: {
+    paleta: ["e", "ou", "nao"],
+    inicial: {
+      pecas: [
+        { id: "cartao", tipo: "entrada", nome: "temCartao", rotulo: "tem cartão", x: 24, y: 70, fixa: true },
+        { id: "livre", tipo: "entrada", nome: "catracaLivre", rotulo: "catraca livre", x: 24, y: 250, fixa: true },
+        { id: "gira", tipo: "saida", nome: "gira", rotulo: "catraca gira", x: 520, y: 150, fixa: true },
+      ],
+      fios: [],
+    },
+  },
+  introducao: [{ texto: "A catraca do metrô só gira com cartão E com a catraca livre. Monte na bancada e depois escreva no Console.", expressao: "curioso" }],
+  partes: [
+    {
+      id: "monta-a-catraca",
+      descricao: "Na bancada, a catraca gira só com cartão e catraca livre.",
+      revisarEm: "lab-logica-u1-f2",
+      validador: {
+        tipo: "todos",
+        validadores: [
+          {
+            tipo: "circuitoTabela",
+            esperado: [
+              { entradas: { temCartao: false, catracaLivre: false }, saida: false },
+              { entradas: { temCartao: true, catracaLivre: false }, saida: false },
+              { entradas: { temCartao: false, catracaLivre: true }, saida: false },
+              { entradas: { temCartao: true, catracaLivre: true }, saida: true },
+            ],
+          },
+          { tipo: "usouPortao", portao: "e" },
+        ],
+      },
+      solucaoDeTeste: [
+        { tipo: "adicionarPortao", portao: "e", id: "e1", x: 280, y: 150 },
+        { tipo: "ligarFio", de: "cartao", para: "e1", porta: 0 },
+        { tipo: "ligarFio", de: "livre", para: "e1", porta: 1 },
+        { tipo: "ligarFio", de: "e1", para: "gira" },
+      ],
+    },
+    {
+      id: "no-console",
+      descricao: "No Console, crie gira com o mesmo portão: temCartao && catracaLivre.",
+      revisarEm: "lab-logica-u1-f1",
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "valorVariavel", nome: "gira", valor: false },
+          { tipo: "usouSintaxe", sintaxe: "e-logico" },
+        ],
+      },
+      solucaoDeTeste: [{ tipo: "executarNoConsole", codigo: "let gira = temCartao && catracaLivre" }],
+    },
+  ],
+  conclusao: [{ texto: "O mesmo E, na bancada e no código: false, porque a catraca não estava livre.", expressao: "comemorando" }],
+  falaFinal: { texto: "Pode continuar mexendo na bancada e no Console.", expressao: "feliz" },
+};
+
+export const FASES_BANCADA_LOGICA: readonly Fase[] = [FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO, FASE_DEMO_DESAFIO_CIRCUITO];

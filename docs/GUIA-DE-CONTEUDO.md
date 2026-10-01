@@ -1330,8 +1330,13 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
   `"palco-memoria"`; `"linha-do-tempo"` e `"snippet"` quando a fase usar.
 - `programa.snippet` (`codigoInicial`, `nome`) põe o editor de Fontes >
   Snippets com Executar, para programas de várias linhas. Sem ele, o
-  jogador escreve várias linhas no Console com Shift+Enter (no toque, o
-  botão de nova linha da barra de símbolos).
+  jogador escreve várias linhas no Console, como no Chrome: `{` fecha
+  sozinha; Enter com o cursor no meio (entre `{` e `}`) ou com o código
+  incompleto pula linha e indenta; com o cursor no fim e o código completo,
+  roda. Digitar o `}` que o Console já fechou passa por cima dele (não
+  duplica). Shift+Enter sempre pula linha e Ctrl+Enter (Cmd+Enter) roda de
+  qualquer jeito. No toque vale o mesmo, com a tecla Enter do teclado, a
+  barra de símbolos (que digita `{` e `}` como o teclado) e o botão Rodar.
 - `programa.preparo`: código que roda escondido quando a fase abre, para a
   memória já começar com algo (a lista do desafio, por exemplo).
 - A linha de ajuda aponta `{ alvo: "console", fala }` ou
@@ -1371,13 +1376,17 @@ olham a memória de agora.
   Console responde se...?" combina com ele.
 - `usouSintaxe` sozinho não prova nada; combine com um validador de
   resultado (`todos`). Exemplo: `valorVariavel` + `usouSintaxe: "let"`.
-- `usouSintaxe: "else"` só vale para um `else` final: um `else if` sem
-  `else` não conta (use `if` nesse caso). Para provar qual caminho de um
-  if/else rodou, prefira `saida` com `igual` (nunca os dois); para provar
-  um bug que pode ser refeito (como o `;` depois do `if`), prefira o
-  estado (`valorVariavel`).
-- Programas de várias linhas no Console: o editor fecha `}` ao digitar `{`;
-  nos testes de navegador o código entra como texto colado.
+- `else` e `else if` são sintaxes separadas: `usouSintaxe: "else"` é o
+  `else` final (o "senão" sem condição) e `usouSintaxe: "else-if"` é o
+  `else if`. Uma cadeia `if / else if / else` conta as três; um `if` dentro
+  do bloco de um `else` não é `else if` (conta `else`). Para provar qual
+  caminho de um if/else rodou, prefira `saida` com `igual` (nunca os dois);
+  para provar um bug que pode ser refeito (como o `;` depois do `if`),
+  prefira o estado (`valorVariavel`).
+- Programas de várias linhas no Console: o editor fecha `}` ao digitar `{`
+  e o `}` digitado passa por cima dele (25.2); nos testes de navegador o
+  código entra como texto colado, ou digitado linha a linha
+  (`testes/console.mjs`).
 - Para o erro: `erroDoTipo` no objetivo que faz o erro acontecer, e a fala
   ao concluir explica a mensagem (a primeira palavra diz o tipo, o resto
   diz o motivo).
@@ -1400,6 +1409,12 @@ olham a memória de agora.
   outra variável aponta a MESMA lista, ela vira uma seta até lá (é assim
   que o jogo ensina referência). Cada chamada de função abre um quadro
   próprio, que some quando ela devolve.
+- Escopo de bloco, como no JavaScript de verdade: `let` e `const` de
+  dentro de um bloco (o `i` do `for`, a variável de dentro do `if`, do
+  `while` ou do `for...of`) aparecem numa caixa tracejada "dentro do
+  bloco" e somem do palco quando o bloco termina. Dentro de função, o
+  bloco fica dentro do quadro dela. (O `switch` ainda não mostra as
+  variáveis declaradas nos `case`.)
 - A linha do tempo (`"linha-do-tempo"`) deixa voltar e avançar a última
   execução passo a passo. Cada passo mostra a memória ANTES da linha
   marcada rodar, como o depurador do Chrome pausado nela. Com três linhas
@@ -1442,6 +1457,16 @@ olham a memória de agora.
   arrastar da saída até a entrada.
 - Ferramentas: `"circuito"` e `"tabela-verdade"`. Primeira unidade que usa:
   `logica-decisoes-u2` (portões lógicos, logo depois do if).
+- **Desafio com circuito:** um `desafio` aceita o campo `circuito` (o mesmo
+  `DadosCircuito`); as partes usam `circuitoTabela` e `usouPortao` e as
+  soluções, as ações da bancada. A meta mostra a bancada antes e depois.
+  Com `circuito` e `programa` juntos é a **ponte circuito/Console**: a
+  bancada é a tela e o painel tem a tabela verdade em cima e o Console
+  embaixo (no celular, um seletor "Tabela verdade | Console"); as partes
+  misturam validadores de circuito e de código (`valorVariavel`,
+  `usouSintaxe`...). Na ponte não há palco: `usaFerramentas` leva
+  `circuito`, `tabela-verdade` e `console`, sem `palco-memoria` nem
+  `linha-do-tempo`. Modelo: `/lab/fases?fase=lab-logica-u1-f3`.
 
 ### 25.8 A unidade-modelo
 

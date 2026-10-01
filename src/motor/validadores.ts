@@ -474,7 +474,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou: teste.passou, descricao, detalhe };
     }
     case "circuitoTabela": {
-      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase com circuito" };
       const tabela = tabelaVerdade(contexto.circuito);
       const erradas: string[] = [];
       for (const linha of validador.esperado) {
@@ -499,7 +499,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou: erradas.length === 0, descricao, detalhe: erradas.length ? erradas.slice(0, 4).join("; ") : "todas as linhas batem" };
     }
     case "usouPortao": {
-      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase circuito-logico" };
+      if (!contexto.circuito) return { passou: false, descricao, detalhe: "só numa fase com circuito" };
       const usados = portoesUsados(contexto.circuito, validador.portao);
       return { passou: usados >= (validador.minimo ?? 1), descricao, detalhe: `${usados} ligado(s)` };
     }

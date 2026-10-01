@@ -57,7 +57,7 @@ export type PainelDasAcoes = {
     definirSnippet: (codigo: string) => void;
     executarSnippet: () => void;
   };
-  /** (Circuito) A bancada: só existe numa fase circuito-logico. Devolve false se não deu (peça que não existe). */
+  /** (Circuito) A bancada: só existe numa fase circuito-logico ou num desafio com circuito. Devolve false se não deu (peça que não existe). */
   circuito?: {
     adicionarPortao: (portao: TipoPortao, id: string, lugar?: { x: number; y: number }) => boolean;
     ligarFio: (de: string, para: string, porta: number) => boolean;
@@ -411,7 +411,7 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "apagarPeca":
     case "verComoCodigo": {
       const bancada = painel.circuito;
-      if (!bancada) throw new ErroAcao(`${acao.tipo} só existe numa fase circuito-logico`);
+      if (!bancada) throw new ErroAcao(`${acao.tipo} só existe numa fase com circuito (circuito-logico ou desafio com circuito)`);
       let deu = true;
       if (acao.tipo === "adicionarPortao") deu = bancada.adicionarPortao(acao.portao, acao.id, acao.x !== undefined && acao.y !== undefined ? { x: acao.x, y: acao.y } : undefined);
       else if (acao.tipo === "ligarFio") deu = bancada.ligarFio(acao.de, acao.para, acao.porta ?? 0);

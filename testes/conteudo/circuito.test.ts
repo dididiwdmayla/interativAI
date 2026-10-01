@@ -177,7 +177,7 @@ describe("demonstração do circuito (/lab)", () => {
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const comTabela = { ...FASE_BANCADA_CONSOLE, objetivos: [{ ...FASE_BANCADA_CONSOLE.objetivos[1], validador: { tipo: "usouPortao" as const, portao: "e" as const } }] };
-    expect(texto(comTabela)).toContain("só vale numa fase circuito-logico");
+    expect(texto(comTabela)).toContain("só vale numa fase com circuito");
     const nomeRuim = {
       ...FASE_DEMO_CIRCUITO,
       circuito: {
@@ -189,5 +189,41 @@ describe("demonstração do circuito (/lab)", () => {
     const t = texto(nomeRuim);
     expect(t).toContain("não vira nome de variável");
     expect(t).toContain('o portão "e" não está na paleta');
+  });
+});
+
+describe("desafio com circuito (ponte circuito/Console, /lab)", () => {
+  it("passa em todas as regras de fase menos a do Rever (que pede a unidade toda)", async () => {
+    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
+    const { FASE_DEMO_DESAFIO_CIRCUITO } = await import("@/conteudo/laboratorio/bancadaLogica");
+    const fase = FASE_DEMO_DESAFIO_CIRCUITO;
+    const problemas = REGRAS_DE_FASE.filter((regra) => regra.id !== "partes-do-desafio").flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] }).map((p) => `${regra.id}: ${p}`));
+    expect(problemas).toEqual([]);
+  });
+
+  it("a bancada e o Console na mesma simulação; a meta mostra a bancada antes e depois", async () => {
+    const { FASE_DEMO_DESAFIO_CIRCUITO } = await import("@/conteudo/laboratorio/bancadaLogica");
+    const { circuitosDoDesafio, criarSimulacao } = await import("@/motor/simulacao");
+    const simulacao = criarSimulacao(FASE_DEMO_DESAFIO_CIRCUITO);
+    const [monta, console] = FASE_DEMO_DESAFIO_CIRCUITO.partes;
+    expect(simulacao.avaliar(monta.validador).passou).toBe(false);
+    simulacao.executar(monta.solucaoDeTeste);
+    expect(simulacao.avaliar(monta.validador).passou).toBe(true);
+    simulacao.executar(console.solucaoDeTeste);
+    expect(simulacao.avaliar(console.validador).passou).toBe(true);
+    const metas = circuitosDoDesafio(FASE_DEMO_DESAFIO_CIRCUITO);
+    expect(metas?.antes.pecas.map((p) => p.id)).toEqual(["cartao", "livre", "gira"]);
+    expect(metas?.depois.pecas.map((p) => p.id)).toContain("e1");
+  });
+
+  it("sabotagem: palco na ponte e ação de circuito numa fase sem circuito", async () => {
+    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
+    const { FASE_DEMO_DESAFIO_CIRCUITO, FASE_BANCADA_CONSOLE } = await import("@/conteudo/laboratorio/bancadaLogica");
+    const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
+      REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
+    const comPalco = { ...FASE_DEMO_DESAFIO_CIRCUITO, usaFerramentas: [...FASE_DEMO_DESAFIO_CIRCUITO.usaFerramentas, "palco-memoria" as const] };
+    expect(texto(comPalco)).toContain("na ponte circuito/Console a tela é a bancada");
+    const comAcao = { ...FASE_BANCADA_CONSOLE, objetivos: [{ ...FASE_BANCADA_CONSOLE.objetivos[1], solucaoDeTeste: [{ tipo: "verComoCodigo" as const }] }] };
+    expect(texto(comAcao)).toContain("a ação verComoCodigo só vale numa fase com circuito");
   });
 });

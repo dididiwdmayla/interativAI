@@ -37,6 +37,7 @@ import { criarNucleoSincrono } from "./executor/fabrica";
 import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 import * as bancada from "./circuito/modelo";
+import { circuitoDaFase } from "./tiposDeFase";
 
 /**
  * O documento inicial da fase, solto (fora da tela): o head fixo com o
@@ -87,7 +88,7 @@ export function criarSimulacao(fase: Fase) {
   if (fase.programa?.preparo) rodarCodigo(fase.programa.preparo, "console", false);
 
   // Circuito lógico: as mesmas funções do modelo que a bancada da tela usa.
-  let circuito: bancada.Circuito | null = fase.tipo === "circuito-logico" ? fase.circuito.inicial : null;
+  let circuito: bancada.Circuito | null = circuitoDaFase(fase)?.inicial ?? null;
   const mudarCircuito = (novo: bancada.Circuito | null): boolean => {
     if (!novo || !circuito) return false;
     circuito = novo;
@@ -198,7 +199,7 @@ export function criarSimulacao(fase: Fase) {
         }
       : undefined,
     circuito:
-      fase.tipo === "circuito-logico"
+      circuito !== null
         ? {
             adicionarPortao: (portao, id, lugar) => {
               if (!circuito || circuito.pecas.some((p) => p.id === id)) return false;
@@ -296,6 +297,23 @@ export function estadoFinalDoDesafio(fase: FaseDesafio): { body: string; css: st
     }
   }
   return { body: simulacao.htmlAtual(), css: simulacao.cssAtual() };
+}
+
+/**
+ * (Desafio com circuito) O circuito antes (o que a fase traz) e depois das
+ * soluções de todas as partes: a bancada da meta. Null sem circuito.
+ */
+export function circuitosDoDesafio(fase: FaseDesafio): { antes: bancada.Circuito; depois: bancada.Circuito } | null {
+  if (!fase.circuito) return null;
+  const simulacao = criarSimulacao(fase);
+  for (const parte of fase.partes) {
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch {
+      // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+    }
+  }
+  return { antes: fase.circuito.inicial, depois: simulacao.circuito() ?? fase.circuito.inicial };
 }
 
 /**
