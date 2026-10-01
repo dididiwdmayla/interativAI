@@ -1310,7 +1310,10 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
   resultado, e não um sorteio específico nem o dia de hoje.
 - O Console guarda a memória entre entradas, como o do Chrome: `let` e
   `const` do topo continuam existindo, e redeclarar `let x` numa entrada
-  nova funciona (no Chrome também). Trocar uma `const` dá `TypeError:
+  nova funciona (no Chrome também), inclusive usar o valor anterior no
+  inicializador da redeclaração. Antes da primeira declaração, let/const
+  dão `ReferenceError`, explicado como "Usou antes de criar". Trocar uma
+  `const` dá `TypeError:
   Assignment to constant variable.`
 - Sem `setTimeout`, `fetch`, `async`/`await` de verdade nesta parte: ficam
   para a Ilha Rede e Servidor (Pendências no ROADMAP).

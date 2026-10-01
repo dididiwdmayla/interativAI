@@ -33,9 +33,18 @@ npx playwright install --with-deps chromium
 
 Neste ambiente, `--with-deps` falhou no `apt` com `Failed to setgroups`
 (restrição de troca de usuário/grupo). Se as bibliotecas já estiverem
-disponíveis, instale só o navegador com `npx playwright install chromium`. Inicie o jogo com `npm run dev` ou, para a bateria
-final, `npm run build` seguido de `npm start`. Os testes usam
-`http://localhost:3000` ou `URL_JOGO`.
+disponíveis, instale só o navegador com `npx playwright install chromium`.
+Os downloads do CDN também chegaram vazios nesta rodada. Alternativa
+usada: instalar `@sparticuz/chromium@133.0.0` numa pasta temporária fora
+do projeto, extrair seu executável e ligá-lo ao caminho do headless shell
+esperado pelo Playwright disponível. Chromium 133 executou as jornadas;
+não altere o manifesto do projeto para esse preparo.
+
+Inicie o jogo com `npm run dev -- --hostname 127.0.0.1` ou, para a bateria
+final, `npm run build` seguido de `npm start -- --hostname 127.0.0.1`.
+Os testes usam `http://localhost:3000` ou `URL_JOGO`. Neste executor, cada
+invocação tem rede isolada: servidor e testes devem ser filhos da mesma
+invocação; use `URL_JOGO=http://127.0.0.1:3000` para ambos.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
