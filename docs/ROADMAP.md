@@ -482,6 +482,24 @@ núcleo comum.
 
 ### Pendências
 
+- **Resolvendo problemas (rodada 25), bloqueia a produção da zona:**
+  - O quadro de passos existe apenas no tipo `ordenar-passos`, com objetivos
+    sequenciais. `FaseDesafio` não aceita `ordenar`; a checagem recusa
+    `ordemValida`, `passoNoPlano`, `passoAntes`, `semSobras` e as ações do
+    quadro nas partes do desafio. A UI e a simulação também só montam o
+    quadro para `ordenar-passos`.
+  - A fase `ordenar-passos` com `rodar` executa os cartões, mas não aceita
+    `programa.snippet`. Falta a composição entre entendimento/decomposição,
+    plano validado por dependências e código escrito e testado pelo aluno
+    no mesmo desafio, com checklist e Rever.
+  - Antes das U1 a U4, ampliar o motor para esse desafio completo, incluindo
+    agrupamento e ordenação do plano, editor de código, `funcaoPassa` com
+    bordas, persistência/recarga, meta antes/depois e simulação das soluções.
+    Verificar a jornada nos três layouts e a bateria de motor. Não substituir
+    o desafio por prática sequencial nem por cartões de código prontos.
+    Nenhuma unidade desta zona foi produzida ou publicada nesta rodada,
+    conforme a regra de parada do prompt.
+
 - **Lógica, parte B (rodada 22), para depois:**
   - O depurador anda pelo rastro, que guarda até 1.000 fotos da memória:
     num programa mais longo, as pausas depois disso não acontecem. A zona
@@ -562,7 +580,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Conteúdo da Lógica, nas zonas, nesta ordem: Resolvendo problemas, Algoritmos essenciais, Estruturas de
+1. Desbloquear o desafio completo de Resolvendo problemas (Pendências,
+   rodada 25) e produzir suas quatro unidades. Depois, conteúdo da Lógica
+   nas zonas, nesta ordem: Algoritmos essenciais, Estruturas de
    dados, Depuração e o projeto-ponte da Lógica (que pede o motor
    `projeto-ponte-js`).
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,

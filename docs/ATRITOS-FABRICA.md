@@ -2,6 +2,20 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 13: Resolvendo problemas (produção bloqueada)
+
+- As demonstrações f5 a f7 validam ordenar, agrupar e executar cartões,
+  mas isso não libera o mesmo quadro no checklist de um desafio. A fábrica,
+  a UI e a simulação restringem o quadro ao tipo `ordenar-passos`.
+- `rodar` executa código fornecido nos cartões; não oferece o Snippet para
+  o aluno transformar o plano em código autoral. A checagem rejeita essa
+  combinação. Substituir o desafio inteiro por prática sequencial ou por
+  cartões de código prontos enfraqueceria o requisito da rodada.
+- A regra de parada foi aplicada antes da U1. Capacidade faltante e
+  critérios para desbloqueá-la registrados em Pendências do ROADMAP;
+  nenhuma unidade incompleta foi publicada. Os testes existentes de
+  estruturas passaram sem timeout, sem necessidade de repetição.
+
 ## Rodada 12: zona Listas e objetos
 
 - valorVariavel e funcaoPassa comparam listas e objetos por conteúdo, recursivamente. Nenhuma capacidade de motor faltou; as funções recebem casos vazios, fronteiras e decimais quando aplicáveis.
