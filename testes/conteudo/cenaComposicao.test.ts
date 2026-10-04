@@ -9,7 +9,7 @@ import { conferirCena } from "@/motor/cena/conferir";
 import { areasDaFase, cenaDaFase } from "@/motor/composicao";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
 import { FASE_DEMO_RESOLVER } from "@/conteudo/laboratorio/bancadaResolver";
-import type { Fase, FasePratica } from "@/conteudo/tipos";
+import type { Fase, FasePratica, Validador } from "@/conteudo/tipos";
 import { abasDoLayout } from "@/componentes/composicao/TelaComposta";
 
 const VITRINE: DadosCena = {
@@ -77,5 +77,38 @@ describe("área cena: o formato e as sabotagens", () => {
     expect(texto).toContain('"geladeira", que não existe no catálogo');
     expect(texto).toContain("antes de chegar");
     expect(texto).toContain('"luz" não é um interruptor');
+  });
+});
+
+describe("validadores de cena: sabotagens da checagem", () => {
+  const base: FasePratica = {
+    ...FASE_DEMO_RESOLVER,
+    areas: ["cena", "snippet", "palco"],
+    plano: undefined,
+    testes: undefined,
+    cena: VITRINE,
+    usaFerramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+    objetivos: FASE_DEMO_RESOLVER.objetivos.filter((o) => o.id === "programar"),
+  };
+  const comValidador = (validador: Validador): FasePratica => ({ ...base, objetivos: [{ ...base.objetivos[0], validador }] });
+  const problemas = (fase: Fase) =>
+    REGRAS_DE_FASE.filter((regra) => regra.id === "composicao").flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
+
+  it("dispositivo, propriedade, valor, ação e instante que não existem", () => {
+    expect(problemas(comValidador({ tipo: "estadoNaCena", dispositivo: "portao", propriedade: "aberto", valor: true }))).toContain('a cena não tem o dispositivo "portao"');
+    expect(problemas(comValidador({ tipo: "estadoNaCena", dispositivo: "luz", propriedade: "acesa", valor: true }))).toContain('não tem a propriedade "acesa"');
+    expect(problemas(comValidador({ tipo: "estadoNaCena", dispositivo: "luz", propriedade: "ligada", valor: "sim" }))).toContain("luz.ligada é booleano, e o valor é texto");
+    expect(problemas(comValidador({ tipo: "estadoNaCena", dispositivo: "luz", propriedade: "ligada", valor: true, noTempo: 99_000 }))).toContain("fora da cena");
+    expect(problemas(comValidador({ tipo: "sequenciaNaCena", dispositivo: "luz", eventos: [{ acao: "piscar" }] }))).toContain('luz não faz "piscar"');
+    expect(problemas(comValidador({ tipo: "sequenciaNaCena", dispositivo: "sensor", eventos: [{ acao: "ligar" }] }))).toContain("ele só é lido");
+    expect(problemas(comValidador({ tipo: "reagiu", quando: { dispositivo: "sensor", propriedade: "temGente", valor: true }, entao: { dispositivo: "luz", acao: "ligar" }, prazoMs: 0 }))).toContain("prazoMs 0");
+  });
+
+  it("variosCenarios: pelo menos 2 linhas do tempo válidas e só validadores de cena dentro", () => {
+    const reagiu: Validador = { tipo: "reagiu", quando: { dispositivo: "sensor", propriedade: "temGente", valor: true }, entao: { dispositivo: "luz", acao: "ligar" }, prazoMs: 500 };
+    expect(problemas(comValidador({ tipo: "variosCenarios", linhasDoTempo: [[{ tipo: "pessoa", chegaMs: 1000 }]], validador: reagiu }))).toContain("pelo menos 2");
+    expect(problemas(comValidador({ tipo: "variosCenarios", linhasDoTempo: [[{ tipo: "pessoa", chegaMs: 1000 }], [{ tipo: "pessoa", chegaMs: 20_000 }]], validador: reagiu }))).toContain("fora da cena");
+    expect(problemas(comValidador({ tipo: "variosCenarios", linhasDoTempo: [[], []], validador: { tipo: "semErro" } }))).toContain("só valem validadores de cena (veio semErro)");
+    expect(problemas({ ...comValidador(reagiu), areas: ["snippet", "palco"], cena: undefined, usaFerramentas: ["snippet", "console", "palco-memoria", "linha-do-tempo"] })).toContain('o validador reagiu pede a área "cena"');
   });
 });

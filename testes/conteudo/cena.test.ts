@@ -8,7 +8,7 @@ import { criarNucleoNode } from "@/motor/executor/node";
 import { explicarErro } from "@/motor/executor/erros";
 import { criarSimulacao } from "@/motor/simulacao";
 import { FASE_DEMO_RESOLVER } from "@/conteudo/laboratorio/bancadaResolver";
-import type { FasePratica } from "@/conteudo/tipos";
+import type { FasePratica, Validador } from "@/conteudo/tipos";
 import { type DadosCena, estadoNoTempo, pessoasPresentes, temperaturaDoForno, valorNoTempo } from "@/motor/cena/modelo";
 
 const QUARTO: DadosCena = {
@@ -207,5 +207,91 @@ describe("a cena na simulação dos testes (o mesmo motor do jogo)", () => {
     expect(simulacao.programa().ultimaExecucao?.erro).toBeNull();
     expect(simulacao.cena()?.mudancas.map((m) => [m.acao, m.tempoMs])).toEqual([["ligar", 3000]]);
     expect(simulacao.cena()?.terminouPorTempo).toBe(true);
+  });
+});
+
+describe("validadores de cena", () => {
+  const faseCom = (validador: Validador): FasePratica => ({
+    ...FASE_DEMO_RESOLVER,
+    areas: ["cena", "snippet", "palco"],
+    plano: undefined,
+    testes: undefined,
+    cena: { ...VITRINE, dispositivos: [...VITRINE.dispositivos, { id: "lampada", tipo: "lampada", x: 40, y: 40 }] },
+    usaFerramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+    objetivos: [{ ...FASE_DEMO_RESOLVER.objetivos[4], validador }],
+  });
+  const rodar = (validador: Validador, codigo: string) => {
+    const simulacao = criarSimulacao(faseCom(validador));
+    const antes = simulacao.avaliar(validador);
+    simulacao.executar([
+      { tipo: "definirSnippet", codigo },
+      { tipo: "executarSnippet" },
+    ]);
+    return { antes, depois: simulacao.avaliar(validador) };
+  };
+  const PISCAR = (vezes: number, ms: number) => `for (let i = 0; i < ${vezes}; i++) {\n  lampada.ligar();\n  esperar(${ms});\n  lampada.desligar();\n  esperar(${ms});\n}`;
+  const PISCOU_3: Validador = {
+    tipo: "sequenciaNaCena",
+    dispositivo: "lampada",
+    exata: true,
+    eventos: [
+      { acao: "ligar" },
+      { acao: "desligar", aposMs: 500 },
+      { acao: "ligar", aposMs: 500 },
+      { acao: "desligar", aposMs: 500 },
+      { acao: "ligar", aposMs: 500 },
+      { acao: "desligar", aposMs: 500 },
+    ],
+  };
+  const LOOP = "while (true) {\n  if (sensor.temGente) {\n    luz.ligar();\n  } else {\n    luz.desligar();\n  }\n  esperar(100);\n}";
+  const REAGIU: Validador = { tipo: "reagiu", quando: { dispositivo: "sensor", propriedade: "temGente", valor: true }, entao: { dispositivo: "luz", acao: "ligar" }, prazoMs: 500 };
+  const VARIOS: Validador = {
+    tipo: "variosCenarios",
+    linhasDoTempo: [[{ tipo: "pessoa", chegaMs: 2000, saiMs: 4000 }], [{ tipo: "pessoa", chegaMs: 5500, saiMs: 8000 }], [{ tipo: "pessoa", chegaMs: 1000, saiMs: 2500 }, { tipo: "pessoa", chegaMs: 6000, saiMs: 9000 }]],
+    validador: REAGIU,
+  };
+
+  it("estadoNaCena: o valor no instante (ou no fim), e nada passa antes de rodar", () => {
+    const fim: Validador = { tipo: "estadoNaCena", dispositivo: "lampada", propriedade: "ligada", valor: false };
+    const { antes, depois } = rodar(fim, "lampada.ligar();\nesperar(1000);\nlampada.desligar();");
+    expect(antes.passou).toBe(false);
+    expect(antes.detalhe).toContain("ainda não rodou");
+    expect(depois.passou).toBe(true);
+    expect(rodar({ tipo: "estadoNaCena", dispositivo: "lampada", propriedade: "ligada", valor: true, noTempo: 500 }, "lampada.ligar();\nesperar(1000);\nlampada.desligar();").depois.passou).toBe(true);
+    expect(rodar({ tipo: "estadoNaCena", dispositivo: "lampada", propriedade: "ligada", valor: true, noTempo: 1500 }, "lampada.ligar();\nesperar(1000);\nlampada.desligar();").depois.detalhe).toContain("false");
+  });
+
+  it("sequenciaNaCena: pisca 3 vezes no ritmo; 4 vezes, sem esperar ou no ritmo errado não passa", () => {
+    expect(rodar(PISCOU_3, PISCAR(3, 500)).depois.passou).toBe(true);
+    expect(rodar(PISCOU_3, PISCAR(3, 450)).depois.passou).toBe(true); // dentro da folga de 100 ms
+    const quatro = rodar(PISCOU_3, PISCAR(4, 500)).depois;
+    expect(quatro.passou).toBe(false);
+    expect(quatro.detalhe).toContain("ligar (3,0 s)");
+    expect(rodar(PISCOU_3, PISCAR(3, 1000)).depois.passou).toBe(false);
+    // Sem esperar, liga e desliga no mesmo instante: o ritmo não bate.
+    expect(rodar(PISCOU_3, "for (let i = 0; i < 3; i++) {\n  lampada.ligar();\n  lampada.desligar();\n}").depois.passou).toBe(false);
+    // Sem exata, a sequência pode estar no meio de outras.
+    expect(rodar({ ...PISCOU_3, exata: false }, PISCAR(4, 500)).depois.passou).toBe(true);
+  });
+
+  it("reagiu: o loop de controle acende quando a pessoa chega; ligar no começo ou depois do prazo não vale", () => {
+    expect(rodar(REAGIU, LOOP).depois.passou).toBe(true);
+    const cedo = rodar(REAGIU, "luz.ligar();").depois;
+    expect(cedo.passou).toBe(false);
+    expect(cedo.detalhe).toContain("não fez ligar em até 500 ms");
+    expect(rodar(REAGIU, LOOP.replace("esperar(100)", "esperar(1000)").replace("while (true)", "esperar(600);\nwhile (true)")).depois.passou).toBe(false);
+    // Decorado: esperar até o segundo 3 e acender passa nesta linha do tempo...
+    expect(rodar(REAGIU, "esperar(3000);\nluz.ligar();").depois.passou).toBe(true);
+  });
+
+  it("variosCenarios: o código decorado cai; o loop de controle passa em todas", () => {
+    const decorado = rodar(VARIOS, "esperar(3000);\nluz.ligar();").depois;
+    expect(decorado.passou).toBe(false);
+    expect(decorado.detalhe).toContain("falhou com alguém chega em 2,0 s");
+    const loop = rodar(VARIOS, LOOP).depois;
+    expect(loop.passou).toBe(true);
+    expect(loop.filhos).toHaveLength(3);
+    // Duas chegadas na mesma linha do tempo: as duas precisam da reação (o loop que não apaga não reage à segunda).
+    expect(rodar(VARIOS, "while (true) {\n  if (sensor.temGente) luz.ligar();\n  esperar(100);\n}").depois.passou).toBe(false);
   });
 });

@@ -3,8 +3,9 @@
  * dispositivos com nomes de variável válidos e linha do tempo dentro da
  * duração. Usada pela regra "composicao" do testar:conteudo.
  */
-import { CATALOGO_DISPOSITIVOS, ehTipoDispositivo, NOMES_RESERVADOS } from "./catalogo";
-import { type DadosCena, DURACAO_MAXIMA_MS, DURACAO_MINIMA_MS, PECAS_CENARIO } from "./modelo";
+import type { Validador } from "@/conteudo/tipos";
+import { ACOES_DO_TIPO, CATALOGO_DISPOSITIVOS, ehTipoDispositivo, NOMES_RESERVADOS } from "./catalogo";
+import { type AcontecimentoCena, type DadosCena, DURACAO_MAXIMA_MS, DURACAO_MINIMA_MS, PECAS_CENARIO, type ValorCena } from "./modelo";
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const NOME_JS = /^[A-Za-z_$][\w$]*$/;
@@ -57,8 +58,18 @@ export function conferirCena(cena: DadosCena): string[] {
       if (tipo !== propriedade.tipo) problemas.push(`o dispositivo "${id}" começa com ${nome} do tipo ${tipo} (é ${propriedade.tipo})`);
     }
   }
-  cena.linhaDoTempo.forEach((item, i) => {
-    const onde = `linhaDoTempo[${i}]`;
+  problemas.push(...conferirLinhaDoTempo(cena, cena.linhaDoTempo));
+  const temSensor = cena.dispositivos.some((d) => d.tipo === "sensor");
+  const temPessoa = cena.linhaDoTempo.some((item) => item.tipo === "pessoa");
+  if (temSensor && !temPessoa) problemas.push("a cena tem sensor de presença, mas ninguém aparece na linha do tempo");
+  return problemas;
+}
+
+/** Os acontecimentos de uma linha do tempo (a da cena ou uma do variosCenarios) dentro da duração e com dispositivos que existem. */
+export function conferirLinhaDoTempo(cena: DadosCena, linha: readonly AcontecimentoCena[], rotulo = "linhaDoTempo"): string[] {
+  const problemas: string[] = [];
+  linha.forEach((item, i) => {
+    const onde = `${rotulo}[${i}]`;
     const dentro = (ms: number) => Number.isFinite(ms) && ms >= 0 && ms < cena.duracaoMs;
     if (item.tipo === "pessoa") {
       if (!dentro(item.chegaMs)) problemas.push(`${onde}: a pessoa chega em ${item.chegaMs} ms, fora da cena (de 0 a ${cena.duracaoMs})`);
@@ -72,8 +83,69 @@ export function conferirCena(cena: DadosCena): string[] {
       problemas.push(`${onde}: acontecimento de tipo desconhecido`);
     }
   });
-  const temSensor = cena.dispositivos.some((d) => d.tipo === "sensor");
-  const temPessoa = cena.linhaDoTempo.some((item) => item.tipo === "pessoa");
-  if (temSensor && !temPessoa) problemas.push("a cena tem sensor de presença, mas ninguém aparece na linha do tempo");
+  return problemas;
+}
+
+function tipoDoValor(valor: ValorCena): "booleano" | "número" | "texto" {
+  return typeof valor === "boolean" ? "booleano" : typeof valor === "number" ? "número" : "texto";
+}
+
+/** A propriedade existe no dispositivo e o valor é do tipo dela. */
+function conferirPropriedade(cena: DadosCena, onde: string, dispositivo: string, propriedade: string, valor: ValorCena): string[] {
+  const alvo = cena.dispositivos.find((d) => d.id === dispositivo);
+  if (!alvo) return [`${onde}: a cena não tem o dispositivo "${dispositivo}"`];
+  const ficha = CATALOGO_DISPOSITIVOS[alvo.tipo];
+  const prop = ficha.propriedades.find((p) => p.nome === propriedade);
+  if (!prop) return [`${onde}: ${ficha.nome.toLowerCase()} não tem a propriedade "${propriedade}" (tem ${ficha.propriedades.map((p) => p.nome).join(", ")})`];
+  if (tipoDoValor(valor) !== prop.tipo) return [`${onde}: ${dispositivo}.${propriedade} é ${prop.tipo}, e o valor é ${tipoDoValor(valor)}`];
+  return [];
+}
+
+/** A ação existe no tipo do dispositivo (as que aparecem no rastro). */
+function conferirAcao(cena: DadosCena, onde: string, dispositivo: string, acao: string): string[] {
+  const alvo = cena.dispositivos.find((d) => d.id === dispositivo);
+  if (!alvo) return [`${onde}: a cena não tem o dispositivo "${dispositivo}"`];
+  const acoes = ACOES_DO_TIPO[alvo.tipo];
+  if (!acoes.includes(acao)) return [`${onde}: ${dispositivo} não faz "${acao}" (${acoes.length ? `faz ${acoes.join(", ")}` : "ele só é lido, não faz ações"})`];
+  return [];
+}
+
+/**
+ * Um validador de cena (estadoNaCena, sequenciaNaCena, reagiu,
+ * variosCenarios) com dispositivos, propriedades, ações e instantes que
+ * existem na cena.
+ */
+export function conferirValidadorDeCena(validador: Validador, cena: DadosCena, onde: string): string[] {
+  const problemas: string[] = [];
+  switch (validador.tipo) {
+    case "estadoNaCena":
+      problemas.push(...conferirPropriedade(cena, onde, validador.dispositivo, validador.propriedade, validador.valor));
+      if (validador.noTempo !== undefined && (validador.noTempo < 0 || validador.noTempo > cena.duracaoMs)) problemas.push(`${onde}: estadoNaCena no instante ${validador.noTempo} ms, fora da cena`);
+      break;
+    case "sequenciaNaCena":
+      if (!validador.eventos.length) problemas.push(`${onde}: sequenciaNaCena sem eventos`);
+      for (const evento of validador.eventos) {
+        problemas.push(...conferirAcao(cena, onde, validador.dispositivo, evento.acao));
+        if ((evento.aposMs !== undefined && evento.aposMs < 0) || (evento.toleranciaMs !== undefined && evento.toleranciaMs < 0)) problemas.push(`${onde}: sequenciaNaCena com tempo negativo`);
+      }
+      break;
+    case "reagiu":
+      problemas.push(...conferirPropriedade(cena, onde, validador.quando.dispositivo, validador.quando.propriedade, validador.quando.valor));
+      problemas.push(...conferirAcao(cena, onde, validador.entao.dispositivo, validador.entao.acao));
+      if (!(validador.prazoMs > 0) || validador.prazoMs > cena.duracaoMs) problemas.push(`${onde}: reagiu com prazoMs ${validador.prazoMs} (de 1 até a duração da cena)`);
+      break;
+    case "variosCenarios": {
+      if (validador.linhasDoTempo.length < 2) problemas.push(`${onde}: variosCenarios com ${validador.linhasDoTempo.length} linha(s) do tempo (pelo menos 2: é o que impede o código decorado)`);
+      validador.linhasDoTempo.forEach((linha, i) => problemas.push(...conferirLinhaDoTempo(cena, linha, `${onde}: linhasDoTempo[${i}]`)));
+      const dentro = (v: Validador): Validador[] => (v.tipo === "todos" || v.tipo === "algum" ? [v, ...v.validadores.flatMap(dentro)] : v.tipo === "nao" ? [v, ...dentro(v.validador)] : [v]);
+      for (const item of dentro(validador.validador)) {
+        if (item.tipo === "variosCenarios") problemas.push(`${onde}: variosCenarios dentro de variosCenarios`);
+        else if (!["estadoNaCena", "sequenciaNaCena", "reagiu", "todos", "algum", "nao"].includes(item.tipo)) problemas.push(`${onde}: dentro do variosCenarios só valem validadores de cena (veio ${item.tipo})`);
+      }
+      break;
+    }
+    default:
+      break;
+  }
   return problemas;
 }

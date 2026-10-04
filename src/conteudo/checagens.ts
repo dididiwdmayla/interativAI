@@ -15,7 +15,8 @@ import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
 import { AREAS_TRABALHO, casosDaFase, cenaDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
-import { conferirCena } from "@/motor/cena/conferir";
+import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
+import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
 import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
@@ -191,7 +192,7 @@ function achatarValidador(validador: Validador): Validador[] {
   if (validador.tipo === "todos" || validador.tipo === "algum") {
     return [validador, ...validador.validadores.flatMap(achatarValidador)];
   }
-  if (validador.tipo === "nao") return [validador, ...achatarValidador(validador.validador)];
+  if (validador.tipo === "nao" || validador.tipo === "variosCenarios") return [validador, ...achatarValidador(validador.validador)];
   return [validador];
 }
 
@@ -1137,6 +1138,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet");
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
+          // Cena: os validadores olham a simulação, com dispositivos, propriedades e ações que existem nela.
+          if (VALIDADORES_DE_CENA.has(item.tipo)) {
+            const cena = cenaDaFase(fase);
+            if (!cena) problemas.push(`${onde}: o validador ${item.tipo} pede a área "cena"`);
+            else problemas.push(...conferirValidadorDeCena(item, cena, onde));
+          }
           if (item.tipo === "planoComentado" && !planoNoCodigo) problemas.push(`${onde}: o validador planoComentado pede as áreas "plano" e "snippet"`);
           if (item.tipo === "casosDoAluno") {
             const dados = casosDaFase(fase);
