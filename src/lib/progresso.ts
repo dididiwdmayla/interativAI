@@ -1,5 +1,6 @@
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
+import type { EscolhaRequisitos, EstadoContrato, EtapaContrato } from "@/motor/contrato/modelo";
 import { type EstadoCasos, MAXIMO_CASOS, MAXIMO_TEXTO_CASO, type ResultadoCaso } from "@/motor/casos/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
@@ -57,6 +58,8 @@ export type EstadoFaseSalvo = {
    * null nas outras fases (e em progresso antigo).
    */
   casos?: EstadoCasos | null;
+  /** (Contrato) A etapa, a lista de requisitos escolhida, a mudança e o tempo de trabalho. null nas outras fases. */
+  contrato?: EstadoContrato | null;
 };
 
 export type ProgramaSalvo = {
@@ -257,6 +260,31 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     circuito: lerCircuitoSalvo(valor.circuito),
     ordenar: lerOrdenarSalvo(valor.ordenar),
     casos: lerCasosSalvo(valor.casos),
+    contrato: lerContratoSalvo(valor.contrato),
+  };
+}
+
+const ETAPAS_CONTRATO: readonly EtapaContrato[] = ["briefing", "requisitos", "trabalho", "entrega"];
+
+function lerContratoSalvo(valor: unknown): EstadoContrato | null {
+  if (!ehObjeto(valor) || typeof valor.etapa !== "string" || !(ETAPAS_CONTRATO as readonly string[]).includes(valor.etapa)) return null;
+  let escolha: EscolhaRequisitos | null = null;
+  if (ehObjeto(valor.escolha)) {
+    const lacunas: Record<string, number[]> = {};
+    if (ehObjeto(valor.escolha.lacunas)) {
+      for (const [id, lista] of Object.entries(valor.escolha.lacunas)) {
+        if (Array.isArray(lista)) lacunas[id] = lista.filter((item): item is number => ehNumero(item)).slice(0, 10);
+      }
+    }
+    escolha = { cartoes: [...new Set(listaDeTextos(valor.escolha.cartoes))].slice(0, 30), lacunas };
+  }
+  return {
+    etapa: valor.etapa as EtapaContrato,
+    escolha,
+    tentativas: ehNumero(valor.tentativas) ? Math.max(0, Math.round(valor.tentativas)) : 0,
+    mudou: valor.mudou === true,
+    tempoMs: ehNumero(valor.tempoMs) ? Math.max(0, valor.tempoMs) : 0,
+    entregue: valor.entregue === true,
   };
 }
 

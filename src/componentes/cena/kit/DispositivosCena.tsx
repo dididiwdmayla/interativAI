@@ -4,7 +4,8 @@
  * que também dá a área de toque (abrir a ficha).
  */
 import type { DispositivoCena, EstadoDispositivos, FiltroPasso, RastroCena } from "@/motor/cena/modelo";
-import { aberturaDoPortao, anguloDoVentilador, letrasAcesas } from "@/motor/cena/animacao";
+import { aberturaDoPortao, anguloDoVentilador, letrasAcesas, mudancasDaCampainha } from "@/motor/cena/animacao";
+import { horaComFracao } from "@/motor/cena/modelo";
 import { LETRAS_DO_LETREIRO } from "@/motor/cena/catalogo";
 import { CONTORNO, cor, SombraNoChao } from "./estilo";
 
@@ -37,6 +38,10 @@ export function caixaDoDispositivo(dispositivo: DispositivoCena): Caixa {
       return { x, y, largura: 64 * e, altura: 56 * e };
     case "ventilador":
       return { x: x - 18 * e, y: y - 58 * e, largura: 36 * e, altura: 60 * e };
+    case "relogio":
+      return { x: x - 13 * e, y: y - 13 * e, largura: 26 * e, altura: 26 * e };
+    case "campainha":
+      return { x: x - 11 * e, y: y - 12 * e, largura: 22 * e, altura: 24 * e };
   }
 }
 
@@ -249,7 +254,70 @@ function Ventilador({ dispositivo, estado, rastro, tempoMs, filtro }: Props) {
   );
 }
 
-const DESENHOS = { lampada: Lampada, sensor: Sensor, interruptor: Interruptor, portao: Portao, letreiro: Letreiro, forno: Forno, ventilador: Ventilador } as const;
+function Relogio({ dispositivo, rastro, tempoMs }: Props) {
+  const { x, y } = dispositivo;
+  const e = dispositivo.escala ?? 1;
+  const hora = horaComFracao(Number(rastro.inicial[dispositivo.id]?.hora ?? 6), tempoMs);
+  const minutos = (hora % 1) * 360;
+  const horas = ((hora % 12) / 12) * 360;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${e})`}>
+      <circle r={12} fill={cor("metal-sombra")} {...CONTORNO} />
+      <circle r={10.2} fill={cor("claro")} {...CONTORNO} />
+      {Array.from({ length: 12 }, (_, i) => (
+        <rect key={i} x={-0.5} y={-9.2} width={1} height={i % 3 === 0 ? 2.6 : 1.4} rx={0.5} fill={cor("contorno")} opacity={0.6} transform={`rotate(${i * 30})`} />
+      ))}
+      <rect x={-1} y={-5.6} width={2} height={6.4} rx={1} fill={cor("contorno")} transform={`rotate(${horas})`} />
+      <rect x={-0.6} y={-8.2} width={1.2} height={9} rx={0.6} fill={cor("toldo")} transform={`rotate(${minutos})`} />
+      <circle r={1.4} fill={cor("metal-sombra")} />
+    </g>
+  );
+}
+
+/** Quanto tempo a campainha balança depois de cada toque. */
+const BALANCO_MS = 700;
+
+function Campainha({ dispositivo, rastro, tempoMs, filtro }: Props) {
+  const { x, y } = dispositivo;
+  const e = dispositivo.escala ?? 1;
+  const toques = mudancasDaCampainha(rastro, dispositivo.id, tempoMs, filtro);
+  const ultimo = toques[toques.length - 1];
+  const desde = ultimo ? tempoMs - ultimo.tempoMs : Number.POSITIVE_INFINITY;
+  const tocando = desde <= BALANCO_MS;
+  const p = tocando ? desde / BALANCO_MS : 1;
+  const giro = tocando ? Math.sin(p * Math.PI * 6) * 16 * (1 - p) : 0;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${e})`}>
+      {/* O suporte na parede */}
+      <rect x={-2} y={-12} width={4} height={5} rx={1} fill={cor("metal-sombra")} {...CONTORNO} />
+      {tocando &&
+        [0, 1].map((onda) => (
+          <g key={onda} fill="none" stroke={cor("luz")} strokeWidth={1.4} strokeLinecap="round" opacity={1 - p}>
+            <path d={`M${-11 - onda * 4 - p * 3} ${-6}q${-3} ${5} 0 ${10}`} />
+            <path d={`M${11 + onda * 4 + p * 3} ${-6}q${3} ${5} 0 ${10}`} />
+          </g>
+        ))}
+      <g transform={`rotate(${giro} 0 -7)`}>
+        <path d="M-8 6q0-12 8-12t8 12z" fill={cor("luz")} {...CONTORNO} />
+        <path d="M2 -5q5 2 5 11h-3q0-7-2-11z" fill="var(--cor-cena-escuro)" opacity={0.15} />
+        <rect x={-9.5} y={5} width={19} height={3} rx={1.5} fill={cor("metal")} {...CONTORNO} />
+        <circle cx={0} cy={9.5} r={2} fill={cor("metal-sombra")} {...CONTORNO} />
+      </g>
+    </g>
+  );
+}
+
+const DESENHOS = {
+  lampada: Lampada,
+  sensor: Sensor,
+  interruptor: Interruptor,
+  portao: Portao,
+  letreiro: Letreiro,
+  forno: Forno,
+  ventilador: Ventilador,
+  relogio: Relogio,
+  campainha: Campainha,
+} as const;
 
 export function DesenhoDispositivo(props: Props) {
   const Desenho = DESENHOS[props.dispositivo.tipo];

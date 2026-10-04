@@ -1,6 +1,8 @@
 import { temObjetivos } from "@/motor/tiposDeFase";
 import type { Fase, FaseComObjetivos, Objetivo } from "@/conteudo/tipos";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
+import { ehContrato, escolhaCerta, estadoInicialContrato, type EstadoContrato } from "./contrato/modelo";
+import { itensDoChecklist } from "./validadores";
 import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "./tipos";
 
 /**
@@ -11,8 +13,11 @@ import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from
  */
 export type EtapaFase = "meta" | "introducao" | "objetivos" | "concluida";
 
-/** Pausa: a fala fica na tela até o jogador seguir. */
-export type PausaMotor = "objetivoConcluido" | "solucao" | "desafioConcluido" | null;
+/**
+ * Pausa: a fala fica na tela até o jogador seguir. "mudancaDoCliente": (contrato)
+ * a mensagem do cliente mudando o pedido está na tela.
+ */
+export type PausaMotor = "objetivoConcluido" | "solucao" | "desafioConcluido" | "mudancaDoCliente" | null;
 
 /**
  * Como a fase está sendo jogada:
@@ -57,6 +62,8 @@ export type EstadoMotor = {
   htmlInicioObjetivo: string | null;
   /** O CSS de quando o objetivo atual começou (par do htmlInicioObjetivo). */
   cssInicioObjetivo: string | null;
+  /** (Contrato) A etapa, a lista de requisitos, a mudança de pedido e o tempo. null nas outras fases. */
+  contrato: EstadoContrato | null;
 };
 
 function limitar(valor: number, minimo: number, maximo: number): number {
@@ -92,6 +99,14 @@ export const FALA_DESAFIO: Fala = {
 
 export const FALA_REVISAO = "Modo revisão: sem estrelas, é só relembrar. Quando quiser, volte ao desafio.";
 
+/** A fala do colega enquanto o cliente conta o que quer (o briefing). */
+export const FALA_BRIEFING: Fala = { texto: "Escuta com atenção: cliente fala de tudo um pouco. Depois a gente separa o que ele pediu de verdade.", expressao: "curioso" };
+
+export const FALA_CONTRATO: Fala = {
+  texto: "Bora trabalhar! O checklist marca cada requisito sozinho. Travou? Me pergunta: eu sou o colega da mesa ao lado.",
+  expressao: "feliz",
+};
+
 export const FALA_PROJETO: Fala = {
   texto: "O site é seu! Sem passo a passo: os requisitos se marcam sozinhos quando você fizer. Travou? O Me ajuda te faz uma pergunta.",
   expressao: "comemorando",
@@ -99,6 +114,7 @@ export const FALA_PROJETO: Fala = {
 
 /** Fala do primeiro momento de objetivos (depois da introdução ou ao abrir direto). */
 export function falaDeInicio(fase: Fase, toque: boolean): Fala {
+  if (ehContrato(fase)) return FALA_BRIEFING;
   if (fase.tipo === "desafio") return FALA_DESAFIO;
   if (fase.tipo === "projeto-ponte") return FALA_PROJETO;
   return falaDoObjetivo(fase, 0, toque);
@@ -121,6 +137,7 @@ export function criarEstadoInicial(
   { modo, mostrarMeta }: OpcoesEstadoInicial,
 ): EstadoMotor {
   const total = temObjetivos(fase) ? fase.objetivos.length : fase.tipo === "desafio" ? fase.partes.length : fase.requisitos.length;
+  const contratoSalvo = ehContrato(fase) && modo === "jogo" && salvo?.introducaoVista ? (salvo.contrato ?? null) : null;
   const base: EstadoMotor = {
     etapa: mostrarMeta ? "meta" : "introducao",
     indiceFala: 0,
@@ -141,9 +158,12 @@ export function criarEstadoInicial(
     listaRever: false,
     htmlInicioObjetivo: null,
     cssInicioObjetivo: null,
+    contrato: ehContrato(fase) ? estadoInicialContrato() : null,
   };
 
   if (modo !== "jogo") {
+    // Fora do jogo (lab, revisão), o contrato abre direto no trabalho, com a lista certa.
+    if (ehContrato(fase)) return { ...base, etapa: "objetivos", fala: FALA_CONTRATO, contrato: { ...estadoInicialContrato(), etapa: "trabalho", escolha: escolhaCerta(fase.contrato) } };
     const fala = falaDeInicio(fase, toque);
     return {
       ...base,
@@ -157,19 +177,28 @@ export function criarEstadoInicial(
   }
 
   if (!temObjetivos(fase)) {
-    const itens = fase.tipo === "desafio" ? fase.partes : fase.requisitos;
+    const contrato = contratoSalvo ?? base.contrato;
+    const itens = itensDoChecklist(fase, contrato?.mudou ?? false) ?? [];
     const partesFeitas = salvo.partesFeitas.filter((id) => itens.some((parte) => parte.id === id));
     const reveres = Math.max(0, salvo.reveres);
-    const comum = { ...base, partesFeitas, reveres, concluidos: partesFeitas.length, estrelas: estrelasDoDesafio(reveres) };
-    if (partesFeitas.length >= total && salvo.objetivoAtual >= total) {
+    const comum = { ...base, partesFeitas, reveres, concluidos: partesFeitas.length, estrelas: estrelasDoDesafio(reveres), contrato };
+    const totalAgora = itens.length;
+    if (partesFeitas.length >= totalAgora && salvo.objetivoAtual >= totalAgora && (!contrato || contrato.entregue)) {
       return { ...comum, etapa: "concluida", indiceFala: fase.conclusao.length, fala: falaFinalDe(fase) };
+    }
+    // Contrato com tudo pronto e ainda não entregue: volta para a entrega.
+    if (contrato && partesFeitas.length >= totalAgora) {
+      return { ...comum, etapa: "objetivos", contrato: { ...contrato, etapa: "entrega" }, fala: { texto: "Tudo pronto! Falta entregar o trabalho para o cliente.", expressao: "comemorando" } };
     }
     return {
       ...comum,
       etapa: "objetivos",
       fala: {
-        texto:
-          fase.tipo === "desafio"
+        texto: contrato
+          ? contrato.etapa === "trabalho"
+            ? "Que bom te ver de novo! O trabalho está do jeitinho que você deixou."
+            : "Que bom te ver de novo! Vamos continuar de onde paramos com o cliente."
+          : fase.tipo === "desafio"
             ? "Que bom te ver de novo! O desafio está do jeitinho que você deixou."
             : "Que bom te ver de novo! Seu site está do jeitinho que você deixou.",
         expressao: "feliz",

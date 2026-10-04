@@ -138,7 +138,10 @@ export function conferirValidadorDeCena(validador: Validador, cena: DadosCena, o
       if (validador.linhasDoTempo.length < 2) problemas.push(`${onde}: variosCenarios com ${validador.linhasDoTempo.length} linha(s) do tempo (pelo menos 2: é o que impede o código decorado)`);
       validador.linhasDoTempo.forEach((linha, i) => problemas.push(...conferirLinhaDoTempo(cena, linha, `${onde}: linhasDoTempo[${i}]`)));
       const dentro = (v: Validador): Validador[] => (v.tipo === "todos" || v.tipo === "algum" ? [v, ...v.validadores.flatMap(dentro)] : v.tipo === "nao" ? [v, ...dentro(v.validador)] : [v]);
-      for (const item of dentro(validador.validador)) {
+      if (validador.porLinha && validador.porLinha.length !== validador.linhasDoTempo.length) {
+        problemas.push(`${onde}: variosCenarios com ${validador.porLinha.length} validador(es) em porLinha para ${validador.linhasDoTempo.length} linhas do tempo (um para cada)`);
+      }
+      for (const item of [...dentro(validador.validador), ...(validador.porLinha ?? []).flatMap(dentro)]) {
         if (item.tipo === "variosCenarios") problemas.push(`${onde}: variosCenarios dentro de variosCenarios`);
         else if (!["estadoNaCena", "sequenciaNaCena", "reagiu", "todos", "algum", "nao"].includes(item.tipo)) problemas.push(`${onde}: dentro do variosCenarios só valem validadores de cena (veio ${item.tipo})`);
       }

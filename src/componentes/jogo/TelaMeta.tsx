@@ -7,7 +7,8 @@ import { Botao } from "@/componentes/ui/Botao";
 import { Modal } from "@/componentes/ui/Modal";
 import type { FaseDesafio, Unidade } from "@/conteudo/tipos";
 import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
-import { circuitosDoDesafio, composicaoDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio } from "@/motor/simulacao";
+import { circuitosDoDesafio, composicaoDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio, type RetratoComposicao } from "@/motor/simulacao";
+import { ehContrato } from "@/motor/contrato/modelo";
 import { faseComposta } from "@/motor/composicao";
 import { MiniComposicao } from "@/componentes/composicao/MiniComposicao";
 import { MiniBancada } from "@/componentes/circuito/MiniBancada";
@@ -45,7 +46,15 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
   const composto = faseComposta(desafio);
   const deProgramas = desafio.programa !== undefined && !deCircuito && !composto;
   const semPagina = deProgramas || deCircuito || composto;
-  const composicao = useMemo(() => (composto && aberta ? composicaoDoDesafio(desafio) : null), [aberta, composto, desafio]);
+  // Contrato: a meta mostra só o mundo (a cena) antes e depois; o código é o aluno que escreve.
+  const deContrato = ehContrato(desafio);
+  const composicao = useMemo(() => {
+    if (!composto || !aberta) return null;
+    const retratos = composicaoDoDesafio(desafio);
+    if (!deContrato) return retratos;
+    const soCena = (retrato: RetratoComposicao): RetratoComposicao => ({ ...retrato, plano: null, codigo: null, casos: null });
+    return { antes: soCena(retratos.antes), depois: soCena(retratos.depois) };
+  }, [aberta, composto, deContrato, desafio]);
   const depois = useMemo(() => (semPagina ? { body: "", css: null } : estadoFinalDoDesafio(desafio)), [semPagina, desafio]);
   // Desafio de programa: o palco antes e depois (a memória que as soluções das partes deixam).
   const memorias = useMemo(() => (deProgramas && aberta ? memoriasDoDesafio(desafio) : null), [aberta, deProgramas, desafio]);
@@ -107,7 +116,9 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
       )}
       {!noDesafio && (
         <p className="mt-3 text-sm text-texto-suave">
-          Esse é o desafio do fim da unidade. Até lá, cada passo aparece primeiro com ajuda e depois sozinho.
+          {deContrato
+            ? "No fim da unidade, um cliente de verdade te contrata para fazer isso. Até lá, você conhece o lugar e os aparelhos."
+            : "Esse é o desafio do fim da unidade. Até lá, cada passo aparece primeiro com ajuda e depois sozinho."}
         </p>
       )}
       <div className="mt-4 flex justify-end">

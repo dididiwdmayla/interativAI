@@ -26,6 +26,7 @@ import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 import type { AreaTrabalho } from "@/motor/composicao";
 import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
 import type { AcontecimentoCena, DadosCena, ValorCena } from "@/motor/cena/modelo";
+import type { DadosContrato } from "@/motor/contrato/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -394,7 +395,17 @@ export type Validador =
    * casos escondidos do funcaoPassa. Assim o aluno não programa "decorado"
    * pro horário exato em que a pessoa chega.
    */
-  | { tipo: "variosCenarios"; linhasDoTempo: AcontecimentoCena[][]; validador: Validador }
+  | {
+      tipo: "variosCenarios";
+      linhasDoTempo: AcontecimentoCena[][];
+      validador: Validador;
+      /**
+       * (Opcional) Um validador de cena a mais para cada linha do tempo, na
+       * mesma ordem: o que muda de um dia para o outro (quantas pessoas
+       * passaram, quando a luz apaga). Vale junto com `validador`.
+       */
+      porLinha?: Validador[];
+    }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -767,8 +778,17 @@ export type ParteDesafio = {
    * Id da fase (da mesma unidade) onde isso foi ensinado de forma GUIADA:
    * abre no "Rever". A fase apontada tem pelo menos 1 objetivo guiado
    * (a escada de ajuda completa socorre quem travou).
+   *
+   * (Contrato) Pode ser uma fase de outra unidade, antes do contrato, onde a
+   * habilidade foi ensinada (o contrato junta a ilha inteira).
    */
   revisarEm: string;
+  /**
+   * (Contrato, obrigatória lá) A pergunta do colega de trabalho para esta
+   * parte: ele só pergunta e lembra do processo ("você já testou com a
+   * vitrine vazia?"), nunca diz a resposta.
+   */
+  pergunta?: string;
   /** Ações que cumprem esta parte (testes, /lab/fases e a prévia do "depois"). */
   solucaoDeTeste: Acao[];
 };
@@ -879,7 +899,19 @@ export type FasePratica = FaseBase & ComposicaoDaFase & {
  * prática composta (plano, código e palco), e as partes podem ser de cada
  * área.
  */
-export type FaseDesafio = FaseBase & ComposicaoDaFase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
+export type FaseDesafio = FaseBase &
+  ComposicaoDaFase & {
+    tipo: "desafio";
+    partes: ParteDesafio[];
+    circuito?: DadosCircuito;
+    /**
+     * O desafio é um CONTRATO (o trabalho de fim de ilha): briefing do
+     * cliente, requisitos escolhidos entre distrações, o checklist ao vivo,
+     * a mudança de pedido no meio, a entrega e o Levar pro mundo. Ver
+     * src/motor/contrato/modelo.ts e o guia, seção 31.
+     */
+    contrato?: DadosContrato;
+  };
 
 /**
  * Um requisito do projeto-ponte: marca sozinho quando o validador passa

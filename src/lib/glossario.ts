@@ -74,7 +74,7 @@ export function destinoDaFase(faseId: string, progresso: Progresso, fases: reado
   const fase = fases.find((item) => item.id === faseId);
   if (!fase) return null;
   const { unidade, numero } = localDaFase(fase);
-  const rotulo = `${unidade.titulo} · ${rotuloDaFase(fase.tipo, numero)}`;
+  const rotulo = `${unidade.titulo} · ${rotuloDaFase(fase.tipo, numero, fase.tipo === "desafio" && fase.contrato !== undefined)}`;
   if (faseLiberada(fase, progresso)) return { faseId, rotulo, href: rotaDaFase(faseId), liberada: true, aviso: null };
   const local = localNoCurriculo(unidade.id);
   const ilha = local?.ilha;

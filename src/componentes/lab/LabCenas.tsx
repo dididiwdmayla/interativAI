@@ -54,6 +54,10 @@ const AMOSTRAS: Amostra[] = [
   amostra("Forno quente", { id: "forno", tipo: "forno", x: 112, y: 70, escala: 1.5 }, [["ligado", true, "ligar"]], 5000),
   amostra("Ventilador parado", { id: "ventilador", tipo: "ventilador", x: 160, y: 160, escala: 1.8 }, [], 100),
   amostra("Ventilador na 3", { id: "ventilador", tipo: "ventilador", x: 160, y: 160, escala: 1.8 }, [["velocidade", 3, "velocidade"]], 120),
+  amostra("Relógio às 6h", { id: "relogio", tipo: "relogio", x: 160, y: 75, escala: 3 }, [], 0),
+  amostra("Relógio às 9h30", { id: "relogio", tipo: "relogio", x: 160, y: 75, escala: 3 }, [], 7000),
+  amostra("Campainha quieta", { id: "campainha", tipo: "campainha", x: 160, y: 75, escala: 2.6 }, [], 100),
+  amostra("Campainha tocando", { id: "campainha", tipo: "campainha", x: 160, y: 75, escala: 2.6 }, [["toques", 1, "tocar"]], 160),
 ];
 
 /** As cenas de referência num momento bom: o quarto aceso e a vitrine acesa com a pessoa na frente. */

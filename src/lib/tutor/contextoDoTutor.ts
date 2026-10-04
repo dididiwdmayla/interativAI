@@ -23,6 +23,14 @@ export function contextoDoTutor(faseId: string, objetivoId: string, enunciadoDoC
   const fase = faseDoId(faseId);
   if (!fase) return { modo: "guiado", enunciado: enunciadoDoCliente, siteAlvo: "site fictício" };
   const siteAlvo = fase.siteAlvo.titulo;
+  if (fase.tipo === "desafio" && fase.contrato) {
+    // O pedido inteiro (com a mudança): o tutor não sabe se ela já chegou, então só usa o que o aluno contar.
+    return {
+      modo: "contrato",
+      enunciado: `Contrato: ${fase.contrato.projeto}, para um cliente. Pedido: ${fase.contrato.documento.paragrafos.join(" ")} Requisitos: ${fase.partes.map((parte) => parte.descricao).join("; ")}`,
+      siteAlvo: fase.contrato.projeto,
+    };
+  }
   if (fase.tipo === "desafio") {
     return {
       modo: "desafio",

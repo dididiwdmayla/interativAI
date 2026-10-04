@@ -101,7 +101,13 @@ export type EventoFase =
   /** (Área cena) Viu o "por dentro" de um dispositivo (o caminho do comando até o mundo real). */
   | { tipo: "viuPorDentro"; dispositivo: string; tipoDispositivo: string }
   /** (Área cena) Trocou a velocidade da simulação. */
-  | { tipo: "mudouVelocidade"; velocidade: number };
+  | { tipo: "mudouVelocidade"; velocidade: number }
+  /** (Contrato) Conferiu a lista de requisitos (certa ou não). */
+  | { tipo: "conferiuRequisitos"; certo: boolean }
+  /** (Contrato) Releu o documento do cliente. */
+  | { tipo: "leuDocumento" }
+  /** (Contrato) Baixou o programa para rodar fora do jogo (Levar pro mundo). */
+  | { tipo: "levouProMundo" };
 
 /**
  * Para onde um link levaria:
@@ -164,4 +170,7 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "abriuFicha",
   "viuPorDentro",
   "mudouVelocidade",
+  "conferiuRequisitos",
+  "leuDocumento",
+  "levouProMundo",
 ];

@@ -45,7 +45,9 @@ import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
 import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
-import type { Acao, Fase, FaseComObjetivos, FaseDesafio, FaseProjetoPonte, ItemRevisao, Objetivo, Unidade, Validador } from "./tipos";
+import type { Acao, Fase, FaseComObjetivos, FaseDesafio, FaseProjetoPonte, ItemRevisao, Objetivo, ParteDesafio, Unidade, Validador } from "./tipos";
+import { conferirContrato } from "@/motor/contrato/conferir";
+import { conferirRequisitos, ehContrato, escolhaCerta, type FaseContrato, idsDasNovas, mudancaPronta, partesVisiveis } from "@/motor/contrato/modelo";
 import { VALIDADORES_CUSTOM } from "./validadoresCustom";
 import { ferramentaDaAcao } from "./ferramentaDaAcao";
 
@@ -179,13 +181,18 @@ function falasDe(fase: Fase): { onde: string; texto: string }[] {
   return falas;
 }
 
+/** Todos os itens do checklist (no contrato, os do começo e os da mudança de pedido). */
+function todosOsItens(fase: Fase): readonly { id: string; validador: Validador; solucaoDeTeste: readonly Acao[] }[] {
+  return fase.tipo === "desafio" ? fase.partes : (itensDoChecklist(fase) ?? []);
+}
+
 /** Validadores da fase (objetivos e partes), com um rótulo. */
 function validadoresDe(fase: Fase): { onde: string; validador: Validador }[] {
   if (temObjetivos(fase)) {
     return fase.objetivos.map((objetivo, indice) => ({ onde: nomeObjetivo(objetivo, indice), validador: objetivo.validador }));
   }
   const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
-  return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}"`, validador: parte.validador }));
+  return todosOsItens(fase).map((parte) => ({ onde: `${rotulo} "${parte.id}"`, validador: parte.validador }));
 }
 
 /** O validador e todos os que estão dentro dele. */
@@ -193,7 +200,8 @@ function achatarValidador(validador: Validador): Validador[] {
   if (validador.tipo === "todos" || validador.tipo === "algum") {
     return [validador, ...validador.validadores.flatMap(achatarValidador)];
   }
-  if (validador.tipo === "nao" || validador.tipo === "variosCenarios") return [validador, ...achatarValidador(validador.validador)];
+  if (validador.tipo === "nao") return [validador, ...achatarValidador(validador.validador)];
+  if (validador.tipo === "variosCenarios") return [validador, ...achatarValidador(validador.validador), ...(validador.porLinha ?? []).flatMap(achatarValidador)];
   return [validador];
 }
 
@@ -201,7 +209,7 @@ function achatarValidador(validador: Validador): Validador[] {
 function acoesDoJogador(fase: Fase): { onde: string; acoes: readonly Acao[] }[] {
   if (!temObjetivos(fase)) {
     const rotulo = fase.tipo === "desafio" ? "parte" : "requisito";
-    return (itensDoChecklist(fase) ?? []).map((parte) => ({ onde: `${rotulo} "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
+    return todosOsItens(fase).map((parte) => ({ onde: `${rotulo} "${parte.id}" solucaoDeTeste`, acoes: parte.solucaoDeTeste }));
   }
   return fase.objetivos.flatMap((objetivo, indice) => {
     const nome = nomeObjetivo(objetivo, indice);
@@ -601,7 +609,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     id: "ids-internos",
     nome: "ids de objetivos e partes são únicos e em kebab-case",
     checar: (fase) => {
-      const ids = temObjetivos(fase) ? fase.objetivos.map((item) => item.id) : (itensDoChecklist(fase) ?? []).map((item) => item.id);
+      const ids = temObjetivos(fase) ? fase.objetivos.map((item) => item.id) : todosOsItens(fase).map((item) => item.id);
       const vazio = {
         pratica: "a fase não tem objetivos",
         desafio: "o desafio não tem partes",
@@ -1354,15 +1362,22 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     },
   },
   {
+    id: "contrato",
+    nome: "o contrato (cliente, briefing, cartões, mudança de pedido e entrega) está bem formado",
+    checar: (fase) => (ehContrato(fase) ? conferirContrato(fase) : []),
+  },
+  {
     id: "partes-do-desafio",
     nome: "cada parte do desafio aponta para uma fase guiada anterior da mesma unidade",
     checar: (fase, { fases }) => {
       if (fase.tipo !== "desafio") return [];
       const indice = fases.indexOf(fase);
+      // O contrato junta a ilha inteira: o Rever pode levar a uma fase de outra unidade, antes dele.
+      const noContrato = ehContrato(fase);
       return fase.partes.flatMap((parte) => {
         const alvo = fases.find((item) => item.id === parte.revisarEm);
         if (!alvo) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não existe`];
-        if (alvo.unidadeId !== fase.unidadeId) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" é de outra unidade`];
+        if (alvo.unidadeId !== fase.unidadeId && !noContrato) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" é de outra unidade`];
         if (!temObjetivos(alvo)) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" não é uma fase de prática`];
         if (fases.indexOf(alvo) > indice) return [`parte "${parte.id}": revisarEm "${parte.revisarEm}" vem depois do desafio`];
         if (!temObjetivoGuiado(alvo)) {
@@ -1514,7 +1529,96 @@ function jogarDesafio(fase: FaseDesafio | FaseProjetoPonte): Jogada {
   return jogada;
 }
 
+/**
+ * Joga o contrato inteiro, como o aluno faria: a lista certa de requisitos
+ * (e uma com distração, que não pode passar), as partes do começo com as
+ * soluções delas (o "antes"), a mudança de pedido chegando, a prova de que
+ * ela exige ajuste (com o código do antes, cada parte nova falha) e as
+ * soluções das partes novas (o "depois"), com tudo passando junto no fim.
+ */
+function jogarContrato(fase: FaseContrato): Jogada {
+  const simulacao = criarSimulacao(fase);
+  const jogada: Jogada = { eventos: [], solucoes: [] };
+  const problemas = jogada.solucoes;
+  const { contrato } = fase;
+  for (const [indice, evento] of (fase.eventosIniciais ?? []).entries()) {
+    try {
+      simulacao.executar(evento.acoes);
+    } catch (erro) {
+      jogada.eventos.push(`evento inicial ${indice + 1} quebrou: ${mensagemDe(erro)}`);
+      return jogada;
+    }
+  }
+  // A etapa de requisitos: a lista certa passa; com uma distração a mais, ou sem um pedido, não.
+  const certa = escolhaCerta(contrato);
+  if (!conferirRequisitos(contrato, certa).certo) problemas.push("a lista certa de requisitos (os cartões de verdade com as lacunas certas) não passa na conferência");
+  const sobra = contrato.requisitos.cartoes.find((cartao) => cartao.sobra);
+  if (sobra && conferirRequisitos(contrato, { ...certa, cartoes: [...certa.cartoes, sobra.id] }).certo) problemas.push("a lista com uma distração a mais passa na conferência");
+  if (certa.cartoes.length && conferirRequisitos(contrato, { ...certa, cartoes: certa.cartoes.slice(1) }).certo) problemas.push("a lista sem um dos pedidos passa na conferência");
+
+  simulacao.comecarObjetivo(null);
+  let mudou = false;
+  let feitas: string[] = [];
+  const atualizar = () => {
+    feitas = recalcularPartesFeitas(fase, feitas, simulacao.contexto(), mudou);
+  };
+  const aplicar = (parte: ParteDesafio, quando: string): boolean => {
+    atualizar();
+    if (feitas.includes(parte.id)) problemas.push(`${quando}, a parte "${parte.id}" já estava marcada antes da própria solução (os itens se misturam)`);
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch (erro) {
+      problemas.push(`parte "${parte.id}": a solucaoDeTeste quebrou na ${mensagemDe(erro)}`);
+      return false;
+    }
+    const resultado = simulacao.avaliar(parte.validador);
+    if (!resultado.passou) {
+      problemas.push(`parte "${parte.id}": depois da solucaoDeTeste, o validador ainda não passa:\n${explicarResultado(resultado)}`);
+      return false;
+    }
+    atualizar();
+    return true;
+  };
+  const conferirNoFim = (quando: string) => {
+    for (const parte of partesVisiveis(fase, mudou)) {
+      if (feitas.includes(parte.id)) continue;
+      problemas.push(`${quando}, a parte "${parte.id}" não passa mais: a solução de uma parte seguinte desfez o efeito dela:\n${explicarResultado(simulacao.avaliar(parte.validador))}`);
+    }
+  };
+
+  // O antes: as partes do começo, na ordem.
+  let chegou = false;
+  for (const parte of partesVisiveis(fase, false)) {
+    if (!aplicar(parte, "antes da mudança")) return jogada;
+    if (!chegou && mudancaPronta(contrato, feitas)) chegou = true;
+  }
+  conferirNoFim("com a solução do antes");
+  if (!chegou) problemas.push(`a mudança de pedido nunca chega: as partes ${contrato.mudanca.depoisDe.join(", ")} não ficaram marcadas juntas`);
+  // A mudança exige ajuste de verdade: com o código do antes, cada parte nova falha.
+  for (const nova of contrato.mudanca.novas) {
+    const parte = fase.partes.find((item) => item.id === nova.parte);
+    if (parte && simulacao.avaliar(parte.validador).passou) {
+      problemas.push(`a parte nova "${nova.parte}" já passa com a solução do antes: a mudança de pedido precisa exigir um ajuste no código`);
+    }
+  }
+  // O depois: o checklist muda e as partes novas recebem as soluções delas.
+  mudou = true;
+  atualizar();
+  const novas = idsDasNovas(contrato);
+  for (const parte of fase.partes.filter((item) => novas.has(item.id))) {
+    if (!aplicar(parte, "depois da mudança")) return jogada;
+  }
+  conferirNoFim("no fim (depois da mudança)");
+  try {
+    estadoFinalDoDesafio(fase);
+  } catch (erro) {
+    problemas.push(`não deu para gerar o "depois" da meta: ${mensagemDe(erro)}`);
+  }
+  return jogada;
+}
+
 function jogar(fase: Fase, usarAjuda: boolean): Jogada {
+  if (ehContrato(fase)) return jogarContrato(fase);
   return temObjetivos(fase) ? jogarObjetivos(fase, usarAjuda) : jogarDesafio(fase);
 }
 

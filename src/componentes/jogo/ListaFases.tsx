@@ -148,7 +148,7 @@ export function ListaFases({ aberta, faseAtual, aoEscolher, aoFechar }: Props) {
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-sm font-black text-texto">
-                                {rotuloDaFase(fase.tipo, indice + 1)}: 
+                                {rotuloDaFase(fase.tipo, indice + 1, fase.tipo === "desafio" && fase.contrato !== undefined)}: 
                                 {fase.titulo}
                               </span>
                               {!liberada && (

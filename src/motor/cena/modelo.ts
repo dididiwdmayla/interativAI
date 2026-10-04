@@ -230,6 +230,19 @@ export function instantesDaLinhaDoTempo(linha: readonly AcontecimentoCena[]): nu
 /* O forno: a temperatura sobe ligado e desce desligado.               */
 /* ------------------------------------------------------------------ */
 
+/** O relógio da cena: cada hora do dia passa em `msPorHora` da simulação, a partir da hora do começo (o `inicial.hora`). */
+export const RELOGIO = { msPorHora: 2_000 } as const;
+
+/** A hora cheia no instante (de 0 a 23), começando em `inicio`. */
+export function horaNoTempo(inicio: number, tempoMs: number): number {
+  return (inicio + Math.floor(Math.max(0, tempoMs) / RELOGIO.msPorHora)) % 24;
+}
+
+/** A hora com a fração (7,5 = 7h30): só o desenho dos ponteiros. */
+export function horaComFracao(inicio: number, tempoMs: number): number {
+  return (inicio + Math.max(0, tempoMs) / RELOGIO.msPorHora) % 24;
+}
+
 export const FORNO = { ambiente: 25, maxima: 250, sobePorSegundo: 40, descePorSegundo: 15 } as const;
 
 /**
@@ -296,6 +309,10 @@ export function estadoNoTempo(rastro: RastroCena, tempoMs: number, opcoes: Opcoe
   for (const { id, tipo } of rastro.dispositivos) {
     if (tipo === "sensor") estado[id].temGente = pessoasPresentes(rastro.linhaDoTempo, tempoMs, antes) > 0;
     if (tipo === "interruptor") estado[id].ligado = (rastro.inicial[id]?.ligado === true) !== (apertosAte(rastro.linhaDoTempo, id, tempoMs, antes) % 2 === 1);
+    if (tipo === "relogio") {
+      const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;
+      estado[id].hora = horaNoTempo(Number(rastro.inicial[id]?.hora ?? 6), instante);
+    }
     if (tipo === "forno") {
       const trocas = trocasDoForno[id] ?? [];
       const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;

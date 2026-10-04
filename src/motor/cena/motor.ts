@@ -306,8 +306,12 @@ export class MotorCena {
       case "ventilador":
         metodo("desligar", () => this.mudar(id, "velocidade", 0, "desligar"));
         break;
+      case "campainha":
+        metodo("tocar", () => this.mudar(id, "toques", Number(this.estado[id]?.toques ?? 0) + 1, "tocar"));
+        break;
       case "sensor":
       case "interruptor":
+      case "relogio":
         break;
     }
     return Object.preventExtensions(objeto);

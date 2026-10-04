@@ -84,9 +84,9 @@ export function semPagina(fase: Fase): boolean {
   return fase.programa !== undefined || circuitoDaFase(fase) !== null || fase.tipo === "ordenar-passos" || faseComposta(fase);
 }
 
-/** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */
-export function rotuloDaFase(tipo: TipoFase, numero: number): string {
-  if (tipo === "desafio") return "Desafio";
+/** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio", "Contrato" ou "Projeto". */
+export function rotuloDaFase(tipo: TipoFase, numero: number, contrato = false): string {
+  if (tipo === "desafio") return contrato ? "Contrato" : "Desafio";
   if (tipo === "projeto-ponte") return "Projeto";
   return `Fase ${numero}`;
 }

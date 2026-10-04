@@ -173,7 +173,7 @@ describe("dispositivos e relógio simulado", () => {
     const nucleo = nucleoCom({ ...VITRINE, dispositivos: [...VITRINE.dispositivos, { id: "forno", tipo: "forno", x: 60, y: 120 }] });
     const r = nucleo.executar("luz.ligar();\nforno.ligar();\nesperar(4000);\nluz.desligar();\nlet fim = 1;", "snippet");
     const ler = (indice: number) =>
-      nucleo.avaliarNaFoto(["luz.ligada", "sensor.temGente", "forno.temperatura"], r.passos[indice].memoria, 0, instanteDoPasso(r, indice)).map((x) => ("valor" in x ? x.valor.v : x.erro));
+      nucleo.avaliarNaFoto(["luz.ligada", "sensor.temGente", "forno.temperatura"], r.passos[indice].memoria, 0, instanteDoPasso(r, indice)).map((x) => ("valor" in x && "v" in x.valor ? x.valor.v : "erro"));
     // Cada pausa mostra o mundo ANTES da linha pausada rodar, como o palco.
     expect(r.passos.map((p) => p.linha).slice(0, 5)).toEqual([1, 2, 3, 4, 5]);
     expect(ler(0)).toEqual([false, false, "25"]);
