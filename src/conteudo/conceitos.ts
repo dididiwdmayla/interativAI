@@ -1122,6 +1122,56 @@ const CATALOGO = {
     "logica"
   ]
 },
+
+  "array-js": {
+    "nome": "Lista de valores",
+    "resumo": "Uma lista guarda vários valores em vagões numerados, na ordem escrita.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "indice-lista-js": {
+    "nome": "Índice começa em zero",
+    "resumo": "O primeiro índice é 0. Ler uma posição ausente devolve undefined, sem erro.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "length-lista-js": {
+    "nome": "Tamanho da lista",
+    "resumo": "length conta os itens; o último índice de uma lista não vazia é length - 1.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "push-pop-js": {
+    "nome": "Pôr e tirar pelo fim",
+    "resumo": "push acrescenta ao fim; pop tira e devolve o último item da lista.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "const-lista-js": {
+    "nome": "Const e conteúdo",
+    "resumo": "const impede trocar a lista inteira, mas permite alterar seus itens.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "referencia-lista-js": {
+    "nome": "Duas setas, uma lista",
+    "resumo": "Atribuir uma lista a outra variável compartilha a lista; não copia os vagões.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  }
+,
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

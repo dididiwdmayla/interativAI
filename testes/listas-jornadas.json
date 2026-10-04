@@ -1,0 +1,76 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const fila = [\"Ana\", \"Bia\", \"Caio\"]\nlet primeiro = fila[0]\nlet ultimo = fila[fila.length - 1]\nlet tamanho = fila.length"
+        ],
+        [
+          "f1-prever",
+          "let fora = fila[3]\nlet tipoFora = typeof fora"
+        ],
+        [
+          "f1-sozinho",
+          "const entregas = [\"Lia\", \"Rui\"]\nlet inicio = entregas[0]\nlet fim = entregas[entregas.length - 1]\nlet quantidade = entregas.length"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const pedidos = [\"pão\", \"bolo\"]\npedidos.push(\"suco\")\nlet saiu = pedidos.pop()\npedidos[0] = \"broa\""
+        ],
+        [
+          "f2-prever",
+          "pedidos = [\"café\"]"
+        ],
+        [
+          "f2-sozinho",
+          "const reservas = [\"Ivo\", \"Eva\"]\nreservas.push(\"Noa\")\nlet cancelada = reservas.pop()\nreservas[0] = \"Luz\""
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const fila = [\"Ana\", \"Bia\"]\nlet copia = fila\ncopia[0] = \"Duda\"\nfor (let pessoa of fila) { console.log(pessoa) }"
+        ],
+        [
+          "f3-prever",
+          "copia.push(\"Eli\")\nlet quantidadeFila = fila.length"
+        ],
+        [
+          "f3-sozinho",
+          "const retirada = [\"Rui\", \"Lia\"]\nlet aConferir = retirada\naConferir[1] = \"Sol\"\nfor (let nome of retirada) { console.log(nome) }"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let abertura = playlist[0]\nlet encerramento = playlist[playlist.length - 1]",
+      "let removida = playlist.pop()\nplaylist.push(\"Bis\")\nlet espelho = playlist\nespelho[0] = \"Festa\"",
+      "for (let musica of playlist) { console.log(musica) }\nlet totalMusicas = playlist.length"
+    ],
+    "negativas": {
+      "f1-guiado": "const fila = [\"Ana\", \"Bia\", \"Caio\"]\nlet primeiro = fila[1]\nlet ultimo = fila[fila.length]\nlet tamanho = fila.length"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {},
+    "listas": {
+      "f1-guiado": {
+        "fila": 3
+      },
+      "f2-guiado": {
+        "pedidos": 2
+      }
+    },
+    "fichas": {},
+    "referencias": {
+      "f3-guiado": {
+        "copia": "fila"
+      },
+      "f3-sozinho": {
+        "aConferir": "retirada"
+      }
+    },
+    "leituras": {}
+  }
+}

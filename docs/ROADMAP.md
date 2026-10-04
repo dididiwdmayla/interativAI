@@ -469,6 +469,8 @@ núcleo comum.
 
 ### Em andamento
 
+- Rodada 24: zona Listas e objetos; U1 produzida, faltam U2 a U4 e o fechamento.
+
 (nada no momento)
 
 ### Pendências

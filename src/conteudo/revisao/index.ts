@@ -1,3 +1,4 @@
+import { ITENS_LISTAS_U1 } from "./listas-u1";
 import { ITENS_ARROW_COM_BLOCO } from "./arrow-com-bloco";
 import { ITENS_RETORNO_IMPLICITO } from "./retorno-implicito";
 import { ITENS_ARROW_JS } from "./arrow-js";
@@ -203,6 +204,7 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_LISTAS_U1,
   ...ITENS_ARROW_COM_BLOCO,
   ...ITENS_RETORNO_IMPLICITO,
   ...ITENS_ARROW_JS,
