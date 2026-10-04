@@ -1101,6 +1101,27 @@ const CATALOGO = {
     "logica"
   ]
 },
+"arrow-js": {
+  "nome": "Função com seta",
+  "resumo": "A seta => cria uma função; parâmetros e chamadas continuam funcionando do mesmo jeito.",
+  "temas": [
+    "logica"
+  ]
+},
+"retorno-implicito": {
+  "nome": "Retorno implícito",
+  "resumo": "Uma arrow sem chaves devolve automaticamente o valor da expressão depois da seta.",
+  "temas": [
+    "logica"
+  ]
+},
+"arrow-com-bloco": {
+  "nome": "Arrow com bloco",
+  "resumo": "Com chaves, a arrow executa instruções e precisa de return para devolver um resultado.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

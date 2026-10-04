@@ -30,3 +30,9 @@ Rodada anterior: `docs/arquivo/PROGRESSO-rodada-22.md`. Status consolidado: `doc
 - U3 com quatro fases: global/local e nomes iguais, ReferenceError fora da função, let do if com moldura tracejada e contador que renascia em cada chamada. Desafio nas visitas da Exposição Marés, com o defeito no preparo e no Snippet: segunda visita em 1 antes, 2 depois.
 - Quatro conceitos com tema Lógica e oito itens de revisão; funções de cálculo com funcaoPassa, contador persistente por valorVariavel e saída/semErro conforme a tarefa.
 - Verificado: 13.406 testes; jornadas nos três layouts, variáveis locais dentro da moldura, variável dentro do bloco e seu desaparecimento antes do return, negativas dos escopos e do contador, meta e desafio; publicar:conteudo, lint e build.
+
+### Etapa 4: Arrow functions
+
+- U4 com três fases: reescrever function como arrow, retorno implícito e bloco sem return; desafio nas medidas da receita da Cozinha Aurora. Arrow com for revisa Repetição, e o desafio com if revisa Decisões.
+- Três conceitos com tema Lógica e seis itens de revisão; funcaoPassa com zero, negativos e decimais, usouSintaxe arrow/return e valorVariavel/semErro. Sem listas e sem ferramentas do depurador.
+- Verificado: 13.622 testes; jornadas nos três layouts com moldura, parâmetro e retorno da arrow, negativas de function no lugar de arrow e de bloco sem return, desafio e console limpo; publicar:conteudo, lint e build.

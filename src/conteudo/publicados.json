@@ -222,6 +222,11 @@
       "logica-funcoes-u3-f2",
       "logica-funcoes-u3-f3",
       "logica-funcoes-u3-f4"
+    ],
+    "logica-funcoes-u4": [
+      "logica-funcoes-u4-f1",
+      "logica-funcoes-u4-f2",
+      "logica-funcoes-u4-f3"
     ]
   },
   "fases": {
@@ -1341,9 +1346,35 @@
         "contador",
         "rotulo"
       ]
+    },
+    "logica-funcoes-u4-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-funcoes-u4-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-funcoes-u4-f3": {
+      "partes": [
+        "xicaras",
+        "colheres"
+      ]
     }
   },
   "itensRevisao": [
+    "arrow-com-bloco-1",
+    "arrow-com-bloco-2",
+    "retorno-implicito-1",
+    "retorno-implicito-2",
+    "arrow-js-1",
+    "arrow-js-2",
     "estado-entre-chamadas-1",
     "estado-entre-chamadas-2",
     "escopo-bloco-js-1",

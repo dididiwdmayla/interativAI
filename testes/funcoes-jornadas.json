@@ -183,5 +183,54 @@
       }
     },
     "caixaDepois": "segunda"
+  },
+  "4": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const dobro = (n) => n * 2\nlet total = dobro(3)"
+        ],
+        [
+          "f1-prever",
+          "let total = dobro(0)"
+        ],
+        [
+          "f1-sozinho",
+          "const triplo = (gramas) => gramas * 3\nlet total = triplo(20)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const dobro = (n) => {\n  return n * 2\n}\nlet total = dobro(4)"
+        ],
+        [
+          "f2-prever",
+          "const teste = (n) => {\n  n * 2\n}\nlet total = teste(4)\nlet faltou = typeof total === \"undefined\""
+        ],
+        [
+          "f2-sozinho",
+          "const porcoes = (n) => {\n  let soma = 0\n  for (let i = 1; i <= n; i++) {\n    soma += i\n  }\n  return soma\n}\nlet total = porcoes(3)"
+        ]
+      ]
+    ],
+    "desafio": [
+      "const ml = (xicaras) => xicaras * 240\nlet leite = ml(1.5)",
+      "const gramas = (colheres) => {\n  if (colheres <= 0) { return 0 }\n  return colheres * 15\n}\nlet farinha = gramas(2)"
+    ],
+    "negativas": {
+      "f1-guiado": "function dobro(n) {\n  return n * 2\n}\nlet total = dobro(3)",
+      "f2-guiado": "const dobro = (n) => {\n  n * 2\n}\nlet total = dobro(4)"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "dobro",
+        "parametros": {
+          "n": "3"
+        },
+        "retorno": "6"
+      }
+    }
   }
 }

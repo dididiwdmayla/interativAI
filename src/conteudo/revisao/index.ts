@@ -1,3 +1,6 @@
+import { ITENS_ARROW_COM_BLOCO } from "./arrow-com-bloco";
+import { ITENS_RETORNO_IMPLICITO } from "./retorno-implicito";
+import { ITENS_ARROW_JS } from "./arrow-js";
 import { ITENS_ESTADO_ENTRE_CHAMADAS } from "./estado-entre-chamadas";
 import { ITENS_ESCOPO_BLOCO_JS } from "./escopo-bloco-js";
 import { ITENS_ESCOPO_FUNCAO_JS } from "./escopo-funcao-js";
@@ -200,6 +203,9 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_ARROW_COM_BLOCO,
+  ...ITENS_RETORNO_IMPLICITO,
+  ...ITENS_ARROW_JS,
   ...ITENS_ESTADO_ENTRE_CHAMADAS,
   ...ITENS_ESCOPO_BLOCO_JS,
   ...ITENS_ESCOPO_FUNCAO_JS,

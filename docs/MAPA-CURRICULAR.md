@@ -579,7 +579,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Revisa:** parâmetros e retorno (U2).
 - **Confusões:** "variável é global sempre".
 
-#### U4. Arrow functions — `logica-funcoes-u4`
+#### U4. Arrow functions (pronta) — `logica-funcoes-u4`
 
 - **Meta:** escrever funções curtas com a seta `=>` e reconhecer as duas
   formas no código dos outros.
