@@ -268,7 +268,7 @@ type OpcoesEstado = {
   filtro?: FiltroPasso | null;
 };
 
-function mudancaVale(mudanca: MudancaCena, tempoMs: number, opcoes: OpcoesEstado): boolean {
+export function mudancaVale(mudanca: MudancaCena, tempoMs: number, opcoes: OpcoesEstado): boolean {
   if (opcoes.antes ? mudanca.tempoMs >= tempoMs : mudanca.tempoMs > tempoMs) return false;
   const filtro = opcoes.filtro;
   if (!filtro || mudanca.execucao < filtro.execucao) return true;

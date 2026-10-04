@@ -152,6 +152,18 @@ export type ResultadoExecucao = {
 /** O valor de uma expressão do painel Observar, avaliada numa foto da memória (o momento pausado). */
 export type ResultadoAvaliacao = { expressao: string; valor: ValorExibido } | { expressao: string; erro: string };
 
+/**
+ * (Cena) O instante de uma pausa do depurador: o relógio da simulação no
+ * passo e o índice do passo (as mudanças dos dispositivos até ali valem).
+ */
+export type InstantePausa = { tempoMs: number; passo: number };
+
+/** O instante da cena num passo de uma execução (undefined: sem cena). */
+export function instanteDoPasso(resultado: { passos: readonly { tempoMs?: number }[]; cena?: unknown }, indice: number): InstantePausa | undefined {
+  const tempoMs = resultado.passos[indice]?.tempoMs;
+  return resultado.cena && tempoMs !== undefined ? { tempoMs, passo: indice } : undefined;
+}
+
 /** Uma medição do gráfico de desempenho: a função rodando com uma lista daquele tamanho. */
 export type MedicaoPassos = { funcao: string; tamanho: number; passos: number; passouDoLimite: boolean; erro: string | null };
 

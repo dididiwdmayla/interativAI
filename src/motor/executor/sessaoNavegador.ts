@@ -12,6 +12,7 @@ import {
   LIMITES,
   type CasoFuncao,
   type FotoMemoria,
+  type InstantePausa,
   type MedicaoPassos,
   type OrigemCodigo,
   type ResultadoAvaliacao,
@@ -31,7 +32,7 @@ export interface SessaoExecutor {
   definirCena(dados: DadosCena | null, cenarios?: AcontecimentoCena[][]): void;
   testarFuncao(nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao>;
   /** O depurador pausado: avalia expressões na memória de um passo (sem mudar o programa). */
-  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]>;
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number, instante?: InstantePausa): Promise<ResultadoAvaliacao[]>;
   /** O gráfico de desempenho: uma chamada de cada vez (cada uma com o tempo reserva dela). */
   medirPassos(nome: string, chamadas: { tamanho: number; args: ValorEsperado[] }[]): Promise<MedicaoPassos[]>;
   /** Roda de novo, em silêncio, o que já tinha rodado (a memória volta como estava). */
@@ -136,10 +137,10 @@ export class SessaoNavegador implements SessaoExecutor {
     });
   }
 
-  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> {
+  avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number, instante?: InstantePausa): Promise<ResultadoAvaliacao[]> {
     return this.emFila(async () => {
       if (!expressoes.length) return [];
-      const resposta = await this.enviar({ tipo: "avaliarNaFoto", expressoes, foto, quadro }, LIMITES.reservaMs);
+      const resposta = await this.enviar({ tipo: "avaliarNaFoto", expressoes, foto, quadro, ...(instante ? { instante } : {}) }, LIMITES.reservaMs);
       if (resposta?.tipo === "avaliarNaFoto") return resposta.resultados;
       await this.recuperar();
       return expressoes.map((expressao) => ({ expressao, erro: "A expressão demorou demais e o jogo parou ela." }));

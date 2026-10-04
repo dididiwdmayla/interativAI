@@ -16,6 +16,9 @@ import {
   tirarPasso,
   umaOrdemValida,
 } from "@/motor/ordenar/modelo";
+import { REGRAS_DE_FASE } from "@/conteudo/checagens";
+import { FASE_BANCADA_CONSOLE, FASE_DEMO_AGRUPAR, FASE_DEMO_ORDENAR, FASE_DEMO_ORDENAR_CODIGO } from "@/conteudo/laboratorio/bancadaLogica";
+import { criarSimulacao } from "@/motor/simulacao";
 
 const CAFE: DadosOrdenar = {
   modo: "ordenar",
@@ -105,8 +108,6 @@ describe("ordenar passos: validação pelas dependências", () => {
 
 describe("ordenar passos na fábrica", () => {
   it("as três demonstrações do /lab passam em todas as regras de fase", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_ORDENAR, FASE_DEMO_AGRUPAR, FASE_DEMO_ORDENAR_CODIGO } = await import("@/conteudo/laboratorio/bancadaLogica");
     for (const fase of [FASE_DEMO_ORDENAR, FASE_DEMO_AGRUPAR, FASE_DEMO_ORDENAR_CODIGO]) {
       const problemas = REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] }).map((p) => `${regra.id}: ${p}`));
       expect(problemas, fase.id).toEqual([]);
@@ -114,8 +115,6 @@ describe("ordenar passos na fábrica", () => {
   });
 
   it("na simulação, a outra ordem válida também passa (não existe ordem decorada)", async () => {
-    const { FASE_DEMO_ORDENAR } = await import("@/conteudo/laboratorio/bancadaLogica");
-    const { criarSimulacao } = await import("@/motor/simulacao");
     const simulacao = criarSimulacao(FASE_DEMO_ORDENAR);
     simulacao.executar([{ tipo: "tirarPasso", passo: "gelo" }, ...["ferver", "filtro", "po", "despejar", "servir"].map((passo) => ({ tipo: "porPasso" as const, passo }))]);
     expect(simulacao.avaliar({ tipo: "ordemValida" }).passou).toBe(true);
@@ -126,8 +125,6 @@ describe("ordenar passos na fábrica", () => {
   });
 
   it("sabotagem: ciclo, dependência que não existe, validador fora do quadro e rodar sem programa", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_ORDENAR, FASE_BANCADA_CONSOLE } = await import("@/conteudo/laboratorio/bancadaLogica");
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const ciclo = {

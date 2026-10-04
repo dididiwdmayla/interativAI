@@ -34,7 +34,7 @@ import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 import { criarNucleoSincrono } from "./executor/fabrica";
-import type { FotoMemoria, OrigemCodigo, ResultadoExecucao } from "./executor/tipos";
+import { type FotoMemoria, instanteDoPasso, type OrigemCodigo, type ResultadoExecucao } from "./executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
 import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
@@ -114,7 +114,7 @@ export function criarSimulacao(fase: Fase) {
   const observarNaPausa = (expressoes: readonly string[]) => {
     if (!executor || !sessao) return;
     const memoria = sessao.resultado.passos[sessao.pausa.indice].memoria;
-    for (const r of executor.avaliarNaFoto(expressoes, memoria, memoria.quadros.length - 1)) {
+    for (const r of executor.avaliarNaFoto(expressoes, memoria, memoria.quadros.length - 1, instanteDoPasso(sessao.resultado, sessao.pausa.indice))) {
       eventos.push({ tipo: "observouValor", expressao: r.expressao, valor: "valor" in r ? r.valor : null });
     }
   };

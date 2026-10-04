@@ -10,6 +10,9 @@ import { chamadasDaMedicao, crescimento, listaDoTamanho, textoDePassos } from "@
 import { arvoreDoNo, contarEstruturas, ehArvore, formaPelasContagens, movimentoDaLista, objetosDoQuadroDeCima, somarContagens, temFormaDeArvore } from "@/motor/estruturas";
 import { criarNucleoNode } from "@/motor/executor/node";
 import { planoDoPalco } from "@/motor/palco";
+import { REGRAS_DE_FASE } from "@/conteudo/checagens";
+import { FASE_DEMO_DESEMPENHO, FASE_DEMO_ESTRUTURAS, FASE_DEMO_ORDENAR } from "@/conteudo/laboratorio/bancadaLogica";
+import { criarSimulacao } from "@/motor/simulacao";
 
 const PREPARO = 'const pilha = [1, 2];\nconst pasta = { nome: "site", filhos: [{ nome: "a" }, { nome: "b", filhos: [{ nome: "c" }] }] };';
 
@@ -128,8 +131,6 @@ describe("o gráfico passos x tamanho", () => {
 
 describe("estruturas e desempenho na fábrica", () => {
   it("as duas demonstrações do /lab passam em todas as regras de fase", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_ESTRUTURAS, FASE_DEMO_DESEMPENHO } = await import("@/conteudo/laboratorio/bancadaLogica");
     for (const fase of [FASE_DEMO_ESTRUTURAS, FASE_DEMO_DESEMPENHO]) {
       const problemas = REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] }).map((p) => `${regra.id}: ${p}`));
       expect(problemas, fase.id).toEqual([]);
@@ -137,8 +138,6 @@ describe("estruturas e desempenho na fábrica", () => {
   });
 
   it("formaDaEstrutura: o lado errado não passa, e a árvore pede um objeto com filhos", async () => {
-    const { FASE_DEMO_ESTRUTURAS } = await import("@/conteudo/laboratorio/bancadaLogica");
-    const { criarSimulacao } = await import("@/motor/simulacao");
     const simulacao = criarSimulacao(FASE_DEMO_ESTRUTURAS);
     simulacao.executar([
       { tipo: "executarNoConsole", codigo: 'pilha.push("prato 3")' },
@@ -153,8 +152,6 @@ describe("estruturas e desempenho na fábrica", () => {
   });
 
   it("passosNoMaximo com tamanho mede a função de agora: o jeito lento não passa, o rápido passa", async () => {
-    const { FASE_DEMO_DESEMPENHO } = await import("@/conteudo/laboratorio/bancadaLogica");
-    const { criarSimulacao } = await import("@/motor/simulacao");
     const simulacao = criarSimulacao(FASE_DEMO_DESEMPENHO);
     const lento = { tipo: "passosNoMaximo" as const, valor: 2000, tamanho: 500, funcao: "temRepetidoLento" };
     expect(simulacao.avaliar(lento).detalhe).toBe("ainda não mediu (nada rodou ou a função não existe)");
@@ -171,7 +168,6 @@ describe("estruturas e desempenho na fábrica", () => {
   });
 
   it("o Medir: a lenta cresce muito mais que a rápida (curva contra reta)", async () => {
-    const { FASE_DEMO_DESEMPENHO } = await import("@/conteudo/laboratorio/bancadaLogica");
     const nucleo = criarNucleoNode({ deterministico: true });
     nucleo.executar(FASE_DEMO_DESEMPENHO.programa?.snippet?.codigoInicial ?? "", "snippet");
     const config = FASE_DEMO_DESEMPENHO.programa?.desempenho;
@@ -183,8 +179,6 @@ describe("estruturas e desempenho na fábrica", () => {
   });
 
   it("sabotagem: desempenho sem a ferramenta, três funções, passosNoMaximo sem contador e árvore sem a ferramenta", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_DESEMPENHO, FASE_DEMO_ESTRUTURAS, FASE_DEMO_ORDENAR } = await import("@/conteudo/laboratorio/bancadaLogica");
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const programa = FASE_DEMO_DESEMPENHO.programa;

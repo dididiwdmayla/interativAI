@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { criarNucleoNode } from "@/motor/executor/node";
+import { instanteDoPasso } from "@/motor/executor/tipos";
 import { explicarErro } from "@/motor/executor/erros";
 import { criarSimulacao, momentoDaFoto } from "@/motor/simulacao";
 import { REGRAS_DE_FASE, REGRAS_GERAIS } from "@/conteudo/checagens";
@@ -166,6 +167,23 @@ describe("dispositivos e relógio simulado", () => {
     const teste = nucleo.testarFuncao("acender", [{ args: [], esperado: true }]);
     expect(teste.passou).toBe(true);
     expect(nucleo.rastroDaCena()?.mudancas).toEqual([]);
+  });
+
+  it("depurador pausado: o Observar lê os dispositivos no instante da pausa, e a simulação volta", () => {
+    const nucleo = nucleoCom({ ...VITRINE, dispositivos: [...VITRINE.dispositivos, { id: "forno", tipo: "forno", x: 60, y: 120 }] });
+    const r = nucleo.executar("luz.ligar();\nforno.ligar();\nesperar(4000);\nluz.desligar();\nlet fim = 1;", "snippet");
+    const ler = (indice: number) =>
+      nucleo.avaliarNaFoto(["luz.ligada", "sensor.temGente", "forno.temperatura"], r.passos[indice].memoria, 0, instanteDoPasso(r, indice)).map((x) => ("valor" in x ? x.valor.v : x.erro));
+    // Cada pausa mostra o mundo ANTES da linha pausada rodar, como o palco.
+    expect(r.passos.map((p) => p.linha).slice(0, 5)).toEqual([1, 2, 3, 4, 5]);
+    expect(ler(0)).toEqual([false, false, "25"]);
+    expect(ler(1)).toEqual([true, false, "25"]);
+    expect(ler(3)).toEqual([true, true, "185"]);
+    expect(ler(4)).toEqual([false, true, "185"]);
+    // Observar um comando não muda a simulação de verdade.
+    nucleo.avaliarNaFoto(["luz.ligar()"], r.passos[4].memoria, 0, instanteDoPasso(r, 4));
+    expect(nucleo.rastroDaCena()?.mudancas.map((m) => m.acao)).toEqual(["ligar", "ligar", "desligar"]);
+    expect(nucleo.rastroDaCena()?.relogioMs).toBe(10_000);
   });
 
   it("variosCenarios: o código roda com cada linha do tempo, e a memória fica a da execução de verdade", () => {

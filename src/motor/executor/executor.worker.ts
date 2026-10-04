@@ -111,7 +111,7 @@ ouvir("message", (evento) => {
     } else if (pedido.tipo === "medirPassos") {
       resposta = { id: pedido.id, tipo: "medirPassos", medicoes: nucleo.medirPassos(pedido.nome, pedido.chamadas) };
     } else if (pedido.tipo === "avaliarNaFoto") {
-      resposta = { id: pedido.id, tipo: "avaliarNaFoto", resultados: nucleo.avaliarNaFoto(pedido.expressoes, pedido.foto, pedido.quadro) };
+      resposta = { id: pedido.id, tipo: "avaliarNaFoto", resultados: nucleo.avaliarNaFoto(pedido.expressoes, pedido.foto, pedido.quadro, pedido.instante) };
     } else {
       // Cena: o Snippet roda de novo com as outras linhas do tempo também (o variosCenarios volta a valer depois de recarregar).
       for (const entrada of pedido.entradas) nucleo.executar(entrada.codigo, entrada.origem, { gravar: false, ...(entrada.origem === "snippet" && pedido.cenarios?.length ? { cenarios: pedido.cenarios } : {}) });
