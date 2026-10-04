@@ -64,7 +64,7 @@ const LIMITES_DIVISOR = { minimo: 0.2, maximo: 0.8 };
 export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba, palcoAberto, aoAlternarPalco, tecladoAberto }: Props) {
   const grade = useRef<HTMLElement>(null);
   /** (Computador) A parte do palco na coluna da direita, quando os testes dividem com ele. */
-  const [divisao, setDivisao] = useState(0.55);
+  const [divisao, setDivisao] = useState(0.48);
   const [arrastando, setArrastando] = useState(false);
   const tem = (area: AreaTrabalho) => areas.includes(area);
   const abas = abasDoLayout(layout, areas);
@@ -130,7 +130,8 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
   const classesGrade = {
     desktop: "grid min-h-0 flex-1 gap-x-3 p-3 lg:gap-x-4 lg:p-4",
     paisagem: "grid min-h-0 flex-1 gap-x-2 gap-y-1.5 p-1.5 pr-14",
-    retrato: "grid min-h-0 flex-1 gap-y-1.5 px-2 pb-2 pt-2",
+    // Em pé, a folga embaixo é do computadorzinho (o botão flutuante não cobre os botões das áreas).
+    retrato: "grid min-h-0 flex-1 gap-y-1.5 px-2 pb-16 pt-2",
   }[layout];
 
   const seletorAbas = (

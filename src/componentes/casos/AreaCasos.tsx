@@ -4,8 +4,9 @@
  * A área "testes" de uma fase composta: o aluno escreve exemplos (a entrada,
  * como os argumentos de uma chamada, e a saída que espera) e roda todos
  * contra a própria função. Cada caso mostra se passou ou falhou e o que veio
- * de fato. Os casos ficam editáveis na própria linha; mudar um caso apaga o
- * resultado dele até rodar de novo.
+ * de fato. O caso novo se escreve em cima (embaixo, no celular, o
+ * computadorzinho cobriria o botão); os casos ficam editáveis na própria
+ * linha, e mudar um caso apaga o resultado dele até rodar de novo.
  *
  * No toque, a barra de símbolos aparece embaixo enquanto um campo está em
  * foco (colchetes, aspas e vírgula que o teclado do celular esconde).
@@ -139,10 +140,68 @@ export function AreaCasos({ casos, toque, ocupado, alvoRodar, aoFocar }: Props) 
         </div>
         {alvoRodar(botaoRodar)}
       </div>
+      <div className="shrink-0 border-b-2 border-borda bg-superficie px-2.5 py-2" data-novo-caso>
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="font-mono text-[13px] font-bold text-texto-suave">{dados.funcao}(</span>
+          <input
+            ref={campoNovaEntrada}
+            value={entrada}
+            onChange={(evento) => setEntrada(evento.target.value)}
+            onKeyDown={aoTeclarNovo}
+            onFocus={focar}
+            onBlur={desfocar}
+            placeholder={dados.parametros.join(", ") || "sem argumentos"}
+            aria-label="Entrada do caso novo"
+            className={`${classeCampo} min-w-[6rem] flex-[2]`}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            disabled={cheia}
+            data-entrada-nova
+          />
+          <span className="font-mono text-[13px] font-bold text-texto-suave">)</span>
+          <span className="text-xs font-black text-texto-suave" aria-hidden="true">
+            devolve
+          </span>
+          <input
+            value={esperado}
+            onChange={(evento) => setEsperado(evento.target.value)}
+            onKeyDown={aoTeclarNovo}
+            onFocus={focar}
+            onBlur={desfocar}
+            placeholder="esperado"
+            aria-label="Saída esperada do caso novo"
+            className={`${classeCampo} min-w-[4.5rem] flex-1`}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            disabled={cheia}
+            data-esperado-novo
+          />
+          <button
+            type="button"
+            // Adicionar não tira o foco do campo: o teclado do celular continua aberto para o próximo caso.
+            onPointerDown={(evento) => evento.preventDefault()}
+            onClick={adicionar}
+            disabled={cheia}
+            className="inline-flex h-8 shrink-0 items-center rounded-full border-2 border-primaria px-3 text-xs font-black text-primaria hover:bg-hover disabled:opacity-60 pointer-coarse:h-11"
+            data-adicionar-caso
+          >
+            Adicionar
+          </button>
+        </div>
+        <p className="mt-1 text-[11px] text-texto-suave" aria-live="polite" data-resumo-casos>
+          {cheia
+            ? `A lista está cheia (${MAXIMO_CASOS} casos).`
+            : comResultado
+              ? `${passando} de ${estado.casos.length} passando na última rodada.`
+              : "Textos vão entre aspas; listas, entre colchetes: [8, 6]."}
+        </p>
+      </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2.5">
         {estado.casos.length === 0 ? (
           <p className="rounded-lg border-2 border-dashed border-borda px-3 py-3 text-center text-xs text-texto-suave">
-            Escreva um exemplo embaixo: a entrada, como numa chamada, e o que a função tem que devolver. Pense nos esquisitos também.
+            Escreva um exemplo em cima: a entrada, como numa chamada, e o que a função tem que devolver. Pense nos esquisitos também.
           </p>
         ) : (
           <ol className="flex flex-col gap-1.5" data-lista-casos>
@@ -171,7 +230,7 @@ export function AreaCasos({ casos, toque, ocupado, alvoRodar, aoFocar }: Props) 
                       onFocus={focar}
                       onBlur={desfocar}
                       aria-label={`Entrada do caso ${indice + 1}`}
-                      className={`${classeCampo} w-24 flex-1`}
+                      className={`${classeCampo} min-w-[6rem] flex-[2]`}
                       spellCheck={false}
                       autoCapitalize="off"
                       autoComplete="off"
@@ -186,7 +245,7 @@ export function AreaCasos({ casos, toque, ocupado, alvoRodar, aoFocar }: Props) 
                       onFocus={focar}
                       onBlur={desfocar}
                       aria-label={`Saída esperada do caso ${indice + 1}`}
-                      className={`${classeCampo} w-16 flex-1`}
+                      className={`${classeCampo} min-w-[4.5rem] flex-1`}
                       spellCheck={false}
                       autoCapitalize="off"
                       autoComplete="off"
@@ -218,64 +277,6 @@ export function AreaCasos({ casos, toque, ocupado, alvoRodar, aoFocar }: Props) 
             })}
           </ol>
         )}
-      </div>
-      <div className="shrink-0 border-t-2 border-borda bg-superficie px-2.5 py-2" data-novo-caso>
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="font-mono text-[13px] font-bold text-texto-suave">{dados.funcao}(</span>
-          <input
-            ref={campoNovaEntrada}
-            value={entrada}
-            onChange={(evento) => setEntrada(evento.target.value)}
-            onKeyDown={aoTeclarNovo}
-            onFocus={focar}
-            onBlur={desfocar}
-            placeholder={dados.parametros.join(", ") || "sem argumentos"}
-            aria-label="Entrada do caso novo"
-            className={`${classeCampo} w-24 flex-1`}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoComplete="off"
-            disabled={cheia}
-            data-entrada-nova
-          />
-          <span className="font-mono text-[13px] font-bold text-texto-suave">)</span>
-          <span className="text-xs font-black text-texto-suave" aria-hidden="true">
-            devolve
-          </span>
-          <input
-            value={esperado}
-            onChange={(evento) => setEsperado(evento.target.value)}
-            onKeyDown={aoTeclarNovo}
-            onFocus={focar}
-            onBlur={desfocar}
-            placeholder="esperado"
-            aria-label="Saída esperada do caso novo"
-            className={`${classeCampo} w-16 flex-1`}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoComplete="off"
-            disabled={cheia}
-            data-esperado-novo
-          />
-          <button
-            type="button"
-            // Adicionar não tira o foco do campo: o teclado do celular continua aberto para o próximo caso.
-            onPointerDown={(evento) => evento.preventDefault()}
-            onClick={adicionar}
-            disabled={cheia}
-            className="inline-flex h-8 shrink-0 items-center rounded-full border-2 border-primaria px-3 text-xs font-black text-primaria hover:bg-hover disabled:opacity-60 pointer-coarse:h-11"
-            data-adicionar-caso
-          >
-            Adicionar
-          </button>
-        </div>
-        <p className="mt-1 text-[11px] text-texto-suave" aria-live="polite" data-resumo-casos>
-          {cheia
-            ? `A lista está cheia (${MAXIMO_CASOS} casos).`
-            : comResultado
-              ? `${passando} de ${estado.casos.length} passando na última rodada.`
-              : "Textos vão entre aspas; listas, entre colchetes: [8, 6]."}
-        </p>
       </div>
       {toque && focado && <BarraSimbolos aoInserir={(simbolo) => inserirNoCampo(campoEmFoco.current, simbolo)} />}
     </div>

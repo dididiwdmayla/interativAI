@@ -9,9 +9,11 @@ type Props = {
   ativa: Aba;
   desbloqueadas: readonly Aba[];
   aoTrocar: (aba: Aba) => void;
+  /** Alvos de 44 px no toque (a tela composta). */
+  alto?: boolean;
 };
 
-export function AbasPainel({ ativa, desbloqueadas, aoTrocar }: Props) {
+export function AbasPainel({ ativa, desbloqueadas, aoTrocar, alto = false }: Props) {
   return (
     <div role="tablist" aria-label="Painéis do DevTools" className="flex min-w-0 items-end gap-0.5 overflow-x-auto">
       {ABAS.map((aba) => {
@@ -27,7 +29,7 @@ export function AbasPainel({ ativa, desbloqueadas, aoTrocar }: Props) {
             aria-disabled={!livre}
             aria-label={livre ? aba.rotulo : `${aba.rotulo} (bloqueada, desbloqueia em breve)`}
             onClick={() => livre && aoTrocar(aba.id)}
-            className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-bold transition-colors ${
+            className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-bold transition-colors ${alto ? "pointer-coarse:min-h-11" : ""} ${
               selecionada
                 ? "bg-superficie text-primaria"
                 : livre

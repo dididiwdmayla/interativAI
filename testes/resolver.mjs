@@ -210,6 +210,47 @@ function ferramentas({ pagina }) {
   conferir((await pagina.locator("[data-resumo-casos]").innerText()).includes("3 de 3 passando"), `${MODO}: o resumo diz quantos passam`);
   conferir(await concluido(), `${MODO}: casosDoAluno com a lista vazia e passando`);
 
+  // No toque, todo alvo das áreas tem pelo menos 44 px de altura (cada aba, com os casos já escritos).
+  if (toque) {
+    if (movel) await fecharBalao(pagina);
+    const abas = MODO === "retrato" ? ["plano", "snippet", "testes"] : ["plano", "palco", "testes"];
+    const pequenos = [];
+    for (const id of abas) {
+      await area(id);
+      pequenos.push(
+        ...(await pagina.locator("[data-composicao]").evaluate((raiz) =>
+          [...raiz.querySelectorAll("button, input, [role=tab]")]
+            .filter((el) => {
+              const caixa = el.getBoundingClientRect();
+              return caixa.width > 0 && caixa.height > 0 && !el.closest(".cm-editor") && !el.closest("[aria-hidden=true]");
+            })
+            .filter((el) => el.getBoundingClientRect().height < 43.5)
+            .map((el) => `${el.tagName.toLowerCase()} "${(el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 30)}" ${Math.round(el.getBoundingClientRect().height)}px`),
+        )),
+      );
+    }
+    conferir(pequenos.length === 0, `${MODO}: alvos de 44 px nas áreas (${[...new Set(pequenos)].join("; ")})`);
+  }
+  // Em pé, o palco começa recolhido e abre com um toque.
+  if (MODO === "retrato") {
+    conferir((await pagina.locator('[data-area-trabalho="palco"]').isVisible()) === false, `${MODO}: o palco começa recolhido`);
+    await tocar(pagina.locator("[data-alternar-palco]"));
+    conferir(await pagina.locator('[data-area-trabalho="palco"] [data-caixinha="media"]').isVisible(), `${MODO}: aberto, o palco mostra a memória`);
+    await tocar(pagina.locator("[data-alternar-palco]"));
+  }
+  // A tela cheia de verdade: a composição continua inteira na tela.
+  if (movel) await fecharBalao(pagina);
+  await tocar(pagina.getByRole("button", { name: "Entrar em tela cheia", exact: true }));
+  await pagina.getByRole("button", { name: "Sair da tela cheia", exact: true }).waitFor();
+  await esperarPronto(pagina);
+  const caixaComposta = await pagina.locator("[data-composicao]").boundingBox();
+  const alturaTela = await pagina.evaluate(() => window.innerHeight);
+  conferir(
+    (await pagina.evaluate(() => document.fullscreenElement === document.documentElement)) && caixaComposta.height > 150 && caixaComposta.y + caixaComposta.height <= alturaTela + 1,
+    `${MODO}: em tela cheia, a composição cabe na tela`,
+  );
+  await tocar(pagina.getByRole("button", { name: "Sair da tela cheia", exact: true }));
+
   const relevantes = errosRelevantes(erros);
   conferir(relevantes.length === 0, `${MODO} média: console limpo (${relevantes.join(" | ")})`);
   await navegador.close();

@@ -185,7 +185,7 @@ export function PlanoDePassos({
   return (
     <div className={`flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-painel shadow-[0_8px_0_var(--cor-sombra)] ${quadro.destaque === "plano" ? "ring-4 ring-destaque" : ""}`} data-plano-ordenar>
       <div className={`flex shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie px-3 py-2 ${acoes ? "flex-wrap" : ""}`}>
-        <div className={`min-w-0 flex-1 ${acoes ? "basis-40" : ""}`}>
+        <div className={`min-w-0 flex-1 ${acoes ? "basis-32" : ""}`}>
           <p className="text-[11px] font-black uppercase tracking-wide text-texto-suave">{dados.modo === "agrupar" ? "Os passos grandes" : "O plano"}</p>
           <p className={`text-sm font-black text-primaria ${acoes ? "" : "truncate"}`}>{dados.problema}</p>
         </div>

@@ -222,6 +222,7 @@ const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
   "contador-passos": "palco",
   "arvore-palco": "palco",
   "casos-de-teste": "testes",
+  "plano-no-codigo": "plano",
 };
 
 /** Ferramentas da aba Medição (zona Ser encontrado). */
@@ -356,7 +357,8 @@ export function JogoFase({
   const [aba, setAba] = useState<Aba>(() => (composta && faseDaProp.programa?.snippet ? "fontes" : faseDaProp.programa ? "console" : "elementos"));
   /** (Fase composta, celular) A área escolhida nas abas e o palco aberto (em pé). */
   const [abaCelular, setAbaCelular] = useState<AreaTrabalho>(() => (areasDaFase(fase).includes("plano") ? "plano" : "snippet"));
-  const [palcoAberto, setPalcoAberto] = useState(true);
+  // Em pé, o palco começa recolhido: o plano, o código e os testes precisam da altura (ele abre com um toque).
+  const [palcoAberto, setPalcoAberto] = useState(false);
   /** (Fase composta) O layout de agora, lido na hora por mostrarArea (ele é calculado mais abaixo). */
   const layoutAtual = useRef<"desktop" | "retrato" | "paisagem">("desktop");
   /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre o palco). */
@@ -1883,6 +1885,7 @@ export function JogoFase({
               abaAtiva={aba}
               abasDesbloqueadas={abasLivres}
               aoTrocarAba={trocarAba}
+              abasAltas={composta}
               ferramentas={
                 fase.programa ? undefined : <>
                   <AlvoFerramenta
@@ -1989,6 +1992,7 @@ export function JogoFase({
                     movel={movel}
                     ocupado={programa.ocupado}
                     aoFocar={aoFocarEditor}
+                    alto={composta}
                     depurador={
                       depurador.ativo && depurador.opcoesEditor
                         ? {

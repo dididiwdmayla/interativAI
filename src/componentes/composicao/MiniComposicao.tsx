@@ -6,24 +6,33 @@
  * fase tem), sem nada clicável.
  */
 import { IconeCerto } from "@/componentes/icones/IconeCerto";
+import { acharBlocoDoPlano } from "@/motor/plano/comentarios";
 import type { RetratoComposicao } from "@/motor/simulacao";
+
+/** O código da miniatura: o bloco do plano vira uma linha só (o plano já aparece em cima), para a função caber. */
+function codigoResumido(codigo: string): string {
+  const bloco = acharBlocoDoPlano(codigo);
+  if (!bloco) return codigo;
+  const linhas = codigo.slice(bloco.de, bloco.ate).split("\n");
+  return `${codigo.slice(0, bloco.de)}${linhas[0]} (${linhas.length - 1} passos em comentário)${codigo.slice(bloco.ate)}`;
+}
 
 /** Linhas do código mostradas (o resto vira "..."). */
 const LINHAS_DO_CODIGO = 9;
 
 export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposicao | null; legenda: string }) {
-  const linhas = retrato?.codigo?.split("\n") ?? [];
+  const linhas = retrato?.codigo ? codigoResumido(retrato.codigo).split("\n") : [];
   return (
     <figure className="flex min-w-0 flex-1 flex-col gap-1" data-mini-composicao={legenda}>
       <figcaption className="text-xs font-black uppercase tracking-wide text-texto-suave">{legenda}</figcaption>
-      <div className="flex h-64 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]">
+      <div className="flex h-72 min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]">
         {retrato?.plano && (
           <section className="rounded-lg border-2 border-borda bg-superficie px-2 py-1" data-mini-plano>
             <p className="text-[10px] font-black uppercase tracking-wide text-texto-suave">Plano</p>
             {retrato.plano.length ? (
               <ol className="list-inside list-decimal font-bold text-texto">
                 {retrato.plano.map((passo) => (
-                  <li key={passo} className="truncate">
+                  <li key={passo} className="break-words">
                     {passo}
                   </li>
                 ))}
@@ -56,7 +65,7 @@ export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposica
                     <span className={`inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full ${caso.passou ? "bg-sucesso text-superficie" : "bg-borda"}`}>
                       {caso.passou && <IconeCerto tamanho={9} />}
                     </span>
-                    <span className="truncate">
+                    <span className="min-w-0 break-all">
                       {caso.chamada} devolve {caso.esperado}
                     </span>
                   </li>
