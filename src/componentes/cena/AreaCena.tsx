@@ -19,6 +19,7 @@ import { CenaSvg } from "./CenaSvg";
 import { FichaDispositivo } from "./FichaDispositivo";
 
 export const VELOCIDADES = [1, 2, 4] as const;
+const SEM_PASSOS: readonly (number | undefined)[] = [];
 export type VelocidadeCena = (typeof VELOCIDADES)[number];
 
 /** Ir para um instante de fora (a linha do tempo da execução escolheu um passo). `chave` muda a cada pedido. */
@@ -35,6 +36,11 @@ type Props = {
   /** A cena passou para outro passo da linha do tempo (tocando ou arrastando a barra). */
   aoPassar?: (indice: number) => void;
   foco?: FocoCena | null;
+  /**
+   * (variosCenarios) A mesma simulação com outras linhas do tempo (o código
+   * rodou com cada uma no último Executar): o aluno vê que funciona em todas.
+   */
+  variantes?: readonly { rotulo: string; descricao: string; rastro: RastroCena }[];
   /** Tocar num dispositivo: abre a ficha dele. */
   aoTocarDispositivo?: (id: string) => void;
   /** A ficha aberta (o dispositivo e se está no "por dentro"). */
@@ -69,10 +75,11 @@ function avisoDoRastro(rastro: RastroCena | null): string | null {
 
 export function AreaCena({
   dados,
-  rastro: rastroDaExecucao,
+  rastro: rastroPrincipal,
   velocidade,
   aoMudarVelocidade,
-  temposDosPassos = [],
+  temposDosPassos: temposPrincipais = [],
+  variantes = [],
   aoPassar,
   foco = null,
   aoTocarDispositivo,
@@ -85,6 +92,17 @@ export function AreaCena({
   alvoVelocidade = (seletor) => seletor,
 }: Props) {
   const inicial = useMemo(() => rastroInicial(dados), [dados]);
+  // A linha do tempo mostrada: a da cena (0) ou a de um teste do variosCenarios (volta à da cena a cada Executar).
+  const [escolha, setEscolha] = useState(0);
+  const [principalVisto, setPrincipalVisto] = useState(rastroPrincipal);
+  if (rastroPrincipal !== principalVisto) {
+    setPrincipalVisto(rastroPrincipal);
+    setEscolha(0);
+  }
+  const variante = escolha > 0 ? variantes[escolha - 1] : undefined;
+  const rastroDaExecucao = variante?.rastro ?? rastroPrincipal;
+  // Nos testes, a linha do tempo da execução não anda junto (os passos são os da linha do tempo da cena).
+  const temposDosPassos = variante ? SEM_PASSOS : temposPrincipais;
   const rastro = rastroDaExecucao ?? inicial;
   const [tempoMs, setTempoMs] = useState(0);
   const [tocando, setTocando] = useState(false);
@@ -229,6 +247,30 @@ export function AreaCena({
         aoVoltar={() => aoVoltarDaFicha?.()}
         aoFechar={() => aoFecharFicha?.()}
       />
+      {variantes.length > 0 && (
+        <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-t-2 border-borda px-2 py-1" role="radiogroup" aria-label="Linha do tempo da cena" data-variantes-cena={variantes.length}>
+          <span className="shrink-0 text-[11px] font-black uppercase tracking-wide text-texto-suave">Linhas do tempo</span>
+          {[{ rotulo: "Da cena", descricao: "A linha do tempo da cena" }, ...variantes].map((opcao, indice) => (
+            <button
+              key={indice}
+              type="button"
+              role="radio"
+              aria-checked={escolha === indice}
+              title={opcao.descricao}
+              onClick={() => setEscolha(indice)}
+              className={`min-h-7 shrink-0 rounded-full border-2 px-2.5 text-xs font-black pointer-coarse:min-h-10 ${escolha === indice ? "border-primaria bg-primaria text-sobre-primaria" : "border-borda bg-superficie text-texto-suave hover:text-texto"}`}
+              data-variante={indice}
+            >
+              {opcao.rotulo}
+            </button>
+          ))}
+        </div>
+      )}
+      {variante && (
+        <p className="shrink-0 truncate px-3 pb-0.5 text-[11px] font-bold text-texto-suave" data-descricao-variante>
+          Teste: {variante.descricao}
+        </p>
+      )}
       <div className="flex shrink-0 items-center gap-2 border-t-2 border-borda bg-painel px-2 py-1.5">
         <button type="button" className={botao} onClick={tocando ? () => setTocando(false) : tocar} aria-label={tocando ? "Pausar a cena" : "Tocar a cena"} data-tocar-cena>
           <IconeTocar pausar={tocando} />

@@ -42,6 +42,7 @@ import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
 import { casosDaFase, cenaDaFase, quadroDaFase, temArea } from "./composicao";
 import { cenariosDaFase } from "./cena/validar";
+import { type DadosCena, type RastroCena, rastroInicial } from "./cena/modelo";
 import * as casosDoAluno from "./casos/modelo";
 import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
@@ -559,8 +560,10 @@ export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | nul
   return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
 }
 
-/** (Desafio composto) O que cada área mostra num momento: o plano, o código, os casos e a memória. */
+/** (Desafio composto) O que cada área mostra num momento: a cena, o plano, o código, os casos e a memória. */
 export type RetratoComposicao = {
+  /** A cena no instante da foto (null: a fase não tem a área cena). */
+  cena: { dados: DadosCena; rastro: RastroCena; tempoMs: number } | null;
   /** Os passos do plano, na ordem (null: a fase não tem a área plano). */
   plano: string[] | null;
   /** O texto do Snippet (null: sem a área snippet). */
@@ -571,12 +574,26 @@ export type RetratoComposicao = {
   memoria: FotoMemoria | null;
 };
 
+/**
+ * O instante da foto da cena na meta: no meio das mudanças que o código fez
+ * (o pisca-pisca aceso, a vitrine acesa com a pessoa na frente); sem
+ * mudanças, o meio da cena.
+ */
+export function momentoDaFoto(rastro: RastroCena): number {
+  const { mudancas } = rastro;
+  if (!mudancas.length) return rastro.duracaoMs / 2;
+  return (mudancas[0].tempoMs + mudancas[mudancas.length - 1].tempoMs) / 2;
+}
+
 function retratoDaComposicao(fase: Fase, simulacao: Simulacao): RetratoComposicao {
   const dados = quadroDaFase(fase);
   const estado = simulacao.ordenar();
   const dadosCasos = casosDaFase(fase);
   const casos = simulacao.casos();
+  const dadosDaCena = cenaDaFase(fase);
+  const rastro = dadosDaCena ? (simulacao.cena() ?? rastroInicial(dadosDaCena)) : null;
   return {
+    cena: dadosDaCena && rastro ? { dados: dadosDaCena, rastro, tempoMs: rastro.fimCodigoMs === null ? 0 : momentoDaFoto(rastro) } : null,
     plano: dados && estado ? quadro.ordemDoPlano(dados, estado).map((id) => dados.cartoes.find((c) => c.id === id)?.texto ?? id) : null,
     codigo: temArea(fase, "snippet") ? simulacao.programa().snippet : null,
     casos:

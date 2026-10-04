@@ -6,7 +6,10 @@
 import { describe, expect, it } from "vitest";
 import { criarNucleoNode } from "@/motor/executor/node";
 import { explicarErro } from "@/motor/executor/erros";
-import { criarSimulacao } from "@/motor/simulacao";
+import { criarSimulacao, momentoDaFoto } from "@/motor/simulacao";
+import { REGRAS_DE_FASE, REGRAS_GERAIS } from "@/conteudo/checagens";
+import { CODIGO_ACENDER, CODIGO_PISCAR, CODIGO_VITRINE, FASE_DEMO_QUARTO, FASE_DEMO_VITRINE, FASES_BANCADA_CENAS, UNIDADE_BANCADA_CENAS } from "@/conteudo/laboratorio/bancadaCenas";
+import { CENA_QUARTO, CENA_VITRINE } from "@/conteudo/laboratorio/cenasDeReferencia";
 import { FASE_DEMO_RESOLVER } from "@/conteudo/laboratorio/bancadaResolver";
 import type { FasePratica, Validador } from "@/conteudo/tipos";
 import { type DadosCena, estadoNoTempo, pessoasPresentes, temperaturaDoForno, valorNoTempo } from "@/motor/cena/modelo";
@@ -293,5 +296,62 @@ describe("validadores de cena", () => {
     expect(loop.filhos).toHaveLength(3);
     // Duas chegadas na mesma linha do tempo: as duas precisam da reação (o loop que não apaga não reage à segunda).
     expect(rodar(VARIOS, "while (true) {\n  if (sensor.temGente) luz.ligar();\n  esperar(100);\n}").depois.passou).toBe(false);
+  });
+});
+
+describe("a bancada das cenas (/lab): as duas cenas de referência", () => {
+  const contexto = { unidades: [UNIDADE_BANCADA_CENAS], fases: [...FASES_BANCADA_CENAS] };
+
+  it("as fases e a unidade passam em todas as regras (inclusive as apresentações das três ferramentas)", () => {
+    for (const fase of FASES_BANCADA_CENAS) {
+      expect(REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, contexto).map((p) => `${regra.id}: ${p}`)), fase.id).toEqual([]);
+    }
+    const gerais = REGRAS_GERAIS.filter((regra) => ["ids-unicos", "ferramentas-apresentadas", "meta-e-desafio"].includes(regra.id));
+    // Snippet, Console e palco já foram apresentados antes (na Lógica); as três da cena, nesta bancada.
+    expect(gerais.flatMap((regra) => regra.checar(contexto)).filter((p) => /"(cena|ficha-dispositivo|velocidade-simulacao)"|desafio|repetid/.test(p))).toEqual([]);
+  });
+
+  it("as duas cenas são de ambientes diferentes, com dispositivos diferentes", () => {
+    expect(CENA_QUARTO.ambiente).not.toBe(CENA_VITRINE.ambiente);
+    expect(CENA_QUARTO.periodo).toBe("noite");
+    expect(new Set(CENA_VITRINE.dispositivos.map((d) => d.tipo))).toEqual(new Set(["letreiro", "lampada", "sensor"]));
+  });
+
+  it("o quarto: a solução pisca no ritmo; com 4 piscadas ou sem esperar não passa", () => {
+    const fase = FASE_DEMO_QUARTO;
+    const piscar = fase.objetivos.find((o) => o.id === "piscar");
+    if (!piscar) throw new Error("piscar");
+    const simulacao = criarSimulacao(fase);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_PISCAR }, { tipo: "executarSnippet" }]);
+    expect(simulacao.avaliar(piscar.validador).passou).toBe(true);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_PISCAR.replace("vez <= 3", "vez <= 4") }, { tipo: "executarSnippet" }]);
+    expect(simulacao.avaliar(piscar.validador).passou).toBe(false);
+  });
+
+  it("a vitrine: o loop que só acende passa no objetivo dele e cai no de apagar; a solução final passa nos dois", () => {
+    const fase = FASE_DEMO_VITRINE;
+    const loop = fase.objetivos.find((o) => o.id === "loop");
+    const apagar = fase.objetivos.find((o) => o.id === "apagar");
+    if (!loop || !apagar) throw new Error("objetivos");
+    const simulacao = criarSimulacao(fase);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_ACENDER }, { tipo: "executarSnippet" }]);
+    expect(simulacao.avaliar(loop.validador).passou).toBe(true);
+    expect(simulacao.avaliar(apagar.validador).passou).toBe(false);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_VITRINE }, { tipo: "executarSnippet" }]);
+    expect(simulacao.avaliar(apagar.validador).passou).toBe(true);
+    // Decorado no segundo 3: passa na linha do tempo da cena, cai nas de teste.
+    simulacao.executar([{ tipo: "definirSnippet", codigo: "esperar(3000);\nluz.ligar();" }, { tipo: "executarSnippet" }]);
+    const decorado = simulacao.avaliar(loop.validador);
+    expect(decorado.passou).toBe(false);
+    expect(decorado.filhos?.[0]?.passou).toBe(true);
+  });
+
+  it("a meta de um desafio com cena mostra a cena no meio do que o código fez", () => {
+    const simulacao = criarSimulacao(FASE_DEMO_VITRINE);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_VITRINE }, { tipo: "executarSnippet" }]);
+    const rastro = simulacao.cena();
+    if (!rastro) throw new Error("sem rastro");
+    expect(momentoDaFoto(rastro)).toBe(5000);
+    expect(estadoNoTempo(rastro, momentoDaFoto(rastro)).luz.ligada).toBe(true);
   });
 });

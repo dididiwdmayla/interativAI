@@ -61,6 +61,9 @@ import { AreaPlano } from "@/componentes/composicao/AreaPlano";
 import { TelaComposta } from "@/componentes/composicao/TelaComposta";
 import { type AreaTrabalho, areasDaFase, cenaDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
 import { AreaCena, type FocoCena, type VelocidadeCena } from "@/componentes/cena/AreaCena";
+import { cenariosDaFase, cenariosDoValidador, textoDaLinhaDoTempo } from "@/motor/cena/validar";
+import { chaveLinhaDoTempo, textoDoTempo } from "@/motor/cena/modelo";
+import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
 import { acharBlocoDoPlano, codigoComPlano, linhaDoPasso, passosNoCodigo } from "@/motor/plano/comentarios";
 import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { type EstadoOrdenar, ordemDoPlano } from "@/motor/ordenar/modelo";
@@ -1448,8 +1451,19 @@ export function JogoFase({
                   .join("\n") || "(nenhum)"
               }`
             : "";
+          // Cena: os dispositivos (com o nome no código) e o que eles fizeram na última simulação.
+          const rastroCena = programa.ultimo?.cena;
+          const cena = dadosCena
+            ? `// A cena "${dadosCena.titulo}" (${textoDoTempo(dadosCena.duracaoMs)}): ${dadosCena.dispositivos.map((d) => `${d.id} (${CATALOGO_DISPOSITIVOS[d.tipo].nome.toLowerCase()})`).join(", ")}\n// ${
+                rastroCena?.fimCodigoMs === null || !rastroCena
+                  ? "ainda não rodou"
+                  : rastroCena.mudancas.length
+                    ? `fez: ${rastroCena.mudancas.slice(0, 12).map((m) => `${m.dispositivo}.${m.acao} em ${textoDoTempo(m.tempoMs)}`).join(", ")}`
+                    : "rodou e nenhum dispositivo mudou"
+              }`
+            : "";
           return {
-            codigo: [plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
+            codigo: [cena, plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
             erro: doCodigo?.erro ?? "",
             variaveis: doCodigo?.variaveis ?? "",
           };
@@ -1906,6 +1920,23 @@ export function JogoFase({
   const quadroNaTela = planoNoCodigo ? ordenar.dados : null;
   const passosDoPlanoNoCodigo = useMemo(() => (quadroNaTela ? passosNoCodigo(quadroNaTela, snippetNaTela) : undefined), [quadroNaTela, snippetNaTela]);
   const linhaDoEscolhido = quadroNaTela && ordenar.selecionado ? linhaDoPasso(quadroNaTela, snippetNaTela, ordenar.selecionado) : null;
+
+  /**
+   * (Cena, variosCenarios) As outras linhas do tempo em que o código rodou no
+   * último Executar: as do objetivo de agora (no desafio, as de todas as
+   * partes), sem a da própria cena.
+   */
+  const objetivoDasVariantes = temObjetivos(fase) && estado.etapa === "objetivos" ? fase.objetivos[estado.objetivoAtual] : undefined;
+  const variantesCena = useMemo(() => {
+    const cenarios = programa.ultimo?.cenarios;
+    if (!cenarios || !dadosCena) return [];
+    const daCena = chaveLinhaDoTempo(dadosCena.linhaDoTempo);
+    const linhas = (objetivoDasVariantes ? cenariosDoValidador(objetivoDasVariantes.validador) : cenariosDaFase(fase)).filter((linha) => chaveLinhaDoTempo(linha) !== daCena);
+    return linhas.flatMap((linha, indice) => {
+      const rastro = cenarios[chaveLinhaDoTempo(linha)];
+      return rastro ? [{ rotulo: `Teste ${indice + 1}`, descricao: textoDaLinhaDoTempo(linha), rastro }] : [];
+    });
+  }, [dadosCena, fase, objetivoDasVariantes, programa.ultimo]);
 
   /** O palco da memória (fase de programa): a tela da fase, ou a área palco de uma fase composta. */
   const telaPalco = fase.programa ? (
@@ -2428,6 +2459,7 @@ export function JogoFase({
                     mudarVelocidadeCena(velocidade);
                   }}
                   temposDosPassos={temposDosPassos}
+                  variantes={variantesCena}
                   aoPassar={seguirCena}
                   foco={focoCena}
                   mostrarTitulo={layout === "desktop"}

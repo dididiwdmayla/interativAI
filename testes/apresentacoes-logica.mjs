@@ -1,5 +1,6 @@
 // As apresentações das ferramentas da Ilha Lógica, parte B, pelo "Rever
-// apresentação" da Caixa de Ferramentas nas demonstrações do /lab: cada uma
+// apresentação" da Caixa de Ferramentas nas demonstrações do /lab (inclusive
+// as da área cena): cada uma
 // abre, acha o alvo de verdade na tela (no celular, a aba certa aparece
 // sozinha; na tela composta, a área da ferramenta) e fecha no Pular.
 // Uso: node testes/apresentacoes-logica.mjs [desktop|retrato|paisagem]
@@ -22,6 +23,8 @@ const GRUPOS = [
   { fase: "lab-logica-u1-f9", ferramentas: ["contador-passos", "grafico-passos"] },
   // A tela composta: cada área aparece sozinha (no celular, a aba dela; em pé, o palco abre).
   { fase: "lab-resolver-u1-f1", ferramentas: ["casos-de-teste", "plano-no-codigo", "palco-memoria", "snippet", "quadro-de-passos"] },
+  // A área cena: a cena, a ficha (o desenho) e a velocidade (embaixo da cena); em pé, a cena abre sozinha.
+  { fase: "lab-cenas-u1-f1", ferramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao"] },
 ];
 
 const todas = GRUPOS.flatMap((grupo) => grupo.ferramentas);

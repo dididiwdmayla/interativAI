@@ -19,16 +19,26 @@ import {
   valorNoTempo,
 } from "./modelo";
 
-/** As outras linhas do tempo que os validadores `variosCenarios` da fase pedem, sem repetir. */
-export function cenariosDaFase(fase: Fase): AcontecimentoCena[][] {
-  const raizes: Validador[] =
-    fase.tipo === "desafio" ? fase.partes.map((p) => p.validador) : fase.tipo === "projeto-ponte" ? fase.requisitos.map((r) => r.validador) : "objetivos" in fase ? fase.objetivos.map((o) => o.validador) : [];
+/** As outras linhas do tempo que os validadores `variosCenarios` pedem, sem repetir. */
+function cenariosDe(raizes: readonly Validador[]): AcontecimentoCena[][] {
   const vistas = new Map<string, AcontecimentoCena[]>();
   for (const validador of raizes.flatMap(validadoresDentro)) {
     if (validador.tipo !== "variosCenarios") continue;
     for (const linha of validador.linhasDoTempo) vistas.set(chaveLinhaDoTempo(linha), linha);
   }
   return [...vistas.values()];
+}
+
+/** As linhas do tempo de um validador (o de um objetivo, por exemplo). */
+export function cenariosDoValidador(validador: Validador): AcontecimentoCena[][] {
+  return cenariosDe([validador]);
+}
+
+/** As outras linhas do tempo que a fase inteira pede (o código roda com todas a cada Executar). */
+export function cenariosDaFase(fase: Fase): AcontecimentoCena[][] {
+  const raizes: Validador[] =
+    fase.tipo === "desafio" ? fase.partes.map((p) => p.validador) : fase.tipo === "projeto-ponte" ? fase.requisitos.map((r) => r.validador) : "objetivos" in fase ? fase.objetivos.map((o) => o.validador) : [];
+  return cenariosDe(raizes);
 }
 
 /** Os validadores que olham a cena (os de dentro de um variosCenarios só podem ser estes, com todos/algum/nao). */

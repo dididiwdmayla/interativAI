@@ -15,7 +15,8 @@ export type Caixa = { x: number; y: number; largura: number; altura: number };
  * - lâmpada pendente: (x, y) é a lâmpada, o fio desce do teto;
  * - lâmpada "spot": (x, y) é a luminária presa no teto ou no toldo;
  * - sensor e interruptor: (x, y) é o centro;
- * - portão, letreiro e forno: (x, y) é o canto de cima à esquerda;
+ * - portão, letreiro e forno: (x, y) é o canto de cima à esquerda (o
+ *   portão ocupa uns 200 de largura: a passagem e o muro onde a folha entra);
  * - ventilador: (x, y) é o meio da base, no chão (ou na mesa).
  */
 export function caixaDoDispositivo(dispositivo: DispositivoCena): Caixa {
@@ -29,7 +30,7 @@ export function caixaDoDispositivo(dispositivo: DispositivoCena): Caixa {
     case "interruptor":
       return { x: x - 8 * e, y: y - 11 * e, largura: 16 * e, altura: 22 * e };
     case "portao":
-      return { x, y, largura: 96 * e, altura: 64 * e };
+      return { x: x - 8 * e, y: y - 6 * e, largura: 198 * e, altura: 70 * e };
     case "letreiro":
       return { x, y, largura: 112 * e, altura: 26 * e };
     case "forno":
@@ -120,12 +121,13 @@ function Portao({ dispositivo, rastro, tempoMs, filtro }: Props) {
   const { x, y } = dispositivo;
   const e = dispositivo.escala ?? 1;
   const abertura = aberturaDoPortao(rastro, dispositivo.id, tempoMs, filtro);
-  const deslize = abertura * 84;
+  const deslize = abertura * 88;
   return (
     <g transform={`translate(${x} ${y}) scale(${e})`}>
-      {/* O trilho e as colunas */}
-      <rect x={-6} y={60} width={190} height={4} rx={1.5} fill={cor("metal-sombra")} />
+      {/* O trilho e a coluna da esquerda */}
+      <rect x={-6} y={60} width={196} height={4} rx={1.5} fill={cor("metal-sombra")} />
       <rect x={-8} y={-4} width={8} height={68} rx={2} fill={cor("fachada-sombra")} {...CONTORNO} />
+      {/* A folha do portão desliza para dentro do muro da direita. */}
       <g transform={`translate(${deslize} 0)`}>
         <rect x={2} y={2} width={92} height={56} rx={2} fill="none" stroke={cor("metal")} strokeWidth={4} />
         {Array.from({ length: 11 }, (_, i) => (
@@ -135,7 +137,15 @@ function Portao({ dispositivo, rastro, tempoMs, filtro }: Props) {
         <circle cx={14} cy={61} r={3} fill={cor("metal-sombra")} />
         <circle cx={82} cy={61} r={3} fill={cor("metal-sombra")} />
       </g>
-      <rect x={96} y={-4} width={8} height={68} rx={2} fill={cor("fachada-sombra")} {...CONTORNO} />
+      {/* O muro onde a folha se esconde, com a coluna na frente */}
+      <rect x={100} y={-4} width={90} height={68} rx={2} fill={cor("fachada")} {...CONTORNO} />
+      {[8, 20, 32, 44, 56].map((linha, i) => (
+        <g key={linha} stroke={cor("fachada-sombra")} strokeWidth={1}>
+          <path d={`M100 ${linha}h90`} />
+          <path d={`M${i % 2 ? 122 : 134} ${linha - 12}v12M${i % 2 ? 166 : 178} ${linha - 12}v12`} />
+        </g>
+      ))}
+      <rect x={96} y={-6} width={10} height={70} rx={2} fill={cor("fachada-sombra")} {...CONTORNO} />
     </g>
   );
 }
