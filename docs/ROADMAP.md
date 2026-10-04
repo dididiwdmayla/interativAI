@@ -29,6 +29,12 @@ núcleo comum.
 
 ### Feito
 
+- **Zona Resolvendo problemas completa (U1 a U4):** 12 fases e 14 itens
+  de revisão; entendimento e decomposição por agrupar, pseudocódigo,
+  dependências com execução dos cartões, plano no código e testes do
+  aluno. U4 e desafios em contextos novos usam a tela composta, com
+  bordas escondidas e próprias (vazio, zero, repetido e negativo).
+
 - Motor: painel Elementos, prévia, sincronia árvore-código-tela,
   ferramentas (árvore, inspecionar, editar, trilha, esconder, apagar,
   desfazer/refazer, duplicar, renomear tag, links na prévia),
@@ -502,10 +508,16 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Resolvendo problemas: U1 a U3 produzidas e verificadas nos três
-  layouts; U4 na sequência curricular.
+(nada no momento)
 
 ### Pendências
+
+- **Revisão de planejamento (rodada 27):** ItemRevisao não aceita quadro
+  nem áreas compostas. Os sete conceitos novos têm duas previsões cada;
+  revisão com cartões/casos próprios pede essa capacidade no item.
+- **Resumo inicial do PROJETO.md:** ainda descreve duas unidades prontas
+  e U3 de Elementos como próxima; atualizar a síntese sem duplicar o
+  status consolidado deste ROADMAP.
 
 - **Tela composta (rodada 26), para depois:**
   - Deitado, o código mostra poucas linhas (abas do DevTools, o cabeçalho
@@ -609,12 +621,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Resolvendo problemas (quatro unidades: Decompor um problema,
-   Pseudocódigo, Ordenar os passos e Testar com exemplos), com a tela
-   composta nos desafios (guia, seção 29). Depois, conteúdo da Lógica nas
-   zonas, nesta ordem: Algoritmos essenciais, Estruturas de dados,
-   Depuração e o projeto-ponte da Lógica (que pede o motor
-   `projeto-ponte-js`).
+1. Zona Algoritmos essenciais. Depois, conteúdo da Lógica nas zonas,
+   nesta ordem: Estruturas de dados, Depuração e o projeto-ponte da Lógica
+   (que pede o motor `projeto-ponte-js`).
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
 3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA

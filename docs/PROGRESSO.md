@@ -5,7 +5,7 @@ Status consolidado: `docs/ROADMAP.md`.
 
 ## Rodada 27: zona Resolvendo problemas
 
-Branch `conteudo/resolvendo-problemas`, a partir de
+Branch `conteudo/resolvendo-problemas-20261004-work`, a partir de
 `claude/intelligent-pascal-5va93x`. Um commit por unidade.
 
 ### U1: Decompor um problema
@@ -63,3 +63,23 @@ Branch `conteudo/resolvendo-problemas`, a partir de
 - Casos de borda com temas Lógica e Ferramentas e duas revisões próprias.
 - `testar:conteudo`: 16.093 testes verdes, sem falha de estruturas por tempo.
 - Jornadas U4 verdes nos três layouts; publicação, build e lint por unidade.
+
+### Fechamento e revisão pedagógica
+
+- Dicas ensinam o conceito, sem entregar a função completa; a linha
+  aponta o editor e o código fica no degrau Solução do guiado. Missão de
+  campo concreta: somar gastos no Console, pelos cinco passos, com [],
+  [0] e [3,3]. Ajustes consolidados no commit da unidade correspondente.
+- Final: 16.093 testes de conteúdo (39 arquivos), build e lint verdes;
+  12 jornadas pelo mapa no build de produção (4 unidades x 3 layouts)
+  verdes após os ajustes; `bateria:conteudo` verde, rodada única no fim
+  (mapa, explorar, publicar e revisão). Estruturas não falharam por tempo.
+- `publicar:conteudo` verde em cada unidade; IDs anteriores preservados.
+  Nenhum arquivo do motor nem dependência do projeto foi alterado.
+- Preparação: Chromium 133 fora do projeto; extração Brotli manual,
+  evitando `EINVAL` de chown no executor. Limites: Chromium headless,
+  tamanhos simulados, apresentações semeadas e tutor Gemini não chamado.
+- ATRITOS e MAPA-CURRICULAR atualizados; ROADMAP: zona em Feito e
+  Algoritmos essenciais em Próximo. Permanecem as pendências conhecidas
+  do editor em paisagem; revisão com quadro/casos próprios em ItemRevisao
+  e resumo inicial antigo do PROJETO registrados para depois.
