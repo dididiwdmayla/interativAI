@@ -95,5 +95,10 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "arvore-palco";
     case "medirDesempenho":
       return "grafico-passos";
+    case "abrirFicha":
+    case "verPorDentro":
+      return "ficha-dispositivo";
+    case "velocidadeCena":
+      return "velocidade-simulacao";
   }
 }

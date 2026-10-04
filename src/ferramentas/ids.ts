@@ -70,6 +70,8 @@ export const IDS_FERRAMENTAS = [
   "arvore-palco",
   // Cenas programáveis: o mundo que o código controla, a ficha de cada dispositivo e a velocidade da simulação
   "cena",
+  "ficha-dispositivo",
+  "velocidade-simulacao",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

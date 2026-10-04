@@ -14,7 +14,7 @@
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
-import { AREAS_TRABALHO, casosDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { AREAS_TRABALHO, casosDaFase, cenaDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
 import { conferirCena } from "@/motor/cena/conferir";
 import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
@@ -1156,9 +1156,20 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if ((acao.tipo === "escreverCaso" || acao.tipo === "apagarCaso" || acao.tipo === "rodarCasos") && !casosDaFase(fase)) problemas.push(`${onde}: ${acao.tipo} pede a área "testes"`);
           if ((acao.tipo === "levarPlanoProCodigo" || acao.tipo === "verPassoNoCodigo") && !planoNoCodigo) problemas.push(`${onde}: ${acao.tipo} pede as áreas "plano" e "snippet"`);
           if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
+          if (acao.tipo === "abrirFicha" || acao.tipo === "verPorDentro" || acao.tipo === "velocidadeCena") {
+            const cena = cenaDaFase(fase);
+            if (!cena) problemas.push(`${onde}: ${acao.tipo} pede a área "cena"`);
+            else if (acao.tipo !== "velocidadeCena" && !cena.dispositivos.some((d) => d.id === acao.dispositivo)) problemas.push(`${onde}: ${acao.tipo} cita o dispositivo "${acao.dispositivo}", que a cena não tem`);
+            if (acao.tipo === "velocidadeCena" && ![1, 2, 4].includes(acao.velocidade)) problemas.push(`${onde}: velocidadeCena ${acao.velocidade} (vale 1, 2 ou 4)`);
+          }
         }
       }
       if (!planoNoCodigo && fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('usaFerramentas tem "plano-no-codigo", mas a fase não tem as áreas "plano" e "snippet"');
+      // A ficha e a velocidade moram na área cena: aparecem sempre com ela (e só com ela).
+      for (const ferramenta of ["ficha-dispositivo", "velocidade-simulacao"] as const) {
+        if (!temArea(fase, "cena") && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a fase não declara a área "cena"`);
+        if (temArea(fase, "cena") && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`com a área "cena", a ${ferramenta === "ficha-dispositivo" ? "ficha de cada dispositivo" : "velocidade da simulação"} aparece: ponha "${ferramenta}" em usaFerramentas`);
+      }
       if (!faseComposta(fase)) {
         if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
         if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');

@@ -211,6 +211,8 @@ const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados
 /** (Fase composta) A área de trabalho onde mora cada ferramenta: a apresentação e a ajuda a põem à vista. */
 const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
   cena: "cena",
+  "ficha-dispositivo": "cena",
+  "velocidade-simulacao": "cena",
   "quadro-de-passos": "plano",
   snippet: "snippet",
   console: "snippet",
@@ -367,6 +369,38 @@ export function JogoFase({
   const [velocidadeCena, setVelocidadeCena] = useState<VelocidadeCena>(1);
   /** A linha do tempo escolheu um passo: a cena vai para o instante dele. */
   const [focoCena, setFocoCena] = useState<FocoCena | null>(null);
+  /** A ficha aberta (o dispositivo e se está no "por dentro"). */
+  const [fichaCena, setFichaCena] = useState<{ dispositivo: string; porDentro: boolean } | null>(null);
+  const tipoNaCena = useCallback((id: string) => dadosCena?.dispositivos.find((d) => d.id === id)?.tipo ?? null, [dadosCena]);
+  const abrirFichaCena = useCallback(
+    (id: string): boolean => {
+      const tipo = tipoNaCena(id);
+      if (!tipo) return false;
+      setFichaCena({ dispositivo: id, porDentro: false });
+      sinalizarUso("ficha-dispositivo");
+      barramento.emitir({ tipo: "abriuFicha", dispositivo: id, tipoDispositivo: tipo });
+      return true;
+    },
+    [barramento, tipoNaCena],
+  );
+  const verPorDentroCena = useCallback(
+    (id: string): boolean => {
+      const tipo = tipoNaCena(id);
+      if (!tipo) return false;
+      setFichaCena({ dispositivo: id, porDentro: true });
+      barramento.emitir({ tipo: "viuPorDentro", dispositivo: id, tipoDispositivo: tipo });
+      return true;
+    },
+    [barramento, tipoNaCena],
+  );
+  const mudarVelocidadeCena = useCallback(
+    (velocidade: VelocidadeCena) => {
+      setVelocidadeCena(velocidade);
+      sinalizarUso("velocidade-simulacao");
+      barramento.emitir({ tipo: "mudouVelocidade", velocidade });
+    },
+    [barramento],
+  );
   /** (Fase composta) O layout de agora, lido na hora por mostrarArea (ele é calculado mais abaixo). */
   const layoutAtual = useRef<"desktop" | "retrato" | "paisagem">("desktop");
   /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre a cena ou o palco de cima). */
@@ -918,6 +952,7 @@ export function JogoFase({
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
       plano: planoNoCodigo ? { levarProCodigo: levarPlanoProCodigo, verPassoNoCodigo: acenderPasso } : undefined,
       casos: casos.ativo ? { escrever: casos.escrever, apagar: casos.apagar, rodar: casos.rodar } : undefined,
+      cena: dadosCena ? { abrirFicha: abrirFichaCena, verPorDentro: verPorDentroCena, mudarVelocidade: mudarVelocidadeCena } : undefined,
       estruturas:
         estruturas.comArvore || estruturas.comGrafico
           ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
@@ -933,6 +968,10 @@ export function JogoFase({
         : undefined,
     }),
     [
+      dadosCena,
+      abrirFichaCena,
+      verPorDentroCena,
+      mudarVelocidadeCena,
       estruturas.comArvore,
       estruturas.comGrafico,
       estruturas.verComoArvore,
@@ -2386,12 +2425,33 @@ export function JogoFase({
                   velocidade={velocidadeCena}
                   aoMudarVelocidade={(velocidade) => {
                     tocarEfeito("clique");
-                    setVelocidadeCena(velocidade);
+                    mudarVelocidadeCena(velocidade);
                   }}
                   temposDosPassos={temposDosPassos}
                   aoPassar={seguirCena}
                   foco={focoCena}
                   mostrarTitulo={layout === "desktop"}
+                  ficha={fichaCena}
+                  aoTocarDispositivo={(id) => {
+                    tocarEfeito("clique");
+                    abrirFichaCena(id);
+                  }}
+                  aoVerPorDentro={(id) => {
+                    tocarEfeito("clique");
+                    verPorDentroCena(id);
+                  }}
+                  aoVoltarDaFicha={() => setFichaCena((atual) => (atual ? { ...atual, porDentro: false } : null))}
+                  aoFecharFicha={() => setFichaCena(null)}
+                  alvoDesenho={(desenho) => (
+                    <AlvoFerramenta ids={["ficha-dispositivo"]} marcador="ficha-dispositivo" aoAbrirCard={abrirCard} classeMarcador="right-2 bottom-2 top-auto" className="flex h-full min-h-0 w-full">
+                      {desenho}
+                    </AlvoFerramenta>
+                  )}
+                  alvoVelocidade={(seletor) => (
+                    <AlvoFerramenta ids={["velocidade-simulacao"]} marcador="velocidade-simulacao" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2.5" as="span" className="inline-flex shrink-0">
+                      {seletor}
+                    </AlvoFerramenta>
+                  )}
                 />
               </AlvoFerramenta>
             ) : null,

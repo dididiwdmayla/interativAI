@@ -14,8 +14,9 @@
  */
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { IconeTocar } from "@/componentes/icones/IconeTocar";
-import { type DadosCena, fimDaAnimacao, type FiltroPasso, type RastroCena, rastroInicial, textoDoTempo } from "@/motor/cena/modelo";
+import { type DadosCena, estadoNoTempo, fimDaAnimacao, type FiltroPasso, type RastroCena, rastroInicial, textoDoTempo } from "@/motor/cena/modelo";
 import { CenaSvg } from "./CenaSvg";
+import { FichaDispositivo } from "./FichaDispositivo";
 
 export const VELOCIDADES = [1, 2, 4] as const;
 export type VelocidadeCena = (typeof VELOCIDADES)[number];
@@ -34,14 +35,18 @@ type Props = {
   /** A cena passou para outro passo da linha do tempo (tocando ou arrastando a barra). */
   aoPassar?: (indice: number) => void;
   foco?: FocoCena | null;
+  /** Tocar num dispositivo: abre a ficha dele. */
   aoTocarDispositivo?: (id: string) => void;
-  destacado?: string | null;
+  /** A ficha aberta (o dispositivo e se está no "por dentro"). */
+  ficha?: { dispositivo: string; porDentro: boolean } | null;
+  aoVerPorDentro?: (id: string) => void;
+  aoVoltarDaFicha?: () => void;
+  aoFecharFicha?: () => void;
   /** O nome da cena numa faixa em cima (no computador; no celular, ele já está no cabeçalho ou na aba). */
   mostrarTitulo: boolean;
-  /** Embrulha o seletor de velocidade (o alvo da apresentação da ferramenta). */
+  /** Embrulha o desenho (o alvo da apresentação da ficha) e o seletor de velocidade. */
+  alvoDesenho?: (desenho: ReactNode) => ReactNode;
   alvoVelocidade?: (seletor: ReactNode) => ReactNode;
-  /** Por cima do desenho (a ficha do dispositivo). */
-  sobreposicao?: ReactNode;
 };
 
 /** O último passo que já tinha acontecido no instante (os passos andam em ordem de tempo). */
@@ -71,10 +76,13 @@ export function AreaCena({
   aoPassar,
   foco = null,
   aoTocarDispositivo,
-  destacado,
+  ficha = null,
+  aoVerPorDentro,
+  aoVoltarDaFicha,
+  aoFecharFicha,
   mostrarTitulo,
+  alvoDesenho = (desenho) => desenho,
   alvoVelocidade = (seletor) => seletor,
-  sobreposicao,
 }: Props) {
   const inicial = useMemo(() => rastroInicial(dados), [dados]);
   const rastro = rastroDaExecucao ?? inicial;
@@ -191,6 +199,7 @@ export function AreaCena({
       ))}
     </div>
   );
+  const fichaDoDispositivo = ficha ? (dados.dispositivos.find((d) => d.id === ficha.dispositivo) ?? null) : null;
   const aviso = !tocando && rastroDaExecucao && tempoMs >= fimDaAnimacao(rastroDaExecucao) - 1 ? avisoDoRastro(rastroDaExecucao) : null;
   return (
     <div
@@ -205,14 +214,21 @@ export function AreaCena({
         </p>
       )}
       <div className="relative min-h-0 flex-1 p-1.5">
-        <CenaSvg dados={dados} rastro={rastro} tempoMs={tempoMs} filtro={filtro} aoTocarDispositivo={aoTocarDispositivo} destacado={destacado} />
+        {alvoDesenho(<CenaSvg dados={dados} rastro={rastro} tempoMs={tempoMs} filtro={filtro} aoTocarDispositivo={aoTocarDispositivo} destacado={ficha?.dispositivo ?? null} />)}
         {aviso && (
           <span className="pointer-events-none absolute bottom-2 left-1/2 max-w-[92%] -translate-x-1/2 truncate rounded-full border-2 border-borda bg-superficie/95 px-3 py-0.5 text-xs font-bold text-texto" data-aviso-cena>
             {aviso}
           </span>
         )}
-        {sobreposicao}
       </div>
+      <FichaDispositivo
+        dispositivo={fichaDoDispositivo}
+        estado={fichaDoDispositivo ? estadoNoTempo(rastro, tempoMs, { filtro })[fichaDoDispositivo.id] : undefined}
+        porDentro={ficha?.porDentro ?? false}
+        aoVerPorDentro={() => fichaDoDispositivo && aoVerPorDentro?.(fichaDoDispositivo.id)}
+        aoVoltar={() => aoVoltarDaFicha?.()}
+        aoFechar={() => aoFecharFicha?.()}
+      />
       <div className="flex shrink-0 items-center gap-2 border-t-2 border-borda bg-painel px-2 py-1.5">
         <button type="button" className={botao} onClick={tocando ? () => setTocando(false) : tocar} aria-label={tocando ? "Pausar a cena" : "Tocar a cena"} data-tocar-cena>
           <IconeTocar pausar={tocando} />

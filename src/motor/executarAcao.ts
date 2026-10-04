@@ -99,6 +99,15 @@ export type PainelDasAcoes = {
     apagar: (indice: number) => boolean;
     rodar: () => boolean;
   };
+  /**
+   * (Área cena) Abrir a ficha de um dispositivo, ver o "por dentro" e trocar
+   * a velocidade da simulação. Devolvem false se o dispositivo não existe.
+   */
+  cena?: {
+    abrirFicha: (dispositivo: string) => boolean;
+    verPorDentro: (dispositivo: string) => boolean;
+    mudarVelocidade: (velocidade: 1 | 2 | 4) => void;
+  };
   /** (Estruturas e desempenho) Ver como árvore e o Medir da aba Desempenho: só nas fases com as ferramentas. */
   estruturas?: {
     verComoArvore?: (nome: string) => boolean;
@@ -217,6 +226,12 @@ export function descreverAcao(acao: Acao): string {
       return `verComoArvore ${acao.nome}`;
     case "medirDesempenho":
       return "medirDesempenho";
+    case "abrirFicha":
+      return `abrirFicha ${acao.dispositivo}`;
+    case "verPorDentro":
+      return `verPorDentro ${acao.dispositivo}`;
+    case "velocidadeCena":
+      return `velocidadeCena ${acao.velocidade}x`;
   }
 }
 
@@ -536,6 +551,20 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       const medir = painel.estruturas?.medirDesempenho;
       if (!medir) throw new ErroAcao("medirDesempenho pede a ferramenta grafico-passos e programa.desempenho");
       if (!medir()) throw new ErroAcao("não deu para medir (a fase não tem programa.desempenho?)");
+      return;
+    }
+    case "abrirFicha":
+    case "verPorDentro": {
+      const cena = painel.cena;
+      if (!cena) throw new ErroAcao(`${acao.tipo} só existe numa fase com a área cena`);
+      const deu = acao.tipo === "abrirFicha" ? cena.abrirFicha(acao.dispositivo) : cena.verPorDentro(acao.dispositivo);
+      if (!deu) throw new ErroAcao(`a cena não tem o dispositivo "${acao.dispositivo}"`);
+      return;
+    }
+    case "velocidadeCena": {
+      const cena = painel.cena;
+      if (!cena) throw new ErroAcao("velocidadeCena só existe numa fase com a área cena");
+      cena.mudarVelocidade(acao.velocidade);
       return;
     }
   }

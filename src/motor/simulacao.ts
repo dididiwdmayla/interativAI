@@ -407,6 +407,26 @@ export function criarSimulacao(fase: Fase) {
             },
           }
         : undefined,
+    // Área cena: abrir a ficha, ver o "por dentro" e trocar a velocidade (fora da tela, só os eventos).
+    cena: dadosCena
+      ? {
+          abrirFicha: (dispositivo) => {
+            const alvo = dadosCena.dispositivos.find((d) => d.id === dispositivo);
+            if (!alvo) return false;
+            eventos.push({ tipo: "abriuFicha", dispositivo, tipoDispositivo: alvo.tipo });
+            return true;
+          },
+          verPorDentro: (dispositivo) => {
+            const alvo = dadosCena.dispositivos.find((d) => d.id === dispositivo);
+            if (!alvo) return false;
+            eventos.push({ tipo: "viuPorDentro", dispositivo, tipoDispositivo: alvo.tipo });
+            return true;
+          },
+          mudarVelocidade: (velocidade) => {
+            eventos.push({ tipo: "mudouVelocidade", velocidade });
+          },
+        }
+      : undefined,
     estruturas: fase.programa
       ? {
           verComoArvore: fase.usaFerramentas.includes("arvore-palco")

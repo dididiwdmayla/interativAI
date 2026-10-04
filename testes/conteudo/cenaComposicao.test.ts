@@ -33,7 +33,7 @@ describe("área cena: o formato e as sabotagens", () => {
     plano: undefined,
     testes: undefined,
     cena: VITRINE,
-    usaFerramentas: ["cena", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+    usaFerramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao", "snippet", "console", "palco-memoria", "linha-do-tempo"],
     objetivos: FASE_DEMO_RESOLVER.objetivos.filter((o) => o.id === "programar"),
   };
   const problemas = (fase: Fase) =>

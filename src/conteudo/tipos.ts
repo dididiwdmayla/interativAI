@@ -539,7 +539,13 @@ export type Acao =
   /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
   | { tipo: "verComoArvore"; nome: string }
   /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
-  | { tipo: "medirDesempenho" };
+  | { tipo: "medirDesempenho" }
+  /** (Área cena) Toca no dispositivo `dispositivo` (o id dele na cena) e abre a ficha. Gera `abriuFicha`. Pede ficha-dispositivo. */
+  | { tipo: "abrirFicha"; dispositivo: string }
+  /** (Área cena) O botão "Por dentro" da ficha do dispositivo. Gera `viuPorDentro`. Pede ficha-dispositivo. */
+  | { tipo: "verPorDentro"; dispositivo: string }
+  /** (Área cena) Escolhe a velocidade da simulação (1x, 2x ou 4x). Gera `mudouVelocidade`. Pede velocidade-simulacao. */
+  | { tipo: "velocidadeCena"; velocidade: 1 | 2 | 4 };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */

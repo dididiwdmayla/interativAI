@@ -197,7 +197,7 @@ describe("a cena na simulação dos testes (o mesmo motor do jogo)", () => {
       plano: undefined,
       testes: undefined,
       cena: VITRINE,
-      usaFerramentas: ["cena", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+      usaFerramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao", "snippet", "console", "palco-memoria", "linha-do-tempo"],
     };
     const simulacao = criarSimulacao(fase);
     simulacao.executar([
