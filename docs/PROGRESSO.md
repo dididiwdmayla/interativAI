@@ -1,85 +1,110 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodada-26.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-27.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 27: zona Resolvendo problemas
+## Rodada 28: motor de cenas programáveis
 
-Branch `conteudo/resolvendo-problemas-20261004-work`, a partir de
-`claude/intelligent-pascal-5va93x`. Um commit por unidade.
+Branch `ccr-f2988c01-0t4z55`, a partir de `claude/intelligent-pascal-5va93x`
+(depois do merge da zona Resolvendo problemas). Um commit por etapa.
 
-### U1: Decompor um problema
+### Etapa 1: a área cena e as cenas como dados
 
-- Entrada, saída e exemplos do pedido da festa classificados por agrupar;
-  decomposição em passos pequenos e troca entre duas leituras independentes.
-- Prática composta: total das fichas com preço e quantidade; desafio em
-  outro contexto, o frete das entregas da loja. Plano, comentários, função
-  autoral e casos do aluno, com vazio, zero e repetidos.
-- Quatro conceitos com temas e oito revisões. As revisões são previsões
-  em contextos próprios: ItemRevisao não aceita quadro/áreas compostas.
-- Teste legado de composição limitado às zonas anteriores: essas telas
-  publicadas continuam protegidas; as novas podem declarar áreas.
-- Jornada `testes/resolvendo.mjs`: mapa, meta, UI real dos cartões,
-  Snippet, previsões, casos, desafio e unidade concluída. Negativas:
-  função constante e apenas um caso passando não cumprem o percurso.
-- Verificação: `testar:conteudo` verde (15.743 testes), jornadas da U1
-  em desktop/retrato/paisagem e `publicar:conteudo` verdes.
+- `AREAS_TRABALHO` ganha `"cena"` (primeira na tela) e a fase, o campo
+  `cena` (`DadosCena`): cenário com peças do kit, dispositivos com nome de
+  variável e linha do tempo (pessoas que chegam e saem, interruptores).
+  Modelo puro em `src/motor/cena/modelo.ts` (o estado de cada dispositivo
+  num instante, a presença, a temperatura do forno) e catálogo em
+  `catalogo.ts` (ficha, comandos, propriedades, ações e "Por dentro").
+- `TelaComposta` nos três layouts: no computador, a cena em cima na coluna
+  da direita (divisor com o palco); deitado, a primeira aba ao lado do
+  código; em pé, em cima e recolhível (recolhe com o teclado aberto), com
+  o palco virando aba.
+- Ferramenta `cena`, tokens `--cor-cena-*` nos três temas e a checagem da
+  cena na regra `composicao` (`src/motor/cena/conferir.ts`).
 
-### U2: Pseudocódigo
+### Etapa 2: dispositivos, relógio simulado e rastro animado
 
-- Cartões em português agrupados em Preparar, Contar e Entregar; plano
-  sem sintaxe obrigatória, seguido da tradução em função curta.
-- Prática na agenda de reservas: contar reservas positivas, não somar
-  pessoas nem incluir uma reserva de zero pessoas. Desafio dos horários
-  livres da oficina, com fichas e condição invertida.
-- Um conceito com tema Lógica e duas revisões em outros contextos.
-- `testar:conteudo`: 15.868 testes verdes.
-- Jornadas U2 verdes nos três layouts; publicação, build e lint por unidade.
+- `MotorCena` (`motor.ts`) dentro do núcleo do executor: objetos no reino
+  do código (getters, métodos e erros do reino), `esperar(ms)` avançando o
+  relógio simulado, sensores lendo a linha do tempo no instante. O fim da
+  cena lança um sinal tratado como fim normal (sem erro; a conferência de
+  parada de cada passo repete o sinal); sem esperar, a proteção de passos
+  com a dica da cena (`naCena` no erro).
+- Executar recomeça a cena; o Console continua de onde ela está; depois do
+  Snippet o mundo vai até o fim. Testes de função, medições e o Observar
+  rodam numa cena separada e voltam a de antes.
+- Rastro: cada mudança com instante e passo; cada passo com `tempoMs`. A
+  área toca a cena (1x, 2x, 4x) com o relógio só nela; a linha do tempo, o
+  palco e a linha do código andam junto, e escolher um passo leva a cena ao
+  instante dele, só com as mudanças até ali.
+- Worker e sessão: `definirCena` (reenviada a cada worker novo), as outras
+  linhas do tempo no mesmo pedido de executar.
 
-### U3: Ordenar os passos
+### Etapa 3: ficha do dispositivo e "Por dentro"
 
-- Quadro com `rodar`: mostrar total antes de criá-lo produz ReferenceError;
-  a ordem válida imprime 12. As duas declarações são independentes.
-- Composição no caixa da loja: primeiro receita, depois vendas menos
-  despesas. Um caso com despesas descobre o código incompleto.
-- Desafio do material da costureira: pedido e estoque antes da diferença,
-  com zero, igualdade e excesso de estoque. Programas de até cinco linhas.
-- Dependências dos passos com tema e duas revisões próprias.
-- `testar:conteudo`: 15.993 testes verdes, incluindo estruturas sem timeout.
-- Jornadas U3 verdes nos três layouts. A proteção das telas antigas usa
-  a ordem curricular, sem impedir composições em zonas futuras; 17 testes
-  de composição verdes após esse ajuste.
+- Tocar num dispositivo abre a ficha (estado agora, comandos, propriedades
+  com o nome da cena, exemplo); "Por dentro" mostra o caminho do comando
+  com uma ilustração por peça (código, plaquinha, relé, driver, motor,
+  resistência, termômetro, display, sensor, contato) e termina na ponte com
+  a trilha Automação.
+- Ferramentas `ficha-dispositivo` e `velocidade-simulacao` com
+  apresentação; ações `abrirFicha`, `verPorDentro`, `velocidadeCena` e
+  eventos `abriuFicha`, `viuPorDentro`, `mudouVelocidade`, na tela e na
+  simulação.
 
-### U4: Testar com exemplos
+### Etapa 4: validadores
 
-- Prática integral na tela composta: maior venda do dia, incluindo
-  estornos negativos. Começar o maior em zero passa nos casos positivos,
-  mas quebra em [-5, -2]. O aluno corrige a função e escreve seus casos.
-- Exige cinco exemplos passando, incluindo vazio, zero, repetido e
-  negativo; `funcaoPassa` também testa essas bordas de forma escondida.
-- Desafio da cantina: troco(preco, pago), pagamento exato, (0,0) e pago
-  menor que preço. Diferença negativa significa quanto ainda falta pagar;
-  regra explicitada no enunciado, decisão a conferir.
-- Casos de borda com temas Lógica e Ferramentas e duas revisões próprias.
-- `testar:conteudo`: 16.093 testes verdes, sem falha de estruturas por tempo.
-- Jornadas U4 verdes nos três layouts; publicação, build e lint por unidade.
+- `estadoNaCena`, `sequenciaNaCena` (ações de verdade, ritmo com folga,
+  `exata`), `reagiu` (toda vez que a propriedade passa ao valor, a ação no
+  prazo) e `variosCenarios` (o código roda com cada linha do tempo a cada
+  Executar; o decorado cai). Nada passa antes de a cena rodar. Checagem de
+  dispositivos, propriedades, valores, ações, instantes e linhas do tempo.
 
-### Fechamento e revisão pedagógica
+### Etapa 5: kit, cenas de referência e a demonstração
 
-- Dicas ensinam o conceito, sem entregar a função completa; a linha
-  aponta o editor e o código fica no degrau Solução do guiado. Missão de
-  campo concreta: somar gastos no Console, pelos cinco passos, com [],
-  [0] e [3,3]. Ajustes consolidados no commit da unidade correspondente.
-- Final: 16.093 testes de conteúdo (39 arquivos), build e lint verdes;
-  12 jornadas pelo mapa no build de produção (4 unidades x 3 layouts)
-  verdes após os ajustes; `bateria:conteudo` verde, rodada única no fim
-  (mapa, explorar, publicar e revisão). Estruturas não falharam por tempo.
-- `publicar:conteudo` verde em cada unidade; IDs anteriores preservados.
-  Nenhum arquivo do motor nem dependência do projeto foi alterado.
-- Preparação: Chromium 133 fora do projeto; extração Brotli manual,
-  evitando `EINVAL` de chown no executor. Limites: Chromium headless,
-  tamanhos simulados, apresentações semeadas e tutor Gemini não chamado.
-- ATRITOS e MAPA-CURRICULAR atualizados; ROADMAP: zona em Feito e
-  Algoritmos essenciais em Próximo. Permanecem as pendências conhecidas
-  do editor em paisagem; revisão com quadro/casos próprios em ItemRevisao
-  e resumo inicial antigo do PROJETO registrados para depois.
+- Kit em SVG com tokens: 13 peças de cenário (com variantes) e 7 tipos de
+  dispositivo, a pessoa e a luz (à noite o ambiente escurece e cada
+  lâmpada acesa abre a área clara dela por máscara, com o cone da
+  pendente e o brilho). Portão desliza para dentro do muro, letreiro acende
+  letra por letra, ventilador gira pelo histórico de velocidade, forno com
+  termômetro e calor na porta.
+- Cenas: o quarto à noite (lâmpada pendente e ventilador) e a vitrine da
+  Padaria Pão de Mel (letreiro, spot da vitrine e sensor de presença; uma
+  pessoa chega no segundo 3 e sai no 7).
+- Bancada `lab-cenas-u1`: f1 (acender, ficha e Por dentro, liga e desliga
+  sem esperar, piscar 3 vezes no ritmo, velocidade) e f2 (sensor no
+  Console, if que roda uma vez só, loop de controle em 4 linhas do tempo,
+  apagar quando a pessoa sai em 3). A cena mostra as linhas do tempo de
+  teste do objetivo de agora ("Teste 1, 2, 3").
+- `/lab/cenas`: o mostruário do kit nos três temas. A meta de um desafio
+  com cena mostra a cena; o tutor recebe o que os dispositivos fizeram.
+- `testes/cenas.mjs` nos três layouts (ritmo do pisca-pisca pela barra de
+  tempo, linha do tempo junto, ficha, Console andando no tempo, proteção
+  sem esperar, fim da simulação, vitrine nas linhas do tempo de teste e as
+  apresentações em modo jogo); `apresentacoes-logica.mjs` com as três
+  ferramentas.
+
+### Etapa 6: guia, regra de ritmo e fechamento
+
+- Guia, seção 30 (área, montar com o kit, dispositivos e relógio,
+  validadores, escolha de dispositivos e linhas do tempo, regra de ritmo,
+  como acrescentar peças), índice, checklist e PROJETO.md (arquitetura).
+- Regra `ritmo-das-cenas`: unidade nova da Lógica (fora do
+  `publicados.json`) sem fase com cena falha; cena repetida (mesmo
+  ambiente, tipos de dispositivo e missão) vira aviso `[aviso de cena]`.
+- Revisão do próprio diff: recarregar a página roda o Snippet de novo com
+  as linhas do tempo de teste (o `variosCenarios` e as partes de um
+  desafio não desmarcam até o próximo Executar); nomes que o Worker e a
+  janela já têm (`name`, `location`, `status`...) ficam proibidos para
+  dispositivos; o cenário é desenhado uma vez só (a animação redesenha só o
+  que muda).
+- Verificação final: `testar:conteudo` 16.126 testes (41 arquivos), lint,
+  `publicar:conteudo` e build verdes; bateria completa (`testes/todos.mjs`,
+  145 arquivos x layouts, inclusive `cenas.mjs` e `apresentacoes-logica.mjs`
+  nos três layouts) verde no build de produção, uma vez, com 3 em paralelo.
+  Depois das correções da revisão: build de novo, `testar:conteudo` e
+  `cenas.mjs` nos três layouts verdes. Console limpo nas jornadas.
+  Publicado igual a antes (nenhuma unidade publicada mudou).
+- Um teste de estruturas passou do tempo (5 s) só com a bateria rodando
+  junto, na mesma máquina; sozinho e com a máquina livre, passa.

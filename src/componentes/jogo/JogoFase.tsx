@@ -59,7 +59,11 @@ import { AreaCasos } from "@/componentes/casos/AreaCasos";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
 import { AreaPlano } from "@/componentes/composicao/AreaPlano";
 import { TelaComposta } from "@/componentes/composicao/TelaComposta";
-import { type AreaTrabalho, areasDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
+import { type AreaTrabalho, areasDaFase, cenaDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
+import { AreaCena, type FocoCena, type VelocidadeCena } from "@/componentes/cena/AreaCena";
+import { cenariosDaFase, cenariosDoValidador, textoDaLinhaDoTempo } from "@/motor/cena/validar";
+import { chaveLinhaDoTempo, textoDoTempo } from "@/motor/cena/modelo";
+import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
 import { acharBlocoDoPlano, codigoComPlano, linhaDoPasso, passosNoCodigo } from "@/motor/plano/comentarios";
 import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { type EstadoOrdenar, ordemDoPlano } from "@/motor/ordenar/modelo";
@@ -209,6 +213,9 @@ const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados
 
 /** (Fase composta) A área de trabalho onde mora cada ferramenta: a apresentação e a ajuda a põem à vista. */
 const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
+  cena: "cena",
+  "ficha-dispositivo": "cena",
+  "velocidade-simulacao": "cena",
   "quadro-de-passos": "plano",
   snippet: "snippet",
   console: "snippet",
@@ -359,18 +366,60 @@ export function JogoFase({
   const [abaCelular, setAbaCelular] = useState<AreaTrabalho>(() => (areasDaFase(fase).includes("plano") ? "plano" : "snippet"));
   // Em pé, o palco começa recolhido: o plano, o código e os testes precisam da altura (ele abre com um toque).
   const [palcoAberto, setPalcoAberto] = useState(false);
+  // Cena programável (área cena): o mundo que o código controla. Em pé, ela fica em cima, aberta.
+  const dadosCena = cenaDaFase(fase);
+  const [cenaAberta, setCenaAberta] = useState(true);
+  const [velocidadeCena, setVelocidadeCena] = useState<VelocidadeCena>(1);
+  /** A linha do tempo escolheu um passo: a cena vai para o instante dele. */
+  const [focoCena, setFocoCena] = useState<FocoCena | null>(null);
+  /** A ficha aberta (o dispositivo e se está no "por dentro"). */
+  const [fichaCena, setFichaCena] = useState<{ dispositivo: string; porDentro: boolean } | null>(null);
+  const tipoNaCena = useCallback((id: string) => dadosCena?.dispositivos.find((d) => d.id === id)?.tipo ?? null, [dadosCena]);
+  const abrirFichaCena = useCallback(
+    (id: string): boolean => {
+      const tipo = tipoNaCena(id);
+      if (!tipo) return false;
+      setFichaCena({ dispositivo: id, porDentro: false });
+      sinalizarUso("ficha-dispositivo");
+      barramento.emitir({ tipo: "abriuFicha", dispositivo: id, tipoDispositivo: tipo });
+      return true;
+    },
+    [barramento, tipoNaCena],
+  );
+  const verPorDentroCena = useCallback(
+    (id: string): boolean => {
+      const tipo = tipoNaCena(id);
+      if (!tipo) return false;
+      setFichaCena({ dispositivo: id, porDentro: true });
+      barramento.emitir({ tipo: "viuPorDentro", dispositivo: id, tipoDispositivo: tipo });
+      return true;
+    },
+    [barramento, tipoNaCena],
+  );
+  const mudarVelocidadeCena = useCallback(
+    (velocidade: VelocidadeCena) => {
+      setVelocidadeCena(velocidade);
+      sinalizarUso("velocidade-simulacao");
+      barramento.emitir({ tipo: "mudouVelocidade", velocidade });
+    },
+    [barramento],
+  );
   /** (Fase composta) O layout de agora, lido na hora por mostrarArea (ele é calculado mais abaixo). */
   const layoutAtual = useRef<"desktop" | "retrato" | "paisagem">("desktop");
-  /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre o palco). */
+  /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre a cena ou o palco de cima). */
   const mostrarArea = useCallback(
     (area: AreaTrabalho) => {
       if (!composta) return;
       const agora = layoutAtual.current;
+      const comCena = areasDaFase(fase).includes("cena");
       if (area === "palco") setPalcoAberto(true);
-      if (agora === "retrato" && area !== "palco") setAbaCelular(area);
+      if (area === "cena") setCenaAberta(true);
+      // Em pé, o que mora em cima (a cena, ou o palco sem cena) não é aba.
+      const emCima = comCena ? "cena" : "palco";
+      if (agora === "retrato" && area !== emCima) setAbaCelular(area);
       if (agora === "paisagem" && area !== "snippet") setAbaCelular(area);
     },
-    [composta],
+    [composta, fase],
   );
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
@@ -477,7 +526,28 @@ export function JogoFase({
     sinalizarUso("linha-do-tempo");
     const linha = passosDoRastro[alvo]?.linha;
     if (ultimo.origem === "snippet") editorSnippetRef.current?.destacarLinhas(linha && alvo < passosDoRastro.length - 1 ? [linha] : []);
+    // Cena: ela vai para o instante do passo, só com as mudanças feitas até ali.
+    const tempoDoPasso = passosDoRastro[alvo]?.tempoMs;
+    if (ultimo.cena && tempoDoPasso !== undefined) setFocoCena({ tempoMs: tempoDoPasso, filtro: { execucao: ultimo.cena.execucao, passo: alvo }, chave: Date.now() });
   };
+  /** (Cena) Os instantes de cada passo da última execução: a cena tocando leva a linha do tempo junto. */
+  const temposDosPassos = useMemo(() => (programa.ultimo?.cena ? programa.ultimo.passos.map((p) => p.tempoMs) : []), [programa.ultimo]);
+  const ultimoDaCena = useRef(programa.ultimo);
+  useEffect(() => {
+    ultimoDaCena.current = programa.ultimo;
+  }, [programa.ultimo]);
+  /** A cena passou de um passo para outro (tocando ou arrastando): o palco e a linha do código acompanham. */
+  const seguirCena = useCallback(
+    (indice: number) => {
+      const ultimo = ultimoDaCena.current;
+      if (!ultimo) return;
+      const final = indice >= ultimo.passos.length - 1;
+      setEscolhaDePasso(final ? null : { de: ultimo, indice });
+      const linha = ultimo.passos[indice]?.linha;
+      if (ultimo.origem === "snippet") editorSnippetRef.current?.destacarLinhas(linha && !final ? [linha] : []);
+    },
+    [editorSnippetRef],
+  );
   const destacarNoPrograma = useCallback(
     (alvo: number[] | "console" | null) => {
       if (alvo === null) {
@@ -885,6 +955,7 @@ export function JogoFase({
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
       plano: planoNoCodigo ? { levarProCodigo: levarPlanoProCodigo, verPassoNoCodigo: acenderPasso } : undefined,
       casos: casos.ativo ? { escrever: casos.escrever, apagar: casos.apagar, rodar: casos.rodar } : undefined,
+      cena: dadosCena ? { abrirFicha: abrirFichaCena, verPorDentro: verPorDentroCena, mudarVelocidade: mudarVelocidadeCena } : undefined,
       estruturas:
         estruturas.comArvore || estruturas.comGrafico
           ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
@@ -900,6 +971,10 @@ export function JogoFase({
         : undefined,
     }),
     [
+      dadosCena,
+      abrirFichaCena,
+      verPorDentroCena,
+      mudarVelocidadeCena,
       estruturas.comArvore,
       estruturas.comGrafico,
       estruturas.verComoArvore,
@@ -1376,8 +1451,19 @@ export function JogoFase({
                   .join("\n") || "(nenhum)"
               }`
             : "";
+          // Cena: os dispositivos (com o nome no código) e o que eles fizeram na última simulação.
+          const rastroCena = programa.ultimo?.cena;
+          const cena = dadosCena
+            ? `// A cena "${dadosCena.titulo}" (${textoDoTempo(dadosCena.duracaoMs)}): ${dadosCena.dispositivos.map((d) => `${d.id} (${CATALOGO_DISPOSITIVOS[d.tipo].nome.toLowerCase()})`).join(", ")}\n// ${
+                rastroCena?.fimCodigoMs === null || !rastroCena
+                  ? "ainda não rodou"
+                  : rastroCena.mudancas.length
+                    ? `fez: ${rastroCena.mudancas.slice(0, 12).map((m) => `${m.dispositivo}.${m.acao} em ${textoDoTempo(m.tempoMs)}`).join(", ")}`
+                    : "rodou e nenhum dispositivo mudou"
+              }`
+            : "";
           return {
-            codigo: [plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
+            codigo: [cena, plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
             erro: doCodigo?.erro ?? "",
             variaveis: doCodigo?.variaveis ?? "",
           };
@@ -1835,6 +1921,23 @@ export function JogoFase({
   const passosDoPlanoNoCodigo = useMemo(() => (quadroNaTela ? passosNoCodigo(quadroNaTela, snippetNaTela) : undefined), [quadroNaTela, snippetNaTela]);
   const linhaDoEscolhido = quadroNaTela && ordenar.selecionado ? linhaDoPasso(quadroNaTela, snippetNaTela, ordenar.selecionado) : null;
 
+  /**
+   * (Cena, variosCenarios) As outras linhas do tempo em que o código rodou no
+   * último Executar: as do objetivo de agora (no desafio, as de todas as
+   * partes), sem a da própria cena.
+   */
+  const objetivoDasVariantes = temObjetivos(fase) && estado.etapa === "objetivos" ? fase.objetivos[estado.objetivoAtual] : undefined;
+  const variantesCena = useMemo(() => {
+    const cenarios = programa.ultimo?.cenarios;
+    if (!cenarios || !dadosCena) return [];
+    const daCena = chaveLinhaDoTempo(dadosCena.linhaDoTempo);
+    const linhas = (objetivoDasVariantes ? cenariosDoValidador(objetivoDasVariantes.validador) : cenariosDaFase(fase)).filter((linha) => chaveLinhaDoTempo(linha) !== daCena);
+    return linhas.flatMap((linha, indice) => {
+      const rastro = cenarios[chaveLinhaDoTempo(linha)];
+      return rastro ? [{ rotulo: `Teste ${indice + 1}`, descricao: textoDaLinhaDoTempo(linha), rastro }] : [];
+    });
+  }, [dadosCena, fase, objetivoDasVariantes, programa.ultimo]);
+
   /** O palco da memória (fase de programa): a tela da fase, ou a área palco de uma fase composta. */
   const telaPalco = fase.programa ? (
     <AlvoFerramenta
@@ -1868,6 +1971,7 @@ export function JogoFase({
             codigo={programa.ultimo?.codigo ?? ""}
             cortado={programa.ultimo?.rastroCortado ?? false}
             totalPassos={programa.ultimo?.totalPassos ?? 0}
+            fimDaSimulacao={programa.ultimo?.cena?.terminouPorTempo ?? false}
           />
         </AlvoFerramenta>
       )}
@@ -2344,6 +2448,45 @@ export function JogoFase({
           layout={layout}
           areas={areas}
           conteudo={{
+            cena: dadosCena ? (
+              <AlvoFerramenta ids={["cena"]} marcador="cena" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                <AreaCena
+                  dados={dadosCena}
+                  rastro={programa.ultimo?.cena ?? null}
+                  velocidade={velocidadeCena}
+                  aoMudarVelocidade={(velocidade) => {
+                    tocarEfeito("clique");
+                    mudarVelocidadeCena(velocidade);
+                  }}
+                  temposDosPassos={temposDosPassos}
+                  variantes={variantesCena}
+                  aoPassar={seguirCena}
+                  foco={focoCena}
+                  mostrarTitulo={layout === "desktop"}
+                  ficha={fichaCena}
+                  aoTocarDispositivo={(id) => {
+                    tocarEfeito("clique");
+                    abrirFichaCena(id);
+                  }}
+                  aoVerPorDentro={(id) => {
+                    tocarEfeito("clique");
+                    verPorDentroCena(id);
+                  }}
+                  aoVoltarDaFicha={() => setFichaCena((atual) => (atual ? { ...atual, porDentro: false } : null))}
+                  aoFecharFicha={() => setFichaCena(null)}
+                  alvoDesenho={(desenho) => (
+                    <AlvoFerramenta ids={["ficha-dispositivo"]} marcador="ficha-dispositivo" aoAbrirCard={abrirCard} classeMarcador="right-2 bottom-2 top-auto" className="flex h-full min-h-0 w-full">
+                      {desenho}
+                    </AlvoFerramenta>
+                  )}
+                  alvoVelocidade={(seletor) => (
+                    <AlvoFerramenta ids={["velocidade-simulacao"]} marcador="velocidade-simulacao" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2.5" as="span" className="inline-flex shrink-0">
+                      {seletor}
+                    </AlvoFerramenta>
+                  )}
+                />
+              </AlvoFerramenta>
+            ) : null,
             plano: ordenar.ativo ? (
               <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
                 <AreaPlano
@@ -2422,6 +2565,12 @@ export function JogoFase({
             tocarEfeito("clique");
             setPalcoAberto((aberto) => !aberto);
           }}
+          cenaAberta={cenaAberta}
+          aoAlternarCena={() => {
+            tocarEfeito("clique");
+            setCenaAberta((aberta) => !aberta);
+          }}
+          tituloCena={dadosCena?.titulo}
           tecladoAberto={viewport.tecladoAberto}
         />
       ) : (

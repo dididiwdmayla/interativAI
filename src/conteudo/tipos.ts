@@ -25,6 +25,7 @@ import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 import type { AreaTrabalho } from "@/motor/composicao";
 import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
+import type { AcontecimentoCena, DadosCena, ValorCena } from "@/motor/cena/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -358,6 +359,42 @@ export type Validador =
    * árvore agora (um objeto com filhos objetos).
    */
   | { tipo: "formaDaEstrutura"; nome: string; forma: "pilha" | "fila" | "arvore" }
+  /*
+   * Cenas programáveis (área cena): src/motor/cena. Olham a simulação de
+   * agora (desde o último Executar); não travam. Ver o guia, seção 30.
+   */
+  /**
+   * (Cena) O dispositivo (o id dele na cena) tem a `propriedade` igual a
+   * `valor` no instante `noTempo` (ms desde o começo da cena; sem ele, no
+   * fim). Ex.: a lâmpada acesa no fim, o portão aberto no segundo 4.
+   */
+  | { tipo: "estadoNaCena"; dispositivo: string; propriedade: string; valor: ValorCena; noTempo?: number }
+  /**
+   * (Cena) O dispositivo fez esta sequência de ações, uma depois da outra
+   * (só mudanças de verdade: ligar o que já está ligado não conta). `aposMs`
+   * é o tempo desde a ação anterior (na primeira, desde o começo da cena),
+   * com folga de `toleranciaMs` (padrão 100). Com `exata`, ele não fez
+   * nenhuma outra dessas ações (piscou 3 vezes, e não 4).
+   */
+  | { tipo: "sequenciaNaCena"; dispositivo: string; eventos: { acao: string; aposMs?: number; toleranciaMs?: number }[]; exata?: boolean }
+  /**
+   * (Cena) Toda vez que `quando` acontece (a propriedade do dispositivo
+   * passa a valer `valor`: o sensor vê gente), `entao` acontece em até
+   * `prazoMs` (a luz faz "ligar"). É como se prova um loop de controle.
+   */
+  | {
+      tipo: "reagiu";
+      quando: { dispositivo: string; propriedade: string; valor: ValorCena };
+      entao: { dispositivo: string; acao: string };
+      prazoMs: number;
+    }
+  /**
+   * (Cena) O código passa no `validador` (de cena) com cada uma destas
+   * linhas do tempo: ele roda de novo com cada uma a cada Executar, como os
+   * casos escondidos do funcaoPassa. Assim o aluno não programa "decorado"
+   * pro horário exato em que a pessoa chega.
+   */
+  | { tipo: "variosCenarios"; linhasDoTempo: AcontecimentoCena[][]; validador: Validador }
   | { tipo: "todos"; validadores: Validador[] }
   | { tipo: "algum"; validadores: Validador[] }
   | { tipo: "nao"; validador: Validador }
@@ -538,7 +575,13 @@ export type Acao =
   /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
   | { tipo: "verComoArvore"; nome: string }
   /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
-  | { tipo: "medirDesempenho" };
+  | { tipo: "medirDesempenho" }
+  /** (Área cena) Toca no dispositivo `dispositivo` (o id dele na cena) e abre a ficha. Gera `abriuFicha`. Pede ficha-dispositivo. */
+  | { tipo: "abrirFicha"; dispositivo: string }
+  /** (Área cena) O botão "Por dentro" da ficha do dispositivo. Gera `viuPorDentro`. Pede ficha-dispositivo. */
+  | { tipo: "verPorDentro"; dispositivo: string }
+  /** (Área cena) Escolhe a velocidade da simulação (1x, 2x ou 4x). Gera `mudouVelocidade`. Pede velocidade-simulacao. */
+  | { tipo: "velocidadeCena"; velocidade: 1 | 2 | 4 };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -785,13 +828,20 @@ type FaseBase = {
  */
 export type ComposicaoDaFase = {
   /**
-   * As áreas de trabalho na mesma tela: "plano" (o quadro de passos, campo
-   * `plano`), "snippet" (o código: aba Fontes com o Snippet e o Console,
-   * pede programa.snippet), "palco" (o palco da memória com a linha do
-   * tempo) e "testes" (os casos de teste do aluno, campo `testes`). Sem o
-   * campo, a fase usa a tela de sempre do tipo dela.
+   * As áreas de trabalho na mesma tela: "cena" (o mundo que o código
+   * controla, campo `cena`), "plano" (o quadro de passos, campo `plano`),
+   * "snippet" (o código: aba Fontes com o Snippet e o Console, pede
+   * programa.snippet), "palco" (o palco da memória com a linha do tempo) e
+   * "testes" (os casos de teste do aluno, campo `testes`). Sem o campo, a
+   * fase usa a tela de sempre do tipo dela.
    */
   areas?: AreaTrabalho[];
+  /**
+   * (Área cena) A cena programável: o cenário (peças do kit), os
+   * dispositivos que o código usa (`lampada.ligar()`, `sensor.temGente`) e
+   * a linha do tempo dos acontecimentos. Ver src/motor/cena e o guia, seção 30.
+   */
+  cena?: DadosCena;
   /**
    * (Área plano) Os cartões do problema, como no ordenar-passos (ordenar ou
    * agrupar, validação pelas dependências), sem `rodar`: o plano vira

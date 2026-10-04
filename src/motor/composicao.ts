@@ -10,6 +10,8 @@
  * Ofício).
  *
  * Cada área tem um dono no formato da fase:
+ * - "cena": o campo `cena` (o mundo que o código controla: o cenário, os
+ *   dispositivos e a linha do tempo dos acontecimentos);
  * - "plano": o campo `plano` (os mesmos cartões do ordenar-passos);
  * - "snippet": `programa.snippet` (o código do aluno);
  * - "palco": `programa` (o palco da memória e a linha do tempo);
@@ -26,9 +28,10 @@
 import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 import type { DadosOrdenar } from "./ordenar/modelo";
 import type { DadosCasos } from "./casos/modelo";
+import type { DadosCena } from "./cena/modelo";
 
 /** As áreas de trabalho que uma fase composta pode declarar, na ordem em que aparecem na tela. */
-export const AREAS_TRABALHO = ["plano", "snippet", "palco", "testes"] as const;
+export const AREAS_TRABALHO = ["cena", "plano", "snippet", "palco", "testes"] as const;
 
 export type AreaTrabalho = (typeof AREAS_TRABALHO)[number];
 
@@ -63,5 +66,11 @@ export function quadroDaFase(fase: Fase): DadosOrdenar | null {
 /** Os casos de teste da fase (área testes): a função que eles chamam. Null sem a área. */
 export function casosDaFase(fase: Fase): DadosCasos | null {
   if (temArea(fase, "testes") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.testes ?? null;
+  return null;
+}
+
+/** A cena programável da fase (área cena): o cenário, os dispositivos e a linha do tempo. Null sem a área. */
+export function cenaDaFase(fase: Fase): DadosCena | null {
+  if (temArea(fase, "cena") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.cena ?? null;
   return null;
 }

@@ -40,7 +40,9 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
-import { casosDaFase, quadroDaFase, temArea } from "./composicao";
+import { casosDaFase, cenaDaFase, quadroDaFase, temArea } from "./composicao";
+import { cenariosDaFase } from "./cena/validar";
+import { type DadosCena, type RastroCena, rastroInicial } from "./cena/modelo";
 import * as casosDoAluno from "./casos/modelo";
 import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
@@ -80,6 +82,10 @@ export function criarSimulacao(fase: Fase) {
 
   // Fase de programa: o executor síncrono (vm no Node, iframe no /lab e na meta), com a mesma lógica do jogo.
   let executor = fase.programa ? criarNucleoSincrono() : null;
+  // Cena programável: os dispositivos e o esperar no reino do código, e as outras linhas do tempo (variosCenarios).
+  const dadosCena = cenaDaFase(fase);
+  executor?.definirCena(dadosCena);
+  const cenariosPedidos = dadosCena ? cenariosDaFase(fase) : [];
   let snippet = fase.programa?.snippet?.codigoInicial ?? "";
   let ultimaExecucao: ResultadoExecucao | null = null;
   const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
@@ -94,6 +100,8 @@ export function criarSimulacao(fase: Fase) {
     if (!executor) return;
     ultimaExecucao = resultado;
     estadoPrograma.memoria = resultado.memoriaFinal;
+    if (resultado.cena) estadoPrograma.cena = resultado.cena;
+    if (resultado.cenarios) estadoPrograma.cenarios = resultado.cenarios;
     for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
     if (medicoesPedidas.length) {
       const medicoes: NonNullable<EstadoPrograma["medicoes"]> = {};
@@ -129,7 +137,7 @@ export function criarSimulacao(fase: Fase) {
       return;
     }
     terminarSessao();
-    const resultado = executor.executar(codigo, origem);
+    const resultado = executor.executar(codigo, origem, origem === "snippet" && cenariosPedidos.length ? { cenarios: cenariosPedidos } : {});
     const pausa = comDepurador && origem === "snippet" && registrar ? primeiraPausa(resultado.passos, depurador.pontos) : null;
     if (pausa) {
       sessao = { resultado, pausa };
@@ -400,6 +408,26 @@ export function criarSimulacao(fase: Fase) {
             },
           }
         : undefined,
+    // Área cena: abrir a ficha, ver o "por dentro" e trocar a velocidade (fora da tela, só os eventos).
+    cena: dadosCena
+      ? {
+          abrirFicha: (dispositivo) => {
+            const alvo = dadosCena.dispositivos.find((d) => d.id === dispositivo);
+            if (!alvo) return false;
+            eventos.push({ tipo: "abriuFicha", dispositivo, tipoDispositivo: alvo.tipo });
+            return true;
+          },
+          verPorDentro: (dispositivo) => {
+            const alvo = dadosCena.dispositivos.find((d) => d.id === dispositivo);
+            if (!alvo) return false;
+            eventos.push({ tipo: "viuPorDentro", dispositivo, tipoDispositivo: alvo.tipo });
+            return true;
+          },
+          mudarVelocidade: (velocidade) => {
+            eventos.push({ tipo: "mudouVelocidade", velocidade });
+          },
+        }
+      : undefined,
     estruturas: fase.programa
       ? {
           verComoArvore: fase.usaFerramentas.includes("arvore-palco")
@@ -468,6 +496,8 @@ export function criarSimulacao(fase: Fase) {
     cssAtual: () => lerCssDoDocumento(documento),
     /** (Fase de programa) A última execução e o texto do Snippet agora; com o depurador, a pausa de agora. */
     programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null, pausa: sessao?.pausa ?? null, depurador }),
+    /** (Cena programável) A simulação de agora (null: a fase não tem cena ou nada rodou). */
+    cena: () => estadoPrograma.cena ?? null,
     /** (Circuito) O circuito agora. */
     circuito: () => circuito,
     /** (Ordenar) Onde está cada cartão agora. */
@@ -530,8 +560,10 @@ export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | nul
   return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
 }
 
-/** (Desafio composto) O que cada área mostra num momento: o plano, o código, os casos e a memória. */
+/** (Desafio composto) O que cada área mostra num momento: a cena, o plano, o código, os casos e a memória. */
 export type RetratoComposicao = {
+  /** A cena no instante da foto (null: a fase não tem a área cena). */
+  cena: { dados: DadosCena; rastro: RastroCena; tempoMs: number } | null;
   /** Os passos do plano, na ordem (null: a fase não tem a área plano). */
   plano: string[] | null;
   /** O texto do Snippet (null: sem a área snippet). */
@@ -542,12 +574,26 @@ export type RetratoComposicao = {
   memoria: FotoMemoria | null;
 };
 
+/**
+ * O instante da foto da cena na meta: no meio das mudanças que o código fez
+ * (o pisca-pisca aceso, a vitrine acesa com a pessoa na frente); sem
+ * mudanças, o meio da cena.
+ */
+export function momentoDaFoto(rastro: RastroCena): number {
+  const { mudancas } = rastro;
+  if (!mudancas.length) return rastro.duracaoMs / 2;
+  return (mudancas[0].tempoMs + mudancas[mudancas.length - 1].tempoMs) / 2;
+}
+
 function retratoDaComposicao(fase: Fase, simulacao: Simulacao): RetratoComposicao {
   const dados = quadroDaFase(fase);
   const estado = simulacao.ordenar();
   const dadosCasos = casosDaFase(fase);
   const casos = simulacao.casos();
+  const dadosDaCena = cenaDaFase(fase);
+  const rastro = dadosDaCena ? (simulacao.cena() ?? rastroInicial(dadosDaCena)) : null;
   return {
+    cena: dadosDaCena && rastro ? { dados: dadosDaCena, rastro, tempoMs: rastro.fimCodigoMs === null ? 0 : momentoDaFoto(rastro) } : null,
     plano: dados && estado ? quadro.ordemDoPlano(dados, estado).map((id) => dados.cartoes.find((c) => c.id === id)?.texto ?? id) : null,
     codigo: temArea(fase, "snippet") ? simulacao.programa().snippet : null,
     casos:

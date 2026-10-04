@@ -27,6 +27,8 @@ import { planoDosComentarios } from "./plano/comentarios";
 import { casaComExigido, type DadosCasos, type EstadoCasos, lerCaso, textoDoExigido } from "./casos/modelo";
 import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
 import { chaveMedicao, textoDePassos } from "./desempenho";
+import { chaveLinhaDoTempo, textoDoTempo, textoDoValorCena } from "./cena/modelo";
+import { conferirEstado, conferirReacao, conferirSequencia, textoDaLinhaDoTempo } from "./cena/validar";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -248,6 +250,14 @@ export function descreverValidador(validador: Validador): string {
         : `${validador.funcao ?? "a função medida"} dá no máximo ${validador.valor} passos com ${validador.tamanho} itens`;
     case "formaDaEstrutura":
       return `${validador.nome} é ${validador.forma === "arvore" ? "uma árvore" : `usada como ${validador.forma}`}`;
+    case "estadoNaCena":
+      return `na cena, ${validador.dispositivo}.${validador.propriedade} vale ${textoDoValorCena(validador.valor)} ${validador.noTempo !== undefined ? `em ${textoDoTempo(validador.noTempo)}` : "no fim"}`;
+    case "sequenciaNaCena":
+      return `na cena, ${validador.dispositivo} fez ${validador.eventos.map((e) => `${e.acao}${e.aposMs !== undefined ? ` (${e.aposMs} ms depois)` : ""}`).join(", ")}${validador.exata ? ", e só isso" : ""}`;
+    case "reagiu":
+      return `na cena, quando ${validador.quando.dispositivo}.${validador.quando.propriedade} vira ${textoDoValorCena(validador.quando.valor)}, ${validador.entao.dispositivo} faz ${validador.entao.acao} em até ${validador.prazoMs} ms`;
+    case "variosCenarios":
+      return `o código passa em ${validador.linhasDoTempo.length} linhas do tempo diferentes`;
     case "todos":
       return "todos estes";
     case "algum":
@@ -623,6 +633,35 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
         passou: !medicao.passouDoLimite && medicao.passos <= validador.valor,
         descricao,
         detalhe: medicao.passouDoLimite ? `passou de ${textoDePassos(medicao.passos)} passos (travaria)` : `${textoDePassos(medicao.passos)} passos`,
+      };
+    }
+    case "estadoNaCena": {
+      const { passou, detalhe } = conferirEstado(validador, contexto.programa?.cena);
+      return { passou, descricao, detalhe };
+    }
+    case "sequenciaNaCena": {
+      const { passou, detalhe } = conferirSequencia(validador, contexto.programa?.cena);
+      return { passou, descricao, detalhe };
+    }
+    case "reagiu": {
+      const { passou, detalhe } = conferirReacao(validador, contexto.programa?.cena);
+      return { passou, descricao, detalhe };
+    }
+    case "variosCenarios": {
+      // O mesmo validador em cada linha do tempo: o código rodou com cada uma no último Executar.
+      const filhos = validador.linhasDoTempo.map((linha) => {
+        const rastro = contexto.programa?.cenarios?.[chaveLinhaDoTempo(linha)];
+        const resultado: ResultadoValidador = rastro
+          ? avaliarDetalhado(validador.validador, { ...contexto, programa: { ...(contexto.programa ?? { memoria: null, testes: {} }), cena: rastro } })
+          : { passou: false, descricao: descreverValidador(validador.validador), detalhe: "ainda não rodou com esta linha do tempo (clique em Executar)" };
+        return { ...resultado, descricao: `com ${textoDaLinhaDoTempo(linha)}: ${resultado.descricao}` };
+      });
+      const falhou = filhos.findIndex((filho) => !filho.passou);
+      return {
+        passou: falhou < 0,
+        descricao,
+        detalhe: falhou < 0 ? "passou em todas" : `falhou com ${textoDaLinhaDoTempo(validador.linhasDoTempo[falhou])}`,
+        filhos,
       };
     }
     case "formaDaEstrutura": {

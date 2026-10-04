@@ -208,7 +208,12 @@ export function explicarErro(erro: ErroExecucao): ExplicacaoErro {
       titulo: "Loop que nunca termina?",
       explicacao:
         "O programa repetiu tantas vezes que o jogo parou ele, para a aba não travar. Quase sempre é um laço cuja condição nunca fica falsa.",
-      dica: "Dentro do laço, alguma coisa muda para a condição um dia ficar falsa? No Chrome de verdade, um loop assim trava a aba.",
+      dica:
+        erro.naCena === "sem-esperar"
+          ? "Na cena, o relógio só anda com esperar(ms): sem ele, o loop dá voltas sem parar no mesmo instante e a simulação nunca chega ao fim."
+          : erro.naCena === "esperar-curto"
+            ? "O loop espera pouco demais a cada volta e dá voltas demais até a cena acabar. Tente esperar(100)."
+            : "Dentro do laço, alguma coisa muda para a condição um dia ficar falsa? No Chrome de verdade, um loop assim trava a aba.",
     };
   }
   if (erro.tipo === "limite-tempo") {

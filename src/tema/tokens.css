@@ -102,6 +102,45 @@
   /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
   --cor-grafico-1: #4f5fe8;
   --cor-grafico-2: #d6337f;
+
+  /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-contorno: #3a1d4d;
+  --cor-cena-parede: #f9dcea;
+  --cor-cena-parede-sombra: #ecbfd7;
+  --cor-cena-fachada: #f6c38f;
+  --cor-cena-fachada-sombra: #e1a46c;
+  --cor-cena-piso: #d4a57c;
+  --cor-cena-piso-sombra: #b5845c;
+  --cor-cena-calcada: #d9d0e0;
+  --cor-cena-calcada-sombra: #bcb0c6;
+  --cor-cena-madeira: #b98458;
+  --cor-cena-madeira-sombra: #8f6340;
+  --cor-cena-tecido: #7f8cf0;
+  --cor-cena-tecido-sombra: #5f6bd6;
+  --cor-cena-claro: #fffaf2;
+  --cor-cena-planta: #4fbf7a;
+  --cor-cena-planta-sombra: #2f9a5b;
+  --cor-cena-vaso: #e8825a;
+  --cor-cena-ceu-dia: #a6dcf7;
+  --cor-cena-ceu-noite: #27306a;
+  --cor-cena-lua: #fff0b3;
+  --cor-cena-escuro: #140a33;
+  --cor-cena-luz: #ffd56b;
+  --cor-cena-metal: #b3bccd;
+  --cor-cena-metal-sombra: #858fa4;
+  --cor-cena-vidro: #d4f1fb;
+  --cor-cena-pessoa: #5b62e0;
+  --cor-cena-pessoa-sombra: #4249b8;
+  --cor-cena-pele: #f0b48e;
+  --cor-cena-cabelo: #4a2a3f;
+  --cor-cena-letreiro: #2a1838;
+  --cor-cena-letreiro-aceso: #ffcf4a;
+  --cor-cena-letreiro-apagado: #4b3759;
+  --cor-cena-quente: #ff6b3d;
+  --cor-cena-toldo: #d6337f;
+  --cor-cena-pao: #e2a15a;
+  --cor-cena-pao-sombra: #b9773a;
+  --cor-cena-led: #20c070;
 }
 
 [data-theme="fliperama"] {
@@ -186,6 +225,45 @@
   /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
   --cor-grafico-1: #3987e5;
   --cor-grafico-2: #e0449a;
+
+  /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-contorno: #05040f;
+  --cor-cena-parede: #3a3478;
+  --cor-cena-parede-sombra: #2c275f;
+  --cor-cena-fachada: #5a3f8f;
+  --cor-cena-fachada-sombra: #45306f;
+  --cor-cena-piso: #6b4f8f;
+  --cor-cena-piso-sombra: #533b72;
+  --cor-cena-calcada: #4b4582;
+  --cor-cena-calcada-sombra: #39346a;
+  --cor-cena-madeira: #9a6fd8;
+  --cor-cena-madeira-sombra: #7553b0;
+  --cor-cena-tecido: #22b8cf;
+  --cor-cena-tecido-sombra: #178ea3;
+  --cor-cena-claro: #f4eeff;
+  --cor-cena-planta: #38e08a;
+  --cor-cena-planta-sombra: #22a865;
+  --cor-cena-vaso: #ff6f91;
+  --cor-cena-ceu-dia: #5aa9e6;
+  --cor-cena-ceu-noite: #0b0a24;
+  --cor-cena-lua: #fff6c2;
+  --cor-cena-escuro: #02010a;
+  --cor-cena-luz: #fff07a;
+  --cor-cena-metal: #a7a3d6;
+  --cor-cena-metal-sombra: #7a76ad;
+  --cor-cena-vidro: #8fd9f0;
+  --cor-cena-pessoa: #ff3dae;
+  --cor-cena-pessoa-sombra: #c92a87;
+  --cor-cena-pele: #f2b896;
+  --cor-cena-cabelo: #1a1640;
+  --cor-cena-letreiro: #05040f;
+  --cor-cena-letreiro-aceso: #22e4f0;
+  --cor-cena-letreiro-apagado: #24204a;
+  --cor-cena-quente: #ff6a3d;
+  --cor-cena-toldo: #ff3dae;
+  --cor-cena-pao: #f0a95c;
+  --cor-cena-pao-sombra: #c47a36;
+  --cor-cena-led: #5cff9d;
 }
 
 [data-theme="segredo"] {
@@ -270,4 +348,43 @@
   /* Gráfico passos x tamanho (aba Desempenho): duas séries validadas para daltonismo */
   --cor-grafico-1: #3987e5;
   --cor-grafico-2: #d95926;
+
+  /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-contorno: #010a06;
+  --cor-cena-parede: #1f4d3c;
+  --cor-cena-parede-sombra: #173b2e;
+  --cor-cena-fachada: #3b5f3a;
+  --cor-cena-fachada-sombra: #2c4a2c;
+  --cor-cena-piso: #6b5a2e;
+  --cor-cena-piso-sombra: #534522;
+  --cor-cena-calcada: #2e4a40;
+  --cor-cena-calcada-sombra: #223a31;
+  --cor-cena-madeira: #b3861f;
+  --cor-cena-madeira-sombra: #8a6616;
+  --cor-cena-tecido: #3987e5;
+  --cor-cena-tecido-sombra: #2a68b3;
+  --cor-cena-claro: #e8fff2;
+  --cor-cena-planta: #3dff8f;
+  --cor-cena-planta-sombra: #22b863;
+  --cor-cena-vaso: #d95926;
+  --cor-cena-ceu-dia: #4f9fcf;
+  --cor-cena-ceu-noite: #031812;
+  --cor-cena-lua: #f4ffc2;
+  --cor-cena-escuro: #000503;
+  --cor-cena-luz: #e8ff7a;
+  --cor-cena-metal: #8fb3a2;
+  --cor-cena-metal-sombra: #648a78;
+  --cor-cena-vidro: #9fe0d0;
+  --cor-cena-pessoa: #ffc94d;
+  --cor-cena-pessoa-sombra: #c99a2e;
+  --cor-cena-pele: #e8b08c;
+  --cor-cena-cabelo: #0b2a20;
+  --cor-cena-letreiro: #010a06;
+  --cor-cena-letreiro-aceso: #3dff8f;
+  --cor-cena-letreiro-apagado: #0f3a2b;
+  --cor-cena-quente: #ff7a3d;
+  --cor-cena-toldo: #d95926;
+  --cor-cena-pao: #e0a35c;
+  --cor-cena-pao-sombra: #b37a3a;
+  --cor-cena-led: #3dff8f;
 }

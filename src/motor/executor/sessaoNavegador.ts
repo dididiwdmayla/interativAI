@@ -7,6 +7,7 @@
  * estava antes da entrada que travou).
  */
 import type { PedidoExecutor, RespostaExecutor } from "./mensagens";
+import type { AcontecimentoCena, DadosCena } from "../cena/modelo";
 import {
   LIMITES,
   type CasoFuncao,
@@ -20,7 +21,14 @@ import {
 } from "./tipos";
 
 export interface SessaoExecutor {
-  executar(codigo: string, origem: OrigemCodigo): Promise<ResultadoExecucao>;
+  /** `cenarios`: (cena, Snippet) outras linhas do tempo, rodadas antes em silêncio (validador variosCenarios). */
+  executar(codigo: string, origem: OrigemCodigo, cenarios?: AcontecimentoCena[][]): Promise<ResultadoExecucao>;
+  /**
+   * (Cena programável) Os dispositivos e o esperar no reino do código; vale
+   * também para os workers que nascerem depois. `cenarios`: as outras linhas
+   * do tempo da fase (o Snippet roda com elas, inclusive ao restaurar).
+   */
+  definirCena(dados: DadosCena | null, cenarios?: AcontecimentoCena[][]): void;
   testarFuncao(nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao>;
   /** O depurador pausado: avalia expressões na memória de um passo (sem mudar o programa). */
   avaliarNaFoto(expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]>;
@@ -47,10 +55,14 @@ export class SessaoNavegador implements SessaoExecutor {
   private readonly esperas = new Map<number, Espera>();
   private historico: { codigo: string; origem: OrigemCodigo }[] = [];
   private fila: Promise<unknown> = Promise.resolve();
+  private cena: DadosCena | null = null;
+  private cenarios: AcontecimentoCena[][] = [];
 
   private garantirWorker(): Worker {
     if (this.worker) return this.worker;
     const worker = criarWorker();
+    // A cena vai antes de tudo: o worker atende os pedidos na ordem em que chegam.
+    if (this.cena) worker.postMessage({ id: 0, tipo: "definirCena", dados: this.cena } satisfies PedidoExecutor);
     worker.addEventListener("message", (evento: MessageEvent<RespostaExecutor>) => {
       const espera = this.esperas.get(evento.data.id);
       if (!espera) return;
@@ -90,12 +102,21 @@ export class SessaoNavegador implements SessaoExecutor {
 
   private async recuperar() {
     if (!this.historico.length) return;
-    await this.enviar({ tipo: "repetir", entradas: this.historico }, LIMITES.reservaMs * 2);
+    const vezes = 1 + this.cenarios.length;
+    await this.enviar({ tipo: "repetir", entradas: this.historico, ...(this.cenarios.length ? { cenarios: this.cenarios } : {}) }, LIMITES.reservaMs * 2 * vezes);
   }
 
-  executar(codigo: string, origem: OrigemCodigo): Promise<ResultadoExecucao> {
+  definirCena(dados: DadosCena | null, cenarios: AcontecimentoCena[][] = []) {
+    this.cena = dados;
+    this.cenarios = dados ? cenarios : [];
+    this.worker?.postMessage({ id: 0, tipo: "definirCena", dados } satisfies PedidoExecutor);
+  }
+
+  executar(codigo: string, origem: OrigemCodigo, cenarios?: AcontecimentoCena[][]): Promise<ResultadoExecucao> {
     return this.emFila(async () => {
-      const resposta = await this.enviar({ tipo: "executar", codigo, origem }, LIMITES.reservaMs);
+      // Com outras linhas do tempo, o código roda mais vezes: o tempo reserva cresce junto.
+      const vezes = 1 + (cenarios?.length ?? 0);
+      const resposta = await this.enviar({ tipo: "executar", codigo, origem, ...(cenarios?.length ? { cenarios } : {}) }, LIMITES.reservaMs * vezes);
       if (resposta?.tipo === "executar") {
         if (!resposta.resultado.erro || resposta.resultado.erro.tipo === "execucao") this.historico.push({ codigo, origem });
         return resposta.resultado;

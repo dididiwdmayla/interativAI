@@ -40,6 +40,9 @@ import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
 import { IconeObservar } from "@/componentes/icones/IconeObservar";
 import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { IconeCasosDeTeste } from "@/componentes/icones/IconeCasosDeTeste";
+import { IconeCena } from "@/componentes/icones/IconeCena";
+import { IconeFichaDispositivo } from "@/componentes/icones/IconeFichaDispositivo";
+import { IconeVelocidade } from "@/componentes/icones/IconeVelocidade";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
@@ -1162,6 +1165,69 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     noF12DeVerdade:
       "a aba Elementos mostra a árvore da página (o DOM): o <html> tem o <head> e o <body> como filhos, e assim por diante. Uma árvore de dados no seu programa funciona igual.",
     experimente: { mouse: "Clique em Ver como árvore.", toque: "Toque em Ver como árvore." },
+    uso: "sinal",
+  },
+  // Cenas programáveis: o mundo real que o código controla (src/motor/cena).
+  cena: {
+    id: "cena",
+    nome: "Cena",
+    Icone: IconeCena,
+    alvo: seletorFerramenta("cena"),
+    oQueFaz: "Mostra o mundo que o seu código controla: um quarto, uma vitrine, um portão. Cada dispositivo é um objeto no código.",
+    praQueServe:
+      "Você escreve lampada.ligar() e vê a lâmpada acender. Com esperar(ms), o tempo da cena anda; Executar roda a cena do começo e ela toca como animação.",
+    comoUsarAqui: {
+      mouse: "Escreva o código no Snippet e clique em Executar: a cena toca do começo. O botão de tocar repete, e a barra de tempo volta e avança.",
+      toque: "Escreva o código no Snippet e toque em Executar: a cena toca do começo. O botão de tocar repete, e a barra de tempo volta e avança.",
+    },
+    noF12DeVerdade:
+      "o F12 não tem cena: na vida real o código roda numa plaquinha (um microcontrolador) ligada aos aparelhos. Na trilha Automação você monta isso de verdade.",
+    experimente: {
+      mouse: "Clique na cena.",
+      toque: "Toque na cena.",
+    },
+    uso: "tocar",
+  },
+  // Cenas programáveis: o manual de cada dispositivo, com o "por dentro" (ponte com a trilha Automação).
+  "ficha-dispositivo": {
+    id: "ficha-dispositivo",
+    nome: "Ficha do dispositivo",
+    Icone: IconeFichaDispositivo,
+    alvo: seletorFerramenta("ficha-dispositivo"),
+    oQueFaz: "Abre o manual do dispositivo: o que ele faz, os comandos e as propriedades que o código usa, com um exemplo.",
+    praQueServe:
+      "Quem programa lê documentação o tempo todo: antes de usar uma peça nova, você descobre como falar com ela. O botão Por dentro mostra o caminho do comando até a lâmpada de verdade.",
+    comoUsarAqui: {
+      mouse: "Clique num dispositivo da cena (a lâmpada, o sensor...). Na ficha, Por dentro mostra o que acontece depois do comando.",
+      toque: "Toque num dispositivo da cena (a lâmpada, o sensor...). Na ficha, Por dentro mostra o que acontece depois do comando.",
+    },
+    noF12DeVerdade:
+      "não fica no F12: é a documentação. No JavaScript do navegador, o MDN (developer.mozilla.org) explica cada comando; numa plaquinha de verdade, quem explica é o manual (datasheet) da peça.",
+    experimente: {
+      mouse: "Clique num dispositivo da cena.",
+      toque: "Toque num dispositivo da cena.",
+    },
+    uso: "sinal",
+  },
+  // Cenas programáveis: a cena toca em 1x, 2x ou 4x (o relógio é da simulação, não do mundo).
+  "velocidade-simulacao": {
+    id: "velocidade-simulacao",
+    nome: "Velocidade da simulação",
+    Icone: IconeVelocidade,
+    alvo: seletorFerramenta("velocidade-simulacao"),
+    oQueFaz: "Escolhe se a cena toca no tempo de verdade (1x), duas vezes mais rápido (2x) ou quatro (4x).",
+    praQueServe:
+      "Uma cena de 10 segundos em 4x passa em 2,5. O tempo do código não muda: esperar(500) continua sendo meio segundo da cena, só a animação corre mais.",
+    comoUsarAqui: {
+      mouse: "Clique em 1x, 2x ou 4x, embaixo da cena, e clique em tocar.",
+      toque: "Toque em 1x, 2x ou 4x, embaixo da cena, e toque em tocar.",
+    },
+    noF12DeVerdade:
+      "o F12 não acelera programas, mas a aba Desempenho (Performance) do Chrome grava o que aconteceu e deixa examinar a gravação com calma, quadro a quadro. Em automação, os simuladores fazem parecido: rodam o tempo mais rápido para testar.",
+    experimente: {
+      mouse: "Clique em 2x.",
+      toque: "Toque em 2x.",
+    },
     uso: "sinal",
   },
 };

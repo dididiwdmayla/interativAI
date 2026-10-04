@@ -14,7 +14,10 @@
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
-import { AREAS_TRABALHO, casosDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { AREAS_TRABALHO, casosDaFase, cenaDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
+import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
+import { unidadesSemCena } from "@/motor/cena/ritmo";
 import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
@@ -190,7 +193,7 @@ function achatarValidador(validador: Validador): Validador[] {
   if (validador.tipo === "todos" || validador.tipo === "algum") {
     return [validador, ...validador.validadores.flatMap(achatarValidador)];
   }
-  if (validador.tipo === "nao") return [validador, ...achatarValidador(validador.validador)];
+  if (validador.tipo === "nao" || validador.tipo === "variosCenarios") return [validador, ...achatarValidador(validador.validador)];
   return [validador];
 }
 
@@ -505,6 +508,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "publicados-congelados",
     nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
     checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
+  },
+  {
+    id: "ritmo-das-cenas",
+    nome: "regra de ritmo: toda unidade nova da Lógica tem pelo menos uma fase com cena (as publicadas ficam isentas)",
+    checar: ({ unidades, fases }) => unidadesSemCena(unidades, fases, new Set(Object.keys(PUBLICADOS.unidades))),
   },
 ];
 
@@ -1131,10 +1139,17 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const problemas: string[] = [];
       const comPlano = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.plano !== undefined;
       const comTestes = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.testes !== undefined;
+      const comCena = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.cena !== undefined;
       // O plano no código pede as duas áreas: o quadro (os cartões) e o Snippet (onde os comentários moram).
       const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet");
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
+          // Cena: os validadores olham a simulação, com dispositivos, propriedades e ações que existem nela.
+          if (VALIDADORES_DE_CENA.has(item.tipo)) {
+            const cena = cenaDaFase(fase);
+            if (!cena) problemas.push(`${onde}: o validador ${item.tipo} pede a área "cena"`);
+            else problemas.push(...conferirValidadorDeCena(item, cena, onde));
+          }
           if (item.tipo === "planoComentado" && !planoNoCodigo) problemas.push(`${onde}: o validador planoComentado pede as áreas "plano" e "snippet"`);
           if (item.tipo === "casosDoAluno") {
             const dados = casosDaFase(fase);
@@ -1154,13 +1169,25 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if ((acao.tipo === "escreverCaso" || acao.tipo === "apagarCaso" || acao.tipo === "rodarCasos") && !casosDaFase(fase)) problemas.push(`${onde}: ${acao.tipo} pede a área "testes"`);
           if ((acao.tipo === "levarPlanoProCodigo" || acao.tipo === "verPassoNoCodigo") && !planoNoCodigo) problemas.push(`${onde}: ${acao.tipo} pede as áreas "plano" e "snippet"`);
           if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
+          if (acao.tipo === "abrirFicha" || acao.tipo === "verPorDentro" || acao.tipo === "velocidadeCena") {
+            const cena = cenaDaFase(fase);
+            if (!cena) problemas.push(`${onde}: ${acao.tipo} pede a área "cena"`);
+            else if (acao.tipo !== "velocidadeCena" && !cena.dispositivos.some((d) => d.id === acao.dispositivo)) problemas.push(`${onde}: ${acao.tipo} cita o dispositivo "${acao.dispositivo}", que a cena não tem`);
+            if (acao.tipo === "velocidadeCena" && ![1, 2, 4].includes(acao.velocidade)) problemas.push(`${onde}: velocidadeCena ${acao.velocidade} (vale 1, 2 ou 4)`);
+          }
         }
       }
       if (!planoNoCodigo && fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('usaFerramentas tem "plano-no-codigo", mas a fase não tem as áreas "plano" e "snippet"');
+      // A ficha e a velocidade moram na área cena: aparecem sempre com ela (e só com ela).
+      for (const ferramenta of ["ficha-dispositivo", "velocidade-simulacao"] as const) {
+        if (!temArea(fase, "cena") && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a fase não declara a área "cena"`);
+        if (temArea(fase, "cena") && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`com a área "cena", a ${ferramenta === "ficha-dispositivo" ? "ficha de cada dispositivo" : "velocidade da simulação"} aparece: ponha "${ferramenta}" em usaFerramentas`);
+      }
       if (!faseComposta(fase)) {
         if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
         if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');
         if (comTestes) problemas.push('a fase tem testes, mas não declara a área "testes" em areas');
+        if (comCena) problemas.push('a fase tem cena, mas não declara a área "cena" em areas');
         return problemas;
       }
       const areas = fase.areas;
@@ -1175,6 +1202,11 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (fase.modoDocumento) problemas.push("fase composta não usa modoDocumento");
       if (areas.includes("testes") && !fase.programa?.snippet) problemas.push('a área "testes" pede programa.snippet (os casos chamam a função do Snippet)');
       if (areas.includes("testes") && !comTestes) problemas.push('a área "testes" pede o campo testes (a função que os casos chamam)');
+      // A cena é o mundo que o código controla: os dispositivos são objetos do código do Snippet.
+      if (areas.includes("cena") && !comCena) problemas.push('a área "cena" pede o campo cena (o cenário, os dispositivos e a linha do tempo)');
+      if (comCena && !areas.includes("cena")) problemas.push('a fase tem cena, mas não declara a área "cena" em areas');
+      if (areas.includes("cena") && !fase.programa?.snippet) problemas.push('a área "cena" pede programa.snippet (o código que controla a cena)');
+      if (comCena && (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.cena) problemas.push(...conferirCena(fase.cena).map((p) => `cena: ${p}`));
       if (comTestes && fase.testes) {
         const { funcao, parametros, inicial } = fase.testes;
         if (!NOME_JS.test(funcao)) problemas.push(`testes.funcao "${funcao}" não é um nome de função`);
@@ -1186,7 +1218,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         });
         if ((inicial ?? []).length > MAXIMO_CASOS) problemas.push(`testes.inicial tem mais de ${MAXIMO_CASOS} casos`);
       }
-      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
+      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { cena: "cena", plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
       for (const area of AREAS_TRABALHO) {
         const ferramenta = ferramentaDaArea[area];
         if (areas.includes(area) && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`a área "${area}" pede "${ferramenta}" em usaFerramentas`);

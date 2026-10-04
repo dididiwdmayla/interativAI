@@ -1,4 +1,5 @@
 import type { SintaxeJs } from "./instrumentar";
+import type { RastroCena } from "../cena/modelo";
 
 /*
  * Tipos do executor de JavaScript do jogador (Ilha Lógica). Tudo aqui é
@@ -86,6 +87,8 @@ export type PassoRastro = {
    * ordenação acontecendo.
    */
   leituras?: { id: number; indice: number }[];
+  /** (Cena programável) O relógio simulado neste passo: a cena anda junto com a linha do tempo. */
+  tempoMs?: number;
 };
 
 export type NivelSaida = "log" | "info" | "warn" | "error" | "debug";
@@ -113,6 +116,12 @@ export type ErroExecucao = {
   mensagem: string;
   linha: number | null;
   coluna: number | null;
+  /**
+   * (Cena programável, passos demais) O loop não chamou esperar() (o relógio
+   * da cena não andou) ou chamou com um tempo curto demais: a explicação dá a
+   * dica certa.
+   */
+  naCena?: "sem-esperar" | "esperar-curto";
 };
 
 export type OrigemCodigo = "console" | "snippet" | "teste";
@@ -134,6 +143,10 @@ export type ResultadoExecucao = {
   globais: { nome: string; declaracao: TipoDeclaracao }[];
   /** O que o código usa (if, for, arrow...), lido da árvore: validador `usouSintaxe`. */
   sintaxes: SintaxeJs[];
+  /** (Cena programável) A simulação depois desta execução: as mudanças dos dispositivos com o instante. */
+  cena?: RastroCena;
+  /** (Cena, Snippet) A mesma simulação com outras linhas do tempo, pela chave (validador variosCenarios). */
+  cenarios?: Record<string, RastroCena>;
 };
 
 /** O valor de uma expressão do painel Observar, avaliada numa foto da memória (o momento pausado). */

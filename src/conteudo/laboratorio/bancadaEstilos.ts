@@ -20,6 +20,7 @@ import { FASE_BANCADA_TEMA } from "./bancadaTema";
 import { FASE_BANCADA_VARIAVEIS } from "./bancadaVariaveis";
 import { FASES_BANCADA_LOGICA, UNIDADE_BANCADA_LOGICA } from "./bancadaLogica";
 import { FASES_BANCADA_RESOLVER, UNIDADE_BANCADA_RESOLVER } from "./bancadaResolver";
+import { FASES_BANCADA_CENAS, UNIDADE_BANCADA_CENAS } from "./bancadaCenas";
 
 const CSS_DA_BANCADA = `body {
   font-family: Georgia, serif;
@@ -201,6 +202,7 @@ export const FASES_LABORATORIO: readonly Fase[] = [
   FASE_DEMO_CAMPANHA,
   ...FASES_BANCADA_LOGICA,
   ...FASES_BANCADA_RESOLVER,
+  ...FASES_BANCADA_CENAS,
 ];
 
-export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA, UNIDADE_BANCADA_LOGICA, UNIDADE_BANCADA_RESOLVER];
+export const UNIDADES_LABORATORIO: readonly Unidade[] = [UNIDADE_BANCADA, UNIDADE_BANCADA_LOGICA, UNIDADE_BANCADA_RESOLVER, UNIDADE_BANCADA_CENAS];

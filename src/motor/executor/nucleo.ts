@@ -10,6 +10,8 @@
  */
 import { analisarCodigo, instrumentar } from "./instrumentar";
 import { textoDaSaida, valorIgual } from "./formatar";
+import { FIM_DA_CENA, MotorCena } from "../cena/motor";
+import { type AcontecimentoCena, chaveLinhaDoTempo, type DadosCena, type RastroCena } from "../cena/modelo";
 import {
   LIMITES,
   type CasoFuncao,
@@ -79,6 +81,7 @@ export type Hospedeiro = {
 type Intrinsecos = {
   ReferenceError: new (mensagem: string) => Error;
   TypeError: new (mensagem: string) => Error;
+  RangeError: new (mensagem: string) => Error;
   Error: new (mensagem: string) => Error;
   JSON: { parse(texto: string): unknown };
   toString: (this: unknown) => string;
@@ -128,11 +131,15 @@ export class NucleoExecutor {
   private leituras: { id: number; indice: number }[] = [];
   private limitePassos: number = LIMITES.passos;
   private limiteTempo: number = LIMITES.tempoMs;
+  /** (Cena programável) O relógio simulado e os dispositivos que o código usa. */
+  private cena: MotorCena | null = null;
+  /** (Cena, variosCenarios) As outras linhas do tempo do último Snippet que rodou com elas (voltam depois de recarregar). */
+  private cenariosAtuais: Record<string, RastroCena> = {};
 
   constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
     if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
     this.intr = host.avaliar(
-      "({ ReferenceError: ReferenceError, TypeError: TypeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype, Array: Array, Object: Object, Map: Map, Set: Set, Date: Date, Function: Function })",
+      "({ ReferenceError: ReferenceError, TypeError: TypeError, RangeError: RangeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype, Array: Array, Object: Object, Map: Map, Set: Set, Date: Date, Function: Function })",
     ) as Intrinsecos;
     this.instalar();
   }
@@ -140,6 +147,29 @@ export class NucleoExecutor {
   /** Nomes globais declarados até agora (ordem de declaração). */
   listaDeGlobais(): { nome: string; declaracao: TipoDeclaracao }[] {
     return [...this.globais].map(([nome, declaracao]) => ({ nome, declaracao }));
+  }
+
+  /**
+   * (Cena programável) Põe os dispositivos da cena e o `esperar` no reino
+   * do código (null: tira). O Snippet recomeça a cena a cada execução; o
+   * Console continua de onde ela está.
+   */
+  definirCena(dados: DadosCena | null) {
+    if (this.cena) for (const nome of Object.keys(this.cena.globais)) delete this.host.global[nome];
+    this.cena = null;
+    this.cenariosAtuais = {};
+    if (!dados) return;
+    const cena = new MotorCena(dados, (tipo, mensagem) => new this.intr[tipo](mensagem));
+    cena.passoAtual = () => (this.gravando ? this.passos.length : null);
+    for (const [nome, valor] of Object.entries(cena.globais)) {
+      Object.defineProperty(this.host.global, nome, { value: valor, writable: false, configurable: true, enumerable: false });
+    }
+    this.cena = cena;
+  }
+
+  /** (Cena programável) O rastro da simulação de agora (null: a fase não tem cena). */
+  rastroDaCena(): RastroCena | null {
+    return this.cena?.rastro() ?? null;
   }
 
   private instalar() {
@@ -248,6 +278,8 @@ export class NucleoExecutor {
 
   private conferirParada() {
     if (this.parado) throw PARADA;
+    // O tempo da cena acabou: todo passo seguinte encerra (um try/catch do aluno não segura).
+    if (this.cena?.acabou) throw FIM_DA_CENA;
   }
 
   private passo(linha: number, coluna: number, depurador = false) {
@@ -267,8 +299,13 @@ export class NucleoExecutor {
     if (!this.gravando) return;
     if (this.passos.length < LIMITES.fotos) {
       const leituras = this.tirarLeituras();
-      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length, ...(depurador ? { depurador: true as const } : {}), ...(leituras ? { leituras } : {}) });
+      this.passos.push({ linha, coluna, tipo: "passo", memoria: this.fotografar(), saidas: this.saidas.length, ...(depurador ? { depurador: true as const } : {}), ...(leituras ? { leituras } : {}), ...this.tempoDaCena() });
     } else this.cortado = true;
+  }
+
+  /** (Cena) O instante do relógio simulado, para a linha do tempo andar junto com a cena. */
+  private tempoDaCena(): { tempoMs?: number } {
+    return this.cena ? { tempoMs: this.cena.relogioMs() } : {};
   }
 
   /** As leituras desde o último passo (e zera a lista). */
@@ -294,6 +331,7 @@ export class NucleoExecutor {
       memoria,
       saidas: this.saidas.length,
       retorno: { funcao: topo.nome, valor: this.paraMemoria(valor, memoria.monte, { n: 0 }) },
+      ...this.tempoDaCena(),
     });
   }
 
@@ -549,7 +587,12 @@ export class NucleoExecutor {
             : `O programa rodou por mais de ${LIMITES.tempoMs / 1000} segundos e o jogo parou ele.`,
         linha: local.linha,
         coluna: local.coluna,
+        ...(this.cena ? { naCena: this.cena.esperou() ? ("esperar-curto" as const) : ("sem-esperar" as const) } : {}),
       };
+    }
+    if (erro === FIM_DA_CENA) {
+      const topo = this.topo();
+      return { tipo: "execucao", nome: "", mensagem: "O tempo da cena acabou antes de a função terminar.", linha: topo.linha, coluna: topo.coluna };
     }
     if (this.host.ehEstouroDeTempo?.(erro)) {
       const topo = this.topo();
@@ -579,10 +622,35 @@ export class NucleoExecutor {
   }
 
   /** Roda uma entrada do Console ou o Snippet, na mesma sessão (as globais continuam). */
-  executar(fonteOriginal: string, origem: OrigemCodigo, opcoes: { gravar?: boolean } = {}): ResultadoExecucao {
+  executar(
+    fonteOriginal: string,
+    origem: OrigemCodigo,
+    opcoes: {
+      gravar?: boolean;
+      /** (Cena, Snippet) Outras linhas do tempo: o código roda com cada uma antes (validador variosCenarios). */
+      cenarios?: readonly AcontecimentoCena[][];
+      /** (Cena, Snippet) A linha do tempo desta execução (padrão: a da cena). */
+      linhaDoTempo?: AcontecimentoCena[];
+    } = {},
+  ): ResultadoExecucao {
+    // Cena: as outras linhas do tempo rodam antes, em silêncio; a execução de verdade é a última (a memória fica a dela).
+    const cenarios: Record<string, RastroCena> = {};
+    if (this.cena && origem === "snippet" && opcoes.cenarios?.length && fonteOriginal.trim()) {
+      for (const linha of opcoes.cenarios) {
+        const variante = this.executar(fonteOriginal, origem, { gravar: false, linhaDoTempo: linha });
+        if (variante.cena) cenarios[chaveLinhaDoTempo(linha)] = variante.cena;
+      }
+    }
     this.entradas += 1;
     const gravar = opcoes.gravar ?? true;
     this.comecar(gravar);
+    const cena = this.cena;
+    // Executar recomeça a cena do zero; o Console continua de onde ela está.
+    if (cena && origem === "snippet" && fonteOriginal.trim()) cena.reiniciar(opcoes.linhaDoTempo);
+    cena?.comecarExecucao(this.entradas);
+    if (Object.keys(cenarios).length) this.cenariosAtuais = cenarios;
+    const daCena = (): Pick<ResultadoExecucao, "cena" | "cenarios"> =>
+      cena ? { cena: cena.rastro(), ...(Object.keys(this.cenariosAtuais).length ? { cenarios: this.cenariosAtuais } : {}) } : {};
     const vazio = (erro: ErroExecucao | null, fonte: string): ResultadoExecucao => ({
       origem,
       codigo: fonte,
@@ -595,6 +663,7 @@ export class NucleoExecutor {
       memoriaFinal: this.fotografar(),
       globais: this.listaDeGlobais(),
       sintaxes: [],
+      ...daCena(),
     });
     if (!fonteOriginal.trim()) return vazio(null, fonteOriginal);
 
@@ -619,15 +688,25 @@ export class NucleoExecutor {
       this.host.avaliar(inst.codigo);
       if (this.parado) erro = this.descreverErro(PARADA);
     } catch (e) {
-      erro = this.descreverErro(e);
+      // O tempo da cena acabou: a simulação terminou, não é erro (o loop de controle para junto com ela).
+      erro = !this.parado && (e === FIM_DA_CENA || cena?.acabou) ? null : this.descreverErro(e);
     }
     this.pilha.length = 1;
     this.pilha[0].escopos.length = 0;
     const memoriaFinal = this.fotografar();
     if (gravar) {
       const leituras = this.tirarLeituras();
-      this.passos.push({ linha: erro?.linha ?? null, coluna: erro?.coluna ?? null, tipo: erro ? "erro" : "fim", memoria: memoriaFinal, saidas: this.saidas.length, ...(leituras ? { leituras } : {}) });
+      this.passos.push({
+        linha: erro?.linha ?? null,
+        coluna: erro?.coluna ?? null,
+        tipo: erro ? "erro" : "fim",
+        memoria: memoriaFinal,
+        saidas: this.saidas.length,
+        ...(leituras ? { leituras } : {}),
+        ...this.tempoDaCena(),
+      });
     }
+    cena?.terminarExecucao(origem === "snippet");
     return {
       origem,
       codigo: inst.fonte,
@@ -640,6 +719,7 @@ export class NucleoExecutor {
       memoriaFinal,
       globais: this.listaDeGlobais(),
       sintaxes: inst.sintaxes,
+      ...daCena(),
     };
   }
 
@@ -649,6 +729,29 @@ export class NucleoExecutor {
    * de uma execução. `chamadas`: os argumentos (JSON) de cada medição.
    */
   medirPassos(nome: string, chamadas: readonly { tamanho: number; args: ValorEsperado[] }[]): MedicaoPassos[] {
+    return this.semMexerNaCena(() => this.medirPassosDentro(nome, chamadas));
+  }
+
+  /**
+   * (Cena) Testes de função, medições e o Observar chamam o código do aluno
+   * fora de uma execução: a cena volta como estava (um teste não liga a
+   * lâmpada da simulação de verdade).
+   */
+  private semMexerNaCena<T>(rodar: () => T): T {
+    const cena = this.cena;
+    if (!cena) return rodar();
+    const marca = cena.marcar();
+    // Cada teste começa com a cena do começo (o relógio em zero).
+    cena.reiniciar();
+    cena.comecarExecucao(0);
+    try {
+      return rodar();
+    } finally {
+      cena.voltar(marca);
+    }
+  }
+
+  private medirPassosDentro(nome: string, chamadas: readonly { tamanho: number; args: ValorEsperado[] }[]): MedicaoPassos[] {
     const funcao = this.globais.has(nome) || nome in this.host.global ? this.ler(this.host.global, nome) : undefined;
     return chamadas.map(({ tamanho, args }) => {
       if (typeof funcao !== "function") return { funcao: nome, tamanho, passos: 0, passouDoLimite: false, erro: `não existe função ${nome}` };
@@ -680,6 +783,10 @@ export class NucleoExecutor {
    * ReferenceError, como no Chrome. Roda numa cópia: nada muda no programa.
    */
   avaliarNaFoto(expressoes: readonly string[], foto: FotoMemoria, quadro: number): ResultadoAvaliacao[] {
+    return this.semMexerNaCena(() => this.avaliarNaFotoDentro(expressoes, foto, quadro));
+  }
+
+  private avaliarNaFotoDentro(expressoes: readonly string[], foto: FotoMemoria, quadro: number): ResultadoAvaliacao[] {
     const valores = new Map<string, unknown>();
     const feitos = new Map<number, unknown>();
     const criar = (valor: ValorMemoria): unknown => {
@@ -795,6 +902,10 @@ export class NucleoExecutor {
    * Os argumentos nascem dentro do reino (JSON.parse de lá). Não grava rastro.
    */
   testarFuncao(nome: string, casos: readonly CasoFuncao[]): ResultadoTesteFuncao {
+    return this.semMexerNaCena(() => this.testarFuncaoDentro(nome, casos));
+  }
+
+  private testarFuncaoDentro(nome: string, casos: readonly CasoFuncao[]): ResultadoTesteFuncao {
     const funcao = this.globais.has(nome) || nome in this.host.global ? this.ler(this.host.global, nome) : undefined;
     const existe = typeof funcao === "function";
     const resultados = casos.map((caso) => {

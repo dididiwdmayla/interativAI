@@ -95,7 +95,13 @@ export type EventoFase =
   /** (Área testes) Escreveu, mudou ou apagou um caso de teste. */
   | { tipo: "editouCasos"; total: number }
   /** (Área testes) Rodou os casos: quantos rodaram e quantos passaram. */
-  | { tipo: "rodouCasos"; total: number; passaram: number };
+  | { tipo: "rodouCasos"; total: number; passaram: number }
+  /** (Área cena) Abriu a ficha (o manual) de um dispositivo da cena. */
+  | { tipo: "abriuFicha"; dispositivo: string; tipoDispositivo: string }
+  /** (Área cena) Viu o "por dentro" de um dispositivo (o caminho do comando até o mundo real). */
+  | { tipo: "viuPorDentro"; dispositivo: string; tipoDispositivo: string }
+  /** (Área cena) Trocou a velocidade da simulação. */
+  | { tipo: "mudouVelocidade"; velocidade: number };
 
 /**
  * Para onde um link levaria:
@@ -155,4 +161,7 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "editouSnippet",
   "editouCasos",
   "rodouCasos",
+  "abriuFicha",
+  "viuPorDentro",
+  "mudouVelocidade",
 ];

@@ -254,7 +254,7 @@ describe("o desafio composto", () => {
 
   it("a meta mostra as áreas antes e depois", () => {
     const { antes, depois } = composicaoDoDesafio(FASE_DEMO_DESAFIO_RESOLVER);
-    expect(antes).toEqual({ plano: [], codigo: "", casos: [], memoria: null });
+    expect(antes).toEqual({ cena: null, plano: [], codigo: "", casos: [], memoria: null });
     expect(depois.plano).toEqual(["Começar a contagem em zero", "Olhar cada nota da lista", "Se a nota for 6 ou mais, contar mais um", "Devolver a contagem"]);
     expect(depois.codigo?.startsWith("// Plano: Contar quantos passaram\n// 1. Começar a contagem em zero")).toBe(true);
     expect(depois.casos?.map((caso) => [caso.chamada, caso.esperado, caso.passou])).toEqual([

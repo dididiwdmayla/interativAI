@@ -318,3 +318,21 @@ html:fullscreen .h-dvh {
 html:fullscreen .h-dvh > header {
   min-height: 46px;
 }
+
+/* Cena programável: o sinal descendo pelo caminho do comando, no "por dentro" da ficha. */
+@keyframes sinal-por-dentro {
+  from {
+    top: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}

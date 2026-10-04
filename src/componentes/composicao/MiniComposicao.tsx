@@ -2,12 +2,13 @@
 
 /*
  * A tela composta em miniatura, para o antes e o depois da meta de um
- * desafio composto: o plano, o código e os casos de teste (as áreas que a
- * fase tem), sem nada clicável.
+ * desafio composto: a cena, o plano, o código e os casos de teste (as áreas
+ * que a fase tem), sem nada clicável.
  */
 import { IconeCerto } from "@/componentes/icones/IconeCerto";
 import { acharBlocoDoPlano } from "@/motor/plano/comentarios";
 import type { RetratoComposicao } from "@/motor/simulacao";
+import { CenaSvg } from "@/componentes/cena/CenaSvg";
 
 /** O código da miniatura: o bloco do plano vira uma linha só (o plano já aparece em cima), para a função caber. */
 function codigoResumido(codigo: string): string {
@@ -26,6 +27,11 @@ export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposica
     <figure className="flex min-w-0 flex-1 flex-col gap-1" data-mini-composicao={legenda}>
       <figcaption className="text-xs font-black uppercase tracking-wide text-texto-suave">{legenda}</figcaption>
       <div className="flex h-72 min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]">
+        {retrato?.cena && (
+          <section className="h-28 shrink-0 overflow-hidden rounded-lg border-2 border-borda bg-superficie" data-mini-cena={retrato.cena.dados.id}>
+            <CenaSvg dados={retrato.cena.dados} rastro={retrato.cena.rastro} tempoMs={retrato.cena.tempoMs} />
+          </section>
+        )}
         {retrato?.plano && (
           <section className="rounded-lg border-2 border-borda bg-superficie px-2 py-1" data-mini-plano>
             <p className="text-[10px] font-black uppercase tracking-wide text-texto-suave">Plano</p>
