@@ -1081,5 +1081,1225 @@
         }
       ]
     }
+  ],
+  "2": [
+    {
+      "id": "logica-algoritmos-essenciais-u2-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "A vitrine por preço",
+      "conceitos": [
+        "ordenacao-selecao"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Na vitrine da feira, organize os preços em ordem crescente. selecao(lista) muda a lista recebida e devolve essa mesma lista.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "A seleção acha o menor do trecho restante, troca com o início dele e avança uma posição.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Na linha do tempo, a leitura acende o vagão. A troca [lista[i],lista[j]] = [lista[j],lista[i]] acende os dois.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "selecao-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Ache o menor e troque com o primeiro. Ordene [9,1]; mostre MENOR 1 no painel.",
+            "toque": "Ache o menor e troque com o primeiro. Ordene [9,1]; mostre MENOR 1 no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "selecao",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "desestruturacao"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "MENOR 1"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Guarde o índice do menor em menor; depois troque os dois vagões.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Guarde o índice do menor em menor; depois troque os dois vagões."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function selecao(lista) {\n  if (lista.length < 2) return lista;\n  let menor = 0;\n  for (let j = 1; j < lista.length; j++) {\n    if (lista[j] < lista[menor]) menor = j;\n  }\n  [lista[0], lista[menor]] = [lista[menor], lista[0]];\n  return lista;\n}\nconst precos = [9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function selecao(lista) {\n  if (lista.length < 2) return lista;\n  let menor = 0;\n  for (let j = 1; j < lista.length; j++) {\n    if (lista[j] < lista[menor]) menor = j;\n  }\n  [lista[0], lista[menor]] = [lista[menor], lista[0]];\n  return lista;\n}\nconst precos = [9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "selecao-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Repita a seleção para cada posição. Ordene [10,9,1]; mostre MENOR 1, inclusive com bordas passando.",
+            "toque": "Repita a seleção para cada posição. Ordene [10,9,1]; mostre MENOR 1, inclusive com bordas passando."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "selecao",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "precos",
+                "valor": [
+                  1,
+                  9,
+                  10
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "MENOR 1"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "O laço externo fixa i; o interno busca o menor entre i+1 e o fim."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function selecao(lista) {\n  for (let i = 0; i < lista.length - 1; i++) {\n    let menor = i;\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[j] < lista[menor]) menor = j;\n    }\n    if (menor !== i) [lista[i], lista[menor]] = [lista[menor], lista[i]];\n  }\n  return lista;\n}\nconst precos = [10,9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Após só a primeira troca da seleção em [10,9,1], qual é a lista?",
+            "opcoes": [
+              "[1,10,9]",
+              "[1,9,10]",
+              "[10,1,9]"
+            ],
+            "correta": 1,
+            "explicacao": "O menor é 1 no índice 2. Troca com o 10; o restante ainda precisa de seleção."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u2",
+        "titulo": "Vitrine da feira",
+        "ambiente": "feira",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "balcao",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          },
+          {
+            "peca": "prateleira",
+            "x": 48,
+            "y": 73,
+            "variante": "potes"
+          },
+          {
+            "peca": "vitrine",
+            "x": 24,
+            "y": 65
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "Vizinhos fora de ordem",
+      "conceitos": [
+        "ordenacao-bolha"
+      ],
+      "revisa": [
+        "ordenacao-selecao",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "ordenacao-selecao",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A bolha compara vizinhos: se o da esquerda for maior, troca. Uma passada leva o maior ao fim.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "bolha(lista) também altera e devolve a lista recebida. Repita passadas encurtando o fim.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "bolha-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Faça uma passada comparando vizinhos. bolha([3,2]) deve devolver [2,3].",
+            "toque": "Faça uma passada comparando vizinhos. bolha([3,2]) deve devolver [2,3]."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "bolha",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        2
+                      ]
+                    ],
+                    "esperado": [
+                      2,
+                      3
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "desestruturacao"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Compare lista[j] com lista[j+1] e troque se a esquerda for maior.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Compare lista[j] com lista[j+1] e troque se a esquerda for maior."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function bolha(lista) {\n  for (let j = 0; j < lista.length - 1; j++) {\n    if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n  }\n  return lista;\n}\nconst pesos = [3,2];\nbolha(pesos);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function bolha(lista) {\n  for (let j = 0; j < lista.length - 1; j++) {\n    if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n  }\n  return lista;\n}\nconst pesos = [3,2];\nbolha(pesos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "bolha-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Complete as passadas: [3,2,1] vira [1,2,3]. Trate vazio, repetidos e lista já ordenada.",
+            "toque": "Complete as passadas: [3,2,1] vira [1,2,3]. Trate vazio, repetidos e lista já ordenada."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "bolha",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "pesos",
+                "valor": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Depois de uma passada, o maior está no fim; faça outra sem revisitá-lo."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function bolha(lista) {\n  for (let fim = lista.length - 1; fim > 0; fim--) {\n    for (let j = 0; j < fim; j++) {\n      if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n    }\n  }\n  return lista;\n}\nconst pesos = [3,2,1];\nbolha(pesos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Uma única passada da esquerda para a direita em [3,2,1] termina como?",
+            "opcoes": [
+              "[2,1,3]",
+              "[1,2,3]",
+              "[3,1,2]"
+            ],
+            "correta": 0,
+            "explicacao": "Troca 3 com 2, depois 3 com 1. O 3 chega ao fim; ainda falta trocar 2 com 1."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f3",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "O sort compara texto",
+      "conceitos": [
+        "sort-numerico"
+      ],
+      "revisa": [
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "arrow-js",
+        "array-js",
+        "return-js"
+      ],
+      "prerequisitos": [
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "arrow-js",
+        "array-js",
+        "return-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "No JavaScript real, sort() sem comparador trata números como textos. \"10\" vem antes de \"9\".",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O comparador (a,b) => a-b é negativo quando a deve vir antes de b. Use uma cópia se não quiser mudar a original.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Por que aprender seleção e bolha? Para entender o custo e escolher quando usar o sort pronto. Ele não custa zero passos.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "sort-padrao",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Preveja e rode no Console: const errado = [10,9,1].sort().",
+            "toque": "Preveja e rode no Console: const errado = [10,9,1].sort()."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "errado",
+                "valor": [
+                  1,
+                  10,
+                  9
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Rode sort sem argumentos e olhe a ordem dos vagões.",
+            "linha": {
+              "alvo": "console",
+              "fala": "Escreva o comando no Console."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "executarNoConsole",
+                  "codigo": "const errado = [10,9,1].sort();"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "executarNoConsole",
+              "codigo": "const errado = [10,9,1].sort();"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Qual lista [10,9,1].sort() devolve?",
+            "opcoes": [
+              "[10,9,1]",
+              "[1,9,10]",
+              "[1,10,9]"
+            ],
+            "correta": 2,
+            "explicacao": "Sem comparador, a ordem é de texto: \"1\", \"10\", \"9\"."
+          }
+        },
+        {
+          "id": "sort-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Crie numerica(lista): devolva uma cópia ordenada com sort e comparador. A original [20,3,11] deve continuar igual.",
+            "toque": "Crie numerica(lista): devolva uma cópia ordenada com sort e comparador. A original [20,3,11] deve continuar igual."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "numerica",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "arrow"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "original",
+                "valor": [
+                  20,
+                  3,
+                  11
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "ordenada",
+                "valor": [
+                  3,
+                  11,
+                  20
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Copie com [...lista] e passe (a,b) => a-b para sort."
+          },
+          "falaAoConcluir": {
+            "texto": "O sort pronto é útil; entender as trocas ajuda a avaliar o trabalho que fica escondido.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function numerica(lista) {\n  return [...lista].sort((a, b) => a - b);\n}\nconst original = [20,3,11];\nconst ordenada = numerica(original);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f4",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "As distâncias do passeio",
+      "conceitos": [],
+      "revisa": [
+        "sort-numerico",
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "sort-numerico",
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Uma guia turística recebe distâncias numéricas. roteiro(distancias) devolve uma cópia em ordem crescente.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Planeje e teste [] e [12] e [12,2,12]. Confira também negativos e [10,9,1]. Use sort com comparador numérico.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "As distâncias do passeio",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Receber as distâncias do passeio"
+          },
+          {
+            "id": "p2",
+            "texto": "Copiar a lista para preservar a entrada",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Ordenar os números com comparador",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver a cópia ordenada",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "roteiro",
+        "parametros": [
+          "distancias"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "roteiro",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        12
+                      ]
+                    ],
+                    "esperado": [
+                      12
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        12,
+                        2,
+                        12
+                      ]
+                    ],
+                    "esperado": [
+                      2,
+                      12,
+                      12
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -1,
+                        0,
+                        -3
+                      ]
+                    ],
+                    "esperado": [
+                      -3,
+                      -1,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "arrow"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: As distâncias do passeio\n// 1. Receber as distâncias do passeio\n// 2. Copiar a lista para preservar a entrada\n// 3. Ordenar os números com comparador\n// 4. Devolver a cópia ordenada\n\nfunction roteiro(lista) {\n  return [...lista].sort((a, b) => a - b);\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    12
+                  ]
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    12,
+                    2,
+                    12
+                  ]
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "[]"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[12]",
+              "esperado": "[12]"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[12, 2, 12]",
+              "esperado": "[2, 12, 12]"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

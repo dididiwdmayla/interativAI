@@ -277,6 +277,12 @@
       "logica-algoritmos-essenciais-u1-f2",
       "logica-algoritmos-essenciais-u1-f3"
     ],
+    "logica-algoritmos-essenciais-u2": [
+      "logica-algoritmos-essenciais-u2-f1",
+      "logica-algoritmos-essenciais-u2-f2",
+      "logica-algoritmos-essenciais-u2-f3",
+      "logica-algoritmos-essenciais-u2-f4"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1655,6 +1661,32 @@
         "testes"
       ]
     },
+    "logica-algoritmos-essenciais-u2-f1": {
+      "objetivos": [
+        "selecao-guiado",
+        "selecao-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f2": {
+      "objetivos": [
+        "bolha-guiado",
+        "bolha-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f3": {
+      "objetivos": [
+        "sort-padrao",
+        "sort-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f4": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1677,6 +1709,12 @@
     }
   },
   "itensRevisao": [
+    "ordenacao-selecao-1",
+    "ordenacao-selecao-2",
+    "ordenacao-bolha-1",
+    "ordenacao-bolha-2",
+    "sort-numerico-1",
+    "sort-numerico-2",
     "busca-linear-1",
     "busca-linear-2",
     "busca-binaria-1",

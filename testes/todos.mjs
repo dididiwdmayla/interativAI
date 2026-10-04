@@ -4,6 +4,9 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["algoritmos.mjs", "desktop", "2"],
+  ["algoritmos.mjs", "retrato", "2"],
+  ["algoritmos.mjs", "paisagem", "2"],
   ["algoritmos.mjs", "desktop", "1"],
   ["algoritmos.mjs", "retrato", "1"],
   ["algoritmos.mjs", "paisagem", "1"],

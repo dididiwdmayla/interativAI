@@ -17,6 +17,10 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"ordenacao-selecao": {"nome": "Ordenação por seleção", "resumo": "Procurar o menor do trecho restante e colocá-lo na próxima posição da lista.", "temas": ["logica", "desempenho"]},
+"ordenacao-bolha": {"nome": "Ordenação por bolha", "resumo": "Comparar vizinhos e trocar os fora de ordem, levando o maior ao fim em cada passada.", "temas": ["logica", "desempenho"]},
+"sort-numerico": {"nome": "sort com números", "resumo": "O sort padrão compara como texto; o comparador (a, b) => a - b coloca números em ordem crescente.", "temas": ["logica", "desempenho"]},
+
 "busca-linear": {"nome": "Busca linear", "resumo": "Olhar um item por vez até achar o alvo ou chegar ao fim da lista.", "temas": ["logica", "desempenho"]},
 "busca-binaria": {"nome": "Busca binária", "resumo": "Numa lista ordenada, comparar o meio e descartar a metade que não pode conter o alvo.", "temas": ["logica", "desempenho"]},
 "lista-ordenada": {"nome": "Lista ordenada", "resumo": "Manter os valores em ordem para que a busca binária possa descartar uma metade com segurança.", "temas": ["logica", "desempenho"]},

@@ -106,3 +106,9 @@ Branch `ccr-c810c095-jo1u85`, a partir de `claude/intelligent-pascal-5va93x`
 - 3 fases com habilidade guiada e sozinha, desafio composto e cena própria.
 - 3 conceitos com temas; 6 itens de revisão em outros contextos.
 - Verificação: testar:conteudo verde (17.048 verificações), duas provas específicas verdes; jornada pelo mapa em desktop, retrato e paisagem, publicar:conteudo, build e lint verdes.
+
+## Zona Algoritmos essenciais: U2 — Ordenar
+
+- 4 fases com habilidade guiada e sozinha, desafio composto e cena própria.
+- 3 conceitos com temas; 6 itens de revisão em outros contextos.
+- Verificação: testar:conteudo verde (17.310 verificações); jornada pelo mapa nos três layouts com comparações e trocas visíveis, publicar:conteudo, build e lint verdes.
