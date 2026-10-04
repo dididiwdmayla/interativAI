@@ -23,6 +23,8 @@ import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
+import type { AreaTrabalho } from "@/motor/composicao";
+import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -317,6 +319,26 @@ export type Validador =
   | { tipo: "passoAntes"; passo: string; antesDe: string }
   /** (Ordenar) Nenhum cartão que sobra (distração) está no plano. */
   | { tipo: "semSobras" }
+  /**
+   * (Fase composta, áreas plano e snippet) O plano está no código como
+   * comentários, na ordem certa pelas dependências: os comentários de linha
+   * inteira que batem com o texto dos cartões (o "Levar o plano pro código"
+   * escreve assim), lidos na ordem do código, formam um plano que vale (os
+   * passos todos, nenhum que sobra, cada um depois do que ele precisa). É o
+   * que garante, no desafio, que o aluno planejou. Olha o código de agora.
+   */
+  | { tipo: "planoComentado" }
+  /**
+   * (Fase composta, área testes) O aluno escreveu pelo menos `minimo` casos
+   * de teste que dá para ler (entrada e saída esperada), incluindo os casos
+   * de borda que o conteúdo exige (`incluir`: pelos argumentos, pela saída
+   * esperada, ou pelos dois; `rotulo` diz como ele aparece no detalhe, como
+   * "a lista vazia"). Com `passando: true`, só contam os casos que passaram
+   * na última vez que os casos rodaram (junto com um `funcaoPassa`, isso
+   * prova que as saídas que o aluno escreveu estão certas). Olha os casos de
+   * agora.
+   */
+  | { tipo: "casosDoAluno"; minimo: number; incluir?: CasoExigido[]; passando?: boolean }
   /*
    * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
    * src/motor/desempenho.ts. Ver o guia, seção 28.
@@ -487,6 +509,32 @@ export type Acao =
   | { tipo: "tirarPasso"; passo: string }
   /** (Ordenar, com `rodar`) O botão Rodar: executa o código do plano, na ordem. Gera `executouCodigo`. */
   | { tipo: "rodarPlano" }
+  /**
+   * (Fase composta, área plano) O botão "Levar o plano pro código": escreve
+   * os passos do plano, na ordem do aluno, como comentários numerados no
+   * topo do Snippet (ou atualiza o bloco que já está lá), sem apagar o
+   * código. Gera `levouPlanoProCodigo`. Pede plano-no-codigo.
+   */
+  | { tipo: "levarPlanoProCodigo" }
+  /**
+   * (Fase composta, área plano) Toca no cartão do plano: se o passo já está no
+   * código como comentário, a linha dele acende no Snippet. Gera
+   * `apontouPasso`. Pede quadro-de-passos.
+   */
+  | { tipo: "verPassoNoCodigo"; passo: string }
+  /**
+   * (Fase composta, área testes) Escreve um caso novo, como o aluno digita:
+   * a entrada como os argumentos de uma chamada ("[8, 6]", "10, 7") e a saída
+   * esperada ("7"). Gera `editouCasos`. Pede casos-de-teste.
+   */
+  | { tipo: "escreverCaso"; entrada: string; esperado: string }
+  /** (Área testes) Apaga o caso da posição `indice` (a partir de 0). Gera `editouCasos`. Pede casos-de-teste. */
+  | { tipo: "apagarCaso"; indice: number }
+  /**
+   * (Área testes) O botão "Rodar os casos": roda o código do Snippet e chama
+   * a função com cada caso. Gera `executouCodigo` e `rodouCasos`. Pede casos-de-teste.
+   */
+  | { tipo: "rodarCasos" }
   /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
   | { tipo: "verComoArvore"; nome: string }
   /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
@@ -729,8 +777,38 @@ type FaseBase = {
   falaFinal?: Fala;
 };
 
+/**
+ * Composição de áreas de trabalho (motor de resolução de problemas): a fase
+ * declara as áreas que usa e o motor monta a tela com elas, em vez de mais
+ * um tipo fechado de fase. Vale para a prática e para o desafio. Ver
+ * src/motor/composicao.ts e o guia, seção 29.
+ */
+export type ComposicaoDaFase = {
+  /**
+   * As áreas de trabalho na mesma tela: "plano" (o quadro de passos, campo
+   * `plano`), "snippet" (o código: aba Fontes com o Snippet e o Console,
+   * pede programa.snippet), "palco" (o palco da memória com a linha do
+   * tempo) e "testes" (os casos de teste do aluno, campo `testes`). Sem o
+   * campo, a fase usa a tela de sempre do tipo dela.
+   */
+  areas?: AreaTrabalho[];
+  /**
+   * (Área plano) Os cartões do problema, como no ordenar-passos (ordenar ou
+   * agrupar, validação pelas dependências), sem `rodar`: o plano vira
+   * comentários no Snippet e o código é o aluno que escreve.
+   */
+  plano?: DadosOrdenar;
+  /**
+   * (Área testes) A função que os casos do aluno chamam (`funcao`, a do
+   * Snippet), os nomes dos parâmetros (o rótulo da entrada) e, se quiser,
+   * exemplos que já vêm escritos (`inicial`, como o aluno escreveria:
+   * `{ entrada: "[8, 6]", esperado: "7" }`).
+   */
+  testes?: DadosCasos;
+};
+
 /** Micro-passos: objetivos guiados e sozinho, em sequência. */
-export type FasePratica = FaseBase & {
+export type FasePratica = FaseBase & ComposicaoDaFase & {
   tipo: "pratica";
   objetivos: Objetivo[];
   /**
@@ -747,9 +825,11 @@ export type FasePratica = FaseBase & {
  * bancada do circuito lógico é a tela (validadores circuitoTabela e
  * usouPortao nas partes); com `circuito` e `programa` juntos, é a ponte
  * circuito/Console: a bancada na tela e, no painel, a tabela verdade em
- * cima e o Console embaixo.
+ * cima e o Console embaixo. Com `areas`, a tela é composta como numa
+ * prática composta (plano, código e palco), e as partes podem ser de cada
+ * área.
  */
-export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
+export type FaseDesafio = FaseBase & ComposicaoDaFase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
 
 /**
  * Um requisito do projeto-ponte: marca sozinho quando o validador passa

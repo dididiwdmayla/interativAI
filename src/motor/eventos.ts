@@ -85,7 +85,17 @@ export type EventoFase =
   /** (Estruturas) Abriu o "Ver como árvore" da variável. */
   | { tipo: "viuComoArvore"; nome: string }
   /** (Desempenho) Mediu o gráfico passos x tamanho. */
-  | { tipo: "mediuDesempenho"; medicoes: MedicaoPassos[] };
+  | { tipo: "mediuDesempenho"; medicoes: MedicaoPassos[] }
+  /** (Fase composta) "Levar o plano pro código": o bloco de comentários do plano entrou (ou foi atualizado) no Snippet. */
+  | { tipo: "levouPlanoProCodigo"; passos: number }
+  /** (Fase composta) Tocou num passo do plano que está no código: o comentário dele acendeu no Snippet. */
+  | { tipo: "apontouPasso"; passo: string; linha: number }
+  /** (Fase composta) O texto do Snippet mudou (avisado depois de uma pausa na digitação, para conferir o plano no código). */
+  | { tipo: "editouSnippet" }
+  /** (Área testes) Escreveu, mudou ou apagou um caso de teste. */
+  | { tipo: "editouCasos"; total: number }
+  /** (Área testes) Rodou os casos: quantos rodaram e quantos passaram. */
+  | { tipo: "rodouCasos"; total: number; passaram: number };
 
 /**
  * Para onde um link levaria:
@@ -140,4 +150,9 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "moveuPasso",
   "viuComoArvore",
   "mediuDesempenho",
+  "levouPlanoProCodigo",
+  "apontouPasso",
+  "editouSnippet",
+  "editouCasos",
+  "rodouCasos",
 ];

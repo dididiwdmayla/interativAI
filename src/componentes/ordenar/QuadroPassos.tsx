@@ -31,12 +31,14 @@ type PropsCartao = {
   /** No plano: a posição (para o número e as setas). */
   noPlano?: { posicao: number; total: number };
   codigo: boolean;
+  /** (Fase composta) O passo já está no código como comentário: o selo "//" aparece. */
+  noCodigo?: boolean;
 };
 
 const botaoPequeno =
   "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-texto-suave hover:bg-hover hover:text-texto disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-10";
 
-function Cartao({ quadro, cartao, noPlano, codigo }: PropsCartao) {
+function Cartao({ quadro, cartao, noPlano, codigo, noCodigo = false }: PropsCartao) {
   const escolhido = quadro.selecionado === cartao.id;
   const arrastando = quadro.arrasto?.passo === cartao.id;
   const destacado = quadro.destaque === cartao.id;
@@ -70,6 +72,12 @@ function Cartao({ quadro, cartao, noPlano, codigo }: PropsCartao) {
       >
         {noPlano && <span className="mr-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secundaria px-1 font-sans text-[11px] text-sobre-secundaria">{noPlano.posicao + 1}</span>}
         <span className="break-words">{cartao.texto}</span>
+        {noCodigo && (
+          <span className="ml-1.5 inline-flex items-center rounded-md border border-borda bg-codigo-fundo px-1 align-middle font-mono text-[11px] font-black text-texto-suave" title="Este passo está no código como comentário" data-no-codigo>
+            <span aria-hidden="true">{"//"}</span>
+            <span className="sr-only">(está no código)</span>
+          </span>
+        )}
       </button>
       {noPlano && !fantasma && (
         <span className="flex shrink-0 items-center">
@@ -116,7 +124,7 @@ function PorAqui({ aoPor, rotulo, dados }: { aoPor: () => void; rotulo: string; 
 }
 
 /** Uma lista do plano (o plano inteiro, ou um passo grande no agrupar). */
-function ListaDoPlano({ quadro, destino, codigo, vazio }: { quadro: QuadroOrdenar; destino: string; codigo: boolean; vazio: string }) {
+function ListaDoPlano({ quadro, destino, codigo, vazio, noCodigo }: { quadro: QuadroOrdenar; destino: string; codigo: boolean; vazio: string; noCodigo?: ReadonlySet<string> }) {
   const dados = quadro.dados;
   const ids = quadro.estado?.listas[destino] ?? [];
   const alvo = quadro.arrasto?.alvo;
@@ -133,7 +141,7 @@ function ListaDoPlano({ quadro, destino, codigo, vazio }: { quadro: QuadroOrdena
     if (escolhido && escolhido !== id) itens.push(<PorAqui key={`aqui-${id}`} aoPor={() => quadro.porPasso(escolhido, i, destino)} rotulo="Pôr aqui" dados={`${destino}:${i}`} />);
     itens.push(
       <li key={id}>
-        <Cartao quadro={quadro} cartao={cartao} noPlano={{ posicao: i, total: ids.length }} codigo={codigo} />
+        <Cartao quadro={quadro} cartao={cartao} noPlano={{ posicao: i, total: ids.length }} codigo={codigo} noCodigo={noCodigo?.has(id)} />
       </li>,
     );
   });
@@ -151,7 +159,23 @@ function ListaDoPlano({ quadro, destino, codigo, vazio }: { quadro: QuadroOrdena
 }
 
 /** A tela: o problema, o plano (ou os passos grandes) e, com `rodar`, o resultado. */
-export function PlanoDePassos({ quadro, linhas, ocupado, toque }: { quadro: QuadroOrdenar; linhas: readonly LinhaConsole[]; ocupado: boolean; toque: boolean }) {
+export function PlanoDePassos({
+  quadro,
+  linhas,
+  ocupado,
+  toque,
+  acoes,
+  noCodigo,
+}: {
+  quadro: QuadroOrdenar;
+  linhas: readonly LinhaConsole[];
+  ocupado: boolean;
+  toque: boolean;
+  /** (Fase composta) Botões no cabeçalho do plano, como o "Levar o plano pro código". */
+  acoes?: ReactNode;
+  /** (Fase composta) Os passos que já estão no código como comentário. */
+  noCodigo?: ReadonlySet<string>;
+}) {
   const dados = quadro.dados;
   if (!dados) return null;
   const codigo = dados.rodar === true;
@@ -160,11 +184,12 @@ export function PlanoDePassos({ quadro, linhas, ocupado, toque }: { quadro: Quad
   const resultado = inicio >= 0 ? linhas.slice(inicio + 1) : [];
   return (
     <div className={`flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-painel shadow-[0_8px_0_var(--cor-sombra)] ${quadro.destaque === "plano" ? "ring-4 ring-destaque" : ""}`} data-plano-ordenar>
-      <div className="flex shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie px-3 py-2">
-        <div className="min-w-0 flex-1">
+      <div className={`flex shrink-0 items-center gap-2 border-b-2 border-borda bg-superficie px-3 py-2 ${acoes ? "flex-wrap" : ""}`}>
+        <div className={`min-w-0 flex-1 ${acoes ? "basis-32" : ""}`}>
           <p className="text-[11px] font-black uppercase tracking-wide text-texto-suave">{dados.modo === "agrupar" ? "Os passos grandes" : "O plano"}</p>
-          <p className="truncate text-sm font-black text-primaria">{dados.problema}</p>
+          <p className={`text-sm font-black text-primaria ${acoes ? "" : "truncate"}`}>{dados.problema}</p>
         </div>
+        {acoes}
         {codigo && (
           <button
             type="button"
@@ -187,12 +212,12 @@ export function PlanoDePassos({ quadro, linhas, ocupado, toque }: { quadro: Quad
                   <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primaria px-1 text-xs text-sobre-primaria">{i + 1}</span>
                   {grupo.titulo}
                 </h3>
-                <ListaDoPlano quadro={quadro} destino={grupo.id} codigo={codigo} vazio={toque ? "Arraste ou toque num cartão e depois aqui." : "Arraste os subpassos para cá."} />
+                <ListaDoPlano quadro={quadro} destino={grupo.id} codigo={codigo} noCodigo={noCodigo} vazio={toque ? "Arraste ou toque num cartão e depois aqui." : "Arraste os subpassos para cá."} />
               </section>
             ))}
           </div>
         ) : (
-          <ListaDoPlano quadro={quadro} destino={LISTA_DO_PLANO} codigo={codigo} vazio={toque ? "Arraste um cartão para cá, ou toque nele e depois aqui." : "Arraste os cartões para cá, na ordem."} />
+          <ListaDoPlano quadro={quadro} destino={LISTA_DO_PLANO} codigo={codigo} noCodigo={noCodigo} vazio={toque ? "Arraste um cartão para cá, ou toque nele e depois aqui." : "Arraste os cartões para cá, na ordem."} />
         )}
       </div>
       {codigo && (

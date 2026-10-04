@@ -534,6 +534,9 @@ resposta da última expressão, as saídas do console e o erro.
   `objetivos`, `concluida`. Modos de jogo: `jogo`, `revisao` (aberta pelo
   "Rever": sem estrelas, sem salvar, começa nos objetivos, botão "Voltar ao
   desafio") e `lab` (/lab/fases: sem salvar, sem apresentações).
+  `/lab/fases?fase=<id>&modo=jogo` abre uma bancada do lab em modo `jogo`
+  (meta, apresentações, estrelas, progresso salvo e o Rever com volta), sem
+  entrar na Revisão do dia: é como se joga uma demonstração do começo ao fim.
 - **Guiado**: os 4 degraus. **Sozinho**: selo "Sozinho" (carinha
   determinada), "Me ajuda" até a dica, tutor só pergunta, comemoração "Fez
   sozinho!". **Previsão**: card com opções no balão (sem "Me ajuda" e sem
@@ -562,6 +565,35 @@ resposta da última expressão, as saídas do console e o erro.
   desafio (sempre que ele começa) e, uma vez só por unidade, na primeira
   fase, se a pessoa não tem nenhum progresso nela (`faseAbreComMeta`,
   `src/lib/metaDaUnidade.ts`; vistas em `metasVistas`).
+
+### Composição de áreas (resolução de problemas, rodada 26)
+
+- Em vez de mais um tipo fechado de fase, a prática e o desafio podem
+  declarar `areas` (`"plano"`, `"snippet"`, `"palco"`, `"testes"`) e o motor
+  monta a tela com elas (`src/motor/composicao.ts`,
+  `src/componentes/composicao/TelaComposta.tsx`). O tipo da fase não muda:
+  objetivos, checklist, Rever, meta e salvamento são os de sempre.
+- Cada área tem o seu dono no formato: `plano` (os cartões do quadro de
+  passos, as mesmas funções do `ordenar-passos`, sem `rodar`),
+  `programa.snippet` (o código), `programa` (o palco com a linha do tempo) e
+  `testes` (a função que os casos do aluno chamam). `quadroDaFase` e
+  `casosDaFase` dão o quadro e os casos para a tela, a simulação, os
+  validadores e as checagens.
+- O plano vira comentários numerados no topo do Snippet ("Levar o plano pro
+  código", `src/motor/plano/comentarios.ts`); mexer no quadro reescreve só
+  esse bloco; tocar num passo acende o comentário dele. O validador
+  `planoComentado` lê os comentários de volta e confere a ordem pelas
+  dependências; `casosDoAluno` confere os casos do aluno
+  (`src/motor/casos/`: os valores são lidos pela árvore do acorn, sem rodar
+  nada; rodar os casos roda o Snippet e chama a função).
+- Os tipos antigos (DevTools, programa, circuito, ponte, ordenar-passos)
+  continuam com as telas deles. Passar a montá-los pela composição não coube
+  com segurança: cada um tem detalhes de tela publicados (a alça da prévia
+  salva em `proporcaoPrevia`, os segmentos do celular, os alvos das
+  apresentações, os seletores de dezenas de testes de navegador) sem ganho
+  para o aluno agora. A composição é o caminho das fases novas (zona
+  Resolvendo problemas, depois a especificação e o código gerado da Ilha IA
+  e os arquivos dos projetos do Ofício, como áreas novas).
 
 ### Navegação (o mapa)
 
@@ -975,6 +1007,13 @@ Detalhes em `docs/AUDIO.md`.
   e, como reforço, `window.visualViewport`: a altura do app segue a altura
   visível, e com campo focado e altura < 78% da maior vista o teclado conta
   como aberto (prévia vai a 25%, barra de objetivos some). Unidades `dvh`.
+- Tela composta (fase com `areas`): no computador, o plano numa coluna à
+  esquerda, o código no centro e, à direita, o palco em cima e os casos de
+  teste embaixo (divisor arrastável); deitado, o plano (ou o palco, ou os
+  testes, em abas) ao lado do código; em pé, as abas "Plano | Código |
+  Testes" e o palco recolhível em cima (começa recolhido; folga embaixo para
+  o computadorzinho). Cada área fica sempre montada no mesmo lugar da
+  grade: girar não remonta o editor.
 - Toque: `touch-action: manipulation` (sem zoom de duplo toque), inspecionar
   arrastando o dedo (soltar escolhe), duplo toque e botão "Editar" no nó
   selecionado, alvos de 44 px (`pointer-coarse:`), toque longo no lugar do

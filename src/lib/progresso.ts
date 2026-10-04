@@ -1,5 +1,6 @@
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
+import { type EstadoCasos, MAXIMO_CASOS, MAXIMO_TEXTO_CASO, type ResultadoCaso } from "@/motor/casos/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
 import { lerMeuTema, type MeuTema } from "@/lib/meuTema";
 import { type EstadoRevisao, lerEstadoRevisao, REVISAO_PADRAO } from "@/lib/estadoRevisao";
@@ -50,6 +51,12 @@ export type EstadoFaseSalvo = {
   circuito: Circuito | null;
   /** (Ordenar passos) Onde está cada cartão. null nas outras fases (e em progresso antigo). */
   ordenar?: EstadoOrdenar | null;
+  /**
+   * (Fase composta, área testes) Os casos de teste do aluno e o resultado da
+   * última rodada (o código volta igual, então o resultado continua valendo).
+   * null nas outras fases (e em progresso antigo).
+   */
+  casos?: EstadoCasos | null;
 };
 
 export type ProgramaSalvo = {
@@ -249,7 +256,34 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     programa: lerProgramaSalvo(valor.programa),
     circuito: lerCircuitoSalvo(valor.circuito),
     ordenar: lerOrdenarSalvo(valor.ordenar),
+    casos: lerCasosSalvo(valor.casos),
   };
+}
+
+function lerCasosSalvo(valor: unknown): EstadoCasos | null {
+  if (!ehObjeto(valor) || !Array.isArray(valor.casos)) return null;
+  const vistos = new Set<number>();
+  const casos = valor.casos
+    .flatMap((item) => {
+      if (!ehObjeto(item) || !ehNumero(item.id) || !Number.isInteger(item.id) || typeof item.entrada !== "string" || typeof item.esperado !== "string") return [];
+      if (vistos.has(item.id)) return [];
+      vistos.add(item.id);
+      return [{ id: item.id, entrada: item.entrada.slice(0, MAXIMO_TEXTO_CASO), esperado: item.esperado.slice(0, MAXIMO_TEXTO_CASO) }];
+    })
+    .slice(0, MAXIMO_CASOS);
+  const resultados: Record<number, ResultadoCaso> = {};
+  if (ehObjeto(valor.resultados)) {
+    for (const [chave, item] of Object.entries(valor.resultados)) {
+      const id = Number(chave);
+      if (!vistos.has(id) || !ehObjeto(item) || !ehBooleano(item.passou)) continue;
+      resultados[id] = {
+        passou: item.passou,
+        obtido: typeof item.obtido === "string" ? item.obtido.slice(0, 300) : null,
+        erro: typeof item.erro === "string" ? item.erro.slice(0, 300) : null,
+      };
+    }
+  }
+  return { casos, resultados, rodou: valor.rodou === true };
 }
 
 function lerOrdenarSalvo(valor: unknown): EstadoOrdenar | null {

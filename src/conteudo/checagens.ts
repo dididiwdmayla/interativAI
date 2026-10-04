@@ -14,6 +14,8 @@
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
+import { AREAS_TRABALHO, casosDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -75,6 +77,8 @@ export type RegraFase = {
 };
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+/** Um nome de variável, função ou parâmetro do JavaScript. */
+const NOME_JS = /^[A-Za-z_$][\w$]*$/;
 const EMOJI = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{20E3}]/u;
 
 /**
@@ -947,7 +951,9 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (!fase.usaFerramentas.includes("console")) problemas.push('fase de programa pede "console" em usaFerramentas (o Console sempre aparece)');
       // Na ponte circuito/Console (desafio com circuito e programa), a tela é a bancada: não há palco.
       const ponte = circuitoDaFase(fase) !== null;
-      if (!ponte && !fase.usaFerramentas.includes("palco-memoria")) problemas.push('fase de programa pede "palco-memoria" em usaFerramentas (o palco é a tela da fase)');
+      // Fase composta: o palco é uma área como as outras (a regra "composicao" confere a ferramenta).
+      const composta = faseComposta(fase);
+      if (!ponte && !composta && !fase.usaFerramentas.includes("palco-memoria")) problemas.push('fase de programa pede "palco-memoria" em usaFerramentas (o palco é a tela da fase)');
       if (ponte && (fase.usaFerramentas.includes("palco-memoria") || fase.usaFerramentas.includes("linha-do-tempo"))) {
         problemas.push("na ponte circuito/Console a tela é a bancada: tire palco-memoria e linha-do-tempo de usaFerramentas");
       }
@@ -1119,17 +1125,93 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     },
   },
   {
-    id: "ordenar-passos",
-    nome: "ordenar passos: cartões com ids e textos válidos, dependências sem ciclo, e validadores e ações do quadro só nele",
+    id: "composicao",
+    nome: "fase composta (areas): áreas válidas, cada uma com o campo e a ferramenta dela, e campos de área só com a área",
     checar: (fase) => {
       const problemas: string[] = [];
-      const dados = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+      const comPlano = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.plano !== undefined;
+      const comTestes = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.testes !== undefined;
+      // O plano no código pede as duas áreas: o quadro (os cartões) e o Snippet (onde os comentários moram).
+      const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet");
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "planoComentado" && !planoNoCodigo) problemas.push(`${onde}: o validador planoComentado pede as áreas "plano" e "snippet"`);
+          if (item.tipo === "casosDoAluno") {
+            const dados = casosDaFase(fase);
+            if (!dados) problemas.push(`${onde}: o validador casosDoAluno pede a área "testes"`);
+            if (!Number.isInteger(item.minimo) || item.minimo < 1) problemas.push(`${onde}: casosDoAluno com minimo ${item.minimo} (pelo menos 1)`);
+            if (item.minimo > MAXIMO_CASOS) problemas.push(`${onde}: casosDoAluno pede ${item.minimo} casos (o máximo da lista é ${MAXIMO_CASOS})`);
+            for (const exigido of item.incluir ?? []) {
+              if (exigido.args === undefined && exigido.esperado === undefined) problemas.push(`${onde}: casosDoAluno.incluir com um caso sem args nem esperado`);
+              if (dados && exigido.args && exigido.args.length !== dados.parametros.length) problemas.push(`${onde}: casosDoAluno.incluir com ${exigido.args.length} argumento(s); a função tem ${dados.parametros.length}`);
+            }
+            if ((item.incluir ?? []).length > item.minimo) problemas.push(`${onde}: casosDoAluno exige ${(item.incluir ?? []).length} casos de borda, mais que o minimo ${item.minimo}`);
+          }
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        for (const acao of acoes) {
+          if ((acao.tipo === "escreverCaso" || acao.tipo === "apagarCaso" || acao.tipo === "rodarCasos") && !casosDaFase(fase)) problemas.push(`${onde}: ${acao.tipo} pede a área "testes"`);
+          if ((acao.tipo === "levarPlanoProCodigo" || acao.tipo === "verPassoNoCodigo") && !planoNoCodigo) problemas.push(`${onde}: ${acao.tipo} pede as áreas "plano" e "snippet"`);
+          if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
+        }
+      }
+      if (!planoNoCodigo && fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('usaFerramentas tem "plano-no-codigo", mas a fase não tem as áreas "plano" e "snippet"');
+      if (!faseComposta(fase)) {
+        if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
+        if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');
+        if (comTestes) problemas.push('a fase tem testes, mas não declara a área "testes" em areas');
+        return problemas;
+      }
+      const areas = fase.areas;
+      for (const area of areas) if (!(AREAS_TRABALHO as readonly string[]).includes(area)) problemas.push(`área de trabalho desconhecida: "${area}"`);
+      problemas.push(...repetidos(areas).map((area) => `a área "${area}" aparece mais de uma vez`));
+      // O código é o centro da composição: o plano vira comentários nele e o palco mostra o que ele faz.
+      if (!areas.includes("snippet")) problemas.push('fase composta pede a área "snippet" (o código do aluno)');
+      if (areas.includes("snippet") && !fase.programa?.snippet) problemas.push('a área "snippet" pede programa.snippet');
+      if (areas.includes("palco") && !fase.programa) problemas.push('a área "palco" pede programa');
+      if (areas.includes("plano") && !comPlano) problemas.push('a área "plano" pede o campo plano (os cartões)');
+      if (fase.tipo === "desafio" && fase.circuito) problemas.push("fase composta não tem circuito (a bancada é de outra tela)");
+      if (fase.modoDocumento) problemas.push("fase composta não usa modoDocumento");
+      if (areas.includes("testes") && !fase.programa?.snippet) problemas.push('a área "testes" pede programa.snippet (os casos chamam a função do Snippet)');
+      if (areas.includes("testes") && !comTestes) problemas.push('a área "testes" pede o campo testes (a função que os casos chamam)');
+      if (comTestes && fase.testes) {
+        const { funcao, parametros, inicial } = fase.testes;
+        if (!NOME_JS.test(funcao)) problemas.push(`testes.funcao "${funcao}" não é um nome de função`);
+        for (const nome of parametros) if (!NOME_JS.test(nome)) problemas.push(`testes.parametros tem "${nome}", que não é um nome de parâmetro`);
+        (inicial ?? []).forEach((caso, i) => {
+          const lido = lerCaso(caso);
+          if (!lido.ok) problemas.push(`testes.inicial[${i}]: ${lido.motivo}`);
+          else if (lido.args.length !== parametros.length) problemas.push(`testes.inicial[${i}] tem ${lido.args.length} argumento(s); a função tem ${parametros.length}`);
+        });
+        if ((inicial ?? []).length > MAXIMO_CASOS) problemas.push(`testes.inicial tem mais de ${MAXIMO_CASOS} casos`);
+      }
+      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
+      for (const area of AREAS_TRABALHO) {
+        const ferramenta = ferramentaDaArea[area];
+        if (areas.includes(area) && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`a área "${area}" pede "${ferramenta}" em usaFerramentas`);
+        if (!areas.includes(area) && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a fase não declara a área "${area}"`);
+      }
+      if (!temArea(fase, "palco") && fase.usaFerramentas.includes("linha-do-tempo")) problemas.push('a linha do tempo mora no palco: declare a área "palco"');
+      // O botão Levar pro código aparece com as duas áreas: ele é uma ferramenta (apresentada como as outras).
+      if (planoNoCodigo && !fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('com as áreas "plano" e "snippet", o botão Levar pro código aparece: ponha "plano-no-codigo" em usaFerramentas');
+      return problemas;
+    },
+  },
+  {
+    id: "ordenar-passos",
+    nome: "ordenar passos (ou área plano): cartões com ids e textos válidos, dependências sem ciclo, e validadores e ações do quadro só nele",
+    checar: (fase) => {
+      const problemas: string[] = [];
+      // O quadro de uma fase ordenar-passos ou o plano de uma fase composta (área plano).
+      const dados = quadroDaFase(fase);
+      const doTipo = fase.tipo === "ordenar-passos";
       const ids = new Set(dados?.cartoes.map((c) => c.id) ?? []);
       const grupos = new Set(dados ? destinosDo(dados) : []);
       const deQuadro = new Set(["ordemValida", "passoNoPlano", "passoAntes", "semSobras"]);
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
-          if (deQuadro.has(item.tipo) && !dados) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase ordenar-passos`);
+          if (deQuadro.has(item.tipo) && !dados) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase ordenar-passos ou com a área plano`);
           if (dados && "seletor" in item) problemas.push(`${onde}: fase de ordenar passos não tem página; o validador ${item.tipo} olha a página`);
           if (!dados) continue;
           if (item.tipo === "passoNoPlano" && !ids.has(item.passo)) problemas.push(`${onde}: passoNoPlano cita o cartão "${item.passo}", que não existe`);
@@ -1139,7 +1221,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       }
       for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
         for (const acao of acoes) {
-          if ((acao.tipo === "porPasso" || acao.tipo === "tirarPasso" || acao.tipo === "rodarPlano") && !dados) problemas.push(`${onde}: a ação ${acao.tipo} só vale numa fase ordenar-passos`);
+          if ((acao.tipo === "porPasso" || acao.tipo === "tirarPasso" || acao.tipo === "rodarPlano") && !dados) problemas.push(`${onde}: a ação ${acao.tipo} só vale numa fase ordenar-passos ou com a área plano`);
           if (!dados) continue;
           if ((acao.tipo === "porPasso" || acao.tipo === "tirarPasso") && !ids.has(acao.passo)) problemas.push(`${onde}: ${acao.tipo} cita o cartão "${acao.passo}", que não existe`);
           if (acao.tipo === "porPasso" && acao.grupo !== undefined && !grupos.has(acao.grupo)) problemas.push(`${onde}: porPasso cita o grupo "${acao.grupo}", que não existe`);
@@ -1178,11 +1260,19 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (dados.modo === "ordenar" && dados.grupos?.length) problemas.push('grupos só valem no modo "agrupar"');
       if (!dados.problema.trim() || dados.problema.length > 60) problemas.push(`o problema tem ${dados.problema.length} caracteres (de 1 a 60)`);
       for (const id of dados.inicial ?? []) if (!ids.has(id)) problemas.push(`inicial cita o cartão "${id}", que não existe`);
+      if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase de ordenar passos usa siteAlvo: SITE_DO_PROGRAMA (sem página)");
+      if (!fase.usaFerramentas.includes("quadro-de-passos")) problemas.push('fase de ordenar passos pede "quadro-de-passos" em usaFerramentas');
+      // Na fase composta o plano não roda: ele vira comentários no Snippet e o código é o aluno que escreve.
+      if (!doTipo) {
+        if (dados.rodar) problemas.push("a área plano não roda o plano (sem rodar): o código fica no Snippet, escrito pelo aluno");
+        for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+          if (acoes.some((acao) => acao.tipo === "rodarPlano")) problemas.push(`${onde}: rodarPlano não existe na área plano (o código roda no Snippet)`);
+        }
+        return problemas;
+      }
       if (dados.rodar && !fase.programa) problemas.push("ordenar.rodar pede programa na fase (o plano roda como código)");
       if (fase.programa && !dados.rodar) problemas.push("fase de ordenar passos com programa precisa de ordenar.rodar");
       if (fase.programa?.snippet) problemas.push("fase de ordenar passos não tem Snippet (o plano é o programa)");
-      if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase de ordenar passos usa siteAlvo: SITE_DO_PROGRAMA (sem página)");
-      if (!fase.usaFerramentas.includes("quadro-de-passos")) problemas.push('fase de ordenar passos pede "quadro-de-passos" em usaFerramentas');
       objetivosDe(fase).forEach((objetivo, indice) => {
         if (objetivo.modo !== "guiado") return;
         const { linha } = objetivo.ajudas;

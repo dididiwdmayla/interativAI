@@ -35,6 +35,8 @@ type Props = {
   movel: boolean;
   ocupado: boolean;
   aoFocar?: () => void;
+  /** Alvos de 44 px no toque no seletor Snippet | Console (a tela composta). */
+  alto?: boolean;
   /** O depurador da aba Fontes (só nas fases com as ferramentas dele). */
   depurador?: {
     /** A barra lateral (computador) ou os painéis em abas (celular). */
@@ -52,7 +54,7 @@ type Props = {
   };
 };
 
-export function PainelFontes({ nome, textoInicial, editorRef, aoMudar, aoExecutar, gaveta, alvoExecutar, toque, movel, ocupado, aoFocar, depurador }: Props) {
+export function PainelFontes({ nome, textoInicial, editorRef, aoMudar, aoExecutar, gaveta, alvoExecutar, toque, movel, ocupado, aoFocar, depurador, alto = false }: Props) {
   const [escolha, setMostrar] = useState<"cima" | "depurador" | "baixo">("cima");
   // No computador não há o botão Depurador (a barra lateral fica sempre à vista).
   const mostrar = !movel && escolha === "depurador" ? "cima" : escolha;
@@ -110,6 +112,7 @@ export function PainelFontes({ nome, textoInicial, editorRef, aoMudar, aoExecuta
             valor={mostrar}
             aoTrocar={(novo) => setMostrar(novo)}
             className="w-full"
+            alto={alto}
           />
         </div>
       )}

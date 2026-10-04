@@ -9,12 +9,17 @@
  * - "simulador-campanha": objetivos como na prática, mais a aba Campanha
  *   (orçamento, palavra-chave, lance, o leilão e o dia simulado).
  *
+ * Uma prática ou um desafio que declara `areas` (src/motor/composicao.ts)
+ * não é um tipo novo: o tipo continua o mesmo e a tela é composta pelas
+ * áreas de trabalho que a fase pede.
+ *
  * Para um tipo novo (ex.: "linha-do-tempo", "comparador",
  * "diagrama-rede"): crie a variante em `Fase` (src/conteudo/tipos.ts),
  * registre aqui com a tela que ele usa, ensine o Jogo a montar essa tela
  * e acrescente as checagens dele em src/conteudo/checagens.ts.
  */
 import type { DadosCircuito, Fase, FaseComObjetivos, TipoFase } from "@/conteudo/tipos";
+import { faseComposta } from "./composicao";
 
 export type TelaDaFase = "devtools" | "circuito" | "ordenar";
 
@@ -74,9 +79,9 @@ export function circuitoDaFase(fase: Fase): DadosCircuito | null {
   return null;
 }
 
-/** A fase não tem página de site (programa ou circuito): a validação usa o documento vazio do começo. */
+/** A fase não tem página de site (programa, circuito, quadro ou composta): a validação usa o documento vazio do começo. */
 export function semPagina(fase: Fase): boolean {
-  return fase.programa !== undefined || circuitoDaFase(fase) !== null || fase.tipo === "ordenar-passos";
+  return fase.programa !== undefined || circuitoDaFase(fase) !== null || fase.tipo === "ordenar-passos" || faseComposta(fase);
 }
 
 /** Como a fase aparece nos rótulos (barra, conclusão, lista, glossário): "Fase 2", "Desafio" ou "Projeto". */

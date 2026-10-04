@@ -38,6 +38,8 @@ import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
 import { IconeControlesDepurador } from "@/componentes/icones/IconeControlesDepurador";
 import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
 import { IconeObservar } from "@/componentes/icones/IconeObservar";
+import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
+import { IconeCasosDeTeste } from "@/componentes/icones/IconeCasosDeTeste";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
@@ -1067,6 +1069,48 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque num cartão.",
     },
     uso: "tocar",
+  },
+  // Fase composta (resolução de problemas): não é do Chrome, é o hábito de planejar dentro do código.
+  "plano-no-codigo": {
+    id: "plano-no-codigo",
+    nome: "Levar o plano pro código",
+    Icone: IconePlanoNoCodigo,
+    alvo: seletorFerramenta("plano-no-codigo"),
+    oQueFaz: "Escreve os passos do seu plano, na sua ordem, como comentários numerados no topo do Snippet, sem apagar o código.",
+    praQueServe:
+      "Cada comentário vira um lembrete do que falta programar. Mexeu no plano depois? Os comentários acompanham, e tocar num passo acende a linha dele no código.",
+    comoUsarAqui: {
+      mouse: "Monte o plano e clique em Levar pro código, no alto do plano. Clique num passo do plano para achar o comentário dele.",
+      toque: "Monte o plano e toque em Levar pro código, no alto do plano. Toque num passo do plano para achar o comentário dele.",
+    },
+    noF12DeVerdade:
+      "não é um botão do F12: é um costume de quem programa. Antes do código, escreva o plano como comentários (// 1. ...) e preencha cada passo embaixo dele.",
+    experimente: {
+      mouse: "Clique em Levar pro código.",
+      toque: "Toque em Levar pro código.",
+    },
+    uso: "sinal",
+  },
+  // Fase composta: os exemplos do aluno rodando contra a função dele (a semente dos testes automatizados).
+  "casos-de-teste": {
+    id: "casos-de-teste",
+    nome: "Casos de teste",
+    Icone: IconeCasosDeTeste,
+    alvo: seletorFerramenta("casos-de-teste"),
+    oQueFaz: "Você escreve exemplos (a entrada e a saída que espera) e roda todos contra a sua função: cada um diz se passou e o que veio de fato.",
+    praQueServe:
+      "Funcionar com um exemplo não prova nada: os esquisitos (lista vazia, zero) é que pegam o erro. É a semente dos testes automatizados que você vai escrever no Ofício.",
+    comoUsarAqui: {
+      mouse: "Escreva a entrada como numa chamada ([8, 6]) e a saída esperada (7), clique em Adicionar e depois em Rodar os casos.",
+      toque: "Escreva a entrada como numa chamada ([8, 6]) e a saída esperada (7), toque em Adicionar e depois em Rodar os casos.",
+    },
+    noF12DeVerdade:
+      "o F12 não tem isso pronto: no Console dá para conferir um caso de cada vez (media([8, 6]) === 7). No Ofício, os mesmos casos viram arquivos de teste que rodam sozinhos.",
+    experimente: {
+      mouse: "Clique em Rodar os casos.",
+      toque: "Toque em Rodar os casos.",
+    },
+    uso: "sinal",
   },
   // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais).
   "contador-passos": {

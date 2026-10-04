@@ -40,6 +40,9 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
+import { casosDaFase, quadroDaFase, temArea } from "./composicao";
+import * as casosDoAluno from "./casos/modelo";
+import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
 import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
 
@@ -146,8 +149,16 @@ export function criarSimulacao(fase: Fase) {
   };
 
   // Ordenar passos: as mesmas funções do modelo que o quadro da tela usa.
-  const dadosOrdenar = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+  const dadosOrdenar = quadroDaFase(fase);
   let ordenar: quadro.EstadoOrdenar | null = dadosOrdenar ? quadro.estadoInicialOrdenar(dadosOrdenar) : null;
+  // Fase composta com a área testes: os casos do aluno, rodados contra a função do Snippet.
+  const dadosCasos = casosDaFase(fase);
+  let casos: casosDoAluno.EstadoCasos | null = dadosCasos ? casosDoAluno.estadoInicialCasos(dadosCasos) : null;
+  // Fase composta com plano e Snippet: o plano vira comentários no código, e mexer no plano atualiza o bloco.
+  const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet") && dadosOrdenar !== null;
+  const acompanharPlano = () => {
+    if (planoNoCodigo && dadosOrdenar && ordenar) snippet = codigoComPlano(snippet, dadosOrdenar, ordenar, false);
+  };
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -319,12 +330,14 @@ export function criarSimulacao(fase: Fase) {
             const novo = quadro.porPasso(dadosOrdenar, ordenar, passo, destino, posicao);
             if (!novo) return false;
             ordenar = novo;
+            acompanharPlano();
             eventos.push({ tipo: "moveuPasso", passo, destino, posicao: quadro.ondeEsta(novo, passo)?.posicao ?? 0 });
             return true;
           },
           tirarPasso: (passo) => {
             if (!ordenar || !dadosOrdenar.cartoes.some((c) => c.id === passo)) return false;
             ordenar = quadro.tirarPasso(ordenar, passo);
+            acompanharPlano();
             eventos.push({ tipo: "moveuPasso", passo, destino: "fora", posicao: 0 });
             return true;
           },
@@ -338,6 +351,55 @@ export function criarSimulacao(fase: Fase) {
           },
         }
       : undefined,
+    plano: planoNoCodigo
+      ? {
+          levarProCodigo: () => {
+            if (!dadosOrdenar || !ordenar) return false;
+            snippet = codigoComPlano(snippet, dadosOrdenar, ordenar, true);
+            eventos.push({ tipo: "levouPlanoProCodigo", passos: quadro.ordemDoPlano(dadosOrdenar, ordenar).length });
+            return true;
+          },
+          verPassoNoCodigo: (passo) => {
+            const linha = dadosOrdenar ? linhaDoPasso(dadosOrdenar, snippet, passo) : null;
+            if (linha === null) return false;
+            eventos.push({ tipo: "apontouPasso", passo, linha });
+            return true;
+          },
+        }
+      : undefined,
+    casos:
+      dadosCasos && casos
+        ? {
+            escrever: (entrada, esperado) => {
+              if (!casos) return false;
+              const novo = casosDoAluno.adicionarCaso(casos, entrada, esperado);
+              if (novo === casos) return false;
+              casos = novo;
+              eventos.push({ tipo: "editouCasos", total: novo.casos.length });
+              return true;
+            },
+            apagar: (indice) => {
+              const caso = casos?.casos[indice];
+              if (!casos || !caso) return false;
+              casos = casosDoAluno.apagarCaso(casos, caso.id);
+              eventos.push({ tipo: "editouCasos", total: casos.casos.length });
+              return true;
+            },
+            rodar: () => {
+              if (!casos || !executor) return false;
+              // Como na tela: roda o código do Snippet e chama a função com cada caso.
+              rodarCodigo(snippet, "snippet");
+              const erro = ultimaExecucao?.erro;
+              const erroDoCodigo = erro ? `${erro.nome ? `${erro.nome}: ` : ""}${erro.mensagem}` : null;
+              const rodados = casosDoAluno.casosParaRodar(casos);
+              const teste = erroDoCodigo || !executor ? null : executor.testarFuncao(dadosCasos.funcao, rodados.map((r) => r.caso));
+              casos = casosDoAluno.resultadosDaRodada(casos, dadosCasos, rodados, teste, erroDoCodigo);
+              const resultados = casos.resultados;
+              eventos.push({ tipo: "rodouCasos", total: rodados.length, passaram: rodados.filter((r) => resultados[r.id]?.passou).length });
+              return true;
+            },
+          }
+        : undefined,
     estruturas: fase.programa
       ? {
           verComoArvore: fase.usaFerramentas.includes("arvore-palco")
@@ -379,6 +441,8 @@ export function criarSimulacao(fase: Fase) {
       programa: fase.programa ? estadoPrograma : undefined,
       circuito: circuito ?? undefined,
       ordenar: dadosOrdenar && ordenar ? { dados: dadosOrdenar, estado: ordenar } : undefined,
+      snippet: fase.programa?.snippet ? snippet : undefined,
+      casos: dadosCasos && casos ? { dados: dadosCasos, estado: casos } : undefined,
     };
   };
 
@@ -408,6 +472,8 @@ export function criarSimulacao(fase: Fase) {
     circuito: () => circuito,
     /** (Ordenar) Onde está cada cartão agora. */
     ordenar: () => ordenar,
+    /** (Área testes) Os casos do aluno agora, com os resultados da última rodada. */
+    casos: () => casos,
   };
 }
 
@@ -462,4 +528,50 @@ export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | nul
     }
   }
   return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
+}
+
+/** (Desafio composto) O que cada área mostra num momento: o plano, o código, os casos e a memória. */
+export type RetratoComposicao = {
+  /** Os passos do plano, na ordem (null: a fase não tem a área plano). */
+  plano: string[] | null;
+  /** O texto do Snippet (null: sem a área snippet). */
+  codigo: string | null;
+  /** Os casos do aluno, com o resultado da última rodada (null: sem a área testes). */
+  casos: { chamada: string; esperado: string; passou: boolean | null }[] | null;
+  /** A memória depois da última execução (null: nada rodou ou sem programa). */
+  memoria: FotoMemoria | null;
+};
+
+function retratoDaComposicao(fase: Fase, simulacao: Simulacao): RetratoComposicao {
+  const dados = quadroDaFase(fase);
+  const estado = simulacao.ordenar();
+  const dadosCasos = casosDaFase(fase);
+  const casos = simulacao.casos();
+  return {
+    plano: dados && estado ? quadro.ordemDoPlano(dados, estado).map((id) => dados.cartoes.find((c) => c.id === id)?.texto ?? id) : null,
+    codigo: temArea(fase, "snippet") ? simulacao.programa().snippet : null,
+    casos:
+      dadosCasos && casos
+        ? casos.casos.map((caso) => ({ chamada: `${dadosCasos.funcao}(${caso.entrada})`, esperado: caso.esperado, passou: casos.resultados[caso.id]?.passou ?? null }))
+        : null,
+    memoria: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null,
+  };
+}
+
+/**
+ * (Desafio composto) As áreas antes (o que a fase traz) e depois das soluções
+ * de todas as partes: o plano montado, o código com o plano nos comentários e
+ * os casos passando. É o antes e depois da meta.
+ */
+export function composicaoDoDesafio(fase: FaseDesafio): { antes: RetratoComposicao; depois: RetratoComposicao } {
+  const simulacao = criarSimulacao(fase);
+  const antes = retratoDaComposicao(fase, simulacao);
+  for (const parte of fase.partes) {
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch {
+      // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+    }
+  }
+  return { antes, depois: retratoDaComposicao(fase, simulacao) };
 }

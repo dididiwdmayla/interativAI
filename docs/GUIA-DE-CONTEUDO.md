@@ -47,6 +47,11 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
     25.3 validadores de código, 25.4 ações, 25.5 palco e linha do tempo,
     25.6 itens de revisão de programa, 25.7 circuito lógico, 25.8 a
     unidade-modelo)
+26. Depurador da aba Fontes
+27. Ordenar passos
+28. Estruturas e desempenho
+29. Resolução de problemas: a tela composta (plano, código, palco e
+    casos de teste na mesma fase, inclusive no desafio)
 
 Arquivos que você vai usar:
 
@@ -61,6 +66,7 @@ Arquivos que você vai usar:
 | `src/conteudo/index.ts` | o registro das unidades, na ordem do jogo |
 | `npm run testar:conteudo` | as checagens automáticas |
 | `/lab/fases` | abrir qualquer fase, ver os validadores ao vivo |
+| `/lab/fases?fase=<id>&modo=jogo` | jogar uma bancada como no jogo (meta, apresentações, Rever, progresso salvo) |
 | `/lab/mapa` | desbloquear tudo no mapa, resetar o progresso e a Lista de fases |
 | `npm run publicar:conteudo` | congela os ids da unidade nova em `src/conteudo/publicados.json` |
 | `docs/ROADMAP.md` | o status do projeto; atualize a seção Status no fim do trabalho |
@@ -1295,7 +1301,9 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
 `lab-logica-u1-f2` (circuito) mostram tudo ao vivo. As outras
 demonstrações da Bancada da Lógica: `f3` (desafio com circuito e ponte
 circuito/Console), `f4` (depurador, seção 26), `f5` a `f7` (ordenar
-passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28).
+passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28). A tela
+composta (plano, código, palco e casos de teste juntos) tem a bancada
+própria, `lab-resolver-u1` (seção 29).
 
 ### 25.1 O executor
 
@@ -1536,6 +1544,9 @@ Depuração. O motor mora em `src/motor/depurador.ts`.
 Modelos: `/lab/fases?fase=lab-logica-u1-f5` (café: dependências e
 distração), `f6` (agrupar) e `f7` (plano de código que roda). Zona que
 usa: Resolvendo problemas. O motor mora em `src/motor/ordenar/modelo.ts`.
+O mesmo quadro é a área "plano" de uma fase composta (seção 29), onde ele
+fica ao lado do código e vira comentários no Snippet; lá os validadores e
+as ações do quadro valem igual, sem `rodar`.
 
 - **Tipo de fase**, não objetivo: `tipo: "ordenar-passos"`
   (`FaseOrdenarPassos`), com objetivos como numa prática, `siteAlvo:
@@ -1612,3 +1623,103 @@ Estruturas de dados e Algoritmos essenciais. Motor:
 - **Previsão casa bem:** "se a lista ficar 50 vezes maior, os passos
   crescem quanto?". O gráfico responde: a reta cresce junto, a curva
   dispara.
+
+## 29. Resolução de problemas: a tela composta
+
+Modelos: `/lab/fases?fase=lab-resolver-u1-f1` (a média das notas, do plano
+aos casos de teste) e `lab-resolver-u1-f2` (o desafio composto: quantos
+passaram na prova). Com `&modo=jogo` no endereço, a bancada abre como no
+jogo: meta com antes e depois, apresentações, progresso salvo e o Rever com
+volta. Motor: `src/motor/composicao.ts` (as áreas),
+`src/motor/plano/comentarios.ts` (o plano no código) e `src/motor/casos/`
+(os casos de teste). Zona que usa: Resolvendo problemas (a U4 e os
+desafios); depois, a especificação e o código gerado da Ilha IA e os
+projetos do Ofício, como áreas novas.
+
+- **Quando usar:** quando o aluno precisa planejar, programar e testar o
+  mesmo problema na mesma tela. Fase só de quadro (decompor, ordenar,
+  agrupar) continua `ordenar-passos` (seção 27).
+- **Não é tipo novo:** a fase é `pratica` ou `desafio` e declara as áreas;
+  o motor monta a tela. `areas`: `"plano"` (o quadro, campo `plano`, um
+  `DadosOrdenar` sem `rodar`), `"snippet"` (o código, pede
+  `programa.snippet`; é obrigatória), `"palco"` (o palco com a linha do
+  tempo) e `"testes"` (os casos do aluno, campo `testes`: `funcao`,
+  `parametros` e, se quiser, exemplos prontos em `inicial`, escritos como o
+  aluno escreveria: `{ entrada: "[8, 6]", esperado: "7" }`).
+  `siteAlvo: SITE_DO_PROGRAMA`.
+- **Ferramentas:** cada área pede a dela em `usaFerramentas`
+  (`quadro-de-passos`, `snippet`, `palco-memoria`, `casos-de-teste`), mais
+  `console` (o Console continua na aba dele), `linha-do-tempo` (com o palco)
+  e `plano-no-codigo` (o botão Levar pro código). Apresente
+  `plano-no-codigo` e `casos-de-teste` no objetivo que usa cada uma (a
+  apresentação dos casos diz que eles são a semente dos testes
+  automatizados do Ofício). A regra `composicao` confere área, campo e
+  ferramenta.
+- **A tela:** no computador, o plano numa coluna à esquerda (o plano em cima
+  e os cartões embaixo), o código no centro e o palco e os casos à direita,
+  um embaixo do outro. Deitado, o plano (ou o palco, ou os testes, em abas)
+  ao lado do código. Em pé, as abas "Plano | Código | Testes" e o palco
+  recolhível em cima (começa recolhido). Alvos de 44 px no toque; a barra de
+  símbolos aparece no Snippet e nos campos dos casos.
+- **O plano no código:** o botão "Levar pro código" escreve o plano, na
+  ordem do aluno, no topo do Snippet, sem apagar o código: um cabeçalho
+  `// Plano: <problema>` e uma linha por passo (`// 1. texto`; no agrupar,
+  `// 1. Passo grande` e `//   1.1 subpasso`). O bloco é o cabeçalho e as
+  linhas numeradas logo abaixo dele; mexer no quadro depois reescreve só
+  ele (o resto do código fica). O plano fica editável o tempo todo. Tocar
+  num passo do plano acende o comentário dele no código; os cartões que já
+  estão no código ganham o selo `//` e o rodapé diz a linha (em pé, com o
+  botão "Ver no código").
+- **Os casos de teste:** o aluno escreve a entrada como os argumentos de
+  uma chamada (`[8, 6]`, `10, 7`) e a saída esperada (`7`); valem números,
+  textos entre aspas, `true`, `false`, `null`, listas e objetos (lidos como
+  valores, sem rodar nada; `undefined` e contas não valem, e o caso diz o
+  motivo). "Rodar os casos" roda o Snippet e chama a função com cada caso:
+  cada um mostra se passou e o que veio. Mudar um caso apaga o resultado
+  dele. Até 12 casos.
+- **Validadores novos:**
+  - `{ tipo: "planoComentado" }`: os comentários de linha inteira que batem
+    com o texto dos cartões (sem diferenciar acento, maiúscula ou ponto no
+    fim), lidos na ordem do código, formam um plano que vale (todos os
+    passos, nenhum que sobra, cada um depois do que ele precisa). O aluno
+    pode descer cada comentário para perto do código que ele vira, desde
+    que a ordem continue valendo. Pede as áreas plano e snippet. Olha o
+    código de agora.
+  - `{ tipo: "casosDoAluno", minimo, incluir?, passando? }`: pelo menos
+    `minimo` casos que dá para ler; `incluir` são os casos de borda exigidos
+    (`{ args?, esperado?, rotulo? }`: casa pelos argumentos, pela saída ou
+    pelos dois; `rotulo` é como ele aparece no detalhe, "a lista vazia");
+    com `passando: true`, só contam os casos que passaram na última rodada.
+    Combine com um `funcaoPassa` de casos escondidos (com as bordas): a
+    função certa mais os casos do aluno passando provam que as saídas que
+    ele escreveu estão certas.
+  - Valem também: `ordemValida`, `passoNoPlano`, `passoAntes` e `semSobras`
+    (no quadro), `funcaoPassa`, `semErro`, `usouSintaxe` e os demais de
+    código.
+- **Ações:** `levarPlanoProCodigo`, `verPassoNoCodigo` (`passo`: tocar no
+  passo do plano), `escreverCaso` (`entrada`, `esperado`), `apagarCaso`
+  (`indice`), `rodarCasos`, mais `porPasso` e `tirarPasso`. Eventos:
+  `levouPlanoProCodigo`, `apontouPasso`, `editouSnippet` (o texto do Snippet
+  mudou, avisado depois de uma pausa), `editouCasos` e `rodouCasos`.
+- **Linha de ajuda:** `{ alvo: "ordenar", passo }` no plano,
+  `{ alvo: "snippet", linhas }` no código e `{ alvo: "ferramenta",
+  ferramenta: "plano-no-codigo" }` ou `"casos-de-teste"`. A área certa
+  aparece sozinha no celular.
+- **Desafio composto:** o `desafio` aceita as mesmas áreas. Bom checklist:
+  uma parte de plano (`ordemValida`), uma de plano no código
+  (`planoComentado`), uma de código (`funcaoPassa` com bordas escondidas) e
+  uma de testes (`casosDoAluno` com `incluir` e `passando`), cada uma com
+  `revisarEm` na prática composta (ou na fase de quadro) que ensinou aquilo.
+  Mexer no plano depois desmarca as partes de plano até ele valer de novo;
+  o código e os testes ficam. A meta mostra o antes e o depois das áreas
+  (o plano, o código com o bloco resumido e os casos). Plano, código e
+  casos ficam salvos (Rever, recarregar).
+- **Tutor:** recebe o plano na ordem do aluno, os casos com o resultado e o
+  código; continua só perguntando (não diz a ordem, o código nem a saída
+  certa de um caso).
+- **Limites:** só comentários de linha inteira contam (comentário no fim de
+  uma linha de código não); deixe uma linha em branco entre o bloco do
+  plano e o código (um comentário numerado colado logo abaixo do bloco é
+  lido como parte dele e some quando o plano muda). Deitado, o código mostra
+  poucas linhas (o celular em pé tem mais espaço). Teste:
+  `testes/resolver.mjs`.

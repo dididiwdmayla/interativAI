@@ -83,7 +83,14 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "porPasso":
     case "tirarPasso":
     case "rodarPlano":
+    case "verPassoNoCodigo":
       return "quadro-de-passos";
+    case "levarPlanoProCodigo":
+      return "plano-no-codigo";
+    case "escreverCaso":
+    case "apagarCaso":
+    case "rodarCasos":
+      return "casos-de-teste";
     case "verComoArvore":
       return "arvore-palco";
     case "medirDesempenho":

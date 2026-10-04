@@ -2,6 +2,14 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 26 (motor): bloqueio de Resolvendo problemas retirado
+
+- A tela composta (guia, seção 29) junta plano, código, palco e casos de
+  teste do aluno na mesma fase, inclusive no desafio, com `planoComentado` e
+  `casosDoAluno`. Modelo pronto em `lab-resolver-u1` (prática e desafio).
+- Para produzir: as fases só de quadro continuam `ordenar-passos`; a U4 e
+  os desafios que cobram plano, código e testes usam `areas`.
+
 ## Rodada 13: Resolvendo problemas (produção bloqueada)
 
 - As demonstrações f5 a f7 validam ordenar, agrupar e executar cartões,
