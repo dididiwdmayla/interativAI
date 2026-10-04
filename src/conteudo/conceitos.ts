@@ -17,6 +17,8 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"casos-de-borda": {"nome": "Casos de borda", "resumo": "Testar vazio, zero, repetido e negativo para expor regras que um caso comum não verifica.", "temas": ["logica", "ferramentas"]},
+
 "dependencias-passos": {"nome": "Dependências dos passos", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},
 
 "pseudocodigo": {"nome": "Pseudocódigo", "resumo": "Planejar em palavras claras, sem precisar da sintaxe de uma linguagem.", "temas": ["logica"]},

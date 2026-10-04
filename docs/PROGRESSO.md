@@ -49,3 +49,17 @@ Branch `conteudo/resolvendo-problemas`, a partir de
 - Jornadas U3 verdes nos três layouts. A proteção das telas antigas usa
   a ordem curricular, sem impedir composições em zonas futuras; 17 testes
   de composição verdes após esse ajuste.
+
+### U4: Testar com exemplos
+
+- Prática integral na tela composta: maior venda do dia, incluindo
+  estornos negativos. Começar o maior em zero passa nos casos positivos,
+  mas quebra em [-5, -2]. O aluno corrige a função e escreve seus casos.
+- Exige cinco exemplos passando, incluindo vazio, zero, repetido e
+  negativo; `funcaoPassa` também testa essas bordas de forma escondida.
+- Desafio da cantina: troco(preco, pago), pagamento exato, (0,0) e pago
+  menor que preço. Diferença negativa significa quanto ainda falta pagar;
+  regra explicitada no enunciado, decisão a conferir.
+- Casos de borda com temas Lógica e Ferramentas e duas revisões próprias.
+- `testar:conteudo`: 16.093 testes verdes, sem falha de estruturas por tempo.
+- Jornadas U4 verdes nos três layouts; publicação, build e lint por unidade.

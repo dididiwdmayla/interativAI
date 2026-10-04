@@ -1071,5 +1071,303 @@
         }
       ]
     }
+  ],
+  "4": [
+    {
+      "id": "logica-resolvendo-problemas-u4-f1",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "maiorVenda",
+        "parametros": [
+          "vendas"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "vazia"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "primeira"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "olhar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "atualizar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Maior venda do dia\n// 1. Se a lista estiver vazia, devolver zero\n// 2. Começar com a primeira venda\n// 3. Comparar cada venda com a maior\n// 4. Se for maior, guardar a venda\n// 5. Devolver a maior venda\n\nfunction maiorVenda(vendas) {\n if (vendas.length === 0) return 0;\n let maior = 0;\n for (const v of vendas) if (v > maior) maior = v;\n return maior;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Maior venda do dia\n// 1. Se a lista estiver vazia, devolver zero\n// 2. Começar com a primeira venda\n// 3. Comparar cada venda com a maior\n// 4. Se for maior, guardar a venda\n// 5. Devolver a maior venda\n\nfunction maiorVenda(vendas) {\n if (vendas.length === 0) return 0;\n let maior = vendas[0];\n for (const v of vendas) if (v > maior) maior = v;\n return maior;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[8,3]",
+              "esperado": "8"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[-5,-2]",
+              "esperado": "-2"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[4,4]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u4-f2",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "troco",
+        "parametros": [
+          "preco",
+          "pago"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "preco"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "pago"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "subtrair"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "troco",
+                "casos": [
+                  {
+                    "args": [
+                      7,
+                      10
+                    ],
+                    "esperado": 3
+                  },
+                  {
+                    "args": [
+                      0,
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      5,
+                      5
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      9,
+                      4
+                    ],
+                    "esperado": -5
+                  },
+                  {
+                    "args": [
+                      2.5,
+                      5
+                    ],
+                    "esperado": 2.5
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Troco da cantina\n// 1. Receber o preço em reais\n// 2. Receber o valor pago em reais\n// 3. Calcular valor pago menos preço\n// 4. Devolver a diferença, inclusive se negativa\n\nfunction troco(preco, pago) {\n return pago - preco;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 4,
+            "incluir": [
+              {
+                "args": [
+                  0,
+                  0
+                ],
+                "rotulo": "zero"
+              },
+              {
+                "args": [
+                  5,
+                  5
+                ],
+                "rotulo": "pagamento exato"
+              },
+              {
+                "args": [
+                  9,
+                  4
+                ],
+                "rotulo": "pagamento insuficiente"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "7, 10",
+              "esperado": "3"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "0, 0",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "5, 5",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "9, 4",
+              "esperado": "-5"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
