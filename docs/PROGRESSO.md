@@ -99,4 +99,12 @@ Branch `ccr-f2988c01-0t4z55`, a partir de `claude/intelligent-pascal-5va93x`
   janela já têm (`name`, `location`, `status`...) ficam proibidos para
   dispositivos; o cenário é desenhado uma vez só (a animação redesenha só o
   que muda).
-- Verificação: ver o fim desta seção (preenchida depois da bateria).
+- Verificação final: `testar:conteudo` 16.126 testes (41 arquivos), lint,
+  `publicar:conteudo` e build verdes; bateria completa (`testes/todos.mjs`,
+  145 arquivos x layouts, inclusive `cenas.mjs` e `apresentacoes-logica.mjs`
+  nos três layouts) verde no build de produção, uma vez, com 3 em paralelo.
+  Depois das correções da revisão: build de novo, `testar:conteudo` e
+  `cenas.mjs` nos três layouts verdes. Console limpo nas jornadas.
+  Publicado igual a antes (nenhuma unidade publicada mudou).
+- Um teste de estruturas passou do tempo (5 s) só com a bateria rodando
+  junto, na mesma máquina; sozinho e com a máquina livre, passa.
