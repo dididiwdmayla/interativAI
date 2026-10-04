@@ -94,7 +94,7 @@ for(const fase of fases){
    if(o.modo==='sozinho'){if(toque)await abrirBalao(pagina);conferir(!await pagina.getByRole('button',{name:/^(Próximo objetivo|Ver resultado)$/}).first().isVisible().catch(()=>false),`${o.id}: treino ainda exige trabalho`);}
    await acoes(o.solucaoDeTeste);
    if(o.id==='linear-sozinho'||o.id==='selecao-sozinho'||o.id==='recursao-sozinho')await conferirRastro(o.id);
-   if(o.id==='sem-parada'){conferir((await pagina.locator('[data-palco-erro]').innerText()).includes('Função que chama'),'proteção de recursão aparece no palco');}
+   if(o.id==='sem-parada'){conferir((await pagina.locator('[data-palco-erro]').innerText()).includes('RangeError'),'proteção de recursão aparece no palco');}
 
    if(i<fase.objetivos.length-1)await conversa('Próximo objetivo');
   }

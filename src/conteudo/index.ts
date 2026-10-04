@@ -1,3 +1,4 @@
+import { FASES_ALGORITMOS_U3, UNIDADE_ALGORITMOS_U3 } from "./ilhas/logica/algoritmos-essenciais/unidade-3/unidade";
 import { FASES_ALGORITMOS_U2, UNIDADE_ALGORITMOS_U2 } from "./ilhas/logica/algoritmos-essenciais/unidade-2/unidade";
 import { FASES_ALGORITMOS_U1, UNIDADE_ALGORITMOS_U1 } from "./ilhas/logica/algoritmos-essenciais/unidade-1/unidade";
 import { FASES_UNIDADE_CONTRATO_LOGICA, UNIDADE_CONTRATO_LOGICA } from "./ilhas/logica/programa-de-verdade/unidade-1/unidade";
@@ -102,6 +103,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_RESOLVER_U4,
   UNIDADE_ALGORITMOS_U1,
   UNIDADE_ALGORITMOS_U2,
+  UNIDADE_ALGORITMOS_U3,
   UNIDADE_CONTRATO_LOGICA,
 ];
 
@@ -155,6 +157,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_RESOLVER_U4,
   ...FASES_ALGORITMOS_U1,
   ...FASES_ALGORITMOS_U2,
+  ...FASES_ALGORITMOS_U3,
   ...FASES_UNIDADE_CONTRATO_LOGICA,
 ];
 

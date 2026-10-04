@@ -283,6 +283,11 @@
       "logica-algoritmos-essenciais-u2-f3",
       "logica-algoritmos-essenciais-u2-f4"
     ],
+    "logica-algoritmos-essenciais-u3": [
+      "logica-algoritmos-essenciais-u3-f1",
+      "logica-algoritmos-essenciais-u3-f2",
+      "logica-algoritmos-essenciais-u3-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1687,6 +1692,27 @@
         "testes"
       ]
     },
+    "logica-algoritmos-essenciais-u3-f1": {
+      "objetivos": [
+        "sem-parada",
+        "recursao-guiado",
+        "recursao-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u3-f2": {
+      "objetivos": [
+        "lista-guiado",
+        "lista-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u3-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1709,6 +1735,12 @@
     }
   },
   "itensRevisao": [
+    "recursao-js-1",
+    "recursao-js-2",
+    "caso-base-recursao-1",
+    "caso-base-recursao-2",
+    "problema-menor-recursao-1",
+    "problema-menor-recursao-2",
     "ordenacao-selecao-1",
     "ordenacao-selecao-2",
     "ordenacao-bolha-1",

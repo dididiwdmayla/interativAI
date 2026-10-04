@@ -2301,5 +2301,892 @@
         }
       ]
     }
+  ],
+  "3": [
+    {
+      "id": "logica-algoritmos-essenciais-u3-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "Volumes na expedição",
+      "conceitos": [
+        "recursao-js",
+        "caso-base-recursao"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A expedição conta volumes. contar(n) devolve n para inteiros positivos e 0 se n for zero ou negativo.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Recursão é a função chamar ela mesma. Cada chamada precisa de um problema menor e de um caso de parada.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Sem caso de parada ela nunca chega ao fim. O JavaScript interrompe com RangeError, e o jogo explica sem travar.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "sem-parada",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Execute function semFim(n) { return semFim(n); } e semFim(1). Observe a proteção.",
+            "toque": "Execute function semFim(n) { return semFim(n); } e semFim(1). Observe a proteção."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "RangeError"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "A chamada não diminui n e não tem um return que pare de chamar.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "A chamada não diminui n e não tem um return que pare de chamar."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function semFim(n) {\n  return semFim(n);\n}\nsemFim(1);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A pilha de chamadas encheu: RangeError. A proteção cortou; essa função não terminou o trabalho.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function semFim(n) {\n  return semFim(n);\n}\nsemFim(1);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "recursao-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie contar com base n===0 e chamada contar(n-1). Conte 2 volumes e mostre TOTAL 2 no painel.",
+            "toque": "Crie contar com base n===0 e chamada contar(n-1). Conte 2 volumes e mostre TOTAL 2 no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "contar",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      2
+                    ],
+                    "esperado": 2
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "return"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "TOTAL 2"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Quando n é zero, devolva 0. Senão devolva 1 mais contar(n-1).",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Quando n é zero, devolva 0. Senão devolva 1 mais contar(n-1)."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function contar(n) {\n  if (n === 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(2);\npainel.mostrar(\"TOTAL \" + total);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O caso base devolve sem chamar. As outras molduras voltam somando um.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function contar(n) {\n  if (n === 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(2);\npainel.mostrar(\"TOTAL \" + total);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "recursao-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Inclua negativos na parada. Conte 4 volumes; mostre TOTAL 4 e reveja as molduras no palco.",
+            "toque": "Inclua negativos na parada. Conte 4 volumes; mostre TOTAL 4 e reveja as molduras no palco."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "contar",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      -1
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      1
+                    ],
+                    "esperado": 1
+                  },
+                  {
+                    "args": [
+                      4
+                    ],
+                    "esperado": 4
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "total",
+                "valor": 4
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "TOTAL 4"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Use n<=0; um n negativo também precisa parar."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function contar(n) {\n  if (n <= 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(4);\npainel.mostrar(\"TOTAL \" + total);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Na versão com n===0, chamar contar(-1) chega à parada ao subtrair 1?",
+            "opcoes": [
+              "Sim, na próxima chamada",
+              "Não: fica cada vez mais negativo",
+              "Sim, após duas chamadas"
+            ],
+            "correta": 1,
+            "explicacao": "-1 vira -2, depois -3. O caso de parada precisa ser alcançável."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u3",
+        "titulo": "Volumes da expedição",
+        "ambiente": "expedicao",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "mesa",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          },
+          {
+            "peca": "prateleira",
+            "x": 42,
+            "y": 53,
+            "variante": "potes"
+          },
+          {
+            "peca": "porta",
+            "x": 245,
+            "y": 65
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u3-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "Avançar pela lista",
+      "conceitos": [
+        "problema-menor-recursao"
+      ],
+      "revisa": [
+        "recursao-js",
+        "caso-base-recursao",
+        "array-js",
+        "indice-lista-js",
+        "return-js",
+        "funcao-js"
+      ],
+      "prerequisitos": [
+        "recursao-js",
+        "caso-base-recursao",
+        "array-js",
+        "indice-lista-js",
+        "return-js",
+        "funcao-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "somaRec(lista, indice=0) soma números. O índice começa em 0; a próxima chamada avança uma posição.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Quando indice chega a length, devolva 0. Sem avançar o índice, até uma lista de um item recorre para sempre.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "lista-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Comece somaRec com indice=0: em [] devolva 0; em [6] devolva 6.",
+            "toque": "Comece somaRec com indice=0: em [] devolva 0; em [6] devolva 6."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somaRec",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        6
+                      ]
+                    ],
+                    "esperado": 6
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "O caso de parada verifica indice>=lista.length antes de ler o vagão.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "O caso de parada verifica indice>=lista.length antes de ler o vagão."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice];\n}\nconst pontos = [6];\nconst soma = somaRec(pontos);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice];\n}\nconst pontos = [6];\nconst soma = somaRec(pontos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "lista-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Some o item atual com a chamada do próximo índice. Confira vazio, um item, repetidos e negativos.",
+            "toque": "Some o item atual com a chamada do próximo índice. Confira vazio, um item, repetidos e negativos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somaRec",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        6
+                      ]
+                    ],
+                    "esperado": 6
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        5
+                      ]
+                    ],
+                    "esperado": 9
+                  },
+                  {
+                    "args": [
+                      [
+                        -3,
+                        0,
+                        4
+                      ]
+                    ],
+                    "esperado": 1
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "soma",
+                "valor": 9
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Devolva lista[indice] + somaRec(lista,indice+1)."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice] + somaRec(lista, indice + 1);\n}\nconst pontos = [2,2,5];\nconst soma = somaRec(pontos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Se a chamada usar indice em vez de indice+1, o que acontece em [6]?",
+            "opcoes": [
+              "Lê o mesmo item sem chegar à parada",
+              "Devolve 6 uma vez",
+              "Pula o item"
+            ],
+            "correta": 0,
+            "explicacao": "O índice não avança; o problema não fica menor e a proteção corta."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u3-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "As caixas da biblioteca",
+      "conceitos": [],
+      "revisa": [
+        "recursao-js",
+        "caso-base-recursao",
+        "problema-menor-recursao",
+        "objeto-js",
+        "acesso-objeto-js",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "recursao-js",
+        "caso-base-recursao",
+        "problema-menor-recursao",
+        "objeto-js",
+        "acesso-objeto-js",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A biblioteca recebe fichas de caixas: {quantidade: 3}. volumes(caixas) devolve a soma das quantidades, usando recursão.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "As quantidades são inteiros não negativos. Planeje e teste [], uma caixa, repetidos e uma caixa com zero.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "As caixas da biblioteca",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Parar com zero quando o índice alcançar o fim"
+          },
+          {
+            "id": "p2",
+            "texto": "Ler a quantidade da caixa atual",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Somar com a chamada do próximo índice",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver o total das chamadas",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "volumes",
+        "parametros": [
+          "caixas"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "volumes",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 4
+                        }
+                      ]
+                    ],
+                    "esperado": 4
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 2
+                        },
+                        {
+                          "quantidade": 2
+                        }
+                      ]
+                    ],
+                    "esperado": 4
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 0
+                        },
+                        {
+                          "quantidade": 3
+                        }
+                      ]
+                    ],
+                    "esperado": 3
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 1
+                        },
+                        {
+                          "quantidade": 5
+                        },
+                        {
+                          "quantidade": 2
+                        }
+                      ]
+                    ],
+                    "esperado": 8
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "return"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: As caixas da biblioteca\n// 1. Parar com zero quando o índice alcançar o fim\n// 2. Ler a quantidade da caixa atual\n// 3. Somar com a chamada do próximo índice\n// 4. Devolver o total das chamadas\n\nfunction volumes(caixas, indice = 0) {\n  if (indice >= caixas.length) return 0;\n  return caixas[indice].quantidade + volumes(caixas, indice + 1);\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "quantidade": 4
+                    }
+                  ]
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "quantidade": 2
+                    },
+                    {
+                      "quantidade": 2
+                    }
+                  ]
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{\"quantidade\": 4}]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{\"quantidade\": 2}, {\"quantidade\": 2}]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
