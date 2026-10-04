@@ -40,7 +40,8 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
-import { quadroDaFase } from "./composicao";
+import { quadroDaFase, temArea } from "./composicao";
+import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
 import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
 
@@ -149,6 +150,11 @@ export function criarSimulacao(fase: Fase) {
   // Ordenar passos: as mesmas funções do modelo que o quadro da tela usa.
   const dadosOrdenar = quadroDaFase(fase);
   let ordenar: quadro.EstadoOrdenar | null = dadosOrdenar ? quadro.estadoInicialOrdenar(dadosOrdenar) : null;
+  // Fase composta com plano e Snippet: o plano vira comentários no código, e mexer no plano atualiza o bloco.
+  const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet") && dadosOrdenar !== null;
+  const acompanharPlano = () => {
+    if (planoNoCodigo && dadosOrdenar && ordenar) snippet = codigoComPlano(snippet, dadosOrdenar, ordenar, false);
+  };
 
   const nucleo = criarNucleoPainel({
     obterDocumento: () => documento,
@@ -320,12 +326,14 @@ export function criarSimulacao(fase: Fase) {
             const novo = quadro.porPasso(dadosOrdenar, ordenar, passo, destino, posicao);
             if (!novo) return false;
             ordenar = novo;
+            acompanharPlano();
             eventos.push({ tipo: "moveuPasso", passo, destino, posicao: quadro.ondeEsta(novo, passo)?.posicao ?? 0 });
             return true;
           },
           tirarPasso: (passo) => {
             if (!ordenar || !dadosOrdenar.cartoes.some((c) => c.id === passo)) return false;
             ordenar = quadro.tirarPasso(ordenar, passo);
+            acompanharPlano();
             eventos.push({ tipo: "moveuPasso", passo, destino: "fora", posicao: 0 });
             return true;
           },
@@ -335,6 +343,22 @@ export function criarSimulacao(fase: Fase) {
             executor = criarNucleoSincrono();
             if (fase.programa?.preparo) executor?.executar(fase.programa.preparo, "console", { gravar: false });
             rodarCodigo(quadro.codigoDoPlano(dadosOrdenar, ordenar), "snippet");
+            return true;
+          },
+        }
+      : undefined,
+    plano: planoNoCodigo
+      ? {
+          levarProCodigo: () => {
+            if (!dadosOrdenar || !ordenar) return false;
+            snippet = codigoComPlano(snippet, dadosOrdenar, ordenar, true);
+            eventos.push({ tipo: "levouPlanoProCodigo", passos: quadro.ordemDoPlano(dadosOrdenar, ordenar).length });
+            return true;
+          },
+          verPassoNoCodigo: (passo) => {
+            const linha = dadosOrdenar ? linhaDoPasso(dadosOrdenar, snippet, passo) : null;
+            if (linha === null) return false;
+            eventos.push({ tipo: "apontouPasso", passo, linha });
             return true;
           },
         }
@@ -380,6 +404,7 @@ export function criarSimulacao(fase: Fase) {
       programa: fase.programa ? estadoPrograma : undefined,
       circuito: circuito ?? undefined,
       ordenar: dadosOrdenar && ordenar ? { dados: dadosOrdenar, estado: ordenar } : undefined,
+      snippet: fase.programa?.snippet ? snippet : undefined,
     };
   };
 

@@ -1127,6 +1127,19 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     checar: (fase) => {
       const problemas: string[] = [];
       const comPlano = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.plano !== undefined;
+      // O plano no código pede as duas áreas: o quadro (os cartões) e o Snippet (onde os comentários moram).
+      const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet");
+      for (const { onde, validador } of validadoresDe(fase)) {
+        for (const item of achatarValidador(validador)) {
+          if (item.tipo === "planoComentado" && !planoNoCodigo) problemas.push(`${onde}: o validador planoComentado pede as áreas "plano" e "snippet"`);
+        }
+      }
+      for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+        for (const acao of acoes) {
+          if ((acao.tipo === "levarPlanoProCodigo" || acao.tipo === "verPassoNoCodigo") && !planoNoCodigo) problemas.push(`${onde}: ${acao.tipo} pede as áreas "plano" e "snippet"`);
+          if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
+        }
+      }
       if (!faseComposta(fase)) {
         if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
         if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');

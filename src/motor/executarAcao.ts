@@ -81,6 +81,15 @@ export type PainelDasAcoes = {
     tirarPasso: (passo: string) => boolean;
     rodarPlano: () => boolean;
   };
+  /**
+   * (Fase composta, área plano) O "Levar o plano pro código": só numa fase
+   * com as áreas plano e snippet. Devolve false se não deu.
+   */
+  plano?: {
+    levarProCodigo: () => boolean;
+    /** Acende o comentário do passo no código; false se ele não está lá. */
+    verPassoNoCodigo: (passo: string) => boolean;
+  };
   /** (Estruturas e desempenho) Ver como árvore e o Medir da aba Desempenho: só nas fases com as ferramentas. */
   estruturas?: {
     verComoArvore?: (nome: string) => boolean;
@@ -185,6 +194,10 @@ export function descreverAcao(acao: Acao): string {
       return `tirarPasso ${acao.passo}`;
     case "rodarPlano":
       return "rodarPlano";
+    case "levarPlanoProCodigo":
+      return "levarPlanoProCodigo";
+    case "verPassoNoCodigo":
+      return `verPassoNoCodigo ${acao.passo}`;
     case "verComoArvore":
       return `verComoArvore ${acao.nome}`;
     case "medirDesempenho":
@@ -475,6 +488,18 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       if (!quadro) throw new ErroAcao(`${acao.tipo} só existe numa fase ordenar-passos`);
       const deu = acao.tipo === "porPasso" ? quadro.porPasso(acao.passo, acao.posicao, acao.grupo) : acao.tipo === "tirarPasso" ? quadro.tirarPasso(acao.passo) : quadro.rodarPlano();
       if (!deu) throw new ErroAcao(acao.tipo === "rodarPlano" ? "rodarPlano pede ordenar.rodar e programa na fase" : `não deu para ${descreverAcao(acao)} (cartão ou grupo que não existe?)`);
+      return;
+    }
+    case "levarPlanoProCodigo": {
+      const plano = painel.plano;
+      if (!plano) throw new ErroAcao("levarPlanoProCodigo só existe numa fase composta com as áreas plano e snippet");
+      if (!plano.levarProCodigo()) throw new ErroAcao("não deu para levar o plano pro código");
+      return;
+    }
+    case "verPassoNoCodigo": {
+      const plano = painel.plano;
+      if (!plano) throw new ErroAcao("verPassoNoCodigo só existe numa fase composta com as áreas plano e snippet");
+      if (!plano.verPassoNoCodigo(acao.passo)) throw new ErroAcao(`o passo "${acao.passo}" não está no código como comentário`);
       return;
     }
     case "verComoArvore": {

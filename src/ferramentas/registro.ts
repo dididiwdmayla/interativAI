@@ -38,6 +38,7 @@ import { IconeTabelaVerdade } from "@/componentes/icones/IconeTabelaVerdade";
 import { IconeControlesDepurador } from "@/componentes/icones/IconeControlesDepurador";
 import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
 import { IconeObservar } from "@/componentes/icones/IconeObservar";
+import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
@@ -1067,6 +1068,27 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       toque: "Toque num cartão.",
     },
     uso: "tocar",
+  },
+  // Fase composta (resolução de problemas): não é do Chrome, é o hábito de planejar dentro do código.
+  "plano-no-codigo": {
+    id: "plano-no-codigo",
+    nome: "Levar o plano pro código",
+    Icone: IconePlanoNoCodigo,
+    alvo: seletorFerramenta("plano-no-codigo"),
+    oQueFaz: "Escreve os passos do seu plano, na sua ordem, como comentários numerados no topo do Snippet, sem apagar o código.",
+    praQueServe:
+      "Cada comentário vira um lembrete do que falta programar. Mexeu no plano depois? Os comentários acompanham, e tocar num passo acende a linha dele no código.",
+    comoUsarAqui: {
+      mouse: "Monte o plano e clique em Levar pro código, no alto do plano. Clique num passo do plano para achar o comentário dele.",
+      toque: "Monte o plano e toque em Levar pro código, no alto do plano. Toque num passo do plano para achar o comentário dele.",
+    },
+    noF12DeVerdade:
+      "não é um botão do F12: é um costume de quem programa. Antes do código, escreva o plano como comentários (// 1. ...) e preencha cada passo embaixo dele.",
+    experimente: {
+      mouse: "Clique em Levar pro código.",
+      toque: "Toque em Levar pro código.",
+    },
+    uso: "sinal",
   },
   // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais).
   "contador-passos": {

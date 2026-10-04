@@ -22,6 +22,10 @@ type Opcoes = {
   salvo: modelo.EstadoOrdenar | null;
   programa: Programa;
   aoUsar?: (ferramenta: "quadro-de-passos") => void;
+  /** (Fase composta) O plano mudou: chamado antes do evento, para o código acompanhar (os comentários do plano). */
+  aoMudarPlano?: (estado: modelo.EstadoOrdenar) => void;
+  /** (Fase composta) O cartão escolhido mudou (null: nenhum): o comentário dele acende no código. */
+  aoEscolher?: (passo: string | null) => void;
 };
 
 /** Onde o cartão cairia agora: num destino (plano ou grupo) numa posição, ou de volta na pilha. */
@@ -63,20 +67,30 @@ function alvoNoPonto(x: number, y: number, arrastado: string): AlvoSoltar | null
   return null;
 }
 
-export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes) {
+export function useOrdenar({ fase, barramento, salvo, programa, aoUsar, aoMudarPlano, aoEscolher }: Opcoes) {
   // O quadro de uma fase ordenar-passos ou o plano de uma fase composta (área plano).
   const dados = quadroDaFase(fase);
   const [estado, setEstado] = useState<modelo.EstadoOrdenar | null>(() => (dados ? estadoValido(dados, salvo) : null));
   /** O mesmo estado, lido na hora (as soluções fazem várias ações seguidas). */
   const atual = useRef(estado);
-  const [selecionado, setSelecionado] = useState<string | null>(null);
+  const [selecionado, setSelecionadoEstado] = useState<string | null>(null);
+  /** O mesmo cartão escolhido, lido na hora (tocar de novo solta). */
+  const selecionadoAtual = useRef<string | null>(null);
+  const setSelecionado = useCallback((passo: string | null) => {
+    selecionadoAtual.current = passo;
+    setSelecionadoEstado(passo);
+  }, []);
   const [destaque, setDestaque] = useState<string | null>(null);
   const [arrasto, setArrasto] = useState<Arrasto | null>(null);
   const arrastoAtual = useRef<Arrasto | null>(null);
   const aoUsarAtual = useRef(aoUsar);
+  const aoMudarPlanoAtual = useRef(aoMudarPlano);
+  const aoEscolherAtual = useRef(aoEscolher);
   useEffect(() => {
     aoUsarAtual.current = aoUsar;
-  }, [aoUsar]);
+    aoMudarPlanoAtual.current = aoMudarPlano;
+    aoEscolherAtual.current = aoEscolher;
+  }, [aoUsar, aoMudarPlano, aoEscolher]);
   const { executarPlano } = programa;
 
   const trocar = useCallback(
@@ -85,6 +99,7 @@ export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes
       setEstado(novo);
       const onde = modelo.ondeEsta(novo, passo);
       aoUsarAtual.current?.("quadro-de-passos");
+      aoMudarPlanoAtual.current?.(novo);
       barramento.emitir({ tipo: "moveuPasso", passo, destino: onde?.destino ?? "fora", posicao: onde?.posicao ?? 0 });
     },
     [barramento],
@@ -102,7 +117,7 @@ export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes
       trocar(novo, passo);
       return true;
     },
-    [dados, trocar],
+    [dados, setSelecionado, trocar],
   );
 
   const tirarPasso = useCallback(
@@ -113,7 +128,7 @@ export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes
       trocar(modelo.tirarPasso(agora, passo), passo);
       return true;
     },
-    [dados, trocar],
+    [dados, setSelecionado, trocar],
   );
 
   /** As setas do cartão no plano: uma posição para cima ou para baixo. */
@@ -136,10 +151,15 @@ export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes
   }, [dados, executarPlano, fase.programa]);
 
   /** Tocar num cartão escolhe ele (tocar de novo solta); depois, tocar num lugar do plano põe ele ali. */
-  const escolher = useCallback((passo: string | null) => {
-    aoUsarAtual.current?.("quadro-de-passos");
-    setSelecionado((agora) => (agora === passo ? null : passo));
-  }, []);
+  const escolher = useCallback(
+    (passo: string | null) => {
+      aoUsarAtual.current?.("quadro-de-passos");
+      const novo = selecionadoAtual.current === passo ? null : passo;
+      setSelecionado(novo);
+      aoEscolherAtual.current?.(novo);
+    },
+    [setSelecionado],
+  );
 
   /* ---------------------------------------------------------------- arrastar (mouse e toque) */
 

@@ -36,6 +36,16 @@ export const PLANO_MEDIA: DadosOrdenar = {
 
 const SOLUCAO_PLANO_MEDIA = ["vazia", "zerar", "somar", "dividir", "devolver"].map((passo) => ({ tipo: "porPasso" as const, passo }));
 
+/** O plano depois da troca (a lista vazia depois da soma), como o "Levar o plano pro código" escreve. */
+export const COMENTARIOS_MEDIA = [
+  "// Plano: Calcular a média das notas",
+  "// 1. Começar a soma em zero",
+  "// 2. Se não tiver nenhuma nota, devolver 0",
+  "// 3. Somar cada nota na soma",
+  "// 4. Dividir a soma pela quantidade de notas",
+  "// 5. Devolver a média",
+].join("\n");
+
 export const CODIGO_MEDIA = [
   "function media(notas) {",
   "  if (notas.length === 0) return 0;",
@@ -57,7 +67,7 @@ export const FASE_DEMO_RESOLVER: FasePratica = {
   prerequisitos: [],
   areas: ["plano", "snippet", "palco"],
   plano: PLANO_MEDIA,
-  usaFerramentas: ["quadro-de-passos", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+  usaFerramentas: ["quadro-de-passos", "plano-no-codigo", "snippet", "console", "palco-memoria", "linha-do-tempo"],
   siteAlvo: SITE_DO_PROGRAMA,
   programa: { snippet: { codigoInicial: "", nome: "media.js" } },
   introducao: [
@@ -83,12 +93,82 @@ export const FASE_DEMO_RESOLVER: FasePratica = {
       solucaoDeTeste: SOLUCAO_PLANO_MEDIA,
     },
     {
+      id: "levar",
+      tipo: "acao",
+      modo: "guiado",
+      apresentar: ["plano-no-codigo"],
+      enunciado: {
+        mouse: "Clique em Levar pro código: o plano vira comentários no topo do Snippet.",
+        toque: "Toque em Levar pro código: o plano vira comentários no topo do Snippet.",
+      },
+      validador: { tipo: "planoComentado" },
+      ajudas: {
+        pergunta: "Onde o plano ajuda mais: num papel do lado ou dentro do próprio código?",
+        dica: "O botão escreve cada passo como um comentário (//), na sua ordem. Comentário não roda: é lembrete.",
+        linha: { alvo: "ferramenta", ferramenta: "plano-no-codigo", fala: "O botão mora no alto do plano." },
+        solucao: { fala: "Levei o plano: cada passo virou um comentário numerado.", acoes: [{ tipo: "levarPlanoProCodigo" }] },
+      },
+      falaAoConcluir: { texto: "O plano está no código! Cada comentário é um passo que ainda vai virar JavaScript.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "levarPlanoProCodigo" }],
+    },
+    {
+      id: "acender",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: {
+        mouse: 'Clique no passo "Dividir a soma pela quantidade de notas" no plano: o comentário dele acende no código.',
+        toque: 'Toque no passo "Dividir a soma pela quantidade de notas" no plano: o comentário dele acende no código.',
+      },
+      validador: { tipo: "evento", evento: "apontouPasso" },
+      ajudas: {
+        pergunta: "Com o plano no código, como achar onde cada passo mora?",
+        dica: "Tocar num passo do plano acende a linha do comentário dele.",
+        linha: { alvo: "ordenar", passo: "dividir", fala: "Este passo aqui." },
+        solucao: { fala: "Acendi o comentário do passo de dividir.", acoes: [{ tipo: "verPassoNoCodigo", passo: "dividir" }] },
+      },
+      falaAoConcluir: { texto: "Plano e código ligados: o passo e o comentário são a mesma coisa em dois lugares.", expressao: "feliz" },
+      solucaoDeTeste: [{ tipo: "verPassoNoCodigo", passo: "dividir" }],
+    },
+    {
+      id: "reordenar",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "O plano já está no código. Se você trocar a ordem de dois passos no plano, o que acontece com os comentários?",
+        opcoes: ["Trocam de ordem junto", "Ficam como estavam", "O código inteiro some"],
+        correta: 0,
+        explicacao: "O bloco de comentários acompanha o plano: só ele muda, o resto do código fica.",
+      },
+      enunciado: {
+        mouse: "Leve a lista vazia para depois da soma em zero e olhe os comentários no código.",
+        toque: "Leve a lista vazia para depois da soma em zero e olhe os comentários no código.",
+      },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "passoAntes", passo: "zerar", antesDe: "vazia" },
+          { tipo: "planoComentado" },
+        ],
+      },
+      ajudas: {
+        pergunta: "A lista vazia precisa vir antes de quê, de verdade?",
+        dica: "Ela só precisa vir antes da divisão: depois da soma em zero também vale.",
+        linha: { alvo: "ordenar", passo: "vazia", fala: "Mude este cartão de lugar." },
+        solucao: { fala: "Troquei de lugar: os comentários acompanharam.", acoes: [{ tipo: "porPasso", passo: "vazia", posicao: 1 }] },
+      },
+      falaAoConcluir: { texto: "Os comentários mudaram junto, e o plano continua valendo: as duas ordens respeitam as dependências.", expressao: "comemorando" },
+      solucaoDeTeste: [
+        { tipo: "responderPrevisao", opcao: 0 },
+        { tipo: "porPasso", passo: "vazia", posicao: 1 },
+      ],
+    },
+    {
       id: "programar",
       tipo: "acao",
       modo: "sozinho",
       enunciado: {
-        mouse: "Agora escreva a função media(notas) no Snippet, seguindo o plano, e clique em Executar.",
-        toque: "Agora escreva a função media(notas) no Snippet, seguindo o plano, e toque em Executar.",
+        mouse: "Agora escreva a função media(notas) embaixo do plano, no Snippet, e clique em Executar.",
+        toque: "Agora escreva a função media(notas) embaixo do plano, no Snippet, e toque em Executar.",
       },
       validador: {
         tipo: "funcaoPassa",
@@ -106,7 +186,7 @@ export const FASE_DEMO_RESOLVER: FasePratica = {
       },
       falaAoConcluir: { texto: "Funciona, até com a lista vazia! O plano virou código, passo por passo.", expressao: "comemorando" },
       solucaoDeTeste: [
-        { tipo: "definirSnippet", codigo: CODIGO_MEDIA },
+        { tipo: "definirSnippet", codigo: `${COMENTARIOS_MEDIA}\n\n${CODIGO_MEDIA}` },
         { tipo: "executarSnippet" },
       ],
     },

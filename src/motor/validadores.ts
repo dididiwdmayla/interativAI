@@ -23,6 +23,7 @@ import { chaveFuncaoPassa, type EstadoPrograma, type ResumoExecucao, variavelGlo
 import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
 import { conferirOrdem, type DadosOrdenar, type EstadoOrdenar, ondeEsta } from "./ordenar/modelo";
+import { planoDosComentarios } from "./plano/comentarios";
 import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
 import { chaveMedicao, textoDePassos } from "./desempenho";
 
@@ -51,6 +52,8 @@ export type ContextoValidacao = {
   circuito?: Circuito;
   /** (Ordenar passos) Os dados do quadro e onde está cada cartão agora. */
   ordenar?: { dados: DadosOrdenar; estado: EstadoOrdenar };
+  /** (Fase com Snippet) O texto do Snippet agora (o que está escrito, rodado ou não). */
+  snippet?: string;
 };
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
@@ -232,6 +235,8 @@ export function descreverValidador(validador: Validador): string {
       return `${validador.passo} vem antes de ${validador.antesDe} no plano`;
     case "semSobras":
       return "nenhum passo que sobra está no plano";
+    case "planoComentado":
+      return "o plano está no código como comentários, na ordem certa";
     case "passosNoMaximo":
       return validador.tamanho === undefined
         ? `a última execução deu no máximo ${validador.valor} passos`
@@ -571,6 +576,14 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       const a = ordem.indexOf(validador.passo);
       const b = ordem.indexOf(validador.antesDe);
       return { passou: a >= 0 && b >= 0 && a < b, descricao, detalhe: a < 0 || b < 0 ? "algum dos dois está fora do plano" : `posições ${a + 1} e ${b + 1}` };
+    }
+    case "planoComentado": {
+      if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase com a área plano" };
+      if (contexto.snippet === undefined) return { passou: false, descricao, detalhe: "só numa fase com o Snippet" };
+      const { estado, achados } = planoDosComentarios(contexto.ordenar.dados, contexto.snippet);
+      if (achados === 0) return { passou: false, descricao, detalhe: "nenhum passo do plano está no código como comentário" };
+      const conferencia = conferirOrdem(contexto.ordenar.dados, estado);
+      return { passou: conferencia.valida, descricao, detalhe: conferencia.valida ? "o plano está no código, na ordem certa" : `nos comentários do código: ${conferencia.motivo}` };
     }
     case "semSobras": {
       if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };

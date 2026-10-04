@@ -298,6 +298,9 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     setLinhas([{ id: proximoId.current++, tipo: "info", texto: "O console foi limpo" }]);
   }, []);
 
+  /** O texto do Snippet agora (lido na hora: o plano no código e o validador planoComentado). */
+  const textoSnippet = useCallback(() => snippetAtual.current, []);
+
   /** O que os validadores de código olham agora (lido na hora). */
   const estadoValidacao = useCallback((): EstadoPrograma => estado.current, []);
 
@@ -337,6 +340,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     executarPlano,
     definirSnippet,
     aoMudarSnippet,
+    textoSnippet,
     limparConsole,
     estadoValidacao,
     contextoTutor,

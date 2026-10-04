@@ -61,6 +61,8 @@ export const IDS_FERRAMENTAS = [
   "pilha-de-chamadas",
   // Ordenar passos (zona Resolvendo problemas)
   "quadro-de-passos",
+  // Fase composta (resolução de problemas): o plano vira comentários no código
+  "plano-no-codigo",
   // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais)
   "contador-passos",
   "grafico-passos",

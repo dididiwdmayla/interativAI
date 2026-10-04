@@ -56,8 +56,10 @@ import { useOrdenar } from "./useOrdenar";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
 import { AreaPlano } from "@/componentes/composicao/AreaPlano";
 import { TelaComposta } from "@/componentes/composicao/TelaComposta";
-import { type AreaTrabalho, areasDaFase, faseComposta } from "@/motor/composicao";
-import { ordemDoPlano } from "@/motor/ordenar/modelo";
+import { type AreaTrabalho, areasDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
+import { acharBlocoDoPlano, codigoComPlano, linhaDoPasso, passosNoCodigo } from "@/motor/plano/comentarios";
+import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
+import { type EstadoOrdenar, ordemDoPlano } from "@/motor/ordenar/modelo";
 import { type AbaDepurador, AvisoPausado, BarraControlesDepurador, PainelDepurador } from "@/componentes/painel/fontes/PainelDepurador";
 import { FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { useCircuito } from "./useCircuito";
@@ -363,16 +365,87 @@ export function JogoFase({
   );
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
+  const editorSnippetRefCedo = programa.editorSnippetRef;
+  /** (Fase composta) A linha do comentário do passo que o aluno tocou no plano: continua acesa depois das ajudas. */
+  const linhaApontada = useRef<number | null>(null);
   // O depurador da aba Fontes (pontos de parada, controles, Escopo, Observar e Pilha de chamadas).
   const depurador = useDepurador({ fase, barramento, programa, editorRef: programa.editorSnippetRef, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   // Fase de circuito lógico: a bancada (o circuito é a fonte única de verdade dela).
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
+  // Fase composta com plano e Snippet: o plano vira comentários no código (o bloco acompanha o quadro).
+  const planoNoCodigo = composta && areas.includes("plano") && areas.includes("snippet");
+  const { textoSnippet, definirSnippet } = programa;
+  /** O quadro mudou: se o bloco do plano já está no código, ele é reescrito (o resto do código fica). */
+  const acompanharPlano = useCallback(
+    (estado: EstadoOrdenar) => {
+      const dados = quadroDaFase(fase);
+      if (!planoNoCodigo || !dados) return;
+      const atual = textoSnippet();
+      const novo = codigoComPlano(atual, dados, estado, false);
+      if (novo === atual) return;
+      definirSnippet(novo);
+      // As linhas mudaram de lugar: a do passo apontado apaga (tocar de novo acende onde ele está agora).
+      if (linhaApontada.current !== null) {
+        linhaApontada.current = null;
+        editorSnippetRefCedo.current?.destacarLinhas([]);
+      }
+    },
+    [definirSnippet, editorSnippetRefCedo, fase, planoNoCodigo, textoSnippet],
+  );
+  /** Tocar num passo do plano acende o comentário dele no código (se ele já está lá). Devolve se acendeu. */
+  const acenderPasso = useCallback(
+    (passo: string | null): boolean => {
+      const dados = quadroDaFase(fase);
+      if (!planoNoCodigo || !dados) return false;
+      const linha = passo ? linhaDoPasso(dados, textoSnippet(), passo) : null;
+      linhaApontada.current = linha;
+      editorSnippetRefCedo.current?.destacarLinhas(linha ? [linha] : []);
+      if (!passo || !linha) return false;
+      setAba("fontes");
+      barramento.emitir({ tipo: "apontouPasso", passo, linha });
+      return true;
+    },
+    [barramento, editorSnippetRefCedo, fase, planoNoCodigo, textoSnippet],
+  );
   // Fase de ordenar passos: o quadro (os cartões e o plano).
-  const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso });
+  const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso, aoMudarPlano: acompanharPlano, aoEscolher: acenderPasso });
   // Estruturas e desempenho: ver como árvore, o contador de passos e o gráfico da aba Desempenho.
   const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
+  /** "Levar o plano pro código": o bloco de comentários entra no topo do Snippet (ou é atualizado), sem apagar código. */
+  const levarPlanoProCodigo = useCallback((): boolean => {
+    const quadro = ordenar.ordenarAgora();
+    if (!planoNoCodigo || !quadro) return false;
+    const novo = codigoComPlano(textoSnippet(), quadro.dados, quadro.estado, true);
+    definirSnippet(novo);
+    sinalizarUso("plano-no-codigo");
+    setAba("fontes");
+    mostrarArea("snippet");
+    // As linhas do bloco acendem no código.
+    const bloco = acharBlocoDoPlano(novo);
+    if (bloco) {
+      const primeira = novo.slice(0, bloco.de).split("\n").length;
+      const ultima = novo.slice(0, bloco.ate).split("\n").length;
+      requestAnimationFrame(() => editorSnippetRef.current?.destacarLinhas(Array.from({ length: ultima - primeira + 1 }, (_, i) => primeira + i)));
+    }
+    barramento.emitir({ tipo: "levouPlanoProCodigo", passos: ordemDoPlano(quadro.dados, quadro.estado).length });
+    return true;
+  }, [barramento, definirSnippet, editorSnippetRef, mostrarArea, ordenar, planoNoCodigo, textoSnippet]);
+  // O Snippet mudou (digitando): depois de uma pausa, avisa o motor para conferir o plano no código.
+  const snippetDigitado = programa.programaSalvo?.snippet ?? null;
+  useEffect(() => {
+    if (!composta || snippetDigitado === null) return;
+    const encerrar = comecarPendencia();
+    const espera = setTimeout(() => {
+      barramento.emitir({ tipo: "editouSnippet" });
+      encerrar();
+    }, 450);
+    return () => {
+      clearTimeout(espera);
+      encerrar();
+    };
+  }, [barramento, composta, snippetDigitado]);
   // Linha do tempo: o passo escolhido vale só para a execução em que foi escolhido (uma nova volta ao fim).
   const comLinhaDoTempo = fase.usaFerramentas.includes("linha-do-tempo");
   const [escolhaDePasso, setEscolhaDePasso] = useState<{ de: typeof programa.ultimo; indice: number } | null>(null);
@@ -397,7 +470,7 @@ export function JogoFase({
     (alvo: number[] | "console" | null) => {
       if (alvo === null) {
         setDestaqueConsole(false);
-        editorSnippetRef.current?.destacarLinhas([]);
+        editorSnippetRef.current?.destacarLinhas(linhaApontada.current !== null ? [linhaApontada.current] : []);
       } else if (alvo === "console") {
         setAba("console");
         setDestaqueConsole(true);
@@ -798,6 +871,7 @@ export function JogoFase({
         ? { alternarPontoDeParada: depurador.alternarPontoDeParada, controlar: depurador.controlar, observar: depurador.observar }
         : undefined,
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
+      plano: planoNoCodigo ? { levarProCodigo: levarPlanoProCodigo, verPassoNoCodigo: acenderPasso } : undefined,
       estruturas:
         estruturas.comArvore || estruturas.comGrafico
           ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
@@ -821,6 +895,9 @@ export function JogoFase({
       ordenar.porPasso,
       ordenar.tirarPasso,
       ordenar.rodarPlano,
+      planoNoCodigo,
+      levarPlanoProCodigo,
+      acenderPasso,
       depurador.ativo,
       depurador.alternarPontoDeParada,
       depurador.controlar,
@@ -960,6 +1037,7 @@ export function JogoFase({
       ...(fase.programa ? { programa: { ...estadoDoPrograma(), ...(depuradorAtivo ? { depurador: estadoDoDepurador() } : {}) } } : {}),
       ...(circuitoAgora() ? { circuito: circuitoAgora() ?? undefined } : {}),
       ...(ordenarAgora() ? { ordenar: ordenarAgora() ?? undefined } : {}),
+      ...(fase.programa?.snippet ? { snippet: textoSnippet() } : {}),
     };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
@@ -969,7 +1047,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora]);
+  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora, textoSnippet]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -1703,6 +1781,12 @@ export function JogoFase({
     </AlvoFerramenta>
   ) : null;
 
+  // (Fase composta) Os passos do plano que já estão no código e a linha do passo escolhido.
+  const snippetNaTela = programa.programaSalvo?.snippet ?? programa.snippetInicial;
+  const quadroNaTela = planoNoCodigo ? ordenar.dados : null;
+  const passosDoPlanoNoCodigo = useMemo(() => (quadroNaTela ? passosNoCodigo(quadroNaTela, snippetNaTela) : undefined), [quadroNaTela, snippetNaTela]);
+  const linhaDoEscolhido = quadroNaTela && ordenar.selecionado ? linhaDoPasso(quadroNaTela, snippetNaTela, ordenar.selecionado) : null;
+
   /** O palco da memória (fase de programa): a tela da fase, ou a área palco de uma fase composta. */
   const telaPalco = fase.programa ? (
     <AlvoFerramenta
@@ -2212,7 +2296,52 @@ export function JogoFase({
           conteudo={{
             plano: ordenar.ativo ? (
               <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
-                <AreaPlano quadro={ordenar} toque={toque} />
+                <AreaPlano
+                  quadro={ordenar}
+                  toque={toque}
+                  noCodigo={passosDoPlanoNoCodigo}
+                  acoes={
+                    planoNoCodigo ? (
+                      <AlvoFerramenta ids={["plano-no-codigo"]} marcador="plano-no-codigo" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-1.5" as="span" className="inline-flex shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            tocarEfeito("clique");
+                            levarPlanoProCodigo();
+                          }}
+                          aria-label="Levar o plano pro código"
+                          title="Escreve o plano como comentários no topo do Snippet"
+                          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border-2 border-primaria bg-primaria px-3 text-xs font-black text-sobre-primaria hover:brightness-110 pointer-coarse:h-11"
+                          data-levar-plano
+                        >
+                          <IconePlanoNoCodigo tamanho={14} />
+                          Levar pro código
+                        </button>
+                      </AlvoFerramenta>
+                    ) : undefined
+                  }
+                  rodape={
+                    linhaDoEscolhido !== null ? (
+                      <div className="mb-1.5 flex shrink-0 items-center gap-2 rounded-xl border-2 border-borda bg-superficie px-3 py-1 text-xs font-bold text-texto" aria-live="polite" data-passo-no-codigo={linhaDoEscolhido}>
+                        <span className="min-w-0 flex-1">Este passo está na linha {linhaDoEscolhido} do código.</span>
+                        {layout === "retrato" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              tocarEfeito("clique");
+                              mostrarArea("snippet");
+                              requestAnimationFrame(() => editorSnippetRef.current?.destacarLinhas([linhaDoEscolhido]));
+                            }}
+                            className="inline-flex min-h-11 shrink-0 items-center rounded-full border-2 border-primaria px-3 font-black text-primaria hover:bg-hover"
+                            data-ver-no-codigo
+                          >
+                            Ver no código
+                          </button>
+                        )}
+                      </div>
+                    ) : undefined
+                  }
+                />
               </AlvoFerramenta>
             ) : null,
             snippet: painelDevtools,

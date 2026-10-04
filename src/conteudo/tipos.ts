@@ -318,6 +318,15 @@ export type Validador =
   | { tipo: "passoAntes"; passo: string; antesDe: string }
   /** (Ordenar) Nenhum cartão que sobra (distração) está no plano. */
   | { tipo: "semSobras" }
+  /**
+   * (Fase composta, áreas plano e snippet) O plano está no código como
+   * comentários, na ordem certa pelas dependências: os comentários de linha
+   * inteira que batem com o texto dos cartões (o "Levar o plano pro código"
+   * escreve assim), lidos na ordem do código, formam um plano que vale (os
+   * passos todos, nenhum que sobra, cada um depois do que ele precisa). É o
+   * que garante, no desafio, que o aluno planejou. Olha o código de agora.
+   */
+  | { tipo: "planoComentado" }
   /*
    * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
    * src/motor/desempenho.ts. Ver o guia, seção 28.
@@ -488,6 +497,19 @@ export type Acao =
   | { tipo: "tirarPasso"; passo: string }
   /** (Ordenar, com `rodar`) O botão Rodar: executa o código do plano, na ordem. Gera `executouCodigo`. */
   | { tipo: "rodarPlano" }
+  /**
+   * (Fase composta, área plano) O botão "Levar o plano pro código": escreve
+   * os passos do plano, na ordem do aluno, como comentários numerados no
+   * topo do Snippet (ou atualiza o bloco que já está lá), sem apagar o
+   * código. Gera `levouPlanoProCodigo`. Pede plano-no-codigo.
+   */
+  | { tipo: "levarPlanoProCodigo" }
+  /**
+   * (Fase composta, área plano) Toca no cartão do plano: se o passo já está no
+   * código como comentário, a linha dele acende no Snippet. Gera
+   * `apontouPasso`. Pede quadro-de-passos.
+   */
+  | { tipo: "verPassoNoCodigo"; passo: string }
   /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
   | { tipo: "verComoArvore"; nome: string }
   /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */

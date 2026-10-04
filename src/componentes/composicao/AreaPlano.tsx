@@ -16,15 +16,20 @@ type Props = {
   toque: boolean;
   /** Botões do cabeçalho do plano (o "Levar o plano pro código"). */
   acoes?: ReactNode;
+  /** Os passos que já estão no código como comentário (o selo "//" no cartão). */
+  noCodigo?: ReadonlySet<string>;
+  /** Em cima do quadro: onde está, no código, o passo escolhido (embaixo, o computadorzinho do celular cobriria). */
+  rodape?: ReactNode;
 };
 
-export function AreaPlano({ quadro, toque, acoes }: Props) {
+export function AreaPlano({ quadro, toque, acoes, noCodigo, rodape }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-area-plano>
+      {rodape}
       <PainelDividido
         rotulo="Redimensionar o plano e os cartões"
         proporcaoInicial={0.6}
-        cima={<PlanoDePassos quadro={quadro} linhas={[]} ocupado={false} toque={toque} acoes={acoes} />}
+        cima={<PlanoDePassos quadro={quadro} linhas={[]} ocupado={false} toque={toque} acoes={acoes} noCodigo={noCodigo} />}
         baixo={<PilhaDeCartoes quadro={quadro} toque={toque} />}
       />
     </div>
