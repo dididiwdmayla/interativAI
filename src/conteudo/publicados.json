@@ -233,6 +233,13 @@
       "logica-listas-e-objetos-u1-f2",
       "logica-listas-e-objetos-u1-f3",
       "logica-listas-e-objetos-u1-f4"
+    ],
+    "logica-listas-e-objetos-u2": [
+      "logica-listas-e-objetos-u2-f1",
+      "logica-listas-e-objetos-u2-f2",
+      "logica-listas-e-objetos-u2-f3",
+      "logica-listas-e-objetos-u2-f4",
+      "logica-listas-e-objetos-u2-f5"
     ]
   },
   "fases": {
@@ -1400,9 +1407,51 @@
         "editar",
         "mostrar"
       ]
+    },
+    "logica-listas-e-objetos-u2-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f4": {
+      "objetivos": [
+        "f4-guiado",
+        "f4-prever",
+        "f4-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f5": {
+      "partes": [
+        "somar",
+        "transformar",
+        "selecionar"
+      ]
     }
   },
   "itensRevisao": [
+    "percorrer-lista-js-1",
+    "percorrer-lista-js-2",
+    "map-lista-js-1",
+    "map-lista-js-2",
+    "filter-lista-js-1",
+    "filter-lista-js-2",
+    "find-lista-js-1",
+    "find-lista-js-2",
     "array-js-1",
     "array-js-2",
     "indice-lista-js-1",

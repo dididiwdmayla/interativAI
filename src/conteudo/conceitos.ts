@@ -1172,6 +1172,40 @@ const CATALOGO = {
     ]
   }
 ,
+
+  "map-lista-js": {
+    "nome": "Transformar com map",
+    "resumo": "map chama a função para cada item e devolve uma lista nova; a original permanece.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "filter-lista-js": {
+    "nome": "Selecionar com filter",
+    "resumo": "filter devolve uma lista com todos os itens cuja condição deu true, ou [] quando nenhum serve.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "find-lista-js": {
+    "nome": "Achar com find",
+    "resumo": "find devolve só o primeiro item que serve, ou undefined quando não encontra.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  }
+,
+"percorrer-lista-js": {
+  "nome": "Percorrer os vagões",
+  "resumo": "for...of entrega os valores da lista; for com índice lê lista[i] até antes de length.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

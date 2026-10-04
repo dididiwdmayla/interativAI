@@ -72,5 +72,100 @@
       }
     },
     "leituras": {}
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const precos = [3, 8, 5]\nlet total = 0\nlet baratos = 0\nfor (let preco of precos) {\n total += preco\n if (preco < 6) { baratos++ }\n}"
+        ],
+        [
+          "f1-sozinho",
+          "const valores = [4, 9, 2, 1]\nlet soma = 0\nfor (let i = 0; i < valores.length; i++) { soma += valores[i] }\nlet quantidade = valores.length"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const precos = [3, 8, 5]\nconst aumentados = precos.map(preco => preco + 2)\nconsole.log(precos[0], aumentados[0])"
+        ],
+        [
+          "f2-prever",
+          "aumentados[0] = 99\nlet preservado = precos[0]"
+        ],
+        [
+          "f2-sozinho",
+          "const descontos = (lista) => lista.map(preco => preco - 1)\nlet ofertas = descontos([2, 6, 10])"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const precos = [3, 8, 5]\nconst baratos = precos.filter(preco => preco < 6)\nlet quantidade = baratos.length"
+        ],
+        [
+          "f3-prever",
+          "const nenhum = precos.filter(preco => preco > 20)\nlet tamanho = nenhum.length"
+        ],
+        [
+          "f3-sozinho",
+          "const ateCinco = (lista) => lista.filter(n => n <= 5)\nlet escolhidos = ateCinco([5, 6, 0])"
+        ]
+      ],
+      [
+        [
+          "f4-guiado",
+          "const estoque = [4, 0, 0, 2]\nlet primeiroZero = estoque.find(n => n === 0)\nconst zeros = estoque.filter(n => n === 0)"
+        ],
+        [
+          "f4-prever",
+          "let ausente = estoque.find(n => n < 0)\nlet tipoAusente = typeof ausente"
+        ],
+        [
+          "f4-sozinho",
+          "const primeiroAlto = (lista) => lista.find(n => n > 10)\nlet achado = primeiroAlto([8, 12, 15])"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let totalVotos = 0\nfor (let quantidade of votos) { totalVotos += quantidade }",
+      "const projetados = votos.map(n => n * 2)",
+      "const aprovados = votos.filter(n => n >= 5)\nlet primeiroAprovado = votos.find(n => n >= 5)\nlet quantidadeAprovados = aprovados.length"
+    ],
+    "negativas": {
+      "f2-guiado": "const precos = [3, 8, 5]\nconst aumentados = precos\naumentados[0] = 5\nconsole.log(precos[0], aumentados[0])"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {
+      "f2-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "3",
+          "8",
+          "5"
+        ]
+      },
+      "f3-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "3",
+          "8",
+          "5"
+        ]
+      }
+    },
+    "listas": {
+      "f2-guiado": {
+        "precos": 3,
+        "aumentados": 3
+      },
+      "f3-guiado": {
+        "baratos": 2
+      }
+    },
+    "fichas": {},
+    "referencias": {},
+    "leituras": {}
   }
 }
