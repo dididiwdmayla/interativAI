@@ -567,7 +567,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Confusões:** "mostrar é devolver"; "o nome do parâmetro precisa ser o
   da variável".
 
-#### U3. Escopo — `logica-funcoes-u3`
+#### U3. Escopo (pronta) — `logica-funcoes-u3`
 
 - **Meta:** saber onde cada variável existe e por que a de dentro da função
   some quando ela termina.

@@ -112,7 +112,7 @@ async function conferirTempo({ variavel, valores }) {
   conferir((await tempo.getAttribute("data-passo-atual")) === String(total - 1), `${MODO}: rastro voltou ao fim`);
 }
 /** Vai para dentro da chamada e volta ao fim pelos controles reais. */
-async function conferirMoldura({ funcao, parametros, retorno }) {
+async function conferirMoldura({ funcao, parametros, retorno, bloco = {} }) {
   if (movel) await fecharBalao(pagina);
   const tempo = pagina.locator("[data-linha-do-tempo]");
   const total = Number(await tempo.getAttribute("data-total-passos"));
@@ -122,6 +122,7 @@ async function conferirMoldura({ funcao, parametros, retorno }) {
   let entrou = false;
   let devolveu = retorno === null;
   const encontrados = new Set();
+  const blocosEncontrados = new Set();
   for (let i = total - 1; i >= 0; i--) {
     if (await quadro.count()) {
       entrou = true;
@@ -129,13 +130,21 @@ async function conferirMoldura({ funcao, parametros, retorno }) {
         const caixa = quadro.locator(`[data-caixinha="${nome}"] [data-valor-palco]`);
         if (await caixa.count() && (await caixa.first().innerText()) === valor) encontrados.add(nome);
       }
+      for (const [nome, valor] of Object.entries(bloco)) {
+        const caixa = quadro.locator(`[data-bloco-palco] [data-caixinha="${nome}"] [data-valor-palco]`);
+        if (await caixa.count() && (await caixa.first().innerText()) === valor) blocosEncontrados.add(nome);
+      }
       const faixa = quadro.locator('[data-faixa-quadro="retorno"]');
-      if (await faixa.count() && (await faixa.innerText()).includes(`devolve ${retorno}`)) devolveu = true;
+      if (await faixa.count() && (await faixa.innerText()).includes(`devolve ${retorno}`)) {
+        devolveu = true;
+        for (const nome of Object.keys(bloco)) conferir(await quadro.locator(`[data-caixinha="${nome}"]`).count() === 0, `${MODO}: ${nome} some ao sair do bloco`);
+      }
     }
     if (i > 0) await tocar(tempo.locator('[data-passo-anterior]'));
   }
   conferir(entrou, `${MODO}: entrada na moldura ${funcao}`);
   for (const nome of Object.keys(parametros)) conferir(encontrados.has(nome), `${MODO}: ${nome} dentro da moldura`);
+  for (const nome of Object.keys(bloco)) conferir(blocosEncontrados.has(nome), `${MODO}: ${nome} dentro do bloco da moldura`);
   conferir(devolveu, `${MODO}: retorno ${retorno} no rastro`);
   for (let i = 1; i < total; i++) await tocar(tempo.locator('[data-passo-proximo]'));
   conferir(await quadro.count() === 0, `${MODO}: voltou ao Global`);

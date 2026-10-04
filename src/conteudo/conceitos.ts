@@ -1073,6 +1073,34 @@ const CATALOGO = {
     "logica"
   ]
 },
+"escopo-global-js": {
+  "nome": "Escopo global",
+  "resumo": "Uma variável do topo continua disponível entre chamadas.",
+  "temas": [
+    "logica"
+  ]
+},
+"escopo-funcao-js": {
+  "nome": "Escopo de função",
+  "resumo": "Uma variável local pertence à chamada; um nome igual fora representa outra caixinha.",
+  "temas": [
+    "logica"
+  ]
+},
+"escopo-bloco-js": {
+  "nome": "Escopo de bloco",
+  "resumo": "let e const dentro de chaves só existem naquele bloco, inclusive dentro de uma função.",
+  "temas": [
+    "logica"
+  ]
+},
+"estado-entre-chamadas": {
+  "nome": "Estado entre chamadas",
+  "resumo": "Uma local nasce de novo a cada chamada; para guardar uma contagem entre chamadas a caixinha deve sobreviver fora.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -107,5 +107,81 @@
         "retorno": "90"
       }
     }
+  },
+  "3": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "let taxa = 10\nfunction calcular(valor) {\n  let taxa = 2\n  return valor + taxa\n}\nlet total = calcular(5)"
+        ],
+        [
+          "f1-prever",
+          "function segredo() {\n  let codigo = 42\n}\nsegredo()\ncodigo"
+        ],
+        [
+          "f1-sozinho",
+          "let ajuste = 20\nfunction acrescer(base) {\n  let ajuste = 3\n  return base + ajuste\n}\nlet total = acrescer(8)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function desconto(preco) {\n  let final = preco\n  if (preco >= 50) {\n    let abatimento = 5\n    final -= abatimento\n  }\n  return final\n}\nlet total = desconto(60)"
+        ],
+        [
+          "f2-prever",
+          "function testar() {\n  if (true) {\n    let aviso = \"OK\"\n  }\n  return aviso\n}\ntestar()"
+        ],
+        [
+          "f2-sozinho",
+          "function ingresso(idade) {\n  let preco = 20\n  if (idade < 12) {\n    let desconto = 8\n    preco -= desconto\n  }\n  return preco\n}\nlet total = ingresso(11)"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "let visitas = 0\nfunction registrar() {\n  visitas++\n  return visitas\n}\nlet primeira = registrar()\nlet segunda = registrar()"
+        ],
+        [
+          "f3-prever",
+          "let visitas = 0\nlet ultima = 0\nfor (let i = 0; i < 3; i++) {\n  ultima = registrar()\n}"
+        ],
+        [
+          "f3-sozinho",
+          "let coletas = 0\nfunction coletar() {\n  coletas++\n  return coletas\n}\nlet ultima = 0\nfor (let i = 0; i < 4; i++) {\n  ultima = coletar()\n}"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let visitas = 0\nfunction visitar() {\n  visitas++\n  return visitas\n}\nlet primeira = visitar()\nlet segunda = visitar()",
+      "function rotulo(n) {\n  let texto = \"Visita \" + n\n  return texto\n}\nlet mensagem = rotulo(segunda)"
+    ],
+    "negativas": {
+      "f2-guiado": "function desconto(preco) {\n  if (preco >= 50) { let final = preco - 5 }\n  return final\n}\nlet total = desconto(60)",
+      "f3-guiado": "function registrar() {\n  let visitas = 0\n  visitas++\n  return visitas\n}\nlet primeira = registrar()\nlet segunda = registrar()"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "calcular",
+        "parametros": {
+          "valor": "5",
+          "taxa": "2"
+        },
+        "retorno": "7"
+      },
+      "f2-guiado": {
+        "funcao": "desconto",
+        "parametros": {
+          "preco": "60",
+          "final": "55"
+        },
+        "retorno": "55",
+        "bloco": {
+          "abatimento": "5"
+        }
+      }
+    },
+    "caixaDepois": "segunda"
   }
 }

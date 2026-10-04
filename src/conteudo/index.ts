@@ -1,3 +1,4 @@
+import { FASES_UNIDADE_FUNCOES_U3, UNIDADE_FUNCOES_U3 } from "./ilhas/logica/funcoes/unidade-3/unidade";
 import { FASES_UNIDADE_FUNCOES_U2, UNIDADE_FUNCOES_U2 } from "./ilhas/logica/funcoes/unidade-2/unidade";
 import { FASES_UNIDADE_FUNCOES_U1, UNIDADE_FUNCOES_U1 } from "./ilhas/logica/funcoes/unidade-1/unidade";
 /*
@@ -77,6 +78,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_REPETICAO_U3,
   UNIDADE_FUNCOES_U1,
   UNIDADE_FUNCOES_U2,
+  UNIDADE_FUNCOES_U3,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -117,6 +119,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_REPETICAO_U3,
   ...FASES_UNIDADE_FUNCOES_U1,
   ...FASES_UNIDADE_FUNCOES_U2,
+  ...FASES_UNIDADE_FUNCOES_U3,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

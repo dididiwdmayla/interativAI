@@ -1,3 +1,7 @@
+import { ITENS_ESTADO_ENTRE_CHAMADAS } from "./estado-entre-chamadas";
+import { ITENS_ESCOPO_BLOCO_JS } from "./escopo-bloco-js";
+import { ITENS_ESCOPO_FUNCAO_JS } from "./escopo-funcao-js";
+import { ITENS_ESCOPO_GLOBAL_JS } from "./escopo-global-js";
 import { ITENS_RETURN_ENCERRA } from "./return-encerra";
 import { ITENS_MOSTRAR_OU_DEVOLVER } from "./mostrar-ou-devolver";
 import { ITENS_RETURN_JS } from "./return-js";
@@ -196,6 +200,10 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_ESTADO_ENTRE_CHAMADAS,
+  ...ITENS_ESCOPO_BLOCO_JS,
+  ...ITENS_ESCOPO_FUNCAO_JS,
+  ...ITENS_ESCOPO_GLOBAL_JS,
   ...ITENS_RETURN_ENCERRA,
   ...ITENS_MOSTRAR_OU_DEVOLVER,
   ...ITENS_RETURN_JS,

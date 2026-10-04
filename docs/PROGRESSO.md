@@ -24,3 +24,9 @@ Rodada anterior: `docs/arquivo/PROGRESSO-rodada-22.md`. Status consolidado: `doc
 - U2 com quatro fases: parâmetro/argumento, return contra console.log, undefined sem return, saída antecipada por if e acumulador/for dentro de função; desafio na calculadora de frete da Loja Rota.
 - Quatro conceitos com tema Lógica e oito itens de revisão; funcaoPassa com zero, negativos, decimais e fronteiras (99/100 e 199/200), combinado com resultados nas caixinhas e semErro.
 - Verificado: 13.118 testes; jornadas nos três layouts com parâmetro dentro da moldura e faixa de retorno, negativas de console.log e função constante, desafio e console limpo; publicar:conteudo, lint e build.
+
+### Etapa 3: Escopo
+
+- U3 com quatro fases: global/local e nomes iguais, ReferenceError fora da função, let do if com moldura tracejada e contador que renascia em cada chamada. Desafio nas visitas da Exposição Marés, com o defeito no preparo e no Snippet: segunda visita em 1 antes, 2 depois.
+- Quatro conceitos com tema Lógica e oito itens de revisão; funções de cálculo com funcaoPassa, contador persistente por valorVariavel e saída/semErro conforme a tarefa.
+- Verificado: 13.406 testes; jornadas nos três layouts, variáveis locais dentro da moldura, variável dentro do bloco e seu desaparecimento antes do return, negativas dos escopos e do contador, meta e desafio; publicar:conteudo, lint e build.
