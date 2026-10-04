@@ -79,7 +79,7 @@ export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
           <OndeEstou partes={compacto ? caminho.slice(-1) : caminho} />
         </div>
         <TotalEstrelas compacto={compacto} />
-        <BotaoTelaCheia />
+        {compacto && <BotaoTelaCheia />}
         {compacto ? (
           <MenuMovel>
             <LinksExplorar noMenu />
@@ -95,6 +95,7 @@ export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
             <SeletorTema />
             <BotaoSom />
+            <BotaoTelaCheia />
           </>
         )}
       </header>

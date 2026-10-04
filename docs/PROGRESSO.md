@@ -36,3 +36,12 @@ Rodada anterior: `docs/arquivo/PROGRESSO-rodada-22.md`. Status consolidado: `doc
 - U4 com três fases: reescrever function como arrow, retorno implícito e bloco sem return; desafio nas medidas da receita da Cozinha Aurora. Arrow com for revisa Repetição, e o desafio com if revisa Decisões.
 - Três conceitos com tema Lógica e seis itens de revisão; funcaoPassa com zero, negativos e decimais, usouSintaxe arrow/return e valorVariavel/semErro. Sem listas e sem ferramentas do depurador.
 - Verificado: 13.622 testes; jornadas nos três layouts com moldura, parâmetro e retorno da arrow, negativas de function no lugar de arrow e de bloco sem return, desafio e console limpo; publicar:conteudo, lint e build.
+
+### Etapa 5: fechamento
+
+- Zona Funções completa: 14 fases, 14 conceitos com tema Lógica e 28 itens (390 no registro), um commit por unidade; nenhum arquivo de unidade previamente publicada foi alterado.
+- Tela cheia reconferida no build final: API real e navegação por fase, ilha, glossário, mundo e revisão nos três layouts, mantendo o documento em tela cheia. Insets de 20/16 px e teclado simulados; a barra em paisagem comporta o alvo de 44 px e a borda sem cortar o toque.
+- Build e lint finais verdes; bateria:conteudo em produção verde (mapa, explorar, publicar, revisão). As jornadas das quatro unidades também estão registradas em testes/todos.mjs.
+- ROADMAP aponta Listas e objetos como próxima zona e exige programas curtos em Depuração, dentro das primeiras 1.000 fotos do rastro. ATRITOS-FABRICA guarda a rodada curta; históricos preservados em docs/arquivo.
+- Decisões: botão fora do menu no celular; saída exata para funções de mensagens da U1; contador global entre chamadas na U3, sem antecipar closures. Não houve mudança no executor nem nos validadores.
+- Limite da verificação: Chromium 133 em ambiente headless; teclado e áreas seguras simulados, sem dispositivo físico ou Safari de iPhone.

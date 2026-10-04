@@ -312,5 +312,9 @@ html:fullscreen {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 html:fullscreen .h-dvh {
-  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: calc(100dvh - var(--tela-cheia-inset, 0px));
+}
+
+html:fullscreen .h-dvh > header {
+  min-height: 46px;
 }

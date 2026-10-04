@@ -6,7 +6,7 @@ const ferramentas = [...readFileSync(new URL('../src/ferramentas/ids.ts', import
 const modo = process.argv[2] ?? 'desktop';
 const tamanhos = {desktop: [1440, 900], retrato: [390, 844], paisagem: [844, 390]};
 const [largura, altura] = tamanhos[modo];
-const { navegador, pagina, contexto } = await abrir({largura, altura, toque: modo !== 'desktop', progresso: progressoComFase('sites-elementos-u1-f1', {}, {mapaDesbloqueado: true, apresentacoesVistas: ferramentas}), esperar: '[data-jogo-fase]'});
+const { navegador, pagina, contexto } = await abrir({largura, altura, toque: modo !== 'desktop', progresso: progressoComFase('sites-elementos-u1-f1', {}, {mapaDesbloqueado: true, apresentacoesVistas: ferramentas, revisao: {conceitos: {tag: {nivel: 1, proxima: "2020-01-01", vezes: 0, ultima: null}}, sequencia: {atual: 0, melhor: 0, ultimoDia: null}}}), esperar: '[data-jogo-fase]'});
 await pagina.evaluate(() => {
   window.testeTelaCheia = {ativa: null, entradas: 0, saidas: 0, rejeitar: false};
   Object.defineProperty(document, 'fullscreenEnabled', {configurable: true, get: () => true});
@@ -51,8 +51,7 @@ await pagina.evaluate(() => {
 await pagina.locator('[data-tela-cheia]').waitFor({state: 'detached'});
 // Contexto novo, API REAL, com tela da fase e teclado simulado por visualViewport.
 const real = await contexto.newPage();
-await real.goto(pagina.url().replace(/\/ilha\/[^/]+.*$/, '/fase/sites-elementos-u1-f1'));
-await real.goto(new URL('/fase/sites-elementos-u1-f1', real.url()).toString());
+await real.goto(new URL('/fase/sites-elementos-u1-f1', pagina.url()).toString());
 await real.getByRole('button', {name: 'Entrar em tela cheia', exact: true}).click();
 await real.getByRole('button', {name: 'Sair da tela cheia', exact: true}).waitFor();
 const medir = () => real.evaluate(() => {
@@ -62,8 +61,14 @@ const medir = () => real.evaluate(() => {
   const p = previa.getBoundingClientRect();
   return {layout: raiz.dataset.layout, largura: r.width, altura: r.height, previa: p.height, janela: innerHeight, transborda: document.documentElement.scrollWidth > innerWidth};
 });
+// Insets simulados: a altura e os alvos continuam dentro da área segura.
+await real.evaluate(() => {
+  document.documentElement.style.setProperty('--tela-cheia-inset', '36px');
+  document.documentElement.style.paddingTop = '20px';
+  document.documentElement.style.paddingBottom = '16px';
+});
 let medidas = await medir();
-conferir(medidas.layout === modo && medidas.altura <= medidas.janela + 1 && medidas.previa > 0 && !medidas.transborda, `${modo}: layout e prévia em tela cheia: ${JSON.stringify(medidas)}`);
+conferir(medidas.layout === modo && medidas.altura <= medidas.janela - 35 && medidas.previa > 0 && !medidas.transborda, `${modo}: layout e prévia em tela cheia: ${JSON.stringify(medidas)}`);
 if (modo === 'retrato') {
   await real.locator('.cm-content').first().focus();
   await real.evaluate(() => {
@@ -74,5 +79,36 @@ if (modo === 'retrato') {
   medidas = await medir();
   conferir(medidas.previa > 0 && medidas.altura <= 461, 'teclado mantém prévia visível');
 }
+if (modo === 'retrato') {
+  await real.evaluate(() => {
+    delete window.visualViewport.height;
+    document.activeElement.blur();
+    window.visualViewport.dispatchEvent(new Event('resize'));
+  });
+}
+async function conferirCabecalho(tela) {
+  await real.getByRole('button', {name: 'Sair da tela cheia', exact: true}).waitFor();
+  const bounds = await real.locator('[data-tela-cheia]').evaluate(b => {
+    const r = b.getBoundingClientRect();
+    return {top: r.top, left: r.left, right: r.right, largura: innerWidth, overflow: document.documentElement.scrollWidth > innerWidth, ativa: document.fullscreenElement === document.documentElement};
+  });
+  conferir(bounds.ativa && bounds.top >= 20 && bounds.left >= 0 && bounds.right <= bounds.largura && !bounds.overflow, `${modo}: ${tela} mantém tela cheia e botão dentro da área visível: ${JSON.stringify(bounds)}`);
+}
+await conferirCabecalho('fase');
+await real.locator('[data-botao-mapa]').click();
+await real.locator('[data-mapa=ilha]').waitFor();
+await conferirCabecalho('ilha');
+if (modo !== 'desktop') await real.getByRole('button', {name: 'Mais opções', exact: true}).click();
+await real.getByRole('link', {name: 'Glossário', exact: true}).click();
+await real.locator('[data-tela=glossario]').waitFor();
+await conferirCabecalho('glossário');
+await real.getByRole('button', {name: 'Voltar', exact: true}).click();
+await real.locator('[data-mapa=ilha]').waitFor();
+await real.getByRole('link', {name: 'Mundo', exact: true}).click();
+await real.locator('[data-mapa=mundo]').waitFor();
+await conferirCabecalho('mundo');
+await real.locator('[data-porto]').click();
+await real.locator('[data-tela=revisao]').waitFor();
+await conferirCabecalho('revisão');
 await navegador.close();
 console.log(`tela-cheia.mjs ${modo}: ok`);
