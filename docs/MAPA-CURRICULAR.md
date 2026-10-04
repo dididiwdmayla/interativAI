@@ -539,7 +539,7 @@ mostra a tabuada do 7.
 Missão de campo: no Console de qualquer site, criar a função
 `dobro(n)` e chamar com três números.
 
-#### U1. Criar e chamar — `logica-funcoes-u1`
+#### U1. Criar e chamar (pronta) — `logica-funcoes-u1`
 
 - **Meta:** guardar um passo a passo numa função e usar de novo quando
   quiser.

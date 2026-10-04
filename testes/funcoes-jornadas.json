@@ -1,0 +1,48 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "function saudar() {\n  console.log(\"Bom dia\")\n}\nsaudar()\nsaudar()"
+        ],
+        [
+          "f1-prever",
+          "function avisar() {\n  console.log(\"Olá\")\n}\navisar\nlet criada = typeof avisar === \"function\""
+        ],
+        [
+          "f1-sozinho",
+          "function despedir() {\n  console.log(\"Até amanhã\")\n}\ndespedir()\ndespedir()\ndespedir()"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function sinalizar() {\n  console.log(\"Oficina aberta\")\n}\nfor (let i = 0; i < 2; i++) {\n  sinalizar()\n}"
+        ],
+        [
+          "f2-prever",
+          "function sinalizar() {\n  console.log(\"Oficina aberta\")\n}\nfor (let i = 0; i < 2; i++) {\n  sinalizar()\n}\nlet fim = \"fora\""
+        ],
+        [
+          "f2-sozinho",
+          "function encerrar() {\n  console.log(\"Fechada\")\n}\nlet aberta = false\nif (!aberta) {\n  encerrar()\n}\nlet fim = \"biblioteca\""
+        ]
+      ]
+    ],
+    "desafio": [
+      "function abrir() {\n  console.log(\"Loja aberta\")\n}\nabrir()",
+      "function fechar() {\n  console.log(\"Até amanhã\")\n}\nfor (let i = 0; i < 2; i++) {\n  fechar()\n}"
+    ],
+    "negativas": {
+      "f1-guiado": "function saudar() {\n  console.log(\"Bom dia\")\n}\nsaudar"
+    },
+    "molduras": {
+      "f2-guiado": {
+        "funcao": "sinalizar",
+        "parametros": {},
+        "retorno": null
+      }
+    }
+  }
+}

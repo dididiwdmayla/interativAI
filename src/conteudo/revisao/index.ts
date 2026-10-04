@@ -1,3 +1,6 @@
+import { ITENS_MOLDURA_FUNCAO } from "./moldura-funcao";
+import { ITENS_CHAMADA_FUNCAO } from "./chamada-funcao";
+import { ITENS_FUNCAO_JS } from "./funcao-js";
 import { ITENS_MEDIA_JS } from "./media-js";
 import { ITENS_MAIOR_MENOR_JS } from "./maior-menor-js";
 import { ITENS_CONTADOR_CONDICIONAL } from "./contador-condicional";
@@ -189,6 +192,9 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_MOLDURA_FUNCAO,
+  ...ITENS_CHAMADA_FUNCAO,
+  ...ITENS_FUNCAO_JS,
   // U1 (modelo, com comentários pedagógicos no topo de cada arquivo)
   ...ITENS_ELEMENTO,
   ...ITENS_TAG,

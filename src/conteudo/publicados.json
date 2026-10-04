@@ -205,6 +205,11 @@
       "logica-repeticao-u3-f3",
       "logica-repeticao-u3-f4",
       "logica-repeticao-u3-f5"
+    ],
+    "logica-funcoes-u1": [
+      "logica-funcoes-u1-f1",
+      "logica-funcoes-u1-f2",
+      "logica-funcoes-u1-f3"
     ]
   },
   "fases": {
@@ -1250,9 +1255,35 @@
         "extremos",
         "media"
       ]
+    },
+    "logica-funcoes-u1-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-funcoes-u1-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-funcoes-u1-f3": {
+      "partes": [
+        "abrir",
+        "fechar"
+      ]
     }
   },
   "itensRevisao": [
+    "moldura-funcao-1",
+    "moldura-funcao-2",
+    "chamada-funcao-1",
+    "chamada-funcao-2",
+    "funcao-js-1",
+    "funcao-js-2",
     "elemento-1",
     "elemento-2",
     "tag-1",

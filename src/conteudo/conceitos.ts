@@ -1024,6 +1024,27 @@ const CATALOGO = {
     "dados"
   ]
 },
+"funcao-js": {
+  "nome": "Função",
+  "resumo": "Guarda instruções sob um nome; criar uma função não executa seu corpo.",
+  "temas": [
+    "logica"
+  ]
+},
+"chamada-funcao": {
+  "nome": "Chamada de função",
+  "resumo": "Os parênteses executam a função; ler apenas o nome obtém a própria função.",
+  "temas": [
+    "logica"
+  ]
+},
+"moldura-funcao": {
+  "nome": "Moldura de chamada",
+  "resumo": "Cada chamada tem seu próprio quadro no palco e volta para quem chamou ao terminar.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
