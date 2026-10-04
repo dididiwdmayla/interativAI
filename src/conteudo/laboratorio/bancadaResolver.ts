@@ -8,7 +8,7 @@
  */
 import { SITE_DO_PROGRAMA } from "@/motor/programa";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
-import type { Fase, FasePratica, Unidade } from "../tipos";
+import type { Fase, FaseDesafio, FasePratica, Unidade } from "../tipos";
 
 export const UNIDADE_BANCADA_RESOLVER: Unidade = {
   id: "lab-resolver-u1",
@@ -16,8 +16,11 @@ export const UNIDADE_BANCADA_RESOLVER: Unidade = {
   zona: "Bancada da resolução de problemas",
   numero: 1,
   titulo: "Resolver um problema inteiro",
-  meta: { enunciado: "Testar a composição de áreas: o plano, o código e o palco na mesma tela, do plano à função pronta." },
-  fases: ["lab-resolver-u1-f1"],
+  meta: {
+    enunciado: "Resolver um problema inteiro na mesma tela: montar o plano, levar pro código, escrever a função e provar com os seus casos de teste.",
+    desafioId: "lab-resolver-u1-f2",
+  },
+  fases: ["lab-resolver-u1-f1", "lab-resolver-u1-f2"],
 };
 
 /** A média das notas: o problema da prática composta. */
@@ -228,4 +231,109 @@ export const FASE_DEMO_RESOLVER: FasePratica = {
   falaFinal: { texto: "Pode continuar mexendo no plano e no código.", expressao: "feliz" },
 };
 
-export const FASES_BANCADA_RESOLVER: readonly Fase[] = [FASE_DEMO_RESOLVER];
+/*
+ * O desafio composto: um problema novo (quantos passaram na prova), sem
+ * passo a passo, com as mesmas áreas. O checklist cobra o plano (no quadro),
+ * o plano no código (planoComentado), o código (funcaoPassa com casos de
+ * borda escondidos) e os testes do aluno (casosDoAluno, com a lista vazia,
+ * passando). Cada parte tem o Rever na prática composta.
+ */
+export const PLANO_APROVADOS: DadosOrdenar = {
+  modo: "ordenar",
+  problema: "Contar quantos passaram",
+  cartoes: [
+    { id: "zerar", texto: "Começar a contagem em zero" },
+    { id: "olhar", texto: "Olhar cada nota da lista", depoisDe: ["zerar"] },
+    { id: "contar", texto: "Se a nota for 6 ou mais, contar mais um", depoisDe: ["olhar"] },
+    { id: "devolver", texto: "Devolver a contagem", depoisDe: ["contar"] },
+    { id: "somar", texto: "Somar todas as notas", sobra: true },
+  ],
+};
+
+export const CODIGO_APROVADOS = [
+  "// Plano: Contar quantos passaram",
+  "// 1. Começar a contagem em zero",
+  "// 2. Olhar cada nota da lista",
+  "// 3. Se a nota for 6 ou mais, contar mais um",
+  "// 4. Devolver a contagem",
+  "",
+  "function aprovados(notas) {",
+  "  let contagem = 0;",
+  "  for (const nota of notas) {",
+  "    if (nota >= 6) contagem = contagem + 1;",
+  "  }",
+  "  return contagem;",
+  "}",
+].join("\n");
+
+export const FASE_DEMO_DESAFIO_RESOLVER: FaseDesafio = {
+  id: "lab-resolver-u1-f2",
+  tipo: "desafio",
+  unidadeId: "lab-resolver-u1",
+  titulo: "Quantos passaram na prova",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  areas: ["plano", "snippet", "palco", "testes"],
+  plano: PLANO_APROVADOS,
+  testes: { funcao: "aprovados", parametros: ["notas"] },
+  usaFerramentas: ["quadro-de-passos", "plano-no-codigo", "snippet", "console", "palco-memoria", "linha-do-tempo", "casos-de-teste"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: { snippet: { codigoInicial: "", nome: "aprovados.js" } },
+  introducao: [
+    { texto: "A turma fez a prova e passa quem tirou 6 ou mais. Quantos passaram? Agora é com você, do plano aos testes.", expressao: "curioso" },
+    { texto: "Monte o plano, leve pro código, escreva aprovados(notas) e prove com os seus casos, inclusive a lista vazia.", expressao: "feliz" },
+  ],
+  partes: [
+    {
+      id: "plano",
+      descricao: "O plano de contar quantos passaram, na ordem das dependências.",
+      revisarEm: "lab-resolver-u1-f1",
+      validador: { tipo: "ordemValida" },
+      solucaoDeTeste: ["zerar", "olhar", "contar", "devolver"].map((passo) => ({ tipo: "porPasso" as const, passo })),
+    },
+    {
+      id: "plano-no-codigo",
+      descricao: "O plano no código, como comentários na ordem certa.",
+      revisarEm: "lab-resolver-u1-f1",
+      validador: { tipo: "planoComentado" },
+      solucaoDeTeste: [{ tipo: "levarPlanoProCodigo" }],
+    },
+    {
+      id: "codigo",
+      descricao: "A função aprovados(notas) devolve quantas notas são 6 ou mais.",
+      revisarEm: "lab-resolver-u1-f1",
+      validador: {
+        tipo: "funcaoPassa",
+        nome: "aprovados",
+        casos: [
+          { args: [[7, 4, 9]], esperado: 2 },
+          { args: [[]], esperado: 0 },
+          { args: [[6]], esperado: 1 },
+          { args: [[5.9, 6]], esperado: 1 },
+          { args: [[3, 2]], esperado: 0 },
+        ],
+      },
+      solucaoDeTeste: [
+        { tipo: "definirSnippet", codigo: CODIGO_APROVADOS },
+        { tipo: "executarSnippet" },
+      ],
+    },
+    {
+      id: "testes",
+      descricao: "Pelo menos 3 casos seus passando, um deles com a lista vazia.",
+      revisarEm: "lab-resolver-u1-f1",
+      validador: { tipo: "casosDoAluno", minimo: 3, incluir: [{ args: [[]], rotulo: "a lista vazia" }], passando: true },
+      solucaoDeTeste: [
+        { tipo: "escreverCaso", entrada: "[7, 4, 9]", esperado: "2" },
+        { tipo: "escreverCaso", entrada: "[6]", esperado: "1" },
+        { tipo: "escreverCaso", entrada: "[]", esperado: "0" },
+        { tipo: "rodarCasos" },
+      ],
+    },
+  ],
+  conclusao: [{ texto: "Plano, código e testes, sem passo a passo! É assim que se resolve um problema de verdade.", expressao: "comemorando" }],
+  falaFinal: { texto: "Pode continuar mexendo no plano, no código e nos casos.", expressao: "feliz" },
+};
+
+export const FASES_BANCADA_RESOLVER: readonly Fase[] = [FASE_DEMO_RESOLVER, FASE_DEMO_DESAFIO_RESOLVER];

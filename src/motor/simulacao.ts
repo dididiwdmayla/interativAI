@@ -529,3 +529,49 @@ export function memoriasDoDesafio(fase: FaseDesafio): { antes: FotoMemoria | nul
   }
   return { antes, depois: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null };
 }
+
+/** (Desafio composto) O que cada área mostra num momento: o plano, o código, os casos e a memória. */
+export type RetratoComposicao = {
+  /** Os passos do plano, na ordem (null: a fase não tem a área plano). */
+  plano: string[] | null;
+  /** O texto do Snippet (null: sem a área snippet). */
+  codigo: string | null;
+  /** Os casos do aluno, com o resultado da última rodada (null: sem a área testes). */
+  casos: { chamada: string; esperado: string; passou: boolean | null }[] | null;
+  /** A memória depois da última execução (null: nada rodou ou sem programa). */
+  memoria: FotoMemoria | null;
+};
+
+function retratoDaComposicao(fase: Fase, simulacao: Simulacao): RetratoComposicao {
+  const dados = quadroDaFase(fase);
+  const estado = simulacao.ordenar();
+  const dadosCasos = casosDaFase(fase);
+  const casos = simulacao.casos();
+  return {
+    plano: dados && estado ? quadro.ordemDoPlano(dados, estado).map((id) => dados.cartoes.find((c) => c.id === id)?.texto ?? id) : null,
+    codigo: temArea(fase, "snippet") ? simulacao.programa().snippet : null,
+    casos:
+      dadosCasos && casos
+        ? casos.casos.map((caso) => ({ chamada: `${dadosCasos.funcao}(${caso.entrada})`, esperado: caso.esperado, passou: casos.resultados[caso.id]?.passou ?? null }))
+        : null,
+    memoria: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null,
+  };
+}
+
+/**
+ * (Desafio composto) As áreas antes (o que a fase traz) e depois das soluções
+ * de todas as partes: o plano montado, o código com o plano nos comentários e
+ * os casos passando. É o antes e depois da meta.
+ */
+export function composicaoDoDesafio(fase: FaseDesafio): { antes: RetratoComposicao; depois: RetratoComposicao } {
+  const simulacao = criarSimulacao(fase);
+  const antes = retratoDaComposicao(fase, simulacao);
+  for (const parte of fase.partes) {
+    try {
+      simulacao.executar(parte.solucaoDeTeste);
+    } catch {
+      // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+    }
+  }
+  return { antes, depois: retratoDaComposicao(fase, simulacao) };
+}

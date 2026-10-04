@@ -7,12 +7,20 @@ import { describe, expect, it } from "vitest";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
 import { FASES } from "@/conteudo";
 import type { Fase } from "@/conteudo/tipos";
-import { FASE_DEMO_RESOLVER, CODIGO_MEDIA, COMENTARIOS_MEDIA, PLANO_MEDIA } from "@/conteudo/laboratorio/bancadaResolver";
+import {
+  CODIGO_MEDIA,
+  COMENTARIOS_MEDIA,
+  FASE_DEMO_DESAFIO_RESOLVER,
+  FASE_DEMO_RESOLVER,
+  FASES_BANCADA_RESOLVER,
+  PLANO_MEDIA,
+  UNIDADE_BANCADA_RESOLVER,
+} from "@/conteudo/laboratorio/bancadaResolver";
 import { conferirOrdem, type DadosOrdenar, estadoInicialOrdenar, type EstadoOrdenar, porPasso } from "@/motor/ordenar/modelo";
 import { codigoComPlano, linhaDoPasso, passosNoCodigo, planoDosComentarios } from "@/motor/plano/comentarios";
-import { avaliarDetalhado } from "@/motor/validadores";
+import { avaliarDetalhado, recalcularPartesFeitas } from "@/motor/validadores";
 import { areasDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
-import { criarSimulacao } from "@/motor/simulacao";
+import { composicaoDoDesafio, criarSimulacao } from "@/motor/simulacao";
 import { semPagina } from "@/motor/tiposDeFase";
 
 function problemas(fase: Fase): string[] {
@@ -209,5 +217,46 @@ describe("o plano no código: a fase de demonstração", () => {
     const semPlano = { ...FASE_DEMO_RESOLVER, areas: ["snippet", "palco"] as typeof FASE_DEMO_RESOLVER.areas, plano: undefined };
     expect(problemas(semPlano).join("\n")).toContain('o validador planoComentado pede as áreas "plano" e "snippet"');
     expect(problemas(semPlano).join("\n")).toContain('levarPlanoProCodigo pede as áreas "plano" e "snippet"');
+  });
+});
+
+describe("o desafio composto", () => {
+  it("passa em todas as regras de fase, com o Rever na prática composta da mesma unidade", () => {
+    const contexto = { unidades: [UNIDADE_BANCADA_RESOLVER], fases: [...FASES_BANCADA_RESOLVER] };
+    const todos = REGRAS_DE_FASE.flatMap((regra) => regra.checar(FASE_DEMO_DESAFIO_RESOLVER, contexto).map((p) => `${regra.id}: ${p}`));
+    expect(todos).toEqual([]);
+  });
+
+  it("o checklist cobra plano, plano no código, código e testes, cada parte na sua hora", () => {
+    const simulacao = criarSimulacao(FASE_DEMO_DESAFIO_RESOLVER);
+    simulacao.comecarObjetivo(null);
+    let feitas: string[] = [];
+    const atualizar = () => (feitas = recalcularPartesFeitas(FASE_DEMO_DESAFIO_RESOLVER, feitas, simulacao.contexto()));
+    for (const parte of FASE_DEMO_DESAFIO_RESOLVER.partes) {
+      simulacao.executar(parte.solucaoDeTeste);
+      atualizar();
+      expect(feitas).toContain(parte.id);
+    }
+    expect(feitas).toEqual(["plano", "plano-no-codigo", "codigo", "testes"]);
+    // Mexer no plano depois: o plano e os comentários desmarcam, o código e os testes ficam.
+    simulacao.executar([{ tipo: "tirarPasso", passo: "devolver" }]);
+    atualizar();
+    expect(feitas).toEqual(["codigo", "testes"]);
+    expect(simulacao.programa().snippet).toContain("function aprovados(notas) {");
+    simulacao.executar([{ tipo: "porPasso", passo: "devolver" }]);
+    atualizar();
+    expect(feitas).toEqual(["plano", "plano-no-codigo", "codigo", "testes"]);
+  });
+
+  it("a meta mostra as áreas antes e depois", () => {
+    const { antes, depois } = composicaoDoDesafio(FASE_DEMO_DESAFIO_RESOLVER);
+    expect(antes).toEqual({ plano: [], codigo: "", casos: [], memoria: null });
+    expect(depois.plano).toEqual(["Começar a contagem em zero", "Olhar cada nota da lista", "Se a nota for 6 ou mais, contar mais um", "Devolver a contagem"]);
+    expect(depois.codigo?.startsWith("// Plano: Contar quantos passaram\n// 1. Começar a contagem em zero")).toBe(true);
+    expect(depois.casos?.map((caso) => [caso.chamada, caso.esperado, caso.passou])).toEqual([
+      ["aprovados([7, 4, 9])", "2", true],
+      ["aprovados([6])", "1", true],
+      ["aprovados([])", "0", true],
+    ]);
   });
 });

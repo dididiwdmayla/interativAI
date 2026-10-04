@@ -180,6 +180,8 @@ type Props = {
   aoTerminarRevisao?: (resultado: ResultadoItem) => void;
   /** Revisão do dia: o caminho da barra (desktop) e o título (celular), no lugar de "Unidade N". */
   barra?: { caminho: string[]; tituloMovel: string };
+  /** Acha uma fase pelo id (o desafio da meta, os títulos do Rever). Padrão: o conteúdo; o /lab inclui as bancadas. */
+  buscarFase?: (id: string) => Fase | undefined;
 };
 
 /**
@@ -316,6 +318,7 @@ export function JogoFase({
   painelLab,
   aoTerminarRevisao,
   barra,
+  buscarFase = faseDoId,
 }: Props) {
   const lab = modo === "lab";
   const revisao = modo === "revisao";
@@ -524,7 +527,7 @@ export function JogoFase({
 
   // A meta (antes/depois) abre o desafio e, uma vez só, a entrada da unidade
   // (ver faseAbreComMeta). Decidido ao abrir a fase, com o progresso de então.
-  const desafioDaUnidade = local.unidade.meta.desafioId ? faseDoId(local.unidade.meta.desafioId) : undefined;
+  const desafioDaUnidade = local.unidade.meta.desafioId ? buscarFase(local.unidade.meta.desafioId) : undefined;
   const desafioParaMeta = useMemo(
     () => (desafioDaUnidade?.tipo === "desafio" ? materializarFase(desafioDaUnidade, coresDaMaquete.cores) : null),
     [desafioDaUnidade, coresDaMaquete],
@@ -1669,7 +1672,7 @@ export function JogoFase({
           desafio && (
             <ListaRever
               pendentes={desafio.partes.filter((parte) => !estado.partesFeitas.includes(parte.id))}
-              tituloDaFase={(id) => faseDoId(id)?.titulo ?? id}
+              tituloDaFase={(id) => buscarFase(id)?.titulo ?? id}
               aoRever={reverParte}
               aoFechar={comClique(motor.fecharListaRever)}
             />

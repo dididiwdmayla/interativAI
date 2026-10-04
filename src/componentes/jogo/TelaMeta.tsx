@@ -7,7 +7,9 @@ import { Botao } from "@/componentes/ui/Botao";
 import { Modal } from "@/componentes/ui/Modal";
 import type { FaseDesafio, Unidade } from "@/conteudo/tipos";
 import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
-import { circuitosDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio } from "@/motor/simulacao";
+import { circuitosDoDesafio, composicaoDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio } from "@/motor/simulacao";
+import { faseComposta } from "@/motor/composicao";
+import { MiniComposicao } from "@/componentes/composicao/MiniComposicao";
 import { MiniBancada } from "@/componentes/circuito/MiniBancada";
 import { PalcoMemoria } from "@/componentes/palco/PalcoMemoria";
 
@@ -39,8 +41,11 @@ function MiniPalco({ foto, legenda }: { foto: ReturnType<typeof memoriasDoDesafi
 
 export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Props) {
   const deCircuito = desafio.circuito !== undefined;
-  const deProgramas = desafio.programa !== undefined && !deCircuito;
-  const semPagina = deProgramas || deCircuito;
+  // Desafio composto: o antes e o depois das áreas (o plano, o código e os casos de teste).
+  const composto = faseComposta(desafio);
+  const deProgramas = desafio.programa !== undefined && !deCircuito && !composto;
+  const semPagina = deProgramas || deCircuito || composto;
+  const composicao = useMemo(() => (composto && aberta ? composicaoDoDesafio(desafio) : null), [aberta, composto, desafio]);
   const depois = useMemo(() => (semPagina ? { body: "", css: null } : estadoFinalDoDesafio(desafio)), [semPagina, desafio]);
   // Desafio de programa: o palco antes e depois (a memória que as soluções das partes deixam).
   const memorias = useMemo(() => (deProgramas && aberta ? memoriasDoDesafio(desafio) : null), [aberta, deProgramas, desafio]);
@@ -61,7 +66,9 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
           <p className="text-xl font-black text-primaria">{noDesafio ? "Hora do desafio!" : unidade.titulo}</p>
           <p className="mt-1 text-[15px] font-bold leading-snug text-texto">
             {noDesafio
-              ? deCircuito
+              ? composto
+                ? "Um problema novo e nenhum passo a passo. Planeje, programe e teste até ficar como o depois, parte por parte."
+                : deCircuito
                 ? "Um problema novo e nenhum passo a passo. Deixe a bancada igualzinha ao depois, parte por parte."
                 : deProgramas
                 ? "Um problema novo e nenhum passo a passo. Deixe a memória igualzinha ao depois, parte por parte."
@@ -70,7 +77,12 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
           </p>
         </div>
       </div>
-      {deCircuito ? (
+      {composto ? (
+        <div className="mt-4 flex gap-3">
+          <MiniComposicao retrato={composicao?.antes ?? null} legenda="Antes" />
+          <MiniComposicao retrato={composicao?.depois ?? null} legenda="Depois" />
+        </div>
+      ) : deCircuito ? (
         <div className="mt-4 flex gap-3">
           <MiniBancada circuito={circuitos?.antes ?? null} legenda="Antes" />
           <MiniBancada circuito={circuitos?.depois ?? null} legenda="Depois" />

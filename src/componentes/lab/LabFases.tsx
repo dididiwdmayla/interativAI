@@ -6,7 +6,7 @@ import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { FASE_INICIAL, faseDoId, type LocalDaFase, localDaFase } from "@/conteudo";
 import { FASES_LABORATORIO, UNIDADES_LABORATORIO } from "@/conteudo/laboratorio/bancadaEstilos";
 import type { Fase } from "@/conteudo/tipos";
-import { useProgressoCarregado } from "@/lib/armazemProgresso";
+import { atualizarProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
 import { PainelLab } from "./PainelLab";
 
 /** Fase do conteúdo ou da bancada do motor (fora do currículo). */
@@ -26,6 +26,17 @@ function faseDoEndereco(): string {
 }
 
 /**
+ * /lab/fases?fase=<id>&modo=jogo: a fase abre como no jogo (meta com antes e
+ * depois, apresentações, estrelas, progresso salvo e o Rever do desafio),
+ * sem a gaveta do lab. Serve para jogar uma bancada do começo ao fim, como a
+ * do desafio composto.
+ */
+function comoNoJogo(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("modo") === "jogo";
+}
+
+/**
  * /lab/fases: abre qualquer fase direto no primeiro objetivo, sem salvar
  * progresso e sem apresentações, com a gaveta do lab por cima. Também abre
  * as fases de bancada do motor (src/conteudo/laboratorio), fora do
@@ -35,11 +46,37 @@ export function LabFases() {
   const carregado = useProgressoCarregado();
   const [faseId, setFaseId] = useState(faseDoEndereco);
   const [rodada, setRodada] = useState(0);
+  const [jogo] = useState(comoNoJogo);
+  /** (Como no jogo) A fase aberta pelo Rever do desafio, em modo revisão. */
+  const [revendo, setRevendo] = useState<string | null>(null);
 
   if (!carregado) return <TelaCarregando />;
-  const { fase, local } = faseDoLab(faseId) ?? { fase: FASE_INICIAL, local: localDaFase(FASE_INICIAL) };
+  const { fase, local } = faseDoLab(revendo ?? faseId) ?? { fase: FASE_INICIAL, local: localDaFase(FASE_INICIAL) };
 
   const resetar = () => setRodada((valor) => valor + 1);
+
+  if (jogo) {
+    const recomecar = () => {
+      atualizarProgresso((atual) => {
+        const fasesEmAndamento = { ...atual.fasesEmAndamento };
+        delete fasesEmAndamento[fase.id];
+        return { ...atual, fasesEmAndamento };
+      });
+      resetar();
+    };
+    return (
+      <JogoFase
+        key={`${fase.id}-${revendo ? "revisao" : "jogo"}-${rodada}`}
+        fase={fase}
+        local={local}
+        modo={revendo ? "revisao" : "jogo"}
+        aoRecomecar={recomecar}
+        aoRever={(id) => setRevendo(id)}
+        aoVoltarAoDesafio={() => setRevendo(null)}
+        buscarFase={(id) => faseDoLab(id)?.fase}
+      />
+    );
+  }
 
   return (
     <JogoFase

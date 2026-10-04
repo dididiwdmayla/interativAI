@@ -206,7 +206,8 @@ export function useMotorFase({
   const salvar = useCallback(
     (atual: EstadoMotor) => {
       if (modo !== "jogo") return;
-      const registrarRevisao = atual.etapa === "concluida" && !concluidaAoAbrir.current && !revisaoRegistrada.current;
+      // As bancadas do /lab (abertas com ?modo=jogo) não entram na Revisão do dia: não são conteúdo.
+      const registrarRevisao = atual.etapa === "concluida" && !concluidaAoAbrir.current && !revisaoRegistrada.current && !fase.unidadeId.startsWith("lab-");
       if (registrarRevisao) revisaoRegistrada.current = true;
       atualizarProgresso((progresso) => {
         const concluida = atual.etapa === "concluida";

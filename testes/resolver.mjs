@@ -214,4 +214,109 @@ function ferramentas({ pagina }) {
   conferir(relevantes.length === 0, `${MODO} média: console limpo (${relevantes.join(" | ")})`);
   await navegador.close();
 }
+// ---------------------------------------------------------------- o desafio composto, como no jogo
+{
+  const aberto = await abrir({ ...TAMANHOS[MODO], progresso: null, rota: "/lab/fases?fase=lab-resolver-u1-f2&modo=jogo", esperar: "[data-jogo-fase]" });
+  const { pagina, navegador, erros } = aberto;
+  const { tocar, area, naConversa, plano, snippet, escreverNoFim } = ferramentas(aberto);
+  await esperarPronto(pagina, 30000);
+  /** Partes marcadas no checklist (em pé, ele abre na barra; deitado, no balão). */
+  const partesFeitas = async () => {
+    const barra = pagina.locator("button[aria-expanded]").filter({ hasText: /Checklist|Desafio/ }).first();
+    if (MODO === "retrato") {
+      await fecharBalao(pagina);
+      await tocar(barra);
+    }
+    if (MODO === "paisagem") await abrirBalao(pagina);
+    const feitas = await pagina.locator('[data-parte][data-feita="true"]').evaluateAll((els) => els.map((e) => e.dataset.parte));
+    if (MODO === "retrato") await tocar(barra);
+    return feitas.join(",");
+  };
+
+  // A meta: o antes e o depois das áreas (plano, código e casos).
+  await pagina.locator("[data-meta]").waitFor({ timeout: 15000 });
+  const depois = pagina.locator('[data-mini-composicao="Depois"]');
+  conferir((await depois.locator("[data-mini-plano] li").count()) === 4, `${MODO}: a meta mostra o plano do depois`);
+  conferir((await depois.locator("[data-mini-codigo]").innerText()).includes("// Plano: Contar quantos passaram"), `${MODO}: a meta mostra o código com o plano nos comentários`);
+  conferir((await depois.locator("[data-mini-casos] li").count()) === 3, `${MODO}: a meta mostra os casos passando`);
+  conferir((await pagina.locator('[data-mini-composicao="Antes"] [data-mini-plano]').innerText()).includes("Vazio"), `${MODO}: no antes, o plano está vazio`);
+  const comecar = pagina.getByRole("button", { name: "Começar o desafio" });
+  if (toque) await comecar.tap();
+  else await comecar.click();
+  await esperarPronto(pagina);
+  for (let i = 0; i < 3; i++) {
+    if (movel) await abrirBalao(pagina);
+    const botao = pagina.getByRole("button", { name: /^(Continuar|Vamos lá!)$/ }).first();
+    if (!(await botao.isVisible().catch(() => false))) break;
+    if (toque) await botao.tap();
+    else await botao.click();
+    await esperarPronto(pagina);
+  }
+  await pagina.waitForFunction(() => document.querySelector("[data-jogo-fase]")?.getAttribute("data-objetivo-atual") === "desafio");
+
+  // Plano, plano no código e código: três partes, sem passo a passo.
+  await area("plano");
+  for (const passo of ["zerar", "olhar", "contar", "devolver"]) {
+    await tocar(pagina.locator(`[data-pilha-ordenar] [data-escolher-passo="${passo}"]`));
+    await tocar(pagina.locator('[data-por-aqui="plano:fim"]'));
+  }
+  conferir((await partesFeitas()) === "plano", `${MODO}: a parte do plano se marca`);
+  await area("plano");
+  await tocar(pagina.locator("[data-levar-plano]"));
+  conferir((await partesFeitas()) === "plano,plano-no-codigo", `${MODO}: a parte do plano no código se marca`);
+  await escreverNoFim("\nfunction aprovados(notas) {\n  let contagem = 0;\n  for (const nota of notas) if (nota >= 6) contagem = contagem + 1;\n  return contagem;\n}");
+  await tocar(pagina.locator("[data-executar-snippet]"));
+  conferir((await partesFeitas()) === "plano,plano-no-codigo,codigo", `${MODO}: a parte do código se marca (funcaoPassa com bordas escondidas)`);
+
+  // Um caso antes do Rever, para ver que ele também fica salvo.
+  await area("testes");
+  if (movel) await fecharBalao(pagina);
+  await pagina.locator("[data-entrada-nova]").fill("[7, 4, 9]");
+  await pagina.locator("[data-esperado-novo]").fill("2");
+  await tocar(pagina.locator("[data-adicionar-caso]"));
+
+  // Rever: a parte dos testes abre a prática composta em revisão, e a volta traz tudo de novo.
+  // O Rever e a lista dele moram no balão: toca sem fechar o balão.
+  await naConversa(/^Rever/);
+  await pagina.locator("[data-lista-rever]").waitFor();
+  const reverTestes = pagina.locator("[data-lista-rever] li").filter({ hasText: "casos seus passando" }).getByRole("button", { name: "Rever este passo" });
+  if (toque) await reverTestes.tap();
+  else await reverTestes.click();
+  await esperarPronto(pagina);
+  await pagina.waitForFunction(() => document.querySelector("[data-jogo-fase]")?.getAttribute("data-jogo-fase") === "lab-resolver-u1-f1");
+  conferir((await pagina.getByText("Revisão", { exact: true }).count()) > 0, `${MODO}: o Rever abre a prática composta em revisão`);
+  await tocar(pagina.getByRole("button", { name: "Voltar ao desafio" }).first());
+  await pagina.waitForFunction(() => document.querySelector("[data-jogo-fase]")?.getAttribute("data-jogo-fase") === "lab-resolver-u1-f2");
+  await esperarPronto(pagina, 30000);
+  const conferirSalvo = async (quando) => {
+    conferir(JSON.stringify(await plano()) === '["zerar","olhar","contar","devolver"]', `${MODO}: ${quando}, o plano continua`);
+    const codigo = await snippet();
+    conferir(codigo.startsWith("// Plano: Contar quantos passaram") && codigo.includes("return contagem;"), `${MODO}: ${quando}, o código continua`);
+    conferir((await pagina.locator('[data-entrada-caso="0"]').inputValue()) === "[7, 4, 9]", `${MODO}: ${quando}, o caso continua`);
+    conferir((await partesFeitas()) === "plano,plano-no-codigo,codigo", `${MODO}: ${quando}, o checklist continua`);
+  };
+  await conferirSalvo("depois do Rever");
+  // Recarregar a página: o progresso traz plano, código e casos.
+  await pagina.reload();
+  await pagina.locator("[data-composicao]").waitFor();
+  await esperarPronto(pagina, 30000);
+  await conferirSalvo("depois de recarregar");
+
+  // Os testes: mais dois casos, um deles a lista vazia, e o desafio termina.
+  await area("testes");
+  for (const [entrada, esperado] of [["[]", "0"], ["[6]", "1"]]) {
+    if (movel) await fecharBalao(pagina);
+    await pagina.locator("[data-entrada-nova]").fill(entrada);
+    await pagina.locator("[data-esperado-novo]").fill(esperado);
+    await tocar(pagina.locator("[data-adicionar-caso]"));
+  }
+  await tocar(pagina.locator("[data-rodar-casos]"));
+  if (movel) await abrirBalao(pagina);
+  await pagina.getByRole("button", { name: "Ver resultado" }).first().waitFor({ timeout: 10000 });
+  conferir(true, `${MODO}: com plano, código e testes, o desafio composto termina`);
+
+  const relevantes = errosRelevantes(erros);
+  conferir(relevantes.length === 0, `${MODO} desafio: console limpo (${relevantes.join(" | ")})`);
+  await navegador.close();
+}
 console.log(`resolver.mjs ${MODO}: ok`);
