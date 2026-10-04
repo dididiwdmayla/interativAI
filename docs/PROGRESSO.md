@@ -68,3 +68,11 @@ Branch `ccr-d9b21b6e-j9p06v`, criada a partir de
 - Testes: `testes/conteudo/composicao.test.ts` e `casos.test.ts`;
   `testes/resolver.mjs` (na bateria, três layouts);
   `apresentacoes-logica.mjs` com a tela composta.
+- Final: 15.443 testes de conteúdo (39 arquivos), lint e build verdes;
+  bateria completa no build de produção verde (130 testes de navegador,
+  paralelo 2, "Tudo certo"), com console limpo. Os dois ajustes da revisão
+  (regra de `plano-no-codigo` e a dependência do Levar pro código) vieram
+  depois dela: build refeito e `resolver.mjs` verde nos três layouts.
+- Limite da verificação: Chromium headless nos três tamanhos, sem
+  dispositivo físico nem Safari; o tutor não foi chamado de verdade (sem
+  chave do Gemini no ambiente), só o contexto montado.
