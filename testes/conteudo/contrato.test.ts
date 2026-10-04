@@ -176,3 +176,29 @@ describe("o kit de clientes", () => {
     }
   });
 });
+
+describe("Levar pro mundo: o .js que roda fora do jogo", () => {
+  it("roda no Node e mostra as ações dos aparelhos no relógio simulado", async () => {
+    const { programaParaLevar } = await import("@/motor/contrato/levarProMundo");
+    const { execFileSync } = await import("node:child_process");
+    const { mkdtempSync, writeFileSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const texto = programaParaLevar({ contrato: CONTRATO.contrato, cena: CONTRATO.cena ?? null, codigo: CODIGO_ESTUDIO_DEPOIS });
+    expect(texto).toMatch(/node estudio-do-rafa\.js/);
+    const arquivo = join(mkdtempSync(join(tmpdir(), "levar-")), "estudio-do-rafa.js");
+    writeFileSync(arquivo, texto);
+    const saida = execFileSync(process.execPath, [arquivo], { encoding: "utf8" }).trim().split("\n");
+    expect(saida).toEqual([
+      "Quarto que avisa a gravação: começou a simulação.",
+      "[0,0 s] Lâmpada: ligada",
+      "[0,5 s] Lâmpada: desligada",
+      "[1,0 s] Lâmpada: ligada",
+      "[1,5 s] Lâmpada: desligada",
+      "[2,0 s] Lâmpada: brilho 30",
+      "[2,0 s] Lâmpada: ligada",
+      "[2,0 s] Ventilador: velocidade 1",
+      "[6,0 s] Fim da simulação.",
+    ]);
+  });
+});

@@ -198,10 +198,36 @@ for (let i = 0; i < 6; i++) {
   if (!(await continuar.isVisible().catch(() => false))) break;
   await tocar(continuar);
 }
-const fim = pagina.locator("[data-fim-entrega]");
-if (await fim.isVisible().catch(() => false)) await tocar(fim);
+await pagina.locator("[data-comemoracao-ilha]").waitFor();
+conferir(await pagina.locator("[data-comemoracao-ilha] [data-cliente]").isVisible(), `${MODO}: a comemoração de fim de ilha, com o cliente satisfeito`);
+await tocar(pagina.locator("[data-fim-entrega]"));
 await pagina.locator("[data-conclusao]").waitFor({ timeout: 15000 });
 conferir(((await pagina.locator("[data-conclusao]").textContent()) ?? "").includes("Trabalho entregue!"), `${MODO}: a conclusão é a do trabalho entregue`);
+
+// ---------------------------------------------------------------- levar pro mundo
+for (let i = 0; i < 4; i++) {
+  if (await pagina.locator("[data-levar-programa]").isVisible().catch(() => false)) break;
+  await tocar(pagina.getByRole("dialog").getByRole("button", { name: "Continuar" }));
+}
+await tocar(pagina.locator("[data-levar-programa]"));
+await pagina.locator("[data-levar-pro-mundo-js]").waitFor();
+conferir(((await pagina.locator("[data-previa-programa]").textContent()) ?? "").includes("lampada.brilho = 30;"), `${MODO}: a prévia mostra o código do aluno`);
+const [download] = await Promise.all([pagina.waitForEvent("download"), tocar(pagina.locator("[data-baixar-programa]"))]);
+conferir(download.suggestedFilename() === "estudio-do-rafa.js", `${MODO}: baixa o estudio-do-rafa.js (${download.suggestedFilename()})`);
+const { readFileSync } = await import("node:fs");
+const { execFileSync } = await import("node:child_process");
+const caminho = await download.path();
+const texto = readFileSync(caminho, "utf8");
+const noNode = execFileSync(process.execPath, [caminho], { encoding: "utf8" });
+conferir(noNode.includes("[2,0 s] Lâmpada: brilho 30") && noNode.includes("Fim da simulação."), `${MODO}: o .js roda no Node e mostra as ações`);
+// No Console de um navegador: uma página qualquer, o arquivo colado inteiro.
+const outra = await pagina.context().newPage();
+const linhasNoConsole = [];
+outra.on("console", (mensagem) => linhasNoConsole.push(mensagem.text()));
+await outra.goto("about:blank");
+await outra.evaluate(texto);
+conferir(linhasNoConsole.includes("[0,5 s] Lâmpada: desligada") && linhasNoConsole.some((linha) => linha.includes("Fim da simulação")), `${MODO}: o .js roda no Console de um navegador (${linhasNoConsole.length} linhas)`);
+await outra.close();
 
 conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo (${errosRelevantes(erros).join(" | ")})`);
 await navegador.close();

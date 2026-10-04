@@ -91,7 +91,7 @@ import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROJETO_VAZIO, type ProjetoSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { marcarPassoDoGuia, salvarLinkPublicado } from "@/lib/projetos";
-import { type ArquivosDoProjeto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
+import { type ArquivosDoProjeto, baixarTexto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
 import { DialogoLevarProMundo } from "@/componentes/projeto/DialogoLevarProMundo";
 import { CabecalhoContrato } from "@/componentes/contrato/CabecalhoContrato";
 import { ConversaCliente } from "@/componentes/contrato/ConversaCliente";
@@ -99,6 +99,9 @@ import { FolhaDocumento, JanelaDocumento } from "@/componentes/contrato/Document
 import { TelaRequisitos } from "@/componentes/contrato/TelaRequisitos";
 import { ehContrato, idsDasNovas, montarRelatorio, resumoDosCasos } from "@/motor/contrato/modelo";
 import { TelaEntrega } from "@/componentes/contrato/TelaEntrega";
+import { ComemoracaoIlha } from "@/componentes/contrato/ComemoracaoIlha";
+import { DialogoLevarProMundoJs } from "@/componentes/contrato/DialogoLevarProMundoJs";
+import { arquivoDoContrato, programaParaLevar } from "@/motor/contrato/levarProMundo";
 import { GuiaPublicacao } from "@/componentes/projeto/GuiaPublicacao";
 import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
 import { rotuloDaFase } from "@/motor/tiposDeFase";
@@ -1251,6 +1254,15 @@ export function JogoFase({
   const tituloChecklist = contrato ? "Requisitos do cliente" : projeto ? "Requisitos do projeto" : "Checklist do desafio";
   const novasDoContrato = useMemo(() => (contrato && estadoContrato?.mudou ? idsDasNovas(contrato.contrato) : undefined), [contrato, estadoContrato?.mudou]);
   const [documentoAberto, setDocumentoAberto] = useState(false);
+  /** (Contrato) A janela do Levar pro mundo: o .js com o programa, que roda fora do jogo. */
+  const [levarJsAberto, setLevarJsAberto] = useState(false);
+  const levaJs = contrato?.contrato.levarProMundo !== undefined && fase.programa?.snippet !== undefined;
+  const baixarPrograma = useCallback(() => {
+    if (!contrato) return;
+    baixarTexto(programaParaLevar({ contrato: contrato.contrato, cena: cenaDaFase(fase), codigo: programa.textoSnippet() }), arquivoDoContrato(contrato.contrato));
+    tocarEfeito("desbloqueio");
+    barramento.emitir({ tipo: "levouProMundo" });
+  }, [barramento, contrato, fase, programa]);
   const abrirDocumento = useCallback(() => {
     tocarEfeito("abrir-painel");
     setDocumentoAberto(true);
@@ -2981,7 +2993,17 @@ export function JogoFase({
               tempoMs: estadoContrato.tempoMs,
             })}
             aoEntregar={comClique(motor.entregar)}
+            comemoracao={<ComemoracaoIlha ilha={local.unidade.ilha} cliente={contrato.contrato.cliente} projeto={contrato.contrato.projeto} />}
           />
+          {levaJs && (
+            <DialogoLevarProMundoJs
+              aberto={levarJsAberto}
+              arquivo={arquivoDoContrato(contrato.contrato)}
+              codigo={levarJsAberto ? programa.textoSnippet() : ""}
+              aoBaixar={baixarPrograma}
+              aoFechar={() => setLevarJsAberto(false)}
+            />
+          )}
           <JanelaDocumento aberta={documentoAberto} contrato={contrato.contrato} mudou={estadoContrato.mudou} aoFechar={() => setDocumentoAberto(false)} />
         </>
       )}
@@ -3020,6 +3042,16 @@ export function JogoFase({
         extras={
           comLevarProMundo ? (
             <Botao variante="secundario" onClick={abrirLevarProMundo} data-levar-pro-mundo-conclusao>
+              Levar pro mundo
+            </Botao>
+          ) : levaJs ? (
+            <Botao
+              onClick={() => {
+                tocarEfeito("clique");
+                setLevarJsAberto(true);
+              }}
+              data-levar-programa
+            >
               Levar pro mundo
             </Botao>
           ) : undefined

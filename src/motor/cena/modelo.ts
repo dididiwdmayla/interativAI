@@ -68,8 +68,13 @@ export type DispositivoCena = {
   escala?: number;
   /** Um jeito do desenho, quando o tipo tem mais de um (lâmpada: "pendente", o padrão, ou "spot"). */
   variante?: string;
-  /** O estado do começo, se não for o padrão do tipo (ex.: o letreiro já mostrando um texto). */
+  /**
+   * O estado do começo, se não for o padrão do tipo (ex.: o letreiro já
+   * mostrando um texto). No relógio, `hora` é a hora em que a cena começa.
+   */
   inicial?: Record<string, ValorCena>;
+  /** Como ele se chama fora do código, no Levar pro mundo ("Luz da vitrine"). Até 24 letras; sem ele, o nome do tipo. */
+  nome?: string;
 };
 
 /** O que acontece na cena sozinho, na linha do tempo (o código não controla). */
