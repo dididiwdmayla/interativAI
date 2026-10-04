@@ -167,5 +167,67 @@
     "fichas": {},
     "referencias": {},
     "leituras": {}
+  },
+  "3": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const pedido = { produto: \"Broa\", total: 5, pago: false }\nlet peloPonto = pedido.total\nlet pelosColchetes = pedido[\"total\"]"
+        ],
+        [
+          "f1-prever",
+          "let ausente = pedido.entrega\nlet tipoAusente = typeof ausente"
+        ],
+        [
+          "f1-sozinho",
+          "const produto = { nome: \"Bolo\", preco: 12, estoque: 4 }\nlet a = produto.preco\nlet b = produto[\"preco\"]"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const produto = { nome: \"Bolo\", preco: 12, estoque: 0 }\nproduto.preco = 14\nproduto[\"estoque\"] = 6\nproduto.categoria = \"doce\"\nlet status = \"esgotado\"\nif (produto.estoque > 0) { status = \"disponível\" }"
+        ],
+        [
+          "f2-prever",
+          "produto.preco = 15\nlet nomeDepois = produto.nome"
+        ],
+        [
+          "f2-sozinho",
+          "const entrega = { bairro: \"Centro\", taxa: 3 }\nentrega.taxa = 4\nentrega.itens = [\"pão\", \"suco\"]"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let especiePonto = pet.especie\nlet especieChave = pet[\"especie\"]\nlet tipoAusente = typeof pet.peso",
+      "pet.idade = 3\npet.vacinado = true\npet.servicos = [\"banho\", \"consulta\"]"
+    ],
+    "negativas": {
+      "f1-guiado": "const pedido = { produto: \"Broa\", total: 5, pago: false }\nlet peloPonto = pedido[0]\nlet pelosColchetes = pedido[\"total\"]"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {},
+    "listas": {},
+    "fichas": {
+      "f1-guiado": {
+        "pedido": [
+          "produto",
+          "total",
+          "pago"
+        ]
+      },
+      "f2-guiado": {
+        "produto": [
+          "nome",
+          "preco",
+          "estoque",
+          "categoria"
+        ]
+      }
+    },
+    "referencias": {},
+    "leituras": {},
+    "caixaDepois": "pet"
   }
 }

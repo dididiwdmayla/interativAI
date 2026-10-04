@@ -4,6 +4,10 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["listas.mjs", "desktop", "logica-listas-e-objetos-u3"],
+  ["listas.mjs", "retrato", "logica-listas-e-objetos-u3"],
+  ["listas.mjs", "paisagem", "logica-listas-e-objetos-u3"],
+
   ["listas.mjs", "desktop", "logica-listas-e-objetos-u2"],
   ["listas.mjs", "retrato", "logica-listas-e-objetos-u2"],
   ["listas.mjs", "paisagem", "logica-listas-e-objetos-u2"],

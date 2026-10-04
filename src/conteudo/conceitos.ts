@@ -1206,6 +1206,32 @@ const CATALOGO = {
     "dados"
   ]
 },
+
+  "objeto-js": {
+    "nome": "Ficha de dados",
+    "resumo": "Um objeto reúne campos nomeados: cada chave guarda um valor, não uma posição numerada.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "acesso-objeto-js": {
+    "nome": "Ponto e colchetes",
+    "resumo": "obj.total e obj[\"total\"] leem a mesma chave; chave ausente dá undefined.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "mudar-campo-js": {
+    "nome": "Alterar e acrescentar campos",
+    "resumo": "Atribuir obj.chave muda só esse campo; uma chave nova acrescenta um campo à ficha.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  }
+,
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
