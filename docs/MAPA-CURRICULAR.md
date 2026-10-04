@@ -649,8 +649,9 @@ dar `push` num item e perguntar o `length`.
 
 ### Zona Resolvendo problemas (`resolvendo-problemas`)
 
-Missão de campo: escolher um problema do seu dia (a divisão da conta do
-bar) e escrever o pseudocódigo antes de abrir o Console.
+Missão de campo: somar gastos no Console de qualquer site seguindo os
+cinco passos: entender entrada e saída, decompor, planejar em comentários,
+programar e testar lista vazia, zero e valores repetidos.
 
 Motor (rodada 26): além do `ordenar-passos`, a tela composta (guia, seção
 29) junta o plano, o código, o palco e os casos de teste do aluno na mesma
@@ -658,16 +659,16 @@ fase, inclusive no desafio: o plano vira comentários no Snippet
 (`planoComentado`) e os casos do aluno são cobrados com `casosDoAluno`.
 Modelo: `/lab/fases?fase=lab-resolver-u1-f1` e `f2`.
 
-- **U1. Decompor um problema** (`logica-resolvendo-problemas-u1`, fase
+- **U1. Decompor um problema (pronta)** (`logica-resolvendo-problemas-u1`, fase
   `ordenar-passos`): quebrar "fazer o pedido da festa" em passos pequenos.
   Confusão: "programador sabe a resposta antes de começar".
-- **U2. Pseudocódigo** (`logica-resolvendo-problemas-u2`, fase
+- **U2. Pseudocódigo (pronta)** (`logica-resolvendo-problemas-u2`, fase
   `ordenar-passos`, variante agrupar): o passo a passo em português com cartões, depois
   cada cartão virando uma linha de código.
-- **U3. Ordenar os passos** (`logica-resolvendo-problemas-u3`, fase
+- **U3. Ordenar os passos (pronta)** (`logica-resolvendo-problemas-u3`, fase
   `ordenar-passos` com `rodar`): pôr linhas na ordem e ver o que quebra (usar antes de
   declarar, somar antes de ler).
-- **U4. Testar com exemplos** (`logica-resolvendo-problemas-u4`): escolher
+- **U4. Testar com exemplos (pronta)** (`logica-resolvendo-problemas-u4`): escolher
   exemplos que provam que a função funciona, inclusive os esquisitos
   (lista vazia, zero, negativo); validado com `funcaoPassa`. Desafio: a
   função de troco de uma cantina. Confusão: "funcionou com um exemplo,

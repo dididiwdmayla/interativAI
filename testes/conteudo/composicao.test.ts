@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
-import { FASES } from "@/conteudo";
+import { FASES, UNIDADES } from "@/conteudo";
 import type { Fase } from "@/conteudo/tipos";
 import {
   CODIGO_MEDIA,
@@ -41,8 +41,10 @@ describe("composição de áreas: o formato", () => {
     expect(semPagina(FASE_DEMO_RESOLVER)).toBe(true);
   });
 
-  it("nenhuma fase publicada declara áreas: o que já existe usa a tela de sempre", () => {
-    expect(FASES.filter((fase) => faseComposta(fase)).map((fase) => fase.id)).toEqual([]);
+  it("as zonas anteriores à resolução preservam suas telas publicadas", () => {
+    const inicio = UNIDADES.findIndex((unidade) => unidade.id === "logica-resolvendo-problemas-u1");
+    const anteriores = new Set(UNIDADES.slice(0, inicio).map((unidade) => unidade.id));
+    expect(FASES.filter((fase) => anteriores.has(fase.unidadeId) && faseComposta(fase)).map((fase) => fase.id)).toEqual([]);
   });
 });
 

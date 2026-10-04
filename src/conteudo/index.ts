@@ -1,3 +1,7 @@
+import { UNIDADE_RESOLVER_U4, FASES_UNIDADE_RESOLVER_U4 } from "./ilhas/logica/resolvendo-problemas/unidade-4/unidade";
+import { UNIDADE_RESOLVER_U3, FASES_UNIDADE_RESOLVER_U3 } from "./ilhas/logica/resolvendo-problemas/unidade-3/unidade";
+import { UNIDADE_RESOLVER_U2, FASES_UNIDADE_RESOLVER_U2 } from "./ilhas/logica/resolvendo-problemas/unidade-2/unidade";
+import { UNIDADE_RESOLVER_U1, FASES_UNIDADE_RESOLVER_U1 } from "./ilhas/logica/resolvendo-problemas/unidade-1/unidade";
 import { FASES_UNIDADE_LISTAS_U4, UNIDADE_LISTAS_U4 } from "./ilhas/logica/listas-e-objetos/unidade-4/unidade";
 import { FASES_UNIDADE_LISTAS_U3, UNIDADE_LISTAS_U3 } from "./ilhas/logica/listas-e-objetos/unidade-3/unidade";
 import { FASES_UNIDADE_LISTAS_U2, UNIDADE_LISTAS_U2 } from "./ilhas/logica/listas-e-objetos/unidade-2/unidade";
@@ -89,6 +93,10 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_LISTAS_U2,
   UNIDADE_LISTAS_U3,
   UNIDADE_LISTAS_U4,
+  UNIDADE_RESOLVER_U1,
+  UNIDADE_RESOLVER_U2,
+  UNIDADE_RESOLVER_U3,
+  UNIDADE_RESOLVER_U4,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -135,6 +143,10 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_LISTAS_U2,
   ...FASES_UNIDADE_LISTAS_U3,
   ...FASES_UNIDADE_LISTAS_U4,
+  ...FASES_UNIDADE_RESOLVER_U1,
+  ...FASES_UNIDADE_RESOLVER_U2,
+  ...FASES_UNIDADE_RESOLVER_U3,
+  ...FASES_UNIDADE_RESOLVER_U4,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

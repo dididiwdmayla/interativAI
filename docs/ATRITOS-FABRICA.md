@@ -2,6 +2,24 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 27: zona Resolvendo problemas
+
+- Sem bloqueio novo de motor. Quadros separados treinam entendimento,
+  decomposição e dependências; uma ponte guiada apresenta as ferramentas
+  compostas antes do primeiro desafio (que não pode apresentar ferramentas).
+  A U4 e todos os desafios cobram o problema inteiro na composição.
+- `ordemValida` usa dependências mínimas: ler pessoas e preço aceita duas
+  ordens; `rodar` deixa observar o erro real de usar antes de declarar.
+- `planoComentado`, função com bordas escondidas e casos do aluno passando
+  conferem partes diferentes. Um caso feliz ou uma função constante não
+  encerra o problema. Zero, vazio, repetido e negativo aparecem no percurso.
+- ItemRevisao não aceita o quadro nem áreas compostas: duas previsões em
+  situações próprias por conceito, sem fabricar uma revisão de cartões.
+- Teste antigo proibia composição em qualquer fase do currículo. Agora
+  protege apenas as unidades anteriores à zona, pela ordem do registro.
+- No teste móvel, checklist do retrato abre na barra; em paisagem, no
+  balão. Conclusão precisa esperar o modal assentar antes de avançar.
+
 ## Rodada 26 (motor): bloqueio de Resolvendo problemas retirado
 
 - A tela composta (guia, seção 29) junta plano, código, palco e casos de

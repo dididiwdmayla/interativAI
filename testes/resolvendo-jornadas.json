@@ -1,0 +1,1373 @@
+{
+  "1": [
+    {
+      "id": "logica-resolvendo-problemas-u1-f1",
+      "tipo": "ordenar-passos",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "entradas",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "precos",
+              "grupo": "entrada"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "quantidades",
+              "grupo": "entrada"
+            }
+          ]
+        },
+        {
+          "id": "entender-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "total",
+              "grupo": "saida"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "vazio",
+              "grupo": "exemplos"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "repetido",
+              "grupo": "exemplos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u1-f2",
+      "tipo": "ordenar-passos",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "preparar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "pessoas"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "preco"
+            }
+          ]
+        },
+        {
+          "id": "prever",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "preco",
+              "posicao": 0
+            }
+          ]
+        },
+        {
+          "id": "completar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "paes"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "total"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u1-f3",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "totalFesta",
+        "parametros": [
+          "itens"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Total do pedido da festa\n// 1. Começar o total em zero\n// 2. Ler preço e quantidade de cada ficha\n// 3. Somar preço vezes quantidade ao total\n// 4. Devolver o total\n\nfunction totalFesta(itens) {\n let total = 0;\n for (const item of itens) total += item.preco;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Total do pedido da festa\n// 1. Começar o total em zero\n// 2. Ler preço e quantidade de cada ficha\n// 3. Somar preço vezes quantidade ao total\n// 4. Devolver o total\n\nfunction totalFesta(itens) {\n let total = 0;\n for (const item of itens) total += item.preco * item.quantidade;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{preco:3,quantidade:2}]",
+              "esperado": "6"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{preco:9,quantidade:0}]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{preco:3,quantidade:2},{preco:3,quantidade:2}]",
+              "esperado": "12"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u1-f4",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "freteTotal",
+        "parametros": [
+          "distancias"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "freteTotal",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        3
+                      ]
+                    ],
+                    "esperado": 12
+                  },
+                  {
+                    "args": [
+                      [
+                        0
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        1.5
+                      ]
+                    ],
+                    "esperado": 3
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: As entregas da loja\n// 1. Começar o total em zero\n// 2. Ler os quilômetros de cada entrega\n// 3. Somar duas vezes os quilômetros\n// 4. Devolver o total\n\nfunction freteTotal(distancias) {\n let total = 0;\n for (const km of distancias) total += km * 2;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "lista vazia"
+              },
+              {
+                "args": [
+                  [
+                    0
+                  ]
+                ],
+                "rotulo": "distância zero"
+              },
+              {
+                "args": [
+                  [
+                    3,
+                    3
+                  ]
+                ],
+                "rotulo": "distância repetida"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[3,3]",
+              "esperado": "12"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "2": [
+    {
+      "id": "logica-resolvendo-problemas-u2-f1",
+      "tipo": "ordenar-passos",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "preparar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "receber",
+              "grupo": "entrada"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "zerar",
+              "grupo": "entrada"
+            }
+          ]
+        },
+        {
+          "id": "prever",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "olhar",
+              "grupo": "saida"
+            }
+          ]
+        },
+        {
+          "id": "completar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "contar",
+              "grupo": "saida"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver",
+              "grupo": "exemplos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u2-f2",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "reservas",
+        "parametros": [
+          "pessoas"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Reservas da agenda\n// 1. Começa sem reservas contadas\n// 2. Olha cada quantidade\n// 3. Se tiver pessoas, conta mais uma reserva\n// 4. Entrega quantas reservas têm pessoas\n\nfunction reservas(pessoas) {\n let total = 0;\n for (const n of pessoas) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Reservas da agenda\n// 1. Começa sem reservas contadas\n// 2. Olha cada quantidade\n// 3. Se tiver pessoas, conta mais uma reserva\n// 4. Entrega quantas reservas têm pessoas\n\nfunction reservas(pessoas) {\n let total = 0;\n for (const n of pessoas) if (n > 0) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[2,0]",
+              "esperado": "1"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[2,2]",
+              "esperado": "2"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u2-f3",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "livres",
+        "parametros": [
+          "horarios"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "livres",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": false
+                        },
+                        {
+                          "ocupado": false
+                        }
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": true
+                        }
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": true
+                        },
+                        {
+                          "ocupado": false
+                        }
+                      ]
+                    ],
+                    "esperado": 1
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Os horários da oficina\n// 1. Começa sem horários livres contados\n// 2. Olha cada horário\n// 3. Se não estiver ocupado, conta mais um\n// 4. Entrega quantos estão livres\n\nfunction livres(horarios) {\n let total = 0;\n for (const h of horarios) if (!h.ocupado) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "agenda vazia"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "ocupado": true
+                    }
+                  ]
+                ],
+                "rotulo": "nenhum horário livre"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{ocupado:false},{ocupado:false}]",
+              "esperado": "2"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{ocupado:true}]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "3": [
+    {
+      "id": "logica-resolvendo-problemas-u3-f1",
+      "tipo": "ordenar-passos",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "preparar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "preco"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "quantidade"
+            }
+          ]
+        },
+        {
+          "id": "prever",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "mostrar"
+            },
+            {
+              "tipo": "rodarPlano"
+            }
+          ]
+        },
+        {
+          "id": "completar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "tirarPasso",
+              "passo": "mostrar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "total"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "mostrar"
+            },
+            {
+              "tipo": "rodarPlano"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u3-f2",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "saldo",
+        "parametros": [
+          "vendas",
+          "despesas"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "receita"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "custo"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "vendas"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "despesas"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Fechar o caixa da loja\n// 1. Começar receita em zero\n// 2. Começar custo em zero\n// 3. Somar as vendas à receita\n// 4. Somar as despesas ao custo\n// 5. Devolver receita menos custo\n\nfunction saldo(vendas, despesas) {\n let receita = 0, custo = 0;\n for (const v of vendas) receita += v;\n for (const d of despesas) custo += d;\n return receita;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Fechar o caixa da loja\n// 1. Começar receita em zero\n// 2. Começar custo em zero\n// 3. Somar as vendas à receita\n// 4. Somar as despesas ao custo\n// 5. Devolver receita menos custo\n\nfunction saldo(vendas, despesas) {\n let receita = 0, custo = 0;\n for (const v of vendas) receita += v;\n for (const d of despesas) custo += d;\n return receita - custo;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[10,10], [4]",
+              "esperado": "16"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[], []",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[], [4]",
+              "esperado": "-4"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0], [0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u3-f3",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "faltam",
+        "parametros": [
+          "pedido",
+          "estoque"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "receber"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "estoque"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "calcular"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "limitar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "faltam",
+                "casos": [
+                  {
+                    "args": [
+                      8,
+                      3
+                    ],
+                    "esperado": 5
+                  },
+                  {
+                    "args": [
+                      0,
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      3,
+                      8
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      4,
+                      4
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: O material da costureira\n// 1. Receber o tamanho do pedido\n// 2. Receber as peças em estoque\n// 3. Calcular pedido menos estoque\n// 4. Se a diferença for negativa, devolver zero\n// 5. Senão, devolver a diferença\n\nfunction faltam(pedido, estoque) {\n const diferenca = pedido - estoque;\n if (diferenca < 0) return 0;\n return diferenca;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 4,
+            "incluir": [
+              {
+                "args": [
+                  0,
+                  0
+                ],
+                "rotulo": "pedido zero"
+              },
+              {
+                "args": [
+                  4,
+                  4
+                ],
+                "rotulo": "estoque igual ao pedido"
+              },
+              {
+                "args": [
+                  3,
+                  8
+                ],
+                "rotulo": "estoque maior"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "8, 3",
+              "esperado": "5"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "0, 0",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "3, 8",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "4, 4",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "4": [
+    {
+      "id": "logica-resolvendo-problemas-u4-f1",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "maiorVenda",
+        "parametros": [
+          "vendas"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "vazia"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "primeira"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "olhar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "atualizar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Maior venda do dia\n// 1. Se a lista estiver vazia, devolver zero\n// 2. Começar com a primeira venda\n// 3. Comparar cada venda com a maior\n// 4. Se for maior, guardar a venda\n// 5. Devolver a maior venda\n\nfunction maiorVenda(vendas) {\n if (vendas.length === 0) return 0;\n let maior = 0;\n for (const v of vendas) if (v > maior) maior = v;\n return maior;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Maior venda do dia\n// 1. Se a lista estiver vazia, devolver zero\n// 2. Começar com a primeira venda\n// 3. Comparar cada venda com a maior\n// 4. Se for maior, guardar a venda\n// 5. Devolver a maior venda\n\nfunction maiorVenda(vendas) {\n if (vendas.length === 0) return 0;\n let maior = vendas[0];\n for (const v of vendas) if (v > maior) maior = v;\n return maior;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[8,3]",
+              "esperado": "8"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[-5,-2]",
+              "esperado": "-2"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[4,4]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u4-f2",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "troco",
+        "parametros": [
+          "preco",
+          "pago"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "preco"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "pago"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "subtrair"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "troco",
+                "casos": [
+                  {
+                    "args": [
+                      7,
+                      10
+                    ],
+                    "esperado": 3
+                  },
+                  {
+                    "args": [
+                      0,
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      5,
+                      5
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      9,
+                      4
+                    ],
+                    "esperado": -5
+                  },
+                  {
+                    "args": [
+                      2.5,
+                      5
+                    ],
+                    "esperado": 2.5
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Troco da cantina\n// 1. Receber o preço em reais\n// 2. Receber o valor pago em reais\n// 3. Calcular valor pago menos preço\n// 4. Devolver a diferença, inclusive se negativa\n\nfunction troco(preco, pago) {\n return pago - preco;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 4,
+            "incluir": [
+              {
+                "args": [
+                  0,
+                  0
+                ],
+                "rotulo": "zero"
+              },
+              {
+                "args": [
+                  5,
+                  5
+                ],
+                "rotulo": "pagamento exato"
+              },
+              {
+                "args": [
+                  9,
+                  4
+                ],
+                "rotulo": "pagamento insuficiente"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "7, 10",
+              "esperado": "3"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "0, 0",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "5, 5",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "9, 4",
+              "esperado": "-5"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
