@@ -727,16 +727,15 @@ pilha (`push` a cada letra, `pop` no desfazer).
 
 ### Zona Programa de verdade (`programa-de-verdade`)
 
-- **U1. Meu primeiro programa** (`logica-programa-de-verdade-u1`, requer
-  `projeto-ponte-js`): o projeto-ponte da ilha. **Formato (decisão da
-  rodada 17):** um snippet que roda no Chrome de verdade (Fontes >
-  Snippets), em qualquer página, sem instalar nada. O jogador escreve
-  sozinho um programa de lógica pura que resolve um problema dele (a
-  divisão da conta, a lista de compras com total, o sorteio de amigo
-  secreto), confere com exemplos no jogo (`funcaoPassa`) e leva para o
-  Chrome com o guia. Por que não Node: instalar e usar o terminal é
-  assunto do Ofício; o Console e os Snippets já estão em todo computador
-  com Chrome, e a ilha inteira foi ensinada neles.
+- **U1. O contrato da padaria** (`logica-programa-de-verdade-u1`,
+  publicada na rodada 29): o fim da ilha é um **contrato** (o formato do
+  guia, seção 31). A Dona Celeste, da Padaria Pão de Mel, contrata o aluno
+  para automatizar a vitrine: luz no horário, promoções no letreiro, aviso
+  do forno e contador de clientes; no meio, ela pede que a luz apague
+  sozinha sem ninguém na porta. A fase 1 apresenta a cena (relógio,
+  campainha, loop de controle). O programa sai do jogo como um .js que roda
+  no Console de qualquer navegador e no Node (substituiu o motor
+  `projeto-ponte-js`, que seria o snippet do Chrome).
 
 ### Motores planejados
 
@@ -754,8 +753,9 @@ existe e continua travada por um `requerMotor` que nomeia o tipo.
   e **`visualizador-arvore`** ("Ver como árvore" no palco): **prontos na
   rodada 22**, com demonstrações em `/lab/fases?fase=lab-logica-u1-f4` a
   `f9`.
-- **`projeto-ponte-js`**: o que falta da Lógica (ficha em
-  `src/curriculo/motores.ts`).
+- **`projeto-ponte-js`**: **saiu na rodada 29**. O fim da Lógica é o
+  contrato (`src/motor/contrato`), e o Levar pro mundo baixa um .js que
+  roda no Console e no Node. Nenhum motor da Lógica segue planejado.
 
 ---
 

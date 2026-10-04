@@ -59,14 +59,14 @@ export function TelaConclusao({
   const naMissao = indiceFala >= fase.conclusao.length;
   const revisao = modo === "revisao";
   const titulo =
-    fase.tipo === "desafio" ? "Desafio completo!" : fase.tipo === "projeto-ponte" ? "Projeto pronto!" : `${fase.titulo}: completa!`;
+    fase.tipo === "desafio" ? (fase.contrato ? "Trabalho entregue!" : "Desafio completo!") : fase.tipo === "projeto-ponte" ? "Projeto pronto!" : `${fase.titulo}: completa!`;
 
   return (
     <Modal aberto={aberta} titulo="Fase completa" aoFechar={aoFechar} className="max-w-xl">
       <div className="flex flex-col items-center text-center" data-conclusao>
         <Mascote expressao={naMissao ? fala.expressao : "comemorando"} tamanho={140} />
         <p className="mt-1 text-xs font-black uppercase tracking-wide text-texto-suave">
-          {unidade.ilha} · {unidade.zona} · Unidade {unidade.numero} · {rotuloDaFase(fase.tipo, numero)}
+          {unidade.ilha} · {unidade.zona} · Unidade {unidade.numero} · {rotuloDaFase(fase.tipo, numero, fase.tipo === "desafio" && fase.contrato !== undefined)}
         </p>
         <p className="text-2xl font-black text-primaria">{titulo}</p>
         <div className="my-2">

@@ -24,6 +24,12 @@ type Props = {
   desafio: boolean;
   /** Projeto-ponte: o "Me ajuda" só faz uma pergunta (sem dica, sem solução, sem Rever). */
   projeto: boolean;
+  /** Contrato: o colega faz uma pergunta e o Rever continua ao lado. */
+  contrato?: boolean;
+  /** (Contrato) Abre e fecha a lista do Rever (o Me ajuda pergunta). */
+  aoAlternarRever?: () => void;
+  /** O rótulo do botão de uma pausa que não é fim de objetivo (ex.: "Voltar ao trabalho"). */
+  rotuloPausa?: string;
   /** Lista do "Rever", montada por quem chama. */
   listaRever: ReactNode;
   aoAvancar: () => void;
@@ -46,6 +52,9 @@ export function AcoesConversa({
   degrauMaximo,
   desafio,
   projeto,
+  contrato = false,
+  aoAlternarRever,
+  rotuloPausa,
   listaRever,
   aoAvancar,
   aoSeguir,
@@ -81,7 +90,7 @@ export function AcoesConversa({
   if (estado.pausa !== null) {
     return (
       <Botao onClick={aoSeguir} className="ml-auto">
-        {ultimaPausa ? rotuloFim : "Próximo objetivo"}
+        {rotuloPausa ?? (ultimaPausa ? rotuloFim : "Próximo objetivo")}
       </Botao>
     );
   }
@@ -96,6 +105,19 @@ export function AcoesConversa({
           Não, vou tentar
         </Botao>
         <Botao onClick={aoConfirmarSolucao}>Sim, mostrar a solução</Botao>
+      </>
+    );
+  }
+  if (emObjetivo && contrato) {
+    return (
+      <>
+        <AlvoFerramenta ids={["me-ajuda"]} marcador="me-ajuda" aoAbrirCard={aoAbrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
+          <Botao variante="secundario" onClick={aoAjudar} data-pergunta-contrato>
+            Me faz uma pergunta
+          </Botao>
+        </AlvoFerramenta>
+        {aoAlternarRever && <BotaoRever aberto={estado.listaRever} aoAlternar={aoAlternarRever} />}
+        {estado.listaRever && listaRever}
       </>
     );
   }

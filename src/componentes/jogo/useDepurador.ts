@@ -28,7 +28,7 @@ import {
   valorDoNome,
 } from "@/motor/depurador";
 import { textoPrevia } from "@/motor/executor/formatar";
-import type { ResultadoAvaliacao, ResultadoExecucao } from "@/motor/executor/tipos";
+import { instanteDoPasso, type ResultadoAvaliacao, type ResultadoExecucao } from "@/motor/executor/tipos";
 import { memoriaParaExibido } from "@/motor/programa";
 import type { GanchosDepuracao, Programa } from "./usePrograma";
 
@@ -95,7 +95,7 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
       if (!expressoes.length) return;
       const foto = alvo.resultado.passos[alvo.pausa.indice].memoria;
       const encerrar = comecarPendencia();
-      void avaliarNaFoto([...expressoes], foto, alvo.quadro)
+      void avaliarNaFoto([...expressoes], foto, alvo.quadro, instanteDoPasso(alvo.resultado, alvo.pausa.indice))
         .then((resultados) => {
           if (sessaoAtual.current?.resultado !== alvo.resultado || sessaoAtual.current.pausa.indice !== alvo.pausa.indice) return;
           setAvaliacoes((atuais) => {
@@ -167,7 +167,7 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
         const atual = sessaoAtual.current;
         if (!atual) return null;
         const foto = atual.resultado.passos[atual.pausa.indice].memoria;
-        return avaliarNaFoto([codigo], foto, atual.quadro).then((r) => r[0] ?? { expressao: codigo, erro: "não deu para avaliar" });
+        return avaliarNaFoto([codigo], foto, atual.quadro, instanteDoPasso(atual.resultado, atual.pausa.indice)).then((r) => r[0] ?? { expressao: codigo, erro: "não deu para avaliar" });
       },
       encerrar: terminar,
     };

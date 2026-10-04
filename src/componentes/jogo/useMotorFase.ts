@@ -30,6 +30,16 @@ import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
 import { documentoSoltoDaFase } from "@/motor/simulacao";
 import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
 import { diaLocal, registrarFaseConcluida } from "@/lib/revisao";
+import { clienteDe } from "@/motor/contrato/clientes";
+import {
+  type ConferenciaRequisitos,
+  conferirRequisitos,
+  ehContrato,
+  type EscolhaRequisitos,
+  type EstadoContrato,
+  falaDaConferencia,
+  mudancaPronta,
+} from "@/motor/contrato/modelo";
 import { avaliarValidador, consultar, type ContextoValidacao, itensDoChecklist, recalcularPartesFeitas } from "@/motor/validadores";
 
 /** Meus projetos: o site do projeto-ponte, copiado a cada mudança (a data só anda se o texto mudou). */
@@ -141,7 +151,10 @@ export function useMotorFase({
   const projeto = fase.tipo === "projeto-ponte" ? fase : null;
   /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
   const comChecklist = desafio ?? projeto;
-  const itensChecklist = comChecklist ? (itensDoChecklist(comChecklist) ?? []) : [];
+  /** (Contrato) O desafio é o trabalho de um cliente: etapas, mudança de pedido e entrega. */
+  const contrato = desafio && ehContrato(desafio) ? desafio : null;
+  const mudou = estado.contrato?.mudou ?? false;
+  const itensChecklist = comChecklist ? (itensDoChecklist(comChecklist, mudou) ?? []) : [];
   const total = pratica ? pratica.objetivos.length : itensChecklist.length;
   const objetivo = pratica && estado.etapa === "objetivos" ? (pratica.objetivos[estado.objetivoAtual] ?? null) : null;
   const previsaoPendente = objetivo?.tipo === "previsao" && estado.previsao === null;
@@ -199,6 +212,17 @@ export function useMotorFase({
   /* Persistência                                                      */
   /* ---------------------------------------------------------------- */
 
+  /* (Contrato) O tempo de trabalho: conta enquanto a etapa é "trabalho" nesta visita. */
+  const inicioTrabalho = useRef<number | null>(null);
+  const trabalhando = estado.contrato?.etapa === "trabalho" && estado.etapa === "objetivos";
+  useEffect(() => {
+    if (trabalhando && inicioTrabalho.current === null) inicioTrabalho.current = Date.now();
+  }, [trabalhando]);
+  const comTempo = useCallback((atual: EstadoContrato): EstadoContrato => {
+    const desde = inicioTrabalho.current;
+    return desde === null ? atual : { ...atual, tempoMs: atual.tempoMs + Math.max(0, Date.now() - desde) };
+  }, []);
+
   // Revisão do dia: a fase concluída agora (não a que já abriu concluída) põe os conceitos na fila, uma vez.
   const concluidaAoAbrir = useRef(estado.etapa === "concluida");
   const revisaoRegistrada = useRef(false);
@@ -231,6 +255,7 @@ export function useMotorFase({
               circuito: circuitoSalvo,
               ordenar: ordenarSalvo,
               casos: casosSalvos,
+              contrato: atual.contrato ? comTempo(atual.contrato) : null,
             },
           },
           // Passou da meta: a da entrada da unidade não aparece de novo.
@@ -256,12 +281,23 @@ export function useMotorFase({
         };
       });
     },
-    [casosSalvos, circuitoSalvo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
+    [casosSalvos, circuitoSalvo, comTempo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
   );
 
   useEffect(() => {
     salvar(estado);
   }, [salvar, estado]);
+
+  // (Contrato) Durante o trabalho, salva de minuto em minuto: o tempo não se perde se a aba fechar.
+  const estadoAtual = useRef(estado);
+  useEffect(() => {
+    estadoAtual.current = estado;
+  }, [estado]);
+  useEffect(() => {
+    if (!trabalhando || modo !== "jogo") return;
+    const intervalo = setInterval(() => salvar(estadoAtual.current), 60_000);
+    return () => clearInterval(intervalo);
+  }, [modo, salvar, trabalhando]);
 
   /* ---------------------------------------------------------------- */
   /* Roteiros e ativação de objetivos                                 */
@@ -393,16 +429,33 @@ export function useMotorFase({
   const atualizarChecklist = useCallback(
     (contexto: ContextoValidacao) => {
       if (!comChecklist) return;
-      const itens = itensDoChecklist(comChecklist) ?? [];
       setEstado((atual) => {
         if (atual.pausa !== null) return atual;
-        const partesFeitas = recalcularPartesFeitas(comChecklist, atual.partesFeitas, contexto);
+        if (atual.contrato && atual.contrato.etapa !== "trabalho") return atual;
+        const jaMudou = atual.contrato?.mudou ?? false;
+        const itens = itensDoChecklist(comChecklist, jaMudou) ?? [];
+        const partesFeitas = recalcularPartesFeitas(comChecklist, atual.partesFeitas, contexto, jaMudou);
+        // (Contrato) A mensagem do cliente chega quando as partes de depoisDe ficam prontas: o checklist muda.
+        if (contrato && atual.contrato && !jaMudou && mudancaPronta(contrato.contrato, partesFeitas)) {
+          const depois = recalcularPartesFeitas(comChecklist, partesFeitas, contexto, true);
+          return {
+            ...atual,
+            partesFeitas: depois,
+            concluidos: depois.length,
+            acertos: atual.acertos + 1,
+            listaRever: false,
+            contrato: { ...atual.contrato, mudou: true },
+            pausa: "mudancaDoCliente",
+            fala: { texto: `Ih, chegou mensagem de ${clienteDe(contrato.contrato.cliente).nome}. Cliente de verdade muda de ideia no meio do caminho!`, expressao: "curioso" },
+          };
+        }
         const novas = partesFeitas.filter((id) => !atual.partesFeitas.includes(id));
         const mesmas = partesFeitas.length === atual.partesFeitas.length && novas.length === 0;
         if (mesmas) return atual;
         const todas = partesFeitas.length >= itens.length;
         const parte = itens.find((item) => item.id === novas[novas.length - 1]);
         const noProjeto = comChecklist.tipo === "projeto-ponte";
+        const noContrato = atual.contrato !== null;
         return {
           ...atual,
           partesFeitas,
@@ -411,21 +464,24 @@ export function useMotorFase({
           listaRever: novas.length > 0 ? false : atual.listaRever,
           pausa: todas ? "desafioConcluido" : null,
           fala: todas
-            ? noProjeto
+            ? noContrato
+              ? { texto: "Todos os requisitos atendidos, inclusive o pedido novo! Bora montar o relatório e entregar?", expressao: "comemorando" }
+              : noProjeto
               ? { texto: "Todos os requisitos! O site é seu, feito do zero, sem passo a passo. Que orgulho!", expressao: "comemorando" }
               : { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" }
             : novas.length > 0
-              ? { texto: `Isso! ${noProjeto ? "Requisito cumprido" : "Parte feita"}: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
+              ? { texto: `Isso! ${noProjeto || noContrato ? "Requisito cumprido" : "Parte feita"}: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
               : atual.fala,
         };
       });
     },
-    [comChecklist],
+    [comChecklist, contrato],
   );
 
   /** Roda a validação contra o documento vivo. */
   const verificar = useCallback(() => {
     if (estado.etapa !== "objetivos" || estado.pausa !== null || estado.roteiro !== null || aplicando.current) return;
+    if (estado.contrato && estado.contrato.etapa !== "trabalho") return;
     const contexto = contextoValidacao();
     if (!contexto) return;
     if (pratica) {
@@ -441,6 +497,7 @@ export function useMotorFase({
     estado.roteiro,
     estado.objetivoAtual,
     estado.previsao,
+    estado.contrato,
     contextoValidacao,
     pratica,
     comChecklist,
@@ -464,11 +521,12 @@ export function useMotorFase({
   );
 
   // Quando algo começa (objetivo, resposta da previsão, fim do roteiro), confere se já está feito.
+  const etapaContrato = estado.contrato?.etapa ?? null;
   useEffect(() => {
     if (estado.etapa !== "objetivos" || estado.pausa !== null || estado.roteiro !== null) return;
     const temporizador = agendarRastreado(() => verificarAtual.current(), ESPERA_VERIFICAR_MS);
     return () => temporizador.cancelar();
-  }, [estado.etapa, estado.objetivoAtual, estado.pausa, estado.roteiro, estado.previsao]);
+  }, [estado.etapa, estado.objetivoAtual, estado.pausa, estado.roteiro, estado.previsao, etapaContrato]);
 
   /* ---------------------------------------------------------------- */
   /* Conversa                                                          */
@@ -508,7 +566,19 @@ export function useMotorFase({
   /** Sai da pausa: ativa o próximo objetivo ou conclui a fase. */
   const seguir = () => {
     if (estado.pausa === null) return;
+    if (estado.pausa === "mudancaDoCliente") {
+      // O pedido mudou: o trabalho continua (os eventos do objetivo continuam valendo).
+      setEstado({ ...estado, pausa: null, fala: { texto: "O checklist já mudou. Mexer em código que já funciona é normal: confere que o resto continua passando.", expressao: "pensativo" } });
+      return;
+    }
     eventosObjetivo.current = [];
+    if (contrato && estado.contrato && (estado.pausa === "desafioConcluido" || estado.concluidos >= total)) {
+      // Contrato: antes da conclusão, a entrega (o relatório, a reação do cliente e o Levar pro mundo).
+      const comTempoFinal = comTempo(estado.contrato);
+      inicioTrabalho.current = null;
+      setEstado({ ...estado, pausa: null, contrato: { ...comTempoFinal, etapa: "entrega" }, fala: { texto: "O relatório saiu sozinho do checklist e dos testes. Confere e entrega!", expressao: "apontando" } });
+      return;
+    }
     if (estado.pausa === "desafioConcluido" || estado.concluidos >= total) {
       setEstado({
         ...estado,
@@ -562,6 +632,15 @@ export function useMotorFase({
   /** "Me ajuda": sobe um degrau por clique (sozinho para no 2). No desafio, abre o "Rever". */
   const ajudar = () => {
     if (estado.pausa !== null || estado.roteiro !== null || estado.etapa !== "objetivos") return;
+    if (contrato) {
+      // No contrato, o computadorzinho é o colega de trabalho: só pergunta, uma de cada parte que falta, em rodízio.
+      const pendentes = itensChecklist.filter((item) => !estado.partesFeitas.includes(item.id));
+      if (pendentes.length === 0) return;
+      const vez = pendentes[estado.degrau % pendentes.length];
+      const pergunta = contrato.partes.find((parte) => parte.id === vez.id)?.pergunta ?? "O que o cliente pediu que ainda falta? Relê o documento dele.";
+      setEstado({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda, listaRever: false, fala: { texto: pergunta, expressao: "curioso" } });
+      return;
+    }
     if (desafio) {
       setEstado({ ...estado, listaRever: !estado.listaRever });
       return;
@@ -650,6 +729,47 @@ export function useMotorFase({
   };
 
   const fecharListaRever = () => setEstado({ ...estado, listaRever: false });
+  const alternarListaRever = () => setEstado({ ...estado, listaRever: !estado.listaRever });
+
+  /* ---------------------------------------------------------------- */
+  /* Contrato: briefing, requisitos e entrega                          */
+  /* ---------------------------------------------------------------- */
+
+  /** Do briefing (o cliente falando e o documento) para a lista de requisitos. */
+  const irParaRequisitos = () => {
+    if (!estado.contrato || estado.contrato.etapa !== "briefing") return;
+    setEstado({ ...estado, contrato: { ...estado.contrato, etapa: "requisitos" }, fala: { texto: contrato?.contrato.requisitos.pergunta ?? "O que o cliente pediu de verdade? Escolhe os cartões e completa as lacunas.", expressao: "curioso" } });
+  };
+
+  /** Confere a lista de requisitos: certa, começa o trabalho; errada, o colega diz o que falta (sem dizer qual, nas primeiras vezes). */
+  const conferirListaDeRequisitos = (escolha: EscolhaRequisitos): ConferenciaRequisitos | null => {
+    if (!contrato || !estado.contrato || estado.contrato.etapa !== "requisitos") return null;
+    const conferencia = conferirRequisitos(contrato.contrato, escolha);
+    barramento.emitir({ tipo: "conferiuRequisitos", certo: conferencia.certo });
+    if (conferencia.certo) {
+      eventosObjetivo.current = [];
+      setEstado({ ...estado, contrato: { ...estado.contrato, etapa: "trabalho", escolha }, fala: { texto: falaDaConferencia(conferencia), expressao: "comemorando" } });
+    } else {
+      setEstado({ ...estado, contrato: { ...estado.contrato, escolha, tentativas: estado.contrato.tentativas + 1 }, fala: { texto: falaDaConferencia(conferencia), expressao: "pensativo" } });
+    }
+    return conferencia;
+  };
+
+  /** Entregou: a fase conclui (a conclusão e o Levar pro mundo vêm depois). */
+  const entregar = () => {
+    if (!estado.contrato || estado.contrato.etapa !== "entrega") return;
+    setEstado({
+      ...estado,
+      etapa: "concluida",
+      objetivoAtual: total,
+      pausa: null,
+      degrau: 0,
+      indiceFala: 0,
+      conclusaoAberta: true,
+      fala: fase.conclusao[0],
+      contrato: { ...estado.contrato, entregue: true },
+    });
+  };
 
   /** Lab: aplica a solução de teste do objetivo (ou da próxima parte) pelas funções da interface. */
   const aplicarSolucaoDeTeste = (): string | null => {
@@ -693,6 +813,10 @@ export function useMotorFase({
     responderPrevisao,
     rever,
     fecharListaRever,
+    alternarListaRever,
+    irParaRequisitos,
+    conferirListaDeRequisitos,
+    entregar,
     aplicarSolucaoDeTeste,
     falar,
     abrirConclusao,

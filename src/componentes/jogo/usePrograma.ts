@@ -16,7 +16,7 @@ import type { Barramento } from "@/motor/barramento";
 import { textoDoErro } from "@/motor/executor/erros";
 import { textoPrevia } from "@/motor/executor/formatar";
 import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
-import type { CasoFuncao, ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, ResultadoTesteFuncao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
+import type { CasoFuncao, ErroExecucao, FotoMemoria, InstantePausa, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, ResultadoTesteFuncao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
 import { chamadasDaMedicao } from "@/motor/desempenho";
 import { cenaDaFase } from "@/motor/composicao";
@@ -270,7 +270,8 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
 
   /** (Depurador) As expressões do Observar numa foto da memória, no Worker. */
   const avaliarNaFoto = useCallback(
-    async (expressoes: string[], foto: FotoMemoria, quadro: number): Promise<ResultadoAvaliacao[]> => (sessao ? sessao.avaliarNaFoto(expressoes, foto, quadro) : []),
+    async (expressoes: string[], foto: FotoMemoria, quadro: number, instante?: InstantePausa): Promise<ResultadoAvaliacao[]> =>
+      sessao ? sessao.avaliarNaFoto(expressoes, foto, quadro, instante) : [],
     [sessao],
   );
 

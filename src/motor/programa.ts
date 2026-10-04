@@ -100,7 +100,8 @@ export function chaveFuncaoPassa(validador: Extract<Validador, { tipo: "funcaoPa
 /** Todos os validadores de uma árvore (todos, algum, nao). */
 export function validadoresDentro(validador: Validador): Validador[] {
   if (validador.tipo === "todos" || validador.tipo === "algum") return [validador, ...validador.validadores.flatMap(validadoresDentro)];
-  if (validador.tipo === "nao" || validador.tipo === "variosCenarios") return [validador, ...validadoresDentro(validador.validador)];
+  if (validador.tipo === "nao") return [validador, ...validadoresDentro(validador.validador)];
+  if (validador.tipo === "variosCenarios") return [validador, ...validadoresDentro(validador.validador), ...(validador.porLinha ?? []).flatMap(validadoresDentro)];
   return [validador];
 }
 

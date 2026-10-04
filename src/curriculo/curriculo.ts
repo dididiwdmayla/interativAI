@@ -9,9 +9,6 @@
  */
 import type { IlhaCurriculo } from "./tipos";
 
-/** O que falta do motor da Lógica (planejado em src/curriculo/motores.ts). */
-const MOTOR_PROJETO_JS =
-  "projeto-ponte-js: projeto-ponte de JavaScript (levar o programa para Fontes > Snippets do Chrome, com o guia passo a passo)";
 const MOTOR_PAGINAS_VIVAS = "JS do jogador rodando no site-alvo e aba Aplicação";
 const MOTOR_REDE = "aba Rede, servidor simulado e diagrama de requisições";
 const MOTOR_IA =
@@ -534,11 +531,11 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         icone: "fontes",
         unidades: [
           {
+            // O contrato da ilha (rodada 29): o formato contrato, com o Levar pro mundo em .js.
             id: "logica-programa-de-verdade-u1",
-            titulo: "Meu primeiro programa",
-            meta: "Escrever sozinho um programa que resolve um problema seu e rodar no Chrome de verdade, como snippet.",
-            temas: ["logica", "ferramentas"],
-            requerMotor: MOTOR_PROJETO_JS,
+            titulo: "O contrato da padaria",
+            meta: "Ser contratado pela Padaria Pão de Mel: entender o pedido, programar a vitrine, aguentar a mudança e entregar.",
+            temas: ["logica"],
           },
         ],
       },

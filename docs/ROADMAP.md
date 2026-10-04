@@ -29,6 +29,28 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 29: formato contrato e o contrato da Lógica:** o "TCC" de fim de
+  ilha como dados (um desafio com o campo `contrato`, em
+  `src/motor/contrato/`): briefing do cliente com o documento do pedido,
+  requisitos escolhidos entre distrações (com lacunas que se acham no
+  documento), checklist ao vivo, mudança de pedido no meio (parte nova ou
+  que troca uma antiga, exigindo ajuste real no código), entrega com o
+  relatório automático e a reação do cliente, comemoração de fim de ilha e
+  o Levar pro mundo (um .js com o programa e os aparelhos de mentirinha,
+  que roda no Console de qualquer navegador e no Node; substitui o motor
+  `projeto-ponte-js`). O computadorzinho vira colega de trabalho (só
+  pergunta) e o tutor ganha o modo contrato. Kit de clientes em SVG (peças
+  como dados, cinco expressões, pisca, respira e fala com a boca
+  acompanhando o texto; `/lab/clientes`), `variosCenarios` com `porLinha`,
+  relógio e campainha no kit de cenas, bancada `lab-contrato-u1` e guia
+  (seção 31). Publicado: **"O contrato da padaria"**
+  (`logica-programa-de-verdade-u1`, a última unidade da Ilha Lógica): a
+  vitrine às seis da manhã e o contrato da Dona Celeste (Padaria Pão de
+  Mel), com a luz que passa a apagar sozinha sem ninguém na porta. Correções:
+  o Observar e o Console do depurador pausado leem a cena no instante da
+  pausa; os testes de conteúdo não carregam mais o currículo dentro do
+  limite de 5 s. Detalhe em `docs/PROGRESSO.md`.
+
 - **Rodada 28: motor de cenas programáveis:** área `cena` na tela composta
   (a cena é dado: cenário com o kit, dispositivos com nome de variável,
   linha do tempo), dispositivos como objetos no reino do código,
@@ -524,10 +546,24 @@ núcleo comum.
 
 ### Pendências
 
+- **Contratos (rodada 29), para depois:**
+  - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
+    pro mundo de cada ilha (o site com interação, o sistema com dados): o
+    da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
+  - Enquanto as zonas Depuração, Algoritmos essenciais e Estruturas de
+    dados não existem, o contrato abre logo depois de Resolvendo problemas;
+    a fase 1 da unidade apresenta a cena (é a primeira cena publicada).
+  - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
+    casos de teste (o divisor arrasta). Em pé, a cena aberta aperta o
+    código; ela recolhe sozinha só com o teclado aberto.
+  - O texto do cliente aparece letra por letra (uns 3 s por fala): as
+    jornadas do contrato ficam mais longas; "Continuar" no meio completa a
+    fala.
+  - O tempo de trabalho do relatório conta com a fase aberta na etapa de
+    trabalho (salvo de minuto em minuto); uma aba esquecida aberta conta.
+  - O relatório não tem "voltar e revisar": depois de tudo marcado, é
+    enviar.
 - **Cenas programáveis (rodada 28), para depois:**
-  - O Observar e o Console com o depurador pausado leem os dispositivos no
-    relógio de agora da simulação, não no instante da pausa (a memória das
-    variáveis é a da pausa).
   - Cada linha do tempo do `variosCenarios` roda o código de novo a cada
     Executar (cada uma com o próprio limite de 1,5 s): use 2 a 4 linhas do
     tempo, com loops de `esperar(100)` ou mais.
@@ -652,14 +688,14 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: formato contrato (o "TCC" de fim de ilha) com o projeto-ponte da
-   Lógica (que pede o motor `projeto-ponte-js`).
-2. Zonas Algoritmos essenciais, Estruturas de dados e Depuração, já com
+1. Zonas Algoritmos essenciais, Estruturas de dados e Depuração, já com
    cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
-   fase com cena, diferente das anteriores; guia, seção 30).
-3. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
+   fase com cena, diferente das anteriores; guia, seção 30). A Depuração
+   pode usar cenas com o depurador (o Observar e o Console pausados leem a
+   cena no instante da pausa). Elas ficam antes do contrato no mapa.
+2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
-4. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
+3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
    ao vivo, que reaproveita a tela composta com a especificação e o código
    gerado; Ofício, com os arquivos do projeto e os testes automatizados),
    intercalados com conteúdo, e a trilha Automação industrial a partir do

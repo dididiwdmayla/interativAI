@@ -68,8 +68,13 @@ export type DispositivoCena = {
   escala?: number;
   /** Um jeito do desenho, quando o tipo tem mais de um (lâmpada: "pendente", o padrão, ou "spot"). */
   variante?: string;
-  /** O estado do começo, se não for o padrão do tipo (ex.: o letreiro já mostrando um texto). */
+  /**
+   * O estado do começo, se não for o padrão do tipo (ex.: o letreiro já
+   * mostrando um texto). No relógio, `hora` é a hora em que a cena começa.
+   */
   inicial?: Record<string, ValorCena>;
+  /** Como ele se chama fora do código, no Levar pro mundo ("Luz da vitrine"). Até 24 letras; sem ele, o nome do tipo. */
+  nome?: string;
 };
 
 /** O que acontece na cena sozinho, na linha do tempo (o código não controla). */
@@ -230,6 +235,19 @@ export function instantesDaLinhaDoTempo(linha: readonly AcontecimentoCena[]): nu
 /* O forno: a temperatura sobe ligado e desce desligado.               */
 /* ------------------------------------------------------------------ */
 
+/** O relógio da cena: cada hora do dia passa em `msPorHora` da simulação, a partir da hora do começo (o `inicial.hora`). */
+export const RELOGIO = { msPorHora: 2_000 } as const;
+
+/** A hora cheia no instante (de 0 a 23), começando em `inicio`. */
+export function horaNoTempo(inicio: number, tempoMs: number): number {
+  return (inicio + Math.floor(Math.max(0, tempoMs) / RELOGIO.msPorHora)) % 24;
+}
+
+/** A hora com a fração (7,5 = 7h30): só o desenho dos ponteiros. */
+export function horaComFracao(inicio: number, tempoMs: number): number {
+  return (inicio + Math.max(0, tempoMs) / RELOGIO.msPorHora) % 24;
+}
+
 export const FORNO = { ambiente: 25, maxima: 250, sobePorSegundo: 40, descePorSegundo: 15 } as const;
 
 /**
@@ -268,7 +286,7 @@ type OpcoesEstado = {
   filtro?: FiltroPasso | null;
 };
 
-function mudancaVale(mudanca: MudancaCena, tempoMs: number, opcoes: OpcoesEstado): boolean {
+export function mudancaVale(mudanca: MudancaCena, tempoMs: number, opcoes: OpcoesEstado): boolean {
   if (opcoes.antes ? mudanca.tempoMs >= tempoMs : mudanca.tempoMs > tempoMs) return false;
   const filtro = opcoes.filtro;
   if (!filtro || mudanca.execucao < filtro.execucao) return true;
@@ -296,6 +314,10 @@ export function estadoNoTempo(rastro: RastroCena, tempoMs: number, opcoes: Opcoe
   for (const { id, tipo } of rastro.dispositivos) {
     if (tipo === "sensor") estado[id].temGente = pessoasPresentes(rastro.linhaDoTempo, tempoMs, antes) > 0;
     if (tipo === "interruptor") estado[id].ligado = (rastro.inicial[id]?.ligado === true) !== (apertosAte(rastro.linhaDoTempo, id, tempoMs, antes) % 2 === 1);
+    if (tipo === "relogio") {
+      const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;
+      estado[id].hora = horaNoTempo(Number(rastro.inicial[id]?.hora ?? 6), instante);
+    }
     if (tipo === "forno") {
       const trocas = trocasDoForno[id] ?? [];
       const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;

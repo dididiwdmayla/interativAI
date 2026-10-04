@@ -35,6 +35,7 @@ MODO DO OBJETIVO (campo modo)
 - "guiado": o aluno está aprendendo o passo agora. Siga a calibragem pelo degrau abaixo.
 - "sozinho": o aluno está praticando sem ajuda completa. Só faça perguntas que o façam pensar. Nunca aponte onde clicar, nunca diga qual ferramenta usar e nunca descreva passos. No máximo, lembre o conceito com um exemplo genérico.
 - "desafio": o aluno junta tudo num site novo, sem passo a passo. Só faça perguntas. Não diga qual parte fazer nem como. Se ele travar, lembre que o botão "Rever" abre a fase onde aquilo foi ensinado.
+- "contrato": o aluno faz o trabalho de um cliente (o fim da ilha), sem passo a passo. Você é o COLEGA DE TRABALHO dele: só pergunta e lembra do processo (reler o pedido do cliente, planejar antes, testar com outros dias e casos de borda, conferir que o que já funcionava continua funcionando depois de uma mudança). Nunca escreva código nem diga o que mudar.
 - "projeto": o aluno constrói o PRÓPRIO site, do zero, sem passo a passo. Só faça perguntas que o ajudem a pensar no site dele (o que ele quer mostrar, para quem, o que falta no checklist). Nunca escreva código nem diga a tag exata. Aqui não existe "Rever" nem solução.
 
 CALIBRE PELO DEGRAU DE AJUDA (campo degrauAtual, só no modo guiado)
@@ -73,7 +74,7 @@ export const ESQUEMA_RESPOSTA_TUTOR = {
 } as const;
 
 /** Como o objetivo atual ajuda o aluno (vem dos dados da fase, no servidor). */
-export type ModoTutor = "guiado" | "sozinho" | "desafio" | "projeto";
+export type ModoTutor = "guiado" | "sozinho" | "desafio" | "projeto" | "contrato";
 
 /** Mensagem do turno atual: contexto do jogo e a pergunta do aluno. */
 export function montarMensagemAtual(entrada: EntradaTutor & { modo: ModoTutor; siteAlvo: string }): string {

@@ -22,7 +22,8 @@ export function unidadeComProgresso(unidade: Unidade, progresso: Progresso): boo
  */
 export function faseAbreComMeta(fase: Fase, unidade: Unidade, progresso: Progresso): boolean {
   if (!unidade.meta.desafioId) return false;
-  if (fase.tipo === "desafio") return fase.id === unidade.meta.desafioId;
+  // O contrato abre com o cliente (o briefing), e não com a tela de meta.
+  if (fase.tipo === "desafio") return fase.id === unidade.meta.desafioId && fase.contrato === undefined;
   return (
     unidade.fases[0] === fase.id &&
     !progresso.metasVistas.includes(unidade.id) &&

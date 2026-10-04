@@ -141,6 +141,28 @@
   --cor-cena-pao: #e2a15a;
   --cor-cena-pao-sombra: #b9773a;
   --cor-cena-led: #20c070;
+  /* Kit de clientes (src/componentes/contrato/kit) */
+  --cor-cliente-pele-clara: #f7d2b6;
+  --cor-cliente-pele-media: #e8b48c;
+  --cor-cliente-pele-morena: #c68a5e;
+  --cor-cliente-pele-escura: #8a5a3b;
+  --cor-cliente-cabelo-preto: #2b1d2a;
+  --cor-cliente-cabelo-castanho: #6b3f2a;
+  --cor-cliente-cabelo-ruivo: #c2552b;
+  --cor-cliente-cabelo-loiro: #e8c26a;
+  --cor-cliente-cabelo-grisalho: #cfc9d6;
+  --cor-cliente-roupa-azul: #4f6fe8;
+  --cor-cliente-roupa-vermelho: #e0475a;
+  --cor-cliente-roupa-verde: #2fae7a;
+  --cor-cliente-roupa-amarelo: #f2b632;
+  --cor-cliente-roupa-roxo: #8a4fd6;
+  --cor-cliente-branco: #fffaf4;
+  --cor-cliente-rosto: #3a1d4d;
+  --cor-cliente-boca: #8c2f4a;
+  --cor-cliente-bochecha: #ff9ecb;
+  --cor-cliente-lente: #3a1d4d;
+  --cor-cliente-contorno: #3a1d4d;
+  --cor-cliente-lente-vidro: rgba(212, 241, 251, 0.35);
 }
 
 [data-theme="fliperama"] {
@@ -264,6 +286,28 @@
   --cor-cena-pao: #f0a95c;
   --cor-cena-pao-sombra: #c47a36;
   --cor-cena-led: #5cff9d;
+  /* Kit de clientes (src/componentes/contrato/kit) */
+  --cor-cliente-pele-clara: #f7d2b6;
+  --cor-cliente-pele-media: #eab894;
+  --cor-cliente-pele-morena: #c68e64;
+  --cor-cliente-pele-escura: #8e5e40;
+  --cor-cliente-cabelo-preto: #352e6e;
+  --cor-cliente-cabelo-castanho: #5a3a5a;
+  --cor-cliente-cabelo-ruivo: #ff6a3d;
+  --cor-cliente-cabelo-loiro: #fff07a;
+  --cor-cliente-cabelo-grisalho: #c8c6f0;
+  --cor-cliente-roupa-azul: #3d7bff;
+  --cor-cliente-roupa-vermelho: #ff3d6e;
+  --cor-cliente-roupa-verde: #5cff9d;
+  --cor-cliente-roupa-amarelo: #ffd23d;
+  --cor-cliente-roupa-roxo: #b06bff;
+  --cor-cliente-branco: #f4eeff;
+  --cor-cliente-rosto: #15132d;
+  --cor-cliente-boca: #6b1a4a;
+  --cor-cliente-bochecha: #ff3dae;
+  --cor-cliente-lente: #22e4f0;
+  --cor-cliente-contorno: #f4eeff;
+  --cor-cliente-lente-vidro: rgba(143, 217, 240, 0.3);
 }
 
 [data-theme="segredo"] {
@@ -387,4 +431,26 @@
   --cor-cena-pao: #e0a35c;
   --cor-cena-pao-sombra: #b37a3a;
   --cor-cena-led: #3dff8f;
+  /* Kit de clientes (src/componentes/contrato/kit) */
+  --cor-cliente-pele-clara: #f2cdb0;
+  --cor-cliente-pele-media: #e6b08c;
+  --cor-cliente-pele-morena: #c48a60;
+  --cor-cliente-pele-escura: #86583a;
+  --cor-cliente-cabelo-preto: #2c5544;
+  --cor-cliente-cabelo-castanho: #5a4030;
+  --cor-cliente-cabelo-ruivo: #d95926;
+  --cor-cliente-cabelo-loiro: #e8d06a;
+  --cor-cliente-cabelo-grisalho: #b8d0c4;
+  --cor-cliente-roupa-azul: #3da0ff;
+  --cor-cliente-roupa-vermelho: #ff5a5a;
+  --cor-cliente-roupa-verde: #3dff8f;
+  --cor-cliente-roupa-amarelo: #ffc94d;
+  --cor-cliente-roupa-roxo: #b07aff;
+  --cor-cliente-branco: #eafff2;
+  --cor-cliente-rosto: #082019;
+  --cor-cliente-boca: #5a1a3a;
+  --cor-cliente-bochecha: #ff7ad9;
+  --cor-cliente-lente: #3dff8f;
+  --cor-cliente-contorno: #d8ffe6;
+  --cor-cliente-lente-vidro: rgba(159, 224, 208, 0.3);
 }

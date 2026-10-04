@@ -57,6 +57,20 @@ export function nomeDoZip(nome: string): string {
   return `${base || "meu-site"}.zip`;
 }
 
+/** Baixa um arquivo de texto no navegador (o .js do Levar pro mundo de um contrato). */
+export function baixarTexto(texto: string, nome: string, tipo = "text/javascript"): void {
+  const blob = new Blob([texto], { type: `${tipo};charset=utf-8` });
+  const endereco = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = endereco;
+  link.download = nome;
+  link.rel = "noopener";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(endereco), 1000);
+}
+
 /** Baixa o .zip no navegador (um link temporário com download). */
 export function baixarZip(arquivos: ArquivosDoProjeto, nome: string): void {
   const dados = zipDoProjeto(arquivos);

@@ -10,7 +10,7 @@
  */
 import type { ValorCena } from "./modelo";
 
-export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador"] as const;
+export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador", "relogio", "campainha"] as const;
 
 export type TipoDispositivo = (typeof TIPOS_DISPOSITIVO)[number];
 
@@ -198,6 +198,39 @@ export const CATALOGO_DISPOSITIVOS: Record<TipoDispositivo, FichaDispositivo> = 
       { peca: "motor", texto: "O motor gira as pás mais rápido ou mais devagar." },
     ],
   },
+  relogio: {
+    tipo: "relogio",
+    nome: "Relógio",
+    classe: "Relogio",
+    sentido: "entrada",
+    oQueFaz: "Conta as horas do dia na cena (cada hora passa em 2 segundos). O código só lê.",
+    comandos: [],
+    propriedades: [{ nome: "hora", tipo: "número", escreve: false, doMundo: true, explicacao: "A hora cheia de agora, de 0 a 23 (às 7h30, vale 7)." }],
+    exemplo: (nome) => `if (${nome}.hora >= 7) {\n  console.log("Já abriu!");\n}`,
+    inicial: { hora: 6 },
+    porDentro: [
+      { peca: "placa", texto: "Dentro da plaquinha (o microcontrolador), um cristal de quartzo vibra sempre no mesmo ritmo." },
+      { peca: "contato", texto: "Ela conta as vibrações: tantas vibrações fazem um segundo, tantos segundos fazem uma hora." },
+      { peca: "codigo", texto: "O código lê a conta pronta: hora vira 7 quando dá sete horas." },
+    ],
+  },
+  campainha: {
+    tipo: "campainha",
+    nome: "Campainha",
+    classe: "Campainha",
+    sentido: "saida",
+    oQueFaz: "Toca um plim curto cada vez que o código manda: bom para avisar alguém.",
+    comandos: [{ nome: "tocar", assinatura: "tocar()", explicacao: "Toca a campainha uma vez." }],
+    propriedades: [{ nome: "toques", tipo: "número", escreve: false, doMundo: false, explicacao: "Quantas vezes ela já tocou nesta simulação." }],
+    exemplo: (nome) => `${nome}.tocar();`,
+    inicial: { toques: 0 },
+    porDentro: [
+      { peca: "codigo", texto: "O código manda a ordem: tocar()." },
+      { peca: "placa", texto: "A plaquinha (o microcontrolador) liga um pino por um instante." },
+      { peca: "rele", texto: "O pino aciona um relé, que manda eletricidade para uma bobina: ela vira um ímã." },
+      { peca: "dispositivo", texto: "O ímã puxa um martelinho, que bate no sino: plim!" },
+    ],
+  },
 };
 
 /** A ficha do tipo. */
@@ -222,6 +255,8 @@ export const ACOES_DO_TIPO: Record<TipoDispositivo, readonly string[]> = {
   letreiro: ["mostrar", "apagar"],
   forno: ["ligar", "desligar"],
   ventilador: ["velocidade", "desligar"],
+  relogio: [],
+  campainha: ["tocar"],
 };
 
 /** Nomes que um dispositivo não pode ter (já existem no reino do código ou no jogo). */

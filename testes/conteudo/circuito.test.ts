@@ -17,6 +17,9 @@ import {
   tabelaVerdade,
 } from "@/motor/circuito/modelo";
 import { avaliarDetalhado, type ContextoValidacao } from "@/motor/validadores";
+import { REGRAS_DE_FASE } from "@/conteudo/checagens";
+import { FASE_BANCADA_CONSOLE, FASE_DEMO_CIRCUITO, FASE_DEMO_DESAFIO_CIRCUITO } from "@/conteudo/laboratorio/bancadaLogica";
+import { circuitosDoDesafio, criarSimulacao } from "@/motor/simulacao";
 
 const PADARIA: Circuito = {
   pecas: [
@@ -165,15 +168,11 @@ describe("circuito lógico", () => {
 
 describe("demonstração do circuito (/lab)", () => {
   it("passa em todas as regras de fase (dados e simulação)", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_CIRCUITO } = await import("@/conteudo/laboratorio/bancadaLogica");
     const problemas = REGRAS_DE_FASE.flatMap((regra) => regra.checar(FASE_DEMO_CIRCUITO, { unidades: [], fases: [FASE_DEMO_CIRCUITO] }).map((p) => `${regra.id}: ${p}`));
     expect(problemas).toEqual([]);
   });
 
   it("sabotagem: validador de circuito fora da fase, entrada com nome ruim e portão fora da paleta", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_CIRCUITO, FASE_BANCADA_CONSOLE } = await import("@/conteudo/laboratorio/bancadaLogica");
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const comTabela = { ...FASE_BANCADA_CONSOLE, objetivos: [{ ...FASE_BANCADA_CONSOLE.objetivos[1], validador: { tipo: "usouPortao" as const, portao: "e" as const } }] };
@@ -194,16 +193,12 @@ describe("demonstração do circuito (/lab)", () => {
 
 describe("desafio com circuito (ponte circuito/Console, /lab)", () => {
   it("passa em todas as regras de fase menos a do Rever (que pede a unidade toda)", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_DESAFIO_CIRCUITO } = await import("@/conteudo/laboratorio/bancadaLogica");
     const fase = FASE_DEMO_DESAFIO_CIRCUITO;
     const problemas = REGRAS_DE_FASE.filter((regra) => regra.id !== "partes-do-desafio").flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] }).map((p) => `${regra.id}: ${p}`));
     expect(problemas).toEqual([]);
   });
 
   it("a bancada e o Console na mesma simulação; a meta mostra a bancada antes e depois", async () => {
-    const { FASE_DEMO_DESAFIO_CIRCUITO } = await import("@/conteudo/laboratorio/bancadaLogica");
-    const { circuitosDoDesafio, criarSimulacao } = await import("@/motor/simulacao");
     const simulacao = criarSimulacao(FASE_DEMO_DESAFIO_CIRCUITO);
     const [monta, console] = FASE_DEMO_DESAFIO_CIRCUITO.partes;
     expect(simulacao.avaliar(monta.validador).passou).toBe(false);
@@ -217,8 +212,6 @@ describe("desafio com circuito (ponte circuito/Console, /lab)", () => {
   });
 
   it("sabotagem: palco na ponte e ação de circuito numa fase sem circuito", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_DESAFIO_CIRCUITO, FASE_BANCADA_CONSOLE } = await import("@/conteudo/laboratorio/bancadaLogica");
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const comPalco = { ...FASE_DEMO_DESAFIO_CIRCUITO, usaFerramentas: [...FASE_DEMO_DESAFIO_CIRCUITO.usaFerramentas, "palco-memoria" as const] };

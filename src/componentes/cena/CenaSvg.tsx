@@ -45,6 +45,10 @@ export function resumoDoDispositivo(dispositivo: DispositivoCena, estado: Record
       return `${e.ligado === true ? "ligado" : "desligado"}, ${String(e.temperatura ?? 25)} graus`;
     case "ventilador":
       return Number(e.velocidade ?? 0) > 0 ? `girando na velocidade ${String(e.velocidade)}` : "parado";
+    case "relogio":
+      return `marca ${String(e.hora ?? 0)}h`;
+    case "campainha":
+      return Number(e.toques ?? 0) > 0 ? `tocou ${String(e.toques)} ${Number(e.toques) === 1 ? "vez" : "vezes"}` : "quieta";
   }
 }
 

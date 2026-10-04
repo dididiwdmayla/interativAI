@@ -1,0 +1,273 @@
+/*
+ * Levar pro mundo (a saída de uma ilha com código): o programa do aluno num
+ * arquivo .js que roda FORA do jogo, no Console de qualquer navegador e no
+ * Node. Junto vai uma versão simples dos dispositivos da cena: em vez de
+ * acender luzes e ligar fornos de verdade, eles escrevem no console o que
+ * fariam ("[07:00] Luz da vitrine: ligada"), no relógio simulado da cena
+ * (esperar não espera de verdade: só avança o tempo). Os acontecimentos da
+ * linha do tempo (alguém chega, alguém vai embora) também aparecem.
+ *
+ * O arquivo é JavaScript simples (ES2017, sem import nem nada do jogo), com
+ * as instruções curtas no topo. Puro: o jogo baixa, os testes rodam no Node e
+ * no navegador.
+ */
+import { CATALOGO_DISPOSITIVOS, LETRAS_DO_LETREIRO } from "../cena/catalogo";
+import { type AcontecimentoCena, type DadosCena, type DispositivoCena, FORNO, RELOGIO } from "../cena/modelo";
+import { clienteDe } from "./clientes";
+import type { DadosContrato } from "./modelo";
+
+/** O nome do dispositivo fora do código: o da cena ou o do tipo. */
+function nomeDe(dispositivo: DispositivoCena): string {
+  return dispositivo.nome ?? CATALOGO_DISPOSITIVOS[dispositivo.tipo].nome;
+}
+
+type Acontecimento = { ms: number; texto: string; tipo: "chega" | "sai" | "aperta"; dispositivo?: string };
+
+/** Os acontecimentos da linha do tempo, em ordem, com a frase de cada um. */
+function acontecimentos(cena: DadosCena): Acontecimento[] {
+  const lista = cena.linhaDoTempo.flatMap((item: AcontecimentoCena): Acontecimento[] => {
+    if (item.tipo === "pessoa") {
+      return [
+        { ms: item.chegaMs, texto: "Chegou alguém.", tipo: "chega" },
+        ...(item.saiMs !== undefined ? [{ ms: item.saiMs, texto: "Alguém foi embora.", tipo: "sai" as const }] : []),
+      ];
+    }
+    const alvo = cena.dispositivos.find((d) => d.id === item.dispositivo);
+    return [{ ms: item.noMs, texto: `Alguém apertou ${alvo ? nomeDe(alvo).toLowerCase() : item.dispositivo}.`, tipo: "aperta", dispositivo: item.dispositivo }];
+  });
+  return lista.sort((a, b) => a.ms - b.ms);
+}
+
+const js = (valor: unknown) => JSON.stringify(valor);
+
+/** A criação de um dispositivo no arquivo (o objeto com os mesmos comandos e propriedades do jogo). */
+function criarDispositivo(dispositivo: DispositivoCena): string {
+  const nome = js(nomeDe(dispositivo));
+  const inicial = { ...CATALOGO_DISPOSITIVOS[dispositivo.tipo].inicial, ...(dispositivo.inicial ?? {}) };
+  const ini = (chave: string) => js(inicial[chave]);
+  switch (dispositivo.tipo) {
+    case "lampada":
+      return `lampada(${nome}, ${ini("ligada")}, ${ini("brilho")})`;
+    case "sensor":
+      return `sensor(${nome})`;
+    case "interruptor":
+      return `interruptor(${nome}, ${js(dispositivo.id)}, ${ini("ligado")})`;
+    case "portao":
+      return `portao(${nome}, ${ini("aberto")})`;
+    case "letreiro":
+      return `letreiro(${nome}, ${ini("texto")})`;
+    case "forno":
+      return `forno(${nome}, ${ini("ligado")})`;
+    case "ventilador":
+      return `ventilador(${nome}, ${ini("velocidade")})`;
+    case "relogio":
+      return `relogio(${ini("hora")})`;
+    case "campainha":
+      return `campainha(${nome})`;
+  }
+}
+
+/** As fábricas dos dispositivos (só as dos tipos que a cena usa entram no arquivo). */
+const FABRICAS: Record<DispositivoCena["tipo"], string> = {
+  lampada: `
+  function lampada(nome, ligada, brilho) {
+    var objeto = {
+      ligar: function () { aindaRoda(); if (!ligada) { ligada = true; avisar(nome + ": ligada"); } },
+      desligar: function () { aindaRoda(); if (ligada) { ligada = false; avisar(nome + ": desligada"); } }
+    };
+    Object.defineProperty(objeto, "ligada", { enumerable: true, get: function () { aindaRoda(); return ligada; }, set: function () { soLeitura("ligada", "ligar() ou desligar()"); } });
+    Object.defineProperty(objeto, "brilho", {
+      enumerable: true,
+      get: function () { aindaRoda(); return brilho; },
+      set: function (valor) { aindaRoda(); valor = numeroNaFaixa(valor, "brilho", 0, 100, false); if (valor !== brilho) { brilho = valor; avisar(nome + ": brilho " + valor); } }
+    });
+    return objeto;
+  }`,
+  sensor: `
+  function sensor(nome) {
+    var objeto = {};
+    Object.defineProperty(objeto, "temGente", { enumerable: true, get: function () { aindaRoda(); return pessoasAgora() > 0; }, set: function () { soLeitura("temGente"); } });
+    return objeto;
+  }`,
+  interruptor: `
+  function interruptor(nome, id, ligadoNoComeco) {
+    var objeto = {};
+    Object.defineProperty(objeto, "ligado", { enumerable: true, get: function () { aindaRoda(); return apertosAte(id) % 2 === 1 ? !ligadoNoComeco : ligadoNoComeco; }, set: function () { soLeitura("ligado"); } });
+    return objeto;
+  }`,
+  portao: `
+  function portao(nome, aberto) {
+    var objeto = {
+      abrir: function () { aindaRoda(); if (!aberto) { aberto = true; avisar(nome + ": abrindo"); } },
+      fechar: function () { aindaRoda(); if (aberto) { aberto = false; avisar(nome + ": fechando"); } }
+    };
+    Object.defineProperty(objeto, "aberto", { enumerable: true, get: function () { aindaRoda(); return aberto; }, set: function () { soLeitura("aberto", "abrir() ou fechar()"); } });
+    return objeto;
+  }`,
+  letreiro: `
+  function letreiro(nome, texto) {
+    var objeto = {
+      mostrar: function (novo) {
+        aindaRoda();
+        if (novo === undefined) throw new TypeError('mostrar precisa do texto, como mostrar("ABERTO").');
+        novo = String(novo).slice(0, ${LETRAS_DO_LETREIRO});
+        if (novo !== texto) { texto = novo; avisar(texto ? nome + ': "' + texto + '"' : nome + ": apagado"); }
+      },
+      apagar: function () { aindaRoda(); if (texto) { texto = ""; avisar(nome + ": apagado"); } }
+    };
+    Object.defineProperty(objeto, "texto", { enumerable: true, get: function () { aindaRoda(); return texto; }, set: function () { soLeitura("texto", "mostrar(texto) ou apagar()"); } });
+    return objeto;
+  }`,
+  forno: `
+  function forno(nome, ligadoNoComeco) {
+    var ligado = ligadoNoComeco;
+    var trocas = [];
+    function temperatura() {
+      var graus = ${FORNO.ambiente}, estado = ligadoNoComeco, desde = 0;
+      function avancar(ate) {
+        var segundos = Math.max(0, ate - desde) / 1000;
+        graus = estado ? Math.min(${FORNO.maxima}, graus + ${FORNO.sobePorSegundo} * segundos) : Math.max(${FORNO.ambiente}, graus - ${FORNO.descePorSegundo} * segundos);
+        desde = ate;
+      }
+      for (var i = 0; i < trocas.length; i++) { avancar(trocas[i].ms); estado = trocas[i].ligado; }
+      avancar(relogioMs);
+      return Math.round(graus);
+    }
+    var objeto = {
+      ligar: function () { aindaRoda(); if (!ligado) { ligado = true; trocas.push({ ms: relogioMs, ligado: true }); avisar(nome + ": ligado (esquentando)"); } },
+      desligar: function () { aindaRoda(); if (ligado) { ligado = false; trocas.push({ ms: relogioMs, ligado: false }); avisar(nome + ": desligado"); } }
+    };
+    Object.defineProperty(objeto, "ligado", { enumerable: true, get: function () { aindaRoda(); return ligado; }, set: function () { soLeitura("ligado", "ligar() ou desligar()"); } });
+    Object.defineProperty(objeto, "temperatura", { enumerable: true, get: function () { aindaRoda(); return temperatura(); }, set: function () { soLeitura("temperatura"); } });
+    return objeto;
+  }`,
+  ventilador: `
+  function ventilador(nome, velocidade) {
+    var objeto = {
+      desligar: function () { aindaRoda(); if (velocidade !== 0) { velocidade = 0; avisar(nome + ": desligado"); } }
+    };
+    Object.defineProperty(objeto, "velocidade", {
+      enumerable: true,
+      get: function () { aindaRoda(); return velocidade; },
+      set: function (valor) { aindaRoda(); valor = numeroNaFaixa(valor, "velocidade", 0, 3, true); if (valor !== velocidade) { velocidade = valor; avisar(valor === 0 ? nome + ": desligado" : nome + ": velocidade " + valor); } }
+    });
+    return objeto;
+  }`,
+  relogio: `
+  function relogio(horaNoComeco) {
+    var objeto = {};
+    Object.defineProperty(objeto, "hora", { enumerable: true, get: function () { aindaRoda(); return (horaNoComeco + Math.floor(relogioMs / ${RELOGIO.msPorHora})) % 24; }, set: function () { soLeitura("hora"); } });
+    return objeto;
+  }`,
+  campainha: `
+  function campainha(nome) {
+    var toques = 0;
+    var objeto = { tocar: function () { aindaRoda(); toques++; avisar(nome + ": plim!"); } };
+    Object.defineProperty(objeto, "toques", { enumerable: true, get: function () { aindaRoda(); return toques; }, set: function () { soLeitura("toques", "tocar()"); } });
+    return objeto;
+  }`,
+};
+
+/** O nome do arquivo baixado. */
+export function arquivoDoContrato(contrato: DadosContrato): string {
+  return contrato.levarProMundo?.arquivo ?? "meu-programa.js";
+}
+
+/** O texto do arquivo .js: as instruções, o mundo simples da cena e o programa do aluno. */
+export function programaParaLevar({ contrato, cena, codigo }: { contrato: DadosContrato; cena: DadosCena | null; codigo: string }): string {
+  const cliente = clienteDe(contrato.cliente);
+  const arquivo = arquivoDoContrato(contrato);
+  const relogio = cena?.dispositivos.find((d) => d.tipo === "relogio");
+  const horaInicial = relogio ? Number({ ...CATALOGO_DISPOSITIVOS.relogio.inicial, ...(relogio.inicial ?? {}) }.hora) : null;
+  const tipos = [...new Set((cena?.dispositivos ?? []).map((d) => d.tipo))];
+  const linhas = [
+    "/*",
+    ` * ${contrato.projeto}`,
+    ` * Para ${cliente.nome} (${cliente.negocio}). Programa feito por você no InterativAI.`,
+    " *",
+    " * COMO RODAR",
+    " * - No navegador: abra qualquer página, aperte F12 (ou Ctrl+Shift+J), vá na",
+    " *   aba Console, cole este arquivo inteiro e aperte Enter.",
+    ` * - No computador, com o Node instalado: node ${arquivo}`,
+    " *",
+    " * Aqui os aparelhos são uma versão simples: em vez de acender luzes e ligar",
+    " * fornos de verdade, eles escrevem no console o que fariam. O tempo é",
+    " * simulado: esperar(500) não espera de verdade, só avança o relógio.",
+    " */",
+    "(function () {",
+    `  var DURACAO_MS = ${cena?.duracaoMs ?? 0};`,
+    `  var HORA_INICIAL = ${horaInicial === null ? "null" : horaInicial};`,
+    `  var MS_POR_HORA = ${RELOGIO.msPorHora};`,
+    `  var ACONTECIMENTOS = ${js(cena ? acontecimentos(cena) : [])};`,
+    "  var relogioMs = 0;",
+    "  var proximo = 0;",
+    "  var acabou = false;",
+    "  var FIM = { fimDaSimulacao: true };",
+    "",
+    "  function doisDigitos(n) { return (n < 10 ? \"0\" : \"\") + n; }",
+    "  /** O instante, como o relógio da cena mostra: 07:30 (com relógio) ou 2,5 s. */",
+    "  function quando(ms) {",
+    "    if (HORA_INICIAL === null) return (ms / 1000).toFixed(1).replace(\".\", \",\") + \" s\";",
+    "    var minutos = Math.floor((ms / MS_POR_HORA) * 60);",
+    "    return doisDigitos((HORA_INICIAL + Math.floor(minutos / 60)) % 24) + \":\" + doisDigitos(minutos % 60);",
+    "  }",
+    "  function avisar(texto) { console.log(\"[\" + quando(relogioMs) + \"] \" + texto); }",
+    "  /** O mundo anda até o instante: quem chega, quem vai embora, quem aperta. */",
+    "  function andarAte(ms) {",
+    "    while (proximo < ACONTECIMENTOS.length && ACONTECIMENTOS[proximo].ms <= ms) {",
+    "      var acontecimento = ACONTECIMENTOS[proximo++];",
+    "      console.log(\"[\" + quando(acontecimento.ms) + \"] \" + acontecimento.texto);",
+    "    }",
+    "  }",
+    "  function pessoasAgora() {",
+    "    var dentro = 0;",
+    "    for (var i = 0; i < ACONTECIMENTOS.length && ACONTECIMENTOS[i].ms <= relogioMs; i++) {",
+    "      if (ACONTECIMENTOS[i].tipo === \"chega\") dentro++;",
+    "      if (ACONTECIMENTOS[i].tipo === \"sai\") dentro--;",
+    "    }",
+    "    return dentro;",
+    "  }",
+    "  function apertosAte(id) {",
+    "    var vezes = 0;",
+    "    for (var i = 0; i < ACONTECIMENTOS.length && ACONTECIMENTOS[i].ms <= relogioMs; i++) if (ACONTECIMENTOS[i].tipo === \"aperta\" && ACONTECIMENTOS[i].dispositivo === id) vezes++;",
+    "    return vezes;",
+    "  }",
+    "  /** Depois do fim da simulação, nada mais roda (nem um try/catch segura). */",
+    "  function aindaRoda() { if (acabou) throw FIM; }",
+    "  function soLeitura(nome, comando) { throw new TypeError(nome + \" só dá para ler.\" + (comando ? \" Use \" + comando + \".\" : \" Quem muda é o mundo.\")); }",
+    "  function numeroNaFaixa(valor, nome, minimo, maximo, inteiro) {",
+    "    if (typeof valor !== \"number\" || valor !== valor) throw new TypeError(nome + \" precisa ser um número, de \" + minimo + \" a \" + maximo + \".\");",
+    "    if (valor < minimo || valor > maximo || (inteiro && Math.floor(valor) !== valor)) throw new RangeError(nome + \" vai de \" + minimo + \" a \" + maximo + \": \" + valor + \" não vale.\");",
+    "    return valor;",
+    "  }",
+    "  function esperar(ms) {",
+    "    aindaRoda();",
+    "    if (typeof ms !== \"number\" || ms !== ms) throw new TypeError(\"esperar precisa de um número: quantos milissegundos esperar, como esperar(500).\");",
+    "    if (ms < 0) throw new RangeError(\"esperar não volta no tempo: use um número de 0 para cima.\");",
+    "    var alvo = relogioMs + ms;",
+    "    if (alvo >= DURACAO_MS) { andarAte(DURACAO_MS); relogioMs = DURACAO_MS; acabou = true; throw FIM; }",
+    "    andarAte(alvo);",
+    "    relogioMs = alvo;",
+    "  }",
+    ...tipos.map((tipo) => FABRICAS[tipo]),
+    "",
+    "  // Os aparelhos da cena, com os nomes que o seu código usa.",
+    ...(cena?.dispositivos ?? []).map((d) => `  var ${d.id} = ${criarDispositivo(d)};`),
+    "",
+    "  console.log(\"" + contrato.projeto.replace(/"/g, "'") + ": começou a simulação.\");",
+    "  try {",
+    "    // ======================= O SEU PROGRAMA =======================",
+    ...codigo.split("\n").map((linha) => (linha ? `    ${linha}` : "")),
+    "    // ==============================================================",
+    "  } catch (erro) {",
+    "    if (erro !== FIM) throw erro;",
+    "  }",
+    "  // O mundo continua até o fim, mesmo que o programa tenha parado antes.",
+    "  andarAte(DURACAO_MS);",
+    "  relogioMs = DURACAO_MS;",
+    "  console.log(\"[\" + quando(DURACAO_MS) + \"] Fim da simulação.\");",
+    "})();",
+    "",
+  ];
+  return linhas.join("\n");
+}

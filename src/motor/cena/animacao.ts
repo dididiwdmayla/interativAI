@@ -27,6 +27,11 @@ function inicialDe(rastro: RastroCena, dispositivo: string, propriedade: string)
   return rastro.inicial[dispositivo]?.[propriedade];
 }
 
+/** Os toques da campainha até o instante (ela balança um pouco depois de cada um). */
+export function mudancasDaCampainha(rastro: RastroCena, dispositivo: string, tempoMs: number, filtro: FiltroPasso | null = null): MudancaCena[] {
+  return mudancasDe(rastro, dispositivo, "toques", tempoMs, filtro);
+}
+
 /** Quanto o portão está aberto no instante: 0 fechado, 1 aberto inteiro (no meio, deslizando). */
 export function aberturaDoPortao(rastro: RastroCena, dispositivo: string, tempoMs: number, filtro: FiltroPasso | null = null): number {
   let posicao = inicialDe(rastro, dispositivo, "aberto") === true ? 1 : 0;

@@ -17,6 +17,9 @@ import {
   secoesDoEscopo,
   valorDoNome,
 } from "@/motor/depurador";
+import { REGRAS_DE_FASE } from "@/conteudo/checagens";
+import { FASE_BANCADA_CONSOLE, FASE_DEMO_DEPURADOR } from "@/conteudo/laboratorio/bancadaLogica";
+import { criarSimulacao } from "@/motor/simulacao";
 
 const PROGRAMA = [
   "function dobro(n) {", // 1
@@ -148,15 +151,11 @@ describe("painéis", () => {
 
 describe("depurador na fábrica (simulação, checagens e progresso)", () => {
   it("a demonstração do /lab passa em todas as regras de fase", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_DEMO_DEPURADOR } = await import("@/conteudo/laboratorio/bancadaLogica");
     const problemas = REGRAS_DE_FASE.flatMap((regra) => regra.checar(FASE_DEMO_DEPURADOR, { unidades: [], fases: [FASE_DEMO_DEPURADOR] }).map((p) => `${regra.id}: ${p}`));
     expect(problemas).toEqual([]);
   });
 
   it("na simulação, o Snippet pausado segura o executouCodigo até o programa terminar", async () => {
-    const { FASE_DEMO_DEPURADOR } = await import("@/conteudo/laboratorio/bancadaLogica");
-    const { criarSimulacao } = await import("@/motor/simulacao");
     const simulacao = criarSimulacao(FASE_DEMO_DEPURADOR);
     simulacao.executar([{ tipo: "alternarPontoDeParada", linha: 9 }]);
     // A linha 9 é só o fecha-chave: o ponto escorrega para a 10.
@@ -174,8 +173,6 @@ describe("depurador na fábrica (simulação, checagens e progresso)", () => {
   });
 
   it("sabotagem: validador do depurador sem o depurador, ferramenta faltando e linha 0", async () => {
-    const { REGRAS_DE_FASE } = await import("@/conteudo/checagens");
-    const { FASE_BANCADA_CONSOLE, FASE_DEMO_DEPURADOR } = await import("@/conteudo/laboratorio/bancadaLogica");
     const texto = (fase: Parameters<(typeof REGRAS_DE_FASE)[number]["checar"]>[0]) =>
       REGRAS_DE_FASE.flatMap((regra) => regra.checar(fase, { unidades: [], fases: [fase] })).join("\n");
     const semDepurador = { ...FASE_BANCADA_CONSOLE, objetivos: [{ ...FASE_BANCADA_CONSOLE.objetivos[1], validador: { tipo: "pausouNaLinha" as const, linha: 2 } }] };

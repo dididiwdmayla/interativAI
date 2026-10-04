@@ -18,6 +18,7 @@ import {
   type ErroExecucao,
   type EscopoMemoria,
   type FotoMemoria,
+  type InstantePausa,
   type MedicaoPassos,
   type NivelSaida,
   type ResultadoAvaliacao,
@@ -737,13 +738,18 @@ export class NucleoExecutor {
    * fora de uma execução: a cena volta como estava (um teste não liga a
    * lâmpada da simulação de verdade).
    */
-  private semMexerNaCena<T>(rodar: () => T): T {
+  private semMexerNaCena<T>(rodar: () => T, instante?: InstantePausa): T {
     const cena = this.cena;
     if (!cena) return rodar();
     const marca = cena.marcar();
-    // Cada teste começa com a cena do começo (o relógio em zero).
-    cena.reiniciar();
-    cena.comecarExecucao(0);
+    if (instante) {
+      // O depurador pausado: a cena no instante da pausa, como o palco.
+      cena.posicionar(instante.tempoMs, instante.passo);
+    } else {
+      // Cada teste começa com a cena do começo (o relógio em zero).
+      cena.reiniciar();
+      cena.comecarExecucao(0);
+    }
     try {
       return rodar();
     } finally {
@@ -781,9 +787,11 @@ export class NucleoExecutor {
    * depurador pausado): as variáveis valem o que valiam naquele passo, no
    * quadro `quadro` (0 = o global). As globais que ainda não existiam ali dão
    * ReferenceError, como no Chrome. Roda numa cópia: nada muda no programa.
+   * (Cena) `instante`: o passo pausado; os dispositivos valem o que valiam
+   * nele (sem ele, a cena do começo).
    */
-  avaliarNaFoto(expressoes: readonly string[], foto: FotoMemoria, quadro: number): ResultadoAvaliacao[] {
-    return this.semMexerNaCena(() => this.avaliarNaFotoDentro(expressoes, foto, quadro));
+  avaliarNaFoto(expressoes: readonly string[], foto: FotoMemoria, quadro: number, instante?: InstantePausa): ResultadoAvaliacao[] {
+    return this.semMexerNaCena(() => this.avaliarNaFotoDentro(expressoes, foto, quadro), instante);
   }
 
   private avaliarNaFotoDentro(expressoes: readonly string[], foto: FotoMemoria, quadro: number): ResultadoAvaliacao[] {

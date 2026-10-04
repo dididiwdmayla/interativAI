@@ -29,6 +29,7 @@ import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
 import { chaveMedicao, textoDePassos } from "./desempenho";
 import { chaveLinhaDoTempo, textoDoTempo, textoDoValorCena } from "./cena/modelo";
 import { conferirEstado, conferirReacao, conferirSequencia, textoDaLinhaDoTempo } from "./cena/validar";
+import { ehContrato, partesVisiveis } from "./contrato/modelo";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -649,11 +650,13 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
     }
     case "variosCenarios": {
       // O mesmo validador em cada linha do tempo: o código rodou com cada uma no último Executar.
-      const filhos = validador.linhasDoTempo.map((linha) => {
+      const filhos = validador.linhasDoTempo.map((linha, indice) => {
         const rastro = contexto.programa?.cenarios?.[chaveLinhaDoTempo(linha)];
+        const extra = validador.porLinha?.[indice];
+        const alvo: Validador = extra ? { tipo: "todos", validadores: [validador.validador, extra] } : validador.validador;
         const resultado: ResultadoValidador = rastro
-          ? avaliarDetalhado(validador.validador, { ...contexto, programa: { ...(contexto.programa ?? { memoria: null, testes: {} }), cena: rastro } })
-          : { passou: false, descricao: descreverValidador(validador.validador), detalhe: "ainda não rodou com esta linha do tempo (clique em Executar)" };
+          ? avaliarDetalhado(alvo, { ...contexto, programa: { ...(contexto.programa ?? { memoria: null, testes: {} }), cena: rastro } })
+          : { passou: false, descricao: descreverValidador(alvo), detalhe: "ainda não rodou com esta linha do tempo (clique em Executar)" };
         return { ...resultado, descricao: `com ${textoDaLinhaDoTempo(linha)}: ${resultado.descricao}` };
       });
       const falhou = filhos.findIndex((filho) => !filho.passou);
@@ -882,8 +885,8 @@ export function motivosDeNaoCaber(documento: Document, largura: number): string[
 export type ItemChecklist = { id: string; descricao: string; validador: Validador; solucaoDeTeste: readonly Acao[] };
 
 /** Os itens do checklist da fase (partes do desafio, requisitos do projeto), ou null na prática. */
-export function itensDoChecklist(fase: Fase): readonly ItemChecklist[] | null {
-  if (fase.tipo === "desafio") return fase.partes;
+export function itensDoChecklist(fase: Fase, mudou = false): readonly ItemChecklist[] | null {
+  if (fase.tipo === "desafio") return ehContrato(fase) ? partesVisiveis(fase, mudou) : fase.partes;
   if (fase.tipo === "projeto-ponte") return fase.requisitos;
   return null;
 }
@@ -898,8 +901,9 @@ export function recalcularPartesFeitas(
   fase: FaseDesafio | FaseProjetoPonte,
   partesFeitas: readonly string[],
   contexto: ContextoValidacao,
+  mudou = false,
 ): string[] {
-  return (itensDoChecklist(fase) ?? [])
+  return (itensDoChecklist(fase, mudou) ?? [])
     .filter((parte) => {
       const passaAgora = avaliarValidador(parte.validador, contexto);
       if (validadorTravado(parte.validador)) return partesFeitas.includes(parte.id) || passaAgora;

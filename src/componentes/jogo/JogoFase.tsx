@@ -91,8 +91,17 @@ import { falaDoLink } from "@/lib/linksPrevia";
 import { faseAbreComMeta } from "@/lib/metaDaUnidade";
 import { type EstadoFaseSalvo, PROJETO_VAZIO, type ProjetoSalvo, PROPORCAO_PREVIA } from "@/lib/progresso";
 import { marcarPassoDoGuia, salvarLinkPublicado } from "@/lib/projetos";
-import { type ArquivosDoProjeto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
+import { type ArquivosDoProjeto, baixarTexto, baixarZip, ligaOCss, montarArquivos } from "@/lib/exportarProjeto";
 import { DialogoLevarProMundo } from "@/componentes/projeto/DialogoLevarProMundo";
+import { CabecalhoContrato } from "@/componentes/contrato/CabecalhoContrato";
+import { ConversaCliente } from "@/componentes/contrato/ConversaCliente";
+import { FolhaDocumento, JanelaDocumento } from "@/componentes/contrato/DocumentoCliente";
+import { TelaRequisitos } from "@/componentes/contrato/TelaRequisitos";
+import { ehContrato, idsDasNovas, montarRelatorio, resumoDosCasos } from "@/motor/contrato/modelo";
+import { TelaEntrega } from "@/componentes/contrato/TelaEntrega";
+import { ComemoracaoIlha } from "@/componentes/contrato/ComemoracaoIlha";
+import { DialogoLevarProMundoJs } from "@/componentes/contrato/DialogoLevarProMundoJs";
+import { arquivoDoContrato, programaParaLevar } from "@/motor/contrato/levarProMundo";
 import { GuiaPublicacao } from "@/componentes/projeto/GuiaPublicacao";
 import { IconeLevarProMundo } from "@/componentes/icones/IconeLevarProMundo";
 import { rotuloDaFase } from "@/motor/tiposDeFase";
@@ -101,7 +110,7 @@ import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import type { EventoFase } from "@/motor/eventos";
-import { enunciadoDe, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
+import { enunciadoDe, FALA_CONTRATO, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
@@ -1234,9 +1243,31 @@ export function JogoFase({
   }, [simulandoViewport, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
   const projeto = fase.tipo === "projeto-ponte" ? fase : null;
-  /** Desafio e projeto-ponte: o checklist (partes ou requisitos). */
-  const itensChecklist = itensDoChecklist(fase);
-  const tituloChecklist = projeto ? "Requisitos do projeto" : "Checklist do desafio";
+  /** (Contrato) O desafio é o trabalho de um cliente: briefing, requisitos, mudança e entrega. */
+  const contrato = ehContrato(fase) ? fase : null;
+  const estadoContrato = estado.contrato;
+  /** Desafio e projeto-ponte: o checklist (partes ou requisitos); no contrato, as de agora (antes ou depois da mudança). */
+  // Antes da etapa de requisitos a lista fica vazia: é o aluno que monta, escolhendo os cartões.
+  const listaMontada = !estadoContrato || estadoContrato.etapa === "trabalho" || estadoContrato.etapa === "entrega" || estado.etapa === "concluida";
+  const itensChecklist = listaMontada ? itensDoChecklist(fase, estadoContrato?.mudou ?? false) : [];
+  const vazioDoChecklist = listaMontada ? undefined : "A lista sai da conversa com o cliente: você monta na etapa de requisitos.";
+  const tituloChecklist = contrato ? "Requisitos do trabalho" : projeto ? "Requisitos do projeto" : "Checklist do desafio";
+  const novasDoContrato = useMemo(() => (contrato && estadoContrato?.mudou ? idsDasNovas(contrato.contrato) : undefined), [contrato, estadoContrato?.mudou]);
+  const [documentoAberto, setDocumentoAberto] = useState(false);
+  /** (Contrato) A janela do Levar pro mundo: o .js com o programa, que roda fora do jogo. */
+  const [levarJsAberto, setLevarJsAberto] = useState(false);
+  const levaJs = contrato?.contrato.levarProMundo !== undefined && fase.programa?.snippet !== undefined;
+  const baixarPrograma = useCallback(() => {
+    if (!contrato) return;
+    baixarTexto(programaParaLevar({ contrato: contrato.contrato, cena: cenaDaFase(fase), codigo: programa.textoSnippet() }), arquivoDoContrato(contrato.contrato));
+    tocarEfeito("desbloqueio");
+    barramento.emitir({ tipo: "levouProMundo" });
+  }, [barramento, contrato, fase, programa]);
+  const abrirDocumento = useCallback(() => {
+    tocarEfeito("abrir-painel");
+    setDocumentoAberto(true);
+    barramento.emitir({ tipo: "leuDocumento" });
+  }, [barramento]);
 
   const apresentacoes = useApresentacoes({
     fase,
@@ -1419,7 +1450,9 @@ export function JogoFase({
 
   const tutor = useTutor({
     faseId: fase.id,
-    objetivo: desafio
+    objetivo: contrato
+      ? { id: "contrato", enunciado: FALA_CONTRATO.texto }
+      : desafio
       ? { id: "desafio", enunciado: FALA_DESAFIO.texto }
       : projeto
         ? { id: "projeto", enunciado: FALA_PROJETO.texto }
@@ -1757,6 +1790,9 @@ export function JogoFase({
         degrauMaximo={motor.degrauMaximo}
         desafio={desafio !== null}
         projeto={projeto !== null}
+        contrato={contrato !== null}
+        aoAlternarRever={contrato ? comClique(motor.alternarListaRever) : undefined}
+        rotuloPausa={estado.pausa === "mudancaDoCliente" ? "Voltar ao trabalho" : undefined}
         listaRever={
           desafio && (
             <ListaRever
@@ -1808,8 +1844,9 @@ export function JogoFase({
   const perguntaDaFala =
     tutor.pendente ?? (tutor.ultima && tutor.ultima.fala === estado.fala ? tutor.ultima.pergunta : null);
 
+  const topoContrato = contrato ? <CabecalhoContrato contrato={contrato.contrato} aoAbrirDocumento={abrirDocumento} /> : null;
   const checklist = itensChecklist ? (
-    <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
+    <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
   ) : null;
   const objetivoDaLinha = objetivoAtivo !== null ? objetivosNaTela[objetivoAtivo] : null;
 
@@ -1823,13 +1860,13 @@ export function JogoFase({
       )}
       {layout === "retrato" && itensChecklist && estado.etapa === "objetivos" && (
         <p className="px-1 text-xs font-bold text-texto-suave">
-          {projeto ? "Projeto" : "Desafio"}: {estado.partesFeitas.length} de {itensChecklist.length}{" "}
-          {projeto ? "requisitos cumpridos" : "partes feitas"}
+          {contrato ? "Contrato" : projeto ? "Projeto" : "Desafio"}: {estado.partesFeitas.length} de {itensChecklist.length}{" "}
+          {projeto || contrato ? "requisitos cumpridos" : "partes feitas"}
         </p>
       )}
       {layout === "paisagem" && itensChecklist && estado.etapa === "objetivos" && (
         <div className="max-h-40 shrink-0">
-          <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} />
+          <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
         </div>
       )}
       <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala} rabo={movel ? "baixo-direita" : "esquerda"}>
@@ -1848,7 +1885,7 @@ export function JogoFase({
     </>
   );
 
-  const rotuloFase = rotuloDaFase(fase.tipo, local.numero);
+  const rotuloFase = rotuloDaFase(fase.tipo, local.numero, fase.tipo === "desafio" && fase.contrato !== undefined);
   const botaoMapa = rotaDoMapa && !lab ? <BotaoMapa href={rotaDoMapa} compacto={movel} /> : null;
   const botaoVoltar = revisao ? (
     <Botao tamanho={movel ? "m" : "p"} onClick={comClique(() => aoVoltarAoDesafio?.())} className="min-h-9">
@@ -1895,7 +1932,9 @@ export function JogoFase({
       ? ""
       : temObjetivos(fase)
         ? (fase.objetivos[estado.objetivoAtual]?.id ?? "")
-        : fase.tipo === "desafio"
+        : contrato
+          ? `contrato-${estadoContrato?.etapa ?? "trabalho"}`
+          : fase.tipo === "desafio"
           ? "desafio"
           : "projeto";
 
@@ -2436,7 +2475,7 @@ export function JogoFase({
               ? {
                   total: itensChecklist.length,
                   resumo:
-                    estado.etapa === "concluida" ? (projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
+                    estado.etapa === "concluida" ? (contrato ? "Trabalho entregue!" : projeto ? "Projeto pronto!" : "Desafio completo!") : tituloChecklist,
                   lista: checklist,
                 }
               : undefined
@@ -2912,6 +2951,62 @@ export function JogoFase({
           />
         </>
       )}
+      {contrato && estadoContrato && (
+        <>
+          <ConversaCliente
+            key="briefing"
+            aberta={estado.etapa === "objetivos" && estadoContrato.etapa === "briefing" && estado.roteiro === null && !ferramentaEmCena}
+            titulo="Um cliente novo"
+            etiqueta="Cliente novo"
+            cliente={contrato.contrato.cliente}
+            falas={contrato.contrato.briefing}
+            depois={<FolhaDocumento contrato={contrato.contrato} mudou={false} />}
+            rotuloFim="Montar a lista de requisitos"
+            aoTerminar={comClique(motor.irParaRequisitos)}
+          />
+          <TelaRequisitos
+            aberta={estado.etapa === "objetivos" && estadoContrato.etapa === "requisitos"}
+            contrato={contrato.contrato}
+            escolhaSalva={estadoContrato.escolha}
+            tentativas={estadoContrato.tentativas}
+            aoConferir={motor.conferirListaDeRequisitos}
+          />
+          <ConversaCliente
+            key={`mudanca-${estadoContrato.mudou ? "sim" : "nao"}`}
+            aberta={estado.pausa === "mudancaDoCliente"}
+            titulo="Mensagem do cliente"
+            etiqueta="Mensagem nova"
+            cliente={contrato.contrato.cliente}
+            falas={contrato.contrato.mudanca.mensagem}
+            rotuloFim="Voltar ao trabalho"
+            aoTerminar={comClique(motor.seguir)}
+          />
+          <TelaEntrega
+            aberta={estado.etapa === "objetivos" && estadoContrato.etapa === "entrega"}
+            contrato={contrato.contrato}
+            relatorio={montarRelatorio({
+              fase: contrato,
+              feitas: estado.partesFeitas,
+              mudou: estadoContrato.mudou,
+              casos: casos.estado ? resumoDosCasos(casos.estado) : null,
+              cenarios: dadosCena ? new Set([chaveLinhaDoTempo(dadosCena.linhaDoTempo), ...cenariosDaFase(fase).map(chaveLinhaDoTempo)]).size : 0,
+              tempoMs: estadoContrato.tempoMs,
+            })}
+            aoEntregar={comClique(motor.entregar)}
+            comemoracao={<ComemoracaoIlha ilha={local.unidade.ilha} cliente={contrato.contrato.cliente} projeto={contrato.contrato.projeto} />}
+          />
+          {levaJs && (
+            <DialogoLevarProMundoJs
+              aberto={levarJsAberto}
+              arquivo={arquivoDoContrato(contrato.contrato)}
+              codigo={levarJsAberto ? programa.textoSnippet() : ""}
+              aoBaixar={baixarPrograma}
+              aoFechar={() => setLevarJsAberto(false)}
+            />
+          )}
+          <JanelaDocumento aberta={documentoAberto} contrato={contrato.contrato} mudou={estadoContrato.mudou} aoFechar={() => setDocumentoAberto(false)} />
+        </>
+      )}
       {desafioParaMeta && (
         <TelaMeta
           aberta={estado.etapa === "meta"}
@@ -2947,6 +3042,16 @@ export function JogoFase({
         extras={
           comLevarProMundo ? (
             <Botao variante="secundario" onClick={abrirLevarProMundo} data-levar-pro-mundo-conclusao>
+              Levar pro mundo
+            </Botao>
+          ) : levaJs ? (
+            <Botao
+              onClick={() => {
+                tocarEfeito("clique");
+                setLevarJsAberto(true);
+              }}
+              data-levar-programa
+            >
               Levar pro mundo
             </Botao>
           ) : undefined

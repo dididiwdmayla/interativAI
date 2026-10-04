@@ -48,7 +48,13 @@ export function conferirCena(cena: DadosCena): string[] {
     }
     if (!Number.isFinite(dispositivo.x) || !Number.isFinite(dispositivo.y)) problemas.push(`o dispositivo "${id}" sem posição (x, y)`);
     const ficha = CATALOGO_DISPOSITIVOS[dispositivo.tipo];
+    if (dispositivo.nome !== undefined && (!dispositivo.nome.trim() || dispositivo.nome.length > 24)) problemas.push(`o dispositivo "${id}" tem nome com ${dispositivo.nome.length} letras (de 1 a 24)`);
     for (const [nome, valor] of Object.entries(dispositivo.inicial ?? {})) {
+      // O relógio começa na hora que a cena diz (o resto do tempo é o mundo que conta).
+      if (dispositivo.tipo === "relogio" && nome === "hora") {
+        if (typeof valor !== "number" || !Number.isInteger(valor) || valor < 0 || valor > 23) problemas.push(`o relógio "${id}" começa na hora ${String(valor)} (de 0 a 23)`);
+        continue;
+      }
       const propriedade = ficha.propriedades.find((p) => p.nome === nome);
       if (!propriedade || propriedade.doMundo) {
         problemas.push(`o dispositivo "${id}" começa com "${nome}", que não é do estado de ${ficha.nome.toLowerCase()}`);
@@ -138,7 +144,10 @@ export function conferirValidadorDeCena(validador: Validador, cena: DadosCena, o
       if (validador.linhasDoTempo.length < 2) problemas.push(`${onde}: variosCenarios com ${validador.linhasDoTempo.length} linha(s) do tempo (pelo menos 2: é o que impede o código decorado)`);
       validador.linhasDoTempo.forEach((linha, i) => problemas.push(...conferirLinhaDoTempo(cena, linha, `${onde}: linhasDoTempo[${i}]`)));
       const dentro = (v: Validador): Validador[] => (v.tipo === "todos" || v.tipo === "algum" ? [v, ...v.validadores.flatMap(dentro)] : v.tipo === "nao" ? [v, ...dentro(v.validador)] : [v]);
-      for (const item of dentro(validador.validador)) {
+      if (validador.porLinha && validador.porLinha.length !== validador.linhasDoTempo.length) {
+        problemas.push(`${onde}: variosCenarios com ${validador.porLinha.length} validador(es) em porLinha para ${validador.linhasDoTempo.length} linhas do tempo (um para cada)`);
+      }
+      for (const item of [...dentro(validador.validador), ...(validador.porLinha ?? []).flatMap(dentro)]) {
         if (item.tipo === "variosCenarios") problemas.push(`${onde}: variosCenarios dentro de variosCenarios`);
         else if (!["estadoNaCena", "sequenciaNaCena", "reagiu", "todos", "algum", "nao"].includes(item.tipo)) problemas.push(`${onde}: dentro do variosCenarios só valem validadores de cena (veio ${item.tipo})`);
       }

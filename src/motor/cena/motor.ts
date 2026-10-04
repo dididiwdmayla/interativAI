@@ -24,8 +24,10 @@ import {
   type EstadoDispositivos,
   estadoInicialDaCena,
   estadoNoTempo,
+  type FiltroPasso,
   MAXIMO_MUDANCAS,
   type MudancaCena,
+  mudancaVale,
   type RastroCena,
   type ValorCena,
 } from "./modelo";
@@ -149,6 +151,20 @@ export class MotorCena {
     this.inicioUltima = marca.inicioUltima;
     this.fimCodigo = marca.fimCodigo;
     this.terminouPorTempo = marca.terminouPorTempo;
+  }
+
+  /**
+   * (Depurador pausado) A cena no instante de um passo da execução mais
+   * recente: o relógio nele e só as mudanças feitas até ali. O Observar e o
+   * Console pausado leem os dispositivos como estavam, igual ao palco.
+   * Use dentro de marcar/voltar (a simulação de verdade volta depois).
+   */
+  posicionar(tempoMs: number, passo: number) {
+    const filtro: FiltroPasso = { execucao: this.execucao, passo };
+    this.mudancas = this.mudancas.filter((mudanca) => mudancaVale(mudanca, tempoMs, { filtro }));
+    this.relogio = Math.max(0, Math.min(tempoMs, this.dados.duracaoMs));
+    this.estado = estadoNoTempo(this.rastroLeve(), this.relogio);
+    this.acabou = false;
   }
 
   /** O rastro da simulação de agora (uma cópia: as próximas execuções não mexem nela). */
@@ -290,8 +306,12 @@ export class MotorCena {
       case "ventilador":
         metodo("desligar", () => this.mudar(id, "velocidade", 0, "desligar"));
         break;
+      case "campainha":
+        metodo("tocar", () => this.mudar(id, "toques", Number(this.estado[id]?.toques ?? 0) + 1, "tocar"));
+        break;
       case "sensor":
       case "interruptor":
+      case "relogio":
         break;
     }
     return Object.preventExtensions(objeto);

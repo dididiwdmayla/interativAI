@@ -1,0 +1,230 @@
+{
+ "pratica": {
+  "id": "logica-programa-de-verdade-u1-f1",
+  "objetivos": [
+   {
+    "id": "ficha-do-relogio",
+    "solucaoDeTeste": [
+     {
+      "tipo": "abrirFicha",
+      "dispositivo": "relogio"
+     }
+    ]
+   },
+   {
+    "id": "hora-no-console",
+    "solucaoDeTeste": [
+     {
+      "tipo": "responderPrevisao",
+      "opcao": 1
+     },
+     {
+      "tipo": "executarNoConsole",
+      "codigo": "esperar(4000)"
+     },
+     {
+      "tipo": "executarNoConsole",
+      "codigo": "relogio.hora"
+     }
+    ]
+   },
+   {
+    "id": "plim",
+    "solucaoDeTeste": [
+     {
+      "tipo": "executarNoConsole",
+      "codigo": "campainha.tocar()"
+     }
+    ]
+   },
+   {
+    "id": "luz-na-abertura",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "while (true) {\n  if (relogio.hora >= 7) {\n    luz.ligar();\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   },
+   {
+    "id": "plim-na-porta",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "let tinhaGente = false;\nwhile (true) {\n  if (sensor.temGente && !tinhaGente) {\n    campainha.tocar();\n  }\n  tinhaGente = sensor.temGente;\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   }
+  ]
+ },
+ "contrato": {
+  "id": "logica-programa-de-verdade-u1-f2",
+  "escolha": {
+   "cartoes": [
+    "luz",
+    "letreiro",
+    "forno",
+    "contador"
+   ],
+   "lacunas": {
+    "luz": [
+     1,
+     1
+    ],
+    "forno": [
+     1
+    ],
+    "contador": [
+     0
+    ]
+   }
+  },
+  "partes": [
+   {
+    "id": "plano",
+    "solucaoDeTeste": [
+     {
+      "tipo": "porPasso",
+      "passo": "inicio"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "forno"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "repetir"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "luz"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "letreiro"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "contar"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "avisar"
+     },
+     {
+      "tipo": "porPasso",
+      "passo": "esperar"
+     },
+     {
+      "tipo": "levarPlanoProCodigo"
+     }
+    ]
+   },
+   {
+    "id": "luz",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "// Plano: Vitrine automática\n// 1. Guardar as promoções e começar o contador de clientes em zero\n// 2. Ligar o forno no começo do dia\n// 3. Repetir o dia inteiro, de meia em meia hora\n// 4. Acender a luz se a padaria estiver aberta; senão, apagar\n// 5. Mostrar a promoção da hora ou, depois de fechar, o total de clientes\n// 6. Contar cada cliente que chega pelo sensor da porta\n// 7. Tocar a campainha uma vez quando o forno chegar a 180 graus\n// 8. Esperar meia hora\n\nfunction aberta(hora) {\n  return hora >= 7 && hora < 19;\n}\n\nwhile (true) {\n  if (aberta(relogio.hora)) {\n    luz.ligar();\n  } else {\n    luz.desligar();\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   },
+   {
+    "id": "letreiro",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "// Plano: Vitrine automática\n// 1. Guardar as promoções e começar o contador de clientes em zero\n// 2. Ligar o forno no começo do dia\n// 3. Repetir o dia inteiro, de meia em meia hora\n// 4. Acender a luz se a padaria estiver aberta; senão, apagar\n// 5. Mostrar a promoção da hora ou, depois de fechar, o total de clientes\n// 6. Contar cada cliente que chega pelo sensor da porta\n// 7. Tocar a campainha uma vez quando o forno chegar a 180 graus\n// 8. Esperar meia hora\n\nfunction aberta(hora) {\n  return hora >= 7 && hora < 19;\n}\n\nconst promocoes = [\"SONHO R$ 4\", \"PÃO QUEIJO R$ 3\", \"CAFÉ+BOLO R$ 8\"];\n\nwhile (true) {\n  const hora = relogio.hora;\n  if (aberta(hora)) {\n    luz.ligar();\n    letreiro.mostrar(promocoes[(hora - 7) % promocoes.length]);\n  } else {\n    luz.desligar();\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   },
+   {
+    "id": "forno",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "// Plano: Vitrine automática\n// 1. Guardar as promoções e começar o contador de clientes em zero\n// 2. Ligar o forno no começo do dia\n// 3. Repetir o dia inteiro, de meia em meia hora\n// 4. Acender a luz se a padaria estiver aberta; senão, apagar\n// 5. Mostrar a promoção da hora ou, depois de fechar, o total de clientes\n// 6. Contar cada cliente que chega pelo sensor da porta\n// 7. Tocar a campainha uma vez quando o forno chegar a 180 graus\n// 8. Esperar meia hora\n\nfunction aberta(hora) {\n  return hora >= 7 && hora < 19;\n}\n\nconst promocoes = [\"SONHO R$ 4\", \"PÃO QUEIJO R$ 3\", \"CAFÉ+BOLO R$ 8\"];\nlet avisou = false;\nforno.ligar();\n\nwhile (true) {\n  const hora = relogio.hora;\n  if (aberta(hora)) {\n    luz.ligar();\n    letreiro.mostrar(promocoes[(hora - 7) % promocoes.length]);\n  } else {\n    luz.desligar();\n  }\n  if (!avisou && forno.temperatura >= 180) {\n    campainha.tocar();\n    avisou = true;\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   },
+   {
+    "id": "contador",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "// Plano: Vitrine automática\n// 1. Guardar as promoções e começar o contador de clientes em zero\n// 2. Ligar o forno no começo do dia\n// 3. Repetir o dia inteiro, de meia em meia hora\n// 4. Acender a luz se a padaria estiver aberta; senão, apagar\n// 5. Mostrar a promoção da hora ou, depois de fechar, o total de clientes\n// 6. Contar cada cliente que chega pelo sensor da porta\n// 7. Tocar a campainha uma vez quando o forno chegar a 180 graus\n// 8. Esperar meia hora\n\nfunction aberta(hora) {\n  return hora >= 7 && hora < 19;\n}\n\nconst promocoes = [\"SONHO R$ 4\", \"PÃO QUEIJO R$ 3\", \"CAFÉ+BOLO R$ 8\"];\nlet clientes = 0;\nlet tinhaGente = false;\nlet avisou = false;\nforno.ligar();\n\nwhile (true) {\n  const hora = relogio.hora;\n  if (aberta(hora)) {\n    luz.ligar();\n    letreiro.mostrar(promocoes[(hora - 7) % promocoes.length]);\n  } else {\n    luz.desligar();\n    if (hora >= 19) letreiro.mostrar(\"CLIENTES: \" + clientes);\n  }\n  if (sensor.temGente && !tinhaGente) clientes = clientes + 1;\n  tinhaGente = sensor.temGente;\n  if (!avisou && forno.temperatura >= 180) {\n    campainha.tocar();\n    avisou = true;\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   },
+   {
+    "id": "testes",
+    "solucaoDeTeste": [
+     {
+      "tipo": "escreverCaso",
+      "entrada": "6",
+      "esperado": "false"
+     },
+     {
+      "tipo": "escreverCaso",
+      "entrada": "7",
+      "esperado": "true"
+     },
+     {
+      "tipo": "escreverCaso",
+      "entrada": "12",
+      "esperado": "true"
+     },
+     {
+      "tipo": "escreverCaso",
+      "entrada": "19",
+      "esperado": "false"
+     },
+     {
+      "tipo": "rodarCasos"
+     }
+    ]
+   },
+   {
+    "id": "luz-movimento",
+    "solucaoDeTeste": [
+     {
+      "tipo": "definirSnippet",
+      "codigo": "// Plano: Vitrine automática\n// 1. Guardar as promoções e começar o contador de clientes em zero\n// 2. Ligar o forno no começo do dia\n// 3. Repetir o dia inteiro, de meia em meia hora\n// 4. Acender a luz se a padaria estiver aberta; senão, apagar\n// 5. Mostrar a promoção da hora ou, depois de fechar, o total de clientes\n// 6. Contar cada cliente que chega pelo sensor da porta\n// 7. Tocar a campainha uma vez quando o forno chegar a 180 graus\n// 8. Esperar meia hora\n\nfunction aberta(hora) {\n  return hora >= 7 && hora < 19;\n}\n\nconst promocoes = [\"SONHO R$ 4\", \"PÃO QUEIJO R$ 3\", \"CAFÉ+BOLO R$ 8\"];\nlet clientes = 0;\nlet tinhaGente = false;\nlet avisou = false;\nlet semNinguem = 0;\nforno.ligar();\n\nwhile (true) {\n  const hora = relogio.hora;\n  if (aberta(hora)) {\n    if (sensor.temGente) {\n      semNinguem = 0;\n    } else {\n      semNinguem = semNinguem + 500;\n    }\n    if (semNinguem <= 2000) {\n      luz.ligar();\n    } else {\n      luz.desligar();\n    }\n    letreiro.mostrar(promocoes[(hora - 7) % promocoes.length]);\n  } else {\n    luz.desligar();\n    semNinguem = 0;\n    if (hora >= 19) letreiro.mostrar(\"CLIENTES: \" + clientes);\n  }\n  if (sensor.temGente && !tinhaGente) clientes = clientes + 1;\n  tinhaGente = sensor.temGente;\n  if (!avisou && forno.temperatura >= 180) {\n    campainha.tocar();\n    avisou = true;\n  }\n  esperar(500);\n}"
+     },
+     {
+      "tipo": "executarSnippet"
+     }
+    ]
+   }
+  ],
+  "novas": [
+   {
+    "parte": "luz-movimento",
+    "substitui": "luz"
+   }
+  ],
+  "depoisDe": [
+   "luz",
+   "letreiro"
+  ],
+  "arquivo": "vitrine-pao-de-mel.js"
+ }
+}
