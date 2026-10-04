@@ -24,6 +24,8 @@ import {
   textoDoTempoDeTrabalho,
 } from "@/motor/contrato/modelo";
 import { conferirContrato } from "@/motor/contrato/conferir";
+import { CLIENTES } from "@/motor/contrato/clientes";
+import { formaDaLetra } from "@/motor/contrato/expressoes";
 import { criarSimulacao } from "@/motor/simulacao";
 import { recalcularPartesFeitas } from "@/motor/validadores";
 
@@ -158,5 +160,19 @@ describe("sabotagens", () => {
     const lista = conferirContrato(fase).join("\n");
     expect(lista).toMatch(/parte "ficha": num contrato, toda parte tem a pergunta/);
     expect(lista).toMatch(/partes novas \(da mudança\) vêm depois/);
+  });
+});
+
+describe("o kit de clientes", () => {
+  it("a boca acompanha a letra: abre nas vogais (com acento também), quase fecha nas consoantes, descansa no resto", () => {
+    expect(["a", "Á", "e", "í", "o", "ú", "m", "ç", " ", "!", undefined].map(formaDaLetra)).toEqual(["a", "a", "e", "e", "o", "o", "m", "m", null, null, null]);
+  });
+
+  it("os clientes têm nome e negócio curtos e ids iguais à chave", () => {
+    for (const [chave, cliente] of Object.entries(CLIENTES)) {
+      expect(cliente.id).toBe(chave);
+      expect(cliente.nome.length).toBeLessThanOrEqual(24);
+      expect(cliente.negocio.length).toBeLessThanOrEqual(40);
+    }
   });
 });

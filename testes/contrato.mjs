@@ -48,8 +48,13 @@ await pagina.locator("[data-conversa-cliente]").waitFor();
 await modalAssentado();
 conferir((await objetivoAtual()) === "contrato-briefing", `${MODO}: o contrato começa no briefing`);
 conferir((await pagina.locator("[data-checklist-vazio]").count()) > 0 || movel, `${MODO}: antes dos requisitos, o checklist não entrega a lista`);
+// O cliente fala: a boca mexe enquanto o texto aparece, com o rosto da expressão da fala.
+const retrato = pagina.locator("[data-conversa-cliente] [data-cliente]");
+conferir((await retrato.getAttribute("data-cliente")) === "rafa-estudio", `${MODO}: o cliente do contrato aparece no briefing`);
+conferir((await retrato.getAttribute("data-expressao")) === "preocupado", `${MODO}: o rosto do cliente segue a expressão da fala`);
 // Continuar no meio da fala completa a fala; depois passa para a próxima.
 await tocar(pagina.locator("[data-conversa-continuar]"));
+conferir((await retrato.getAttribute("data-falando")) === "nao", `${MODO}: com a fala completa, a boca para de mexer`);
 conferir((await pagina.locator("[data-conversa-cliente]").getAttribute("data-fala-completa")) === "sim", `${MODO}: Continuar no meio completa a fala do cliente`);
 for (let i = 0; i < 10; i++) {
   if (await pagina.locator("[data-conversa-fim]").isVisible().catch(() => false)) break;
