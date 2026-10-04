@@ -288,6 +288,11 @@
       "logica-algoritmos-essenciais-u3-f2",
       "logica-algoritmos-essenciais-u3-f3"
     ],
+    "logica-algoritmos-essenciais-u4": [
+      "logica-algoritmos-essenciais-u4-f1",
+      "logica-algoritmos-essenciais-u4-f2",
+      "logica-algoritmos-essenciais-u4-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1713,6 +1718,29 @@
         "testes"
       ]
     },
+    "logica-algoritmos-essenciais-u4-f1": {
+      "objetivos": [
+        "contar-guiado",
+        "grafico-guiado",
+        "contar-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u4-f2": {
+      "objetivos": [
+        "limite-guiado",
+        "vizinho-guiado",
+        "eficiente-sozinho",
+        "comparar-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u4-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1735,6 +1763,12 @@
     }
   },
   "itensRevisao": [
+    "custo-em-passos-1",
+    "custo-em-passos-2",
+    "crescimento-dos-passos-1",
+    "crescimento-dos-passos-2",
+    "evitar-trabalho-repetido-1",
+    "evitar-trabalho-repetido-2",
     "recursao-js-1",
     "recursao-js-2",
     "caso-base-recursao-1",

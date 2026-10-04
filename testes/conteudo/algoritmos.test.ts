@@ -37,3 +37,25 @@ describe('Algoritmos essenciais: provas pedagógicas', () => {
     expect(sim.avaliar(val).passou).toBe(true);
   });
 });
+
+
+it('comparar cada par acerta a resposta, mas reprova no orçamento de desempenho', () => {
+  const fase = fases.find(f => f.id === 'logica-algoritmos-essenciais-u4-f2')!;
+  if (fase.tipo !== 'pratica') throw new Error('Fase de prática esperada');
+  const sim = criarSimulacao(fase);
+  sim.executar([{ tipo: 'definirSnippet', codigo: `function conferir(lista) {
+    for (let i = 0; i < lista.length; i++) {
+      for (let j = i + 1; j < lista.length; j++) {
+        if (lista[i] === lista[j]) return true;
+      }
+    }
+    return false;
+  }` }, { tipo: 'executarSnippet' }]);
+  const objetivo = fase.objetivos.find(o => o.id === 'eficiente-sozinho')!;
+  const val = objetivo.validador;
+  if (val.tipo !== 'todos') throw new Error('Validação conjunta esperada');
+  expect(sim.avaliar(val.validadores[0]).passou).toBe(true);
+  expect(sim.avaliar(val).passou).toBe(false);
+  sim.executar(objetivo.solucaoDeTeste!);
+  expect(sim.avaliar(val).passou).toBe(true);
+});

@@ -118,3 +118,9 @@ Branch `ccr-c810c095-jo1u85`, a partir de `claude/intelligent-pascal-5va93x`
 - 3 fases com habilidade guiada e sozinha, desafio composto e cena própria.
 - 3 conceitos com temas; 6 itens de revisão em outros contextos.
 - Verificação: testar:conteudo verde (17.544 verificações); jornada pelo mapa nos três layouts com RangeError e molduras recursivas no palco, publicar:conteudo, build e lint verdes.
+
+## Zona Algoritmos essenciais: U4 — Por que isso trava?
+
+- 3 fases com habilidade guiada e sozinha, desafio composto e cena própria.
+- 3 conceitos com temas; 6 itens de revisão em outros contextos.
+- Verificação: testar:conteudo verde (17.779 verificações); jornada pelo mapa nos três layouts com gráfico, proteção de passos e bordas, publicar:conteudo, build e lint verdes.

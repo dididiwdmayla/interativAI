@@ -17,6 +17,10 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"custo-em-passos": {"nome": "Custo em passos", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
+"crescimento-dos-passos": {"nome": "Crescimento dos passos", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
+"evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},
+
 "recursao-js": {"nome": "Recursão", "resumo": "Uma função chama ela mesma para resolver uma versão menor do problema; cada chamada ganha uma moldura.", "temas": ["logica"]},
 "caso-base-recursao": {"nome": "Caso de parada da recursão", "resumo": "O caso base devolve uma resposta sem nova chamada; sem alcançá-lo, a recursão continua até a proteção cortar.", "temas": ["logica"]},
 "problema-menor-recursao": {"nome": "Um problema menor a cada chamada", "resumo": "A cada chamada, diminuir o número ou avançar na lista aproxima a função do caso de parada.", "temas": ["logica", "desempenho"]},
