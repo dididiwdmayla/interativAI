@@ -29,6 +29,16 @@ núcleo comum.
 
 ### Feito
 
+- **Zona Algoritmos essenciais completa (U1 a U4):** Buscar (linear e
+  binária só em lista ordenada), Ordenar (seleção, bolha e sort numérico),
+  Recursão (molduras e caso de parada) e Por que isso trava? (passos e
+  crescimento). 13 fases, 12 conceitos com temas e 24 itens de revisão;
+  quatro cenas diferentes com o kit existente, desafios em tela composta
+  e casos de borda. Binária até 130 passos e vizinhos até 4.500, ambos
+  medidos com 1.000 itens. Jornadas nos três layouts, conteúdo, publicação,
+  build, lint e bateria de conteúdo em produção verdes.
+  Detalhe em `docs/PROGRESSO.md`.
+
 - **Rodada 29: formato contrato e o contrato da Lógica:** o "TCC" de fim de
   ilha como dados (um desafio com o campo `contrato`, em
   `src/motor/contrato/`): briefing do cliente com o documento do pedido,
@@ -550,9 +560,9 @@ núcleo comum.
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
     pro mundo de cada ilha (o site com interação, o sistema com dados): o
     da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
-  - Enquanto as zonas Depuração, Algoritmos essenciais e Estruturas de
-    dados não existem, o contrato abre logo depois de Resolvendo problemas;
-    a fase 1 da unidade apresenta a cena (é a primeira cena publicada).
+  - Enquanto as zonas Depuração e Estruturas de dados não existem, o
+    contrato abre depois de Algoritmos essenciais; a fase 1 da unidade
+    apresenta os aparelhos específicos da padaria.
   - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
     casos de teste (o divisor arrasta). Em pé, a cena aberta aperta o
     código; ela recolhe sozinha só com o teclado aberto.
@@ -688,7 +698,7 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zonas Algoritmos essenciais, Estruturas de dados e Depuração, já com
+1. Zona Estruturas de dados; depois, Depuração, já com
    cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
    fase com cena, diferente das anteriores; guia, seção 30). A Depuração
    pode usar cenas com o depurador (o Observar e o Console pausados leem a
