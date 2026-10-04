@@ -473,7 +473,32 @@ núcleo comum.
   e pedidos da Padaria Pão de Mel, desafios em contextos novos e missão
   verificável no Console real. Validação por conteúdo de listas/objetos,
   um commit por unidade e jornadas nos três layouts. Detalhe em
-  `docs/PROGRESSO.md` e rodada curta no `docs/ATRITOS-FABRICA.md`.
+  `docs/arquivo/PROGRESSO-rodada-24.md` e rodada curta no `docs/ATRITOS-FABRICA.md`.
+
+- **Rodada 26: motor de resolução de problemas (tela composta)**:
+  - **Composição de áreas:** a prática e o desafio declaram `areas`
+    (`plano`, `snippet`, `palco`, `testes`) e o motor monta a tela, sem
+    tipo novo de fase. Os tipos publicados seguem com as telas deles (o
+    porquê no `PROJETO.md`); nenhuma fase publicada declara áreas.
+  - **Plano junto do código:** o quadro de passos (ordenar ou agrupar)
+    fica editável o tempo todo; "Levar pro código" escreve o plano como
+    comentários numerados no topo do Snippet, sem apagar código, e mexer no
+    plano reescreve só esse bloco; tocar num passo acende o comentário
+    dele. Validador `planoComentado`.
+  - **Casos de teste do aluno:** entrada e saída esperada, rodados contra a
+    própria função, com passou/falhou e o que veio; a semente dos testes
+    automatizados do Ofício. Validador `casosDoAluno` (minimo, casos de
+    borda exigidos, passando). Tutor com plano, código e casos.
+  - **Desafio composto:** partes de plano, plano no código, código e
+    testes; Rever, meta com antes e depois das áreas e plano, código e
+    casos salvos. `/lab/fases?modo=jogo` joga uma bancada como no jogo.
+  - Três layouts (coluna do plano, código e palco/testes no computador;
+    plano e código lado a lado deitado; abas "Plano | Código | Testes" com
+    o palco recolhível em pé), alvos de 44 px e tela cheia. Ferramentas
+    `plano-no-codigo` e `casos-de-teste` com apresentação. Demonstração
+    `lab-resolver-u1` (prática e desafio, do plano aos testes), guia
+    (seção 29), `testes/resolver.mjs` nos três layouts. Detalhe em
+    `docs/PROGRESSO.md`.
 
 ### Em andamento
 
@@ -482,23 +507,27 @@ núcleo comum.
 
 ### Pendências
 
-- **Resolvendo problemas (rodada 25), bloqueia a produção da zona:**
-  - O quadro de passos existe apenas no tipo `ordenar-passos`, com objetivos
-    sequenciais. `FaseDesafio` não aceita `ordenar`; a checagem recusa
-    `ordemValida`, `passoNoPlano`, `passoAntes`, `semSobras` e as ações do
-    quadro nas partes do desafio. A UI e a simulação também só montam o
-    quadro para `ordenar-passos`.
-  - A fase `ordenar-passos` com `rodar` executa os cartões, mas não aceita
-    `programa.snippet`. Falta a composição entre entendimento/decomposição,
-    plano validado por dependências e código escrito e testado pelo aluno
-    no mesmo desafio, com checklist e Rever.
-  - Antes das U1 a U4, ampliar o motor para esse desafio completo, incluindo
-    agrupamento e ordenação do plano, editor de código, `funcaoPassa` com
-    bordas, persistência/recarga, meta antes/depois e simulação das soluções.
-    Verificar a jornada nos três layouts e a bateria de motor. Não substituir
-    o desafio por prática sequencial nem por cartões de código prontos.
-    Nenhuma unidade desta zona foi produzida ou publicada nesta rodada,
-    conforme a regra de parada do prompt.
+- **Tela composta (rodada 26), para depois:**
+  - Deitado, o código mostra poucas linhas (abas do DevTools, o cabeçalho
+    do Snippet, o seletor Snippet | Console e a barra de símbolos ocupam a
+    altura); com o teclado aberto, quase nada. É o mesmo aperto das fases
+    de programa deitadas; o recado de virar o celular continua valendo.
+  - Em pé, o palco começa recolhido; quem quer ver a memória depois de
+    Executar precisa abri-lo (talvez um aviso de "a memória mudou" no
+    cabeçalho dele).
+  - No computador de 1024 x 768, a lista de casos fica baixa embaixo do
+    palco (o divisor arrasta); a coluna do plano quebra cartões longos em
+    duas linhas.
+  - O bloco do plano no código é o cabeçalho e as linhas numeradas logo
+    abaixo: um comentário numerado do aluno colado ao bloco é lido como
+    parte dele e some quando o plano muda. Só comentários de linha inteira
+    contam para `planoComentado`.
+  - `casosDoAluno.incluir` casa por argumentos e/ou saída exatos: uma borda
+    como "pago igual ao preço" (qualquer valor) precisa ser escrita pela
+    saída esperada (`esperado: 0`) ou por argumentos fixos.
+  - Os tipos publicados (DevTools, programa, circuito, ponte e
+    ordenar-passos) não passaram a usar a composição por baixo: migrá-los
+    pede revisar telas e testes publicados, sem ganho para o aluno agora.
 
 - **Lógica, parte B (rodada 22), para depois:**
   - O depurador anda pelo rastro, que guarda até 1.000 fotos da memória:
@@ -580,17 +609,20 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Desbloquear o desafio completo de Resolvendo problemas (Pendências,
-   rodada 25) e produzir suas quatro unidades. Depois, conteúdo da Lógica
-   nas zonas, nesta ordem: Algoritmos essenciais, Estruturas de
-   dados, Depuração e o projeto-ponte da Lógica (que pede o motor
+1. Zona Resolvendo problemas (quatro unidades: Decompor um problema,
+   Pseudocódigo, Ordenar os passos e Testar com exemplos), com a tela
+   composta nos desafios (guia, seção 29). Depois, conteúdo da Lógica nas
+   zonas, nesta ordem: Algoritmos essenciais, Estruturas de dados,
+   Depuração e o projeto-ponte da Lógica (que pede o motor
    `projeto-ponte-js`).
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
 3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
-   ao vivo; Ofício), intercalados com conteúdo, e a trilha Automação industrial a
-   partir do protótipo `InterativAIPLUS` (ver "Como integrar uma trilha
-   nova" no `PROJETO.md`).
+   ao vivo, que reaproveita a tela composta com a especificação e o código
+   gerado; Ofício, com os arquivos do projeto e os testes automatizados),
+   intercalados com conteúdo, e a trilha Automação industrial a partir do
+   protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no
+   `PROJETO.md`).
 
 ## Decisões aprovadas
 

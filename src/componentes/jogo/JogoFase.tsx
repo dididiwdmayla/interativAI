@@ -425,8 +425,9 @@ export function JogoFase({
   const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
   /** "Levar o plano pro código": o bloco de comentários entra no topo do Snippet (ou é atualizado), sem apagar código. */
+  const quadroAgora = ordenar.ordenarAgora;
   const levarPlanoProCodigo = useCallback((): boolean => {
-    const quadro = ordenar.ordenarAgora();
+    const quadro = quadroAgora();
     if (!planoNoCodigo || !quadro) return false;
     const novo = codigoComPlano(textoSnippet(), quadro.dados, quadro.estado, true);
     definirSnippet(novo);
@@ -442,7 +443,7 @@ export function JogoFase({
     }
     barramento.emitir({ tipo: "levouPlanoProCodigo", passos: ordemDoPlano(quadro.dados, quadro.estado).length });
     return true;
-  }, [barramento, definirSnippet, editorSnippetRef, mostrarArea, ordenar, planoNoCodigo, textoSnippet]);
+  }, [barramento, definirSnippet, editorSnippetRef, mostrarArea, planoNoCodigo, quadroAgora, textoSnippet]);
   // O Snippet mudou (digitando): depois de uma pausa, avisa o motor para conferir o plano no código.
   const snippetDigitado = programa.programaSalvo?.snippet ?? null;
   useEffect(() => {

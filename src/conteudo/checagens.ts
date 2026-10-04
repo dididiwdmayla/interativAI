@@ -1156,6 +1156,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
           if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
         }
       }
+      if (!planoNoCodigo && fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('usaFerramentas tem "plano-no-codigo", mas a fase não tem as áreas "plano" e "snippet"');
       if (!faseComposta(fase)) {
         if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
         if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');
@@ -1192,6 +1193,8 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         if (!areas.includes(area) && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a fase não declara a área "${area}"`);
       }
       if (!temArea(fase, "palco") && fase.usaFerramentas.includes("linha-do-tempo")) problemas.push('a linha do tempo mora no palco: declare a área "palco"');
+      // O botão Levar pro código aparece com as duas áreas: ele é uma ferramenta (apresentada como as outras).
+      if (planoNoCodigo && !fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('com as áreas "plano" e "snippet", o botão Levar pro código aparece: ponha "plano-no-codigo" em usaFerramentas');
       return problemas;
     },
   },

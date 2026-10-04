@@ -367,7 +367,9 @@ a ficha em `src/curriculo/motores.ts`. A parte B ficou pronta na rodada
 22: ordenar passos (Resolvendo problemas), depurador da aba Fontes
 (Depuração) e estruturas no palco, com "Ver como árvore" e o gráfico de
 passos (Estruturas de dados e Algoritmos essenciais). Ver o guia de
-conteúdo, seções 26 a 28.
+conteúdo, seções 26 a 28. A rodada 26 acrescentou a tela composta (plano,
+código, palco e casos de teste juntos, inclusive no desafio), que destrava
+a zona Resolvendo problemas (guia, seção 29).
 
 ### Zona Primeiros comandos (`primeiros-comandos`)
 
@@ -649,6 +651,12 @@ dar `push` num item e perguntar o `length`.
 
 Missão de campo: escolher um problema do seu dia (a divisão da conta do
 bar) e escrever o pseudocódigo antes de abrir o Console.
+
+Motor (rodada 26): além do `ordenar-passos`, a tela composta (guia, seção
+29) junta o plano, o código, o palco e os casos de teste do aluno na mesma
+fase, inclusive no desafio: o plano vira comentários no Snippet
+(`planoComentado`) e os casos do aluno são cobrados com `casosDoAluno`.
+Modelo: `/lab/fases?fase=lab-resolver-u1-f1` e `f2`.
 
 - **U1. Decompor um problema** (`logica-resolvendo-problemas-u1`, fase
   `ordenar-passos`): quebrar "fazer o pedido da festa" em passos pequenos.

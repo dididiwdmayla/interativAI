@@ -86,6 +86,8 @@ describe("composição de áreas: sabotagens", () => {
     expect(t).toContain('a linha do tempo mora no palco');
     const semQuadro = { ...FASE_DEMO_RESOLVER, usaFerramentas: FASE_DEMO_RESOLVER.usaFerramentas.filter((id) => id !== "quadro-de-passos") };
     expect(texto(semQuadro)).toContain('a área "plano" pede "quadro-de-passos"');
+    const semBotao = { ...FASE_DEMO_RESOLVER, usaFerramentas: FASE_DEMO_RESOLVER.usaFerramentas.filter((id) => id !== "plano-no-codigo") };
+    expect(texto(semBotao)).toContain('ponha "plano-no-codigo" em usaFerramentas');
   });
 
   it("a área plano não roda o plano", () => {
