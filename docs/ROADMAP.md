@@ -502,8 +502,8 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Resolvendo problemas: U1 e U2 produzidas e verificadas nos três
-  layouts; U3 e U4 na sequência curricular.
+- Zona Resolvendo problemas: U1 a U3 produzidas e verificadas nos três
+  layouts; U4 na sequência curricular.
 
 ### Pendências
 

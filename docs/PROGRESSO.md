@@ -35,3 +35,17 @@ Branch `conteudo/resolvendo-problemas`, a partir de
 - Um conceito com tema Lógica e duas revisões em outros contextos.
 - `testar:conteudo`: 15.868 testes verdes.
 - Jornadas U2 verdes nos três layouts; publicação, build e lint por unidade.
+
+### U3: Ordenar os passos
+
+- Quadro com `rodar`: mostrar total antes de criá-lo produz ReferenceError;
+  a ordem válida imprime 12. As duas declarações são independentes.
+- Composição no caixa da loja: primeiro receita, depois vendas menos
+  despesas. Um caso com despesas descobre o código incompleto.
+- Desafio do material da costureira: pedido e estoque antes da diferença,
+  com zero, igualdade e excesso de estoque. Programas de até cinco linhas.
+- Dependências dos passos com tema e duas revisões próprias.
+- `testar:conteudo`: 15.993 testes verdes, incluindo estruturas sem timeout.
+- Jornadas U3 verdes nos três layouts. A proteção das telas antigas usa
+  a ordem curricular, sem impedir composições em zonas futuras; 17 testes
+  de composição verdes após esse ajuste.

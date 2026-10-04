@@ -262,6 +262,11 @@
       "logica-resolvendo-problemas-u2-f1",
       "logica-resolvendo-problemas-u2-f2",
       "logica-resolvendo-problemas-u2-f3"
+    ],
+    "logica-resolvendo-problemas-u3": [
+      "logica-resolvendo-problemas-u3-f1",
+      "logica-resolvendo-problemas-u3-f2",
+      "logica-resolvendo-problemas-u3-f3"
     ]
   },
   "fases": {
@@ -1568,9 +1573,37 @@
         "codigo",
         "testes"
       ]
+    },
+    "logica-resolvendo-problemas-u3-f1": {
+      "objetivos": [
+        "preparar",
+        "prever",
+        "completar"
+      ]
+    },
+    "logica-resolvendo-problemas-u3-f2": {
+      "objetivos": [
+        "plano-guiado",
+        "plano-sozinho",
+        "levar",
+        "codigo-guiado",
+        "codigo-sozinho",
+        "teste-guiado",
+        "teste-sozinho"
+      ]
+    },
+    "logica-resolvendo-problemas-u3-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
     }
   },
   "itensRevisao": [
+    "dependencias-passos-1",
+    "dependencias-passos-2",
     "pseudocodigo-1",
     "pseudocodigo-2",
     "entender-problema-1",

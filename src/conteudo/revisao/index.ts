@@ -1,3 +1,4 @@
+import { ITENS_RESOLVER_U3 } from "./resolver-u3";
 import { ITENS_RESOLVER_U2 } from "./resolver-u2";
 import { ITENS_RESOLVER_U1 } from "./resolver-u1";
 import { ITENS_LISTAS_U4 } from "./listas-u4";
@@ -209,6 +210,7 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_RESOLVER_U3,
   ...ITENS_RESOLVER_U2,
   ...ITENS_RESOLVER_U1,
   ...ITENS_LISTAS_U4,

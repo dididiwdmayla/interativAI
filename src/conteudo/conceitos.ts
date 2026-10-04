@@ -17,6 +17,8 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"dependencias-passos": {"nome": "Dependências dos passos", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},
+
 "pseudocodigo": {"nome": "Pseudocódigo", "resumo": "Planejar em palavras claras, sem precisar da sintaxe de uma linguagem.", "temas": ["logica"]},
 
 "entender-problema": {"nome": "Entender o problema", "resumo": "Separar os dados de entrada, a resposta pedida e exemplos antes de programar.", "temas": ["logica"]},
