@@ -100,3 +100,9 @@ Branch `ccr-c810c095-jo1u85`, a partir de `claude/intelligent-pascal-5va93x`
   (o leitor de tela ouve a fala inteira uma vez): build de novo e os dois
   testes de contrato nos três layouts, verdes. Publicado igual a antes
   (nenhuma unidade publicada mudou; entrou a `logica-programa-de-verdade-u1`).
+
+## Zona Algoritmos essenciais: U1 — Buscar
+
+- 3 fases com habilidade guiada e sozinha, desafio composto e cena própria.
+- 3 conceitos com temas; 6 itens de revisão em outros contextos.
+- Verificação: testar:conteudo verde (17.048 verificações), duas provas específicas verdes; jornada pelo mapa em desktop, retrato e paisagem, publicar:conteudo, build e lint verdes.

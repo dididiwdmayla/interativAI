@@ -17,6 +17,10 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"busca-linear": {"nome": "Busca linear", "resumo": "Olhar um item por vez até achar o alvo ou chegar ao fim da lista.", "temas": ["logica", "desempenho"]},
+"busca-binaria": {"nome": "Busca binária", "resumo": "Numa lista ordenada, comparar o meio e descartar a metade que não pode conter o alvo.", "temas": ["logica", "desempenho"]},
+"lista-ordenada": {"nome": "Lista ordenada", "resumo": "Manter os valores em ordem para que a busca binária possa descartar uma metade com segurança.", "temas": ["logica", "desempenho"]},
+
 "casos-de-borda": {"nome": "Casos de borda", "resumo": "Testar vazio, zero, repetido e negativo para expor regras que um caso comum não verifica.", "temas": ["logica", "ferramentas"]},
 
 "dependencias-passos": {"nome": "Dependências dos passos", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},

@@ -272,6 +272,11 @@
       "logica-resolvendo-problemas-u4-f1",
       "logica-resolvendo-problemas-u4-f2"
     ],
+    "logica-algoritmos-essenciais-u1": [
+      "logica-algoritmos-essenciais-u1-f1",
+      "logica-algoritmos-essenciais-u1-f2",
+      "logica-algoritmos-essenciais-u1-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1627,6 +1632,29 @@
         "testes"
       ]
     },
+    "logica-algoritmos-essenciais-u1-f1": {
+      "objetivos": [
+        "ficha",
+        "linear-guiado",
+        "linear-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u1-f2": {
+      "objetivos": [
+        "meio-guiado",
+        "binaria-sozinho",
+        "medir-guiado",
+        "medir-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u1-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1649,6 +1677,12 @@
     }
   },
   "itensRevisao": [
+    "busca-linear-1",
+    "busca-linear-2",
+    "busca-binaria-1",
+    "busca-binaria-2",
+    "lista-ordenada-1",
+    "lista-ordenada-2",
     "casos-de-borda-1",
     "casos-de-borda-2",
     "dependencias-passos-1",
