@@ -92,4 +92,11 @@ Branch `ccr-c810c095-jo1u85`, a partir de `claude/intelligent-pascal-5va93x`
 - Guia, seção 31 (como escrever um contrato), e os ajustes nas seções 18 e
   30 (relógio, campainha, `porLinha`); PROJETO.md (arquitetura) e
   MAPA-CURRICULAR.md (a zona Programa de verdade e o motor que saiu).
-- Verificação final: ver abaixo.
+- Verificação final: `testar:conteudo` 16.814 testes (42 arquivos), lint,
+  `publicar:conteudo` e build verdes; bateria completa (`testes/todos.mjs`,
+  151 arquivos x layouts, inclusive `contrato.mjs` e `contrato-logica.mjs`
+  nos três layouts) verde no build de produção, uma vez, com 3 em paralelo,
+  console limpo. Depois da correção de acessibilidade da fala do cliente
+  (o leitor de tela ouve a fala inteira uma vez): build de novo e os dois
+  testes de contrato nos três layouts, verdes. Publicado igual a antes
+  (nenhuma unidade publicada mudou; entrou a `logica-programa-de-verdade-u1`).
