@@ -467,7 +467,16 @@ núcleo comum.
   - 13.622 testes; jornadas de cada unidade nos três layouts,
     publicar:conteudo, lint, build e bateria:conteudo verdes.
 
+- **Rodada 24: zona Listas e objetos completa (U1 a U4)** — 16 fases,
+  17 conceitos com temas Lógica e Dados e 34 itens de revisão. Vagões,
+  fichas e setas de referência; map/filter na linha do tempo; cardápio
+  e pedidos da Padaria Pão de Mel, desafios em contextos novos e missão
+  verificável no Console real. Validação por conteúdo de listas/objetos,
+  um commit por unidade e jornadas nos três layouts. Detalhe em
+  `docs/PROGRESSO.md` e rodada curta no `docs/ATRITOS-FABRICA.md`.
+
 ### Em andamento
+
 
 (nada no momento)
 
@@ -553,7 +562,7 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Conteúdo da Lógica, nas zonas, nesta ordem: Listas e objetos, Resolvendo problemas, Algoritmos essenciais, Estruturas de
+1. Conteúdo da Lógica, nas zonas, nesta ordem: Resolvendo problemas, Algoritmos essenciais, Estruturas de
    dados, Depuração e o projeto-ponte da Lógica (que pede o motor
    `projeto-ponte-js`).
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,

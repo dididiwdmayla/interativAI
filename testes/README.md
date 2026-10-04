@@ -236,3 +236,12 @@ U3 também confere os tipos no palco e a linha do tempo do programa com comentá
 
 - `node testes/funcoes.mjs [desktop|retrato|paisagem] logica-funcoes-uN`: jornada da unidade pelo mapa, negativas pedagógicas, molduras, parâmetros e retorno no rastro, desafio e volta para a ilha.
 - `node testes/tela-cheia.mjs [desktop|retrato|paisagem]`: alternância simulada, mudança externa, rejeição, falta de suporte, navegação interna e layout com API real; teclado simulado em retrato.
+
+### Zona Listas e objetos
+
+Exemplo: `node testes/listas.mjs desktop logica-listas-e-objetos-u1`.
+O primeiro argumento aceita desktop, retrato ou paisagem; o segundo é o ID
+completo da U1, U2, U3 ou U4. Jornada pelo mapa, meta, prática e
+desafio; semeia o conteúdo anterior pelos dados publicados. Confere vagões,
+fichas, referências compartilhadas, chamadas de map/filter na linha do tempo
+e negativas pedagógicas. As doze jornadas estão em `todos.mjs`.

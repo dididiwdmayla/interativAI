@@ -1,0 +1,320 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const fila = [\"Ana\", \"Bia\", \"Caio\"]\nlet primeiro = fila[0]\nlet ultimo = fila[fila.length - 1]\nlet tamanho = fila.length"
+        ],
+        [
+          "f1-prever",
+          "let fora = fila[3]\nlet tipoFora = typeof fora"
+        ],
+        [
+          "f1-sozinho",
+          "const entregas = [\"Lia\", \"Rui\"]\nlet inicio = entregas[0]\nlet fim = entregas[entregas.length - 1]\nlet quantidade = entregas.length"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const pedidos = [\"pão\", \"bolo\"]\npedidos.push(\"suco\")\nlet saiu = pedidos.pop()\npedidos[0] = \"broa\""
+        ],
+        [
+          "f2-prever",
+          "pedidos = [\"café\"]"
+        ],
+        [
+          "f2-sozinho",
+          "const reservas = [\"Ivo\", \"Eva\"]\nreservas.push(\"Noa\")\nlet cancelada = reservas.pop()\nreservas[0] = \"Luz\""
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const fila = [\"Ana\", \"Bia\"]\nlet copia = fila\ncopia[0] = \"Duda\"\nfor (let pessoa of fila) { console.log(pessoa) }"
+        ],
+        [
+          "f3-prever",
+          "copia.push(\"Eli\")\nlet quantidadeFila = fila.length"
+        ],
+        [
+          "f3-sozinho",
+          "const retirada = [\"Rui\", \"Lia\"]\nlet aConferir = retirada\naConferir[1] = \"Sol\"\nfor (let nome of retirada) { console.log(nome) }"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let abertura = playlist[0]\nlet encerramento = playlist[playlist.length - 1]",
+      "let removida = playlist.pop()\nplaylist.push(\"Bis\")\nlet espelho = playlist\nespelho[0] = \"Festa\"",
+      "for (let musica of playlist) { console.log(musica) }\nlet totalMusicas = playlist.length"
+    ],
+    "negativas": {
+      "f1-guiado": "const fila = [\"Ana\", \"Bia\", \"Caio\"]\nlet primeiro = fila[1]\nlet ultimo = fila[fila.length]\nlet tamanho = fila.length"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {},
+    "listas": {
+      "f1-guiado": {
+        "fila": 3
+      },
+      "f2-guiado": {
+        "pedidos": 2
+      }
+    },
+    "fichas": {},
+    "referencias": {
+      "f3-guiado": {
+        "copia": "fila"
+      },
+      "f3-sozinho": {
+        "aConferir": "retirada"
+      }
+    },
+    "leituras": {}
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const precos = [3, 8, 5]\nlet total = 0\nlet baratos = 0\nfor (let preco of precos) {\n total += preco\n if (preco < 6) { baratos++ }\n}"
+        ],
+        [
+          "f1-sozinho",
+          "const valores = [4, 9, 2, 1]\nlet soma = 0\nfor (let i = 0; i < valores.length; i++) { soma += valores[i] }\nlet quantidade = valores.length"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const precos = [3, 8, 5]\nconst aumentados = precos.map(preco => preco + 2)\nconsole.log(precos[0], aumentados[0])"
+        ],
+        [
+          "f2-prever",
+          "aumentados[0] = 99\nlet preservado = precos[0]"
+        ],
+        [
+          "f2-sozinho",
+          "const descontos = (lista) => lista.map(preco => preco - 1)\nlet ofertas = descontos([2, 6, 10])"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const precos = [3, 8, 5]\nconst baratos = precos.filter(preco => preco < 6)\nlet quantidade = baratos.length"
+        ],
+        [
+          "f3-prever",
+          "const nenhum = precos.filter(preco => preco > 20)\nlet tamanho = nenhum.length"
+        ],
+        [
+          "f3-sozinho",
+          "const ateCinco = (lista) => lista.filter(n => n <= 5)\nlet escolhidos = ateCinco([5, 6, 0])"
+        ]
+      ],
+      [
+        [
+          "f4-guiado",
+          "const estoque = [4, 0, 0, 2]\nlet primeiroZero = estoque.find(n => n === 0)\nconst zeros = estoque.filter(n => n === 0)"
+        ],
+        [
+          "f4-prever",
+          "let ausente = estoque.find(n => n < 0)\nlet tipoAusente = typeof ausente"
+        ],
+        [
+          "f4-sozinho",
+          "const primeiroAlto = (lista) => lista.find(n => n > 10)\nlet achado = primeiroAlto([8, 12, 15])"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let totalVotos = 0\nfor (let quantidade of votos) { totalVotos += quantidade }",
+      "const projetados = votos.map(n => n * 2)",
+      "const aprovados = votos.filter(n => n >= 5)\nlet primeiroAprovado = votos.find(n => n >= 5)\nlet quantidadeAprovados = aprovados.length"
+    ],
+    "negativas": {
+      "f2-guiado": "const precos = [3, 8, 5]\nconst aumentados = precos\naumentados[0] = 5\nconsole.log(precos[0], aumentados[0])"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {
+      "f2-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "3",
+          "8",
+          "5"
+        ]
+      },
+      "f3-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "3",
+          "8",
+          "5"
+        ]
+      }
+    },
+    "listas": {
+      "f2-guiado": {
+        "precos": 3,
+        "aumentados": 3
+      },
+      "f3-guiado": {
+        "baratos": 2
+      }
+    },
+    "fichas": {},
+    "referencias": {},
+    "leituras": {}
+  },
+  "3": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const pedido = { produto: \"Broa\", total: 5, pago: false }\nlet peloPonto = pedido.total\nlet pelosColchetes = pedido[\"total\"]"
+        ],
+        [
+          "f1-prever",
+          "let ausente = pedido.entrega\nlet tipoAusente = typeof ausente"
+        ],
+        [
+          "f1-sozinho",
+          "const produto = { nome: \"Bolo\", preco: 12, estoque: 4 }\nlet a = produto.preco\nlet b = produto[\"preco\"]"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const produto = { nome: \"Bolo\", preco: 12, estoque: 0 }\nproduto.preco = 14\nproduto[\"estoque\"] = 6\nproduto.categoria = \"doce\"\nlet status = \"esgotado\"\nif (produto.estoque > 0) { status = \"disponível\" }"
+        ],
+        [
+          "f2-prever",
+          "produto.preco = 15\nlet nomeDepois = produto.nome"
+        ],
+        [
+          "f2-sozinho",
+          "const entrega = { bairro: \"Centro\", taxa: 3 }\nentrega.taxa = 4\nentrega.itens = [\"pão\", \"suco\"]"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let especiePonto = pet.especie\nlet especieChave = pet[\"especie\"]\nlet tipoAusente = typeof pet.peso",
+      "pet.idade = 3\npet.vacinado = true\npet.servicos = [\"banho\", \"consulta\"]"
+    ],
+    "negativas": {
+      "f1-guiado": "const pedido = { produto: \"Broa\", total: 5, pago: false }\nlet peloPonto = pedido[0]\nlet pelosColchetes = pedido[\"total\"]"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {},
+    "listas": {},
+    "fichas": {
+      "f1-guiado": {
+        "pedido": [
+          "produto",
+          "total",
+          "pago"
+        ]
+      },
+      "f2-guiado": {
+        "produto": [
+          "nome",
+          "preco",
+          "estoque",
+          "categoria"
+        ]
+      }
+    },
+    "referencias": {},
+    "leituras": {},
+    "caixaDepois": "pet"
+  },
+  "4": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "let primeiroNome = cardapio[0].nome\nlet item = cardapio[1]\nitem.preco = 9\nlet outroPreco = cardapio[0].preco"
+        ],
+        [
+          "f1-prever",
+          "item.preco = 10\nlet precoBolo = cardapio[2].preco"
+        ],
+        [
+          "f1-sozinho",
+          "const pedidos = [{ cliente: \"Ana\", total: 8 }, { cliente: \"Rui\", total: 15 }]\npedidos[1].total = 17\nconst totais = pedidos.map(pedido => pedido.total)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "let total = 0\nlet maiorPreco = 0\nlet maisCaro = \"\"\nfor (let item of cardapio) {\n const { nome, preco } = item\n total += preco\n if (preco > maiorPreco) { maiorPreco = preco; maisCaro = nome }\n console.log(nome)\n}"
+        ],
+        [
+          "f2-prever",
+          "let original = cardapio[0].nome"
+        ],
+        [
+          "f2-sozinho",
+          "function somaPedidos(lista) {\n let soma = 0\n for (let pedido of lista) {\n  const { total } = pedido\n  soma += total\n }\n return soma\n}\nlet soma = somaPedidos([{total: 0}, {total: 6}, {total: 9}])"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const opcoes = cardapio.filter(item => item.semGluten)\nconst nomes = opcoes.map(item => item.nome)\nlet primeira = cardapio.find(item => item.semGluten)"
+        ],
+        [
+          "f3-prever",
+          "opcoes[0].preco = 9\nlet compartilhado = cardapio[1].preco"
+        ],
+        [
+          "f3-sozinho",
+          "const baratos = (lista) => lista.filter(item => item.preco <= 6)\nlet achados = baratos([{nome: \"Broa\", preco: 5}, {nome: \"Bolo\", preco: 12}])"
+        ]
+      ]
+    ],
+    "desafio": [
+      "function totalPedido(lista) {\n let soma = 0\n for (let item of lista) {\n  const { preco, quantidade } = item\n  soma += preco * quantidade\n }\n return soma\n}\nlet total = totalPedido(pedido)",
+      "const vegetarianas = pedido.filter(item => item.vegetariana)\nconst nomes = vegetarianas.map(item => item.nome)"
+    ],
+    "negativas": {
+      "f1-guiado": "let primeiroNome = cardapio[0].nome\nlet item = cardapio[1]\nfor (let produto of cardapio) { produto.preco = 9 }\nlet outroPreco = cardapio[0].preco\ncardapio[0].preco = 5\ncardapio[2].preco = 12",
+      "f3-sozinho": "const baratos = (lista) => lista\nlet achados = baratos([{nome: \"Broa\", preco: 5}, {nome: \"Bolo\", preco: 12}])"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {
+      "f2-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "5",
+          "8",
+          "12"
+        ]
+      },
+      "f3-guiado": {
+        "variavel": "item",
+        "referencias": [
+          "cardapio[0]",
+          "cardapio[1]",
+          "cardapio[2]"
+        ]
+      }
+    },
+    "listas": {
+      "f3-guiado": {
+        "opcoes": 1,
+        "nomes": 1
+      }
+    },
+    "fichas": {},
+    "referencias": {
+      "f1-guiado": {
+        "item": "cardapio[1]"
+      }
+    },
+    "leituras": {},
+    "caixaDepois": "pedido"
+  }
+}

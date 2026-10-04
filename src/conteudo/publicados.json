@@ -227,6 +227,30 @@
       "logica-funcoes-u4-f1",
       "logica-funcoes-u4-f2",
       "logica-funcoes-u4-f3"
+    ],
+    "logica-listas-e-objetos-u1": [
+      "logica-listas-e-objetos-u1-f1",
+      "logica-listas-e-objetos-u1-f2",
+      "logica-listas-e-objetos-u1-f3",
+      "logica-listas-e-objetos-u1-f4"
+    ],
+    "logica-listas-e-objetos-u2": [
+      "logica-listas-e-objetos-u2-f1",
+      "logica-listas-e-objetos-u2-f2",
+      "logica-listas-e-objetos-u2-f3",
+      "logica-listas-e-objetos-u2-f4",
+      "logica-listas-e-objetos-u2-f5"
+    ],
+    "logica-listas-e-objetos-u3": [
+      "logica-listas-e-objetos-u3-f1",
+      "logica-listas-e-objetos-u3-f2",
+      "logica-listas-e-objetos-u3-f3"
+    ],
+    "logica-listas-e-objetos-u4": [
+      "logica-listas-e-objetos-u4-f1",
+      "logica-listas-e-objetos-u4-f2",
+      "logica-listas-e-objetos-u4-f3",
+      "logica-listas-e-objetos-u4-f4"
     ]
   },
   "fases": {
@@ -1366,9 +1390,152 @@
         "xicaras",
         "colheres"
       ]
+    },
+    "logica-listas-e-objetos-u1-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u1-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u1-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u1-f4": {
+      "partes": [
+        "posicoes",
+        "editar",
+        "mostrar"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f4": {
+      "objetivos": [
+        "f4-guiado",
+        "f4-prever",
+        "f4-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u2-f5": {
+      "partes": [
+        "somar",
+        "transformar",
+        "selecionar"
+      ]
+    },
+    "logica-listas-e-objetos-u3-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u3-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u3-f3": {
+      "partes": [
+        "ler",
+        "atualizar"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f4": {
+      "partes": [
+        "total",
+        "filtrar"
+      ]
     }
   },
   "itensRevisao": [
+    "lista-objetos-js-1",
+    "lista-objetos-js-2",
+    "somar-campo-js-1",
+    "somar-campo-js-2",
+    "filtrar-campo-js-1",
+    "filtrar-campo-js-2",
+    "desestruturacao-objeto-js-1",
+    "desestruturacao-objeto-js-2",
+    "objeto-js-1",
+    "objeto-js-2",
+    "acesso-objeto-js-1",
+    "acesso-objeto-js-2",
+    "mudar-campo-js-1",
+    "mudar-campo-js-2",
+    "percorrer-lista-js-1",
+    "percorrer-lista-js-2",
+    "map-lista-js-1",
+    "map-lista-js-2",
+    "filter-lista-js-1",
+    "filter-lista-js-2",
+    "find-lista-js-1",
+    "find-lista-js-2",
+    "array-js-1",
+    "array-js-2",
+    "indice-lista-js-1",
+    "indice-lista-js-2",
+    "length-lista-js-1",
+    "length-lista-js-2",
+    "push-pop-js-1",
+    "push-pop-js-2",
+    "const-lista-js-1",
+    "const-lista-js-2",
+    "referencia-lista-js-1",
+    "referencia-lista-js-2",
     "arrow-com-bloco-1",
     "arrow-com-bloco-2",
     "retorno-implicito-1",

@@ -1122,6 +1122,146 @@ const CATALOGO = {
     "logica"
   ]
 },
+
+  "array-js": {
+    "nome": "Lista de valores",
+    "resumo": "Uma lista guarda vários valores em vagões numerados, na ordem escrita.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "indice-lista-js": {
+    "nome": "Índice começa em zero",
+    "resumo": "O primeiro índice é 0. Ler uma posição ausente devolve undefined, sem erro.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "length-lista-js": {
+    "nome": "Tamanho da lista",
+    "resumo": "length conta os itens; o último índice de uma lista não vazia é length - 1.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "push-pop-js": {
+    "nome": "Pôr e tirar pelo fim",
+    "resumo": "push acrescenta ao fim; pop tira e devolve o último item da lista.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "const-lista-js": {
+    "nome": "Const e conteúdo",
+    "resumo": "const impede trocar a lista inteira, mas permite alterar seus itens.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "referencia-lista-js": {
+    "nome": "Duas setas, uma lista",
+    "resumo": "Atribuir uma lista a outra variável compartilha a lista; não copia os vagões.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+
+  "map-lista-js": {
+    "nome": "Transformar com map",
+    "resumo": "map chama a função para cada item e devolve uma lista nova; a original permanece.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "filter-lista-js": {
+    "nome": "Selecionar com filter",
+    "resumo": "filter devolve uma lista com todos os itens cuja condição deu true, ou [] quando nenhum serve.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "find-lista-js": {
+    "nome": "Achar com find",
+    "resumo": "find devolve só o primeiro item que serve, ou undefined quando não encontra.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+"percorrer-lista-js": {
+  "nome": "Percorrer os vagões",
+  "resumo": "for...of entrega os valores da lista; for com índice lê lista[i] até antes de length.",
+  "temas": [
+    "logica",
+    "dados"
+  ]
+},
+
+  "objeto-js": {
+    "nome": "Ficha de dados",
+    "resumo": "Um objeto reúne campos nomeados: cada chave guarda um valor, não uma posição numerada.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "acesso-objeto-js": {
+    "nome": "Ponto e colchetes",
+    "resumo": "obj.total e obj[\"total\"] leem a mesma chave; chave ausente dá undefined.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "mudar-campo-js": {
+    "nome": "Alterar e acrescentar campos",
+    "resumo": "Atribuir obj.chave muda só esse campo; uma chave nova acrescenta um campo à ficha.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+
+  "lista-objetos-js": {
+    "nome": "Lista de fichas",
+    "resumo": "Uma lista pode guardar objetos: lista[0] escolhe uma ficha e lista[0].nome lê um campo dela.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "somar-campo-js": {
+    "nome": "Somar um campo",
+    "resumo": "Percorra as fichas e acrescente o campo numérico de cada item ao acumulador.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "filtrar-campo-js": {
+    "nome": "Filtrar por campo",
+    "resumo": "A condição do filter pode ler um campo da ficha; o resultado guarda as fichas aprovadas.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "desestruturacao-objeto-js": {
+    "nome": "Separar campos em variáveis",
+    "resumo": "const { nome, preco } = item lê esses campos e cria variáveis locais com seus valores.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;
