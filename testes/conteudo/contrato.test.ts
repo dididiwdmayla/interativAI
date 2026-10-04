@@ -202,3 +202,59 @@ describe("Levar pro mundo: o .js que roda fora do jogo", () => {
     ]);
   });
 });
+
+describe("o contrato da Lógica (Padaria Pão de Mel)", () => {
+  it("o código decorado (o total de um dia só) cai nos outros dias de teste", async () => {
+    const { FASE_CONTRATO_LOGICA, CODIGO_PADARIA_ANTES } = await import("@/conteudo/ilhas/logica/programa-de-verdade/unidade-1/fase-2-contrato");
+    const contador = FASE_CONTRATO_LOGICA.partes.find((parte) => parte.id === "contador");
+    const simulacao = criarSimulacao(FASE_CONTRATO_LOGICA);
+    simulacao.comecarObjetivo(null);
+    simulacao.executar([{ tipo: "definirSnippet", codigo: CODIGO_PADARIA_ANTES }, { tipo: "executarSnippet" }]);
+    expect(contador && simulacao.avaliar(contador.validador).passou).toBe(true);
+    const decorado = CODIGO_PADARIA_ANTES.replace('"CLIENTES: " + clientes', '"CLIENTES: 4"');
+    simulacao.executar([{ tipo: "definirSnippet", codigo: decorado }, { tipo: "executarSnippet" }]);
+    const resultado = contador ? simulacao.avaliar(contador.validador) : null;
+    expect(resultado?.passou).toBe(false);
+    expect(resultado?.detalhe).toMatch(/falhou com/);
+  });
+
+  it("o .js da vitrine roda no Node: a luz, a campainha, o letreiro e quem chega, no relógio do dia", async () => {
+    const { FASE_CONTRATO_LOGICA, CODIGO_PADARIA_DEPOIS } = await import("@/conteudo/ilhas/logica/programa-de-verdade/unidade-1/fase-2-contrato");
+    const { programaParaLevar } = await import("@/motor/contrato/levarProMundo");
+    const { execFileSync } = await import("node:child_process");
+    const { mkdtempSync, writeFileSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const contrato = FASE_CONTRATO_LOGICA as FaseContrato;
+    const arquivo = join(mkdtempSync(join(tmpdir(), "levar-")), "vitrine-pao-de-mel.js");
+    writeFileSync(arquivo, programaParaLevar({ contrato: contrato.contrato, cena: contrato.cena ?? null, codigo: CODIGO_PADARIA_DEPOIS }));
+    const saida = execFileSync(process.execPath, [arquivo], { encoding: "utf8" });
+    for (const linha of [
+      "[06:00] Forno: ligado (esquentando)",
+      "[07:00] Luz da vitrine: ligada",
+      '[07:00] Letreiro: "SONHO R$ 4"',
+      "[07:30] Chegou alguém.",
+      "[08:00] Campainha do forno: plim!",
+      "[09:00] Luz da vitrine: desligada",
+      "[10:30] Luz da vitrine: ligada",
+      '[19:00] Letreiro: "CLIENTES: 4"',
+      "[21:00] Fim da simulação.",
+    ]) {
+      expect(saida, linha).toContain(linha);
+    }
+  });
+});
+
+describe("a jornada de navegador do contrato da Lógica", () => {
+  it("testes/contrato-jornadas.json tem as mesmas soluções do conteúdo (não se desvia do TS)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { FASES_UNIDADE_CONTRATO_LOGICA } = await import("@/conteudo/ilhas/logica/programa-de-verdade/unidade-1/unidade");
+    const jornada = JSON.parse(readFileSync("testes/contrato-jornadas.json", "utf8"));
+    const [f1, f2] = FASES_UNIDADE_CONTRATO_LOGICA;
+    if (f1.tipo !== "pratica" || !ehContrato(f2)) throw new Error("a unidade mudou de forma");
+    expect(jornada.pratica.objetivos).toEqual(f1.objetivos.map((o) => ({ id: o.id, solucaoDeTeste: o.solucaoDeTeste })));
+    expect(jornada.contrato.partes).toEqual(f2.partes.map((p) => ({ id: p.id, solucaoDeTeste: p.solucaoDeTeste })));
+    expect(jornada.contrato.escolha).toEqual(escolhaCerta(f2.contrato));
+    expect(jornada.contrato.novas).toEqual(f2.contrato.mudanca.novas);
+  });
+});

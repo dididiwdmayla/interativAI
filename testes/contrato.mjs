@@ -119,7 +119,7 @@ const verChecklist = async () => {
   if (MODO === "paisagem") await abrirBalao(pagina);
   if (MODO === "retrato") {
     await fecharBalao(pagina);
-    const barra = pagina.locator('button[aria-expanded]:has-text("Requisitos do cliente")').first();
+    const barra = pagina.locator('button[aria-expanded]:has-text("Requisitos do trabalho")').first();
     if ((await barra.getAttribute("aria-expanded")) !== "true") await tocar(barra);
   }
   await pagina.locator("[data-checklist]").first().waitFor();
@@ -127,7 +127,7 @@ const verChecklist = async () => {
 const esconderChecklist = async () => {
   if (MODO === "paisagem") await fecharBalao(pagina);
   if (MODO === "retrato") {
-    const barra = pagina.locator('button[aria-expanded="true"]:has-text("Requisitos do cliente")').first();
+    const barra = pagina.locator('button[aria-expanded="true"]:has-text("Requisitos do trabalho")').first();
     if (await barra.count()) await tocar(barra);
   }
 };

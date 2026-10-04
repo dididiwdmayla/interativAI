@@ -271,6 +271,10 @@
     "logica-resolvendo-problemas-u4": [
       "logica-resolvendo-problemas-u4-f1",
       "logica-resolvendo-problemas-u4-f2"
+    ],
+    "logica-programa-de-verdade-u1": [
+      "logica-programa-de-verdade-u1-f1",
+      "logica-programa-de-verdade-u1-f2"
     ]
   },
   "fases": {
@@ -1621,6 +1625,26 @@
         "comentarios",
         "codigo",
         "testes"
+      ]
+    },
+    "logica-programa-de-verdade-u1-f1": {
+      "objetivos": [
+        "ficha-do-relogio",
+        "hora-no-console",
+        "plim",
+        "luz-na-abertura",
+        "plim-na-porta"
+      ]
+    },
+    "logica-programa-de-verdade-u1-f2": {
+      "partes": [
+        "plano",
+        "luz",
+        "letreiro",
+        "forno",
+        "contador",
+        "testes",
+        "luz-movimento"
       ]
     }
   },

@@ -1251,7 +1251,7 @@ export function JogoFase({
   const listaMontada = !estadoContrato || estadoContrato.etapa === "trabalho" || estadoContrato.etapa === "entrega" || estado.etapa === "concluida";
   const itensChecklist = listaMontada ? itensDoChecklist(fase, estadoContrato?.mudou ?? false) : [];
   const vazioDoChecklist = listaMontada ? undefined : "A lista sai da conversa com o cliente: você monta na etapa de requisitos.";
-  const tituloChecklist = contrato ? "Requisitos do cliente" : projeto ? "Requisitos do projeto" : "Checklist do desafio";
+  const tituloChecklist = contrato ? "Requisitos do trabalho" : projeto ? "Requisitos do projeto" : "Checklist do desafio";
   const novasDoContrato = useMemo(() => (contrato && estadoContrato?.mudou ? idsDasNovas(contrato.contrato) : undefined), [contrato, estadoContrato?.mudou]);
   const [documentoAberto, setDocumentoAberto] = useState(false);
   /** (Contrato) A janela do Levar pro mundo: o .js com o programa, que roda fora do jogo. */

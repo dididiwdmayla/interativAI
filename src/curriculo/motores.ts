@@ -10,7 +10,9 @@
  * tipo de fase em src/motor/tiposDeFase.ts). Na rodada 22 saíram o
  * `ordenar-passos` (tipo de fase, src/motor/ordenar), o `depurador-fontes`
  * (aba Fontes, src/motor/depurador.ts) e o `visualizador-arvore` ("Ver
- * como árvore" no palco, src/motor/estruturas.ts).
+ * como árvore" no palco, src/motor/estruturas.ts). Na rodada 29 saiu o
+ * `projeto-ponte-js`: o contrato (src/motor/contrato) leva o programa da
+ * Ilha Lógica pro mundo como um .js que roda no Console e no Node.
  *
  * Quando o motor ficar pronto, o tipo de fase entra no registro de tipos
  * (src/motor/tiposDeFase.ts), a entrada sai daqui e o `requerMotor` das
@@ -18,7 +20,8 @@
  */
 import type { IdIlha } from "./trilhas";
 
-export type IdMotorPlanejado = "projeto-ponte-js";
+/** Nenhum motor planejado agora; um novo entra aqui com o id do tipo de fase. */
+export type IdMotorPlanejado = string;
 
 export type UsoDoMotor = {
   /** Unidade do currículo que usa o tipo de fase. */
@@ -42,18 +45,4 @@ export type MotorPlanejado = {
   ilhasFuturas: readonly IdIlha[];
 };
 
-export const MOTORES_PLANEJADOS: readonly MotorPlanejado[] = [
-  {
-    id: "projeto-ponte-js",
-    nome: "Projeto-ponte de JavaScript",
-    ideia: "Levar um programa escrito no jogo para Fontes > Snippets do Chrome de verdade e rodar lá, em qualquer página.",
-    pecas: [
-      "baixar o programa como arquivo .js",
-      "guia passo a passo para criar o snippet no Chrome (conferido na época, com data)",
-      "conferir o programa com exemplos antes de levar",
-    ],
-    usadoEm: [{ unidadeId: "logica-programa-de-verdade-u1", como: "O programa final da ilha, feito sozinho e rodado fora do jogo." }],
-    trilhas: ["web"],
-    ilhasFuturas: [],
-  },
-];
+export const MOTORES_PLANEJADOS: readonly MotorPlanejado[] = [];

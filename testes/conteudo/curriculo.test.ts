@@ -92,12 +92,12 @@ describe("currículo em dados", () => {
     }
   });
 
-  it("portões lógicos e a parte B da Lógica prontos: só o projeto-ponte-js segue planejado", () => {
-    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual(["projeto-ponte-js"]);
+  it("portões lógicos, a parte B da Lógica e o contrato prontos: nenhum motor da Lógica segue planejado", () => {
+    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual([]);
     for (const id of ["logica-resolvendo-problemas-u1", "logica-resolvendo-problemas-u3", "logica-depuracao-u2", "logica-depuracao-u3", "logica-estruturas-de-dados-u3"]) {
       expect(localNoCurriculo(id)?.unidade.requerMotor, id).toBeUndefined();
     }
-    expect(localNoCurriculo("logica-programa-de-verdade-u1")?.unidade.requerMotor).toContain("projeto-ponte-js");
+    expect(localNoCurriculo("logica-programa-de-verdade-u1")?.unidade.requerMotor).toBeUndefined();
     expect(localNoCurriculo("logica-decisoes-u2")?.indice).toBe(1);
     expect(localNoCurriculo("logica-decisoes-u2")?.unidade.requerMotor).toBeUndefined();
     expect(localNoCurriculo("origens-museu-u6")?.unidade.requerMotor).not.toContain("circuito-logico");
