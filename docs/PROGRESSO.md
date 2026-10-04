@@ -18,3 +18,9 @@ Rodada anterior: `docs/arquivo/PROGRESSO-rodada-22.md`. Status consolidado: `doc
 - Três conceitos com tema Lógica e seis itens de revisão em contextos novos; missão no Console real sem parâmetros/return, reservados à U2.
 - Validação por saída exata e tipo da função nesta unidade de mensagens; funcaoPassa entra na U2, que ensina funções que devolvem valores. Nenhuma capacidade de motor faltou.
 - Verificado: 12.830 testes; jornada pelo mapa nos três layouts com negativa de nome sem parênteses, entrada/sumiço da moldura e retorno ao Global; publicar:conteudo, lint e build.
+
+### Etapa 2: Parâmetros e retorno
+
+- U2 com quatro fases: parâmetro/argumento, return contra console.log, undefined sem return, saída antecipada por if e acumulador/for dentro de função; desafio na calculadora de frete da Loja Rota.
+- Quatro conceitos com tema Lógica e oito itens de revisão; funcaoPassa com zero, negativos, decimais e fronteiras (99/100 e 199/200), combinado com resultados nas caixinhas e semErro.
+- Verificado: 13.118 testes; jornadas nos três layouts com parâmetro dentro da moldura e faixa de retorno, negativas de console.log e função constante, desafio e console limpo; publicar:conteudo, lint e build.

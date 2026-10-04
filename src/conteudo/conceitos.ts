@@ -1045,6 +1045,34 @@ const CATALOGO = {
     "logica"
   ]
 },
+"parametro-argumento": {
+  "nome": "Parâmetro e argumento",
+  "resumo": "Parâmetro é o nome de dentro; argumento é o valor entregue na posição da chamada.",
+  "temas": [
+    "logica"
+  ]
+},
+"return-js": {
+  "nome": "Retorno",
+  "resumo": "return entrega um valor para quem chamou e encerra a chamada.",
+  "temas": [
+    "logica"
+  ]
+},
+"mostrar-ou-devolver": {
+  "nome": "Mostrar ou devolver",
+  "resumo": "console.log mostra uma mensagem; return entrega um resultado. Sem return a função devolve undefined.",
+  "temas": [
+    "logica"
+  ]
+},
+"return-encerra": {
+  "nome": "Return encerra a chamada",
+  "resumo": "Um return termina imediatamente a chamada; as instruções seguintes daquela função não executam.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

@@ -210,6 +210,12 @@
       "logica-funcoes-u1-f1",
       "logica-funcoes-u1-f2",
       "logica-funcoes-u1-f3"
+    ],
+    "logica-funcoes-u2": [
+      "logica-funcoes-u2-f1",
+      "logica-funcoes-u2-f2",
+      "logica-funcoes-u2-f3",
+      "logica-funcoes-u2-f4"
     ]
   },
   "fases": {
@@ -1275,9 +1281,44 @@
         "abrir",
         "fechar"
       ]
+    },
+    "logica-funcoes-u2-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-funcoes-u2-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-funcoes-u2-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-funcoes-u2-f4": {
+      "partes": [
+        "frete",
+        "total"
+      ]
     }
   },
   "itensRevisao": [
+    "return-encerra-1",
+    "return-encerra-2",
+    "mostrar-ou-devolver-1",
+    "mostrar-ou-devolver-2",
+    "return-js-1",
+    "return-js-2",
+    "parametro-argumento-1",
+    "parametro-argumento-2",
     "moldura-funcao-1",
     "moldura-funcao-2",
     "chamada-funcao-1",

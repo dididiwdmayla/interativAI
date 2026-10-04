@@ -1,3 +1,7 @@
+import { ITENS_RETURN_ENCERRA } from "./return-encerra";
+import { ITENS_MOSTRAR_OU_DEVOLVER } from "./mostrar-ou-devolver";
+import { ITENS_RETURN_JS } from "./return-js";
+import { ITENS_PARAMETRO_ARGUMENTO } from "./parametro-argumento";
 import { ITENS_MOLDURA_FUNCAO } from "./moldura-funcao";
 import { ITENS_CHAMADA_FUNCAO } from "./chamada-funcao";
 import { ITENS_FUNCAO_JS } from "./funcao-js";
@@ -192,6 +196,10 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_RETURN_ENCERRA,
+  ...ITENS_MOSTRAR_OU_DEVOLVER,
+  ...ITENS_RETURN_JS,
+  ...ITENS_PARAMETRO_ARGUMENTO,
   ...ITENS_MOLDURA_FUNCAO,
   ...ITENS_CHAMADA_FUNCAO,
   ...ITENS_FUNCAO_JS,

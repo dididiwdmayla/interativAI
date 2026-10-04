@@ -44,5 +44,68 @@
         "retorno": null
       }
     }
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "function precoComDesconto(preco) {\n  return preco * 0.9\n}\nlet total = precoComDesconto(100)"
+        ],
+        [
+          "f1-prever",
+          "let etiqueta = 50\nlet total = precoComDesconto(etiqueta)"
+        ],
+        [
+          "f1-sozinho",
+          "function somar(a, b) {\n  return a + b\n}\nlet total = somar(7, 5)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function somar(a, b) {\n  console.log(a + b)\n}\nlet total = somar(2, 3)\nlet semRetorno = typeof total === \"undefined\""
+        ],
+        [
+          "f2-prever",
+          "function somar(a, b) {\n  return a + b\n}\nlet total = somar(2, 3)"
+        ],
+        [
+          "f2-sozinho",
+          "function dobro(horas) {\n  return horas * 2\n}\nlet custo = dobro(4)"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "function frete(preco) {\n  if (preco >= 100) { return 0 }\n  return 12\n}\nlet entrega = frete(100)"
+        ],
+        [
+          "f3-prever",
+          "let entrega = frete(99)"
+        ],
+        [
+          "f3-sozinho",
+          "function somarAte(n) {\n  let soma = 0\n  for (let i = 1; i <= n; i++) {\n    soma += i\n  }\n  return soma\n}\nlet pontos = somarAte(4)"
+        ]
+      ]
+    ],
+    "desafio": [
+      "function calcularFrete(preco) {\n  if (preco >= 200) { return 0 }\n  return 18\n}\nlet entrega = calcularFrete(200)",
+      "function totalPedido(preco, entrega) {\n  return preco + entrega\n}\nlet total = totalPedido(80, calcularFrete(80))"
+    ],
+    "negativas": {
+      "f2-prever": "function somar(a, b) {\n  console.log(a + b)\n}\nlet total = somar(2, 3)",
+      "f3-guiado": "function frete(preco) {\n  return 0\n}\nlet entrega = frete(100)"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "precoComDesconto",
+        "parametros": {
+          "preco": "100"
+        },
+        "retorno": "90"
+      }
+    }
   }
 }

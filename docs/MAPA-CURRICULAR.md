@@ -552,7 +552,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Confusões:** "escrever a função já roda"; "`saudar` e `saudar()` são a
   mesma coisa".
 
-#### U2. Parâmetros e retorno — `logica-funcoes-u2`
+#### U2. Parâmetros e retorno (pronta) — `logica-funcoes-u2`
 
 - **Meta:** dar valores para a função trabalhar e receber a resposta de
   volta com `return`.
