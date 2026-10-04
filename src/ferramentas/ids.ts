@@ -63,6 +63,7 @@ export const IDS_FERRAMENTAS = [
   "quadro-de-passos",
   // Fase composta (resolução de problemas): o plano vira comentários no código
   "plano-no-codigo",
+  "casos-de-teste",
   // Estruturas e desempenho no palco (zonas Estruturas de dados e Algoritmos essenciais)
   "contador-passos",
   "grafico-passos",

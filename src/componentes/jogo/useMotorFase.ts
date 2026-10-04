@@ -12,6 +12,7 @@ import { caminhoDoNo, raizDaArvore } from "@/lib/dom";
 import { type EstadoFaseSalvo, type Progresso, type ProgramaSalvo, PROJETO_VAZIO } from "@/lib/progresso";
 import type { Circuito } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
+import type { EstadoCasos } from "@/motor/casos/modelo";
 import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -69,7 +70,7 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa" | "circuito" | "ordenar">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa" | "circuito" | "ordenar" | "snippet" | "casos">;
   /** (Fase de programa) Degrau 3: pisca linhas do Snippet ou a linha do Console; null apaga. */
   destacarNoPrograma?: (alvo: number[] | "console" | null) => void;
   /** (Fase de programa) O que rodou e o Snippet, para salvar junto com a fase. */
@@ -82,6 +83,8 @@ type Opcoes = {
   destacarNoOrdenar?: (alvo: string | null) => void;
   /** (Ordenar) O quadro de agora, para salvar junto com a fase. */
   ordenarSalvo?: EstadoOrdenar | null;
+  /** (Área testes) Os casos do aluno de agora, para salvar junto com a fase. */
+  casosSalvos?: EstadoCasos | null;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -121,6 +124,7 @@ export function useMotorFase({
   circuitoSalvo = null,
   destacarNoOrdenar,
   ordenarSalvo = null,
+  casosSalvos = null,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -225,6 +229,7 @@ export function useMotorFase({
               programa: programaSalvo,
               circuito: circuitoSalvo,
               ordenar: ordenarSalvo,
+              casos: casosSalvos,
             },
           },
           // Passou da meta: a da entrada da unidade não aparece de novo.
@@ -250,7 +255,7 @@ export function useMotorFase({
         };
       });
     },
-    [circuitoSalvo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
+    [casosSalvos, circuitoSalvo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
   );
 
   useEffect(() => {

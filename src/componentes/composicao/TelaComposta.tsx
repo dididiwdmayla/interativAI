@@ -28,6 +28,7 @@ export const ROTULO_DA_AREA: Record<AreaTrabalho, string> = {
   plano: "Plano",
   snippet: "Código",
   palco: "Palco",
+  testes: "Testes",
 };
 
 type Props = {
@@ -69,8 +70,8 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
   const abas = abasDoLayout(layout, areas);
   const aba = abaVisivel(layout, areas, abaCelular);
   const palcoVisivelEmPe = tem("palco") && palcoAberto && !tecladoAberto;
-  // O que mora na coluna da direita do computador (por enquanto, só o palco).
-  const direita = (["palco"] as const).filter(tem);
+  // O que mora na coluna da direita do computador: o palco em cima e os testes embaixo.
+  const direita = (["palco", "testes"] as const).filter(tem);
   const divididaNaDireita = direita.length > 1;
 
   /* ------------------------------------------------------------- a grade de cada layout */
@@ -85,7 +86,7 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
       gridTemplateRows: divididaNaDireita ? `minmax(0, ${divisao}fr) 0.75rem minmax(0, ${1 - divisao}fr)` : "minmax(0, 1fr)",
       gridTemplateAreas: linhas.map((l) => `"${l}"`).join(" "),
     };
-    lugar = { plano: "plano", snippet: "codigo", palco: "palco" };
+    lugar = { plano: "plano", snippet: "codigo", palco: "palco", testes: "testes" };
   } else if (layout === "paisagem") {
     const comLado = abas.length > 0;
     estiloGrade = comLado
@@ -95,12 +96,12 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
           gridTemplateAreas: abas.length > 1 ? '"abas codigo" "lado codigo"' : '"lado codigo"',
         }
       : { gridTemplateColumns: "minmax(0, 1fr)", gridTemplateRows: "minmax(0, 1fr)", gridTemplateAreas: '"codigo"' };
-    lugar = { plano: "lado", snippet: "codigo", palco: "lado" };
+    lugar = { plano: "lado", snippet: "codigo", palco: "lado", testes: "lado" };
   } else {
     const linhas = [tem("palco") ? '"cabecalho"' : null, palcoVisivelEmPe ? '"palco"' : null, abas.length > 1 ? '"abas"' : null, '"conteudo"'].filter(Boolean);
     const alturas = [tem("palco") ? "auto" : null, palcoVisivelEmPe ? "minmax(0, 2fr)" : null, abas.length > 1 ? "auto" : null, palcoVisivelEmPe ? "minmax(0, 3fr)" : "minmax(0, 1fr)"].filter(Boolean);
     estiloGrade = { gridTemplateColumns: "minmax(0, 1fr)", gridTemplateRows: alturas.join(" "), gridTemplateAreas: linhas.join(" ") };
-    lugar = { plano: "conteudo", snippet: "conteudo", palco: "palco" };
+    lugar = { plano: "conteudo", snippet: "conteudo", palco: "palco", testes: "conteudo" };
   }
 
   /** A área aparece neste layout agora? */
@@ -166,11 +167,11 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
           {seletorAbas}
         </div>
       )}
-      {(["plano", "snippet", "palco"] as const).map((area) =>
+      {(["plano", "snippet", "palco", "testes"] as const).map((area) =>
         tem(area) ? (
           <section
             key={area}
-            aria-label={area === "plano" ? "Plano" : area === "snippet" ? "Código" : "Palco da memória"}
+            aria-label={{ plano: "Plano", snippet: "Código", palco: "Palco da memória", testes: "Casos de teste" }[area]}
             className={visivel(area) ? "flex min-h-0 min-w-0 flex-col" : "hidden"}
             style={{ gridArea: lugar[area] }}
             data-area-trabalho={area}

@@ -24,6 +24,7 @@ import { textoDoEsperado, textoPrevia, valorIgual } from "./executor/formatar";
 import { DADOS_DO_CONTROLE, normalizarExpressao } from "./depurador";
 import { conferirOrdem, type DadosOrdenar, type EstadoOrdenar, ondeEsta } from "./ordenar/modelo";
 import { planoDosComentarios } from "./plano/comentarios";
+import { casaComExigido, type DadosCasos, type EstadoCasos, lerCaso, textoDoExigido } from "./casos/modelo";
 import { ehArvore, formaPelasContagens, somarContagens } from "./estruturas";
 import { chaveMedicao, textoDePassos } from "./desempenho";
 
@@ -54,6 +55,8 @@ export type ContextoValidacao = {
   ordenar?: { dados: DadosOrdenar; estado: EstadoOrdenar };
   /** (Fase com Snippet) O texto do Snippet agora (o que está escrito, rodado ou não). */
   snippet?: string;
+  /** (Fase composta, área testes) A função dos casos e os casos do aluno agora, com os resultados da última rodada. */
+  casos?: { dados: DadosCasos; estado: EstadoCasos };
 };
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
@@ -237,6 +240,8 @@ export function descreverValidador(validador: Validador): string {
       return "nenhum passo que sobra está no plano";
     case "planoComentado":
       return "o plano está no código como comentários, na ordem certa";
+    case "casosDoAluno":
+      return `pelo menos ${validador.minimo} caso(s) de teste do aluno${validador.passando ? " passando" : ""}${validador.incluir?.length ? `, incluindo ${validador.incluir.map((exigido) => textoDoExigido(null, exigido)).join(" e ")}` : ""}`;
     case "passosNoMaximo":
       return validador.tamanho === undefined
         ? `a última execução deu no máximo ${validador.valor} passos`
@@ -584,6 +589,20 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       if (achados === 0) return { passou: false, descricao, detalhe: "nenhum passo do plano está no código como comentário" };
       const conferencia = conferirOrdem(contexto.ordenar.dados, estado);
       return { passou: conferencia.valida, descricao, detalhe: conferencia.valida ? "o plano está no código, na ordem certa" : `nos comentários do código: ${conferencia.motivo}` };
+    }
+    case "casosDoAluno": {
+      if (!contexto.casos) return { passou: false, descricao, detalhe: "só numa fase com a área testes" };
+      const { dados, estado } = contexto.casos;
+      const lidos = estado.casos.flatMap((caso) => {
+        const lido = lerCaso(caso);
+        return lido.ok ? [{ ...lido, id: caso.id }] : [];
+      });
+      const contam = validador.passando ? lidos.filter((caso) => estado.resultados[caso.id]?.passou) : lidos;
+      const faltam = (validador.incluir ?? []).filter((exigido) => !contam.some((caso) => casaComExigido(caso, exigido)));
+      const partes = [`${lidos.length} caso(s) válido(s)${validador.passando ? `, ${contam.length} passando` : ""}`];
+      if (lidos.length < estado.casos.length) partes.push(`${estado.casos.length - lidos.length} que não dá para ler`);
+      if (faltam.length) partes.push(`falta ${faltam.map((exigido) => textoDoExigido(dados, exigido)).join(" e ")}`);
+      return { passou: contam.length >= validador.minimo && faltam.length === 0, descricao, detalhe: partes.join("; ") };
     }
     case "semSobras": {
       if (!contexto.ordenar) return { passou: false, descricao, detalhe: "só numa fase ordenar-passos" };

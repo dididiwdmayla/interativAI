@@ -16,7 +16,7 @@ import type { Barramento } from "@/motor/barramento";
 import { textoDoErro } from "@/motor/executor/erros";
 import { textoPrevia } from "@/motor/executor/formatar";
 import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
-import type { ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
+import type { CasoFuncao, ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, ResultadoTesteFuncao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
 import { chamadasDaMedicao } from "@/motor/desempenho";
 
@@ -198,9 +198,10 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     [acrescentar, atualizarEstado, barramento, mostrarResultado, mostrarSaidas],
   );
 
+  /** Roda o código (Console ou Snippet) e devolve o resultado (null: não rodou, ou o Console respondeu na pausa). */
   const rodar = useCallback(
-    async (codigo: string, origem: OrigemCodigo, rotulo?: string) => {
-      if (!sessao) return;
+    async (codigo: string, origem: OrigemCodigo, rotulo?: string): Promise<ResultadoExecucao | null> => {
+      if (!sessao) return null;
       if (origem === "console") {
         acrescentar([{ tipo: "entrada", codigo }]);
         setHistorico((atual) => (atual[atual.length - 1] === codigo ? atual : [...atual, codigo].slice(-100)));
@@ -214,7 +215,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
           } finally {
             encerrar();
           }
-          return;
+          return null;
         }
       } else {
         depuracao.current?.encerrar();
@@ -231,9 +232,10 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         // O depurador pausou: o palco mostra o passo da pausa e o resto sai quando o programa terminar.
         if (origem === "snippet" && depuracao.current?.pausar(resultado)) {
           mostrarResultado(resultado);
-          return;
+          return resultado;
         }
         await concluir(resultado);
+        return resultado;
       } finally {
         setOcupado((n) => n - 1);
         encerrar();
@@ -261,6 +263,15 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     aoUsarAtual.current?.("snippet");
     void rodar(snippetAtual.current, "snippet");
   }, [rodar]);
+
+  /** (Casos de teste) Roda o Snippet e espera o fim: os casos chamam a função do código de agora. */
+  const executarSnippetEsperando = useCallback((rotulo: string) => rodar(snippetAtual.current, "snippet", rotulo), [rodar]);
+
+  /** (Casos de teste) Chama a função global com cada caso, na sessão de agora (null: a fase não tem programa). */
+  const testarFuncao = useCallback(
+    async (nome: string, casos: CasoFuncao[]): Promise<ResultadoTesteFuncao | null> => (sessao ? sessao.testarFuncao(nome, casos) : null),
+    [sessao],
+  );
 
   /**
    * (Ordenar passos) Roda o código do plano, na ordem dos cartões, com a
@@ -337,6 +348,8 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     programaSalvo,
     executarNoConsole,
     executarSnippet,
+    executarSnippetEsperando,
+    testarFuncao,
     executarPlano,
     definirSnippet,
     aoMudarSnippet,

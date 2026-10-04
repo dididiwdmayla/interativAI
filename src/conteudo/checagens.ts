@@ -14,7 +14,8 @@
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
-import { AREAS_TRABALHO, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { AREAS_TRABALHO, casosDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
 import { conferirItensDeRevisao } from "./revisao/conferirItens";
@@ -76,6 +77,8 @@ export type RegraFase = {
 };
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+/** Um nome de variável, função ou parâmetro do JavaScript. */
+const NOME_JS = /^[A-Za-z_$][\w$]*$/;
 const EMOJI = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{20E3}]/u;
 
 /**
@@ -1127,15 +1130,28 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
     checar: (fase) => {
       const problemas: string[] = [];
       const comPlano = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.plano !== undefined;
+      const comTestes = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.testes !== undefined;
       // O plano no código pede as duas áreas: o quadro (os cartões) e o Snippet (onde os comentários moram).
       const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet");
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
           if (item.tipo === "planoComentado" && !planoNoCodigo) problemas.push(`${onde}: o validador planoComentado pede as áreas "plano" e "snippet"`);
+          if (item.tipo === "casosDoAluno") {
+            const dados = casosDaFase(fase);
+            if (!dados) problemas.push(`${onde}: o validador casosDoAluno pede a área "testes"`);
+            if (!Number.isInteger(item.minimo) || item.minimo < 1) problemas.push(`${onde}: casosDoAluno com minimo ${item.minimo} (pelo menos 1)`);
+            if (item.minimo > MAXIMO_CASOS) problemas.push(`${onde}: casosDoAluno pede ${item.minimo} casos (o máximo da lista é ${MAXIMO_CASOS})`);
+            for (const exigido of item.incluir ?? []) {
+              if (exigido.args === undefined && exigido.esperado === undefined) problemas.push(`${onde}: casosDoAluno.incluir com um caso sem args nem esperado`);
+              if (dados && exigido.args && exigido.args.length !== dados.parametros.length) problemas.push(`${onde}: casosDoAluno.incluir com ${exigido.args.length} argumento(s); a função tem ${dados.parametros.length}`);
+            }
+            if ((item.incluir ?? []).length > item.minimo) problemas.push(`${onde}: casosDoAluno exige ${(item.incluir ?? []).length} casos de borda, mais que o minimo ${item.minimo}`);
+          }
         }
       }
       for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
         for (const acao of acoes) {
+          if ((acao.tipo === "escreverCaso" || acao.tipo === "apagarCaso" || acao.tipo === "rodarCasos") && !casosDaFase(fase)) problemas.push(`${onde}: ${acao.tipo} pede a área "testes"`);
           if ((acao.tipo === "levarPlanoProCodigo" || acao.tipo === "verPassoNoCodigo") && !planoNoCodigo) problemas.push(`${onde}: ${acao.tipo} pede as áreas "plano" e "snippet"`);
           if (acao.tipo === "verPassoNoCodigo" && !quadroDaFase(fase)?.cartoes.some((c) => c.id === acao.passo)) problemas.push(`${onde}: verPassoNoCodigo cita o cartão "${acao.passo}", que não existe`);
         }
@@ -1143,6 +1159,7 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (!faseComposta(fase)) {
         if ((fase.tipo === "pratica" || fase.tipo === "desafio") && fase.areas !== undefined) problemas.push("areas vazia: declare as áreas de trabalho ou tire o campo");
         if (comPlano) problemas.push('a fase tem plano, mas não declara a área "plano" em areas');
+        if (comTestes) problemas.push('a fase tem testes, mas não declara a área "testes" em areas');
         return problemas;
       }
       const areas = fase.areas;
@@ -1155,7 +1172,20 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (areas.includes("plano") && !comPlano) problemas.push('a área "plano" pede o campo plano (os cartões)');
       if (fase.tipo === "desafio" && fase.circuito) problemas.push("fase composta não tem circuito (a bancada é de outra tela)");
       if (fase.modoDocumento) problemas.push("fase composta não usa modoDocumento");
-      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria" };
+      if (areas.includes("testes") && !fase.programa?.snippet) problemas.push('a área "testes" pede programa.snippet (os casos chamam a função do Snippet)');
+      if (areas.includes("testes") && !comTestes) problemas.push('a área "testes" pede o campo testes (a função que os casos chamam)');
+      if (comTestes && fase.testes) {
+        const { funcao, parametros, inicial } = fase.testes;
+        if (!NOME_JS.test(funcao)) problemas.push(`testes.funcao "${funcao}" não é um nome de função`);
+        for (const nome of parametros) if (!NOME_JS.test(nome)) problemas.push(`testes.parametros tem "${nome}", que não é um nome de parâmetro`);
+        (inicial ?? []).forEach((caso, i) => {
+          const lido = lerCaso(caso);
+          if (!lido.ok) problemas.push(`testes.inicial[${i}]: ${lido.motivo}`);
+          else if (lido.args.length !== parametros.length) problemas.push(`testes.inicial[${i}] tem ${lido.args.length} argumento(s); a função tem ${parametros.length}`);
+        });
+        if ((inicial ?? []).length > MAXIMO_CASOS) problemas.push(`testes.inicial tem mais de ${MAXIMO_CASOS} casos`);
+      }
+      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
       for (const area of AREAS_TRABALHO) {
         const ferramenta = ferramentaDaArea[area];
         if (areas.includes(area) && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`a área "${area}" pede "${ferramenta}" em usaFerramentas`);

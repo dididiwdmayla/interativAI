@@ -2,7 +2,8 @@
 // o plano, o código e o palco na mesma tela. Monta o plano tocando nos
 // cartões, leva o plano pro código, acende um passo no código, troca a ordem
 // (os comentários acompanham e o código escrito fica), escreve a função
-// embaixo do plano e mexe no plano de novo sem perder o código.
+// embaixo do plano, mexe no plano de novo sem perder o código e escreve os
+// próprios casos de teste (um errado de propósito, corrigido na linha).
 // Uso: node testes/resolver.mjs [desktop|retrato|paisagem]
 import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
@@ -95,7 +96,7 @@ function ferramentas({ pagina }) {
   const aberto = await abrirFase("lab-resolver-u1-f1");
   const { pagina, navegador, erros } = aberto;
   const { tocar, area, naConversa, concluido, esperarObjetivo, plano, snippet, escreverNoFim } = ferramentas(aberto);
-  conferir((await pagina.locator("[data-composicao]").getAttribute("data-composicao")) === "plano snippet palco", `${MODO}: a tela é composta pelas áreas da fase`);
+  conferir((await pagina.locator("[data-composicao]").getAttribute("data-composicao")) === "plano snippet palco testes", `${MODO}: a tela é composta pelas áreas da fase`);
 
   // 1. O plano, tocando no cartão e depois em "Pôr no fim".
   await esperarObjetivo("planejar");
@@ -163,6 +164,51 @@ function ferramentas({ pagina }) {
   await tocar(pagina.locator('[data-tirar-passo="devolver"]'));
   const depois = await snippet();
   conferir(!depois.includes("Devolver a média") && depois.includes("return soma / notas.length;") && depois.includes("let rascunho = 1;"), `${MODO}: tirar um passo do plano tira só o comentário dele`);
+
+  await naConversa(/Próximo objetivo/);
+
+  // 6. Os casos de teste: um errado de propósito, corrigido na própria linha, e a lista vazia.
+  await esperarObjetivo("testar");
+  await area("testes");
+  const escreverCaso = async (entrada, esperado) => {
+    if (movel) await fecharBalao(pagina);
+    const campoEntrada = pagina.locator("[data-entrada-nova]");
+    await campoEntrada.click();
+    await campoEntrada.fill(entrada);
+    const campoEsperado = pagina.locator("[data-esperado-novo]");
+    await campoEsperado.click();
+    await campoEsperado.fill(esperado);
+    await tocar(pagina.locator("[data-adicionar-caso]"));
+  };
+  await escreverCaso("[8, 6]", "8");
+  if (toque) {
+    // No toque, a barra de símbolos aparece com o campo em foco e escreve nele.
+    await pagina.locator("[data-entrada-nova]").focus();
+    await esperarPronto(pagina);
+    conferir(await pagina.locator("[data-casos-de-teste] [data-barra-simbolos]").isVisible(), `${MODO}: a barra de símbolos aparece nos casos`);
+    await pagina.locator("[data-casos-de-teste] [data-barra-simbolos] button", { hasText: "[" }).dispatchEvent("click");
+    await pagina.locator("[data-casos-de-teste] [data-barra-simbolos] button", { hasText: "]" }).dispatchEvent("click");
+    conferir((await pagina.locator("[data-entrada-nova]").inputValue()) === "[]", `${MODO}: a barra escreve no campo do caso`);
+    await pagina.locator("[data-esperado-novo]").fill("0");
+    await tocar(pagina.locator("[data-adicionar-caso]"));
+  } else {
+    await escreverCaso("[]", "0");
+  }
+  await tocar(pagina.locator("[data-rodar-casos]"));
+  conferir((await pagina.locator('[data-caso="0"]').getAttribute("data-situacao-caso")) === "falhou", `${MODO}: o caso com a saída errada falha`);
+  conferir((await pagina.locator('[data-resultado-caso="0"]').innerText()).includes("veio 7"), `${MODO}: o caso mostra o que veio de fato`);
+  conferir((await pagina.locator('[data-caso="1"]').getAttribute("data-situacao-caso")) === "passou", `${MODO}: a lista vazia passa`);
+  conferir(!(await concluido()), `${MODO}: com um caso falhando e só dois casos, o objetivo não passa`);
+  // Corrigir a saída esperada na própria linha: o resultado apaga até rodar de novo.
+  if (movel) await fecharBalao(pagina);
+  await pagina.locator('[data-esperado-caso="0"]').fill("7");
+  conferir((await pagina.locator('[data-caso="0"]').getAttribute("data-situacao-caso")) === "sem-resultado", `${MODO}: mudar o caso apaga o resultado dele`);
+  await escreverCaso("[10]", "10");
+  await tocar(pagina.locator("[data-rodar-casos]"));
+  const situacoes = await pagina.locator("[data-situacao-caso]").evaluateAll((els) => els.map((e) => e.dataset.situacaoCaso));
+  conferir(JSON.stringify(situacoes) === '["passou","passou","passou"]', `${MODO}: os três casos passam (${situacoes})`);
+  conferir((await pagina.locator("[data-resumo-casos]").innerText()).includes("3 de 3 passando"), `${MODO}: o resumo diz quantos passam`);
+  conferir(await concluido(), `${MODO}: casosDoAluno com a lista vazia e passando`);
 
   const relevantes = errosRelevantes(erros);
   conferir(relevantes.length === 0, `${MODO} média: console limpo (${relevantes.join(" | ")})`);

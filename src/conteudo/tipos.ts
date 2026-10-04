@@ -24,6 +24,7 @@ import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 import type { AreaTrabalho } from "@/motor/composicao";
+import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -327,6 +328,17 @@ export type Validador =
    * que garante, no desafio, que o aluno planejou. Olha o código de agora.
    */
   | { tipo: "planoComentado" }
+  /**
+   * (Fase composta, área testes) O aluno escreveu pelo menos `minimo` casos
+   * de teste que dá para ler (entrada e saída esperada), incluindo os casos
+   * de borda que o conteúdo exige (`incluir`: pelos argumentos, pela saída
+   * esperada, ou pelos dois; `rotulo` diz como ele aparece no detalhe, como
+   * "a lista vazia"). Com `passando: true`, só contam os casos que passaram
+   * na última vez que os casos rodaram (junto com um `funcaoPassa`, isso
+   * prova que as saídas que o aluno escreveu estão certas). Olha os casos de
+   * agora.
+   */
+  | { tipo: "casosDoAluno"; minimo: number; incluir?: CasoExigido[]; passando?: boolean }
   /*
    * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
    * src/motor/desempenho.ts. Ver o guia, seção 28.
@@ -510,6 +522,19 @@ export type Acao =
    * `apontouPasso`. Pede quadro-de-passos.
    */
   | { tipo: "verPassoNoCodigo"; passo: string }
+  /**
+   * (Fase composta, área testes) Escreve um caso novo, como o aluno digita:
+   * a entrada como os argumentos de uma chamada ("[8, 6]", "10, 7") e a saída
+   * esperada ("7"). Gera `editouCasos`. Pede casos-de-teste.
+   */
+  | { tipo: "escreverCaso"; entrada: string; esperado: string }
+  /** (Área testes) Apaga o caso da posição `indice` (a partir de 0). Gera `editouCasos`. Pede casos-de-teste. */
+  | { tipo: "apagarCaso"; indice: number }
+  /**
+   * (Área testes) O botão "Rodar os casos": roda o código do Snippet e chama
+   * a função com cada caso. Gera `executouCodigo` e `rodouCasos`. Pede casos-de-teste.
+   */
+  | { tipo: "rodarCasos" }
   /** (Estruturas) O botão "Ver como árvore" da caixinha da variável global `nome`. Gera `viuComoArvore`. Pede arvore-palco. */
   | { tipo: "verComoArvore"; nome: string }
   /** (Desempenho) O botão Medir da aba Desempenho (o gráfico passos x tamanho). Gera `mediuDesempenho`. Pede grafico-passos. */
@@ -762,8 +787,9 @@ export type ComposicaoDaFase = {
   /**
    * As áreas de trabalho na mesma tela: "plano" (o quadro de passos, campo
    * `plano`), "snippet" (o código: aba Fontes com o Snippet e o Console,
-   * pede programa.snippet) e "palco" (o palco da memória com a linha do
-   * tempo). Sem o campo, a fase usa a tela de sempre do tipo dela.
+   * pede programa.snippet), "palco" (o palco da memória com a linha do
+   * tempo) e "testes" (os casos de teste do aluno, campo `testes`). Sem o
+   * campo, a fase usa a tela de sempre do tipo dela.
    */
   areas?: AreaTrabalho[];
   /**
@@ -772,6 +798,13 @@ export type ComposicaoDaFase = {
    * comentários no Snippet e o código é o aluno que escreve.
    */
   plano?: DadosOrdenar;
+  /**
+   * (Área testes) A função que os casos do aluno chamam (`funcao`, a do
+   * Snippet), os nomes dos parâmetros (o rótulo da entrada) e, se quiser,
+   * exemplos que já vêm escritos (`inicial`, como o aluno escreveria:
+   * `{ entrada: "[8, 6]", esperado: "7" }`).
+   */
+  testes?: DadosCasos;
 };
 
 /** Micro-passos: objetivos guiados e sozinho, em sequência. */

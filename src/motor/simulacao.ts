@@ -40,7 +40,8 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
-import { quadroDaFase, temArea } from "./composicao";
+import { casosDaFase, quadroDaFase, temArea } from "./composicao";
+import * as casosDoAluno from "./casos/modelo";
 import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
 import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
@@ -150,6 +151,9 @@ export function criarSimulacao(fase: Fase) {
   // Ordenar passos: as mesmas funções do modelo que o quadro da tela usa.
   const dadosOrdenar = quadroDaFase(fase);
   let ordenar: quadro.EstadoOrdenar | null = dadosOrdenar ? quadro.estadoInicialOrdenar(dadosOrdenar) : null;
+  // Fase composta com a área testes: os casos do aluno, rodados contra a função do Snippet.
+  const dadosCasos = casosDaFase(fase);
+  let casos: casosDoAluno.EstadoCasos | null = dadosCasos ? casosDoAluno.estadoInicialCasos(dadosCasos) : null;
   // Fase composta com plano e Snippet: o plano vira comentários no código, e mexer no plano atualiza o bloco.
   const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet") && dadosOrdenar !== null;
   const acompanharPlano = () => {
@@ -363,6 +367,39 @@ export function criarSimulacao(fase: Fase) {
           },
         }
       : undefined,
+    casos:
+      dadosCasos && casos
+        ? {
+            escrever: (entrada, esperado) => {
+              if (!casos) return false;
+              const novo = casosDoAluno.adicionarCaso(casos, entrada, esperado);
+              if (novo === casos) return false;
+              casos = novo;
+              eventos.push({ tipo: "editouCasos", total: novo.casos.length });
+              return true;
+            },
+            apagar: (indice) => {
+              const caso = casos?.casos[indice];
+              if (!casos || !caso) return false;
+              casos = casosDoAluno.apagarCaso(casos, caso.id);
+              eventos.push({ tipo: "editouCasos", total: casos.casos.length });
+              return true;
+            },
+            rodar: () => {
+              if (!casos || !executor) return false;
+              // Como na tela: roda o código do Snippet e chama a função com cada caso.
+              rodarCodigo(snippet, "snippet");
+              const erro = ultimaExecucao?.erro;
+              const erroDoCodigo = erro ? `${erro.nome ? `${erro.nome}: ` : ""}${erro.mensagem}` : null;
+              const rodados = casosDoAluno.casosParaRodar(casos);
+              const teste = erroDoCodigo || !executor ? null : executor.testarFuncao(dadosCasos.funcao, rodados.map((r) => r.caso));
+              casos = casosDoAluno.resultadosDaRodada(casos, dadosCasos, rodados, teste, erroDoCodigo);
+              const resultados = casos.resultados;
+              eventos.push({ tipo: "rodouCasos", total: rodados.length, passaram: rodados.filter((r) => resultados[r.id]?.passou).length });
+              return true;
+            },
+          }
+        : undefined,
     estruturas: fase.programa
       ? {
           verComoArvore: fase.usaFerramentas.includes("arvore-palco")
@@ -405,6 +442,7 @@ export function criarSimulacao(fase: Fase) {
       circuito: circuito ?? undefined,
       ordenar: dadosOrdenar && ordenar ? { dados: dadosOrdenar, estado: ordenar } : undefined,
       snippet: fase.programa?.snippet ? snippet : undefined,
+      casos: dadosCasos && casos ? { dados: dadosCasos, estado: casos } : undefined,
     };
   };
 
@@ -434,6 +472,8 @@ export function criarSimulacao(fase: Fase) {
     circuito: () => circuito,
     /** (Ordenar) Onde está cada cartão agora. */
     ordenar: () => ordenar,
+    /** (Área testes) Os casos do aluno agora, com os resultados da última rodada. */
+    casos: () => casos,
   };
 }
 

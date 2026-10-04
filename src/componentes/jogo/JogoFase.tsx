@@ -53,6 +53,9 @@ import { usePrograma } from "./usePrograma";
 import { useDepurador } from "./useDepurador";
 import { useEstruturas } from "./useEstruturas";
 import { useOrdenar } from "./useOrdenar";
+import { useCasos } from "./useCasos";
+import { lerCaso } from "@/motor/casos/modelo";
+import { AreaCasos } from "@/componentes/casos/AreaCasos";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
 import { AreaPlano } from "@/componentes/composicao/AreaPlano";
 import { TelaComposta } from "@/componentes/composicao/TelaComposta";
@@ -216,6 +219,7 @@ const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
   "linha-do-tempo": "palco",
   "contador-passos": "palco",
   "arvore-palco": "palco",
+  "casos-de-teste": "testes",
 };
 
 /** Ferramentas da aba Medição (zona Ser encontrado). */
@@ -410,6 +414,8 @@ export function JogoFase({
   );
   // Fase de ordenar passos: o quadro (os cartões e o plano).
   const ordenar = useOrdenar({ fase, barramento, salvo: salvo?.ordenar ?? null, programa, aoUsar: sinalizarUso, aoMudarPlano: acompanharPlano, aoEscolher: acenderPasso });
+  // Fase composta com a área testes: os casos de teste do aluno, rodados contra a função do Snippet.
+  const casos = useCasos({ fase, barramento, programa, salvo: salvo?.casos ?? null, aoUsar: sinalizarUso });
   // Estruturas e desempenho: ver como árvore, o contador de passos e o gráfico da aba Desempenho.
   const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
   const { editorSnippetRef } = programa;
@@ -872,6 +878,7 @@ export function JogoFase({
         : undefined,
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
       plano: planoNoCodigo ? { levarProCodigo: levarPlanoProCodigo, verPassoNoCodigo: acenderPasso } : undefined,
+      casos: casos.ativo ? { escrever: casos.escrever, apagar: casos.apagar, rodar: casos.rodar } : undefined,
       estruturas:
         estruturas.comArvore || estruturas.comGrafico
           ? { verComoArvore: estruturas.comArvore ? estruturas.verComoArvore : undefined, medirDesempenho: estruturas.comGrafico ? estruturas.medir : undefined }
@@ -898,6 +905,10 @@ export function JogoFase({
       planoNoCodigo,
       levarPlanoProCodigo,
       acenderPasso,
+      casos.ativo,
+      casos.escrever,
+      casos.apagar,
+      casos.rodar,
       depurador.ativo,
       depurador.alternarPontoDeParada,
       depurador.controlar,
@@ -1022,6 +1033,7 @@ export function JogoFase({
     [depurador.salvo, programa.programaSalvo],
   );
   const { circuitoAgora } = circuito;
+  const { casosAgora } = casos;
   const { ordenarAgora, setDestaque: destacarNoOrdenar } = ordenar;
   /** Degrau 3 no quadro: pisca o cartão (ou o plano); na fase composta, a área do plano aparece. */
   const destacarNoQuadro = useCallback(
@@ -1038,6 +1050,7 @@ export function JogoFase({
       ...(circuitoAgora() ? { circuito: circuitoAgora() ?? undefined } : {}),
       ...(ordenarAgora() ? { ordenar: ordenarAgora() ?? undefined } : {}),
       ...(fase.programa?.snippet ? { snippet: textoSnippet() } : {}),
+      ...(casosAgora() ? { casos: casosAgora() ?? undefined } : {}),
     };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
@@ -1047,7 +1060,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora, textoSnippet]);
+  }, [casosAgora, circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora, textoSnippet]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -1085,6 +1098,7 @@ export function JogoFase({
     circuitoSalvo: circuito.circuito,
     destacarNoOrdenar: destacarNoQuadro,
     ordenarSalvo: ordenar.estado,
+    casosSalvos: casos.estado,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -1334,7 +1348,35 @@ export function JogoFase({
     degrau: estado.degrau,
     htmlAtual,
     cssAtual,
-    obterPrograma: ordenar.ativo
+    obterPrograma: composta
+      ? () => {
+          // Fase composta: o plano na ordem do aluno, os casos de teste com o resultado e o código.
+          const doCodigo = programa.contextoTutor();
+          const quadro = ordenar.ordenarAgora();
+          const texto = (id: string) => quadro?.dados.cartoes.find((c) => c.id === id)?.texto ?? id;
+          const plano = quadro
+            ? `// O plano de "${quadro.dados.problema}", na ordem do aluno\n${ordemDoPlano(quadro.dados, quadro.estado).map((id, i) => `${i + 1}. ${texto(id)}`).join("\n") || "(vazio)"}`
+            : "";
+          const doTeste = casos.casosAgora();
+          const testes = doTeste
+            ? `// Casos de teste do aluno\n${
+                doTeste.estado.casos
+                  .map((caso) => {
+                    const resultado = doTeste.estado.resultados[caso.id];
+                    const lido = lerCaso(caso);
+                    const situacao = !lido.ok ? `não dá para ler (${lido.motivo})` : !resultado ? "ainda não rodou" : resultado.erro ? `deu erro: ${resultado.erro}` : resultado.passou ? "passou" : `falhou, veio ${resultado.obtido ?? "nada"}`;
+                    return `${doTeste.dados.funcao}(${caso.entrada}) devolve ${caso.esperado || "?"}: ${situacao}`;
+                  })
+                  .join("\n") || "(nenhum)"
+              }`
+            : "";
+          return {
+            codigo: [plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
+            erro: doCodigo?.erro ?? "",
+            variaveis: doCodigo?.variaveis ?? "",
+          };
+        }
+      : ordenar.ativo
       ? () => {
           const quadro = ordenar.ordenarAgora();
           if (!quadro) return null;
@@ -2346,6 +2388,21 @@ export function JogoFase({
             ) : null,
             snippet: painelDevtools,
             palco: telaPalco,
+            testes: casos.ativo ? (
+              <AlvoFerramenta ids={["casos-de-teste"]} className="flex min-h-0 flex-1 flex-col">
+                <AreaCasos
+                  casos={casos}
+                  toque={toque}
+                  ocupado={programa.ocupado}
+                  aoFocar={aoFocarEditor}
+                  alvoRodar={(botao) => (
+                    <AlvoFerramenta ids={["casos-de-teste"]} marcador="casos-de-teste" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-1.5" as="span" className="inline-flex shrink-0">
+                      {botao}
+                    </AlvoFerramenta>
+                  )}
+                />
+              </AlvoFerramenta>
+            ) : null,
           }}
           abaCelular={abaCelular}
           aoTrocarAba={(area) => {

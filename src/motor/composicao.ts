@@ -5,14 +5,16 @@
  * declara as ÁREAS que usa (`areas: ["plano", "snippet", "palco"]`) e o
  * motor monta a tela com elas: o quadro de passos (o plano), o código (a
  * aba Fontes com o Snippet e o Console), o palco da memória com a linha do
- * tempo e, mais tarde, outras áreas (os casos de teste do aluno, e nas ilhas
- * seguintes a especificação e o código gerado da Ilha IA ou os arquivos de
- * um projeto do Ofício).
+ * tempo, os casos de teste do aluno e, nas ilhas seguintes, outras áreas (a
+ * especificação e o código gerado da Ilha IA, os arquivos de um projeto do
+ * Ofício).
  *
  * Cada área tem um dono no formato da fase:
  * - "plano": o campo `plano` (os mesmos cartões do ordenar-passos);
  * - "snippet": `programa.snippet` (o código do aluno);
- * - "palco": `programa` (o palco da memória e a linha do tempo).
+ * - "palco": `programa` (o palco da memória e a linha do tempo);
+ * - "testes": o campo `testes` (os casos de teste que o aluno escreve e
+ *   roda contra a própria função).
  *
  * Os tipos antigos (prática de DevTools, programa, circuito, ordenar-passos)
  * continuam com as telas deles: a composição só vale para a fase que declara
@@ -23,9 +25,10 @@
  */
 import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 import type { DadosOrdenar } from "./ordenar/modelo";
+import type { DadosCasos } from "./casos/modelo";
 
 /** As áreas de trabalho que uma fase composta pode declarar, na ordem em que aparecem na tela. */
-export const AREAS_TRABALHO = ["plano", "snippet", "palco"] as const;
+export const AREAS_TRABALHO = ["plano", "snippet", "palco", "testes"] as const;
 
 export type AreaTrabalho = (typeof AREAS_TRABALHO)[number];
 
@@ -54,5 +57,11 @@ export function temArea(fase: Fase, area: AreaTrabalho): boolean {
 export function quadroDaFase(fase: Fase): DadosOrdenar | null {
   if (fase.tipo === "ordenar-passos") return fase.ordenar;
   if (temArea(fase, "plano") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.plano ?? null;
+  return null;
+}
+
+/** Os casos de teste da fase (área testes): a função que eles chamam. Null sem a área. */
+export function casosDaFase(fase: Fase): DadosCasos | null {
+  if (temArea(fase, "testes") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.testes ?? null;
   return null;
 }

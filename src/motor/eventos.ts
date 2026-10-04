@@ -91,7 +91,11 @@ export type EventoFase =
   /** (Fase composta) Tocou num passo do plano que está no código: o comentário dele acendeu no Snippet. */
   | { tipo: "apontouPasso"; passo: string; linha: number }
   /** (Fase composta) O texto do Snippet mudou (avisado depois de uma pausa na digitação, para conferir o plano no código). */
-  | { tipo: "editouSnippet" };
+  | { tipo: "editouSnippet" }
+  /** (Área testes) Escreveu, mudou ou apagou um caso de teste. */
+  | { tipo: "editouCasos"; total: number }
+  /** (Área testes) Rodou os casos: quantos rodaram e quantos passaram. */
+  | { tipo: "rodouCasos"; total: number; passaram: number };
 
 /**
  * Para onde um link levaria:
@@ -149,4 +153,6 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "levouPlanoProCodigo",
   "apontouPasso",
   "editouSnippet",
+  "editouCasos",
+  "rodouCasos",
 ];
