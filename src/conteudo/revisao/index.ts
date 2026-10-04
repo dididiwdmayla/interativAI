@@ -1,3 +1,17 @@
+import { ITENS_ARROW_COM_BLOCO } from "./arrow-com-bloco";
+import { ITENS_RETORNO_IMPLICITO } from "./retorno-implicito";
+import { ITENS_ARROW_JS } from "./arrow-js";
+import { ITENS_ESTADO_ENTRE_CHAMADAS } from "./estado-entre-chamadas";
+import { ITENS_ESCOPO_BLOCO_JS } from "./escopo-bloco-js";
+import { ITENS_ESCOPO_FUNCAO_JS } from "./escopo-funcao-js";
+import { ITENS_ESCOPO_GLOBAL_JS } from "./escopo-global-js";
+import { ITENS_RETURN_ENCERRA } from "./return-encerra";
+import { ITENS_MOSTRAR_OU_DEVOLVER } from "./mostrar-ou-devolver";
+import { ITENS_RETURN_JS } from "./return-js";
+import { ITENS_PARAMETRO_ARGUMENTO } from "./parametro-argumento";
+import { ITENS_MOLDURA_FUNCAO } from "./moldura-funcao";
+import { ITENS_CHAMADA_FUNCAO } from "./chamada-funcao";
+import { ITENS_FUNCAO_JS } from "./funcao-js";
 import { ITENS_MEDIA_JS } from "./media-js";
 import { ITENS_MAIOR_MENOR_JS } from "./maior-menor-js";
 import { ITENS_CONTADOR_CONDICIONAL } from "./contador-condicional";
@@ -189,6 +203,20 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_ARROW_COM_BLOCO,
+  ...ITENS_RETORNO_IMPLICITO,
+  ...ITENS_ARROW_JS,
+  ...ITENS_ESTADO_ENTRE_CHAMADAS,
+  ...ITENS_ESCOPO_BLOCO_JS,
+  ...ITENS_ESCOPO_FUNCAO_JS,
+  ...ITENS_ESCOPO_GLOBAL_JS,
+  ...ITENS_RETURN_ENCERRA,
+  ...ITENS_MOSTRAR_OU_DEVOLVER,
+  ...ITENS_RETURN_JS,
+  ...ITENS_PARAMETRO_ARGUMENTO,
+  ...ITENS_MOLDURA_FUNCAO,
+  ...ITENS_CHAMADA_FUNCAO,
+  ...ITENS_FUNCAO_JS,
   // U1 (modelo, com comentários pedagógicos no topo de cada arquivo)
   ...ITENS_ELEMENTO,
   ...ITENS_TAG,

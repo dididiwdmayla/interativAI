@@ -4,6 +4,21 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["funcoes.mjs", "desktop", "logica-funcoes-u4"],
+  ["funcoes.mjs", "retrato", "logica-funcoes-u4"],
+  ["funcoes.mjs", "paisagem", "logica-funcoes-u4"],
+  ["funcoes.mjs", "desktop", "logica-funcoes-u3"],
+  ["funcoes.mjs", "retrato", "logica-funcoes-u3"],
+  ["funcoes.mjs", "paisagem", "logica-funcoes-u3"],
+  ["funcoes.mjs", "desktop", "logica-funcoes-u2"],
+  ["funcoes.mjs", "retrato", "logica-funcoes-u2"],
+  ["funcoes.mjs", "paisagem", "logica-funcoes-u2"],
+  ["funcoes.mjs", "desktop", "logica-funcoes-u1"],
+  ["funcoes.mjs", "retrato", "logica-funcoes-u1"],
+  ["funcoes.mjs", "paisagem", "logica-funcoes-u1"],
+  ["tela-cheia.mjs", "desktop"],
+  ["tela-cheia.mjs", "retrato"],
+  ["tela-cheia.mjs", "paisagem"],
   ["sincronia.mjs"],
   ["ferramentas.mjs"],
   ["fase-completa.mjs", "desktop"],

@@ -1,3 +1,4 @@
+import { BotaoTelaCheia } from "@/componentes/layout/BotaoTelaCheia";
 import type { ReactNode } from "react";
 import { BotaoSom } from "./BotaoSom";
 import { EstrelasFase } from "./EstrelasFase";
@@ -35,6 +36,7 @@ export function BarraSuperior({ caminho, estrelas, logo, acoes }: Props) {
         {acoes}
         <SeletorTema />
         <BotaoSom />
+        <BotaoTelaCheia />
       </div>
     </header>
   );

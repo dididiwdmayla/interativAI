@@ -539,7 +539,7 @@ mostra a tabuada do 7.
 Missão de campo: no Console de qualquer site, criar a função
 `dobro(n)` e chamar com três números.
 
-#### U1. Criar e chamar — `logica-funcoes-u1`
+#### U1. Criar e chamar (pronta) — `logica-funcoes-u1`
 
 - **Meta:** guardar um passo a passo numa função e usar de novo quando
   quiser.
@@ -552,7 +552,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Confusões:** "escrever a função já roda"; "`saudar` e `saudar()` são a
   mesma coisa".
 
-#### U2. Parâmetros e retorno — `logica-funcoes-u2`
+#### U2. Parâmetros e retorno (pronta) — `logica-funcoes-u2`
 
 - **Meta:** dar valores para a função trabalhar e receber a resposta de
   volta com `return`.
@@ -567,7 +567,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Confusões:** "mostrar é devolver"; "o nome do parâmetro precisa ser o
   da variável".
 
-#### U3. Escopo — `logica-funcoes-u3`
+#### U3. Escopo (pronta) — `logica-funcoes-u3`
 
 - **Meta:** saber onde cada variável existe e por que a de dentro da função
   some quando ela termina.
@@ -579,7 +579,7 @@ Missão de campo: no Console de qualquer site, criar a função
 - **Revisa:** parâmetros e retorno (U2).
 - **Confusões:** "variável é global sempre".
 
-#### U4. Arrow functions — `logica-funcoes-u4`
+#### U4. Arrow functions (pronta) — `logica-funcoes-u4`
 
 - **Meta:** escrever funções curtas com a seta `=>` e reconhecer as duas
   formas no código dos outros.

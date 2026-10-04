@@ -1024,6 +1024,104 @@ const CATALOGO = {
     "dados"
   ]
 },
+"funcao-js": {
+  "nome": "Função",
+  "resumo": "Guarda instruções sob um nome; criar uma função não executa seu corpo.",
+  "temas": [
+    "logica"
+  ]
+},
+"chamada-funcao": {
+  "nome": "Chamada de função",
+  "resumo": "Os parênteses executam a função; ler apenas o nome obtém a própria função.",
+  "temas": [
+    "logica"
+  ]
+},
+"moldura-funcao": {
+  "nome": "Moldura de chamada",
+  "resumo": "Cada chamada tem seu próprio quadro no palco e volta para quem chamou ao terminar.",
+  "temas": [
+    "logica"
+  ]
+},
+"parametro-argumento": {
+  "nome": "Parâmetro e argumento",
+  "resumo": "Parâmetro é o nome de dentro; argumento é o valor entregue na posição da chamada.",
+  "temas": [
+    "logica"
+  ]
+},
+"return-js": {
+  "nome": "Retorno",
+  "resumo": "return entrega um valor para quem chamou e encerra a chamada.",
+  "temas": [
+    "logica"
+  ]
+},
+"mostrar-ou-devolver": {
+  "nome": "Mostrar ou devolver",
+  "resumo": "console.log mostra uma mensagem; return entrega um resultado. Sem return a função devolve undefined.",
+  "temas": [
+    "logica"
+  ]
+},
+"return-encerra": {
+  "nome": "Return encerra a chamada",
+  "resumo": "Um return termina imediatamente a chamada; as instruções seguintes daquela função não executam.",
+  "temas": [
+    "logica"
+  ]
+},
+"escopo-global-js": {
+  "nome": "Escopo global",
+  "resumo": "Uma variável do topo continua disponível entre chamadas.",
+  "temas": [
+    "logica"
+  ]
+},
+"escopo-funcao-js": {
+  "nome": "Escopo de função",
+  "resumo": "Uma variável local pertence à chamada; um nome igual fora representa outra caixinha.",
+  "temas": [
+    "logica"
+  ]
+},
+"escopo-bloco-js": {
+  "nome": "Escopo de bloco",
+  "resumo": "let e const dentro de chaves só existem naquele bloco, inclusive dentro de uma função.",
+  "temas": [
+    "logica"
+  ]
+},
+"estado-entre-chamadas": {
+  "nome": "Estado entre chamadas",
+  "resumo": "Uma local nasce de novo a cada chamada; para guardar uma contagem entre chamadas a caixinha deve sobreviver fora.",
+  "temas": [
+    "logica"
+  ]
+},
+"arrow-js": {
+  "nome": "Função com seta",
+  "resumo": "A seta => cria uma função; parâmetros e chamadas continuam funcionando do mesmo jeito.",
+  "temas": [
+    "logica"
+  ]
+},
+"retorno-implicito": {
+  "nome": "Retorno implícito",
+  "resumo": "Uma arrow sem chaves devolve automaticamente o valor da expressão depois da seta.",
+  "temas": [
+    "logica"
+  ]
+},
+"arrow-com-bloco": {
+  "nome": "Arrow com bloco",
+  "resumo": "Com chaves, a arrow executa instruções e precisa de return para devolver um resultado.",
+  "temas": [
+    "logica"
+  ]
+},
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

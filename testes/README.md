@@ -231,3 +231,8 @@ U3 também confere os tipos no palco e a linha do tempo do programa com comentá
 - Apresentações das ferramentas novas: `node testes/apresentacoes-logica.mjs [desktop|retrato|paisagem]`, pelo "Rever apresentação" da Caixa nas demonstrações do `/lab` (o alvo aparece na tela; no celular, a aba certa abre sozinha).
 - Ordenar passos: `node testes/ordenar.mjs [desktop|retrato|paisagem]` nas demonstrações `lab-logica-u1-f5` (café: tirar o que sobra, arrastar pela alça com mouse ou dedo de verdade pelo CDP, tocar e "Pôr aqui", setas, ordem validada pelas dependências), `f6` (agrupar) e `f7` (plano de código com Rodar: o erro da ordem errada e o 18 da certa).
 - Estruturas e desempenho: `node testes/estruturas.mjs [desktop|retrato|paisagem]` nas demonstrações `lab-logica-u1-f8` (push e pop com o vagão entrando e saindo pela direita, push e shift com a saída pela esquerda, "Ver como árvore" com a ponte para Elementos, e o bolha.js na linha do tempo com o vagão lido e a troca acesos) e `f9` (o contador de passos e a aba Desempenho: Medir, legenda, o valor no fim de cada linha, a lenta disparando acima da rápida, o detalhe de um ponto e a tabela).
+
+### Funções e tela cheia
+
+- `node testes/funcoes.mjs [desktop|retrato|paisagem] logica-funcoes-uN`: jornada da unidade pelo mapa, negativas pedagógicas, molduras, parâmetros e retorno no rastro, desafio e volta para a ilha.
+- `node testes/tela-cheia.mjs [desktop|retrato|paisagem]`: alternância simulada, mudança externa, rejeição, falta de suporte, navegação interna e layout com API real; teclado simulado em retrato.

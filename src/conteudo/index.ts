@@ -1,3 +1,7 @@
+import { FASES_UNIDADE_FUNCOES_U4, UNIDADE_FUNCOES_U4 } from "./ilhas/logica/funcoes/unidade-4/unidade";
+import { FASES_UNIDADE_FUNCOES_U3, UNIDADE_FUNCOES_U3 } from "./ilhas/logica/funcoes/unidade-3/unidade";
+import { FASES_UNIDADE_FUNCOES_U2, UNIDADE_FUNCOES_U2 } from "./ilhas/logica/funcoes/unidade-2/unidade";
+import { FASES_UNIDADE_FUNCOES_U1, UNIDADE_FUNCOES_U1 } from "./ilhas/logica/funcoes/unidade-1/unidade";
 /*
  * Registro de todo o conteúdo do jogo, na ordem em que se joga.
  * Unidade nova: importe o `unidade.ts` dela e acrescente nas duas listas.
@@ -73,6 +77,10 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_REPETICAO_U1,
   UNIDADE_REPETICAO_U2,
   UNIDADE_REPETICAO_U3,
+  UNIDADE_FUNCOES_U1,
+  UNIDADE_FUNCOES_U2,
+  UNIDADE_FUNCOES_U3,
+  UNIDADE_FUNCOES_U4,
 ];
 
 /** Todas as fases, na ordem das unidades. */
@@ -111,6 +119,10 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_REPETICAO_U1,
   ...FASES_UNIDADE_REPETICAO_U2,
   ...FASES_UNIDADE_REPETICAO_U3,
+  ...FASES_UNIDADE_FUNCOES_U1,
+  ...FASES_UNIDADE_FUNCOES_U2,
+  ...FASES_UNIDADE_FUNCOES_U3,
+  ...FASES_UNIDADE_FUNCOES_U4,
 ];
 
 export const FASE_INICIAL: Fase = FASES[0];

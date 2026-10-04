@@ -451,6 +451,22 @@ núcleo comum.
     de produção verdes (o arrasto com o dedo do `ordenar.mjs` agora para
     no destino antes de soltar). Conteúdo publicado sem mudança.
 
+- **Rodada 23: tela cheia e zona Funções completa (U1 a U4)**:
+  - Botão SVG nos controles gerais do mundo, ilha, fase, revisão e
+    glossário, Fullscreen API no documento, estado por fullscreenchange,
+    oculto sem suporte; navegação interna preserva a tela cheia, layouts
+    e altura visual do teclado com áreas seguras.
+  - **U1 Criar e chamar**, **U2 Parâmetros e retorno**, **U3 Escopo** e
+    **U4 Arrow functions**: 14 fases, 14 conceitos com tema Lógica e 28
+    itens de revisão (390 registrados). Guiado/sozinho, previsões,
+    desafios novos, if/for dentro das funções e missões no Console real.
+  - Molduras e linha do tempo mostram parâmetros, variáveis locais,
+    escopo de bloco e retorno; confusões entre declaração/chamada,
+    console.log/return, undefined e arrow com/sem chaves atacadas com
+    programas executáveis e negativas. Sem listas e sem depurador.
+  - 13.622 testes; jornadas de cada unidade nos três layouts,
+    publicar:conteudo, lint, build e bateria:conteudo verdes.
+
 ### Em andamento
 
 (nada no momento)
@@ -459,7 +475,8 @@ núcleo comum.
 
 - **Lógica, parte B (rodada 22), para depois:**
   - O depurador anda pelo rastro, que guarda até 1.000 fotos da memória:
-    num programa mais longo, as pausas depois disso não acontecem.
+    num programa mais longo, as pausas depois disso não acontecem. A zona
+    Depuração deve usar programas curtos, dentro dessas primeiras 1.000 fotos.
   - O palco ainda não mostra as variáveis declaradas dentro de um `case`
     do `switch` (o escopo de bloco cobre if, for, while e for...of).
   - A troca com variável auxiliar aparece como duas escritas que piscam;
@@ -536,8 +553,7 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Conteúdo da Lógica, nas zonas, nesta ordem: Funções, Listas e
-   objetos, Resolvendo problemas, Algoritmos essenciais, Estruturas de
+1. Conteúdo da Lógica, nas zonas, nesta ordem: Listas e objetos, Resolvendo problemas, Algoritmos essenciais, Estruturas de
    dados, Depuração e o projeto-ponte da Lógica (que pede o motor
    `projeto-ponte-js`).
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,

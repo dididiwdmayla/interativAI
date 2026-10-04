@@ -1,0 +1,236 @@
+{
+  "1": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "function saudar() {\n  console.log(\"Bom dia\")\n}\nsaudar()\nsaudar()"
+        ],
+        [
+          "f1-prever",
+          "function avisar() {\n  console.log(\"Olá\")\n}\navisar\nlet criada = typeof avisar === \"function\""
+        ],
+        [
+          "f1-sozinho",
+          "function despedir() {\n  console.log(\"Até amanhã\")\n}\ndespedir()\ndespedir()\ndespedir()"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function sinalizar() {\n  console.log(\"Oficina aberta\")\n}\nfor (let i = 0; i < 2; i++) {\n  sinalizar()\n}"
+        ],
+        [
+          "f2-prever",
+          "function sinalizar() {\n  console.log(\"Oficina aberta\")\n}\nfor (let i = 0; i < 2; i++) {\n  sinalizar()\n}\nlet fim = \"fora\""
+        ],
+        [
+          "f2-sozinho",
+          "function encerrar() {\n  console.log(\"Fechada\")\n}\nlet aberta = false\nif (!aberta) {\n  encerrar()\n}\nlet fim = \"biblioteca\""
+        ]
+      ]
+    ],
+    "desafio": [
+      "function abrir() {\n  console.log(\"Loja aberta\")\n}\nabrir()",
+      "function fechar() {\n  console.log(\"Até amanhã\")\n}\nfor (let i = 0; i < 2; i++) {\n  fechar()\n}"
+    ],
+    "negativas": {
+      "f1-guiado": "function saudar() {\n  console.log(\"Bom dia\")\n}\nsaudar"
+    },
+    "molduras": {
+      "f2-guiado": {
+        "funcao": "sinalizar",
+        "parametros": {},
+        "retorno": null
+      }
+    }
+  },
+  "2": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "function precoComDesconto(preco) {\n  return preco * 0.9\n}\nlet total = precoComDesconto(100)"
+        ],
+        [
+          "f1-prever",
+          "let etiqueta = 50\nlet total = precoComDesconto(etiqueta)"
+        ],
+        [
+          "f1-sozinho",
+          "function somar(a, b) {\n  return a + b\n}\nlet total = somar(7, 5)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function somar(a, b) {\n  console.log(a + b)\n}\nlet total = somar(2, 3)\nlet semRetorno = typeof total === \"undefined\""
+        ],
+        [
+          "f2-prever",
+          "function somar(a, b) {\n  return a + b\n}\nlet total = somar(2, 3)"
+        ],
+        [
+          "f2-sozinho",
+          "function dobro(horas) {\n  return horas * 2\n}\nlet custo = dobro(4)"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "function frete(preco) {\n  if (preco >= 100) { return 0 }\n  return 12\n}\nlet entrega = frete(100)"
+        ],
+        [
+          "f3-prever",
+          "let entrega = frete(99)"
+        ],
+        [
+          "f3-sozinho",
+          "function somarAte(n) {\n  let soma = 0\n  for (let i = 1; i <= n; i++) {\n    soma += i\n  }\n  return soma\n}\nlet pontos = somarAte(4)"
+        ]
+      ]
+    ],
+    "desafio": [
+      "function calcularFrete(preco) {\n  if (preco >= 200) { return 0 }\n  return 18\n}\nlet entrega = calcularFrete(200)",
+      "function totalPedido(preco, entrega) {\n  return preco + entrega\n}\nlet total = totalPedido(80, calcularFrete(80))"
+    ],
+    "negativas": {
+      "f2-prever": "function somar(a, b) {\n  console.log(a + b)\n}\nlet total = somar(2, 3)",
+      "f3-guiado": "function frete(preco) {\n  return 0\n}\nlet entrega = frete(100)"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "precoComDesconto",
+        "parametros": {
+          "preco": "100"
+        },
+        "retorno": "90"
+      }
+    }
+  },
+  "3": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "let taxa = 10\nfunction calcular(valor) {\n  let taxa = 2\n  return valor + taxa\n}\nlet total = calcular(5)"
+        ],
+        [
+          "f1-prever",
+          "function segredo() {\n  let codigo = 42\n}\nsegredo()\ncodigo"
+        ],
+        [
+          "f1-sozinho",
+          "let ajuste = 20\nfunction acrescer(base) {\n  let ajuste = 3\n  return base + ajuste\n}\nlet total = acrescer(8)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "function desconto(preco) {\n  let final = preco\n  if (preco >= 50) {\n    let abatimento = 5\n    final -= abatimento\n  }\n  return final\n}\nlet total = desconto(60)"
+        ],
+        [
+          "f2-prever",
+          "function testar() {\n  if (true) {\n    let aviso = \"OK\"\n  }\n  return aviso\n}\ntestar()"
+        ],
+        [
+          "f2-sozinho",
+          "function ingresso(idade) {\n  let preco = 20\n  if (idade < 12) {\n    let desconto = 8\n    preco -= desconto\n  }\n  return preco\n}\nlet total = ingresso(11)"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "let visitas = 0\nfunction registrar() {\n  visitas++\n  return visitas\n}\nlet primeira = registrar()\nlet segunda = registrar()"
+        ],
+        [
+          "f3-prever",
+          "let visitas = 0\nlet ultima = 0\nfor (let i = 0; i < 3; i++) {\n  ultima = registrar()\n}"
+        ],
+        [
+          "f3-sozinho",
+          "let coletas = 0\nfunction coletar() {\n  coletas++\n  return coletas\n}\nlet ultima = 0\nfor (let i = 0; i < 4; i++) {\n  ultima = coletar()\n}"
+        ]
+      ]
+    ],
+    "desafio": [
+      "let visitas = 0\nfunction visitar() {\n  visitas++\n  return visitas\n}\nlet primeira = visitar()\nlet segunda = visitar()",
+      "function rotulo(n) {\n  let texto = \"Visita \" + n\n  return texto\n}\nlet mensagem = rotulo(segunda)"
+    ],
+    "negativas": {
+      "f2-guiado": "function desconto(preco) {\n  if (preco >= 50) { let final = preco - 5 }\n  return final\n}\nlet total = desconto(60)",
+      "f3-guiado": "function registrar() {\n  let visitas = 0\n  visitas++\n  return visitas\n}\nlet primeira = registrar()\nlet segunda = registrar()"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "calcular",
+        "parametros": {
+          "valor": "5",
+          "taxa": "2"
+        },
+        "retorno": "7"
+      },
+      "f2-guiado": {
+        "funcao": "desconto",
+        "parametros": {
+          "preco": "60",
+          "final": "55"
+        },
+        "retorno": "55",
+        "bloco": {
+          "abatimento": "5"
+        }
+      }
+    },
+    "caixaDepois": "segunda"
+  },
+  "4": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "const dobro = (n) => n * 2\nlet total = dobro(3)"
+        ],
+        [
+          "f1-prever",
+          "let total = dobro(0)"
+        ],
+        [
+          "f1-sozinho",
+          "const triplo = (gramas) => gramas * 3\nlet total = triplo(20)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "const dobro = (n) => {\n  return n * 2\n}\nlet total = dobro(4)"
+        ],
+        [
+          "f2-prever",
+          "const teste = (n) => {\n  n * 2\n}\nlet total = teste(4)\nlet faltou = typeof total === \"undefined\""
+        ],
+        [
+          "f2-sozinho",
+          "const porcoes = (n) => {\n  let soma = 0\n  for (let i = 1; i <= n; i++) {\n    soma += i\n  }\n  return soma\n}\nlet total = porcoes(3)"
+        ]
+      ]
+    ],
+    "desafio": [
+      "const ml = (xicaras) => xicaras * 240\nlet leite = ml(1.5)",
+      "const gramas = (colheres) => {\n  if (colheres <= 0) { return 0 }\n  return colheres * 15\n}\nlet farinha = gramas(2)"
+    ],
+    "negativas": {
+      "f1-guiado": "function dobro(n) {\n  return n * 2\n}\nlet total = dobro(3)",
+      "f2-guiado": "const dobro = (n) => {\n  n * 2\n}\nlet total = dobro(4)"
+    },
+    "molduras": {
+      "f1-guiado": {
+        "funcao": "dobro",
+        "parametros": {
+          "n": "3"
+        },
+        "retorno": "6"
+      }
+    }
+  }
+}

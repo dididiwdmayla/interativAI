@@ -53,11 +53,13 @@ export function useViewportVisivel(): { altura: number | null; tecladoAberto: bo
     medir();
     visual?.addEventListener("resize", medir);
     window.addEventListener("resize", medir);
+    document.addEventListener("fullscreenchange", medir);
     window.addEventListener("focusin", medir);
     window.addEventListener("focusout", medir);
     return () => {
       visual?.removeEventListener("resize", medir);
       window.removeEventListener("resize", medir);
+      document.removeEventListener("fullscreenchange", medir);
       window.removeEventListener("focusin", medir);
       window.removeEventListener("focusout", medir);
     };

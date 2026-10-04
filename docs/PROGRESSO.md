@@ -1,53 +1,47 @@
 # Progresso
 
-Esta rodada guarda o detalhe mais recente. Rodada anterior: `docs/arquivo/PROGRESSO-rodada-21.md`. Status consolidado: `docs/ROADMAP.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-22.md`. Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 22: Ilha Lógica, parte B (motor)
+## Rodada 23: tela cheia e zona Funções
 
-Um commit por etapa. Fidelidade ao Chrome conferida em developer.chrome.com pela busca (o site direto está bloqueado pela política de rede do ambiente): ponto de parada no número da linha e `debugger;`, pausa antes da linha, F8, F10, F11 e Shift+F11 (e os atalhos de Ctrl/Cmd), Ctrl+B, painéis Scope, Watch e Call Stack.
+### Etapa 0: tela cheia
 
-### Etapa 1: pendências de motor
+- Botão SVG nos cabeçalhos do mapa, da fase, revisão e glossário; no celular fica junto ao menu para acesso em um toque. Documento inteiro via Fullscreen API, estado pelo fullscreenchange, sem botão quando fullscreenEnabled é falso.
+- Dica e rótulo acessível, controle durante a promessa e mensagem em caso de rejeição do navegador. Navegação interna mantém o documento e a tela cheia.
+- Altura dvh e VisualViewport preservadas; fullscreenchange refaz a medida, e os insets de área segura descontam a altura disponível, inclusive com teclado.
+- Verificado: 12.614 testes de conteúdo, build, lint; tela-cheia.mjs nos três layouts, alternância simulada, saída externa, falta de suporte, rejeição, navegação e API real com prévia visível; teclado simulado em retrato.
+- Ambiente: Chromium 133 extraído do pacote temporário sem alterar manifesto/lockfile; o extrator padrão falhou em chown e foi substituído por descompressão local dos mesmos binários.
 
-- Console: o `}` que o próprio Console fechou passa por cima (não duplica); Enter entre `{` e `}` abre o bloco indentado; Enter só roda com o código completo e o cursor no fim; Shift+Enter pula linha e Ctrl+Enter roda sempre. A barra de símbolos do toque digita como o teclado (`src/componentes/painel/console/digitacaoConsole.ts`).
-- `usouSintaxe`: `else` é o else final e `else-if` é o `else if` (id em kebab-case, como as outras sintaxes). Documentado no guia (25.3).
-- Desafio com `circuito`: partes com `circuitoTabela` e `usouPortao`, meta com a bancada antes e depois. Com `programa` junto, a ponte circuito/Console (bancada como tela; tabela verdade e Console no painel; no celular, um seletor).
-- Palco: `let`/`const` de dentro de um bloco aparecem numa caixa "dentro do bloco" e somem quando o bloco termina.
-- Testes: unitários do Console, do else-if, do escopo de bloco e do desafio com circuito; `testes/console.mjs` digita um if linha a linha (desktop e toque); `testes/ponte-circuito.mjs` nova.
+### Etapa 1: Criar e chamar
 
-### Etapa 2: aba Fontes com depurador
+- U1 publicada com três fases: declarar, chamar com parênteses, moldura por chamada, desafio nas mensagens de abertura e fechamento da Loja Girassol. Revisa textos, console.log, if e for.
+- Três conceitos com tema Lógica e seis itens de revisão em contextos novos; missão no Console real sem parâmetros/return, reservados à U2.
+- Validação por saída exata e tipo da função nesta unidade de mensagens; funcaoPassa entra na U2, que ensina funções que devolvem valores. Nenhuma capacidade de motor faltou.
+- Verificado: 12.830 testes; jornada pelo mapa nos três layouts com negativa de nome sem parênteses, entrada/sumiço da moldura e retorno ao Global; publicar:conteudo, lint e build.
 
-- O depurador anda pelo rastro do executor (memória antes de cada linha): pontos de parada no número da linha e `debugger;`, "Pausado no depurador", linha acesa, palco do momento, Snippet só de leitura na pausa, valor no hover, Console respondendo no momento pausado.
-- Controles Retomar, Passar por cima, Entrar e Sair, com os atalhos do Chrome; painéis Escopo, Observar e Pilha de chamadas. No celular: barra de controles grande embaixo e painéis em abas.
-- Validadores `pontoDeParada`, `pausouNaLinha`, `observou` (com `valor`) e `usouControle`; ações e eventos; 5 ferramentas com apresentação; demonstração `lab-logica-u1-f4`.
-- Testes: `depurador.test.ts`, `testes/depurador.mjs` e `testes/apresentacoes-logica.mjs`.
+### Etapa 2: Parâmetros e retorno
 
-### Etapa 3: ordenar passos
+- U2 com quatro fases: parâmetro/argumento, return contra console.log, undefined sem return, saída antecipada por if e acumulador/for dentro de função; desafio na calculadora de frete da Loja Rota.
+- Quatro conceitos com tema Lógica e oito itens de revisão; funcaoPassa com zero, negativos, decimais e fronteiras (99/100 e 199/200), combinado com resultados nas caixinhas e semErro.
+- Verificado: 13.118 testes; jornadas nos três layouts com parâmetro dentro da moldura e faixa de retorno, negativas de console.log e função constante, desafio e console limpo; publicar:conteudo, lint e build.
 
-- Tipo de fase `ordenar-passos` (o quadro é a tela inteira, como a bancada do circuito). Cartões com `depoisDe`, distrações (`sobra`), `inicial`, variante agrupar e plano de código que roda (`rodar`).
-- Validação pelas dependências (qualquer ordem que as respeite); `ordemValida`, `passoNoPlano`, `passoAntes`, `semSobras`; arrastar pela alça (mouse e dedo), tocar e "Pôr aqui", setas.
-- Demonstrações `f5` (café), `f6` (agrupar) e `f7` (plano de código). Testes: `ordenar.test.ts` (todas as permutações) e `testes/ordenar.mjs`.
+### Etapa 3: Escopo
 
-### Etapa 4: palco para estruturas e desempenho
+- U3 com quatro fases: global/local e nomes iguais, ReferenceError fora da função, let do if com moldura tracejada e contador que renascia em cada chamada. Desafio nas visitas da Exposição Marés, com o defeito no preparo e no Snippet: segunda visita em 1 antes, 2 depois.
+- Quatro conceitos com tema Lógica e oito itens de revisão; funções de cálculo com funcaoPassa, contador persistente por valorVariavel e saída/semErro conforme a tarefa.
+- Verificado: 13.406 testes; jornadas nos três layouts, variáveis locais dentro da moldura, variável dentro do bloco e seu desaparecimento antes do return, negativas dos escopos e do contador, meta e desafio; publicar:conteudo, lint e build.
 
-- Vagões entrando e saindo pelo lado certo (push/pop pela direita, unshift/shift pela esquerda); a leitura acende o vagão ("2 leu") e a troca numa linha só acende os dois ("trocou"). Leituras gravadas pela instrumentação (`__r.li`), sem contar o lado esquerdo de atribuições.
-- "Ver como árvore" para objetos com filhos objetos, com o nó da função de agora aceso e a ponte para a árvore de Elementos.
-- Contador de passos no palco e aba Desempenho (simulação) com o gráfico passos x tamanho: Medir, legenda, valor no fim de cada linha, detalhe ao passar o mouse ou tocar, tabela e "travaria" acima de 2 milhões de passos. Cores das duas séries validadas para daltonismo nos três temas (`--cor-grafico-1` e `--cor-grafico-2`).
-- Validadores `passosNoMaximo` (com e sem `tamanho`) e `formaDaEstrutura` (`forma`: pilha, fila ou árvore); ações `verComoArvore` e `medirDesempenho`; checagem `estruturas-desempenho`.
-- Demonstrações `f8` (pilha, fila, árvore e bolha.js) e `f9` (a lenta quadrática dispara a 125 mil passos com 500 itens; a rápida linear fica em 1.003). Testes: `estruturas.test.ts` e `testes/estruturas.mjs`.
+### Etapa 4: Arrow functions
+
+- U4 com três fases: reescrever function como arrow, retorno implícito e bloco sem return; desafio nas medidas da receita da Cozinha Aurora. Arrow com for revisa Repetição, e o desafio com if revisa Decisões.
+- Três conceitos com tema Lógica e seis itens de revisão; funcaoPassa com zero, negativos e decimais, usouSintaxe arrow/return e valorVariavel/semErro. Sem listas e sem ferramentas do depurador.
+- Verificado: 13.622 testes; jornadas nos três layouts com moldura, parâmetro e retorno da arrow, negativas de function no lugar de arrow e de bloco sem return, desafio e console limpo; publicar:conteudo, lint e build.
 
 ### Etapa 5: fechamento
 
-- Revisão de retrato e paisagem das peças novas: aviso da aba Desempenho encurtado; gráfico rola dentro da aba e árvore rola na horizontal.
-- Guia: seções 26 (depurador), 27 (ordenar passos) e 28 (estruturas e desempenho); 25 aponta as demonstrações.
-- Currículo: sem `requerMotor` em Resolvendo problemas u1 a u3, Depuração u2 e u3 e Estruturas de dados u3; `MOTORES_PLANEJADOS` só com `projeto-ponte-js`; MAPA-CURRICULAR atualizado.
-- Verificado: 12.614 testes unitários, lint e build verdes. Bateria completa no build de produção (100 arquivos, 3 em paralelo): 99 verdes; o `ordenar.mjs paisagem` falhou porque o arrasto sintético pelo CDP soltava o dedo em movimento, o Chrome lia um "fling" e engolia o toque seguinte (no avatar do computadorzinho). O teste agora para o dedo no destino antes de soltar, como uma pessoa; reconferido nos três layouts no build de produção.
-
-### Decisões a conferir
-
-- `else-if` em kebab-case (não `elseIf`), seguindo os ids de sintaxe existentes.
-- Ordenar passos como tipo de fase, não objetivo.
-- `formaDaEstrutura` usa a chave `forma` (o `tipo` do prompt colidia com o discriminante); `passosNoMaximo` ganhou `funcao` opcional.
-- O depurador é replay do rastro: até 1.000 fotos de memória; Snippet só de leitura enquanto pausado; Observar avalia numa cópia.
-- A troca acende como "trocou" só quando acontece numa linha (desestruturação); com variável auxiliar são duas escritas que piscam.
-- A aba se chama Desempenho, como a Performance do Chrome, com aviso de que a daqui conta passos e a do Chrome mede tempo.
-- O contador mostra "Nenhum passo ainda" até a primeira execução de verdade (a abertura roda um código vazio).
+- Zona Funções completa: 14 fases, 14 conceitos com tema Lógica e 28 itens (390 no registro), um commit por unidade; nenhum arquivo de unidade previamente publicada foi alterado.
+- Tela cheia reconferida no build final: API real e navegação por fase, ilha, glossário, mundo e revisão nos três layouts, mantendo o documento em tela cheia. Insets de 20/16 px e teclado simulados; a barra em paisagem comporta o alvo de 44 px e a borda sem cortar o toque.
+- Build e lint finais verdes; bateria:conteudo em produção verde (mapa, explorar, publicar, revisão). As jornadas das quatro unidades também estão registradas em testes/todos.mjs.
+- ROADMAP aponta Listas e objetos como próxima zona e exige programas curtos em Depuração, dentro das primeiras 1.000 fotos do rastro. ATRITOS-FABRICA guarda a rodada curta; históricos preservados em docs/arquivo.
+- Decisões: botão fora do menu no celular; saída exata para funções de mensagens da U1; contador global entre chamadas na U3, sem antecipar closures. Não houve mudança no executor nem nos validadores.
+- Limite da verificação: Chromium 133 em ambiente headless; teclado e áreas seguras simulados, sem dispositivo físico ou Safari de iPhone.

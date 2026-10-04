@@ -2057,7 +2057,7 @@ export function JogoFase({
       data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
       data-pronto={pronta ? "sim" : "nao"}
       data-roteiro={estado.roteiro ?? "nenhum"}
-      style={movel && viewport.altura ? { height: viewport.altura } : undefined}
+      style={movel && viewport.altura ? { height: `calc(${viewport.altura}px - var(--tela-cheia-inset, 0px))` } : undefined}
     >
       {movel ? (
         <BarraSuperiorMovel

@@ -1,5 +1,7 @@
 "use client";
 
+import { BotaoTelaCheia } from "@/componentes/layout/BotaoTelaCheia";
+
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
 import { LinksExplorar } from "@/componentes/explorar/LinksExplorar";
@@ -77,6 +79,7 @@ export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
           <OndeEstou partes={compacto ? caminho.slice(-1) : caminho} />
         </div>
         <TotalEstrelas compacto={compacto} />
+        {compacto && <BotaoTelaCheia />}
         {compacto ? (
           <MenuMovel>
             <LinksExplorar noMenu />
@@ -92,6 +95,7 @@ export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
             <SeletorTema />
             <BotaoSom />
+            <BotaoTelaCheia />
           </>
         )}
       </header>
