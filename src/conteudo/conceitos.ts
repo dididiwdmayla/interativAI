@@ -17,6 +17,8 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"pseudocodigo": {"nome": "Pseudocódigo", "resumo": "Planejar em palavras claras, sem precisar da sintaxe de uma linguagem.", "temas": ["logica"]},
+
 "entender-problema": {"nome": "Entender o problema", "resumo": "Separar os dados de entrada, a resposta pedida e exemplos antes de programar.", "temas": ["logica"]},
 "decompor-problema": {"nome": "Decompor um problema", "resumo": "Dividir um pedido grande em partes pequenas que dá para resolver separadamente.", "temas": ["logica"]},
 "plano-comentado": {"nome": "Plano no código", "resumo": "Guardar o plano em comentários para conferir qual ideia cada linha realiza.", "temas": ["logica", "ferramentas"]},

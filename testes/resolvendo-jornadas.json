@@ -378,5 +378,346 @@
         }
       ]
     }
+  ],
+  "2": [
+    {
+      "id": "logica-resolvendo-problemas-u2-f1",
+      "tipo": "ordenar-passos",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "preparar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "receber",
+              "grupo": "entrada"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "zerar",
+              "grupo": "entrada"
+            }
+          ]
+        },
+        {
+          "id": "prever",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "olhar",
+              "grupo": "saida"
+            }
+          ]
+        },
+        {
+          "id": "completar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "contar",
+              "grupo": "saida"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver",
+              "grupo": "exemplos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u2-f2",
+      "tipo": "pratica",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "reservas",
+        "parametros": [
+          "pessoas"
+        ]
+      },
+      "objetivos": [
+        {
+          "id": "plano-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            }
+          ]
+        },
+        {
+          "id": "plano-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "levar",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Reservas da agenda\n// 1. Começa sem reservas contadas\n// 2. Olha cada quantidade\n// 3. Se tiver pessoas, conta mais uma reserva\n// 4. Entrega quantas reservas têm pessoas\n\nfunction reservas(pessoas) {\n let total = 0;\n for (const n of pessoas) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "codigo-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Reservas da agenda\n// 1. Começa sem reservas contadas\n// 2. Olha cada quantidade\n// 3. Se tiver pessoas, conta mais uma reserva\n// 4. Entrega quantas reservas têm pessoas\n\nfunction reservas(pessoas) {\n let total = 0;\n for (const n of pessoas) if (n > 0) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "teste-guiado",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[2,0]",
+              "esperado": "1"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        },
+        {
+          "id": "teste-sozinho",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[0]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[2,2]",
+              "esperado": "2"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-resolvendo-problemas-u2-f3",
+      "tipo": "desafio",
+      "conclusao": [
+        {
+          "texto": "Entender, decompor, planejar, programar e testar: guarde esse caminho.",
+          "expressao": "apontando"
+        }
+      ],
+      "testes": {
+        "funcao": "livres",
+        "parametros": [
+          "horarios"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "zerar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "ler"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "somar"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "devolver"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "livres",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": false
+                        },
+                        {
+                          "ocupado": false
+                        }
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": true
+                        }
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "ocupado": true
+                        },
+                        {
+                          "ocupado": false
+                        }
+                      ]
+                    ],
+                    "esperado": 1
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Os horários da oficina\n// 1. Começa sem horários livres contados\n// 2. Olha cada horário\n// 3. Se não estiver ocupado, conta mais um\n// 4. Entrega quantos estão livres\n\nfunction livres(horarios) {\n let total = 0;\n for (const h of horarios) if (!h.ocupado) total++;\n return total;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "agenda vazia"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "ocupado": true
+                    }
+                  ]
+                ],
+                "rotulo": "nenhum horário livre"
+              }
+            ],
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{ocupado:false},{ocupado:false}]",
+              "esperado": "2"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{ocupado:true}]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

@@ -24,3 +24,14 @@ Branch `conteudo/resolvendo-problemas`, a partir de
   função constante e apenas um caso passando não cumprem o percurso.
 - Verificação: `testar:conteudo` verde (15.743 testes), jornadas da U1
   em desktop/retrato/paisagem e `publicar:conteudo` verdes.
+
+### U2: Pseudocódigo
+
+- Cartões em português agrupados em Preparar, Contar e Entregar; plano
+  sem sintaxe obrigatória, seguido da tradução em função curta.
+- Prática na agenda de reservas: contar reservas positivas, não somar
+  pessoas nem incluir uma reserva de zero pessoas. Desafio dos horários
+  livres da oficina, com fichas e condição invertida.
+- Um conceito com tema Lógica e duas revisões em outros contextos.
+- `testar:conteudo`: 15.868 testes verdes.
+- Jornadas U2 verdes nos três layouts; publicação, build e lint por unidade.
