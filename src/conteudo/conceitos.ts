@@ -1170,8 +1170,7 @@ const CATALOGO = {
       "logica",
       "dados"
     ]
-  }
-,
+  },
 
   "map-lista-js": {
     "nome": "Transformar com map",
@@ -1196,8 +1195,7 @@ const CATALOGO = {
       "logica",
       "dados"
     ]
-  }
-,
+  },
 "percorrer-lista-js": {
   "nome": "Percorrer os vagões",
   "resumo": "for...of entrega os valores da lista; for com índice lê lista[i] até antes de length.",
@@ -1230,8 +1228,40 @@ const CATALOGO = {
       "logica",
       "dados"
     ]
-  }
-,
+  },
+
+  "lista-objetos-js": {
+    "nome": "Lista de fichas",
+    "resumo": "Uma lista pode guardar objetos: lista[0] escolhe uma ficha e lista[0].nome lê um campo dela.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "somar-campo-js": {
+    "nome": "Somar um campo",
+    "resumo": "Percorra as fichas e acrescente o campo numérico de cada item ao acumulador.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "filtrar-campo-js": {
+    "nome": "Filtrar por campo",
+    "resumo": "A condição do filter pode ler um campo da ficha; o resultado guarda as fichas aprovadas.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
+  "desestruturacao-objeto-js": {
+    "nome": "Separar campos em variáveis",
+    "resumo": "const { nome, preco } = item lê esses campos e cria variáveis locais com seus valores.",
+    "temas": [
+      "logica",
+      "dados"
+    ]
+  },
 } as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
 
 export type IdConceito = keyof typeof CATALOGO;

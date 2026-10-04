@@ -96,18 +96,22 @@ async function rodar(codigo) {
   }
 }
 /** Percorre o rastro pelos botões reais e lê os valores nas caixinhas. */
-async function conferirTempo({ variavel, valores }) {
+async function conferirTempo({ variavel, valores = [], referencias = [] }) {
   if (movel) await fecharBalao(pagina);
   const tempo = pagina.locator("[data-linha-do-tempo]");
   const total = Number(await tempo.getAttribute("data-total-passos"));
   conferir(total > 2, `${MODO}: rastro disponível`);
   const encontrados = new Set();
+  const ponteiros = new Set();
   for (let i = total - 1; i >= 0; i--) {
     const valor = caixinha(variavel).locator("[data-valor-palco]");
     if (await valor.count()) encontrados.add(await valor.first().innerText());
+    const ponteiro = caixinha(variavel).locator("[data-ponteiro]");
+    if (await ponteiro.count()) ponteiros.add(await ponteiro.first().innerText());
     if (i > 0) await tocar(tempo.locator("[data-passo-anterior]"));
   }
   for (const valor of valores) conferir(encontrados.has(valor), `${MODO}: ${variavel} vale ${valor} numa volta`);
+  for (const dono of referencias) conferir([...ponteiros].some(texto => texto.includes(dono)), `${MODO}: ${variavel} passa pela ficha ${dono}`);
   for (let i = 1; i < total; i++) await tocar(tempo.locator("[data-passo-proximo]"));
   conferir((await tempo.getAttribute("data-passo-atual")) === String(total - 1), `${MODO}: rastro voltou ao fim`);
 }

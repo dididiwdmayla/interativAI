@@ -469,7 +469,7 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 24: zona Listas e objetos; U1 a U3 publicadas, falta U4 e o fechamento.
+- Rodada 24: zona Listas e objetos; U1 a U4 publicadas, falta o fechamento.
 
 (nada no momento)
 

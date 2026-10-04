@@ -229,5 +229,92 @@
     "referencias": {},
     "leituras": {},
     "caixaDepois": "pet"
+  },
+  "4": {
+    "passos": [
+      [
+        [
+          "f1-guiado",
+          "let primeiroNome = cardapio[0].nome\nlet item = cardapio[1]\nitem.preco = 9\nlet outroPreco = cardapio[0].preco"
+        ],
+        [
+          "f1-prever",
+          "item.preco = 10\nlet precoBolo = cardapio[2].preco"
+        ],
+        [
+          "f1-sozinho",
+          "const pedidos = [{ cliente: \"Ana\", total: 8 }, { cliente: \"Rui\", total: 15 }]\npedidos[1].total = 17\nconst totais = pedidos.map(pedido => pedido.total)"
+        ]
+      ],
+      [
+        [
+          "f2-guiado",
+          "let total = 0\nlet maiorPreco = 0\nlet maisCaro = \"\"\nfor (let item of cardapio) {\n const { nome, preco } = item\n total += preco\n if (preco > maiorPreco) { maiorPreco = preco; maisCaro = nome }\n console.log(nome)\n}"
+        ],
+        [
+          "f2-prever",
+          "let original = cardapio[0].nome"
+        ],
+        [
+          "f2-sozinho",
+          "function somaPedidos(lista) {\n let soma = 0\n for (let pedido of lista) {\n  const { total } = pedido\n  soma += total\n }\n return soma\n}\nlet soma = somaPedidos([{total: 0}, {total: 6}, {total: 9}])"
+        ]
+      ],
+      [
+        [
+          "f3-guiado",
+          "const opcoes = cardapio.filter(item => item.semGluten)\nconst nomes = opcoes.map(item => item.nome)\nlet primeira = cardapio.find(item => item.semGluten)"
+        ],
+        [
+          "f3-prever",
+          "opcoes[0].preco = 9\nlet compartilhado = cardapio[1].preco"
+        ],
+        [
+          "f3-sozinho",
+          "const baratos = (lista) => lista.filter(item => item.preco <= 6)\nlet achados = baratos([{nome: \"Broa\", preco: 5}, {nome: \"Bolo\", preco: 12}])"
+        ]
+      ]
+    ],
+    "desafio": [
+      "function totalPedido(lista) {\n let soma = 0\n for (let item of lista) {\n  const { preco, quantidade } = item\n  soma += preco * quantidade\n }\n return soma\n}\nlet total = totalPedido(pedido)",
+      "const vegetarianas = pedido.filter(item => item.vegetariana)\nconst nomes = vegetarianas.map(item => item.nome)"
+    ],
+    "negativas": {
+      "f1-guiado": "let primeiroNome = cardapio[0].nome\nlet item = cardapio[1]\nfor (let produto of cardapio) { produto.preco = 9 }\nlet outroPreco = cardapio[0].preco\ncardapio[0].preco = 5\ncardapio[2].preco = 12",
+      "f3-sozinho": "const baratos = (lista) => lista\nlet achados = baratos([{nome: \"Broa\", preco: 5}, {nome: \"Bolo\", preco: 12}])"
+    },
+    "caixinhas": {},
+    "linhaDoTempo": {
+      "f2-guiado": {
+        "variavel": "preco",
+        "valores": [
+          "5",
+          "8",
+          "12"
+        ]
+      },
+      "f3-guiado": {
+        "variavel": "item",
+        "referencias": [
+          "cardapio[0]",
+          "cardapio[1]",
+          "cardapio[2]"
+        ]
+      }
+    },
+    "listas": {
+      "f3-guiado": {
+        "opcoes": 1,
+        "nomes": 1
+      }
+    },
+    "fichas": {},
+    "referencias": {
+      "f1-guiado": {
+        "item": "cardapio[1]"
+      }
+    },
+    "leituras": {},
+    "caixaDepois": "pedido"
   }
 }

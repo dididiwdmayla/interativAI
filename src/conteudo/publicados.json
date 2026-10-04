@@ -245,6 +245,12 @@
       "logica-listas-e-objetos-u3-f1",
       "logica-listas-e-objetos-u3-f2",
       "logica-listas-e-objetos-u3-f3"
+    ],
+    "logica-listas-e-objetos-u4": [
+      "logica-listas-e-objetos-u4-f1",
+      "logica-listas-e-objetos-u4-f2",
+      "logica-listas-e-objetos-u4-f3",
+      "logica-listas-e-objetos-u4-f4"
     ]
   },
   "fases": {
@@ -1466,9 +1472,44 @@
         "ler",
         "atualizar"
       ]
+    },
+    "logica-listas-e-objetos-u4-f1": {
+      "objetivos": [
+        "f1-guiado",
+        "f1-prever",
+        "f1-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f2": {
+      "objetivos": [
+        "f2-guiado",
+        "f2-prever",
+        "f2-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f3": {
+      "objetivos": [
+        "f3-guiado",
+        "f3-prever",
+        "f3-sozinho"
+      ]
+    },
+    "logica-listas-e-objetos-u4-f4": {
+      "partes": [
+        "total",
+        "filtrar"
+      ]
     }
   },
   "itensRevisao": [
+    "lista-objetos-js-1",
+    "lista-objetos-js-2",
+    "somar-campo-js-1",
+    "somar-campo-js-2",
+    "filtrar-campo-js-1",
+    "filtrar-campo-js-2",
+    "desestruturacao-objeto-js-1",
+    "desestruturacao-objeto-js-2",
     "objeto-js-1",
     "objeto-js-2",
     "acesso-objeto-js-1",
