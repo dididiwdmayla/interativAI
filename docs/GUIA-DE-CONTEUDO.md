@@ -52,6 +52,10 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
 28. Estruturas e desempenho
 29. Resolução de problemas: a tela composta (plano, código, palco e
     casos de teste na mesma fase, inclusive no desafio)
+30. Cenas programáveis (30.1 a área cena, 30.2 montar uma cena com o kit,
+    30.3 dispositivos e relógio simulado, 30.4 validadores de cena, 30.5
+    escolher dispositivos e linhas do tempo, 30.6 regra de ritmo, 30.7
+    como acrescentar peças ao kit)
 
 Arquivos que você vai usar:
 
@@ -68,6 +72,7 @@ Arquivos que você vai usar:
 | `/lab/fases` | abrir qualquer fase, ver os validadores ao vivo |
 | `/lab/fases?fase=<id>&modo=jogo` | jogar uma bancada como no jogo (meta, apresentações, Rever, progresso salvo) |
 | `/lab/mapa` | desbloquear tudo no mapa, resetar o progresso e a Lista de fases |
+| `/lab/cenas` | o kit de cenas (peças e dispositivos) nos três temas |
 | `npm run publicar:conteudo` | congela os ids da unidade nova em `src/conteudo/publicados.json` |
 | `docs/ROADMAP.md` | o status do projeto; atualize a seção Status no fim do trabalho |
 
@@ -1011,6 +1016,9 @@ fase. As outras bancadas: `f2` (modo documento com dispositivo), `f3`
       `abrirBalao`, `fecharBalao`), nunca `waitForTimeout` (seção 11).
 - [ ] Seletores com âncoras naturais, sem posição.
 - [ ] Ferramentas apresentadas no primeiro objetivo que usa cada uma.
+- [ ] Unidade nova da Lógica: pelo menos uma fase com cena, diferente das
+      anteriores (outro ambiente, outro dispositivo ou outra missão; seção
+      30.6), sem `[aviso de cena]` no `testar:conteudo`.
 - [ ] Fase de CSS (seção 12): `@media` só com condição que o motor sabe
       (12.8),
       `paineisElementos` ligado, `valorEfetivo` onde o resultado importa e
@@ -1303,7 +1311,9 @@ demonstrações da Bancada da Lógica: `f3` (desafio com circuito e ponte
 circuito/Console), `f4` (depurador, seção 26), `f5` a `f7` (ordenar
 passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28). A tela
 composta (plano, código, palco e casos de teste juntos) tem a bancada
-própria, `lab-resolver-u1` (seção 29).
+própria, `lab-resolver-u1` (seção 29), e as cenas programáveis, a
+`lab-cenas-u1` (seção 30). **Regra de ritmo:** toda unidade nova da Lógica
+tem pelo menos uma fase com cena (seção 30.6).
 
 ### 25.1 O executor
 
@@ -1634,7 +1644,8 @@ volta. Motor: `src/motor/composicao.ts` (as áreas),
 `src/motor/plano/comentarios.ts` (o plano no código) e `src/motor/casos/`
 (os casos de teste). Zona que usa: Resolvendo problemas (a U4 e os
 desafios); depois, a especificação e o código gerado da Ilha IA e os
-projetos do Ofício, como áreas novas.
+projetos do Ofício, como áreas novas. A área `cena` (o mundo que o código
+controla) está na seção 30.
 
 - **Quando usar:** quando o aluno precisa planejar, programar e testar o
   mesmo problema na mesma tela. Fase só de quadro (decompor, ordenar,
@@ -1723,3 +1734,210 @@ projetos do Ofício, como áreas novas.
   lido como parte dele e some quando o plano muda). Deitado, o código mostra
   poucas linhas (o celular em pé tem mais espaço). Teste:
   `testes/resolver.mjs`.
+
+## 30. Cenas programáveis: o mundo que o código controla
+
+Modelos: `/lab/fases?fase=lab-cenas-u1-f1` (o quarto à noite: acender,
+ficha e Por dentro, liga e desliga sem esperar, piscar 3 vezes, a
+velocidade) e `lab-cenas-u1-f2` (a vitrine da Padaria Pão de Mel: o sensor
+lido no Console, o if que roda uma vez só, o loop de controle nas várias
+linhas do tempo). O mostruário do kit, nos três temas: `/lab/cenas`. Motor:
+`src/motor/cena/` (`modelo.ts`, os dados e o estado no tempo;
+`catalogo.ts`, os dispositivos e as fichas; `motor.ts`, o relógio e os
+objetos no executor; `validar.ts`, os validadores; `ritmo.ts`, a regra de
+ritmo). Desenho: `src/componentes/cena/` (o kit em `kit/`).
+
+O foco é a PROGRAMAÇÃO: o que o código manda, como o dispositivo responde e
+por que funciona. A parte elétrica aparece só no "Por dentro" da ficha,
+como ponte para a trilha Automação.
+
+### 30.1 A cena é uma área da tela composta
+
+- A fase é `pratica` ou `desafio` com `areas` (seção 29) e a área `"cena"`
+  (sempre com `"snippet"`; o `"palco"` é opcional, mas a linha do tempo
+  mora nele). Campo `cena` (`DadosCena`), `siteAlvo: SITE_DO_PROGRAMA`,
+  `programa.snippet`.
+- `usaFerramentas`: `"cena"`, `"ficha-dispositivo"` e
+  `"velocidade-simulacao"` (as três aparecem sempre com a área; a regra
+  `composicao` cobra), mais `snippet`, `console` e, com o palco,
+  `palco-memoria` e `linha-do-tempo`. Apresente `cena` na primeira fase
+  com cena (`apresentar` da fase), `ficha-dispositivo` no objetivo que
+  manda abrir a ficha e `velocidade-simulacao` quando fizer sentido trocar
+  a velocidade (modelo: f1 da bancada).
+- A tela: no computador, a cena em cima na coluna da direita (com o palco
+  embaixo, divisor arrastável); deitado, a cena é a primeira aba ao lado
+  do código; em pé, a cena fica em cima (recolhível, e recolhe sozinha
+  enquanto o teclado está aberto) e as abas "Código | Palco" embaixo.
+- A linha de ajuda aponta `{ alvo: "ferramenta", ferramenta: "cena" }`,
+  `"ficha-dispositivo"` (o desenho) ou `"velocidade-simulacao"`; a área
+  aparece sozinha no celular.
+
+### 30.2 Montar uma cena com o kit (cenas são dados)
+
+Uma cena nova é montar peças, não desenhar. `DadosCena`:
+
+- `id` (kebab-case, ex.: `garagem-portao`), `titulo` (até 40), `ambiente`
+  (kebab-case: `quarto`, `vitrine`, `garagem`...; a regra de ritmo compara
+  por ele), `periodo` (`"noite"`: o ambiente escurece e cada lâmpada acesa
+  clareia a área dela de verdade; `"dia"`: claro, a janela mostra o céu
+  azul) e `duracaoMs` (de 2.000 a 60.000; o loop de controle termina junto).
+- `cenario`: as peças, na ordem de desenho (de trás para a frente), no
+  sistema de coordenadas 320 x 200 (0, 0 é o canto de cima à esquerda; o
+  chão das cenas de referência começa em y 150 e os pés das pessoas ficam
+  em y 186). Cada peça: `{ peca, x, y, largura?, altura?, variante?,
+  espelhar? }`, com x e y no canto de cima à esquerda. As peças e as
+  variantes:
+  - `parede` (320 x 150; `listras`, `tijolos` para fachada, ou lisa);
+  - `piso` (320 x 50; `madeira` ou `calcada`, com meio-fio);
+  - `janela` (64 x 52; o céu segue o `periodo`; `cortina`);
+  - `porta` (40 x 82; `vidro`, com a plaquinha de loja);
+  - `cama` (112 x 50), `mesa` (46 x 34; `cabeceira`, com gavetas),
+    `planta` (26 x 44), `quadro` (36 x 28), `tapete` (96 x 16);
+  - `prateleira` (64 x 30; `livros`, `paes` ou `potes`);
+  - `balcao` (120 x 46; `padaria`, com pães atrás do vidro);
+  - `toldo` (200 x 26) e `vitrine` (150 x 84: o vidro com reflexo; ponha
+    o que fica dentro dela ANTES, no `cenario`).
+- `dispositivos` (1 a 6): `{ id, tipo, x, y, escala?, variante?, inicial? }`.
+  O `id` é o NOME DA VARIÁVEL no código (`lampada`, `luz`, `sensor`) e não
+  pode ser um nome que o código já tem (`esperar`, `console`...). O ponto
+  (x, y) de cada tipo: lâmpada pendente, a lâmpada (o fio desce do teto);
+  lâmpada `variante: "spot"`, a luminária presa no teto ou no toldo;
+  sensor e interruptor, o centro; portão (uns 200 de largura: a passagem e
+  o muro onde a folha entra), letreiro e forno, o canto de cima à
+  esquerda; ventilador, o meio da base. `inicial` muda o começo (ex.: o
+  letreiro já mostrando `"PÃO DE MEL"`, o interruptor já ligado).
+- `linhaDoTempo`: o que acontece sozinho. `{ tipo: "pessoa", chegaMs,
+  saiMs?, x?, y?, lado? }` (ela aparece andando um pouco antes, vinda do
+  `lado`, para em `x` e os sensores de presença veem gente de `chegaMs` a
+  `saiMs`) e `{ tipo: "interruptor", dispositivo, noMs }` (alguém aperta).
+- Confira no `/lab/fases` (a cena aparece com o objetivo ao lado) e no
+  `/lab/cenas` (o padrão do kit). A regra `composicao` confere peças,
+  dispositivos, nomes e instantes.
+
+### 30.3 Os dispositivos e o relógio simulado
+
+Cada tipo tem a ficha no `catalogo.ts` (o aluno abre tocando nele):
+
+| Tipo | Comandos | Propriedades |
+| --- | --- | --- |
+| `lampada` | `ligar()`, `desligar()` | `ligada`, `brilho` (0 a 100, troca com `=`) |
+| `sensor` (presença) | nenhum | `temGente` (do mundo) |
+| `interruptor` | nenhum | `ligado` (do mundo) |
+| `portao` | `abrir()`, `fechar()` | `aberto` |
+| `letreiro` | `mostrar(texto)`, `apagar()` | `texto` (até 16 letras) |
+| `forno` | `ligar()`, `desligar()` | `ligado`, `temperatura` (sobe uns 40 graus por segundo ligado, desce 15 desligado) |
+| `ventilador` | `desligar()` | `velocidade` (0 a 3, troca com `=`) |
+
+- `esperar(ms)` avança o relógio da SIMULAÇÃO (não espera de verdade). Os
+  sensores leem a linha do tempo no instante do relógio. Sem `esperar`,
+  tudo acontece no mesmo instante: ligar e desligar seguidos não aparecem
+  (uma boa previsão).
+- Executar (o Snippet) recomeça a cena do zero; o Console continua de onde
+  ela está (dá para ler `sensor.temGente`, rodar `esperar(3500)` e ler de
+  novo). Depois do Snippet, o mundo continua até o fim da cena, mesmo que
+  o código pare antes.
+- Loop de controle: `while (true)` com `esperar()` dentro é legítimo. A
+  simulação termina sozinha quando o tempo da cena acaba ("A simulação
+  terminou"), sem erro, e nem um try/catch do aluno segura. Um loop SEM
+  `esperar()` cai na proteção de sempre ("Loop que nunca termina?"), com a
+  dica da cena; com `esperar(0)` ou `esperar(1)`, a dica manda esperar mais
+  (o limite de 100 mil passos vale: cenas de até 60 s com `esperar(100)`
+  ficam bem longe dele).
+- Erros em PT-BR, do JavaScript de verdade: trocar uma propriedade só de
+  leitura (`lampada.ligada = true`) é `TypeError` com a dica do comando;
+  valor fora da faixa (`ventilador.velocidade = 5`) é `RangeError`.
+- No Console, `lampada` mostra `Lampada {ligada: false, brilho: 100}`, como
+  um objeto do Chrome. Os dispositivos não entram no palco (só o que o
+  aluno declara).
+- A cena toca como animação (1x, 2x, 4x) depois de cada Executar. A linha
+  do tempo da execução, o palco e a linha do código andam junto com a
+  cena; escolher um passo na linha do tempo leva a cena para o instante
+  dele, só com as mudanças feitas até ali. Limite: a linha do tempo guarda
+  as primeiras 1.000 fotos (o rastro da cena guarda até 2.000 mudanças).
+
+### 30.4 Validadores de cena
+
+Olham a simulação de agora (desde o último Executar) e não travam; nenhum
+passa antes de a cena rodar.
+
+- `{ tipo: "estadoNaCena", dispositivo, propriedade, valor, noTempo? }`: o
+  valor no instante (ms; sem `noTempo`, no fim da cena).
+- `{ tipo: "sequenciaNaCena", dispositivo, eventos: [{ acao, aposMs?,
+  toleranciaMs? }], exata? }`: o dispositivo fez essas ações em ordem (só
+  mudanças de verdade: ligar o que já está ligado não conta). `aposMs` é o
+  tempo desde a ação anterior (na primeira, desde o começo), com folga
+  padrão de 100 ms; `exata`: nada a mais dessas ações (piscou 3 vezes, e
+  não 4). As ações: lâmpada `ligar`, `desligar`, `brilho`; portão `abrir`,
+  `fechar`; letreiro `mostrar`, `apagar`; forno `ligar`, `desligar`;
+  ventilador `velocidade`, `desligar`.
+- `{ tipo: "reagiu", quando: { dispositivo, propriedade, valor }, entao: {
+  dispositivo, acao }, prazoMs }`: TODA vez que a propriedade passa a valer
+  o valor (o sensor vê gente), a ação acontece no prazo (a luz faz
+  `ligar` em até 500 ms). Ligar no começo e deixar ligado não conta.
+- `{ tipo: "variosCenarios", linhasDoTempo: [...], validador }`: o código
+  roda de novo com cada linha do tempo a cada Executar (como os casos
+  escondidos do `funcaoPassa`) e o validador de cena de dentro passa em
+  todas. É o que pega o código "decorado" (`esperar(3000); luz.ligar()`).
+  Pelo menos 2 linhas do tempo; dentro, só validadores de cena (com
+  `todos`, `algum`, `nao`). A cena mostra as linhas do tempo de teste do
+  objetivo de agora ("Teste 1, 2, 3") para o aluno ver que funciona em
+  todas.
+- Combine com `usouSintaxe` quando o caminho importa (`for`/`while` no
+  pisca-pisca; `if` no "roda uma vez só"). Eventos para a ficha e a
+  velocidade: `abriuFicha`, `viuPorDentro`, `mudouVelocidade` (validador
+  `evento`). Ações: `abrirFicha` e `verPorDentro` (`dispositivo`) e
+  `velocidadeCena` (`velocidade`: 1, 2 ou 4).
+
+### 30.5 Escolher dispositivos e linhas do tempo
+
+- Uma missão, um conceito: o pisca-pisca ensina loop e tempo; a vitrine
+  ensina o if dentro do loop de controle; o forno serve para um `while`
+  que espera uma condição (`while (forno.temperatura < 180)`); o portão,
+  para a sequência abrir, esperar, fechar; o interruptor, para reagir a
+  uma entrada.
+- Poucos dispositivos (1 a 3 na missão); os outros são para explorar
+  depois (a fala final convida: "o ventilador também obedece").
+- Linhas do tempo de teste com horários bem diferentes (cedo, tarde,
+  duas chegadas), longe das bordas da cena, e uma que pega o código que
+  só acende e nunca apaga, quando a missão pedir apagar.
+- Previsões que funcionam: "liga e desliga sem esperar: o que você vê?",
+  "o if sozinho acende quando a pessoa chega no segundo 3?", "em 4x, o
+  esperar(500) vale quanto?".
+
+### 30.6 Regra de ritmo
+
+- A partir das cenas, **toda unidade nova da Lógica tem pelo menos uma
+  fase com cena**. O `testar:conteudo` cobra (regra `ritmo-das-cenas`) só
+  nas unidades fora do `publicados.json`: as publicadas antes ficam
+  isentas. Fase de revisão e item de revisão não contam.
+- **Cada cena nova é diferente das anteriores**: outro ambiente, outro
+  dispositivo ou outra missão. O `testar:conteudo` avisa (sem falhar)
+  quando uma fase repete a cena de outra no mesmo ambiente, com os mesmos
+  tipos de dispositivo e a mesma missão (aviso `[aviso de cena]` na saída).
+  Reaproveitar o mesmo cenário com outra missão vale.
+
+### 30.7 Como acrescentar peças ao kit
+
+Para outros agentes (inclusive o ChatGPT) criarem ambientes novos no mesmo
+padrão visual:
+
+1. **Peça de cenário** (decoração): acrescente o nome em `PECAS_CENARIO`
+   (`src/motor/cena/modelo.ts`), o tamanho padrão em `TAMANHO_PADRAO` e o
+   desenho em `src/componentes/cena/kit/PecasCenario.tsx` (uma função que
+   recebe x, y, largura, altura e variante, registrada em `DESENHOS`).
+2. **Dispositivo novo** (o código usa): o tipo em `TIPOS_DISPOSITIVO` e a
+   ficha em `CATALOGO_DISPOSITIVOS` (`catalogo.ts`: comandos, propriedades,
+   exemplo, estado do começo e o "Por dentro", de 3 a 5 etapas terminando
+   no dispositivo), as ações em `ACOES_DO_TIPO`, os métodos em `motor.ts`
+   (`criarObjeto`), o desenho e a caixa de toque em
+   `kit/DispositivosCena.tsx`, a frase de estado em `resumoDoDispositivo`
+   (`CenaSvg.tsx`) e, se ele brilhar sozinho, a parte em `Emissao`.
+3. **O padrão visual**: cores só por tokens `--cor-cena-*` (acrescente o
+   token nos TRÊS temas de `src/tema/tokens.css`); formas arredondadas;
+   contorno `CONTORNO` (fino e transparente); cada peça com a cor de base
+   e a "-sombra" dela no lado de baixo ou da direita (luz de cima); sombra
+   no chão (`SombraNoChao`) embaixo de móveis e pessoas; nada de texto
+   desenhado, a não ser números e letras de display (letreiro, termômetro).
+4. **Conferir**: o `/lab/cenas` (a peça nos três temas, de dia e de noite)
+   e uma fase de laboratório usando a peça; `npm run testar:conteudo`
+   (a regra `composicao` aceita a peça nova só depois do passo 1).

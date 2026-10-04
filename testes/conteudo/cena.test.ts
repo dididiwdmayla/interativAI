@@ -176,6 +176,18 @@ describe("dispositivos e relógio simulado", () => {
     expect(variante?.mudancas.map((m) => m.tempoMs)).toEqual([6000]);
     expect(r.cena?.mudancas.map((m) => m.tempoMs)).toEqual([3000]);
     expect(nucleo.executar("vezes", "console").resultado).toEqual({ t: "number", v: "8" });
+    // As outras linhas do tempo continuam valendo depois (o Console e a memória que volta ao recarregar as trazem junto).
+    expect(nucleo.executar("", "console").cenarios?.[JSON.stringify(outra)]?.mudancas).toHaveLength(1);
+  });
+
+  it("restaurar (recarregar a página) roda o Snippet com as linhas do tempo de teste de novo", () => {
+    const nucleo = nucleoCom(VITRINE);
+    const outra = [{ tipo: "pessoa" as const, chegaMs: 6000, saiMs: 8000 }];
+    // Como o Worker faz no "repetir": sem gravar, com as linhas do tempo da fase.
+    nucleo.executar("while (true) {\n  if (sensor.temGente) luz.ligar();\n  esperar(100);\n}", "snippet", { gravar: false, cenarios: [outra] });
+    const agora = nucleo.executar("", "console");
+    expect(agora.cena?.mudancas.map((m) => m.tempoMs)).toEqual([3000]);
+    expect(agora.cenarios?.[JSON.stringify(outra)]?.mudancas.map((m) => m.tempoMs)).toEqual([6000]);
   });
 });
 

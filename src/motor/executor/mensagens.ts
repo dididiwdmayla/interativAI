@@ -14,7 +14,7 @@ export type PedidoExecutor =
   /** O gráfico de desempenho: quantos passos a função dá com cada chamada. */
   | { id: number; tipo: "medirPassos"; nome: string; chamadas: { tamanho: number; args: ValorEsperado[] }[] }
   /** Depois de um estouro de tempo (worker novo): roda de novo o que tinha dado certo, sem gravar. */
-  | { id: number; tipo: "repetir"; entradas: { codigo: string; origem: OrigemCodigo }[] };
+  | { id: number; tipo: "repetir"; entradas: { codigo: string; origem: OrigemCodigo }[]; cenarios?: AcontecimentoCena[][] };
 
 export type RespostaExecutor =
   | { id: number; tipo: "executar"; resultado: ResultadoExecucao }

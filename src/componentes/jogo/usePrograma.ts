@@ -79,7 +79,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
     const nova = new SessaoNavegador();
     // Cena programável: os dispositivos e o esperar entram no reino do código antes de tudo.
     const cena = cenaDaFase(fase);
-    if (cena) nova.definirCena(cena);
+    if (cena) nova.definirCena(cena, cenariosDaFase(fase));
     return nova;
   });
   /** (Cena, variosCenarios) As outras linhas do tempo em que o Snippet roda junto. */

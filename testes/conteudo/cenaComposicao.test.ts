@@ -9,7 +9,10 @@ import { conferirCena } from "@/motor/cena/conferir";
 import { areasDaFase, cenaDaFase } from "@/motor/composicao";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
 import { FASE_DEMO_RESOLVER } from "@/conteudo/laboratorio/bancadaResolver";
-import type { Fase, FasePratica, Validador } from "@/conteudo/tipos";
+import type { Fase, FasePratica, Unidade, Validador } from "@/conteudo/tipos";
+import { cenasRepetidas, unidadesSemCena } from "@/motor/cena/ritmo";
+import { FASES, UNIDADES } from "@/conteudo";
+import { PUBLICADOS } from "@/conteudo/publicados";
 import { abasDoLayout } from "@/componentes/composicao/TelaComposta";
 
 const VITRINE: DadosCena = {
@@ -110,5 +113,44 @@ describe("validadores de cena: sabotagens da checagem", () => {
     expect(problemas(comValidador({ tipo: "variosCenarios", linhasDoTempo: [[{ tipo: "pessoa", chegaMs: 1000 }], [{ tipo: "pessoa", chegaMs: 20_000 }]], validador: reagiu }))).toContain("fora da cena");
     expect(problemas(comValidador({ tipo: "variosCenarios", linhasDoTempo: [[], []], validador: { tipo: "semErro" } }))).toContain("só valem validadores de cena (veio semErro)");
     expect(problemas({ ...comValidador(reagiu), areas: ["snippet", "palco"], cena: undefined, usaFerramentas: ["snippet", "console", "palco-memoria", "linha-do-tempo"] })).toContain('o validador reagiu pede a área "cena"');
+  });
+});
+
+describe("regra de ritmo das cenas", () => {
+  const unidade = (id: string): Unidade => ({ id, ilha: "Ilha Lógica", zona: "Teste", numero: 1, titulo: "Teste", meta: { enunciado: "Teste." }, fases: [`${id}-f1`] });
+  const comCena = (id: string, unidadeId: string, cena: DadosCena): FasePratica => ({
+    ...FASE_DEMO_RESOLVER,
+    id,
+    unidadeId,
+    areas: ["cena", "snippet", "palco"],
+    plano: undefined,
+    testes: undefined,
+    cena,
+    usaFerramentas: ["cena", "ficha-dispositivo", "velocidade-simulacao", "snippet", "console", "palco-memoria", "linha-do-tempo"],
+    objetivos: [{ ...FASE_DEMO_RESOLVER.objetivos[4], validador: { tipo: "reagiu", quando: { dispositivo: "sensor", propriedade: "temGente", valor: true }, entao: { dispositivo: "luz", acao: "ligar" }, prazoMs: 500 } }],
+  });
+
+  it("unidade nova da Lógica sem cena falha; publicada fica isenta; com cena passa", () => {
+    const nova = unidade("logica-algoritmos-essenciais-u1");
+    const semCena = { ...FASE_DEMO_RESOLVER, id: `${nova.id}-f1`, unidadeId: nova.id };
+    expect(unidadesSemCena([nova], [semCena], new Set())).toEqual([expect.stringContaining('"logica-algoritmos-essenciais-u1" é nova na Lógica')]);
+    expect(unidadesSemCena([nova], [semCena], new Set([nova.id]))).toEqual([]);
+    expect(unidadesSemCena([nova], [comCena(`${nova.id}-f1`, nova.id, VITRINE)], new Set())).toEqual([]);
+    // Só a Lógica: uma unidade de outra ilha não precisa de cena.
+    expect(unidadesSemCena([unidade("sites-algo-u1")], [], new Set())).toEqual([]);
+  });
+
+  it("as unidades da Lógica que já existem estão todas publicadas (a regra só pega as novas)", () => {
+    expect(unidadesSemCena(UNIDADES, FASES, new Set(Object.keys(PUBLICADOS.unidades)))).toEqual([]);
+  });
+
+  it("avisa a cena que repete outra: mesmo ambiente, mesmos dispositivos e a mesma missão", () => {
+    const a = comCena("logica-x-u1-f1", "logica-x-u1", VITRINE);
+    const repetida = comCena("logica-x-u2-f1", "logica-x-u2", { ...VITRINE, id: "vitrine-2" });
+    const outroAmbiente = comCena("logica-x-u3-f1", "logica-x-u3", { ...VITRINE, id: "loja", ambiente: "loja" });
+    const outraMissao = { ...comCena("logica-x-u4-f1", "logica-x-u4", VITRINE), objetivos: [{ ...a.objetivos[0], validador: { tipo: "estadoNaCena" as const, dispositivo: "luz", propriedade: "ligada", valor: true } }] };
+    const avisos = cenasRepetidas([a, repetida, outroAmbiente, outraMissao]);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toContain('a cena da fase "logica-x-u2-f1" repete a da fase "logica-x-u1-f1"');
   });
 });

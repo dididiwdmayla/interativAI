@@ -133,6 +133,8 @@ export class NucleoExecutor {
   private limiteTempo: number = LIMITES.tempoMs;
   /** (Cena programável) O relógio simulado e os dispositivos que o código usa. */
   private cena: MotorCena | null = null;
+  /** (Cena, variosCenarios) As outras linhas do tempo do último Snippet que rodou com elas (voltam depois de recarregar). */
+  private cenariosAtuais: Record<string, RastroCena> = {};
 
   constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
     if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
@@ -155,6 +157,7 @@ export class NucleoExecutor {
   definirCena(dados: DadosCena | null) {
     if (this.cena) for (const nome of Object.keys(this.cena.globais)) delete this.host.global[nome];
     this.cena = null;
+    this.cenariosAtuais = {};
     if (!dados) return;
     const cena = new MotorCena(dados, (tipo, mensagem) => new this.intr[tipo](mensagem));
     cena.passoAtual = () => (this.gravando ? this.passos.length : null);
@@ -645,8 +648,9 @@ export class NucleoExecutor {
     // Executar recomeça a cena do zero; o Console continua de onde ela está.
     if (cena && origem === "snippet" && fonteOriginal.trim()) cena.reiniciar(opcoes.linhaDoTempo);
     cena?.comecarExecucao(this.entradas);
+    if (Object.keys(cenarios).length) this.cenariosAtuais = cenarios;
     const daCena = (): Pick<ResultadoExecucao, "cena" | "cenarios"> =>
-      cena ? { cena: cena.rastro(), ...(Object.keys(cenarios).length ? { cenarios } : {}) } : {};
+      cena ? { cena: cena.rastro(), ...(Object.keys(this.cenariosAtuais).length ? { cenarios: this.cenariosAtuais } : {}) } : {};
     const vazio = (erro: ErroExecucao | null, fonte: string): ResultadoExecucao => ({
       origem,
       codigo: fonte,

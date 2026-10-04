@@ -569,7 +569,7 @@ resposta da última expressão, as saídas do console e o erro.
 ### Composição de áreas (resolução de problemas, rodada 26)
 
 - Em vez de mais um tipo fechado de fase, a prática e o desafio podem
-  declarar `areas` (`"plano"`, `"snippet"`, `"palco"`, `"testes"`) e o motor
+  declarar `areas` (`"cena"`, `"plano"`, `"snippet"`, `"palco"`, `"testes"`) e o motor
   monta a tela com elas (`src/motor/composicao.ts`,
   `src/componentes/composicao/TelaComposta.tsx`). O tipo da fase não muda:
   objetivos, checklist, Rever, meta e salvamento são os de sempre.
@@ -594,6 +594,41 @@ resposta da última expressão, as saídas do console e o erro.
   para o aluno agora. A composição é o caminho das fases novas (zona
   Resolvendo problemas, depois a especificação e o código gerado da Ilha IA
   e os arquivos dos projetos do Ofício, como áreas novas).
+
+### Cenas programáveis (área cena, rodada 28)
+
+- A cena é uma área da composição (`"cena"`, campo `cena`): o mundo real
+  que o código controla (um quarto, uma vitrine, um portão). É DADO
+  (`src/motor/cena/modelo.ts`): o cenário montado com peças do kit, os
+  dispositivos (com o nome de variável que o código usa) e a linha do tempo
+  dos acontecimentos (pessoas que chegam e saem, interruptores). Criar uma
+  cena nova é montar peças, não desenhar.
+- Os dispositivos são objetos no MESMO reino do código do aluno (o Web
+  Worker no jogo, o vm do Node nos testes), criados pelo motor da cena
+  (`src/motor/cena/motor.ts`) dentro do núcleo do executor: getters para
+  as propriedades (o Console mostra `Lampada {ligada: false}` como o
+  Chrome), métodos para os comandos e os erros do reino (TypeError,
+  RangeError) em PT-BR. Nada sai do Worker além do rastro em JSON.
+- O tempo é SIMULADO: `esperar(ms)` avança o relógio da cena, o executor
+  continua síncrono (sem timers nem async, que seguem para a Ilha Rede e
+  Servidor). Quando o relógio passa do fim da cena, o motor lança um sinal
+  que o executor trata como fim normal ("a simulação terminou"); a
+  conferência de parada de cada passo repete o sinal, então um try/catch do
+  aluno não segura o fim. Um loop sem `esperar` não anda no tempo e cai na
+  proteção de passos de sempre (com uma dica da cena).
+- O rastro guarda cada mudança com o instante e o passo da execução; cada
+  passo guarda o instante. A tela toca o rastro como animação (o relógio da
+  animação mora só na área da cena, para não redesenhar o jogo inteiro a
+  cada quadro) e leva a linha do tempo, o palco e a linha do código junto.
+- Validadores (`src/motor/cena/validar.ts`): estado no instante, sequência
+  com ritmo, reação no prazo e várias linhas do tempo. As outras linhas do
+  tempo rodam no mesmo Executar, ANTES da execução de verdade e sem
+  gravar passos, para a memória do Console ficar a da linha do tempo da
+  cena.
+- A parte elétrica fica no "Por dentro" da ficha de cada dispositivo
+  (código, plaquinha, relé ou driver, motor...), curto e terminando na ponte
+  com a trilha Automação. Regra de ritmo: toda unidade nova da Lógica tem
+  pelo menos uma fase com cena (guia, seção 30).
 
 ### Navegação (o mapa)
 

@@ -29,6 +29,18 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 28: motor de cenas programáveis:** área `cena` na tela composta
+  (a cena é dado: cenário com o kit, dispositivos com nome de variável,
+  linha do tempo), dispositivos como objetos no reino do código,
+  `esperar(ms)` no relógio simulado, `while (true)` com esperar terminando
+  com a simulação (sem esperar, a proteção de sempre), rastro animado em
+  1x/2x/4x sincronizado com a linha do tempo e o palco, ficha do
+  dispositivo com "Por dentro", validadores `estadoNaCena`,
+  `sequenciaNaCena`, `reagiu` e `variosCenarios`, kit SVG com tokens nos
+  três temas, cenas de referência (quarto à noite e vitrine da Padaria Pão
+  de Mel), bancada `lab-cenas-u1`, mostruário `/lab/cenas`, guia (seção 30)
+  e a regra de ritmo no `testar:conteudo`. Detalhe em `docs/PROGRESSO.md`.
+
 - **Zona Resolvendo problemas completa (U1 a U4):** 12 fases e 14 itens
   de revisão; entendimento e decomposição por agrupar, pseudocódigo,
   dependências com execução dos cartões, plano no código e testes do
@@ -512,6 +524,25 @@ núcleo comum.
 
 ### Pendências
 
+- **Cenas programáveis (rodada 28), para depois:**
+  - O Observar e o Console com o depurador pausado leem os dispositivos no
+    relógio de agora da simulação, não no instante da pausa (a memória das
+    variáveis é a da pausa).
+  - Cada linha do tempo do `variosCenarios` roda o código de novo a cada
+    Executar (cada uma com o próprio limite de 1,5 s): use 2 a 4 linhas do
+    tempo, com loops de `esperar(100)` ou mais.
+  - Com loops curtos e cenas longas, a linha do tempo da execução para nas
+    primeiras 1.000 fotos (a cena continua tocando até o fim).
+  - `ItemRevisao` não aceita cena (como não aceita áreas compostas): a
+    revisão de conceitos de cena fica em previsões.
+  - O aviso de cena repetida só aparece na saída do `testar:conteudo`
+    (o `/lab/fases` não mostra avisos).
+  - A foto da cena na meta de um desafio usa o meio das mudanças que o
+    código fez; uma cena com mudanças muito espalhadas pode pedir um
+    instante escolhido pelo conteúdo.
+  - À noite, o escuro cobre também a janela e a rua; uma janela com luz
+    própria (poste, lua mais forte) pede uma peça emissiva nova no kit.
+
 - **Revisão de planejamento (rodada 27):** ItemRevisao não aceita quadro
   nem áreas compostas. Os sete conceitos novos têm duas previsões cada;
   revisão com cartões/casos próprios pede essa capacidade no item.
@@ -621,17 +652,19 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Algoritmos essenciais. Depois, conteúdo da Lógica nas zonas,
-   nesta ordem: Estruturas de dados, Depuração e o projeto-ponte da Lógica
-   (que pede o motor `projeto-ponte-js`).
-2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
+1. Opus: formato contrato (o "TCC" de fim de ilha) com o projeto-ponte da
+   Lógica (que pede o motor `projeto-ponte-js`).
+2. Zonas Algoritmos essenciais, Estruturas de dados e Depuração, já com
+   cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
+   fase com cena, diferente das anteriores; guia, seção 30).
+3. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
-3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
+4. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
    ao vivo, que reaproveita a tela composta com a especificação e o código
    gerado; Ofício, com os arquivos do projeto e os testes automatizados),
    intercalados com conteúdo, e a trilha Automação industrial a partir do
    protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no
-   `PROJETO.md`).
+   `PROJETO.md`; o "Por dentro" das cenas já aponta para ela).
 
 ## Decisões aprovadas
 

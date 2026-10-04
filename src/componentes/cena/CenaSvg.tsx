@@ -7,7 +7,7 @@
  * de verdade (uma máscara com um gradiente), com o brilho regulando o
  * tamanho. Tocar num dispositivo abre a ficha dele.
  */
-import { type KeyboardEvent, useId } from "react";
+import { type KeyboardEvent, useId, useMemo } from "react";
 import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
 import {
   ALTURA_CENA,
@@ -124,6 +124,11 @@ function Emissao({ dispositivo, estado, rastro, tempoMs, filtro }: { dispositivo
 
 export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDispositivo, destacado = null }: Props) {
   const id = `cena-${useId().replace(/:/g, "")}`;
+  // O cenário não muda com o tempo: desenhado uma vez só (a cena redesenha a cada quadro da animação).
+  const cenario = useMemo(
+    () => dados.cenario.map((peca, indice) => <PecaDoCenario key={indice} peca={peca} periodo={dados.periodo} id={id} />),
+    [dados.cenario, dados.periodo, id],
+  );
   const estado = estadoNoTempo(rastro, tempoMs, { filtro });
   const pessoas = pessoasNoDesenho(rastro.linhaDoTempo, tempoMs, rastro.duracaoMs);
   const noite = dados.periodo === "noite";
@@ -184,9 +189,7 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
         </clipPath>
       </defs>
       <g clipPath={`url(#${id}-moldura)`}>
-        {dados.cenario.map((peca, indice) => (
-          <PecaDoCenario key={indice} peca={peca} periodo={dados.periodo} id={id} />
-        ))}
+        {cenario}
         {dados.dispositivos.map((dispositivo) => (
           <g key={dispositivo.id} data-desenho={dispositivo.id}>
             <DesenhoDispositivo dispositivo={dispositivo} estado={estado} rastro={rastro} tempoMs={tempoMs} filtro={filtro} />

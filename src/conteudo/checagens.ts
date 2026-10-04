@@ -17,6 +17,7 @@ import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
 import { AREAS_TRABALHO, casosDaFase, cenaDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
 import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
 import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
+import { unidadesSemCena } from "@/motor/cena/ritmo";
 import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
@@ -507,6 +508,11 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     id: "publicados-congelados",
     nome: "ids publicados (src/conteudo/publicados.json) não somem nem mudam",
     checar: (contexto) => conferirPublicados(PUBLICADOS, { ...contexto, itens: contexto.itens ?? ITENS_REVISAO }),
+  },
+  {
+    id: "ritmo-das-cenas",
+    nome: "regra de ritmo: toda unidade nova da Lógica tem pelo menos uma fase com cena (as publicadas ficam isentas)",
+    checar: ({ unidades, fases }) => unidadesSemCena(unidades, fases, new Set(Object.keys(PUBLICADOS.unidades))),
   },
 ];
 
