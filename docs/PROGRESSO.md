@@ -30,3 +30,11 @@ Rodada anterior: `docs/arquivo/PROGRESSO-rodada-23.md`. Status consolidado: `doc
 - totalPedido e filtros conferidos por funcaoPassa, com objetos/listas por conteúdo, casos vazios, quantidade zero, fronteiras e decimais.
 - Verificado: 14.822 testes de conteúdo verdes; jornada pelo mapa nos três layouts com referência até cardapio[1], preços 5/8/12 no laço, callbacks passando pelas três fichas, negativas de mutação em todas as fichas e função que não filtra; publicar:conteudo, build e lint verdes.
 - Um teste antigo das demonstrações de estruturas excedeu 5 s enquanto o build rodava; os 16 testes do arquivo passaram isolados, e testar:conteudo voltou verde sem mudança no motor.
+
+### Etapa 5: fechamento
+
+- Zona completa: U1 Listas, U2 Percorrer listas, U3 Objetos e U4 Listas de objetos, na ordem curricular e em quatro commits próprios; 16 fases, 17 conceitos e 34 revisões (424 itens no registro).
+- Todas as unidades publicadas, com jornadas pelo mapa nos três layouts, meta, desafios, negativas, vagões, fichas, setas e linha do tempo. Os validadores existentes comparam listas/objetos pelo conteúdo; não houve falta de motor nem alteração de dependências ou de unidades previamente publicadas.
+- Final: 14.822 testes de conteúdo, build e lint verdes; npm run bateria:conteudo em produção verde (mapa, explorar, publicar, revisão). Documentos de Status, currículo, progresso e atritos atualizados; a próxima zona é Resolvendo problemas.
+- Decisões a conferir: conceito próprio para percorrer listas com os laços já aprendidos; comparação entre listas novas e fichas compartilhadas no filter; undefined conferido por typeof e pelo palco, seguindo o modelo anterior.
+- Limite da verificação: Chromium 133 headless nos três layouts, sem Safari nem dispositivo físico. Sem pendência nova de motor.

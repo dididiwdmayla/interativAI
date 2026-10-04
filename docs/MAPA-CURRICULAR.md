@@ -596,7 +596,7 @@ Missão de campo: no Console de qualquer site, criar a função
 Missão de campo: no Console de qualquer site, criar a lista de compras,
 dar `push` num item e perguntar o `length`.
 
-#### U1. Listas — `logica-listas-e-objetos-u1`
+#### U1. Listas (pronta) — `logica-listas-e-objetos-u1`
 
 - **Meta:** guardar vários valores numa lista, pegar cada um pelo índice e
   pôr e tirar itens.
@@ -609,7 +609,7 @@ dar `push` num item e perguntar o `length`.
 - **Revisa:** variáveis, for...of.
 - **Confusões:** "o primeiro é o 1"; "copiar a variável copia a lista".
 
-#### U2. Percorrer listas — `logica-listas-e-objetos-u2`
+#### U2. Percorrer listas (pronta) — `logica-listas-e-objetos-u2`
 
 - **Meta:** passar por todos os itens de uma lista e transformar, filtrar e
   achar itens.
@@ -621,7 +621,7 @@ dar `push` num item e perguntar o `length`.
 - **Revisa:** arrow functions, for.
 - **Confusões:** "o `map` muda a lista original".
 
-#### U3. Objetos — `logica-listas-e-objetos-u3`
+#### U3. Objetos (pronta) — `logica-listas-e-objetos-u3`
 
 - **Meta:** descrever uma coisa com chaves e valores, e ler e mudar cada
   campo.
@@ -633,7 +633,7 @@ dar `push` num item e perguntar o `length`.
 - **Revisa:** tipos, listas.
 - **Confusões:** "objeto é a mesma coisa que lista".
 
-#### U4. Listas de objetos — `logica-listas-e-objetos-u4`
+#### U4. Listas de objetos (pronta) — `logica-listas-e-objetos-u4`
 
 - **Meta:** organizar o cardápio de uma padaria como dados e responder
   perguntas sobre ele.
