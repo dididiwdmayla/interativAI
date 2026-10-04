@@ -304,3 +304,13 @@ body {
 .corrente-no-fio {
   animation: corrente-no-fio 0.6s linear infinite;
 }
+
+/* A tela inteira usa os mesmos layouts e a altura visual do teclado. */
+html:fullscreen {
+  --tela-cheia-inset: calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));
+  background: var(--cor-superficie);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+html:fullscreen .h-dvh {
+  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}

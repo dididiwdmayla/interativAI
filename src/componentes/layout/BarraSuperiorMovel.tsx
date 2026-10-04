@@ -1,3 +1,4 @@
+import { BotaoTelaCheia } from "@/componentes/layout/BotaoTelaCheia";
 import type { ReactNode } from "react";
 import { EstrelasFase } from "./EstrelasFase";
 import { MenuMovel } from "./MenuMovel";
@@ -35,6 +36,7 @@ export function BarraSuperiorMovel({ titulo, estrelas, fina = false, menu, acaoF
         <EstrelasFase quantidade={estrelas} tamanho={fina ? 16 : 18} />
       )}
       {acaoFixa}
+      <BotaoTelaCheia />
       <MenuMovel>{menu}</MenuMovel>
     </header>
   );
