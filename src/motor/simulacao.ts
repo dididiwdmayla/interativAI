@@ -40,7 +40,8 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
-import { casosDaFase, quadroDaFase, temArea } from "./composicao";
+import { casosDaFase, cenaDaFase, quadroDaFase, temArea } from "./composicao";
+import { cenariosDaFase } from "./cena/validar";
 import * as casosDoAluno from "./casos/modelo";
 import { codigoComPlano, linhaDoPasso } from "./plano/comentarios";
 import * as quadro from "./ordenar/modelo";
@@ -80,6 +81,10 @@ export function criarSimulacao(fase: Fase) {
 
   // Fase de programa: o executor síncrono (vm no Node, iframe no /lab e na meta), com a mesma lógica do jogo.
   let executor = fase.programa ? criarNucleoSincrono() : null;
+  // Cena programável: os dispositivos e o esperar no reino do código, e as outras linhas do tempo (variosCenarios).
+  const dadosCena = cenaDaFase(fase);
+  executor?.definirCena(dadosCena);
+  const cenariosPedidos = dadosCena ? cenariosDaFase(fase) : [];
   let snippet = fase.programa?.snippet?.codigoInicial ?? "";
   let ultimaExecucao: ResultadoExecucao | null = null;
   const estadoPrograma: EstadoPrograma = { memoria: null, testes: {} };
@@ -94,6 +99,8 @@ export function criarSimulacao(fase: Fase) {
     if (!executor) return;
     ultimaExecucao = resultado;
     estadoPrograma.memoria = resultado.memoriaFinal;
+    if (resultado.cena) estadoPrograma.cena = resultado.cena;
+    if (resultado.cenarios) estadoPrograma.cenarios = resultado.cenarios;
     for (const teste of testesDaFase) estadoPrograma.testes[chaveFuncaoPassa(teste)] = executor.testarFuncao(teste.nome, teste.casos);
     if (medicoesPedidas.length) {
       const medicoes: NonNullable<EstadoPrograma["medicoes"]> = {};
@@ -129,7 +136,7 @@ export function criarSimulacao(fase: Fase) {
       return;
     }
     terminarSessao();
-    const resultado = executor.executar(codigo, origem);
+    const resultado = executor.executar(codigo, origem, origem === "snippet" && cenariosPedidos.length ? { cenarios: cenariosPedidos } : {});
     const pausa = comDepurador && origem === "snippet" && registrar ? primeiraPausa(resultado.passos, depurador.pontos) : null;
     if (pausa) {
       sessao = { resultado, pausa };
@@ -468,6 +475,8 @@ export function criarSimulacao(fase: Fase) {
     cssAtual: () => lerCssDoDocumento(documento),
     /** (Fase de programa) A última execução e o texto do Snippet agora; com o depurador, a pausa de agora. */
     programa: () => ({ ultimaExecucao, snippet, disponivel: executor !== null, pausa: sessao?.pausa ?? null, depurador }),
+    /** (Cena programável) A simulação de agora (null: a fase não tem cena ou nada rodou). */
+    cena: () => estadoPrograma.cena ?? null,
     /** (Circuito) O circuito agora. */
     circuito: () => circuito,
     /** (Ordenar) Onde está cada cartão agora. */

@@ -310,7 +310,10 @@ export function valorNoTempo(rastro: RastroCena, dispositivo: string, propriedad
   return estadoNoTempo(rastro, tempoMs, opcoes)[dispositivo]?.[propriedade];
 }
 
-/** Quando a animação de uma simulação termina: Executar mostra a cena inteira; o Console, até o relógio. */
+/**
+ * Até onde a cena toca sozinha depois de uma execução: o Snippet mostra a
+ * cena inteira (o relógio vai até o fim); o Console, o pedaço que ele andou.
+ */
 export function fimDaAnimacao(rastro: RastroCena): number {
   return Math.max(rastro.inicioUltimaMs, rastro.relogioMs);
 }

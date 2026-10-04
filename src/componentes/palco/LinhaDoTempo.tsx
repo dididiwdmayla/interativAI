@@ -16,18 +16,20 @@ type Props = {
   codigo: string;
   cortado: boolean;
   totalPassos: number;
+  /** (Cena) O programa parou porque o tempo da cena acabou. */
+  fimDaSimulacao?: boolean;
 };
 
-function descreverPasso(passo: PassoRastro | undefined, codigo: string): string {
+function descreverPasso(passo: PassoRastro | undefined, codigo: string, fimDaSimulacao: boolean): string {
   if (!passo) return "Rode algo para ver os passos.";
-  if (passo.tipo === "fim") return "Fim do programa";
+  if (passo.tipo === "fim") return fimDaSimulacao ? "Fim da simulação (o tempo da cena acabou)" : "Fim do programa";
   if (passo.tipo === "erro") return `Parou com erro${passo.linha !== null ? ` na linha ${passo.linha}` : ""}`;
   const texto = passo.linha !== null ? (codigo.split("\n")[passo.linha - 1] ?? "").trim() : "";
   const retorno = passo.tipo === "retorno" && passo.retorno ? `${passo.retorno.funcao} devolve · ` : "";
   return `${retorno}linha ${passo.linha}: ${texto.length > 60 ? `${texto.slice(0, 60)}…` : texto}`;
 }
 
-export function LinhaDoTempo({ passos, indice, aoMudar, codigo, cortado, totalPassos }: Props) {
+export function LinhaDoTempo({ passos, indice, aoMudar, codigo, cortado, totalPassos, fimDaSimulacao = false }: Props) {
   const total = passos.length;
   const botao =
     "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-borda bg-superficie text-texto hover:border-primaria hover:text-primaria disabled:opacity-40 pointer-coarse:h-11 pointer-coarse:w-11";
@@ -54,7 +56,7 @@ export function LinhaDoTempo({ passos, indice, aoMudar, codigo, cortado, totalPa
       </div>
       <p className="truncate font-mono text-xs text-texto" data-descricao-passo>
         <span className="font-sans font-bold text-texto-suave">{total ? `Passo ${indice + 1} de ${total}` : "Sem passos"} · </span>
-        {descreverPasso(passos[indice], codigo)}
+        {descreverPasso(passos[indice], codigo, fimDaSimulacao)}
       </p>
       {cortado && (
         <p className="text-[11px] text-texto-suave">

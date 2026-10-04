@@ -19,6 +19,9 @@ import { SessaoNavegador } from "@/motor/executor/sessaoNavegador";
 import type { CasoFuncao, ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, ResultadoTesteFuncao, SaidaConsole, ValorExibido } from "@/motor/executor/tipos";
 import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "@/motor/programa";
 import { chamadasDaMedicao } from "@/motor/desempenho";
+import { cenaDaFase } from "@/motor/composicao";
+import { cenariosDaFase } from "@/motor/cena/validar";
+import { textoDoTempo } from "@/motor/cena/modelo";
 
 export type LinhaConsole =
   | { id: number; tipo: "entrada"; codigo: string }
@@ -71,7 +74,16 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
   }, []);
   const ativo = fase.programa !== undefined;
   const nomeSnippet = fase.programa?.snippet?.nome ?? "programa.js";
-  const [sessao] = useState(() => (ativo ? new SessaoNavegador() : null));
+  const [sessao] = useState(() => {
+    if (!ativo) return null;
+    const nova = new SessaoNavegador();
+    // Cena programável: os dispositivos e o esperar entram no reino do código antes de tudo.
+    const cena = cenaDaFase(fase);
+    if (cena) nova.definirCena(cena);
+    return nova;
+  });
+  /** (Cena, variosCenarios) As outras linhas do tempo em que o Snippet roda junto. */
+  const cenarios = useMemo(() => (ativo ? cenariosDaFase(fase) : []), [ativo, fase]);
   const [linhas, setLinhas] = useState<LinhaConsole[]>([]);
   const [historico, setHistorico] = useState<string[]>(() => (salvo?.entradas ?? []).filter((e) => e.origem === "console").map((e) => e.codigo));
   const [snippetInicial] = useState(() => salvo?.snippet ?? fase.programa?.snippet?.codigoInicial ?? "");
@@ -119,7 +131,15 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         const [medicao] = await sessao.medirPassos(pedida.funcao, [{ tamanho: pedida.tamanho, args: pedida.args }]);
         if (medicao) medicoes[pedida.chave] = medicao;
       }
-      estado.current = { memoria: resultado.memoriaFinal, testes: novos, ...(medicoesPedidas.length ? { medicoes } : {}) };
+      const anterior = estado.current;
+      estado.current = {
+        memoria: resultado.memoriaFinal,
+        testes: novos,
+        ...(medicoesPedidas.length ? { medicoes } : {}),
+        // Cena: a simulação de agora; as outras linhas do tempo só mudam quando o Snippet roda de novo.
+        ...(resultado.cena || anterior.cena ? { cena: resultado.cena ?? anterior.cena } : {}),
+        ...(resultado.cenarios || anterior.cenarios ? { cenarios: resultado.cenarios ?? anterior.cenarios } : {}),
+      };
     },
     [medicoesPedidas, sessao, testes],
   );
@@ -191,6 +211,10 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       const novas: LinhaSemId[] = [];
       if (resultado.erro) novas.push({ tipo: "erro", erro: resultado.erro, origem: resultado.origem });
       else if (resultado.origem === "console") novas.push({ tipo: "resposta", valor: resultado.resultado });
+      // Cena: o loop de controle terminou junto com o tempo da cena (não é erro).
+      if (!resultado.erro && resultado.cena?.terminouPorTempo) {
+        novas.push({ tipo: "info", texto: `A simulação terminou: a cena tem ${textoDoTempo(resultado.cena.duracaoMs)} e o programa parou junto com ela.` });
+      }
       acrescentar(novas);
       mostrarResultado(resultado);
       barramento.emitir({ tipo: "executouCodigo", execucao: resumirExecucao(resultado) });
@@ -225,7 +249,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
       // Os testes de navegador esperam o programa terminar (data-pronto).
       const encerrar = comecarPendencia();
       try {
-        const resultado = await sessao.executar(codigo, origem);
+        const resultado = await sessao.executar(codigo, origem, origem === "snippet" && cenarios.length ? cenarios : undefined);
         if (!resultado.erro || resultado.erro.tipo === "execucao") {
           setEntradas((atuais) => [...atuais, { codigo, origem: origem === "snippet" ? ("snippet" as const) : ("console" as const) }].slice(-MAXIMO_ENTRADAS_SALVAS));
         }
@@ -241,7 +265,7 @@ export function usePrograma({ fase, barramento, salvo, aoUsar }: Opcoes) {
         encerrar();
       }
     },
-    [acrescentar, concluir, mostrarResultado, nomeSnippet, sessao],
+    [acrescentar, cenarios, concluir, mostrarResultado, nomeSnippet, sessao],
   );
 
   /** (Depurador) As expressões do Observar numa foto da memória, no Worker. */

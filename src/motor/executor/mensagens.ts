@@ -1,10 +1,13 @@
 /*
  * O protocolo entre a página do jogo e o Web Worker do executor. Só JSON.
  */
+import type { AcontecimentoCena, DadosCena } from "../cena/modelo";
 import type { CasoFuncao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoAvaliacao, ResultadoExecucao, ResultadoTesteFuncao, ValorEsperado } from "./tipos";
 
 export type PedidoExecutor =
-  | { id: number; tipo: "executar"; codigo: string; origem: OrigemCodigo }
+  | { id: number; tipo: "executar"; codigo: string; origem: OrigemCodigo; cenarios?: AcontecimentoCena[][] }
+  /** (Cena programável) Os dispositivos e o esperar no reino do código (null: tira). Resposta não é esperada. */
+  | { id: number; tipo: "definirCena"; dados: DadosCena | null }
   | { id: number; tipo: "testarFuncao"; nome: string; casos: CasoFuncao[] }
   /** O depurador pausado: expressões avaliadas na memória de um passo, no quadro escolhido. */
   | { id: number; tipo: "avaliarNaFoto"; expressoes: string[]; foto: FotoMemoria; quadro: number }
@@ -19,4 +22,5 @@ export type RespostaExecutor =
   | { id: number; tipo: "avaliarNaFoto"; resultados: ResultadoAvaliacao[] }
   | { id: number; tipo: "medirPassos"; medicoes: MedicaoPassos[] }
   | { id: number; tipo: "repetir" }
+  | { id: number; tipo: "definirCena" }
   | { id: number; tipo: "falha"; mensagem: string };

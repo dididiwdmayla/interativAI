@@ -102,7 +102,10 @@ ouvir("message", (evento) => {
   let resposta: RespostaExecutor;
   try {
     if (pedido.tipo === "executar") {
-      resposta = { id: pedido.id, tipo: "executar", resultado: nucleo.executar(pedido.codigo, pedido.origem) };
+      resposta = { id: pedido.id, tipo: "executar", resultado: nucleo.executar(pedido.codigo, pedido.origem, { cenarios: pedido.cenarios }) };
+    } else if (pedido.tipo === "definirCena") {
+      nucleo.definirCena(pedido.dados);
+      resposta = { id: pedido.id, tipo: "definirCena" };
     } else if (pedido.tipo === "testarFuncao") {
       resposta = { id: pedido.id, tipo: "testarFuncao", resultado: nucleo.testarFuncao(pedido.nome, pedido.casos) };
     } else if (pedido.tipo === "medirPassos") {

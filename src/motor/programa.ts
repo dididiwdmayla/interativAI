@@ -9,6 +9,7 @@ import type { SintaxeJs } from "./executor/instrumentar";
 import type { ErroExecucao, FotoMemoria, MedicaoPassos, OrigemCodigo, ResultadoExecucao, ResultadoTesteFuncao, ValorEsperado, ValorExibido, ValorMemoria } from "./executor/tipos";
 import { type ContagemEstrutura, contarEstruturas } from "./estruturas";
 import { chamadasDaMedicao, chaveMedicao } from "./desempenho";
+import type { RastroCena } from "./cena/modelo";
 
 /**
  * O site-alvo de uma fase de programa: não tem página (a tela é o palco da
@@ -47,6 +48,10 @@ export type EstadoPrograma = {
   depurador?: { pontos: readonly number[]; observacoes: readonly string[] };
   /** (Desempenho) As medições dos `passosNoMaximo` com tamanho, pela chave (`chaveMedicao`). */
   medicoes?: Record<string, MedicaoPassos>;
+  /** (Cena programável) A simulação de agora (desde o último Executar, com o que o Console fez depois). */
+  cena?: RastroCena | null;
+  /** (Cena, variosCenarios) A mesma simulação com outras linhas do tempo, na última vez que o Snippet rodou. */
+  cenarios?: Record<string, RastroCena>;
 };
 
 export function faseDePrograma(fase: Fase): boolean {

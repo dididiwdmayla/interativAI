@@ -180,7 +180,7 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
           ))}
         </mask>
         <clipPath id={`${id}-moldura`}>
-          <rect width={LARGURA_CENA} height={ALTURA_CENA} />
+          <rect width={LARGURA_CENA} height={ALTURA_CENA} rx={8} />
         </clipPath>
       </defs>
       <g clipPath={`url(#${id}-moldura)`}>

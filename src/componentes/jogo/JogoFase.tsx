@@ -59,7 +59,8 @@ import { AreaCasos } from "@/componentes/casos/AreaCasos";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
 import { AreaPlano } from "@/componentes/composicao/AreaPlano";
 import { TelaComposta } from "@/componentes/composicao/TelaComposta";
-import { type AreaTrabalho, areasDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
+import { type AreaTrabalho, areasDaFase, cenaDaFase, faseComposta, quadroDaFase } from "@/motor/composicao";
+import { AreaCena, type FocoCena, type VelocidadeCena } from "@/componentes/cena/AreaCena";
 import { acharBlocoDoPlano, codigoComPlano, linhaDoPasso, passosNoCodigo } from "@/motor/plano/comentarios";
 import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { type EstadoOrdenar, ordemDoPlano } from "@/motor/ordenar/modelo";
@@ -209,6 +210,7 @@ const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados
 
 /** (Fase composta) A área de trabalho onde mora cada ferramenta: a apresentação e a ajuda a põem à vista. */
 const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
+  cena: "cena",
   "quadro-de-passos": "plano",
   snippet: "snippet",
   console: "snippet",
@@ -359,18 +361,28 @@ export function JogoFase({
   const [abaCelular, setAbaCelular] = useState<AreaTrabalho>(() => (areasDaFase(fase).includes("plano") ? "plano" : "snippet"));
   // Em pé, o palco começa recolhido: o plano, o código e os testes precisam da altura (ele abre com um toque).
   const [palcoAberto, setPalcoAberto] = useState(false);
+  // Cena programável (área cena): o mundo que o código controla. Em pé, ela fica em cima, aberta.
+  const dadosCena = cenaDaFase(fase);
+  const [cenaAberta, setCenaAberta] = useState(true);
+  const [velocidadeCena, setVelocidadeCena] = useState<VelocidadeCena>(1);
+  /** A linha do tempo escolheu um passo: a cena vai para o instante dele. */
+  const [focoCena, setFocoCena] = useState<FocoCena | null>(null);
   /** (Fase composta) O layout de agora, lido na hora por mostrarArea (ele é calculado mais abaixo). */
   const layoutAtual = useRef<"desktop" | "retrato" | "paisagem">("desktop");
-  /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre o palco). */
+  /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre a cena ou o palco de cima). */
   const mostrarArea = useCallback(
     (area: AreaTrabalho) => {
       if (!composta) return;
       const agora = layoutAtual.current;
+      const comCena = areasDaFase(fase).includes("cena");
       if (area === "palco") setPalcoAberto(true);
-      if (agora === "retrato" && area !== "palco") setAbaCelular(area);
+      if (area === "cena") setCenaAberta(true);
+      // Em pé, o que mora em cima (a cena, ou o palco sem cena) não é aba.
+      const emCima = comCena ? "cena" : "palco";
+      if (agora === "retrato" && area !== emCima) setAbaCelular(area);
       if (agora === "paisagem" && area !== "snippet") setAbaCelular(area);
     },
-    [composta],
+    [composta, fase],
   );
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
@@ -477,7 +489,28 @@ export function JogoFase({
     sinalizarUso("linha-do-tempo");
     const linha = passosDoRastro[alvo]?.linha;
     if (ultimo.origem === "snippet") editorSnippetRef.current?.destacarLinhas(linha && alvo < passosDoRastro.length - 1 ? [linha] : []);
+    // Cena: ela vai para o instante do passo, só com as mudanças feitas até ali.
+    const tempoDoPasso = passosDoRastro[alvo]?.tempoMs;
+    if (ultimo.cena && tempoDoPasso !== undefined) setFocoCena({ tempoMs: tempoDoPasso, filtro: { execucao: ultimo.cena.execucao, passo: alvo }, chave: Date.now() });
   };
+  /** (Cena) Os instantes de cada passo da última execução: a cena tocando leva a linha do tempo junto. */
+  const temposDosPassos = useMemo(() => (programa.ultimo?.cena ? programa.ultimo.passos.map((p) => p.tempoMs) : []), [programa.ultimo]);
+  const ultimoDaCena = useRef(programa.ultimo);
+  useEffect(() => {
+    ultimoDaCena.current = programa.ultimo;
+  }, [programa.ultimo]);
+  /** A cena passou de um passo para outro (tocando ou arrastando): o palco e a linha do código acompanham. */
+  const seguirCena = useCallback(
+    (indice: number) => {
+      const ultimo = ultimoDaCena.current;
+      if (!ultimo) return;
+      const final = indice >= ultimo.passos.length - 1;
+      setEscolhaDePasso(final ? null : { de: ultimo, indice });
+      const linha = ultimo.passos[indice]?.linha;
+      if (ultimo.origem === "snippet") editorSnippetRef.current?.destacarLinhas(linha && !final ? [linha] : []);
+    },
+    [editorSnippetRef],
+  );
   const destacarNoPrograma = useCallback(
     (alvo: number[] | "console" | null) => {
       if (alvo === null) {
@@ -1868,6 +1901,7 @@ export function JogoFase({
             codigo={programa.ultimo?.codigo ?? ""}
             cortado={programa.ultimo?.rastroCortado ?? false}
             totalPassos={programa.ultimo?.totalPassos ?? 0}
+            fimDaSimulacao={programa.ultimo?.cena?.terminouPorTempo ?? false}
           />
         </AlvoFerramenta>
       )}
@@ -2344,6 +2378,23 @@ export function JogoFase({
           layout={layout}
           areas={areas}
           conteudo={{
+            cena: dadosCena ? (
+              <AlvoFerramenta ids={["cena"]} marcador="cena" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                <AreaCena
+                  dados={dadosCena}
+                  rastro={programa.ultimo?.cena ?? null}
+                  velocidade={velocidadeCena}
+                  aoMudarVelocidade={(velocidade) => {
+                    tocarEfeito("clique");
+                    setVelocidadeCena(velocidade);
+                  }}
+                  temposDosPassos={temposDosPassos}
+                  aoPassar={seguirCena}
+                  foco={focoCena}
+                  mostrarTitulo={layout === "desktop"}
+                />
+              </AlvoFerramenta>
+            ) : null,
             plano: ordenar.ativo ? (
               <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
                 <AreaPlano
@@ -2422,6 +2473,12 @@ export function JogoFase({
             tocarEfeito("clique");
             setPalcoAberto((aberto) => !aberto);
           }}
+          cenaAberta={cenaAberta}
+          aoAlternarCena={() => {
+            tocarEfeito("clique");
+            setCenaAberta((aberta) => !aberta);
+          }}
+          tituloCena={dadosCena?.titulo}
           tecladoAberto={viewport.tecladoAberto}
         />
       ) : (
