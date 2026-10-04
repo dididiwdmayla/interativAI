@@ -2,6 +2,21 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 29 (motor): o formato contrato
+
+- Sem bloqueio para os próximos contratos: é um desafio com o campo
+  `contrato` (guia, seção 31). O modelo é `logica-programa-de-verdade-u1`.
+- Uma fase antes do contrato apresenta as ferramentas e os aparelhos novos
+  (o desafio não apresenta nada). Na Lógica, ela também é a primeira fase
+  com cena publicada.
+- Soluções de código em camadas: cada parte traz o código inteiro até ali,
+  com o bloco do plano no topo (senão o plano desmarca e a jogada acusa).
+- O que muda de um dia de teste para o outro vai em `porLinha`; os
+  instantes conferidos ficam longe das trocas (mais de meia hora da cena).
+- A jornada de navegador lê as soluções de um JSON
+  (`testes/contrato-jornadas.json`), conferido contra o TS no
+  `testar:conteudo`.
+
 ## Rodada 27: zona Resolvendo problemas
 
 - Sem bloqueio novo de motor. Quadros separados treinam entendimento,

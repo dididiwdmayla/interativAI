@@ -56,6 +56,10 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
     30.3 dispositivos e relógio simulado, 30.4 validadores de cena, 30.5
     escolher dispositivos e linhas do tempo, 30.6 regra de ritmo, 30.7
     como acrescentar peças ao kit)
+31. Contratos: o trabalho de fim de ilha (31.1 as etapas, 31.2 o campo
+    contrato, 31.3 o briefing, 31.4 requisitos, 31.5 a mudança, 31.6 o kit
+    de clientes, 31.7 validadores e fábrica, 31.8 Levar pro mundo, 31.9
+    checklist)
 
 Arquivos que você vai usar:
 
@@ -1019,6 +1023,8 @@ fase. As outras bancadas: `f2` (modo documento com dispositivo), `f3`
 - [ ] Unidade nova da Lógica: pelo menos uma fase com cena, diferente das
       anteriores (outro ambiente, outro dispositivo ou outra missão; seção
       30.6), sem `[aviso de cena]` no `testar:conteudo`.
+- [ ] Fim de ilha: um contrato (seção 31.9), com a jogada inteira verde no
+      `testar:conteudo` e a jornada nos três layouts.
 - [ ] Fase de CSS (seção 12): `@media` só com condição que o motor sabe
       (12.8),
       `paineisElementos` ligado, `valorEfetivo` onde o resultado importa e
@@ -1114,6 +1120,9 @@ O modelo é a P2, "Do jogo pro mundo"
 - Concluir a última unidade pronta de uma ilha acende a ilha no mapa
   (borda, festa uma vez, "Completa!" no mundo): o fim da ilha pede uma
   conclusão à altura.
+- Nas outras ilhas, o fim é um **contrato** (seção 31): um cliente, o
+  pedido, a mudança no meio, a entrega e o Levar pro mundo da ilha (na
+  Lógica, um .js que roda no Console e no Node).
 
 ## 19. Itens de revisão (Revisão do dia)
 
@@ -1827,6 +1836,8 @@ Cada tipo tem a ficha no `catalogo.ts` (o aluno abre tocando nele):
 | `letreiro` | `mostrar(texto)`, `apagar()` | `texto` (até 16 letras) |
 | `forno` | `ligar()`, `desligar()` | `ligado`, `temperatura` (sobe uns 40 graus por segundo ligado, desce 15 desligado) |
 | `ventilador` | `desligar()` | `velocidade` (0 a 3, troca com `=`) |
+| `relogio` | nenhum | `hora` (do mundo: a hora cheia, de 0 a 23; cada hora passa em 2 s; `inicial: { hora }` é a hora do começo) |
+| `campainha` | `tocar()` | `toques` (quantas vezes tocou) |
 
 - `esperar(ms)` avança o relógio da SIMULAÇÃO (não espera de verdade). Os
   sensores leem a linha do tempo no instante do relógio. Sem `esperar`,
@@ -1869,7 +1880,7 @@ passa antes de a cena rodar.
   padrão de 100 ms; `exata`: nada a mais dessas ações (piscou 3 vezes, e
   não 4). As ações: lâmpada `ligar`, `desligar`, `brilho`; portão `abrir`,
   `fechar`; letreiro `mostrar`, `apagar`; forno `ligar`, `desligar`;
-  ventilador `velocidade`, `desligar`.
+  ventilador `velocidade`, `desligar`; campainha `tocar`.
 - `{ tipo: "reagiu", quando: { dispositivo, propriedade, valor }, entao: {
   dispositivo, acao }, prazoMs }`: TODA vez que a propriedade passa a valer
   o valor (o sensor vê gente), a ação acontece no prazo (a luz faz
@@ -1879,7 +1890,9 @@ passa antes de a cena rodar.
   escondidos do `funcaoPassa`) e o validador de cena de dentro passa em
   todas. É o que pega o código "decorado" (`esperar(3000); luz.ligar()`).
   Pelo menos 2 linhas do tempo; dentro, só validadores de cena (com
-  `todos`, `algum`, `nao`). A cena mostra as linhas do tempo de teste do
+  `todos`, `algum`, `nao`). Com `porLinha` (um validador de cena para cada
+  linha do tempo, na mesma ordem), o esperado muda de um dia para o outro
+  (o total de clientes, os instantes em que a luz apaga; seção 31.7). A cena mostra as linhas do tempo de teste do
   objetivo de agora ("Teste 1, 2, 3") para o aluno ver que funciona em
   todas.
 - Combine com `usouSintaxe` quando o caminho importa (`for`/`while` no
@@ -1941,3 +1954,194 @@ padrão visual:
 4. **Conferir**: o `/lab/cenas` (a peça nos três temas, de dia e de noite)
    e uma fase de laboratório usando a peça; `npm run testar:conteudo`
    (a regra `composicao` aceita a peça nova só depois do passo 1).
+
+## 31. Contratos: o trabalho de fim de ilha
+
+Modelos: o contrato da Lógica, `logica-programa-de-verdade-u1`
+(`src/conteudo/ilhas/logica/programa-de-verdade/unidade-1/`: a fase 1
+apresenta a vitrine e os aparelhos; a fase 2 é o contrato da Padaria Pão de
+Mel), e a bancada enxuta `/lab/fases?fase=lab-contrato-u1-f1&modo=jogo` (o
+estúdio do Rafa). Motor: `src/motor/contrato/` (`modelo.ts`, as etapas, o
+checklist antes e depois da mudança, a conferência dos requisitos e o
+relatório; `conferir.ts`, as checagens dos dados; `clientes.ts`, o kit de
+clientes; `levarProMundo.ts`, o .js que sai do jogo). Tela:
+`src/componentes/contrato/`. O mostruário dos clientes: `/lab/clientes`.
+
+No fim de cada ilha, o aluno recebe um trabalho de verdade: um cliente o
+contrata para criar um sistema e ele passa pelo processo inteiro. A graça é
+ser realista, inclusive na parte em que o cliente muda de ideia no meio.
+
+### 31.1 O formato (as etapas)
+
+1. **Briefing:** o cliente aparece e conta o que quer, do jeito dele. As
+   falas aparecem como alguém falando (a boca acompanha o texto) e, no fim,
+   vem o pedido por escrito: o **documento do cliente**, que o botão
+   "Pedido" (em cima do checklist) reabre a qualquer momento.
+2. **Requisitos:** "o que ele pediu de verdade?". O aluno escolhe entre
+   cartões (pedidos de verdade e distrações) e completa as lacunas lendo o
+   documento. Só segue com a lista certa. Na primeira conferência errada, o
+   colega diz o que falta sem dizer qual cartão; da segunda em diante, os
+   cartões errados aparecem com o porquê.
+3. **Trabalho:** a tela da fase (a composta, com cena, plano, código, palco
+   e testes, ou a do DevTools nas ilhas de site) e o checklist dos
+   requisitos marcando ao vivo, como no desafio. Antes da etapa de
+   requisitos, o checklist não mostra a lista (é o aluno que monta).
+4. **Mudança de pedido:** quando as partes de `mudanca.depoisDe` ficam
+   prontas, o cliente manda uma mensagem. O checklist muda (com o selo
+   "Novo"), o documento ganha o adendo e o código precisa passar nos
+   requisitos antigos e nos novos.
+5. **Entrega:** tudo marcado abre o relatório automático (pedidos
+   atendidos, com o que mudou; dias de teste na cena; casos do aluno
+   passando; tempo de trabalho; o processo). O aluno envia, o cliente
+   reage e vem a comemoração de fim de ilha.
+6. **Levar pro mundo:** na conclusão, o programa sai do jogo (seção 31.8).
+
+O computadorzinho vira **colega de trabalho**: o "Me faz uma pergunta" fala
+a `pergunta` de uma parte que falta (em rodízio), sempre de processo
+("você já testou com a vitrine vazia?"), e o Rever continua ao lado. O
+tutor entra no modo `contrato` (só pergunta e lembra do processo).
+
+### 31.2 O contrato é um desafio com o campo `contrato`
+
+Não é tipo novo: a fase é `tipo: "desafio"` (com `areas`, cena, plano,
+testes, como qualquer desafio composto) e o campo `contrato`
+(`DadosContrato`):
+
+- `cliente`: o id no kit de clientes (seção 31.6);
+- `projeto` (até 40): o nome do trabalho no relatório e no arquivo;
+- `briefing`: de 2 a 8 falas do cliente (`{ texto, expressao }`, até 160,
+  expressões `feliz`, `pensativo`, `preocupado`, `empolgado`,
+  `satisfeito`);
+- `documento`: `titulo` (até 60) e de 1 a 8 `paragrafos` (até 320): o
+  pedido por escrito, com os números exatos (horários, nomes, formatos);
+- `requisitos.cartoes` (até 12): os de verdade com `parte` (a parte do
+  desafio que ele vira), as distrações com `sobra: true`, e todos com
+  `porque` (até 160); `texto` com lacunas `___`, uma para cada item de
+  `lacunas` (`{ opcoes, correta }`, de 2 a 4 opções);
+- `mudanca`: `depoisDe` (ids de partes do começo), `mensagem` (1 a 4
+  falas), `adendo` (o parágrafo novo do documento) e `novas`
+  (`{ parte, substitui? }`: a parte que só existe depois; com
+  `substitui`, ela toma o lugar de uma antiga no checklist);
+- `entrega.reacao`: de 1 a 4 falas;
+- `levarProMundo.arquivo` (ilhas com código): o nome do .js, em kebab-case.
+
+As `partes` do desafio são os requisitos: as do cliente (ligadas aos
+cartões e às novas) e as do **processo** (sem cartão: o plano no código,
+os casos de teste, ler a ficha). No contrato, toda parte tem `pergunta`
+(até 160) e o `revisarEm` pode apontar para uma fase de outra unidade,
+antes do contrato, onde a habilidade foi ensinada com objetivo guiado. As
+partes novas ficam no fim de `partes` (a meta aplica as soluções em ordem e
+termina com o código do depois).
+
+O contrato abre com o cliente, não com a tela de meta; a meta da unidade
+(na primeira fase) mostra só a cena antes e depois, nunca o código.
+
+### 31.3 Um briefing com cara de cliente de verdade
+
+- O cliente fala de tudo um pouco, do jeito dele, com o vocabulário do
+  negócio ("abro às 7 e fecho às 7 da noite"). Ele não sabe programar: não
+  diz "variável", "loop" nem "função".
+- Os números aparecem do jeito cotidiano na fala e exatos no documento
+  ("7 da noite" na fala, "19h" no documento): a lacuna do cartão obriga a
+  traduzir.
+- Misture o pedido com conversa: o palpite da sobrinha, o site do vizinho,
+  o que fica "pra outro dia". É daí que saem as distrações.
+- Dê a cada fala uma expressão que combine (preocupado com a correria,
+  empolgado com a ideia, pensativo no detalhe).
+
+### 31.4 Requisitos: distrações e lacunas
+
+- Pelo menos 2 cartões de verdade e 2 distrações (a Lógica tem 4 e 3).
+- Boas distrações: o que o cliente comentou mas não pediu (pintar a
+  fachada), o que ele disse que fica pra depois (o site) e um quase igual
+  ao pedido de verdade ("avisar quando o pão ficar pronto" contra "quando o
+  forno chegar a 180 graus").
+- Pelo menos uma lacuna, sempre com a resposta no documento (o horário, a
+  temperatura, o formato do texto). As opções erradas são plausíveis (18h,
+  19h, 20h).
+- O `porque` explica sem humilhar: "Quem sugeriu foi a sobrinha, e é
+  trabalho de pintor, não de programa."
+
+### 31.5 Uma mudança que faça sentido
+
+- Realista: o cliente usou o que você fez e descobriu algo (a conta de luz
+  assustou). Ela chega depois de partes prontas (`depoisDe`), de
+  preferência das que ela mexe.
+- Ela exige **ajuste real** no código pronto: a checagem roda a solução do
+  antes e acusa a parte nova que já passasse com ela. Trocar um requisito
+  antigo (`substitui`) é o caso mais comum; acrescentar um novo também vale.
+- O documento ganha o `adendo` (o pedido novo, por escrito, com os números)
+  e a mensagem termina lembrando o que continua igual ("na abertura ela
+  acende, como antes").
+
+### 31.6 O kit de clientes (como criar um cliente novo)
+
+Um cliente é DADO em `src/motor/contrato/clientes.ts`: `id` (kebab-case,
+igual à chave), `nome` (até 24), `negocio` (até 40) e a `aparencia` montada
+com as peças do kit (`src/componentes/contrato/kit/`):
+
+- `pele`: `clara`, `media`, `morena`, `escura`;
+- `cabelo`: `coque`, `curto`, `cacheado`, `longo`, `careca`, `rabo`, com
+  `corCabelo`: `preto`, `castanho`, `ruivo`, `loiro`, `grisalho`;
+- `roupa`: `avental`, `camisa`, `jaleco`, `macacao`, com `corRoupa`:
+  `azul`, `vermelho`, `verde`, `amarelo`, `roxo`;
+- `acessorios`: `oculos`, `bigode`, `touca`, `brincos`, `lenco`, `bone`.
+
+Nomes e negócios originais (nada de personagens ou marcas conhecidas).
+Confira o cliente novo no `/lab/clientes` (as cinco expressões, falando, nos
+três temas). Para uma peça nova do kit: o nome na lista do `clientes.ts`, o
+desenho no arquivo da peça (`Cabelo.tsx`, `Roupa.tsx`, `Acessorios.tsx`),
+cores só por tokens `--cor-cliente-*` nos TRÊS temas de
+`src/tema/tokens.css`, formas arredondadas, contorno `CONTORNO` e a sombra
+como camada escura transparente (`SOMBRA`).
+
+O cliente tem a vida do computadorzinho: pisca, respira, inclina a cabeça
+para pensar, pula de empolgação e, falando, a boca abre nas vogais e quase
+fecha nas consoantes (`formaDaLetra`).
+
+### 31.7 Validadores e a fábrica
+
+- Os de sempre: os de cena (seção 30.4), os de código, `funcaoPassa`,
+  `casosDoAluno`, `ordemValida` e `planoComentado`.
+- `variosCenarios` com `porLinha`: um validador de cena a mais para cada
+  linha do tempo (o que muda de um dia para o outro: quantos clientes
+  passaram, quando a luz apaga). Os instantes conferidos ficam longe das
+  trocas (um pouco mais de meia hora da cena depois de cada uma), para
+  valer qualquer ritmo de loop razoável.
+- A regra `contrato` confere os dados (seção 31.2). O `testar:conteudo`
+  joga o contrato inteiro (`jogarContrato`): a lista certa passa e as
+  erradas não; as partes do começo, uma a uma, com as soluções delas (o
+  antes); a mudança chegando; cada parte nova falhando com o código do
+  antes; as soluções das partes novas (o depois); e tudo passando junto no
+  fim. As soluções de código são em camadas: cada uma é o código inteiro
+  até ali (com o bloco do plano no topo).
+- O relatório e a conferência dos requisitos são funções puras
+  (`montarRelatorio`, `conferirRequisitos`).
+
+### 31.8 Levar pro mundo
+
+Nas ilhas com código, a conclusão do contrato tem o "Levar pro mundo": um
+.js com o programa do aluno e uma versão simples dos aparelhos da cena, que
+escrevem no console o que fariam ("[07:00] Luz da vitrine: ligada"), no
+relógio simulado; os acontecimentos da linha do tempo também aparecem
+("Chegou alguém."). Roda no Console de qualquer navegador (colar e Enter) e
+no Node (`node arquivo.js`); as instruções vão no topo do arquivo. Dê a
+cada dispositivo da cena um `nome` (até 24: "Luz da vitrine"), que é como
+ele aparece fora do código. Nas próximas ilhas, o Levar pro mundo é o da
+ilha (o site com interação, o sistema com dados).
+
+### 31.9 Checklist de um contrato novo
+
+- [ ] Uma fase antes do contrato apresenta as ferramentas e os aparelhos
+      novos (o desafio não apresenta nada).
+- [ ] Briefing com cara de cliente, documento com os números exatos.
+- [ ] Cartões: pedidos de verdade, distrações plausíveis, lacunas com a
+      resposta no documento, `porque` em todos.
+- [ ] Partes do cliente e do processo, cada uma com `pergunta` de colega.
+- [ ] Mudança realista, depois de partes prontas, exigindo ajuste real.
+- [ ] Vários dias de teste (`variosCenarios`, com `porLinha` quando o
+      esperado muda de um dia para o outro).
+- [ ] Reação do cliente, conclusão à altura do fim da ilha e o Levar pro
+      mundo.
+- [ ] `testar:conteudo` verde (a jogada do contrato inteiro) e a jornada de
+      navegador nos três layouts.

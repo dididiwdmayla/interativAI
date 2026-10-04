@@ -29,10 +29,12 @@ export function FalaDoCliente({ cliente, fala, mostrado, falando, children }: Pr
             {dados.nome} <span className="font-bold normal-case tracking-normal text-texto-suave">· {dados.negocio}</span>
           </p>
           {/* O texto inteiro fica reservado (invisível) para o balão não pular de tamanho enquanto digita. */}
-          <p className="relative text-[15px] font-bold leading-snug text-texto" aria-live="polite">
-            <span className="invisible" aria-hidden="true">
-              {fala.texto}
-            </span>
+          {/* O leitor de tela ouve a fala inteira uma vez; a digitação é só visual. */}
+          <p className="sr-only" aria-live="polite">
+            {fala.texto}
+          </p>
+          <p className="relative text-[15px] font-bold leading-snug text-texto" aria-hidden="true">
+            <span className="invisible">{fala.texto}</span>
             <span className="absolute inset-0" data-texto-cliente>
               {mostrado}
             </span>

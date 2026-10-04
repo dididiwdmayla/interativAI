@@ -630,6 +630,33 @@ resposta da última expressão, as saídas do console e o erro.
   com a trilha Automação. Regra de ritmo: toda unidade nova da Lógica tem
   pelo menos uma fase com cena (guia, seção 30).
 
+### Contratos (o trabalho de fim de ilha, rodada 29)
+
+- O contrato é um DESAFIO com o campo `contrato` (`DadosContrato`, em
+  `src/motor/contrato/modelo.ts`): o cliente do kit, o briefing, o
+  documento do pedido, os cartões de requisitos (com distrações e
+  lacunas), a mudança de pedido e a reação na entrega. As partes do
+  desafio são os requisitos (do cliente e do processo); reaproveita a tela
+  composta, as cenas, os casos de teste e o checklist.
+- O estado da fase ganha `contrato` (etapa: briefing, requisitos, trabalho
+  ou entrega; a lista escolhida; a mudança; o tempo; entregue), salvo no
+  progresso. O checklist mostra as partes de agora (`partesVisiveis`: antes
+  ou depois da mudança, com a parte nova no lugar da que ela troca). A
+  mensagem do cliente é uma pausa do motor (`mudancaDoCliente`).
+- A tela (`src/componentes/contrato/`): a conversa com o cliente (o texto
+  digitando, `useTextoDigitado`), o documento, a etapa de requisitos, o
+  cabeçalho do checklist com o botão Pedido, a entrega (relatório,
+  reação, comemoração de fim de ilha) e o Levar pro mundo.
+- O kit de clientes: aparência como dados (`clientes.ts`), desenho em
+  peças (`src/componentes/contrato/kit/`) com tokens `--cor-cliente-*`;
+  pisca, respira e fala com a boca acompanhando o texto.
+- Levar pro mundo (Lógica): `levarProMundo.ts` gera um .js com o programa
+  do aluno e os aparelhos de mentirinha, que escrevem no console o que
+  fariam no relógio simulado; roda no Console de um navegador e no Node.
+- Fábrica: a regra `contrato` confere os dados e o `testar:conteudo` joga o
+  contrato inteiro (`jogarContrato`, em `src/conteudo/checagens.ts`). Guia,
+  seção 31.
+
 ### Navegação (o mapa)
 
 - Rotas (`src/lib/rotas.ts`), todas com deep link: `/` é o mundo,
