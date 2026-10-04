@@ -40,6 +40,7 @@ import { IconeEscopo } from "@/componentes/icones/IconeEscopo";
 import { IconeObservar } from "@/componentes/icones/IconeObservar";
 import { IconePlanoNoCodigo } from "@/componentes/icones/IconePlanoNoCodigo";
 import { IconeCasosDeTeste } from "@/componentes/icones/IconeCasosDeTeste";
+import { IconeCena } from "@/componentes/icones/IconeCena";
 import { IconePilhaChamadas } from "@/componentes/icones/IconePilhaChamadas";
 import { IconePontoDeParada } from "@/componentes/icones/IconePontoDeParada";
 import { IconeQuadroPassos } from "@/componentes/icones/IconeQuadroPassos";
@@ -1163,6 +1164,27 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       "a aba Elementos mostra a árvore da página (o DOM): o <html> tem o <head> e o <body> como filhos, e assim por diante. Uma árvore de dados no seu programa funciona igual.",
     experimente: { mouse: "Clique em Ver como árvore.", toque: "Toque em Ver como árvore." },
     uso: "sinal",
+  },
+  // Cenas programáveis: o mundo real que o código controla (src/motor/cena).
+  cena: {
+    id: "cena",
+    nome: "Cena",
+    Icone: IconeCena,
+    alvo: seletorFerramenta("cena"),
+    oQueFaz: "Mostra o mundo que o seu código controla: um quarto, uma vitrine, um portão. Cada dispositivo é um objeto no código.",
+    praQueServe:
+      "Você escreve lampada.ligar() e vê a lâmpada acender. Com esperar(ms), o tempo da cena anda; Executar roda a cena do começo e ela toca como animação.",
+    comoUsarAqui: {
+      mouse: "Escreva o código no Snippet e clique em Executar: a cena toca do começo. O botão de tocar repete, e a barra de tempo volta e avança.",
+      toque: "Escreva o código no Snippet e toque em Executar: a cena toca do começo. O botão de tocar repete, e a barra de tempo volta e avança.",
+    },
+    noF12DeVerdade:
+      "o F12 não tem cena: na vida real o código roda numa plaquinha (um microcontrolador) ligada aos aparelhos. Na trilha Automação você monta isso de verdade.",
+    experimente: {
+      mouse: "Clique na cena.",
+      toque: "Toque na cena.",
+    },
+    uso: "tocar",
   },
 };
 

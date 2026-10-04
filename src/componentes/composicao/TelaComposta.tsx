@@ -5,12 +5,13 @@
  * áreas de trabalho que a fase declara, nos três layouts.
  *
  * - Computador: o plano numa coluna à esquerda, o código no centro e, à
- *   direita, o palco em cima e os casos de teste embaixo (divisor
- *   arrastável quando os dois existem).
- * - Celular deitado: o plano (ou o palco, ou os testes, em abas) ao lado do
- *   código, que fica sempre à vista.
- * - Celular em pé: o palco recolhível em cima e as abas "Plano | Código |
- *   Testes" embaixo.
+ *   direita, a cena, o palco e os casos de teste, um embaixo do outro
+ *   (divisor arrastável entre o primeiro e o resto).
+ * - Celular deitado: a cena (ou o plano, o palco, os testes, em abas) ao
+ *   lado do código, que fica sempre à vista.
+ * - Celular em pé: com cena, ela fica em cima (como a prévia nas fases de
+ *   site, recolhível) e as abas "Código | Palco | ..." embaixo; sem cena, o
+ *   palco recolhível em cima e as abas "Plano | Código | Testes" embaixo.
  *
  * Cada área fica SEMPRE montada no mesmo lugar da árvore (um filho da grade,
  * na mesma ordem): girar o celular ou trocar de aba só muda a grade e o que
@@ -25,6 +26,7 @@ import type { AreaTrabalho } from "@/motor/composicao";
 
 /** O nome de cada área nas abas do celular. */
 export const ROTULO_DA_AREA: Record<AreaTrabalho, string> = {
+  cena: "Cena",
   plano: "Plano",
   snippet: "Código",
   palco: "Palco",
@@ -42,6 +44,10 @@ type Props = {
   /** (Em pé) O palco aberto ou recolhido. */
   palcoAberto: boolean;
   aoAlternarPalco: () => void;
+  /** (Em pé, com cena) A cena aberta ou recolhida, e o nome dela no cabeçalho. */
+  cenaAberta?: boolean;
+  aoAlternarCena?: () => void;
+  tituloCena?: string;
   /** Teclado virtual aberto: o palco recolhe sozinho (o código precisa do espaço). */
   tecladoAberto: boolean;
 };
@@ -49,7 +55,8 @@ type Props = {
 /** As áreas que viram abas em cada layout de celular (as outras ficam fixas). */
 export function abasDoLayout(layout: LayoutJogo, areas: readonly AreaTrabalho[]): AreaTrabalho[] {
   if (layout === "paisagem") return areas.filter((area) => area !== "snippet");
-  if (layout === "retrato") return areas.filter((area) => area !== "palco");
+  // Em pé, o que mora em cima não vira aba: a cena (quando há) ou o palco.
+  if (layout === "retrato") return areas.filter((area) => area !== (areas.includes("cena") ? "cena" : "palco"));
   return [];
 }
 
@@ -61,32 +68,53 @@ export function abaVisivel(layout: LayoutJogo, areas: readonly AreaTrabalho[], e
 
 const LIMITES_DIVISOR = { minimo: 0.2, maximo: 0.8 };
 
-export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba, palcoAberto, aoAlternarPalco, tecladoAberto }: Props) {
+export function TelaComposta({
+  layout,
+  areas,
+  conteudo,
+  abaCelular,
+  aoTrocarAba,
+  palcoAberto,
+  aoAlternarPalco,
+  cenaAberta = true,
+  aoAlternarCena,
+  tituloCena,
+  tecladoAberto,
+}: Props) {
   const grade = useRef<HTMLElement>(null);
-  /** (Computador) A parte do palco na coluna da direita, quando os testes dividem com ele. */
-  const [divisao, setDivisao] = useState(0.48);
-  const [arrastando, setArrastando] = useState(false);
   const tem = (area: AreaTrabalho) => areas.includes(area);
+  /** (Computador) A parte da primeira área na coluna da direita, quando as outras dividem com ela. */
+  const [divisao, setDivisao] = useState(() => (areas.includes("cena") ? 0.56 : 0.48));
+  const [arrastando, setArrastando] = useState(false);
   const abas = abasDoLayout(layout, areas);
   const aba = abaVisivel(layout, areas, abaCelular);
-  const palcoVisivelEmPe = tem("palco") && palcoAberto && !tecladoAberto;
-  // O que mora na coluna da direita do computador: o palco em cima e os testes embaixo.
-  const direita = (["palco", "testes"] as const).filter(tem);
+  const comCena = tem("cena");
+  // Em pé, em cima mora a cena (com cena) ou o palco recolhível (sem cena).
+  const palcoEmCima = tem("palco") && !comCena;
+  const palcoVisivelEmPe = palcoEmCima && palcoAberto && !tecladoAberto;
+  const cenaVisivelEmPe = comCena && cenaAberta && !tecladoAberto;
+  // O que mora na coluna da direita do computador: a cena, o palco e os testes, um embaixo do outro.
+  const direita = (["cena", "palco", "testes"] as const).filter(tem);
   const divididaNaDireita = direita.length > 1;
 
   /* ------------------------------------------------------------- a grade de cada layout */
   let estiloGrade: CSSProperties;
   let lugar: Record<AreaTrabalho, string>;
   if (layout === "desktop") {
-    const colunas = [tem("plano") ? "minmax(16rem, 27%)" : null, "minmax(0, 1fr)", direita.length ? "minmax(18rem, 32%)" : null].filter(Boolean);
+    const larguraDireita = comCena ? "minmax(20rem, 40%)" : "minmax(18rem, 32%)";
+    const colunas = [tem("plano") ? "minmax(16rem, 27%)" : null, "minmax(0, 1fr)", direita.length ? larguraDireita : null].filter(Boolean);
     const linha = (alvo: string) => [tem("plano") ? "plano" : null, "codigo", direita.length ? alvo : null].filter(Boolean).join(" ");
-    const linhas = divididaNaDireita ? [linha(direita[0]), linha("divisor"), linha(direita[1])] : [linha(direita[0] ?? "codigo")];
+    // O divisor fica entre a primeira área da direita e as outras (que dividem o resto ao meio).
+    const linhas = divididaNaDireita ? [linha(direita[0]), linha("divisor"), ...direita.slice(1).map(linha)] : [linha(direita[0] ?? "codigo")];
+    const resto = (1 - divisao) / Math.max(1, direita.length - 1);
     estiloGrade = {
       gridTemplateColumns: colunas.join(" "),
-      gridTemplateRows: divididaNaDireita ? `minmax(0, ${divisao}fr) 0.75rem minmax(0, ${1 - divisao}fr)` : "minmax(0, 1fr)",
+      gridTemplateRows: divididaNaDireita
+        ? [`minmax(0, ${divisao}fr)`, "0.75rem", ...direita.slice(1).map(() => `minmax(0, ${resto}fr)`)].join(" ")
+        : "minmax(0, 1fr)",
       gridTemplateAreas: linhas.map((l) => `"${l}"`).join(" "),
     };
-    lugar = { plano: "plano", snippet: "codigo", palco: "palco", testes: "testes" };
+    lugar = { cena: "cena", plano: "plano", snippet: "codigo", palco: "palco", testes: "testes" };
   } else if (layout === "paisagem") {
     const comLado = abas.length > 0;
     estiloGrade = comLado
@@ -96,12 +124,17 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
           gridTemplateAreas: abas.length > 1 ? '"abas codigo" "lado codigo"' : '"lado codigo"',
         }
       : { gridTemplateColumns: "minmax(0, 1fr)", gridTemplateRows: "minmax(0, 1fr)", gridTemplateAreas: '"codigo"' };
-    lugar = { plano: "lado", snippet: "codigo", palco: "lado", testes: "lado" };
+    lugar = { cena: "lado", plano: "lado", snippet: "codigo", palco: "lado", testes: "lado" };
   } else {
-    const linhas = [tem("palco") ? '"cabecalho"' : null, palcoVisivelEmPe ? '"palco"' : null, abas.length > 1 ? '"abas"' : null, '"conteudo"'].filter(Boolean);
-    const alturas = [tem("palco") ? "auto" : null, palcoVisivelEmPe ? "minmax(0, 2fr)" : null, abas.length > 1 ? "auto" : null, palcoVisivelEmPe ? "minmax(0, 3fr)" : "minmax(0, 1fr)"].filter(Boolean);
+    const temCabecalho = palcoEmCima || comCena;
+    const emCimaVisivel = palcoVisivelEmPe || cenaVisivelEmPe;
+    const linhas = [temCabecalho ? '"cabecalho"' : null, emCimaVisivel ? '"emcima"' : null, abas.length > 1 ? '"abas"' : null, '"conteudo"'].filter(Boolean);
+    // A cena precisa de um pouco mais de altura que o palco (o desenho tem proporção fixa).
+    const alturaEmCima = cenaVisivelEmPe ? "minmax(0, 5fr)" : "minmax(0, 2fr)";
+    const alturaConteudo = cenaVisivelEmPe ? "minmax(0, 6fr)" : palcoVisivelEmPe ? "minmax(0, 3fr)" : "minmax(0, 1fr)";
+    const alturas = [temCabecalho ? "auto" : null, emCimaVisivel ? alturaEmCima : null, abas.length > 1 ? "auto" : null, alturaConteudo].filter(Boolean);
     estiloGrade = { gridTemplateColumns: "minmax(0, 1fr)", gridTemplateRows: alturas.join(" "), gridTemplateAreas: linhas.join(" ") };
-    lugar = { plano: "conteudo", snippet: "conteudo", palco: "palco", testes: "conteudo" };
+    lugar = { cena: "emcima", plano: "conteudo", snippet: "conteudo", palco: palcoEmCima ? "emcima" : "conteudo", testes: "conteudo" };
   }
 
   /** A área aparece neste layout agora? */
@@ -109,7 +142,8 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
     if (!tem(area)) return false;
     if (layout === "desktop") return true;
     if (layout === "paisagem") return area === "snippet" || area === aba;
-    if (area === "palco") return palcoVisivelEmPe;
+    if (area === "cena") return cenaVisivelEmPe;
+    if (area === "palco" && palcoEmCima) return palcoVisivelEmPe;
     return area === aba;
   };
 
@@ -147,8 +181,23 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
 
   return (
     <main ref={grade} className={classesGrade} style={estiloGrade} data-composicao={areas.join(" ")} data-aba-composta={aba ?? ""}>
+      {/* (Em pé, com cena) O cabeçalho da cena recolhível. */}
+      {layout === "retrato" && comCena && (
+        <button
+          type="button"
+          onClick={aoAlternarCena}
+          aria-expanded={cenaVisivelEmPe}
+          className="flex min-h-11 items-center gap-2 rounded-xl border-2 border-borda bg-superficie px-3 text-left text-sm font-black text-texto"
+          style={{ gridArea: "cabecalho" }}
+          data-alternar-cena
+        >
+          <span className="min-w-0 flex-1 truncate">{tituloCena ? `Cena: ${tituloCena}` : "Cena"}</span>
+          <span className="shrink-0 text-xs font-bold text-texto-suave">{cenaVisivelEmPe ? "Recolher" : tecladoAberto ? "Recolhida enquanto digita" : "Mostrar"}</span>
+          <IconeChevron direcao={cenaVisivelEmPe ? "cima" : "baixo"} />
+        </button>
+      )}
       {/* (Em pé) O cabeçalho do palco recolhível. */}
-      {layout === "retrato" && tem("palco") && (
+      {layout === "retrato" && palcoEmCima && (
         <button
           type="button"
           onClick={aoAlternarPalco}
@@ -168,11 +217,11 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
           {seletorAbas}
         </div>
       )}
-      {(["plano", "snippet", "palco", "testes"] as const).map((area) =>
+      {(["cena", "plano", "snippet", "palco", "testes"] as const).map((area) =>
         tem(area) ? (
           <section
             key={area}
-            aria-label={{ plano: "Plano", snippet: "Código", palco: "Palco da memória", testes: "Casos de teste" }[area]}
+            aria-label={{ cena: "Cena", plano: "Plano", snippet: "Código", palco: "Palco da memória", testes: "Casos de teste" }[area]}
             className={visivel(area) ? "flex min-h-0 min-w-0 flex-col" : "hidden"}
             style={{ gridArea: lugar[area] }}
             data-area-trabalho={area}
@@ -186,7 +235,7 @@ export function TelaComposta({ layout, areas, conteudo, abaCelular, aoTrocarAba,
         <div
           role="separator"
           aria-orientation="horizontal"
-          aria-label="Redimensionar o palco e os casos de teste"
+          aria-label={`Redimensionar ${direita[0] === "cena" ? "a cena" : "o palco"} e ${direita[1] === "testes" ? "os casos de teste" : "o palco"}`}
           aria-valuemin={20}
           aria-valuemax={80}
           aria-valuenow={Math.round(divisao * 100)}

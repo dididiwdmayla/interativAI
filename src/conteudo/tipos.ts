@@ -25,6 +25,7 @@ import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 import type { AreaTrabalho } from "@/motor/composicao";
 import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
+import type { DadosCena } from "@/motor/cena/modelo";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -785,13 +786,20 @@ type FaseBase = {
  */
 export type ComposicaoDaFase = {
   /**
-   * As áreas de trabalho na mesma tela: "plano" (o quadro de passos, campo
-   * `plano`), "snippet" (o código: aba Fontes com o Snippet e o Console,
-   * pede programa.snippet), "palco" (o palco da memória com a linha do
-   * tempo) e "testes" (os casos de teste do aluno, campo `testes`). Sem o
-   * campo, a fase usa a tela de sempre do tipo dela.
+   * As áreas de trabalho na mesma tela: "cena" (o mundo que o código
+   * controla, campo `cena`), "plano" (o quadro de passos, campo `plano`),
+   * "snippet" (o código: aba Fontes com o Snippet e o Console, pede
+   * programa.snippet), "palco" (o palco da memória com a linha do tempo) e
+   * "testes" (os casos de teste do aluno, campo `testes`). Sem o campo, a
+   * fase usa a tela de sempre do tipo dela.
    */
   areas?: AreaTrabalho[];
+  /**
+   * (Área cena) A cena programável: o cenário (peças do kit), os
+   * dispositivos que o código usa (`lampada.ligar()`, `sensor.temGente`) e
+   * a linha do tempo dos acontecimentos. Ver src/motor/cena e o guia, seção 30.
+   */
+  cena?: DadosCena;
   /**
    * (Área plano) Os cartões do problema, como no ordenar-passos (ordenar ou
    * agrupar, validação pelas dependências), sem `rodar`: o plano vira
