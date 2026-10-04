@@ -23,6 +23,7 @@ import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
+import type { AreaTrabalho } from "@/motor/composicao";
 
 export type { Fala } from "@/motor/tipos";
 export type { IdConceito } from "./conceitos";
@@ -729,8 +730,30 @@ type FaseBase = {
   falaFinal?: Fala;
 };
 
+/**
+ * Composição de áreas de trabalho (motor de resolução de problemas): a fase
+ * declara as áreas que usa e o motor monta a tela com elas, em vez de mais
+ * um tipo fechado de fase. Vale para a prática e para o desafio. Ver
+ * src/motor/composicao.ts e o guia, seção 29.
+ */
+export type ComposicaoDaFase = {
+  /**
+   * As áreas de trabalho na mesma tela: "plano" (o quadro de passos, campo
+   * `plano`), "snippet" (o código: aba Fontes com o Snippet e o Console,
+   * pede programa.snippet) e "palco" (o palco da memória com a linha do
+   * tempo). Sem o campo, a fase usa a tela de sempre do tipo dela.
+   */
+  areas?: AreaTrabalho[];
+  /**
+   * (Área plano) Os cartões do problema, como no ordenar-passos (ordenar ou
+   * agrupar, validação pelas dependências), sem `rodar`: o plano vira
+   * comentários no Snippet e o código é o aluno que escreve.
+   */
+  plano?: DadosOrdenar;
+};
+
 /** Micro-passos: objetivos guiados e sozinho, em sequência. */
-export type FasePratica = FaseBase & {
+export type FasePratica = FaseBase & ComposicaoDaFase & {
   tipo: "pratica";
   objetivos: Objetivo[];
   /**
@@ -747,9 +770,11 @@ export type FasePratica = FaseBase & {
  * bancada do circuito lógico é a tela (validadores circuitoTabela e
  * usouPortao nas partes); com `circuito` e `programa` juntos, é a ponte
  * circuito/Console: a bancada na tela e, no painel, a tabela verdade em
- * cima e o Console embaixo.
+ * cima e o Console embaixo. Com `areas`, a tela é composta como numa
+ * prática composta (plano, código e palco), e as partes podem ser de cada
+ * área.
  */
-export type FaseDesafio = FaseBase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
+export type FaseDesafio = FaseBase & ComposicaoDaFase & { tipo: "desafio"; partes: ParteDesafio[]; circuito?: DadosCircuito };
 
 /**
  * Um requisito do projeto-ponte: marca sozinho quando o validador passa

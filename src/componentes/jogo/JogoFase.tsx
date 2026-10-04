@@ -54,6 +54,9 @@ import { useDepurador } from "./useDepurador";
 import { useEstruturas } from "./useEstruturas";
 import { useOrdenar } from "./useOrdenar";
 import { PilhaDeCartoes, PlanoDePassos } from "@/componentes/ordenar/QuadroPassos";
+import { AreaPlano } from "@/componentes/composicao/AreaPlano";
+import { TelaComposta } from "@/componentes/composicao/TelaComposta";
+import { type AreaTrabalho, areasDaFase, faseComposta } from "@/motor/composicao";
 import { ordemDoPlano } from "@/motor/ordenar/modelo";
 import { type AbaDepurador, AvisoPausado, BarraControlesDepurador, PainelDepurador } from "@/componentes/painel/fontes/PainelDepurador";
 import { FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
@@ -197,6 +200,22 @@ const SOM_DO_EVENTO: Partial<Record<EventoFase["tipo"], IdEfeito>> = {
 /** Ferramentas da aba Busca (zona Ser encontrado). */
 const FERRAMENTAS_DA_BUSCA: readonly IdFerramenta[] = ["resultado-busca", "dados-estruturados"];
 
+/** (Fase composta) A área de trabalho onde mora cada ferramenta: a apresentação e a ajuda a põem à vista. */
+const AREA_DA_FERRAMENTA: Partial<Record<IdFerramenta, AreaTrabalho>> = {
+  "quadro-de-passos": "plano",
+  snippet: "snippet",
+  console: "snippet",
+  "pontos-de-parada": "snippet",
+  "controles-depurador": "snippet",
+  "painel-escopo": "snippet",
+  "painel-observar": "snippet",
+  "pilha-de-chamadas": "snippet",
+  "palco-memoria": "palco",
+  "linha-do-tempo": "palco",
+  "contador-passos": "palco",
+  "arvore-palco": "palco",
+};
+
 /** Ferramentas da aba Medição (zona Ser encontrado). */
 const FERRAMENTAS_DA_MEDICAO: readonly IdFerramenta[] = ["medicao", "link-rastreavel"];
 
@@ -321,7 +340,27 @@ export function JogoFase({
   const temCss = cssInicial !== null;
   const [abaEditor, setAbaEditor] = useState<AbaEditor>("html");
   const [barramento] = useState(criarBarramento);
-  const [aba, setAba] = useState<Aba>(() => (faseDaProp.programa ? "console" : "elementos"));
+  // Fase composta (src/motor/composicao.ts): a tela é montada pelas áreas de trabalho que a fase declara.
+  const composta = faseComposta(fase);
+  const areas = useMemo(() => areasDaFase(fase), [fase]);
+  // Na fase composta o código é o Snippet: a aba Fontes abre primeiro.
+  const [aba, setAba] = useState<Aba>(() => (composta && faseDaProp.programa?.snippet ? "fontes" : faseDaProp.programa ? "console" : "elementos"));
+  /** (Fase composta, celular) A área escolhida nas abas e o palco aberto (em pé). */
+  const [abaCelular, setAbaCelular] = useState<AreaTrabalho>(() => (areasDaFase(fase).includes("plano") ? "plano" : "snippet"));
+  const [palcoAberto, setPalcoAberto] = useState(true);
+  /** (Fase composta) O layout de agora, lido na hora por mostrarArea (ele é calculado mais abaixo). */
+  const layoutAtual = useRef<"desktop" | "retrato" | "paisagem">("desktop");
+  /** (Fase composta) Põe a área à vista: no celular, troca a aba (ou, em pé, abre o palco). */
+  const mostrarArea = useCallback(
+    (area: AreaTrabalho) => {
+      if (!composta) return;
+      const agora = layoutAtual.current;
+      if (area === "palco") setPalcoAberto(true);
+      if (agora === "retrato" && area !== "palco") setAbaCelular(area);
+      if (agora === "paisagem" && area !== "snippet") setAbaCelular(area);
+    },
+    [composta],
+  );
   // Fase de programa: a sessão do executor (Web Worker), o Console e o Snippet.
   const programa = usePrograma({ fase, barramento, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
   // O depurador da aba Fontes (pontos de parada, controles, Escopo, Observar e Pilha de chamadas).
@@ -362,12 +401,14 @@ export function JogoFase({
       } else if (alvo === "console") {
         setAba("console");
         setDestaqueConsole(true);
+        mostrarArea("snippet");
       } else {
         setAba("fontes");
+        mostrarArea("snippet");
         editorSnippetRef.current?.destacarLinhas(alvo);
       }
     },
-    [editorSnippetRef],
+    [editorSnippetRef, mostrarArea],
   );
   const [quebrarLinhas, setQuebrarLinhas] = useState(true);
   /** Apresentação de uma ferramenta do depurador no celular: o que a aba Fontes mostra. */
@@ -387,6 +428,9 @@ export function JogoFase({
   const esperaRecado = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recipienteMovel = useRef<HTMLElement>(null);
   const layout = useLayoutJogo();
+  useEffect(() => {
+    layoutAtual.current = layout;
+  }, [layout]);
   const movel = layout !== "desktop";
   /** Deitado não há segmento Estilos (ele fica ao lado da árvore): vale o da árvore. */
   const segmentoVisivel = segmento === "estilos" && layout !== "retrato" ? "arvore" : segmento;
@@ -901,7 +945,15 @@ export function JogoFase({
     [depurador.salvo, programa.programaSalvo],
   );
   const { circuitoAgora } = circuito;
-  const { ordenarAgora } = ordenar;
+  const { ordenarAgora, setDestaque: destacarNoOrdenar } = ordenar;
+  /** Degrau 3 no quadro: pisca o cartão (ou o plano); na fase composta, a área do plano aparece. */
+  const destacarNoQuadro = useCallback(
+    (alvo: string | null) => {
+      destacarNoOrdenar(alvo);
+      if (alvo !== null) mostrarArea("plano");
+    },
+    [destacarNoOrdenar, mostrarArea],
+  );
   const extraValidacao = useCallback(() => {
     const doSimulador = {
       ...(dadosCampanha && campanhaAtual.current ? { campanha: { dados: dadosCampanha, estado: campanhaAtual.current } } : {}),
@@ -953,7 +1005,7 @@ export function JogoFase({
     programaSalvo,
     destacarNoCircuito: circuito.setDestaque,
     circuitoSalvo: circuito.circuito,
-    destacarNoOrdenar: ordenar.setDestaque,
+    destacarNoOrdenar: destacarNoQuadro,
     ordenarSalvo: ordenar.estado,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
@@ -1061,10 +1113,13 @@ export function JogoFase({
 
   /** Deixa o alvo da apresentação visível: no celular, abre ou fecha o balão e troca Árvore | Código. */
   const prepararAlvo = (ferramenta: Ferramenta) => {
+    // Fase composta: a área da ferramenta aparece (no celular, a aba dela); o painel só troca de aba para as dele.
+    const area = composta ? AREA_DA_FERRAMENTA[ferramenta.id] : undefined;
+    if (area) mostrarArea(area);
     // A aba Lighthouse (ou Busca) para as ferramentas dela; Elementos para as outras (o alvo precisa estar à vista).
     const naBusca = FERRAMENTAS_DA_BUSCA.includes(ferramenta.id);
     const naMedicao = FERRAMENTAS_DA_MEDICAO.includes(ferramenta.id);
-    setAba(
+    if (!composta || area === "snippet") setAba(
       ferramenta.id === "lighthouse"
         ? "lighthouse"
         : naBusca
@@ -1648,6 +1703,45 @@ export function JogoFase({
     </AlvoFerramenta>
   ) : null;
 
+  /** O palco da memória (fase de programa): a tela da fase, ou a área palco de uma fase composta. */
+  const telaPalco = fase.programa ? (
+    <AlvoFerramenta
+      ids={["palco-memoria"]}
+      marcador="palco-memoria"
+      aoAbrirCard={abrirCard}
+      classeMarcador="right-3 top-3"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
+    >
+      <PalcoMemoria
+        foto={fotoNoPalco}
+        anterior={fotoAnteriorNoPalco}
+        passo={passoNoPalco}
+        erro={programa.ultimo?.erro ?? null}
+        arvores={estruturas.arvores}
+        contador={
+          estruturas.contador && (
+            <AlvoFerramenta ids={["contador-passos"]} marcador="contador-passos" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
+              <ContadorPassos passos={estruturas.contador.passos} />
+            </AlvoFerramenta>
+          )
+        }
+      />
+      {depurador.ativo && <AvisoPausado depurador={depurador} />}
+      {comLinhaDoTempo && pausaNoPalco === null && (
+        <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
+          <LinhaDoTempo
+            passos={passosDoRastro}
+            indice={indicePasso}
+            aoMudar={irParaPasso}
+            codigo={programa.ultimo?.codigo ?? ""}
+            cortado={programa.ultimo?.rastroCortado ?? false}
+            totalPassos={programa.ultimo?.totalPassos ?? 0}
+          />
+        </AlvoFerramenta>
+      )}
+    </AlvoFerramenta>
+  ) : null;
+
   const painelDevtools = (
           <AlvoFerramenta
             ids={["painel"]}
@@ -2111,6 +2205,32 @@ export function JogoFase({
           }
         />
       )}
+      {composta ? (
+        <TelaComposta
+          layout={layout}
+          areas={areas}
+          conteudo={{
+            plano: ordenar.ativo ? (
+              <AlvoFerramenta ids={["quadro-de-passos"]} marcador="quadro-de-passos" aoAbrirCard={abrirCard} classeMarcador="right-2 top-2" className="flex min-h-0 flex-1 flex-col">
+                <AreaPlano quadro={ordenar} toque={toque} />
+              </AlvoFerramenta>
+            ) : null,
+            snippet: painelDevtools,
+            palco: telaPalco,
+          }}
+          abaCelular={abaCelular}
+          aoTrocarAba={(area) => {
+            tocarEfeito("clique");
+            setAbaCelular(area);
+          }}
+          palcoAberto={palcoAberto}
+          aoAlternarPalco={() => {
+            tocarEfeito("clique");
+            setPalcoAberto((aberto) => !aberto);
+          }}
+          tecladoAberto={viewport.tecladoAberto}
+        />
+      ) : (
       <AlvoFerramenta ids={["sincronia"]} as="main" className={classesMain} ref={recipienteMovel}>
         <section
           aria-label="Painel"
@@ -2207,42 +2327,8 @@ export function JogoFase({
                 aoApagarFio={circuito.apagarFio}
               />
             </AlvoFerramenta>
-          ) : fase.programa ? (
-            <AlvoFerramenta
-              ids={["palco-memoria"]}
-              marcador="palco-memoria"
-              aoAbrirCard={abrirCard}
-              classeMarcador="right-3 top-3"
-              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-borda bg-codigo-fundo shadow-[0_8px_0_var(--cor-sombra)]"
-            >
-              <PalcoMemoria
-                foto={fotoNoPalco}
-                anterior={fotoAnteriorNoPalco}
-                passo={passoNoPalco}
-                erro={programa.ultimo?.erro ?? null}
-                arvores={estruturas.arvores}
-                contador={
-                  estruturas.contador && (
-                    <AlvoFerramenta ids={["contador-passos"]} marcador="contador-passos" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
-                      <ContadorPassos passos={estruturas.contador.passos} />
-                    </AlvoFerramenta>
-                  )
-                }
-              />
-              {depurador.ativo && <AvisoPausado depurador={depurador} />}
-              {comLinhaDoTempo && pausaNoPalco === null && (
-                <AlvoFerramenta ids={["linha-do-tempo"]} marcador="linha-do-tempo" aoAbrirCard={abrirCard} classeMarcador="right-2 -top-2.5">
-                  <LinhaDoTempo
-                    passos={passosDoRastro}
-                    indice={indicePasso}
-                    aoMudar={irParaPasso}
-                    codigo={programa.ultimo?.codigo ?? ""}
-                    cortado={programa.ultimo?.rastroCortado ?? false}
-                    totalPassos={programa.ultimo?.totalPassos ?? 0}
-                  />
-                </AlvoFerramenta>
-              )}
-            </AlvoFerramenta>
+          ) : telaPalco ? (
+            telaPalco
           ) : (
           <AlvoFerramenta
             ids={["previa"]}
@@ -2390,6 +2476,7 @@ export function JogoFase({
           )}
         </section>
       </AlvoFerramenta>
+      )}
       {movel ? (
         <MascoteFlutuante
           expressao={falaNaTela.expressao}

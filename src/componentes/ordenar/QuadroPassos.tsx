@@ -151,7 +151,20 @@ function ListaDoPlano({ quadro, destino, codigo, vazio }: { quadro: QuadroOrdena
 }
 
 /** A tela: o problema, o plano (ou os passos grandes) e, com `rodar`, o resultado. */
-export function PlanoDePassos({ quadro, linhas, ocupado, toque }: { quadro: QuadroOrdenar; linhas: readonly LinhaConsole[]; ocupado: boolean; toque: boolean }) {
+export function PlanoDePassos({
+  quadro,
+  linhas,
+  ocupado,
+  toque,
+  acoes,
+}: {
+  quadro: QuadroOrdenar;
+  linhas: readonly LinhaConsole[];
+  ocupado: boolean;
+  toque: boolean;
+  /** (Fase composta) Botões no cabeçalho do plano, como o "Levar o plano pro código". */
+  acoes?: ReactNode;
+}) {
   const dados = quadro.dados;
   if (!dados) return null;
   const codigo = dados.rodar === true;
@@ -165,6 +178,7 @@ export function PlanoDePassos({ quadro, linhas, ocupado, toque }: { quadro: Quad
           <p className="text-[11px] font-black uppercase tracking-wide text-texto-suave">{dados.modo === "agrupar" ? "Os passos grandes" : "O plano"}</p>
           <p className="truncate text-sm font-black text-primaria">{dados.problema}</p>
         </div>
+        {acoes}
         {codigo && (
           <button
             type="button"

@@ -40,6 +40,7 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
+import { quadroDaFase } from "./composicao";
 import * as quadro from "./ordenar/modelo";
 import { alternarPonto, faseComDepurador, linhaDoPontoDeParada, normalizarExpressao, type PausaDepurador, primeiraPausa, proximaPausa } from "./depurador";
 
@@ -146,7 +147,7 @@ export function criarSimulacao(fase: Fase) {
   };
 
   // Ordenar passos: as mesmas funções do modelo que o quadro da tela usa.
-  const dadosOrdenar = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+  const dadosOrdenar = quadroDaFase(fase);
   let ordenar: quadro.EstadoOrdenar | null = dadosOrdenar ? quadro.estadoInicialOrdenar(dadosOrdenar) : null;
 
   const nucleo = criarNucleoPainel({

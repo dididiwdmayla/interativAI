@@ -1,7 +1,8 @@
 "use client";
 
 /*
- * O quadro de uma fase ordenar-passos: onde está cada cartão (a fonte única
+ * O quadro de uma fase ordenar-passos (ou a área plano de uma fase
+ * composta): onde está cada cartão (a fonte única
  * de verdade, como o circuito na bancada), o arrastar (mouse e toque, pelo
  * mesmo caminho dos Pointer Events), o "toque no cartão e depois no lugar"
  * e o Rodar do plano de código. As mudanças passam pelo modelo
@@ -12,6 +13,7 @@ import { type PointerEvent as EventoPonteiro, useCallback, useEffect, useRef, us
 import type { Fase } from "@/conteudo/tipos";
 import type { Barramento } from "@/motor/barramento";
 import * as modelo from "@/motor/ordenar/modelo";
+import { quadroDaFase } from "@/motor/composicao";
 import type { Programa } from "./usePrograma";
 
 type Opcoes = {
@@ -62,7 +64,8 @@ function alvoNoPonto(x: number, y: number, arrastado: string): AlvoSoltar | null
 }
 
 export function useOrdenar({ fase, barramento, salvo, programa, aoUsar }: Opcoes) {
-  const dados = fase.tipo === "ordenar-passos" ? fase.ordenar : null;
+  // O quadro de uma fase ordenar-passos ou o plano de uma fase composta (área plano).
+  const dados = quadroDaFase(fase);
   const [estado, setEstado] = useState<modelo.EstadoOrdenar | null>(() => (dados ? estadoValido(dados, salvo) : null));
   /** O mesmo estado, lido na hora (as soluções fazem várias ações seguidas). */
   const atual = useRef(estado);
