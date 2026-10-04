@@ -17,6 +17,11 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"entender-problema": {"nome": "Entender o problema", "resumo": "Separar os dados de entrada, a resposta pedida e exemplos antes de programar.", "temas": ["logica"]},
+"decompor-problema": {"nome": "Decompor um problema", "resumo": "Dividir um pedido grande em partes pequenas que dá para resolver separadamente.", "temas": ["logica"]},
+"plano-comentado": {"nome": "Plano no código", "resumo": "Guardar o plano em comentários para conferir qual ideia cada linha realiza.", "temas": ["logica", "ferramentas"]},
+"exemplos-de-teste": {"nome": "Exemplos de teste", "resumo": "Escrever entradas e saídas esperadas antes de conferir a função.", "temas": ["logica", "ferramentas"]},
+
   // Unidade 1: o site é seu
   elemento: {
     nome: "Elemento",

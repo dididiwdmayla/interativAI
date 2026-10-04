@@ -246,3 +246,11 @@ completo da U1, U2, U3 ou U4. Jornada pelo mapa, meta, prática e
 desafio; semeia o conteúdo anterior pelos dados publicados. Confere vagões,
 fichas, referências compartilhadas, chamadas de map/filter na linha do tempo
 e negativas pedagógicas. As doze jornadas estão em `todos.mjs`.
+
+### Zona Resolvendo problemas
+
+`node testes/resolvendo.mjs [desktop|retrato|paisagem] [1|2|3|4]` percorre
+o mapa, a meta, os cartões, as previsões, o código e os casos pela UI real.
+Semeia apenas unidades anteriores e apresentações de ferramentas; não usa
+as soluções sintéticas do lab. Confere as bordas contra função constante,
+a insuficiência de um caso feliz e o progresso concluído na ilha.

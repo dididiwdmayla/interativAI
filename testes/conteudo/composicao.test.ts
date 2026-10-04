@@ -41,8 +41,8 @@ describe("composição de áreas: o formato", () => {
     expect(semPagina(FASE_DEMO_RESOLVER)).toBe(true);
   });
 
-  it("nenhuma fase publicada declara áreas: o que já existe usa a tela de sempre", () => {
-    expect(FASES.filter((fase) => faseComposta(fase)).map((fase) => fase.id)).toEqual([]);
+  it("as zonas anteriores à resolução preservam suas telas publicadas", () => {
+    expect(FASES.filter((fase) => !fase.unidadeId.startsWith("logica-resolvendo-problemas-") && faseComposta(fase)).map((fase) => fase.id)).toEqual([]);
   });
 });
 

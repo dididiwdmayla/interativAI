@@ -251,6 +251,12 @@
       "logica-listas-e-objetos-u4-f2",
       "logica-listas-e-objetos-u4-f3",
       "logica-listas-e-objetos-u4-f4"
+    ],
+    "logica-resolvendo-problemas-u1": [
+      "logica-resolvendo-problemas-u1-f1",
+      "logica-resolvendo-problemas-u1-f2",
+      "logica-resolvendo-problemas-u1-f3",
+      "logica-resolvendo-problemas-u1-f4"
     ]
   },
   "fases": {
@@ -1499,9 +1505,49 @@
         "total",
         "filtrar"
       ]
+    },
+    "logica-resolvendo-problemas-u1-f1": {
+      "objetivos": [
+        "entradas",
+        "entender-sozinho"
+      ]
+    },
+    "logica-resolvendo-problemas-u1-f2": {
+      "objetivos": [
+        "preparar",
+        "prever",
+        "completar"
+      ]
+    },
+    "logica-resolvendo-problemas-u1-f3": {
+      "objetivos": [
+        "plano-guiado",
+        "plano-sozinho",
+        "levar",
+        "codigo-guiado",
+        "codigo-sozinho",
+        "teste-guiado",
+        "teste-sozinho"
+      ]
+    },
+    "logica-resolvendo-problemas-u1-f4": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
     }
   },
   "itensRevisao": [
+    "entender-problema-1",
+    "entender-problema-2",
+    "decompor-problema-1",
+    "decompor-problema-2",
+    "plano-comentado-1",
+    "plano-comentado-2",
+    "exemplos-de-teste-1",
+    "exemplos-de-teste-2",
     "lista-objetos-js-1",
     "lista-objetos-js-2",
     "somar-campo-js-1",
