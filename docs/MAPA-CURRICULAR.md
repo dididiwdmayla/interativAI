@@ -712,18 +712,21 @@ achar um número entre 1 e 1000 (no Console, com um contador).
 
 ### Zona Estruturas de dados (`estruturas-de-dados`)
 
-Missão de campo: no Console, simular o desfazer de um editor com uma
-pilha (`push` a cada letra, `pop` no desfazer).
+Missão de campo: no Console de qualquer site, usar uma lista como pilha
+com `push`/`pop` e outra como fila com `push`/`shift`; comparar quem sai.
 
-- **U1. Pilhas e filas** (`logica-estruturas-de-dados-u1`): pilha (o
-  desfazer do painel Elementos) e fila (a fila de impressão), com `push`,
-  `pop` e `shift` (os vagões entram e saem pelo lado certo no palco;
-  `formaDaEstrutura`).
-- **U2. Dicionários** (`logica-estruturas-de-dados-u2`): `Map` (`set`,
-  `get`, `has`), quando usar no lugar de lista (achar sem percorrer).
-- **U3. Árvores** (`logica-estruturas-de-dados-u3`, "Ver como árvore"
-  no palco, `arvore-palco`): nós e filhos, percorrer, e o DOM da aba Elementos
-  como árvore.
+- **U1. Pilha** (`logica-estruturas-de-dados-u1`): desfazer, último a
+  entrar sai primeiro, vagões pelo mesmo lado, vazio e um item.
+- **U2. Fila** (`logica-estruturas-de-dados-u2`): primeiro a entrar sai
+  primeiro, vagões por lados opostos; esquina com pedestres e semáforo.
+  `shift` desloca o trem; índice evita esse trabalho escondido no gráfico.
+- **U3. Dicionário (Map)** (`logica-estruturas-de-dados-u3`): `set`,
+  `get`, `has`, atualização e ausência; objeto para campos de uma ficha,
+  Map para pares dinâmicos. Umidade por canteiro na estufa; comparar
+  `includes` e `Map.has`, incluindo a montagem do mapa.
+- **U4. Árvore** (`logica-estruturas-de-dados-u4`): raiz, nós, filhos e
+  folhas, "Ver como árvore" no palco, casa com cômodos e lâmpadas;
+  percurso recursivo e ponte com a árvore DOM da Ilha Sites.
 
 ### Zona Programa de verdade (`programa-de-verdade`)
 

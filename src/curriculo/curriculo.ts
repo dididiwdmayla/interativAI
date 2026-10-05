@@ -507,20 +507,26 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         unidades: [
           {
             id: "logica-estruturas-de-dados-u1",
-            titulo: "Pilhas e filas",
-            meta: "Usar pilhas e filas, e reconhecer as duas no desfazer e na fila de impressão.",
+            titulo: "Pilha",
+            meta: "Desfazer ações retirando primeiro o último item que entrou.",
             temas: ["dados", "logica"],
           },
           {
             id: "logica-estruturas-de-dados-u2",
-            titulo: "Dicionários",
-            meta: "Guardar pares de chave e valor num Map e achar o que precisa sem percorrer tudo.",
+            titulo: "Fila",
+            meta: "Atender na ordem de chegada e evitar o trabalho escondido de shift em listas enormes.",
             temas: ["dados", "logica", "desempenho"],
           },
           {
             id: "logica-estruturas-de-dados-u3",
-            titulo: "Árvores",
-            meta: "Percorrer uma árvore e perceber que o DOM, a árvore de elementos do F12, é uma delas.",
+            titulo: "Dicionário (Map)",
+            meta: "Guardar pares num Map e comparar muitas consultas has com includes.",
+            temas: ["dados", "logica", "desempenho"],
+          },
+          {
+            id: "logica-estruturas-de-dados-u4",
+            titulo: "Árvore",
+            meta: "Percorrer nós e filhos com recursão e reconhecer o DOM como árvore.",
             temas: ["dados", "logica"],
           },
         ],

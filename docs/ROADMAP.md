@@ -584,14 +584,14 @@ núcleo comum.
 
 ### Em andamento
 
+- Zona Estruturas de dados em produção na branch `codex/estruturas-dados`,
+  após o merge do custo escondido (PR #33).
+
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
 
 ### Pendências
 
-- **Estruturas de dados, na retomada (rodada 31):** separar pilha e fila
-  em unidades distintas (quatro no pedido; três no mapa atual, ainda não
-  publicadas). O bloqueio do custo de `shift` saiu na rodada 32.
 - **Custo escondido (rodada 32), para depois:**
   - Fora do modelo (contam 0 escondidos): `flat`, `Object.assign`,
     `structuredClone`, `JSON.stringify`/`parse`, `slice`/`padStart` de

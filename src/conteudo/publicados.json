@@ -293,6 +293,11 @@
       "logica-algoritmos-essenciais-u4-f2",
       "logica-algoritmos-essenciais-u4-f3"
     ],
+    "logica-estruturas-de-dados-u1": [
+      "logica-estruturas-de-dados-u1-f1",
+      "logica-estruturas-de-dados-u1-f2",
+      "logica-estruturas-de-dados-u1-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1741,6 +1746,23 @@
         "testes"
       ]
     },
+    "logica-estruturas-de-dados-u1-f1": {
+      "objetivos": [
+        "pilha-guiado",
+        "pilha-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u1-f2": {
+      "objetivos": [
+        "vazio-guiado",
+        "vazio-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u1-f3": {
+      "partes": [
+        "codigo"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1763,6 +1785,10 @@
     }
   },
   "itensRevisao": [
+    "pilha-js-1",
+    "pilha-js-2",
+    "pilha-vazia-1",
+    "pilha-vazia-2",
     "custo-em-passos-1",
     "custo-em-passos-2",
     "crescimento-dos-passos-1",

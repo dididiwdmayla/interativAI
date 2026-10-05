@@ -17,6 +17,9 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"pilha-js": {"nome": "Pilha", "resumo": "Numa pilha, o último item que entrou é o primeiro a sair; push e pop usam o mesmo lado.", "temas": ["dados", "logica"]},
+"pilha-vazia": {"nome": "Pilha vazia", "resumo": "Antes de retirar de uma pilha, confira length; pop no vazio devolve undefined.", "temas": ["dados", "logica"]},
+
 "custo-em-passos": {"nome": "Custo em passos", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
 "crescimento-dos-passos": {"nome": "Crescimento dos passos", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
 "evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},

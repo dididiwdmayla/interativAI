@@ -1,0 +1,631 @@
+{
+  "1": [
+    {
+      "id": "logica-estruturas-de-dados-u1-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u1",
+      "titulo": "O último desfaz primeiro",
+      "conceitos": [
+        "pilha-js"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A cozinha guarda ajustes de brilho no histórico. push põe no fim; pop retira pelo mesmo lado: o direito no palco.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Pilha: último a entrar, primeiro a sair. Fila: primeiro a entrar, primeiro a sair. O desfazer usa pilha.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "pilha-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Guarde 20 e 80 com push no historico vazio. Retire com pop, acenda luz com o brilho retirado.",
+            "toque": "Guarde 20 e 80 com push no historico vazio. Retire com pop, acenda luz com o brilho retirado."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "formaDaEstrutura",
+                "nome": "historico",
+                "forma": "pilha"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "historico",
+                "valor": [
+                  20
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "saiu",
+                "valor": 80
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "luz",
+                "propriedade": "brilho",
+                "valor": 80
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "luz",
+                "propriedade": "ligada",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Declare [], faça dois push e guarde o retorno de pop. luz.brilho recebe esse número.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Declare [], faça dois push e guarde o retorno de pop. luz.brilho recebe esse número."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const historico = [];\nhistorico.push(20);\nhistorico.push(80);\nconst saiu = historico.pop();\nluz.brilho = saiu;\nluz.ligar();"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Os vagões entraram e saíram à direita. pop devolveu o último: 80.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const historico = [];\nhistorico.push(20);\nhistorico.push(80);\nconst saiu = historico.pop();\nluz.brilho = saiu;\nluz.ligar();"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "pilha-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Guarde 15, 40 e 90; retire duas vezes. Acenda a luz com o segundo brilho retirado.",
+            "toque": "Guarde 15, 40 e 90; retire duas vezes. Acenda a luz com o segundo brilho retirado."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "formaDaEstrutura",
+                "nome": "historico",
+                "forma": "pilha"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "historico",
+                "valor": [
+                  15
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "saiu",
+                "valor": 90
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "anterior",
+                "valor": 40
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "luz",
+                "propriedade": "brilho",
+                "valor": 40
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "A primeira retirada desfaz 90; a segunda chega ao ajuste anterior."
+          },
+          "falaAoConcluir": {
+            "texto": "O primeiro ajuste fica no fundo da pilha.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const historico = [];\nhistorico.push(15);\nhistorico.push(40);\nhistorico.push(90);\nconst saiu = historico.pop();\nconst anterior = historico.pop();\nluz.brilho = anterior;\nluz.ligar();"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Qual vagão sai do primeiro pop após push(15), push(40), push(90)?",
+            "opcoes": [
+              "15",
+              "40",
+              "90"
+            ],
+            "correta": 2,
+            "explicacao": "Sai 90: entrou por último."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou.",
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "pilha-cozinha",
+        "titulo": "Desfazer a luz da cozinha",
+        "ambiente": "cozinha",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "cozinha",
+            "x": 80,
+            "y": 45
+          },
+          {
+            "peca": "janela",
+            "x": 240,
+            "y": 25
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "luz",
+            "tipo": "lampada",
+            "x": 160,
+            "y": 25
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-estruturas-de-dados-u1-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u1",
+      "titulo": "Desfazer sem histórico",
+      "conceitos": [
+        "pilha-vazia"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "pop em [] devolve undefined. Nosso editor combina outra resposta: desfazer(lista) devolve null se estiver vazia.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O if vem antes do pop. Um item ainda pode sair normalmente; a função devolve o que retirou.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "vazio-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie desfazer(lista): null no vazio, último item nas outras listas. Chame com [\"pintar\"].",
+            "toque": "Crie desfazer(lista): null no vazio, último item nas outras listas. Chame com [\"pintar\"]."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "desfazer",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": null
+                  },
+                  {
+                    "args": [
+                      [
+                        "pintar"
+                      ]
+                    ],
+                    "esperado": "pintar"
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "r",
+                "valor": "pintar"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Teste length===0 e devolva null; caso contrário devolva lista.pop().",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Teste length===0 e devolva null; caso contrário devolva lista.pop()."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function desfazer(lista) {\n  if (lista.length === 0) return null;\n  return lista.pop();\n}\nconst r = desfazer([\"pintar\"]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Vazio é uma borda, não um erro do editor.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function desfazer(lista) {\n  if (lista.length === 0) return null;\n  return lista.pop();\n}\nconst r = desfazer([\"pintar\"]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "vazio-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Teste desfazer com [\"mover\", \"apagar\"]. Guarde o retorno em r e confira também vazio e um item.",
+            "toque": "Teste desfazer com [\"mover\", \"apagar\"]. Guarde o retorno em r e confira também vazio e um item."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "desfazer",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": null
+                  },
+                  {
+                    "args": [
+                      [
+                        "x"
+                      ]
+                    ],
+                    "esperado": "x"
+                  },
+                  {
+                    "args": [
+                      [
+                        "mover",
+                        "apagar"
+                      ]
+                    ],
+                    "esperado": "apagar"
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "r",
+                "valor": "apagar"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Retire pelo fim e devolva o valor retirado."
+          },
+          "falaAoConcluir": {
+            "texto": "O contrato da função cobre vazio, um e vários itens.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function desfazer(lista) {\n  if (lista.length === 0) return null;\n  return lista.pop();\n}\nconst r = desfazer([\"mover\", \"apagar\"]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "desfazer([]) com o if do editor deve devolver o quê?",
+            "opcoes": [
+              "null",
+              "undefined",
+              "Uma lista com null"
+            ],
+            "correta": 0,
+            "explicacao": "null é a resposta combinada pelo editor."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou."
+    },
+    {
+      "id": "logica-estruturas-de-dados-u1-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-estruturas-de-dados-u1",
+      "titulo": "A volta do passeio",
+      "conceitos": [],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js",
+        "pilha-vazia"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js",
+        "pilha-vazia"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "programa": {
+        "snippet": {
+          "nome": "desafio.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Crie inverter(lista): devolva os pontos na ordem de volta, sem perder repetidos; vazio vira [].",
+          "expressao": "curioso"
+        }
+      ],
+      "partes": [
+        {
+          "id": "codigo",
+          "descricao": "Crie inverter(lista): devolva os pontos na ordem de volta, sem perder repetidos; vazio vira [].",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "inverter",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        "ponte"
+                      ]
+                    ],
+                    "esperado": [
+                      "ponte"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        "a",
+                        "b",
+                        "a"
+                      ]
+                    ],
+                    "esperado": [
+                      "a",
+                      "b",
+                      "a"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        "praça",
+                        "ponte",
+                        "museu"
+                      ]
+                    ],
+                    "esperado": [
+                      "museu",
+                      "ponte",
+                      "praça"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "rota",
+                "valor": [
+                  "museu",
+                  "ponte",
+                  "praça"
+                ]
+              }
+            ]
+          },
+          "revisarEm": "logica-estruturas-de-dados-u1-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function inverter(lista) {\n  const pilha = [];\n  for (const item of lista) pilha.push(item);\n  const resposta = [];\n  while (pilha.length > 0) resposta.push(pilha.pop());\n  return resposta;\n}\nconst rota = inverter([\"praça\", \"ponte\", \"museu\"]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "A regra funcionou com vazio, um item e caminhos diferentes. Sua estrutura atende o novo pedido.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "No Console real, compare push/pop e push/shift com os mesmos itens.",
+        "expressao": "feliz"
+      },
+      "missaoDeCampo": "No Console de qualquer site, use uma lista como pilha com push/pop e outra como fila com push/shift. Veja quem sai primeiro."
+    }
+  ]
+}
