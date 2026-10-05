@@ -27,6 +27,40 @@ raciocínio não expostas para confirmação nesta sessão.
   forno antigo mantêm o rastro anterior; o teste de tipo inexistente
   passou a usar teletransporte, pois geladeira agora existe.
 
+### Etapa 2 — ambientes, missões e revisão visual
+
+- Garagem com carro que aguarda a abertura e libera o sensor ao entrar;
+  cozinha com porta, aviso pulsante e timer do forno; esquina com sinais
+  distintos para carro/pedestre e travessia; estufa com umidade gradual,
+  aspersor e transição visual de dia/noite.
+- Seis peças novas reutilizáveis: céu, garagem, cozinha, rua, estrutura
+  de estufa e canteiro. Tokens adicionais nos três temas.
+- Bancada `lab-cenas-novas-u1`, com quatro fases: uma missão por cena.
+  Essa composição mantém o contrato existente de uma cena por fase.
+  Todos usam `variosCenarios` e `porLinha`, com soluções testadas e
+  negativas contra horários decorados, contagem acumulada indevida,
+  botão ignorado, limite inclusivo incorreto e irrigação à noite.
+- Mostruário `/lab/cenas` com antes/durante/depois. 36 PNGs da execução
+  real das missões, em retrato, densidade 3×, nos três temas; índice em
+  `docs/capturas/cenas-novas/README.md`.
+- Jornadas novas nos três layouts: fichas e Por dentro, estados e atores,
+  cenários alternativos, movimento reduzido, temas e console limpo.
+- Verificações: 17.803 testes em 45 arquivos passaram; os 15 testes
+  específicos foram repetidos após dar tolerância de 100 ms à reação
+  do alarme e ao início da rega, preservando os limites estritos de
+  2 s e umidade 30. Build e lint passaram; bateria de conteúdo em
+  produção passou (mapa, explorar, publicar e revisão).
+- Na revisão pelo navegador, uma prateleira da estufa com altura muito
+  pequena produzia retângulos negativos. Corrigidos os dados, com novo
+  teste da estufa e console limpo.
+- Bateria completa em andamento; duas jornadas de Recursão deram timeout
+  esperando o erro no palco sob execução paralela. Diagnóstico isolado
+  mostrou o RangeError correto; retestes pendentes ao fim da bateria.
+
+Decisões: umidade é entrada de teste, sem modelo físico de absorção;
+alarme tem aviso visual pulsante, sem áudio novo; semáforo grande controla
+carros, e o sinal menor corresponde à passagem dos pedestres.
+
 ## Rodada 30: zona Algoritmos essenciais
 
 Branch `conteudo/algoritmos-essenciais`, a partir de

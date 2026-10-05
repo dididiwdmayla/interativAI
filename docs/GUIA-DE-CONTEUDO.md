@@ -1838,6 +1838,19 @@ Cada tipo tem a ficha no `catalogo.ts` (o aluno abre tocando nele):
 | `ventilador` | `desligar()` | `velocidade` (0 a 3, troca com `=`) |
 | `relogio` | nenhum | `hora` (do mundo: a hora cheia, de 0 a 23; cada hora passa em 2 s; `inicial: { hora }` é a hora do começo) |
 | `campainha` | `tocar()` | `toques` (quantas vezes tocou) |
+| `sensorCarro` | nenhum | `temCarro` (entrada do mundo; o ator libera ao terminar a entrada) |
+| `geladeira` | nenhum | `portaAberta` (entrada do mundo) |
+| `alarme` | `tocar()`, `parar()` | `tocando` (aviso visual pulsante; sem áudio novo) |
+| `semaforo` | `mudar("verde")`, `mudar("amarelo")`, `mudar("vermelho")` | `cor` (para carros; o sinal menor de pedestre libera no vermelho) |
+| `botao` | nenhum | `pressionado` (entrada momentânea; soltar exige evento false) |
+| `aspersor` | `ligar()`, `desligar()` | `ligado` |
+| `sensorUmidade` | nenhum | `valor` (entrada numérica de 0 a 100) |
+| `sensorDia` | nenhum | `dia` (entrada booleana, também controla o período visual com `periodoPor`) |
+
+O forno também aceita `assar(ms)` (1 a 60.000): liga e desliga sozinho
+quando o timer acaba; `restante` informa os milissegundos restantes.
+`ligar()` ou `desligar()` cancelam o timer. Os comandos antigos mantêm o
+comportamento anterior.
 
 - `esperar(ms)` avança o relógio da SIMULAÇÃO (não espera de verdade). Os
   sensores leem a linha do tempo no instante do relógio. Sem `esperar`,
@@ -1954,6 +1967,44 @@ padrão visual:
 4. **Conferir**: o `/lab/cenas` (a peça nos três temas, de dia e de noite)
    e uma fase de laboratório usando a peça; `npm run testar:conteudo`
    (a regra `composicao` aceita a peça nova só depois do passo 1).
+
+### Ambientes novos do kit
+
+Mostruário: `/lab/cenas`, antes, durante e depois em Doce, Fliperama e
+Segredo. Bancada `lab-cenas-novas-u1`: quatro fases, uma por missão (a
+cena pertence à fase, não a um objetivo). Os dados estão em
+`src/conteudo/laboratorio/cenasNovas.ts`; missões e soluções em
+`bancadaCenasNovas.ts`.
+
+| Peça | Tamanho padrão | Uso |
+| --- | --- | --- |
+| `ceu` | 320 × 160 | Sol/nuvens de dia; lua/estrelas à noite |
+| `garagem` | 270 × 142 | Fachada, telhado, bancada e mangueira; portão é dispositivo separado |
+| `cozinha` | 180 × 110 | Armários, azulejos, bancada, pia e utensílios |
+| `rua` | 320 × 100 | Calçadas, faixa de pedestres e marcas da pista |
+| `estufa` | 284 × 162 | Estrutura de vidro, reflexos e janela de ventilação |
+| `canteiro` | 124 × 50 | Terra e mudas; variante `tomates` com frutos |
+
+Os dispositivos novos usam o canto superior esquerdo como referência.
+Tamanhos: geladeira 52 × 88, semáforo 62 × 108 (inclui o sinal de
+pedestre), umidade 30 × 43, demais com caixa de 30 × 30, multiplicados
+por `escala`. Carros e pessoas são atores; x/y marcam o chão sob eles.
+Para escolher cores, há tokens adicionais `--cor-cena-sinal-vermelho`,
+`--cor-cena-sinal-amarelo`, `--cor-cena-sinal-verde` e `--cor-cena-agua`
+nos três temas.
+
+As missões cobrem horários distintos de chegada; porta aberta por tempo
+curto, exato e prolongado com reabertura; botão cedo/tarde/ausente;
+umidade gradual, amanhecer e terra úmida. `porLinha` se soma ao
+`validador` comum de `variosCenarios`: condições específicas de horário
+ficam em `porLinha`. A estufa lê umidade de uma linha do tempo de teste;
+a água desenhada não simula uma equação física de absorção da terra.
+
+Capturas reproduzíveis, com o jogo em produção no ar:
+`CAPTURAS=1 node testes/cenas-novas.mjs retrato` (usa `URL_JOGO`).
+Saída em `docs/capturas/cenas-novas/`: quatro ambientes × três temas ×
+três estados. O modo reduzido mantém gotas fixas e remove o pulso; atores
+e portão mudam de posição sem deslocamento contínuo.
 
 ### 30.8 Entradas genéricas e atores (extensão do motor)
 

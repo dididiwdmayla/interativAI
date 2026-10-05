@@ -27,14 +27,14 @@ export const FASE_INICIAL = "sites-elementos-u1-f1";
  * Abre o jogo. Sem `rota`, vai direto para a fase atual do progresso (ou a
  * primeira), em /fase/<id>; o mundo é "/" e a ilha, /ilha/<id>.
  */
-export async function abrir({ largura = 1440, altura = 900, toque = false, progresso = null, rota, esperar = "iframe" } = {}) {
+export async function abrir({ largura = 1440, altura = 900, toque = false, escala = 1, progresso = null, rota, esperar = "iframe" } = {}) {
   const destino = rota ?? `/fase/${progresso?.faseAtual ?? FASE_INICIAL}`;
   const navegador = await chromium.launch();
   const contexto = await navegador.newContext({
     viewport: { width: largura, height: altura },
     hasTouch: toque,
     isMobile: toque,
-    deviceScaleFactor: 1,
+    deviceScaleFactor: escala,
   });
   // Só no Playwright: cada worker do executor (inclusive após recarga/timeout)
   // recebe o preparo determinístico. A página do jogo mantém seu relógio real.

@@ -222,7 +222,7 @@ function Forno({ dispositivo, estado }: Props) {
       <circle cx={27} cy={9} r={1.6} fill={ligado ? cor("quente") : cor("contorno")} opacity={ligado ? 1 : 0.35} />
       <rect x={33} y={5.5} width={24} height={7} rx={1.5} fill={cor("letreiro")} />
       <text x={45} y={11} textAnchor="middle" fontSize={6} fontWeight={800} fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" fill={cor("letreiro-aceso")}>
-        {`${temperatura}°`}
+        {Number(estado[dispositivo.id]?.restante ?? 0) > 0 ? `${Math.ceil(Number(estado[dispositivo.id].restante) / 1000)}s` : `${temperatura}°`}
       </text>
       {/* A porta com o vidro: o calor acende lá dentro */}
       <rect x={6} y={18} width={52} height={24} rx={3} fill={cor("metal-sombra")} {...CONTORNO} />

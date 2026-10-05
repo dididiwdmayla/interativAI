@@ -1,0 +1,6 @@
+[
+  "while (true) {\n  if (sensorCarro.temCarro) {\n    portao.abrir();\n    luz.ligar();\n  } else {\n    portao.fechar();\n    luz.desligar();\n  }\n  esperar(100);\n}",
+  "let abertaPor = 0;\nforno.assar(3000);\nwhile (true) {\n  if (geladeira.portaAberta) {\n    if (abertaPor > 2000) alarme.tocar();\n    abertaPor += 100;\n  } else {\n    abertaPor = 0;\n    alarme.parar();\n  }\n  esperar(100);\n}",
+  "while (true) {\n  let verdePor = 0;\n  while (!botao.pressionado && verdePor < 5000) {\n    esperar(100);\n    verdePor += 100;\n  }\n  semaforo.mudar(\"amarelo\");\n  esperar(1000);\n  semaforo.mudar(\"vermelho\");\n  esperar(2500);\n  semaforo.mudar(\"verde\");\n}",
+  "while (true) {\n  if (sensorUmidade.valor < 30 && sensorDia.dia) {\n    aspersor.ligar();\n  } else {\n    aspersor.desligar();\n  }\n  esperar(100);\n}"
+]

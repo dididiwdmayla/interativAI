@@ -21,6 +21,7 @@ export type ValorCena = boolean | number | string;
 
 /** As peças do kit que montam o cenário (decoração: o código não mexe nelas). */
 export const PECAS_CENARIO = [
+  "ceu", "garagem", "cozinha", "rua", "estufa", "canteiro",
   "parede",
   "piso",
   "janela",

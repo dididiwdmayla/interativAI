@@ -1,3 +1,4 @@
+import { Ceu, Garagem, Cozinha, Rua, Estufa, Canteiro } from "./AmbientesNovos";
 /*
  * As peças do cenário (decoração: o código não mexe nelas). Cada peça
  * desenha a partir do canto de cima à esquerda (x, y), com o tamanho padrão
@@ -9,6 +10,7 @@ import { CONTORNO, cor, SombraNoChao } from "./estilo";
 
 /** O tamanho padrão de cada peça (largura x altura). */
 export const TAMANHO_PADRAO: Record<PecaCenario["peca"], [number, number]> = {
+  ceu: [320, 160], garagem: [270, 142], cozinha: [180, 110], rua: [320, 100], estufa: [284, 162], canteiro: [124, 50],
   parede: [320, 150],
   piso: [320, 50],
   janela: [64, 52],
@@ -370,6 +372,7 @@ function Vitrine({ x, y, l, a }: PropsPeca) {
 }
 
 const DESENHOS: Record<PecaCenario["peca"], (props: PropsPeca) => ReactNode> = {
+  ceu: Ceu, garagem: Garagem, cozinha: Cozinha, rua: Rua, estufa: Estufa, canteiro: Canteiro,
   parede: Parede,
   piso: Piso,
   janela: Janela,

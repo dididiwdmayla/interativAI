@@ -118,7 +118,7 @@ function Emissao({ dispositivo, estado, rastro, tempoMs, filtro }: { dispositivo
       <g transform={`translate(${x} ${y}) scale(${e})`}>
         <rect x={10} y={21} width={44} height={16} rx={2} fill={cor("quente")} opacity={calor * 0.85} />
         <text x={45} y={11} textAnchor="middle" fontSize={6} fontWeight={800} fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" fill={cor("letreiro-aceso")}>
-          {`${String(atual.temperatura ?? 25)}°`}
+          {Number(atual.restante ?? 0) > 0 ? `${Math.ceil(Number(atual.restante) / 1000)}s` : `${String(atual.temperatura ?? 25)}°`}
         </text>
       </g>
     );
@@ -208,6 +208,7 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
       </defs>
       <g clipPath={`url(#${id}-moldura)`}>
         {cenario}
+        <AtoresCena rastro={rastro} estado={estado} tempoMs={tempoMs} filtro={filtro} reduzido={reduzido} />
         {dados.dispositivos.map((dispositivo) => (
           <g key={dispositivo.id} data-desenho={dispositivo.id}>
             <DesenhoDispositivo reduzido={reduzido} dispositivo={dispositivo} estado={estado} rastro={rastro} tempoMs={tempoMs} filtro={filtro} />
@@ -216,7 +217,6 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
         {pessoas.map((pessoa) => (
           <PessoaCena key={pessoa.indice} pessoa={pessoa} tempoMs={tempoMs} />
         ))}
-        <AtoresCena rastro={rastro} estado={estado} tempoMs={tempoMs} filtro={filtro} reduzido={reduzido} />
         {/* A luz: o cone da lâmpada pendente e o brilho em volta. */}
         {luzes.map(({ dispositivo, brilho, centro, raio }) =>
           dispositivo.variante === "spot" ? null : (
