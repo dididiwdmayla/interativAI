@@ -27,6 +27,13 @@ raciocínio não expostas para confirmação nesta sessão.
   forno antigo mantêm o rastro anterior; o teste de tipo inexistente
   passou a usar teletransporte, pois geladeira agora existe.
 
+### Correção de fronteira da etapa 1
+
+A expiração do timer do forno é aplicada antes de uma nova ordem no mesmo
+instante. Assim, `assar(2000); esperar(2000); ligar()` mantém o forno
+ligado. Teste específico acrescentado e 57 testes afetados verdes
+(acontecimentos, motor anterior, composição e missões novas).
+
 ### Etapa 2 — ambientes, missões e revisão visual
 
 - Garagem com carro que aguarda a abertura e libera o sensor ao entrar;

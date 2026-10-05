@@ -330,7 +330,7 @@ export function estadoBaseNoTempo(rastro: RastroCena, tempoMs: number, opcoes: O
       estado[id].hora = horaNoTempo(Number(rastro.inicial[id]?.hora ?? 6), instante);
     }
     if (tipo === "forno") {
-      const trocas = [...(trocasDoForno[id] ?? [])];
+      const trocas: { tempoMs: number; ligado: boolean; automatica?: boolean }[] = [...(trocasDoForno[id] ?? [])];
       // Cada timer vale até a próxima operação no forno; a expiração também esfria.
       const comandos = rastro.mudancas.filter(m => m.dispositivo === id && mudancaVale(m, tempoMs, opcoes));
       for (let i = 0; i < comandos.length; i++) {
@@ -338,9 +338,10 @@ export function estadoBaseNoTempo(rastro: RastroCena, tempoMs: number, opcoes: O
         if (m.propriedade !== "desligaEm" || Number(m.valor) <= 0) continue;
         const fim = Number(m.valor);
         const cancelado = comandos.slice(i + 1).some(n => n.tempoMs < fim && (n.propriedade === "desligaEm" || n.propriedade === "ligado"));
-        if (!cancelado && (antes ? fim < tempoMs : fim <= tempoMs)) trocas.push({ tempoMs: fim, ligado: false });
+        if (!cancelado && (antes ? fim < tempoMs : fim <= tempoMs)) trocas.push({ tempoMs: fim, ligado: false, automatica: true });
       }
-      trocas.sort((a, b) => a.tempoMs - b.tempoMs);
+      // No instante da expiração, uma ordem explícita nova vence o timer antigo.
+      trocas.sort((a, b) => a.tempoMs - b.tempoMs || Number(b.automatica ?? false) - Number(a.automatica ?? false));
       if (trocas.length) estado[id].ligado = trocas.at(-1)!.ligado;
       estado[id].restante = Math.max(0, Number(estado[id].desligaEm ?? 0) - tempoMs);
       delete estado[id].desligaEm;

@@ -67,6 +67,11 @@ describe("acontecimentos genéricos e atores", () => {
       [{ em: 0, dispositivo: "umidade", propriedade: "valor", valor: NaN }],
     ]) expect(conferirLinhaDoTempo(dados, linha)).not.toEqual([]);
   });
+  it("uma ordem no instante exato da expiração vence o timer anterior", () => {
+    const r = rodar("forno.assar(2000); esperar(2000); forno.ligar(); esperar(100);");
+    expect(valorNoTempo(r, "forno", "ligado", 2100)).toBe(true);
+    expect(valorNoTempo(r, "forno", "temperatura", 2100)).toBe(109);
+  });
   it("o forno desliga com timer e começa a esfriar no instante certo", () => {
     const r = rodar("forno.assar(2000); esperar(3000);");
     expect(valorNoTempo(r, "forno", "ligado", 1999)).toBe(true);
