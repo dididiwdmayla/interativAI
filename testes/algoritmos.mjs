@@ -41,26 +41,39 @@ async function acoes(lista) {
  }
 }
 
-async function conferirRastro(habilidade){
+async function mostrarPalco(){
  if(toque)await fecharBalao(pagina);
  if(await pagina.locator('[data-composicao]').count()){
   if(modo==='paisagem')await area('palco');
   if(modo==='retrato'){if(await pagina.locator('[data-alternar-palco]').count()){if(!await pagina.locator('[data-area-trabalho="palco"]').isVisible())await tocar(pagina.locator('[data-alternar-palco]'));}else await area('palco');}
  }
+ await pagina.locator('[data-palco]').waitFor({state:'visible'});
+}
+
+async function conferirRastro(habilidade){
+ await mostrarPalco();
  const tempo=pagina.locator('[data-linha-do-tempo]');
  const total=Number(await tempo.getAttribute('data-total-passos'));
  conferir(total>2,'linha do tempo guarda o trabalho');
+ const barra=tempo.locator('[data-barra-tempo]');
+ async function esperarPasso(indice){
+  await pagina.waitForFunction(alvo=>Number(document.querySelector('[data-linha-do-tempo]')?.getAttribute('data-passo-atual'))===alvo,indice);
+  // A cena e o palco precisam ter aplicado o foco, não apenas estar sem roteiro.
+  await pagina.locator('[data-area-cena][data-tocando="nao"]').waitFor({state:'attached'});
+ }
+ // A cena também move a linha do tempo. Não presumir que estamos no fim
+ // quando a execução responde: ir ao início pela UI pausa a animação.
+ await barra.focus();await pagina.keyboard.press('Home');await esperarPasso(0);
  let leu=false,trocou=false,quadros=0;
- for(let i=total-1;i>=0;i--){
+ for(let i=0;i<total;i++){
   leu ||= await pagina.locator('[data-vagao][data-lido="sim"]').count()>0;
   trocou ||= await pagina.locator('[data-vagao][data-trocou="sim"]').count()>0;
   quadros=Math.max(quadros,await pagina.locator('[data-quadro]').count());
-  if(i>0){await tempo.locator('[data-barra-tempo]').focus();await pagina.keyboard.press('ArrowLeft');await pronto();}
+  if(i<total-1){await barra.focus();await pagina.keyboard.press('ArrowRight');await esperarPasso(i+1);}
  }
  if(habilidade==='linear-sozinho')conferir(leu,'comparações acendem vagões');
  if(habilidade==='selecao-sozinho')conferir(leu&&trocou,'comparações e troca acendem vagões');
  if(habilidade==='recursao-sozinho')conferir(quadros>=4,'chamadas recursivas abrem molduras');
- for(let i=1;i<total;i++){await tempo.locator('[data-barra-tempo]').focus();await pagina.keyboard.press('ArrowRight');await pronto();}
 }
 
 const ponto=pagina.locator(`[data-unidade="${id}"]`);conferir(await ponto.getAttribute('data-estado')==='disponivel','unidade disponível no mapa');await tocar(ponto);await tocar(pagina.getByRole('dialog').getByRole('button',{name:'Jogar',exact:true}));
@@ -94,7 +107,22 @@ for(const fase of fases){
    if(o.modo==='sozinho'){if(toque)await abrirBalao(pagina);conferir(!await pagina.getByRole('button',{name:/^(Próximo objetivo|Ver resultado)$/}).first().isVisible().catch(()=>false),`${o.id}: treino ainda exige trabalho`);}
    await acoes(o.solucaoDeTeste);
    if(o.id==='linear-sozinho'||o.id==='selecao-sozinho'||o.id==='recursao-sozinho')await conferirRastro(o.id);
-   if(o.id==='sem-parada'){conferir((await pagina.locator('[data-palco-erro]').innerText()).includes('RangeError'),'proteção de recursão aparece no palco');}
+   if(o.id==='sem-parada'){
+    // Nos layouts móveis a cena é a área inicial; o palco pode nem estar
+    // montado. Esperar tempo não o abre: escolher a área antes de ler o erro.
+    await mostrarPalco();
+    // O aviso pertence ao passo de erro, no fim do rastro. A cena pode
+    // ter selecionado outro passo enquanto o teste abriu a área.
+    const tempo=pagina.locator('[data-linha-do-tempo]');
+    const ultimo=Number(await tempo.getAttribute('data-total-passos'))-1;
+    const barra=tempo.locator('[data-barra-tempo]');
+    await barra.focus();await pagina.keyboard.press('Home');
+    await pagina.waitForFunction(()=>document.querySelector('[data-linha-do-tempo]')?.getAttribute('data-passo-atual')==='0');
+    await pagina.locator('[data-area-cena][data-tocando="nao"]').waitFor({state:'attached'});
+    await pagina.keyboard.press('End');
+    await pagina.waitForFunction(alvo=>Number(document.querySelector('[data-linha-do-tempo]')?.getAttribute('data-passo-atual'))===alvo,ultimo);
+    conferir((await pagina.locator('[data-palco-erro]').innerText()).includes('RangeError'),'proteção de recursão aparece no palco');
+   }
 
    if(i<fase.objetivos.length-1)await conversa('Próximo objetivo');
   }

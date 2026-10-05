@@ -519,8 +519,8 @@
           "tipo": "previsao",
           "modo": "sozinho",
           "enunciado": {
-            "mouse": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens.",
-            "toque": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens."
+            "mouse": "Complete a busca com while: true se existe, false se não. Cabe em 500 passos com 5.000 itens.",
+            "toque": "Complete a busca com while: true se existe, false se não. Cabe em 500 passos com 5.000 itens."
           },
           "validador": {
             "tipo": "todos",
@@ -611,8 +611,8 @@
               },
               {
                 "tipo": "passosNoMaximo",
-                "valor": 130,
-                "tamanho": 1000,
+                "valor": 500,
+                "tamanho": 5000,
                 "funcao": "binaria"
               }
             ]
@@ -816,7 +816,7 @@
           "expressao": "apontando"
         },
         {
-          "texto": "Use busca binária sem ordenar de novo. Planeje, teste vazio, um ingresso, repetidos e ausente; caiba em 130 passos com 1.000 itens.",
+          "texto": "Use busca binária sem ordenar de novo. Planeje, teste vazio, um ingresso, repetidos e ausente; caiba em 500 passos com 5.000 itens.",
           "expressao": "apontando"
         }
       ],
@@ -998,8 +998,8 @@
               },
               {
                 "tipo": "passosNoMaximo",
-                "valor": 130,
-                "tamanho": 1000,
+                "valor": 500,
+                "tamanho": 5000,
                 "funcao": "ingresso"
               },
               {
@@ -3732,7 +3732,7 @@
           "expressao": "apontando"
         },
         {
-          "texto": "Comece pelos dois primeiros; depois avance comparando vizinhos. Com 1.000 códigos, caiba em 4.500 passos.",
+          "texto": "Comece pelos dois primeiros; depois avance comparando vizinhos. Com 1.000 códigos, caiba em 20.000 passos.",
           "expressao": "apontando"
         },
         {
@@ -3874,8 +3874,8 @@
           "tipo": "previsao",
           "modo": "sozinho",
           "enunciado": {
-            "mouse": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados.",
-            "toque": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados."
+            "mouse": "Complete todos os vizinhos. Trate as bordas e caiba em 20.000 passos com 1.000 códigos ordenados.",
+            "toque": "Complete todos os vizinhos. Trate as bordas e caiba em 20.000 passos com 1.000 códigos ordenados."
           },
           "validador": {
             "tipo": "todos",
@@ -3957,7 +3957,7 @@
               },
               {
                 "tipo": "passosNoMaximo",
-                "valor": 4500,
+                "valor": 20000,
                 "tamanho": 1000,
                 "funcao": "conferir"
               }
@@ -4103,7 +4103,7 @@
           "expressao": "apontando"
         },
         {
-          "texto": "Planeje, trate vazio, um código e repetidos; até 4.500 passos com 1.000 códigos. Compare vizinhos sem ordenar novamente.",
+          "texto": "Planeje, trate vazio, um código e repetidos; até 20.000 passos com 1.000 códigos. Compare vizinhos sem ordenar novamente.",
           "expressao": "apontando"
         }
       ],
@@ -4292,7 +4292,7 @@
               },
               {
                 "tipo": "passosNoMaximo",
-                "valor": 4500,
+                "valor": 20000,
                 "tamanho": 1000,
                 "funcao": "repetiu"
               }
