@@ -1093,7 +1093,7 @@ export const FASE_DEMO_CUSTO_SHIFT: FasePratica = {
   conceitos: ["elemento"],
   revisa: [],
   prerequisitos: [],
-  usaFerramentas: ["console", "snippet", "palco-memoria", "contador-passos", "grafico-passos"],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "linha-do-tempo", "contador-passos", "grafico-passos"],
   apresentar: ["snippet"],
   siteAlvo: SITE_DO_PROGRAMA,
   programa: {

@@ -5,7 +5,10 @@
 //   na linha do tempo (o vagão lido acende e a troca pisca);
 // - lab-logica-u1-f9: o contador de passos no palco e a aba Desempenho (Medir,
 //   as duas linhas com legenda e o valor no fim, o detalhe de um ponto, a
-//   tabela), com a lenta (quadrática) disparando e a rápida (linear) deitada.
+//   tabela), com a lenta (quadrática) disparando e a rápida (linear) deitada;
+// - lab-logica-u1-f10 e f11: o custo escondido dos métodos nativos. O contador
+//   mostra "+ escondidos em shift", o trem desliza na linha do tempo e o
+//   gráfico (o total) põe shift acima do índice e includes acima do Map.has.
 // Uso: node testes/estruturas.mjs [desktop|retrato|paisagem]
 import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 
@@ -222,6 +225,60 @@ const caixinha = (pagina, nome) => pagina.locator(`[data-palco] [data-caixinha="
 
   const relevantes = errosRelevantes(erros);
   conferir(relevantes.length === 0, `${MODO} f9: console limpo (${relevantes.join(" | ")})`);
+  await navegador.close();
+}
+// ================================================================ f10 e f11: o custo escondido
+for (const demo of [
+  { fase: "lab-logica-u1-f10", metodo: "shift", cara: "consumirComShift", barata: "consumirPorIndice", lista: "pedidos" },
+  { fase: "lab-logica-u1-f11", metodo: "includes", cara: "procurarNaLista", barata: "procurarNoMapa", lista: null },
+]) {
+  const { navegador, pagina, erros } = await abrirFase(demo.fase);
+  const { tocar, naConversa, pularIntroducao, esperarObjetivo, objetivoConcluido, aba, prever } = ferramentas(pagina);
+  await pularIntroducao();
+
+  await esperarObjetivo("contar");
+  await aba("Fontes");
+  if (movel) await tocar(pagina.getByRole("tab", { name: "Snippet", exact: true }));
+  await tocar(pagina.locator("[data-executar-snippet]"));
+  await pagina.waitForFunction(() => Number(document.querySelector("[data-contador-passos]")?.getAttribute("data-contador-escondidos")) > 0, null, { timeout: 8000 });
+  const textoContador = await pagina.locator("[data-contador-passos]").first().innerText();
+  conferir(new RegExp(`[\\d.]+ passos \\+ [\\d.]+ escondidos em\\s+${demo.metodo}`).test(textoContador.replace(/\s+/g, " ")), `${MODO} ${demo.fase}: o contador separa os passos do código e os escondidos em ${demo.metodo} (${textoContador.replace(/\s+/g, " ")})`);
+  conferir(await objetivoConcluido(), `${MODO} ${demo.fase}: passosNoMaximo da execução passa`);
+
+  if (demo.lista) {
+    // Na linha do tempo, depois de cada shift os vagões que ficaram deslizam.
+    const tempo = pagina.locator("[data-linha-do-tempo]");
+    const total = Number(await tempo.getAttribute("data-total-passos"));
+    const barra = tempo.locator("[data-barra-tempo]");
+    if (movel) await fecharBalao(pagina);
+    await barra.focus();
+    await pagina.keyboard.press("Home");
+    let deslizou = 0;
+    for (let k = 0; k < total && !deslizou; k++) {
+      deslizou = await caixinha(pagina, demo.lista).locator("[data-deslizou]").count();
+      await pagina.keyboard.press("ArrowRight");
+    }
+    conferir(deslizou >= 2, `${MODO} ${demo.fase}: depois do shift, todos os vagões que ficaram deslizam (${deslizou})`);
+  }
+  await naConversa(/Próximo objetivo/);
+
+  await esperarObjetivo("medir");
+  await prever();
+  await aba("Desempenho");
+  await tocar(pagina.locator("[data-medir-desempenho]"));
+  const grafico = pagina.locator("[data-grafico-passos]");
+  await grafico.locator("[data-serie-grafico]").nth(1).waitFor({ timeout: 15000 });
+  const rotulo = async (funcao) => (await grafico.locator(`[data-rotulo-final="${funcao}"]`).textContent()) ?? "";
+  const cara = await rotulo(demo.cara);
+  const barata = await rotulo(demo.barata);
+  conferir(cara.includes("mil") && !barata.includes("mil"), `${MODO} ${demo.fase}: com 1.000 itens, ${demo.cara} passa de 10 mil passos e ${demo.barata} não (${cara} x ${barata})`);
+  const alturaDe = (funcao) => grafico.locator(`[data-ponto-grafico="${funcao}:1000"]`).evaluate((el) => Number(el.getAttribute("cy")));
+  conferir((await alturaDe(demo.cara)) < (await alturaDe(demo.barata)) - 50, `${MODO} ${demo.fase}: no gráfico, ${demo.cara} sobe muito acima de ${demo.barata}`);
+  conferir((await pagina.locator("[data-legenda-escondidos]").getAttribute("data-legenda-escondidos")) === "sim", `${MODO} ${demo.fase}: a legenda explica que o ponto é o total com os escondidos`);
+  conferir(await objetivoConcluido(), `${MODO} ${demo.fase}: mediuDesempenho passa`);
+
+  const relevantes = errosRelevantes(erros);
+  conferir(relevantes.length === 0, `${MODO} ${demo.fase}: console limpo (${relevantes.join(" | ")})`);
   await navegador.close();
 }
 console.log(`estruturas.mjs ${MODO}: ok`);
