@@ -77,3 +77,19 @@ após o merge do custo escondido (PR #33). Sem mudança no motor.
   fase 1 verdes após remover a exigência redundante de reabrir a árvore
   no sozinho. Jornada nos três layouts, confirmação final no desktop,
   publicação, build e lint verdes.
+
+### Fechamento
+
+- Quatro unidades publicadas, uma por commit; 12 fases, nove conceitos
+  com temas e 18 itens de revisão. Todas as jornadas pelo mapa passaram
+  nos três layouts; casos, previsões e validadores do JSON correspondem
+  aos dados do conteúdo. A Árvore teve confirmação final no desktop.
+- Publicar conteúdo, build e lint passaram ao fim de cada unidade.
+  Verificações de conteúdo consolidadas: 18.608, com reteste apenas da
+  prova específica e da fase afetadas na U4, conforme a economia de cota.
+- `npm run bateria:conteudo` executada uma vez no build de produção:
+  mapa, exploração, publicação e revisão verdes, com console limpo.
+- ATRITOS-FABRICA com rodada curta; ROADMAP com a zona em Feito,
+  Depuração em Próximo e a exportação dos aparelhos novos em Pendências.
+- Principal permaneceu em `22a4b9f`; a entrega segue pela branch
+  `codex/estruturas-dados` e pull request, sem push direto na principal.

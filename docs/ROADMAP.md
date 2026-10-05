@@ -37,8 +37,8 @@ núcleo comum.
   escondido no gráfico, includes contra Map.has incluindo a montagem,
   objeto ou Map, recursão e ponte com o DOM da Ilha Sites. Bordas vazias
   e de um item, orçamentos com folga comprovada e missão no Console real.
-  Jornadas nos três layouts, publicação, build e lint verdes. Detalhes
-  e verificação final em `docs/PROGRESSO.md`.
+  Jornadas nos três layouts, publicação, build, lint e bateria de
+  conteúdo em produção verdes. Detalhes em `docs/PROGRESSO.md`.
 
 - **Rodada 32, custo escondido dos métodos nativos:** cada método nativo
   soma passos escondidos proporcionais ao trabalho (shift e unshift o
