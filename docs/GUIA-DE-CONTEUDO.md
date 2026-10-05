@@ -49,7 +49,7 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
     unidade-modelo)
 26. Depurador da aba Fontes
 27. Ordenar passos
-28. Estruturas e desempenho
+28. Estruturas e desempenho (28.1: o custo escondido dos métodos nativos)
 29. Resolução de problemas: a tela composta (plano, código, palco e
     casos de teste na mesma fase, inclusive no desafio)
 30. Cenas programáveis (30.1 a área cena, 30.2 montar uma cena com o kit,
@@ -1318,7 +1318,8 @@ Modelo: a unidade `logica-primeiros-comandos-u1` ("O Console calcula",
 `lab-logica-u1-f2` (circuito) mostram tudo ao vivo. As outras
 demonstrações da Bancada da Lógica: `f3` (desafio com circuito e ponte
 circuito/Console), `f4` (depurador, seção 26), `f5` a `f7` (ordenar
-passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28). A tela
+passos, seção 27), `f8` e `f9` (estruturas e desempenho, seção 28), `f10` e
+`f11` (custo escondido dos métodos nativos, seção 28.1). A tela
 composta (plano, código, palco e casos de teste juntos) tem a bancada
 própria, `lab-resolver-u1` (seção 29), e as cenas programáveis, a
 `lab-cenas-u1` (seção 30). **Regra de ritmo:** toda unidade nova da Lógica
@@ -1618,7 +1619,8 @@ Estruturas de dados e Algoritmos essenciais. Motor:
   acontecendo). Embaixo, a ponte para a árvore de Elementos do F12.
 - **Contador de passos** (`"contador-passos"`): no canto do palco, os
   passos da última execução (cada linha executada, inclusive cada volta
-  de laço).
+  de laço) e, à parte, os escondidos nos métodos nativos ("1.001 passos +
+  500.500 escondidos em `shift`"; seção 28.1).
 - **Gráfico passos x tamanho** (`"grafico-passos"` com
   `programa.desempenho`): a aba Desempenho (simulação: a do Chrome mede
   tempo) roda cada função com listas de vários tamanhos e desenha uma
@@ -1627,9 +1629,11 @@ Estruturas de dados e Algoritmos essenciais. Motor:
   número; sem `args`, a função recebe só a lista), `tamanhos` (2 a 6,
   crescentes, até 5000; padrão 10, 100, 500 e 1000) e `lista`
   (`crescente`, `decrescente` ou `embaralhada`, sempre a mesma). Acima de
-  2 milhões de passos a medida para e o ponto diz "travaria".
-- **Validadores:** `passosNoMaximo` sem `tamanho` (a última execução do
-  objetivo deu no máximo `valor` passos; pede `contador-passos`) e com
+  2 milhões de passos a medida para e o ponto diz "travaria". Cada ponto é
+  o total (código mais escondidos), e a legenda embaixo dos botões explica.
+- **Validadores:** `passosNoMaximo` (conta o total, com os escondidos;
+  `contarEscondidos: false` conta só os do código) sem `tamanho` (a última
+  execução do objetivo deu no máximo `valor` passos; pede `contador-passos`) e com
   `tamanho` (a função, `funcao` ou a primeira do `desempenho`, com a lista
   desse tamanho, medida de novo a cada execução: o jogador melhora o
   algoritmo, não decora). `formaDaEstrutura` (`nome`, `forma`): `pilha`
@@ -1648,6 +1652,60 @@ Estruturas de dados e Algoritmos essenciais. Motor:
 - **Previsão casa bem:** "se a lista ficar 50 vezes maior, os passos
   crescem quanto?". O gráfico responde: a reta cresce junto, a curva
   dispara.
+
+### 28.1 O custo escondido dos métodos nativos
+
+Modelos: `/lab/fases?fase=lab-logica-u1-f10` (consumir uma fila com
+`shift` contra andar por índice) e `f11` (procurar com `includes` contra
+`Map.has`). Motor: `src/motor/executor/custoNativo.ts`.
+
+- **O problema que resolve:** o contador conta comandos do aluno. Sem o
+  custo escondido, `while (fila.length) fila.shift()` com 1.000 itens dava
+  1.001 passos, menos que a versão por índice (2.002), e o gráfico ensinava
+  o contrário da verdade: cada `shift` move todos os itens.
+- **O modelo** (passos escondidos, somados à parte, por método):
+
+  | Método | Custo escondido |
+  | --- | --- |
+  | `shift`, `unshift` | o tamanho da lista (todos se movem) |
+  | `splice` | os itens movidos depois da posição + inseridos + removidos |
+  | `indexOf`, `includes`, `lastIndexOf` | os examinados até achar (ou todos) |
+  | `slice`, `concat`, `join`, `reverse`, `fill`, `...`, `Array.from`, `Object.keys/values/entries`, `new Set(lista)`, `new Map(pares)` | os itens copiados ou percorridos |
+  | `sort()` sem comparador | n x log2(n); com comparador, só as chamadas dele (já contam como passos do código) |
+  | `map`, `filter`, `find`, `findIndex`, `some`, `every`, `forEach`, `reduce`, `flatMap` | um por item visitado (o callback conta os passos dele à parte) |
+  | texto: `includes`, `indexOf` / `split`, `replaceAll` / `repeat` | até achar / o texto todo / o texto que sai |
+  | `push`, `pop`, `Map` e `Set` (`get`, `set`, `has`, `delete`, `add`), `lista[i]`, `obj.chave` | nenhum: o passo do comando é o trabalho todo |
+
+  Só conta a chamada escrita no código do jogador e só quando o método é o
+  nativo: uma classe `Fila` com um `shift` próprio conta os passos do
+  próprio código. É um modelo didático (o motor de JavaScript tem atalhos),
+  não uma medida de tempo; os textos da fase falam em "trabalho", nunca em
+  milissegundos.
+- **Onde aparece:** o contador do palco mostra "N passos + M escondidos em
+  `shift`" (os dois métodos que mais pesaram); o gráfico de Desempenho usa
+  o total (e a medição para em 2 milhões, contando os escondidos); no
+  palco, depois de `shift`, `unshift` e `splice`, cada vagão que mudou de
+  posição desliza, um depois do outro (o trem inteiro andando é o custo).
+- **O que não muda:** os escondidos não criam fotos na linha do tempo nem
+  no depurador (não pesam no limite de 1.000 fotos) e não contam para o
+  limite de 100 mil passos de uma execução (um `shift` em lista grande não
+  é loop infinito).
+- **No conteúdo:**
+  - Para ensinar estrutura certa para o trabalho (zona Estruturas de
+    dados), compare no gráfico o método caro com o barato: `shift` contra
+    índice, `includes` contra `Map.has`/`Set.has`. A previsão casa bem:
+    "com 1.000 itens, qual dá mais passos no total?".
+  - O orçamento de `passosNoMaximo` segue a regra da seção 28 (3 vezes a
+    eficiente mais falante, 10 vezes abaixo da ingênua), medindo as duas
+    com o total. Nas demonstrações: fila de 1.000 itens, 10.000 passos
+    (índice 2.002; shift 501.501); estoque de 1.000 itens, 20.000 passos
+    (Map 3.005; includes 502.503).
+  - `contarEscondidos: false` só em casos especiais: quando a fase ensina
+    a forma do código (contar as voltas de um laço escrito pelo aluno) e
+    um método pronto fora do foco não deve pesar. O ponto que "travaria"
+    reprova mesmo assim.
+  - Na fala, chame de "trabalho escondido" ou "o método trabalha por
+    dentro"; evite "custo" sozinho (o jogador ainda não tem a palavra).
 
 ## 29. Resolução de problemas: a tela composta
 

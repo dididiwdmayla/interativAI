@@ -9,8 +9,10 @@
  * certo (push e pop pela direita, unshift e shift pela esquerda: a
  * diferença entre pilha e fila aparece), a posição escrita pisca, a troca
  * balança os dois vagões e a posição que a linha anterior leu acende.
+ * Depois de shift, unshift e splice, todos os vagões que mudaram de posição
+ * deslizam, um depois do outro: o custo escondido do método fica visível.
  */
-import { useContext } from "react";
+import { type CSSProperties, useContext } from "react";
 import { literalJs } from "@/motor/executor/formatar";
 import { movimentoDaLista } from "@/motor/estruturas";
 import { assinar, type NoPalco, tipoDoNo } from "@/motor/palco";
@@ -41,9 +43,38 @@ function mesmo(a: NoPalco | null | undefined, b: NoPalco): boolean {
 }
 
 /** Um vagão da lista (o valor e o índice embaixo), com a animação e as marcas do passo. */
-function Vagao({ item, anterior, indice, classe, lido, trocou, fantasma = false }: { item: NoPalco; anterior: NoPalco | null; indice: number; classe: string; lido: boolean; trocou: boolean; fantasma?: boolean }) {
+/** Atraso do deslize de cada vagão (o trem anda um vagão depois do outro), com teto para listas longas. */
+const atrasoDoDeslize = (ordem: number) => `${Math.min(ordem * 40, 600)}ms`;
+
+function Vagao({
+  item,
+  anterior,
+  indice,
+  classe,
+  lido,
+  trocou,
+  fantasma = false,
+  deslize = 0,
+  ordemDeslize = 0,
+}: {
+  item: NoPalco;
+  anterior: NoPalco | null;
+  indice: number;
+  classe: string;
+  lido: boolean;
+  trocou: boolean;
+  fantasma?: boolean;
+  /** Quantas posições o vagão andou (positivo: veio da direita). */
+  deslize?: number;
+  ordemDeslize?: number;
+}) {
+  const estilo = deslize ? ({ "--deslize": deslize, animationDelay: atrasoDoDeslize(ordemDeslize) } as CSSProperties) : undefined;
   return (
-    <span className={`inline-flex flex-col items-center ${classe}`} data-vagao={fantasma ? undefined : indice} data-vagao-saindo={fantasma ? indice : undefined} data-lido={lido ? "sim" : undefined} data-trocou={trocou ? "sim" : undefined}>
+    <span
+      className={`inline-flex flex-col items-center ${deslize ? "palco-deslizar" : classe}`}
+      style={estilo}
+      data-deslizou={deslize ? deslize : undefined}
+      data-vagao={fantasma ? undefined : indice} data-vagao-saindo={fantasma ? indice : undefined} data-lido={lido ? "sim" : undefined} data-trocou={trocou ? "sim" : undefined}>
       <span
         className={`min-w-8 rounded-md border-2 bg-superficie px-1.5 py-0.5 text-center text-sm ${lido ? "border-realce shadow-[0_0_0_3px_var(--cor-realce-inspecao)]" : "border-js-objeto"} ${trocou ? "bg-codigo-destaque-linha" : ""}`}
       >
@@ -61,11 +92,12 @@ function ListaPalco({ no, anterior }: { no: Extract<NoPalco, { t: "lista" }>; an
   const lidos = leituras.get(no.id);
   const n = no.itens.length;
   const saindoInicio = itensAntes && movimento?.sairamInicio ? itensAntes.slice(0, movimento.sairamInicio) : [];
+  const meio = movimento?.meio ?? null;
   const saindoFim = itensAntes && movimento?.sairamFim && !movimento.escritos.length ? itensAntes.slice(itensAntes.length - movimento.sairamFim) : [];
   return (
-    <span className="inline-flex max-w-full flex-wrap items-end gap-1" data-lista-palco={no.id} data-ancora-objeto={no.id}>
+    <span className="relative inline-flex max-w-full flex-wrap items-end gap-1" data-lista-palco={no.id} data-ancora-objeto={no.id}>
       {saindoInicio.map((item, i) => (
-        <Vagao key={`sai-inicio-${i}`} item={item} anterior={null} indice={i} classe="palco-sair-esquerda" lido={false} trocou={false} fantasma />
+        <Vagao key={`sai-inicio-${i}`} item={item} anterior={null} indice={i} classe="palco-sair-esquerda palco-sair-solto" lido={false} trocou={false} fantasma />
       ))}
       {n === 0 && saindoInicio.length + saindoFim.length === 0 && <span className="rounded-md border-2 border-dashed border-js-objeto px-2 py-0.5 text-xs text-texto-suave">vazia</span>}
       {no.itens.map((item, i) => {
@@ -75,9 +107,43 @@ function ListaPalco({ no, anterior }: { no: Extract<NoPalco, { t: "lista" }>; an
         const escrito = movimento?.escritos.includes(i) ?? false;
         // Depois do shift e do unshift, o vagão de antes na mesma posição é outro: compara pelo deslocamento.
         const deslocamento = movimento ? movimento.entraramInicio - movimento.sairamInicio : 0;
+        if (meio) {
+          // splice no meio: o trecho novo surge, os de depois deslizam (vindos de removidos - inseridos posições).
+          const inserido = i >= meio.posicao && i < meio.posicao + meio.inseridos;
+          const depois = i >= meio.posicao + meio.inseridos;
+          const andou = depois ? meio.removidos - meio.inseridos : 0;
+          const antes = inserido ? null : (itensAntes?.[depois ? i + andou : i] ?? null);
+          return (
+            <Vagao
+              key={`${i}-m${meio.posicao}-${meio.removidos}-${meio.inseridos}`}
+              item={item}
+              anterior={antes}
+              indice={i}
+              classe={inserido ? "palco-surgir" : ""}
+              lido={lidos?.has(i) ?? false}
+              trocou={false}
+              deslize={andou}
+              ordemDeslize={i - meio.posicao - meio.inseridos}
+            />
+          );
+        }
         const antes = itensAntes?.[i - deslocamento] ?? null;
         const classe = entrouFim ? "palco-entrar-direita" : entrouInicio ? "palco-entrar-esquerda" : trocou ? "palco-trocar" : escrito ? "palco-piscar" : "";
-        return <Vagao key={`${i}-${deslocamento}`} item={item} anterior={antes} indice={i} classe={classe} lido={lidos?.has(i) ?? false} trocou={trocou} />;
+        // Os que ficaram andaram junto (shift: vieram da direita; unshift: da esquerda).
+        const ficou = !entrouInicio && !entrouFim && deslocamento !== 0;
+        return (
+          <Vagao
+            key={`${i}-${deslocamento}`}
+            item={item}
+            anterior={antes}
+            indice={i}
+            classe={classe}
+            lido={lidos?.has(i) ?? false}
+            trocou={trocou}
+            deslize={ficou ? -deslocamento : 0}
+            ordemDeslize={deslocamento < 0 ? i : n - 1 - i}
+          />
+        );
       })}
       {saindoFim.map((item, i) => (
         <Vagao key={`sai-fim-${i}`} item={item} anterior={null} indice={n + i} classe="palco-sair-direita" lido={false} trocou={false} fantasma />

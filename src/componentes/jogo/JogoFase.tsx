@@ -1995,7 +1995,7 @@ export function JogoFase({
         contador={
           estruturas.contador && (
             <AlvoFerramenta ids={["contador-passos"]} marcador="contador-passos" aoAbrirCard={abrirCard} classeMarcador="-right-2 -top-2" as="span" className="inline-flex">
-              <ContadorPassos passos={estruturas.contador.passos} />
+              <ContadorPassos passos={estruturas.contador.passos} escondidos={estruturas.contador.escondidos} porMetodo={estruturas.contador.porMetodo} />
             </AlvoFerramenta>
           )
         }

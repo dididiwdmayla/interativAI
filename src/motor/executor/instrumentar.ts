@@ -26,7 +26,15 @@
  *   colchetes, fora de atribuição, de chamada e de cadeia opcional): guarda
  *   que a linha leu aquela posição da lista (o palco acende o vagão, para
  *   ver busca e ordenação acontecendo). Os colchetes viram vírgula e
- *   parêntese no mesmo lugar: as colunas e as linhas não mudam.
+ *   parêntese no mesmo lugar: as colunas e as linhas não mudam;
+ * - `__r.m(objeto, "texto")` em volta do objeto de uma chamada de método
+ *   com custo escondido (`lista.shift()` vira `__r.m(lista,"lista").shift()`):
+ *   o método nativo soma os passos do trabalho que faz por dentro (ver
+ *   custoNativo.ts). O texto do objeto refaz a mensagem "x.shift is not a
+ *   function";
+ * - `__r.e(valor)` no espalhar (`...lista`) e `__r.e(valor, "new Set")` no
+ *   primeiro argumento de `new Set(...)` e `new Map(...)`: soma os itens
+ *   percorridos.
  *
  * Modo do Console (REPL do Chrome, que aceita declarar de novo let, const e
  * class em entradas separadas, desde o Chrome 80 e 92): as declarações do
@@ -39,6 +47,7 @@
  */
 import { parse, tokenizer, type AnyNode, type Comment, type Program, type Statement, type Pattern, type Node as NoAcorn } from "acorn";
 import type { TipoDeclaracao } from "./tipos";
+import { METODOS_COM_CUSTO } from "./custoNativo";
 
 export type SintaxeJs =
   | "if"
@@ -581,6 +590,20 @@ class Instrumentador {
     this.membro(no, prof);
   }
 
+  /**
+   * `objeto.metodo(...)` com um método de custo escondido: o objeto vira
+   * `__r.m(objeto,"texto")` (fora de cadeia opcional e de super).
+   */
+  private metodoComCusto(no: AnyNode & { type: "CallExpression" }, prof: number) {
+    const callee = no.callee;
+    if (callee.type !== "MemberExpression" || callee.computed || callee.optional || no.optional || this.dentroDeCadeia > 0) return;
+    if (callee.object.type === "Super" || callee.property.type !== "Identifier" || !METODOS_COM_CUSTO.has(callee.property.name)) return;
+    const original = this.fonte.slice(callee.object.start, callee.object.end);
+    const rotulo = /^[\w$.]+$/.test(original) ? original : "(intermediate value)";
+    this.inserir(callee.object.start, "__r.m(", false, prof + 1);
+    this.inserir(callee.object.end, `,${texto(rotulo)})`, true, prof + 1);
+  }
+
   /** Um nó qualquer (padrão, declaração na cabeça do for...): procura expressões dentro. */
   private qualquer(no: AnyNode, prof: number) {
     if (no.type === "VariableDeclaration") {
@@ -621,6 +644,15 @@ class Instrumentador {
       case "CallExpression":
       case "NewExpression":
         // Quem é chamado (lista[i]()) não é embrulhado: o this da chamada continua o mesmo.
+        if (no.type === "CallExpression" && no.callee.type === "MemberExpression") this.metodoComCusto(no, prof);
+        if (no.type === "NewExpression" && no.callee.type === "Identifier" && (no.callee.name === "Set" || no.callee.name === "Map") && !this.ehLocal(no.callee.name)) {
+          const [primeiro] = no.arguments;
+          if (primeiro && primeiro.type !== "SpreadElement") {
+            // Mais raso que o argumento (que entra com prof + 1): o embrulho fica por fora.
+            this.inserir(primeiro.start, "__r.e(", false, prof);
+            this.inserir(primeiro.end, `,${texto(`new ${no.callee.name}`)})`, true, prof);
+          }
+        }
         if (no.callee.type === "MemberExpression") this.membro(no.callee, prof + 1);
         else this.expressao(no.callee, prof + 1);
         for (const argumento of no.arguments) this.expressao(argumento, prof + 1);
@@ -674,6 +706,11 @@ class Instrumentador {
         }
         if (no.argument.type === "MemberExpression") this.membro(no.argument, prof + 1);
         else if (no.argument.type !== "Identifier") this.expressao(no.argument, prof + 1);
+        return;
+      case "SpreadElement":
+        this.inserir(no.argument.start, "__r.e(", false, prof);
+        this.inserir(no.argument.end, ")", true, prof);
+        this.expressao(no.argument, prof + 1);
         return;
       case "Property":
         if (no.key.type !== "Identifier" || no.computed) this.expressao(no.key, prof + 1);

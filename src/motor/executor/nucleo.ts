@@ -9,6 +9,7 @@
  * (CODIGO_PREPARO) só entra quando o hospedeiro de testes pede.
  */
 import { analisarCodigo, instrumentar } from "./instrumentar";
+import { type CustoNativo, METODOS_COM_CUSTO, NOME_ESPALHAR, custoDoEspalhar, tabelaDeCustos, tamanhoAntes } from "./custoNativo";
 import { textoDaSaida, valorIgual } from "./formatar";
 import { FIM_DA_CENA, MotorCena } from "../cena/motor";
 import { type AcontecimentoCena, chaveLinhaDoTempo, type DadosCena, type RastroCena } from "../cena/modelo";
@@ -93,6 +94,8 @@ type Intrinsecos = {
   Set: new () => Set<unknown>;
   Date: new (texto: string) => Date;
   Function: new (...partes: string[]) => (...args: unknown[]) => unknown;
+  arrayProto: Record<string, unknown>;
+  stringProto: Record<string, unknown>;
 };
 
 type EscopoVivo = { id: string; tipo: "funcao" | "bloco"; decl: [string, TipoDeclaracao][]; ler: (k: number) => unknown };
@@ -131,6 +134,15 @@ export class NucleoExecutor {
   /** Leituras de lista (lista[i]) desde o último passo: vão no passo seguinte. */
   private leituras: { id: number; indice: number }[] = [];
   private limitePassos: number = LIMITES.passos;
+  /** O trabalho por dentro dos métodos nativos (custoNativo.ts): não vira foto nem para a execução. */
+  private escondidos = 0;
+  private escondidosPorMetodo: Record<string, number> = {};
+  /** (Gráfico de Desempenho) Os escondidos contam para o limite da medição ("travaria"). */
+  private medindo = false;
+  private readonly custos: Map<unknown, CustoNativo>;
+  /** O objeto que `__r.m(x)` devolve: cada método com custo é um getter que lê o método em x. */
+  private readonly porteiro: object;
+  private receptor: unknown = undefined;
   private limiteTempo: number = LIMITES.tempoMs;
   /** (Cena programável) O relógio simulado e os dispositivos que o código usa. */
   private cena: MotorCena | null = null;
@@ -140,8 +152,10 @@ export class NucleoExecutor {
   constructor(private readonly host: Hospedeiro, opcoes: { deterministico?: boolean } = {}) {
     if (opcoes.deterministico) host.avaliar(CODIGO_PREPARO);
     this.intr = host.avaliar(
-      "({ ReferenceError: ReferenceError, TypeError: TypeError, RangeError: RangeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype, Array: Array, Object: Object, Map: Map, Set: Set, Date: Date, Function: Function })",
+      "({ ReferenceError: ReferenceError, TypeError: TypeError, RangeError: RangeError, Error: Error, JSON: JSON, toString: Object.prototype.toString, funcaoPrototipo: Function.prototype, Array: Array, Object: Object, Map: Map, Set: Set, Date: Date, Function: Function, arrayProto: Array.prototype, stringProto: String.prototype })",
     ) as Intrinsecos;
+    this.custos = tabelaDeCustos({ arrayProto: this.intr.arrayProto, stringProto: this.intr.stringProto, Array: this.intr.Array as unknown as Record<string, unknown>, Object: this.intr.Object as unknown as Record<string, unknown> });
+    this.porteiro = this.criarPorteiro();
     this.instalar();
   }
 
@@ -229,6 +243,17 @@ export class NucleoExecutor {
         this.resposta = valor;
         return valor;
       },
+      m: (receptor: unknown, texto: string) => {
+        // null e undefined seguem: o acesso ao método dá o mesmo TypeError do navegador.
+        if (receptor === null || receptor === undefined) return receptor;
+        this.receptor = receptor;
+        this.textoReceptor = texto;
+        return this.porteiro;
+      },
+      e: (valor: unknown, nome?: string) => {
+        this.esconder(nome ?? NOME_ESPALHAR, custoDoEspalhar(valor, tag(valor)));
+        return valor;
+      },
       li: (objeto: unknown, chave: unknown) => {
         if (this.gravando && Array.isArray(objeto) && this.leituras.length < LIMITES.leiturasPorPasso) {
           const indice = typeof chave === "number" ? chave : Number(chave);
@@ -273,6 +298,68 @@ export class NucleoExecutor {
     });
   }
 
+  private textoReceptor = "";
+
+  /** Soma passos escondidos de um método nativo. */
+  private esconder(nome: string, quantos: number) {
+    if (!(quantos > 0)) return;
+    this.escondidos += quantos;
+    this.escondidosPorMetodo[nome] = (this.escondidosPorMetodo[nome] ?? 0) + quantos;
+    if (this.medindo && this.total + this.escondidos > this.limitePassos) {
+      this.parado = { tipo: "limite-passos", local: { linha: this.topo().linha, coluna: this.topo().coluna } };
+      throw PARADA;
+    }
+  }
+
+  /**
+   * O porteiro de `__r.m(x).metodo(...)`: o getter lê o método em x NA HORA
+   * (como `x.metodo` leria, antes dos argumentos) e devolve quem chama com
+   * o this certo. Método nativo com custo: mede; qualquer outro (uma classe
+   * do jogador) só é chamado.
+   */
+  private criarPorteiro(): object {
+    const porteiro: Record<string, unknown> = {};
+    for (const nome of METODOS_COM_CUSTO) {
+      Object.defineProperty(porteiro, nome, {
+        get: () => {
+          const receptor = this.receptor;
+          const texto = this.textoReceptor;
+          // Texto é primitivo: o método vem do String.prototype do reino do código (no Node, o vm é outro reino).
+          const metodo = typeof receptor === "string" ? this.intr.stringProto[nome] : (receptor as Record<string, unknown>)[nome];
+          if (typeof metodo !== "function") {
+            return () => {
+              throw new this.intr.TypeError(`${texto}.${nome} is not a function`);
+            };
+          }
+          const custo = this.custos.get(metodo);
+          if (!custo) return (...args: unknown[]) => Reflect.apply(metodo, receptor, args);
+          return (...args: unknown[]) => this.chamarComCusto(metodo as (...a: unknown[]) => unknown, receptor, args, custo);
+        },
+        enumerable: false,
+      });
+    }
+    return Object.freeze(porteiro);
+  }
+
+  private chamarComCusto(metodo: (...a: unknown[]) => unknown, receptor: unknown, args: unknown[], custo: CustoNativo): unknown {
+    if (custo.tipo === "visita") {
+      const callback = args[0];
+      if (typeof callback === "function") {
+        const esconder = () => this.esconder(custo.nome, 1);
+        // function (não seta): o thisArg de forEach(cb, thisArg) continua chegando no callback.
+        args[0] = function (this: unknown, ...dados: unknown[]) {
+          esconder();
+          return Reflect.apply(callback, this, dados);
+        };
+      }
+      return Reflect.apply(metodo, receptor, args);
+    }
+    const antes = tamanhoAntes(receptor);
+    const resultado = Reflect.apply(metodo, receptor, args);
+    this.esconder(custo.nome, custo.custo(receptor, args, resultado, antes));
+    return resultado;
+  }
+
   private topo(): QuadroVivo {
     return this.pilha[this.pilha.length - 1];
   }
@@ -289,7 +376,7 @@ export class NucleoExecutor {
     const topo = this.topo();
     topo.linha = linha;
     topo.coluna = coluna;
-    if (this.total > this.limitePassos) {
+    if (this.total + (this.medindo ? this.escondidos : 0) > this.limitePassos) {
       this.parado = { tipo: "limite-passos", local: { linha, coluna } };
       throw PARADA;
     }
@@ -574,6 +661,10 @@ export class NucleoExecutor {
     this.leituras = [];
     this.limitePassos = LIMITES.passos;
     this.limiteTempo = LIMITES.tempoMs;
+    this.escondidos = 0;
+    this.escondidosPorMetodo = {};
+    this.medindo = false;
+    this.receptor = undefined;
   }
 
   private descreverErro(erro: unknown): ErroExecucao {
@@ -661,6 +752,8 @@ export class NucleoExecutor {
       passos: [],
       rastroCortado: false,
       totalPassos: 0,
+      passosEscondidos: 0,
+      escondidosPorMetodo: {},
       memoriaFinal: this.fotografar(),
       globais: this.listaDeGlobais(),
       sintaxes: [],
@@ -717,6 +810,8 @@ export class NucleoExecutor {
       passos: this.passos,
       rastroCortado: this.cortado,
       totalPassos: this.total,
+      passosEscondidos: this.escondidos,
+      escondidosPorMetodo: this.escondidosPorMetodo,
       memoriaFinal,
       globais: this.listaDeGlobais(),
       sintaxes: inst.sintaxes,
@@ -760,8 +855,9 @@ export class NucleoExecutor {
   private medirPassosDentro(nome: string, chamadas: readonly { tamanho: number; args: ValorEsperado[] }[]): MedicaoPassos[] {
     const funcao = this.globais.has(nome) || nome in this.host.global ? this.ler(this.host.global, nome) : undefined;
     return chamadas.map(({ tamanho, args }) => {
-      if (typeof funcao !== "function") return { funcao: nome, tamanho, passos: 0, passouDoLimite: false, erro: `não existe função ${nome}` };
+      if (typeof funcao !== "function") return { funcao: nome, tamanho, passos: 0, escondidos: 0, passouDoLimite: false, erro: `não existe função ${nome}` };
       this.comecar(false);
+      this.medindo = true;
       this.limitePassos = LIMITES.passosMedicao;
       this.limiteTempo = LIMITES.tempoMedicaoMs;
       let erro: string | null = null;
@@ -775,10 +871,12 @@ export class NucleoExecutor {
         }
       }
       const passouDoLimite = this.parado !== null;
-      const passos = this.total;
+      // O gráfico usa o total: os passos do código e os escondidos nos métodos nativos.
+      const passos = this.total + this.escondidos;
+      const escondidos = this.escondidos;
       this.pilha.length = 1;
       this.comecar(false);
-      return { funcao: nome, tamanho, passos: Math.min(passos, LIMITES.passosMedicao), passouDoLimite, erro };
+      return { funcao: nome, tamanho, passos: Math.min(passos, LIMITES.passosMedicao), escondidos: Math.min(escondidos, LIMITES.passosMedicao), passouDoLimite, erro };
     });
   }
 

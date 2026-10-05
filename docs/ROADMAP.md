@@ -29,6 +29,17 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 32, custo escondido dos métodos nativos:** cada método nativo
+  soma passos escondidos proporcionais ao trabalho (shift e unshift o
+  tamanho da lista, includes até achar, sort n x log2(n), callbacks por
+  item; push, pop, Map e Set, nenhum). Contador "N passos + M escondidos
+  em shift", gráfico de Desempenho com o total e legenda, trem deslizando
+  no palco depois de shift, unshift e splice. `passosNoMaximo` conta o
+  total (`contarEscondidos: false` para casos especiais); escondidos não
+  criam fotos. Demonstrações `lab-logica-u1-f10` (shift x índice) e `f11`
+  (includes x Map.has); guia, seção 28.1. Conteúdo publicado sem mudança
+  de orçamento (as soluções não usam métodos com custo).
+
 - **Rodada 31, Etapa 0 de Estruturas de dados:** binária com orçamento de
   500 passos em 5.000 itens e vizinhos com 20.000 em 1.000; regra de
   folga de três vezes a solução eficiente e dez abaixo da ingênua no
@@ -575,21 +586,21 @@ núcleo comum.
 
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
-- Zona Estruturas de dados: produção suspensa pela regra de parada do
-  pedido da rodada 31; falta contabilizar o custo nativo de `shift` no
-  gráfico de Desempenho. Nenhuma unidade nova foi publicada.
 
 ### Pendências
 
-- **Estruturas de dados, bloqueio de motor (rodada 31):** o gráfico conta
-  linhas executadas, sem o trabalho interno dos métodos nativos. Consumir
-  1.000 itens com `while (lista.length) lista.shift()` mede 1.001 passos;
-  percorrer por índice com uma variável intermediária mede 2.002. As duas
-  curvas são lineares, e a fila com shift parece mais barata. O pedido
-  exige mostrar esse custo no gráfico; não cabe inventar trabalho no
-  conteúdo. Definir e implementar uma medição honesta dos métodos nativos
-  antes de produzir a zona. Na retomada, separar pilha e fila em unidades
-  distintas (quatro no pedido; três no mapa atual, ainda não publicadas).
+- **Estruturas de dados, na retomada (rodada 31):** separar pilha e fila
+  em unidades distintas (quatro no pedido; três no mapa atual, ainda não
+  publicadas). O bloqueio do custo de `shift` saiu na rodada 32.
+- **Custo escondido (rodada 32), para depois:**
+  - Fora do modelo (contam 0 escondidos): `flat`, `Object.assign`,
+    `structuredClone`, `JSON.stringify`/`parse`, `slice`/`padStart` de
+    texto, a desestruturação com resto (`[a, ...resto] = lista`) e
+    chamadas indiretas (`Array.prototype.shift.call(l)`, `l["shift"]()`,
+    `l?.shift()`). Nenhum conteúdo depende deles hoje.
+  - O deslize do trem é por transform: numa lista que quebra em duas
+    linhas no palco estreito, o vagão que muda de linha desliza na
+    horizontal (aproximação).
 
 - O Levar pro mundo dos contratos exporta apenas o kit anterior: os
   acontecimentos genéricos, atores e novos dispositivos ainda não têm
@@ -737,8 +748,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Desbloquear a medição de `shift` no motor e produzir a zona Estruturas
-   de dados; depois, Depuração, já com
+1. Zona Estruturas de dados (conteúdo), usando o custo escondido (guia,
+   seção 28.1: `includes` contra `Map.has`, `shift` contra índice); depois,
+   Depuração, já com
    cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
    fase com cena, diferente das anteriores; guia, seção 30). A Depuração
    pode usar cenas com o depurador (o Observar e o Console pausados leem a

@@ -17,7 +17,7 @@ export const UNIDADE_BANCADA_LOGICA: Unidade = {
   numero: 1,
   titulo: "Bancada da Lógica",
   meta: { enunciado: "Testar o motor da Ilha Lógica: Console, Snippet, palco da memória, linha do tempo e circuito lógico." },
-  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4", "lab-logica-u1-f5", "lab-logica-u1-f6", "lab-logica-u1-f7", "lab-logica-u1-f8", "lab-logica-u1-f9"],
+  fases: ["lab-logica-u1-f1", "lab-logica-u1-f2", "lab-logica-u1-f3", "lab-logica-u1-f4", "lab-logica-u1-f5", "lab-logica-u1-f6", "lab-logica-u1-f7", "lab-logica-u1-f8", "lab-logica-u1-f9", "lab-logica-u1-f10", "lab-logica-u1-f11"],
 };
 
 export const FASE_BANCADA_CONSOLE: FasePratica = {
@@ -1051,6 +1051,236 @@ export const FASE_DEMO_DESEMPENHO: FasePratica = {
   falaFinal: { texto: "Pode continuar mudando as funções e medindo de novo.", expressao: "feliz" },
 };
 
+/*
+ * Demonstração do custo escondido dos métodos nativos (guia, seção 28.1):
+ * - f10: consumir uma fila com shift contra andar por índice. O código das
+ *   duas dá uns mil passos com mil itens, mas o shift move todos os itens a
+ *   cada chamada: o contador mostra "+ escondidos em shift", o palco anima o
+ *   trem deslizando e o gráfico usa o total (a curva é a do shift);
+ * - f11: procurar com includes numa lista contra Map.has. O includes
+ *   examina item por item; o Map vai direto na chave.
+ */
+const SNIPPET_SHIFT = [
+  "function consumirComShift(fila) {",
+  "  while (fila.length > 0) {",
+  "    const item = fila.shift();",
+  "  }",
+  "}",
+  "",
+  "function consumirPorIndice(fila) {",
+  "  let inicio = 0;",
+  "  while (inicio < fila.length) {",
+  "    const item = fila[inicio];",
+  "    inicio++;",
+  "  }",
+  "}",
+  "",
+  "const pedidos = [1, 2, 3, 4, 5];",
+  "while (pedidos.length > 0) pedidos.shift();",
+  "console.log(pedidos.length);",
+].join("\n");
+
+const SNIPPET_SHIFT_MELHOR = SNIPPET_SHIFT.replace(
+  ["function consumirComShift(fila) {", "  while (fila.length > 0) {", "    const item = fila.shift();", "  }", "}"].join("\n"),
+  ["function consumirComShift(fila) {", "  let inicio = 0;", "  while (inicio < fila.length) {", "    const item = fila[inicio];", "    inicio++;", "  }", "}"].join("\n"),
+);
+
+export const FASE_DEMO_CUSTO_SHIFT: FasePratica = {
+  id: "lab-logica-u1-f10",
+  tipo: "pratica",
+  unidadeId: "lab-logica-u1",
+  titulo: "Custo escondido: shift",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "linha-do-tempo", "contador-passos", "grafico-passos"],
+  apresentar: ["snippet"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: {
+    snippet: { codigoInicial: SNIPPET_SHIFT, nome: "fila.js" },
+    desempenho: { funcoes: [{ nome: "consumirComShift" }, { nome: "consumirPorIndice" }], tamanhos: [10, 100, 500, 1000] },
+  },
+  introducao: [{ texto: "Dois jeitos de atender uma fila: tirar o primeiro com shift ou andar com um índice. O código parece do mesmo tamanho.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "contar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: {
+        mouse: "Execute o fila.js e olhe o contador: além dos passos do código, aparecem os escondidos no shift.",
+        toque: "Execute o fila.js e olhe o contador: além dos passos do código, aparecem os escondidos no shift.",
+      },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "saida", contem: "0" },
+          { tipo: "passosNoMaximo", valor: 100 },
+        ],
+      },
+      apresentar: ["contador-passos"],
+      ajudas: {
+        pergunta: "O que faz o programa rodar?",
+        dica: "O botão Executar, em cima do Snippet.",
+        linha: { alvo: "ferramenta", ferramenta: "snippet", fala: "O Executar mora aqui." },
+        solucao: { fala: "Executei: cada shift moveu os pedidos que sobraram.", acoes: [{ tipo: "executarSnippet" }] },
+      },
+      falaAoConcluir: { texto: "Na linha do tempo, a cada shift o trem inteiro anda uma casa: é o trabalho escondido.", expressao: "curioso" },
+      solucaoDeTeste: [{ tipo: "executarSnippet" }],
+    },
+    {
+      id: "medir",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Com 1.000 pedidos, qual das duas dá mais passos no total?",
+        opcoes: ["consumirComShift", "consumirPorIndice", "Empatam"],
+        correta: 0,
+        explicacao: "Cada shift move todos os pedidos que sobraram: 1.000 + 999 + 998... uns 500 mil passos escondidos.",
+      },
+      enunciado: { mouse: "Na aba Desempenho, clique em Medir.", toque: "Na aba Desempenho, toque em Medir." },
+      validador: { tipo: "evento", evento: "mediuDesempenho" },
+      apresentar: ["grafico-passos"],
+      ajudas: {
+        pergunta: "Onde o jogo roda as funções com listas de vários tamanhos?",
+        dica: "Na aba Desempenho, no botão Medir.",
+        linha: { alvo: "ferramenta", ferramenta: "grafico-passos", fala: "Aqui." },
+        solucao: { fala: "Medi: o shift virou uma curva; o índice, uma reta deitada.", acoes: [{ tipo: "medirDesempenho" }] },
+      },
+      falaAoConcluir: { texto: "A curva é a do shift: o código é curto, mas o método trabalha por dentro.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 0 }, { tipo: "medirDesempenho" }],
+    },
+    {
+      id: "melhorar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: {
+        mouse: "Mude a consumirComShift para dar no máximo 10.000 passos com 1.000 pedidos e execute.",
+        toque: "Mude a consumirComShift para dar no máximo 10.000 passos com 1.000 pedidos e execute.",
+      },
+      validador: { tipo: "passosNoMaximo", valor: 10000, tamanho: 1000, funcao: "consumirComShift" },
+      ajudas: { pergunta: "Precisa mesmo tirar o pedido da lista?", dica: "Um índice que anda lê o próximo pedido sem mover os outros." },
+      falaAoConcluir: { texto: "Sem shift, nada se move: os passos crescem junto com a fila.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "definirSnippet", codigo: SNIPPET_SHIFT_MELHOR }, { tipo: "executarSnippet" }],
+    },
+  ],
+  conclusao: [{ texto: "Custo escondido do shift testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode trocar a fila por unshift ou splice e medir de novo.", expressao: "feliz" },
+};
+
+const SNIPPET_BUSCA = [
+  "function procurarNaLista(lista, pedidos) {",
+  "  let achados = 0;",
+  "  for (const pedido of pedidos) {",
+  "    if (lista.includes(pedido)) achados++;",
+  "  }",
+  "  return achados;",
+  "}",
+  "",
+  "function procurarNoMapa(lista, pedidos) {",
+  "  const mapa = new Map();",
+  "  for (const item of lista) mapa.set(item, true);",
+  "  let achados = 0;",
+  "  for (const pedido of pedidos) {",
+  "    if (mapa.has(pedido)) achados++;",
+  "  }",
+  "  return achados;",
+  "}",
+  "",
+  "const estoque = [4, 8, 15, 16, 23, 42];",
+  "console.log(procurarNaLista(estoque, [8, 42, 7]), procurarNoMapa(estoque, [8, 42, 7]));",
+].join("\n");
+
+const SNIPPET_BUSCA_MELHOR = SNIPPET_BUSCA.replace(
+  ["function procurarNaLista(lista, pedidos) {", "  let achados = 0;", "  for (const pedido of pedidos) {", "    if (lista.includes(pedido)) achados++;", "  }", "  return achados;", "}"].join("\n"),
+  ["function procurarNaLista(lista, pedidos) {", "  const vistos = new Set(lista);", "  let achados = 0;", "  for (const pedido of pedidos) {", "    if (vistos.has(pedido)) achados++;", "  }", "  return achados;", "}"].join("\n"),
+);
+
+export const FASE_DEMO_CUSTO_BUSCA: FasePratica = {
+  id: "lab-logica-u1-f11",
+  tipo: "pratica",
+  unidadeId: "lab-logica-u1",
+  titulo: "Custo escondido: includes e Map",
+  conceitos: ["elemento"],
+  revisa: [],
+  prerequisitos: [],
+  usaFerramentas: ["console", "snippet", "palco-memoria", "contador-passos", "grafico-passos"],
+  apresentar: ["snippet"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  programa: {
+    snippet: { codigoInicial: SNIPPET_BUSCA, nome: "estoque.js" },
+    // Cada item da lista é procurado nela mesma: o includes acha o item k depois de examinar k itens.
+    desempenho: {
+      funcoes: [
+        { nome: "procurarNaLista", args: ["$lista", "$lista"] },
+        { nome: "procurarNoMapa", args: ["$lista", "$lista"] },
+      ],
+      tamanhos: [10, 100, 500, 1000],
+    },
+  },
+  introducao: [{ texto: "Procurar pedidos no estoque: numa lista com includes ou num Map com has. As duas dão a mesma resposta.", expressao: "curioso" }],
+  objetivos: [
+    {
+      id: "contar",
+      tipo: "acao",
+      modo: "guiado",
+      enunciado: { mouse: "Execute o estoque.js e olhe o contador de passos.", toque: "Execute o estoque.js e olhe o contador de passos." },
+      validador: {
+        tipo: "todos",
+        validadores: [
+          { tipo: "saida", contem: "2 2" },
+          { tipo: "passosNoMaximo", valor: 200 },
+        ],
+      },
+      apresentar: ["contador-passos"],
+      ajudas: {
+        pergunta: "O que faz o programa rodar?",
+        dica: "O botão Executar, em cima do Snippet.",
+        linha: { alvo: "ferramenta", ferramenta: "snippet", fala: "O Executar mora aqui." },
+        solucao: { fala: "Executei: as duas acharam 2 pedidos.", acoes: [{ tipo: "executarSnippet" }] },
+      },
+      falaAoConcluir: { texto: "Os escondidos vêm do includes: ele examina o estoque item por item.", expressao: "curioso" },
+      solucaoDeTeste: [{ tipo: "executarSnippet" }],
+    },
+    {
+      id: "medir",
+      tipo: "previsao",
+      modo: "guiado",
+      previsao: {
+        pergunta: "Com 1.000 itens no estoque e 1.000 pedidos, qual dá mais passos no total?",
+        opcoes: ["procurarNaLista", "procurarNoMapa", "Empatam"],
+        correta: 0,
+        explicacao: "Cada includes examina a lista até achar: 1 + 2 + 3... até 1.000, uns 500 mil. O has do Map vai direto: 1 passo.",
+      },
+      enunciado: { mouse: "Na aba Desempenho, clique em Medir.", toque: "Na aba Desempenho, toque em Medir." },
+      validador: { tipo: "evento", evento: "mediuDesempenho" },
+      apresentar: ["grafico-passos"],
+      ajudas: {
+        pergunta: "Onde o jogo roda as funções com listas de vários tamanhos?",
+        dica: "Na aba Desempenho, no botão Medir.",
+        linha: { alvo: "ferramenta", ferramenta: "grafico-passos", fala: "Aqui." },
+        solucao: { fala: "Medi: a lista virou uma curva; o Map, uma reta deitada.", acoes: [{ tipo: "medirDesempenho" }] },
+      },
+      falaAoConcluir: { texto: "Montar o Map custa uma volta; depois, cada has é um passo só.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: 0 }, { tipo: "medirDesempenho" }],
+    },
+    {
+      id: "melhorar",
+      tipo: "acao",
+      modo: "sozinho",
+      enunciado: {
+        mouse: "Mude a procurarNaLista para dar no máximo 20.000 passos com 1.000 itens e execute.",
+        toque: "Mude a procurarNaLista para dar no máximo 20.000 passos com 1.000 itens e execute.",
+      },
+      validador: { tipo: "passosNoMaximo", valor: 20000, tamanho: 1000, funcao: "procurarNaLista" },
+      ajudas: { pergunta: "Qual estrutura responde has num passo só?", dica: "Um Map ou um Set montado uma vez com o estoque." },
+      falaAoConcluir: { texto: "Montar o Set uma vez e perguntar has: a curva virou reta.", expressao: "comemorando" },
+      solucaoDeTeste: [{ tipo: "definirSnippet", codigo: SNIPPET_BUSCA_MELHOR }, { tipo: "executarSnippet" }],
+    },
+  ],
+  conclusao: [{ texto: "Custo escondido do includes testado.", expressao: "feliz" }],
+  falaFinal: { texto: "Pode trocar o includes por indexOf ou find e medir de novo.", expressao: "feliz" },
+};
+
 export const FASES_BANCADA_LOGICA: readonly Fase[] = [
   FASE_BANCADA_CONSOLE,
   FASE_DEMO_CIRCUITO,
@@ -1061,4 +1291,6 @@ export const FASES_BANCADA_LOGICA: readonly Fase[] = [
   FASE_DEMO_ORDENAR_CODIGO,
   FASE_DEMO_ESTRUTURAS,
   FASE_DEMO_DESEMPENHO,
+  FASE_DEMO_CUSTO_SHIFT,
+  FASE_DEMO_CUSTO_BUSCA,
 ];
