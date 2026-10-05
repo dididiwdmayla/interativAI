@@ -39,3 +39,21 @@ após o merge do custo escondido (PR #33). Sem mudança no motor.
 
 - Verificação: 18.191 testes verdes; jornada nos três layouts, publicação,
   build e lint verdes.
+
+### Etapa 3 — Dicionário (Map)
+
+- Umidade por canteiro na estufa: dois sensores, água e atualização da
+  mesma chave quando a entrada genérica muda a leitura no segundo 2.
+- set/get/has, ausência, zero e escolha explícita: objeto para uma ficha
+  com campos conhecidos; Map para pares dinâmicos. Prática guiada e
+  sozinha das chaves numérica e textual, que permanecem distintas.
+- Gráfico naLista x noMapa, incluindo a montagem do Map, liga includes
+  ao trabalho escondido e has à consulta barata. A jornada verifica a
+  distância entre as curvas e a legenda do total.
+- Desafio dos bilhetes repetidos do cinema em tela composta, com vazio,
+  um item, zero, repetição e chaves de tipos diferentes; 20.000 passos
+  em 1.000 itens, com a mesma prova automatizada de folga da Fila.
+- Três conceitos com temas e seis itens próprios de revisão.
+
+- Verificação: 18.425 testes verdes; jornada nos três layouts, publicação,
+  build e lint verdes.

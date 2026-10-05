@@ -303,6 +303,11 @@
       "logica-estruturas-de-dados-u2-f2",
       "logica-estruturas-de-dados-u2-f3"
     ],
+    "logica-estruturas-de-dados-u3": [
+      "logica-estruturas-de-dados-u3-f1",
+      "logica-estruturas-de-dados-u3-f2",
+      "logica-estruturas-de-dados-u3-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1785,6 +1790,25 @@
         "codigo"
       ]
     },
+    "logica-estruturas-de-dados-u3-f1": {
+      "objetivos": [
+        "map-guiado",
+        "map-sozinho",
+        "escolha-guiado",
+        "escolha-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u3-f2": {
+      "objetivos": [
+        "busca-guiado",
+        "busca-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u3-f3": {
+      "partes": [
+        "codigo"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1807,6 +1831,12 @@
     }
   },
   "itensRevisao": [
+    "dicionario-map-1",
+    "dicionario-map-2",
+    "objeto-ou-map-1",
+    "objeto-ou-map-2",
+    "busca-com-map-1",
+    "busca-com-map-2",
     "fila-js-1",
     "fila-js-2",
     "fila-por-indice-1",

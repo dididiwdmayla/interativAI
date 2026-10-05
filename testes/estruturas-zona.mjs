@@ -43,7 +43,14 @@ async function acoes(lista) {
    conferir(await arvore.locator('[data-no-arvore]').count()>=5,'árvore mostra raiz, cômodos e folhas');
    conferir(await arvore.locator('[data-ponte-elementos]').isVisible(),'ponte com Elementos aparece');
   }
-  else if(a.tipo==='medirDesempenho'){if(toque)await fecharBalao(pagina);await tocar(pagina.getByRole('tab',{name:'Desempenho',exact:true}));await tocar(pagina.locator('[data-medir-desempenho]'));await pagina.locator('[data-grafico-passos]').waitFor();conferir(await pagina.locator('[data-ponto-grafico]').count()>=3,'gráfico medido com vários tamanhos');}
+  else if(a.tipo==='medirDesempenho'){if(toque)await fecharBalao(pagina);await tocar(pagina.getByRole('tab',{name:'Desempenho',exact:true}));await tocar(pagina.locator('[data-medir-desempenho]'));await pagina.locator('[data-grafico-passos]').waitFor();conferir(await pagina.locator('[data-ponto-grafico]').count()>=3,'gráfico medido com vários tamanhos');
+   const [cara,barata]=n==='2'?['comShift','porIndice']:['naLista','noMapa'];
+   const grafico=pagina.locator('[data-grafico-passos]');
+   await grafico.locator('[data-serie-grafico]').nth(1).waitFor();
+   const altura=nome=>grafico.locator(`[data-ponto-grafico="${nome}:1000"]`).evaluate(el=>Number(el.getAttribute('cy')));
+   conferir(await altura(cara)<await altura(barata)-50,'trabalho escondido faz a curva ingênua crescer muito mais');
+   conferir(await pagina.locator('[data-legenda-escondidos]').getAttribute('data-legenda-escondidos')==='sim','gráfico explica que os pontos somam código e escondidos');
+}
   else if(a.tipo==='executarNoConsole'){if(toque)await fecharBalao(pagina);await tocar(pagina.getByRole('tab',{name:'Console',exact:true}));const ed=pagina.locator('[data-console]:visible [data-entrada-console]').first();await ed.click();await pagina.keyboard.insertText(a.codigo);if(toque)await tocar(pagina.locator('[data-console]:visible [data-rodar-console]').first());else{await pagina.keyboard.press('Enter');await pronto();}}
   else if(a.tipo==='velocidadeCena'){if(modo==='paisagem')await area('cena');if(toque)await fecharBalao(pagina);await tocar(pagina.locator(`[data-velocidade-cena="${a.velocidade}"]`));}
   else throw Error(`Ação sem UI: ${a.tipo}`);

@@ -17,6 +17,10 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"dicionario-map": {"nome": "Dicionário com Map", "resumo": "Map guarda pares: set escreve ou atualiza, get lê, has confere se a chave existe.", "temas": ["dados", "logica"]},
+"objeto-ou-map": {"nome": "Objeto ou Map", "resumo": "Objeto descreve campos de uma coisa; Map serve para pares dinâmicos com chaves que também podem ser números ou objetos.", "temas": ["dados", "logica"]},
+"busca-com-map": {"nome": "Buscar com Map", "resumo": "Montar um Map custa percorrer os dados uma vez; muitas consultas has evitam repetir includes numa lista grande.", "temas": ["dados", "logica", "desempenho"]},
+
 "fila-js": {"nome": "Fila", "resumo": "Numa fila, o primeiro item que entrou sai primeiro; push entra pelo fim e shift sai pelo começo.", "temas": ["dados", "logica"]},
 "fila-por-indice": {"nome": "Fila sem deslizar", "resumo": "Para atender uma lista grande, avançar um índice preserva a ordem sem deslocar todos os vagões a cada shift.", "temas": ["dados", "logica", "desempenho"]},
 

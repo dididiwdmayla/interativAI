@@ -1394,5 +1394,990 @@
       },
       "missaoDeCampo": "No Console de qualquer site, use uma lista como pilha com push/pop e outra como fila com push/shift. Veja quem sai primeiro."
     }
+  ],
+  "3": [
+    {
+      "id": "logica-estruturas-de-dados-u3-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u3",
+      "titulo": "Cada canteiro tem uma chave",
+      "conceitos": [
+        "dicionario-map",
+        "objeto-ou-map"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Uma ficha com nome e preço conhecidos cabe em objeto. Um cadastro que ganha e perde chaves usa Map; chaves podem ser números ou objetos.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Na estufa, cada nome de canteiro aponta sua umidade: set grava, get lê, has verifica. set na mesma chave troca o valor, sem criar outro par.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "get de chave ausente devolve undefined. has é a pergunta certa sobre existência: umidade 0 existe e também pede água.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "map-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie umidade com Map; guarde as leituras de ervas e tomates. Leia ervas, confira has e regue se abaixo de 30.",
+            "toque": "Crie umidade com Map; guarde as leituras de ervas e tomates. Leia ervas, confira has e regue se abaixo de 30."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "leitura",
+                "valor": 20
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "existe",
+                "valor": true
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "agua",
+                "propriedade": "ligado",
+                "valor": true
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:set"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:get"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:has"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Use new Map(), set(nome, valor), get(\"ervas\") e has(\"ervas\").",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use new Map(), set(nome, valor), get(\"ervas\") e has(\"ervas\")."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const umidade = new Map();\numidade.set(\"ervas\", sensorErvas.valor);\numidade.set(\"tomates\", sensorTomates.valor);\nconst leitura = umidade.get(\"ervas\");\nconst existe = umidade.has(\"ervas\");\nif (existe && leitura < 30) agua.ligar();"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O nome é a chave; a leitura é o valor. A água usa o que get devolveu.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const umidade = new Map();\numidade.set(\"ervas\", sensorErvas.valor);\numidade.set(\"tomates\", sensorTomates.valor);\nconst leitura = umidade.get(\"ervas\");\nconst existe = umidade.has(\"ervas\");\nif (existe && leitura < 30) agua.ligar();"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "map-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Espere 2.000 ms e atualize ervas com a nova leitura do sensor. Leia de novo, desligue a água e confira has(\"flores\").",
+            "toque": "Espere 2.000 ms e atualize ervas com a nova leitura do sensor. Leia de novo, desligue a água e confira has(\"flores\")."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "leitura",
+                "valor": 55
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "existe",
+                "valor": true
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "faltou",
+                "valor": false
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "agua",
+                "propriedade": "ligado",
+                "valor": false
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:set"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:get"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:has"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Use esperar(2000), depois set(\"ervas\", sensorErvas.valor). A mesma chave ganha a leitura nova."
+          },
+          "falaAoConcluir": {
+            "texto": "Objeto descreve o sensor; Map relaciona nomes aos valores de muitos canteiros.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const umidade = new Map();\numidade.set(\"ervas\", sensorErvas.valor);\numidade.set(\"tomates\", sensorTomates.valor);\nesperar(2000);\numidade.set(\"ervas\", sensorErvas.valor);\nconst leitura = umidade.get(\"ervas\");\nconst existe = umidade.has(\"ervas\");\nif (existe && leitura < 30) agua.ligar();\nelse agua.desligar();\nconst faltou = umidade.has(\"flores\");"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Após set(\"ervas\",20) e set(\"ervas\",55), quanto get(\"ervas\") devolve?",
+            "opcoes": [
+              "20",
+              "55",
+              "[20,55]"
+            ],
+            "correta": 1,
+            "explicacao": "A chave é a mesma: o valor passa a 55."
+          }
+        },
+        {
+          "id": "escolha-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Descreva ficha com nome Ervas e limite 30. Em pares, guarde 1 como \"número\" e \"1\" como \"texto\"; consulte cada chave.",
+            "toque": "Descreva ficha com nome Ervas e limite 30. Em pares, guarde 1 como \"número\" e \"1\" como \"texto\"; consulte cada chave."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "ficha",
+                "valor": {
+                  "nome": "Ervas",
+                  "limite": 30
+                }
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "numerica",
+                "valor": "número"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "textual",
+                "valor": "texto"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "quantas",
+                "valor": 2
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:set"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:get"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Você descreve uma coisa com campos conhecidos ou registra pares por chaves?",
+            "dica": "Crie ficha como objeto; crie pares com Map. O número e o texto são chaves distintas.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use {nome:\"Ervas\",limite:30} para a ficha e set para os pares."
+            },
+            "solucao": {
+              "fala": "Compare o objeto com os pares do Map.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const ficha = {nome:\"Ervas\", limite:30};\nconst pares = new Map();\npares.set(1, \"número\");\npares.set(\"1\", \"texto\");\nconst numerica = pares.get(1);\nconst textual = pares.get(\"1\");\nconst quantas = pares.size;"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Objeto reúne os campos de uma ficha. Map guarda pares por chave, preservando o tipo de cada chave.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const ficha = {nome:\"Ervas\", limite:30};\nconst pares = new Map();\npares.set(1, \"número\");\npares.set(\"1\", \"texto\");\nconst numerica = pares.get(1);\nconst textual = pares.get(\"1\");\nconst quantas = pares.size;"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "escolha-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Mantenha ficha como objeto; em pares, guarde 2 como \"canteiro A\" e \"2\" como \"canteiro B\". Consulte cada chave.",
+            "toque": "Mantenha ficha como objeto; em pares, guarde 2 como \"canteiro A\" e \"2\" como \"canteiro B\". Consulte cada chave."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "ficha",
+                "valor": {
+                  "nome": "Ervas",
+                  "limite": 30
+                }
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "numerica",
+                "valor": "canteiro A"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "textual",
+                "valor": "canteiro B"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "quantas",
+                "valor": 2
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:set"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:get"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Você descreve uma coisa com campos conhecidos ou registra pares por chaves?",
+            "dica": "Crie ficha como objeto; crie pares com Map. O número e o texto são chaves distintas."
+          },
+          "falaAoConcluir": {
+            "texto": "Objeto reúne os campos de uma ficha. Map guarda pares por chave, preservando o tipo de cada chave.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const ficha = {nome:\"Ervas\", limite:30};\nconst pares = new Map();\npares.set(2, \"canteiro A\");\npares.set(\"2\", \"canteiro B\");\nconst numerica = pares.get(2);\nconst textual = pares.get(\"2\");\nconst quantas = pares.size;"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Um canteiro tem nome e limite fixos; uma tabela associa códigos variados às leituras. Qual escolha combina?",
+            "opcoes": [
+              "Map para tudo, sempre",
+              "Só listas",
+              "Objeto para a ficha; Map para os pares"
+            ],
+            "correta": 2,
+            "explicacao": "A ficha descreve uma coisa; o Map relaciona chaves e valores que entram e saem."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou.",
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "map-estufa",
+        "titulo": "Umidade por canteiro",
+        "ambiente": "estufa",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "ceu",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "estufa",
+            "x": 17,
+            "y": 10
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150
+          },
+          {
+            "peca": "canteiro",
+            "x": 28,
+            "y": 125
+          },
+          {
+            "peca": "canteiro",
+            "x": 178,
+            "y": 125,
+            "variante": "tomates"
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "sensorErvas",
+            "tipo": "sensorUmidade",
+            "x": 85,
+            "y": 122,
+            "inicial": {
+              "valor": 20
+            }
+          },
+          {
+            "id": "sensorTomates",
+            "tipo": "sensorUmidade",
+            "x": 238,
+            "y": 122,
+            "inicial": {
+              "valor": 60
+            }
+          },
+          {
+            "id": "agua",
+            "tipo": "aspersor",
+            "x": 145,
+            "y": 115
+          }
+        ],
+        "linhaDoTempo": [
+          {
+            "em": 2000,
+            "dispositivo": "sensorErvas",
+            "propriedade": "valor",
+            "valor": 55
+          }
+        ]
+      }
+    },
+    {
+      "id": "logica-estruturas-de-dados-u3-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u3",
+      "titulo": "Procurar mil vezes",
+      "conceitos": [
+        "busca-com-map"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "dicionario-map",
+        "custo-em-passos",
+        "crescimento-dos-passos"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "dicionario-map",
+        "custo-em-passos",
+        "crescimento-dos-passos"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "naLista",
+              "args": [
+                "$lista",
+                "$lista"
+              ]
+            },
+            {
+              "nome": "noMapa",
+              "args": [
+                "$lista",
+                "$lista"
+              ]
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "includes procura item a item; uma lista grande custa trabalho escondido. Map.has consulta a chave sem fazer essa busca linear no modelo.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Monte o Map uma vez, antes do laço de pedidos. O gráfico também conta essa montagem. Uma única consulta pequena pode dispensar um Map.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Revise Algoritmos: responder certo não basta para medir trabalho. Compare as funções nos mesmos dados crescentes.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "busca-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie naLista e noMapa para contar pedidos presentes no estoque. Execute as chamadas e meça o gráfico.",
+            "toque": "Crie naLista e noMapa para contar pedidos presentes no estoque. Execute as chamadas e meça o gráfico."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "noMapa",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      [
+                        1
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ],
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": 1
+                  },
+                  {
+                    "args": [
+                      [
+                        4,
+                        8,
+                        12
+                      ],
+                      [
+                        8,
+                        99,
+                        4
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        0
+                      ],
+                      [
+                        0,
+                        0
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        1
+                      ],
+                      []
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "achados",
+                "valor": 2
+              },
+              {
+                "tipo": "evento",
+                "evento": "mediuDesempenho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Monte mapa com set; depois conte cada pedido cujo mapa.has(pedido) é true.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Monte mapa com set; depois conte cada pedido cujo mapa.has(pedido) é true."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function naLista(lista, pedidos) {\n  let achados = 0;\n  for (const pedido of pedidos) {\n    if (lista.includes(pedido)) achados++;\n  }\n  return achados;\n}\nfunction noMapa(lista, pedidos) {\n  const mapa = new Map();\n  for (const item of lista) mapa.set(item, true);\n  let achados = 0;\n  for (const pedido of pedidos) {\n    const existe = mapa.has(pedido);\n    if (existe) achados++;\n  }\n  return achados;\n}\nconst achados = noMapa([4,8,12], [8,99,4]);\nconsole.log(naLista([4,8,12], [8,99,4]), achados);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "medirDesempenho"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "includes soma muitas leituras escondidas; montar o Map custa uma volta.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function naLista(lista, pedidos) {\n  let achados = 0;\n  for (const pedido of pedidos) {\n    if (lista.includes(pedido)) achados++;\n  }\n  return achados;\n}\nfunction noMapa(lista, pedidos) {\n  const mapa = new Map();\n  for (const item of lista) mapa.set(item, true);\n  let achados = 0;\n  for (const pedido of pedidos) {\n    const existe = mapa.has(pedido);\n    if (existe) achados++;\n  }\n  return achados;\n}\nconst achados = noMapa([4,8,12], [8,99,4]);\nconsole.log(naLista([4,8,12], [8,99,4]), achados);"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "medirDesempenho"
+            }
+          ]
+        },
+        {
+          "id": "busca-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Consulte [12,12,99] no estoque [4,8,12]. Guarde achados e mantenha noMapa dentro de 20.000 passos.",
+            "toque": "Consulte [12,12,99] no estoque [4,8,12]. Guarde achados e mantenha noMapa dentro de 20.000 passos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "noMapa",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      [
+                        1
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ],
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": 1
+                  },
+                  {
+                    "args": [
+                      [
+                        4,
+                        8,
+                        12
+                      ],
+                      [
+                        8,
+                        99,
+                        4
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        0
+                      ],
+                      [
+                        0,
+                        0
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        1
+                      ],
+                      []
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "achados",
+                "valor": 2
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "pedidos",
+                "valor": [
+                  12,
+                  12,
+                  99
+                ]
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "funcao": "noMapa",
+                "tamanho": 1000,
+                "valor": 20000
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Cada pedido conta, inclusive repetido. O Map deve ser montado fora do laço de consultas."
+          },
+          "falaAoConcluir": {
+            "texto": "has é barato; includes repete a busca para cada pedido.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function naLista(lista, pedidos) {\n  let achados = 0;\n  for (const pedido of pedidos) {\n    if (lista.includes(pedido)) achados++;\n  }\n  return achados;\n}\nfunction noMapa(lista, pedidos) {\n  const mapa = new Map();\n  for (const item of lista) mapa.set(item, true);\n  let achados = 0;\n  for (const pedido of pedidos) {\n    const existe = mapa.has(pedido);\n    if (existe) achados++;\n  }\n  return achados;\n}\nconst pedidos = [12,12,99];\nconst achados = noMapa([4,8,12], pedidos);\nconsole.log(naLista([4,8,12], [8,99,4]), achados);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Mil consultas em mil códigos: qual faz mais trabalho total, incluindo a montagem?",
+            "opcoes": [
+              "naLista com includes",
+              "noMapa com has",
+              "Empatam"
+            ],
+            "correta": 0,
+            "explicacao": "includes percorre códigos em cada busca; o Map foi montado só uma vez."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou."
+    },
+    {
+      "id": "logica-estruturas-de-dados-u3-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-estruturas-de-dados-u3",
+      "titulo": "Bilhetes na entrada do cinema",
+      "conceitos": [],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "dicionario-map",
+        "objeto-ou-map",
+        "busca-com-map"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "dicionario-map",
+        "objeto-ou-map",
+        "busca-com-map"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "programa": {
+        "snippet": {
+          "nome": "desafio.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "conferir"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Crie conferir(lista): conte bilhetes repetidos após a primeira ocorrência. Uma lista vazia devolve 0.",
+          "expressao": "curioso"
+        }
+      ],
+      "partes": [
+        {
+          "id": "codigo",
+          "descricao": "Crie conferir(lista): conte bilhetes repetidos após a primeira ocorrência. Uma lista vazia devolve 0.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "conferir",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        9
+                      ]
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3,
+                        3
+                      ]
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        0,
+                        0
+                      ]
+                    ],
+                    "esperado": 1
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        "1"
+                      ]
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "repetidos",
+                "valor": 2
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "funcao": "conferir",
+                "tamanho": 1000,
+                "valor": 20000
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:set"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:has"
+              }
+            ]
+          },
+          "revisarEm": "logica-estruturas-de-dados-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function conferir(lista) {\n  const vistos = new Map();\n  let repetidos = 0;\n  for (const codigo of lista) {\n    const existe = vistos.has(codigo);\n    if (existe) repetidos++;\n    else vistos.set(codigo, true);\n  }\n  return repetidos;\n}\nconst repetidos = conferir([3,1,3,3]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "A regra funcionou com vazio, um item e caminhos diferentes. Sua estrutura atende o novo pedido.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "No Console real, compare push/pop e push/shift com os mesmos itens.",
+        "expressao": "feliz"
+      },
+      "missaoDeCampo": "No Console de qualquer site, use uma lista como pilha com push/pop e outra como fila com push/shift. Veja quem sai primeiro."
+    }
   ]
 }
