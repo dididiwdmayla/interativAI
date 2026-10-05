@@ -1,0 +1,843 @@
+{
+  "1": [
+    {
+      "id": "logica-depuracao-u1-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u1",
+      "titulo": "O vermelho é uma pista",
+      "conceitos": [
+        "dicionario-de-erros"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "const pedido = true;\nif (pedido) luz.ligada = true;"
+        }
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "Programadores passam muito tempo consertando. Reproduza, forme uma hipótese, olhe as pistas, confirme ou descarte e teste de novo.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Dicionário: SyntaxError indica escrita inválida; ReferenceError, nome indisponível; TypeError, operação incompatível com o valor.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "reproduzir",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Execute e leia tipo, mensagem e linha do erro antes de mudar o código.",
+            "toque": "Execute e leia tipo, mensagem e linha do erro antes de mudar o código."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "TypeError"
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "TypeError: ligada é somente leitura; a ficha mostra o comando ligar().",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "TypeError: ligada é somente leitura; a ficha mostra o comando ligar()."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Erro é pista, não fracasso. O programa parou; você não estragou o computador.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "consertar",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Confirme a hipótese: use o comando da luz e execute de novo.",
+            "toque": "Confirme a hipótese: use o comando da luz e execute de novo."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "luz",
+                "propriedade": "ligada",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Troque a escrita em ligada pelo comando ligar().",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Troque a escrita em ligada pelo comando ligar()."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const pedido = true;\nif (pedido) luz.ligar();"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A mensagem mostrou a operação inválida. A luz agora responde ao pedido.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const pedido = true;\nif (pedido) luz.ligar();"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "outro-erro",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue forno.ligado = true: execute antes de consertar.",
+            "toque": "Investigue forno.ligado = true: execute antes de consertar."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "TypeError"
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Leia a propriedade e procure o comando na ficha."
+          },
+          "falaAoConcluir": {
+            "texto": "Mesma categoria em outro aparelho; procure o motivo, não decore a linha.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "forno.ligado = true;"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "outro-conserto",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Conserte o pedido de ligar o forno e teste de novo.",
+            "toque": "Conserte o pedido de ligar o forno e teste de novo."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "forno",
+                "propriedade": "ligado",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Qual comando muda ligado sem escrever nessa propriedade?"
+          },
+          "falaAoConcluir": {
+            "texto": "A hipótese foi confirmada por um teste.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "forno.ligar();"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "O que a mensagem TypeError permite concluir?",
+            "opcoes": [
+              "O computador quebrou",
+              "Uma operação não combina com o valor",
+              "Todo o programa está errado"
+            ],
+            "correta": 1,
+            "explicacao": "Ela descreve uma operação inválida, como escrever numa propriedade somente leitura."
+          }
+        }
+      ],
+      "cena": {
+        "id": "depuracao-cozinha",
+        "titulo": "A luz não acende",
+        "ambiente": "cozinha",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "luz",
+            "tipo": "lampada",
+            "x": 110,
+            "y": 40
+          },
+          {
+            "id": "forno",
+            "tipo": "forno",
+            "x": 200,
+            "y": 100
+          }
+        ],
+        "linhaDoTempo": []
+      },
+      "apresentar": [
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ]
+    },
+    {
+      "id": "logica-depuracao-u1-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u1",
+      "titulo": "A linha da pista e a causa",
+      "conceitos": [
+        "causa-do-erro"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "const pedidos = [{nome: \"chá\"}];\nfor (let i = 0; i <= pedidos.length; i++) {\n  console.log(pedidos[i].nome);\n}"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "A linha 3 lê .nome de undefined. Hipótese: o índice passa do fim. A causa pode estar na condição da linha 2.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Leia o índice, o tamanho e a mensagem. Mexer no chute costuma criar outros bugs.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "limite-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Execute o programa e leia a falha na linha 3.",
+            "toque": "Execute o programa e leia a falha na linha 3."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "TypeError"
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Na última volta, i vale length e não aponta nenhum item.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Na última volta, i vale length e não aponta nenhum item."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A lista termina em length - 1. A linha indicada é onde o problema apareceu.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Qual linha pode causar a leitura inválida da linha 3?",
+            "opcoes": [
+              "A linha 2, com <=",
+              "Só a linha 3",
+              "A chamada console.log"
+            ],
+            "correta": 0,
+            "explicacao": "O <= permite i igual ao tamanho, fora dos índices válidos."
+          }
+        },
+        {
+          "id": "limite-conserto",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Teste a hipótese corrigindo o limite do laço.",
+            "toque": "Teste a hipótese corrigindo o limite do laço."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "saida",
+                "igual": [
+                  "chá"
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Use < no limite; não esconda o erro removendo o console.log.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use < no limite; não esconda o erro removendo o console.log."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const pedidos = [{nome: \"chá\"}];\nfor (let i = 0; i < pedidos.length; i++) {\n  console.log(pedidos[i].nome);\n}"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Você corrigiu a causa, mantendo o pedido de mostrar todos os nomes.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const pedidos = [{nome: \"chá\"}];\nfor (let i = 0; i < pedidos.length; i++) {\n  console.log(pedidos[i].nome);\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "nome-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Troque o programa por console.log(saldo); execute e leia a mensagem.",
+            "toque": "Troque o programa por console.log(saldo); execute e leia a mensagem."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "ReferenceError"
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Um nome existe só depois da declaração e no alcance dela."
+          },
+          "falaAoConcluir": {
+            "texto": "ReferenceError: procure declaração, grafia e escopo.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "console.log(saldo);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "nome-conserto",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Declare saldo com 0 antes de mostrar e teste novamente.",
+            "toque": "Declare saldo com 0 antes de mostrar e teste novamente."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "saida",
+                "igual": [
+                  "0"
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Onde saldo precisa existir antes de ser lido?"
+          },
+          "falaAoConcluir": {
+            "texto": "Sem chute: a declaração resolveu a indisponibilidade.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const saldo = 0;\nconsole.log(saldo);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "sintaxe-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Execute const soma = (2 + 3; e leia o erro de escrita.",
+            "toque": "Execute const soma = (2 + 3; e leia o erro de escrita."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "SyntaxError"
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Compare os parênteses que abrem e fecham."
+          },
+          "falaAoConcluir": {
+            "texto": "SyntaxError acontece antes de executar as linhas.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const soma = (2 + 3;"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "sintaxe-conserto",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Feche a conta e mostre soma no Console.",
+            "toque": "Feche a conta e mostre soma no Console."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "soma",
+                "valor": 5
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Um parêntese aberto precisa de seu fechamento."
+          },
+          "falaAoConcluir": {
+            "texto": "A escrita e o resultado foram conferidos.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const soma = (2 + 3);\nconsole.log(soma);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-depuracao-u1-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-depuracao-u1",
+      "titulo": "As etiquetas da viagem",
+      "conceitos": [],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function etiquetas(itens {\n  const nomes = [];\n  for (let i = 0; i <= itens.length; i++) {\n    nomes.push(item[i].nome);\n  }\n  return nomes;\n}\nconsole.log(etiquetas([{nome: \"mala\"}]));"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "introducao": [
+        {
+          "texto": "A equipe precisa de etiquetas(itens): devolva os nomes na mesma ordem, inclusive repetidos. Lista vazia vira []. Há três defeitos.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Execute e trate os erros na ordem em que aparecem. Depois confira os casos comuns e as bordas.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "partes": [
+        {
+          "id": "escrita",
+          "descricao": "Reproduza e resolva o erro de escrita; execute até aparecer o próximo erro.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "erroDoTipo",
+                "nome": "SyntaxError"
+              },
+              {
+                "tipo": "erroDoTipo",
+                "nome": "ReferenceError"
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function etiquetas(itens) {\n  const nomes = [];\n  for (let i = 0; i <= itens.length; i++) {\n    nomes.push(item[i].nome);\n  }\n  return nomes;\n}\nconsole.log(etiquetas([{nome: \"mala\"}]));"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u1-f2"
+        },
+        {
+          "id": "nome",
+          "descricao": "Resolva o nome indisponível e reproduza o erro seguinte.",
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "TypeError"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function etiquetas(itens) {\n  const nomes = [];\n  for (let i = 0; i <= itens.length; i++) {\n    nomes.push(itens[i].nome);\n  }\n  return nomes;\n}\nconsole.log(etiquetas([{nome: \"mala\"}]));"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u1-f2"
+        },
+        {
+          "id": "codigo",
+          "descricao": "Entregue etiquetas com vazio, um item e nomes repetidos, sem erro.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "etiquetas",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "x"
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "a"
+                        },
+                        {
+                          "nome": "b"
+                        },
+                        {
+                          "nome": "a"
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "a",
+                      "b",
+                      "a"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function etiquetas(itens) {\n  const nomes = [];\n  for (let i = 0; i < itens.length; i++) {\n    nomes.push(itens[i].nome);\n  }\n  return nomes;\n}\nconsole.log(etiquetas([{nome: \"mala\"}]));"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u1-f2"
+        },
+        {
+          "id": "testes",
+          "descricao": "Rode os casos visíveis e confirme o conserto.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 2,
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "rodarCasos"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u1-f2"
+        }
+      ],
+      "missaoDeCampo": "No Chrome, abra DevTools > Sources > Snippets, crie um Snippet curto e execute. Marque um ponto no número da linha; use F10, F11 e Shift+F11 e confira Scope e Watch.",
+      "testes": {
+        "funcao": "etiquetas",
+        "parametros": [
+          "itens"
+        ],
+        "inicial": [
+          {
+            "entrada": "[]",
+            "esperado": "[]"
+          },
+          {
+            "entrada": "[{nome: \"mala\"}]",
+            "esperado": "[\"mala\"]"
+          }
+        ]
+      }
+    }
+  ]
+}

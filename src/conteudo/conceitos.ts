@@ -17,6 +17,9 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  "dicionario-de-erros": {"nome": "Dicionário de erros", "resumo": "SyntaxError aponta escrita inválida, ReferenceError um nome indisponível e TypeError uma operação incompatível com o valor.", "temas": ["logica", "ferramentas"]},
+  "causa-do-erro": {"nome": "Pista e causa", "resumo": "A linha apontada mostra onde a falha apareceu; a causa pode estar antes, como no limite de um laço.", "temas": ["logica", "ferramentas"]},
+
 "arvore-de-dados": {"nome": "Árvore de dados", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
 "percorrer-arvore": {"nome": "Percorrer a árvore", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
 

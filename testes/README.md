@@ -259,3 +259,5 @@ as soluções sintéticas do lab. Confere as bordas contra função constante,
 a insuficiência de um caso feliz e o progresso concluído na ilha.
 
 - `node testes/estruturas-zona.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa da zona Estruturas, previsões, bordas, vagões pelos lados certos, custo escondido no gráfico e árvore.
+
+- Depuração: `node testes/depuracao.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa com editor, erros sucessivos, pausas, controles, Observar e casos de teste. Dados em `depuracao-jornadas.json`, conferidos contra o conteúdo.
