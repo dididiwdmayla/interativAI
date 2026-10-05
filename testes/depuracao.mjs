@@ -17,6 +17,9 @@ async function tocar(el) { await el.scrollIntoViewIfNeeded(); await (toque ? el.
 async function conversa(nome) { if(toque) await abrirBalao(pagina); await tocar(pagina.getByRole('button',{name:nome}).first()); }
 async function area(a) { if(toque) await fecharBalao(pagina); const aba=pagina.locator(`[data-abas-composicao] [data-segmento="${a}"]`); if(await aba.count() && await aba.getAttribute('aria-selected')!=='true') await tocar(aba); }
 async function fontes(nome='Snippet') {
+ if (modo==='retrato' && nome==='Depurador' && await pagina.locator('[data-alternar-cena]').count() && await pagina.locator('[data-area-trabalho="cena"]').isVisible()) {
+  await fecharBalao(pagina);await tocar(pagina.locator('[data-alternar-cena]'));
+ }
  await area('snippet');
  const tab=pagina.getByRole('tab',{name:'Fontes',exact:true});if(await tab.isVisible().catch(()=>false))await tocar(tab);
  const aba=pagina.getByRole('tablist',{name:'Mostrar na aba Fontes'}).getByRole('tab',{name:nome,exact:true});if(await aba.isVisible().catch(()=>false))await tocar(aba);
@@ -25,6 +28,11 @@ async function edit(codigo) {
  await fontes();if(toque)await fecharBalao(pagina);
  const ed=pagina.locator('[data-editor-snippet] .cm-content');await ed.focus();
  await pagina.keyboard.press('ControlOrMeta+A');await pagina.keyboard.insertText(codigo);await pronto();
+}
+let observados = new Map();
+async function capturarObservados() {
+ const valores = await pagina.locator('[data-observacao]').evaluateAll(els => els.flatMap(el => { const v = el.querySelector('[data-valor-observado=valor]'); return v ? [[el.getAttribute('data-observacao'), v.textContent.trim()]] : []; }));
+ for (const [expressao, valor] of valores) observados.set(expressao, [...(observados.get(expressao) ?? []), valor]);
 }
 async function acoes(lista) {
  for(const a of lista){
@@ -37,6 +45,11 @@ async function acoes(lista) {
   else if(a.tipo==='controlarDepurador'){
    await fontes('Depurador');if(toque)await fecharBalao(pagina);
    await tocar(pagina.locator(`[data-controle-depurador="${a.controle}"]:visible`).first());
+   if (a.controle==='entrar') {
+    const pilha=pagina.getByRole('tablist',{name:'Painéis do depurador'}).getByRole('tab',{name:'Pilha',exact:true});
+    if (await pilha.isVisible().catch(()=>false)) await tocar(pilha);
+    conferir(await pagina.locator('[data-quadro-pilha]').count()>=2,'Entrar abriu a chamada sobre quem chamou');
+   }
   }
   else if(a.tipo==='observar'){
    await fontes('Depurador');
@@ -48,6 +61,14 @@ async function acoes(lista) {
   else if(a.tipo==='rodarCasos'){await area('testes');await tocar(pagina.locator('[data-rodar-casos]'));}
   else if(a.tipo==='escreverCaso'){await area('testes');await pagina.locator('[data-entrada-nova]').fill(a.entrada);await pagina.locator('[data-esperado-novo]').fill(a.esperado);await tocar(pagina.locator('[data-adicionar-caso]'));}
   else throw Error(`Ação sem UI: ${a.tipo}`);
+  if (['executarSnippet','controlarDepurador','observar'].includes(a.tipo)) {
+   const depurador = pagina.getByRole('tablist',{name:'Mostrar na aba Fontes'}).getByRole('tab',{name:'Depurador',exact:true});
+   if (await depurador.isVisible().catch(()=>false)) await fontes('Depurador');
+   const aba = pagina.getByRole('tablist',{name:'Painéis do depurador'}).getByRole('tab',{name:'Observar',exact:true});
+   if (await aba.isVisible().catch(()=>false)) await tocar(aba);
+   await pagina.waitForFunction(() => [...document.querySelectorAll('[data-observacao]')].every(el => el.querySelector('[data-valor-observado]')), null, {timeout:10000});
+   await capturarObservados();
+  }
  }
 }
 async function introducao(){for(let i=0;i<8;i++){if(toque)await abrirBalao(pagina);const b=pagina.getByRole('button',{name:/^(Continuar|Vamos lá!)$/}).first();if(!await b.isVisible().catch(()=>false))break;await tocar(b);}}
@@ -63,13 +84,12 @@ for(const fase of fases){
   for(const [i,o] of fase.objetivos.entries()){
    await pagina.waitForFunction(alvo=>document.querySelector('[data-jogo-fase]')?.getAttribute('data-objetivo-atual')===alvo,o.id);
    if(o.modo==='sozinho'){if(toque)await abrirBalao(pagina);conferir(!await pagina.getByRole('button',{name:/^(Próximo objetivo|Ver resultado)$/}).first().isVisible().catch(()=>false),`${o.id}: sozinho exige trabalho`);}
+   observados = new Map();
    await acoes(o.solucaoDeTeste);
    // Com valor, a observação precisa vir de uma pausa real, e não só da lista do Watch.
    const vs=o.validador.tipo==='todos'?o.validador.validadores:[o.validador];
    for(const v of vs.filter(v=>v.tipo==='observou'&&v.valor!==undefined)){
-    await fontes('Depurador');const aba=pagina.getByRole('tab',{name:'Observar',exact:true});if(await aba.isVisible().catch(()=>false))await tocar(aba);
-    const valor=await pagina.locator(`[data-observacao="${v.expressao}"] [data-valor-observado]`).first().innerText();
-    conferir(valor.includes(String(v.valor)),`Observar mostrou ${v.expressao} = ${v.valor}`);
+    conferir((observados.get(v.expressao) ?? []).some(valor => valor.includes(String(v.valor))),`Observar mostrou ${v.expressao} = ${v.valor} durante a investigação`);
    }
    if(i<fase.objetivos.length-1)await conversa('Próximo objetivo');
   }

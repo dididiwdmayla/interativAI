@@ -17,6 +17,10 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  "ponto-de-parada": {"nome": "Ponto de parada", "resumo": "Marcar uma linha permite pausar antes dela executar e olhar a memória daquele instante.", "temas": ["logica", "ferramentas"]},
+  "hipotese-de-bug": {"nome": "Hipótese de bug", "resumo": "Uma explicação provisória do defeito precisa ser confirmada ou descartada pelos valores observados.", "temas": ["logica", "ferramentas"]},
+  "bug-silencioso": {"nome": "Bug silencioso", "resumo": "Um programa pode terminar sem erro e ainda devolver o resultado errado; casos de teste revelam a diferença.", "temas": ["logica", "ferramentas"]},
+
   "dicionario-de-erros": {"nome": "Dicionário de erros", "resumo": "SyntaxError aponta escrita inválida, ReferenceError um nome indisponível e TypeError uma operação incompatível com o valor.", "temas": ["logica", "ferramentas"]},
   "causa-do-erro": {"nome": "Pista e causa", "resumo": "A linha apontada mostra onde a falha apareceu; a causa pode estar antes, como no limite de um laço.", "temas": ["logica", "ferramentas"]},
 

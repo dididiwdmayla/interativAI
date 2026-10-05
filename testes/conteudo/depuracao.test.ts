@@ -20,3 +20,27 @@ it('consertar só o exemplo não passa nas bordas escondidas', () => {
     expect(sim.avaliar(f).passou, fase.id).toBe(false);
   }
 });
+it('um conserto correto sem investigação não cumpre a caça ao bug', () => {
+  for (const fase of fases) {
+    if (fase.tipo !== 'desafio') continue;
+    const investigar = fase.partes.find(p => p.id === 'investigar');
+    if (!investigar) continue;
+    const codigo = fase.partes.find(p => p.id === 'codigo')!.solucaoDeTeste.find(a => a.tipo === 'definirSnippet');
+    if (codigo?.tipo !== 'definirSnippet') throw new Error('Código de conserto esperado');
+    const sim = criarSimulacao(fase);
+    sim.executar([codigo, {tipo:'executarSnippet'}]);
+    expect(sim.avaliar(investigar.validador).passou, fase.id).toBe(false);
+    expect(sim.avaliar(fase.partes.find(p => p.id === 'codigo')!.validador).passou, fase.id).toBe(true);
+  }
+});
+it('as execuções investigadas cabem nas primeiras mil fotos da memória', () => {
+  for (const fase of fases) {
+    const sim = criarSimulacao(fase);
+    const alvos = fase.tipo === 'pratica' ? fase.objetivos : fase.tipo === 'desafio' ? fase.partes : [];
+    for (const alvo of alvos) {
+      sim.executar(alvo.solucaoDeTeste);
+      const execucao = sim.programa().ultimaExecucao;
+      if (execucao) expect(execucao.rastroCortado, `${fase.id}/${alvo.id}`).toBe(false);
+    }
+  }
+});

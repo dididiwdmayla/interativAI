@@ -24,3 +24,18 @@ conforme o pedido. O contrato continua no fim da Ilha Lógica.
   afetados. Jornada da unidade nos três layouts, publicação, build e
   lint verdes. Publicação exigiu apresentar as ferramentas de cena
   nesta zona, que fica antes de Algoritmos no currículo.
+
+### Etapa 2 — Pontos de parada
+
+- Garagem com atribuição na condição: portão abre e não fecha; valores
+  observados antes do conserto revelam a decisão alterada.
+- Soma com uma volta a mais, sem erro vermelho, e desafio da carga com
+  índice inicial errado. Comparar índice e tamanho confirma a hipótese.
+- Três conceitos com temas, seis revisões; casos escondidos rejeitam
+  solução constante e investigação é necessária mesmo com código certo.
+- Conteúdo: 19.028 verificações, com dois casos antigos sensíveis à carga
+  (bancada e recursão infinita) verdes no reteste isolado. As quatro
+  provas específicas e 81 checagens afetadas passaram. Jornadas nos três
+  layouts verdes, com leitura dos valores efetivamente vistos na pausa;
+  teste móvel abre Observar e recolhe a cena em retrato. Publicação,
+  build e lint verdes.

@@ -839,5 +839,1058 @@
         ]
       }
     }
+  ],
+  "2": [
+    {
+      "id": "logica-depuracao-u2-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u2",
+      "titulo": "O portão ficou aberto",
+      "conceitos": [
+        "ponto-de-parada",
+        "hipotese-de-bug"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "let deveFechar = true;\nportao.abrir();\nesperar(1000);\nif (deveFechar = false) {\n  portao.fechar();\n}\nconsole.log(deveFechar);"
+        }
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "O portão abre e nunca fecha. Hipótese: a decisão de fechar foi alterada. Pause e compare o valor com o true declarado.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Um ponto para ANTES da linha. Escopo mostra valores; Observar guarda expressões. console.log ajuda, mas o depurador dispensa mudar o código.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "pausa-guiada",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Marque a linha 7, adicione deveFechar em Observar e execute.",
+            "toque": "Marque a linha 7, adicione deveFechar em Observar e execute."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pontoDeParada",
+                "linha": 7
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 7
+              },
+              {
+                "tipo": "observou",
+                "expressao": "deveFechar",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Clique ou toque no número 7. Em Observar adicione deveFechar; execute.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Clique ou toque no número 7. Em Observar adicione deveFechar; execute."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 7
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "deveFechar"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "deveFechar virou false: = atribui, não compara. A pista confirma que a decisão mudou.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 7
+            },
+            {
+              "tipo": "observar",
+              "expressao": "deveFechar"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Para olhar o valor antes de console.log, onde pôr o ponto?",
+            "opcoes": [
+              "Linha 1, antes de declarar",
+              "Linha 7, antes de mostrar",
+              "Depois do programa"
+            ],
+            "correta": 1,
+            "explicacao": "O ponto na linha 7 pausa antes de console.log, com o valor já alterado."
+          },
+          "apresentar": [
+            "pontos-de-parada",
+            "controles-depurador",
+            "painel-escopo",
+            "painel-observar"
+          ]
+        },
+        {
+          "id": "corrigir-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome, tire o ponto e corrija a comparação; o portão deve fechar após 1 segundo.",
+            "toque": "Retome, tire o ponto e corrija a comparação; o portão deve fechar após 1 segundo."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "portao",
+                "propriedade": "aberto",
+                "valor": false,
+                "noTempo": 1100
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Retome antes de editar. Pergunte se deveFechar === true.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Retome antes de editar. Pergunte se deveFechar === true."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 7
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "let deveFechar = true;\nportao.abrir();\nesperar(1000);\nif (deveFechar === true) {\n  portao.fechar();\n}\nconsole.log(deveFechar);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Conserto confirmado: o portão abriu e depois fechou.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 7
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let deveFechar = true;\nportao.abrir();\nesperar(1000);\nif (deveFechar === true) {\n  portao.fechar();\n}\nconsole.log(deveFechar);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "pausa-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue um pedido de fechar após 2 segundos: pause e compare a decisão.",
+            "toque": "Investigue um pedido de fechar após 2 segundos: pause e compare a decisão."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pontoDeParada",
+                "linha": 7
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 7
+              },
+              {
+                "tipo": "observou",
+                "expressao": "deveFechar",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Escolha um instante depois da decisão e compare o que foi declarado com o que ficou."
+          },
+          "falaAoConcluir": {
+            "texto": "A investigação é reproduzível; não depende de um palpite novo a cada tentativa.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let deveFechar = true;\nportao.abrir();\nesperar(2000);\nif (deveFechar = false) {\n  portao.fechar();\n}\nconsole.log(deveFechar);"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 7
+            },
+            {
+              "tipo": "observar",
+              "expressao": "deveFechar"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "corrigir-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Retome e conserte o pedido, verificando que abriu e fechou nos instantes certos.",
+            "toque": "Retome e conserte o pedido, verificando que abriu e fechou nos instantes certos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "portao",
+                "propriedade": "aberto",
+                "valor": true,
+                "noTempo": 500
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "portao",
+                "propriedade": "aberto",
+                "valor": false,
+                "noTempo": 2500
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "A condição precisa comparar sem mudar a caixinha."
+          },
+          "falaAoConcluir": {
+            "texto": "Testar só o fim não prova a abertura; os dois instantes confirmam o pedido.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 7
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let deveFechar = true;\nportao.abrir();\nesperar(2000);\nif (deveFechar === true) {\n  portao.fechar();\n}\nconsole.log(deveFechar);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "cena": {
+        "id": "depuracao-garagem",
+        "titulo": "O portão não fecha",
+        "ambiente": "garagem",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "portao",
+            "tipo": "portao",
+            "x": 50,
+            "y": 65
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-depuracao-u2-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u2",
+      "titulo": "O índice ultrapassa a lista",
+      "conceitos": [
+        "bug-silencioso"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function somar(valores) {\n  let total = 0;\n  for (let i = 0; i <= valores.length; i++) {\n    total += valores[i];\n  }\n  return total;\n}\nconst resultado = somar([4, 6]);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "somar([4, 6]) deveria dar 10. Não aparece erro vermelho, mas o resultado é NaN. Hipótese: o laço lê além do fim.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Código que roda sem erro pode produzir uma resposta errada. Retomar vai ao próximo ponto, inclusive na próxima volta do laço.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "indice-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Pause na soma e retome até i valer o tamanho da lista. Observe i e valores.length.",
+            "toque": "Pause na soma e retome até i valer o tamanho da lista. Observe i e valores.length."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pontoDeParada",
+                "linha": 4
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 4
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 2
+              },
+              {
+                "tipo": "observou",
+                "expressao": "valores.length",
+                "valor": 2
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Ponto na linha 4. Observe os dois valores e retome duas vezes.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Ponto na linha 4. Observe os dois valores e retome duas vezes."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 4
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "i"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "valores.length"
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "i e length valem 2; os índices válidos eram 0 e 1.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "observar",
+              "expressao": "i"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "valores.length"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Antes de somar na terceira pausa, qual índice aparece?",
+            "opcoes": [
+              "2, fora da lista",
+              "1, o último válido",
+              "0, sempre reinicia"
+            ],
+            "correta": 0,
+            "explicacao": "O <= deixa i chegar a 2; esse item não existe."
+          }
+        },
+        {
+          "id": "soma-guiada",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome, retire o ponto e conserte somar. Confirme vazio e entradas diferentes.",
+            "toque": "Retome, retire o ponto e conserte somar. Confirme vazio e entradas diferentes."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somar",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        4,
+                        6
+                      ]
+                    ],
+                    "esperado": 10
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        2
+                      ]
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Use < para não ler valores[length].",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use < para não ler valores[length]."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 4
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function somar(valores) {\n  let total = 0;\n  for (let i = 0; i < valores.length; i++) {\n    total += valores[i];\n  }\n  return total;\n}\nconst resultado = somar([4, 6]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Não basta sumir o vermelho: a função devolve os totais esperados.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somar(valores) {\n  let total = 0;\n  for (let i = 0; i < valores.length; i++) {\n    total += valores[i];\n  }\n  return total;\n}\nconst resultado = somar([4, 6]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "indice-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Repita a investigação com [7]: compare i e length na volta que não deveria acontecer.",
+            "toque": "Repita a investigação com [7]: compare i e length na volta que não deveria acontecer."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pontoDeParada",
+                "linha": 4
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 4
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 1
+              },
+              {
+                "tipo": "observou",
+                "expressao": "valores.length",
+                "valor": 1
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Reutilize as observações; um item só tem índice 0."
+          },
+          "falaAoConcluir": {
+            "texto": "A borda de um item confirma a mesma causa.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somar(valores) {\n  let total = 0;\n  for (let i = 0; i <= valores.length; i++) {\n    total += valores[i];\n  }\n  return total;\n}\nconst resultado = somar([7]);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            }
+          ]
+        },
+        {
+          "id": "soma-sozinha",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Conserte e teste somar com vazio, um item e negativos.",
+            "toque": "Conserte e teste somar com vazio, um item e negativos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somar",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": 7
+                  },
+                  {
+                    "args": [
+                      [
+                        -3,
+                        8
+                      ]
+                    ],
+                    "esperado": 5
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Retome até terminar; depois edite e execute de novo."
+          },
+          "falaAoConcluir": {
+            "texto": "A hipótese resolveu casos diferentes, sem uma resposta fixa.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somar(valores) {\n  let total = 0;\n  for (let i = 0; i < valores.length; i++) {\n    total += valores[i];\n  }\n  return total;\n}\nconst resultado = somar([7]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-depuracao-u2-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-depuracao-u2",
+      "titulo": "A carga do depósito",
+      "conceitos": [],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "casos-de-teste"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function contarCaixas(caixas) {\n  let total = 0;\n  for (let i = 1; i < caixas.length; i++) {\n    total += caixas[i];\n  }\n  return total;\n}\nconst carga = contarCaixas([3, 5]);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "introducao": [
+        {
+          "texto": "contarCaixas(caixas) deve devolver a soma de todas as caixas, incluindo a primeira; vazio dá 0. A carga [3, 5] saiu errada.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Escolha uma hipótese e um ponto, registre o valor que encontrou e conserte. Use os testes para confirmar.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "partes": [
+        {
+          "id": "investigar",
+          "descricao": "Investigue no depurador e registre uma evidência do defeito.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pontoDeParada",
+                "linha": 4
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 4
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 1
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "observar",
+              "expressao": "i"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u2-f2"
+        },
+        {
+          "id": "codigo",
+          "descricao": "Entregue a soma correta de todas as caixas, inclusive vazio e uma caixa.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "contarCaixas",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        9
+                      ]
+                    ],
+                    "esperado": 9
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        4
+                      ]
+                    ],
+                    "esperado": 8
+                  },
+                  {
+                    "args": [
+                      [
+                        0,
+                        7
+                      ]
+                    ],
+                    "esperado": 7
+                  }
+                ]
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function contarCaixas(caixas) {\n  let total = 0;\n  for (let i = 0; i < caixas.length; i++) {\n    total += caixas[i];\n  }\n  return total;\n}\nconst carga = contarCaixas([3, 5]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u2-f2"
+        },
+        {
+          "id": "testes",
+          "descricao": "Rode os casos e confirme também uma caixa só.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "passando": true,
+            "incluir": [
+              {
+                "args": [
+                  [
+                    9
+                  ]
+                ],
+                "esperado": 9
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[9]",
+              "esperado": "9"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u2-f2"
+        }
+      ],
+      "missaoDeCampo": "No Chrome, abra DevTools > Sources > Snippets, crie um Snippet curto e execute. Marque um ponto no número da linha; use F10, F11 e Shift+F11 e confira Scope e Watch.",
+      "testes": {
+        "funcao": "contarCaixas",
+        "parametros": [
+          "caixas"
+        ],
+        "inicial": [
+          {
+            "entrada": "[]",
+            "esperado": "0"
+          },
+          {
+            "entrada": "[3, 5]",
+            "esperado": "8"
+          }
+        ]
+      }
+    }
   ]
 }

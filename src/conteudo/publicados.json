@@ -277,6 +277,11 @@
       "logica-depuracao-u1-f2",
       "logica-depuracao-u1-f3"
     ],
+    "logica-depuracao-u2": [
+      "logica-depuracao-u2-f1",
+      "logica-depuracao-u2-f2",
+      "logica-depuracao-u2-f3"
+    ],
     "logica-algoritmos-essenciais-u1": [
       "logica-algoritmos-essenciais-u1-f1",
       "logica-algoritmos-essenciais-u1-f2",
@@ -1699,6 +1704,29 @@
         "testes"
       ]
     },
+    "logica-depuracao-u2-f1": {
+      "objetivos": [
+        "pausa-guiada",
+        "corrigir-guiado",
+        "pausa-sozinho",
+        "corrigir-sozinho"
+      ]
+    },
+    "logica-depuracao-u2-f2": {
+      "objetivos": [
+        "indice-guiado",
+        "soma-guiada",
+        "indice-sozinho",
+        "soma-sozinha"
+      ]
+    },
+    "logica-depuracao-u2-f3": {
+      "partes": [
+        "investigar",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-algoritmos-essenciais-u1-f1": {
       "objetivos": [
         "ficha",
@@ -1902,6 +1930,12 @@
     "dicionario-de-erros-2",
     "causa-do-erro-1",
     "causa-do-erro-2",
+    "ponto-de-parada-1",
+    "ponto-de-parada-2",
+    "hipotese-de-bug-1",
+    "hipotese-de-bug-2",
+    "bug-silencioso-1",
+    "bug-silencioso-2",
     "pilha-js-1",
     "pilha-js-2",
     "pilha-vazia-1",

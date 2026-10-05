@@ -1,3 +1,4 @@
+import { FASES_DEPURACAO_U2, UNIDADE_DEPURACAO_U2 } from "./ilhas/logica/depuracao/unidade-2/unidade";
 import { FASES_DEPURACAO_U1, UNIDADE_DEPURACAO_U1 } from "./ilhas/logica/depuracao/unidade-1/unidade";
 import { FASES_ESTRUTURAS_U4, UNIDADE_ESTRUTURAS_U4 } from "./ilhas/logica/estruturas-de-dados/unidade-4/unidade";
 import { FASES_ESTRUTURAS_U3, UNIDADE_ESTRUTURAS_U3 } from "./ilhas/logica/estruturas-de-dados/unidade-3/unidade";
@@ -108,6 +109,7 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_RESOLVER_U3,
   UNIDADE_RESOLVER_U4,
   UNIDADE_DEPURACAO_U1,
+  UNIDADE_DEPURACAO_U2,
   UNIDADE_ALGORITMOS_U1,
   UNIDADE_ALGORITMOS_U2,
   UNIDADE_ALGORITMOS_U3,
@@ -168,6 +170,7 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_RESOLVER_U3,
   ...FASES_UNIDADE_RESOLVER_U4,
   ...FASES_DEPURACAO_U1,
+  ...FASES_DEPURACAO_U2,
   ...FASES_ALGORITMOS_U1,
   ...FASES_ALGORITMOS_U2,
   ...FASES_ALGORITMOS_U3,
