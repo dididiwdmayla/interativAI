@@ -39,7 +39,9 @@ async function acoes(lista) {
    const tempo=pagina.locator('[data-linha-do-tempo]');await tempo.locator('[data-barra-tempo]').focus();await pagina.keyboard.press('End');
    await pagina.waitForFunction(()=>{const t=document.querySelector('[data-linha-do-tempo]');return Number(t?.getAttribute('data-passo-atual'))===Number(t?.getAttribute('data-total-passos'))-1;});
    const arvore=pagina.locator(`[data-caixinha="${a.nome}"] [data-arvore-palco]`);
-   if(!await arvore.count())await tocar(pagina.locator(`[data-ver-como-arvore="${a.nome}"]`));
+   const botao=pagina.locator(`[data-ver-como-arvore="${a.nome}"]`);
+   if(await arvore.count())await tocar(botao);
+   await tocar(botao);
    conferir(await arvore.locator('[data-no-arvore]').count()>=5,'árvore mostra raiz, cômodos e folhas');
    conferir(await arvore.locator('[data-ponte-elementos]').isVisible(),'ponte com Elementos aparece');
   }
@@ -79,16 +81,18 @@ async function conferirRastro(habilidade){
  }
  await passo(0);
  let entrou=false,saiu=false,deslizou=false,quadros=0;
+ const visitados=new Set();
  for(let i=0;i<total;i++){
   entrou ||= await pagina.locator('.palco-entrar-direita').count()>0;
   saiu ||= await pagina.locator(habilidade==='fila-sozinho'?'.palco-sair-esquerda':'.palco-sair-direita').count()>0;
   deslizou ||= await pagina.locator('.palco-deslizar').count()>0;
+  for(const nome of await pagina.locator('[data-no-visitado="sim"]').evaluateAll(els=>els.map(el=>el.getAttribute('data-no-arvore'))))visitados.add(nome);
   quadros=Math.max(quadros,await pagina.locator('[data-quadro]').count());
   if(i<total-1)await passo(i+1);
  }
  if(habilidade==='pilha-sozinho')conferir(entrou&&saiu,'pilha entra e sai pelo mesmo lado');
  if(habilidade==='fila-sozinho')conferir(entrou&&saiu&&deslizou,'fila entra pelo fim, sai pelo começo e desliza');
- if(habilidade==='percurso-sozinho')conferir(quadros>=3,'recursão visita filhos com molduras');
+ if(habilidade==='percurso-sozinho')conferir(quadros>=3&&visitados.size>=3,'recursão destaca vários nós e abre molduras ao visitar os filhos');
 }
 
 const ponto=pagina.locator(`[data-unidade="${id}"]`);conferir(await ponto.getAttribute('data-estado')==='disponivel','unidade disponível no mapa');await tocar(ponto);await tocar(pagina.getByRole('dialog').getByRole('button',{name:'Jogar',exact:true}));

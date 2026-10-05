@@ -65,3 +65,27 @@ it('orçamentos incluem escondidos, aceitam variáveis intermediárias e rejeita
     }
   }
 });
+it('um percurso de níveis fixos acerta a casa, mas perde a lâmpada de um ramo mais profundo', () => {
+  const fase = fases.find(f => f.id === 'logica-estruturas-de-dados-u4-f2')!;
+  if (fase.tipo !== 'pratica' || fase.objetivos[0].validador.tipo !== 'todos') throw new Error('Prática esperada');
+  const bordas = fase.objetivos[0].validador.validadores[0];
+  if (bordas.tipo !== 'funcaoPassa') throw new Error('Função esperada');
+  const codigo = `function luzes(no) {
+    if (no === null) return [];
+    const nomes=[];
+    if(no.lampada === true) nomes.push(no.nome);
+    for(const filho of no.filhos) {
+      if(filho.lampada === true) nomes.push(filho.nome);
+      for(const neto of filho.filhos) if(neto.lampada === true) nomes.push(neto.nome);
+    }
+    return nomes;
+  }`;
+  const nucleo = criarNucleoNode();
+  nucleo.executar(codigo, 'snippet');
+  expect(nucleo.testarFuncao('luzes', bordas.casos.slice(0,4)).passou).toBe(true);
+  const sim = criarSimulacao(fase);
+  sim.executar([{tipo:'definirSnippet',codigo},{tipo:'executarSnippet'}]);
+  expect(sim.avaliar(bordas).passou).toBe(false);
+  sim.executar(fase.objetivos[0].solucaoDeTeste);
+  expect(sim.avaliar(bordas).passou).toBe(true);
+});

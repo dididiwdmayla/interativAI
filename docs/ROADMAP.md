@@ -29,6 +29,17 @@ núcleo comum.
 
 ### Feito
 
+- **Zona Estruturas de dados completa (U1 a U4):** Pilha, Fila,
+  Dicionário (Map) e Árvore, na ordem do mapa e um commit por unidade.
+  12 fases, nove conceitos com temas e 18 itens de revisão; cozinha,
+  esquina, estufa e casa como árvore, desafios em contextos novos na
+  tela composta. Vagões pelo lado certo, shift com deslize e trabalho
+  escondido no gráfico, includes contra Map.has incluindo a montagem,
+  objeto ou Map, recursão e ponte com o DOM da Ilha Sites. Bordas vazias
+  e de um item, orçamentos com folga comprovada e missão no Console real.
+  Jornadas nos três layouts, publicação, build e lint verdes. Detalhes
+  e verificação final em `docs/PROGRESSO.md`.
+
 - **Rodada 32, custo escondido dos métodos nativos:** cada método nativo
   soma passos escondidos proporcionais ao trabalho (shift e unshift o
   tamanho da lista, includes até achar, sort n x log2(n), callbacks por
@@ -584,9 +595,6 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Estruturas de dados em produção na branch `codex/estruturas-dados`,
-  após o merge do custo escondido (PR #33).
-
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
 
@@ -602,16 +610,17 @@ núcleo comum.
     linhas no palco estreito, o vagão que muda de linha desliza na
     horizontal (aproximação).
 
-- O Levar pro mundo dos contratos exporta apenas o kit anterior: os
-  acontecimentos genéricos, atores e novos dispositivos ainda não têm
-  exportação autônoma. As quatro demonstrações são fases de laboratório.
+- **Levar pro mundo:** ainda não exporta os dispositivos novos das cenas,
+  nem seus acontecimentos genéricos e atores. O exportador dos contratos
+  cobre apenas o kit anterior; as novas cenas da zona não são contratos
+  exportáveis.
 
 - **Contratos (rodada 29), para depois:**
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
     pro mundo de cada ilha (o site com interação, o sistema com dados): o
     da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
-  - Enquanto as zonas Depuração e Estruturas de dados não existem, o
-    contrato abre depois de Algoritmos essenciais; a fase 1 da unidade
+  - Enquanto a zona Depuração não existe, o contrato abre depois de
+    Estruturas de dados; a fase 1 da unidade
     apresenta os aparelhos específicos da padaria.
   - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
     casos de teste (o divisor arrasta). Em pé, a cena aberta aperta o
@@ -748,13 +757,10 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Estruturas de dados (conteúdo), usando o custo escondido (guia,
-   seção 28.1: `includes` contra `Map.has`, `shift` contra índice); depois,
-   Depuração, já com
-   cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
-   fase com cena, diferente das anteriores; guia, seção 30). A Depuração
-   pode usar cenas com o depurador (o Observar e o Console pausados leem a
-   cena no instante da pausa). Elas ficam antes do contrato no mapa.
+1. Zona Depuração, com cenas e o depurador (o Observar e o Console
+   pausados leem a cena no instante da pausa). Regra de ritmo: toda
+   unidade nova da Lógica tem uma cena diferente (guia, seção 30).
+   A zona fica antes do contrato no mapa.
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
 3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA

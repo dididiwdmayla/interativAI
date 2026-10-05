@@ -1,106 +1,27 @@
 # Atritos da fábrica
 
-Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
+Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodadas-12-a-31.md`.
 
-## Rodada 31: Estruturas de dados — parada por motor
+## Rodada 33: zona Estruturas de dados
 
-- O gráfico não conta o custo interno de shift: em 1.000 itens, consumir
-  com shift mede 1.001 passos e percorrer por índice mede 2.002. A lição
-  exigida daria a impressão contrária; produção suspensa, sem inventar
-  uma curva ou reimplementar o método no conteúdo.
-- Para ter 500 passos na binária e dez vezes de distância da linear
-  enxuta, a entrada do validador passou a 5.000 itens. A regra do guia
-  agora protege também a solução eficiente com variáveis intermediárias.
-- O teste do rastro deve esperar o índice selecionado e a cena pausada:
-  a animação também altera o índice, e a espera geral não garante o alvo.
-  Recursão/paisagem também reproduziu timeout buscando o erro com a cena
-  ativa: o teste precisa abrir o palco e escolher o passo final de erro,
-  esperando o índice e a pausa da cena antes de ler o aviso.
-- O mapa junta pilha e fila; a retomada precisa seguir as quatro unidades
-  do pedido. Nenhum id de Estruturas está publicado.
-
-## Rodada 30: zona Algoritmos essenciais
-
-- Nenhuma peça ou capacidade nova de motor foi necessária: quatro cenas
-  com ambientes e missões diferentes usam o painel do kit como resultado,
-  além dos vagões e das molduras no palco. As funções de algoritmo não
-  dependem dos aparelhos; os comandos da cena ficam nas chamadas do Snippet.
-- O contador mede linhas executadas, não só comparações nem tempo de
-  relógio. O gráfico usa listas distintas de 10, 100 e 1.000 valores, e
-  explica a distribuição usada; métodos nativos têm trabalho interno que
-  o contador não mostra por inteiro.
-- Resultado e eficiência são conferidos separadamente: duas sabotagens
-  acertam as bordas, mas falham no orçamento (linear no lugar de binária;
-  todos os pares no lugar de vizinhos). Comparar vizinhos exige ordem.
-- Jornada pelo mapa com previsão, editor, gráfico, cena, plano e casos;
-  JSON vinculado às ações do TS. O palco de uma cena vira aba em retrato,
-  e voltar do gráfico exige a aba Fontes. Em Snippet longo no toque, o
-  teste foca o editor para evitar acertar a barra de símbolos; o rastro
-  usa o controle deslizante por teclado para evitar o indicador do Next.
-- Publicação e build por unidade; bateria de conteúdo uma vez no fim.
-  Nenhuma unidade anteriormente publicada foi alterada.
-
-## Rodada 29 (motor): o formato contrato
-
-- Sem bloqueio para os próximos contratos: é um desafio com o campo
-  `contrato` (guia, seção 31). O modelo é `logica-programa-de-verdade-u1`.
-- Uma fase antes do contrato apresenta as ferramentas e os aparelhos novos
-  (o desafio não apresenta nada). Na Lógica, ela também é a primeira fase
-  com cena publicada.
-- Soluções de código em camadas: cada parte traz o código inteiro até ali,
-  com o bloco do plano no topo (senão o plano desmarca e a jogada acusa).
-- O que muda de um dia de teste para o outro vai em `porLinha`; os
-  instantes conferidos ficam longe das trocas (mais de meia hora da cena).
-- A jornada de navegador lê as soluções de um JSON
-  (`testes/contrato-jornadas.json`), conferido contra o TS no
-  `testar:conteudo`.
-
-## Rodada 27: zona Resolvendo problemas
-
-- Sem bloqueio novo de motor. Quadros separados treinam entendimento,
-  decomposição e dependências; uma ponte guiada apresenta as ferramentas
-  compostas antes do primeiro desafio (que não pode apresentar ferramentas).
-  A U4 e todos os desafios cobram o problema inteiro na composição.
-- `ordemValida` usa dependências mínimas: ler pessoas e preço aceita duas
-  ordens; `rodar` deixa observar o erro real de usar antes de declarar.
-- `planoComentado`, função com bordas escondidas e casos do aluno passando
-  conferem partes diferentes. Um caso feliz ou uma função constante não
-  encerra o problema. Zero, vazio, repetido e negativo aparecem no percurso.
-- ItemRevisao não aceita o quadro nem áreas compostas: duas previsões em
-  situações próprias por conceito, sem fabricar uma revisão de cartões.
-- Teste antigo proibia composição em qualquer fase do currículo. Agora
-  protege apenas as unidades anteriores à zona, pela ordem do registro.
-- No teste móvel, checklist do retrato abre na barra; em paisagem, no
-  balão. Conclusão precisa esperar o modal assentar antes de avançar.
-
-## Rodada 26 (motor): bloqueio de Resolvendo problemas retirado
-
-- A tela composta (guia, seção 29) junta plano, código, palco e casos de
-  teste do aluno na mesma fase, inclusive no desafio, com `planoComentado` e
-  `casosDoAluno`. Modelo pronto em `lab-resolver-u1` (prática e desafio).
-- Para produzir: as fases só de quadro continuam `ordenar-passos`; a U4 e
-  os desafios que cobram plano, código e testes usam `areas`.
-
-## Rodada 13: Resolvendo problemas (produção bloqueada)
-
-- As demonstrações f5 a f7 validam ordenar, agrupar e executar cartões,
-  mas isso não libera o mesmo quadro no checklist de um desafio. A fábrica,
-  a UI e a simulação restringem o quadro ao tipo `ordenar-passos`.
-- `rodar` executa código fornecido nos cartões; não oferece o Snippet para
-  o aluno transformar o plano em código autoral. A checagem rejeita essa
-  combinação. Substituir o desafio inteiro por prática sequencial ou por
-  cartões de código prontos enfraqueceria o requisito da rodada.
-- A regra de parada foi aplicada antes da U1. Capacidade faltante e
-  critérios para desbloqueá-la registrados em Pendências do ROADMAP;
-  nenhuma unidade incompleta foi publicada. Os testes existentes de
-  estruturas passaram sem timeout, sem necessidade de repetição.
-
-## Rodada 12: zona Listas e objetos
-
-- valorVariavel e funcaoPassa comparam listas e objetos por conteúdo, recursivamente. Nenhuma capacidade de motor faltou; as funções recebem casos vazios, fronteiras e decimais quando aplicáveis.
-- Leitura de índice/propriedade ausente é observada no palco e conferida por typeof, como nas unidades anteriores: undefined não vira uma mensagem impressa nem um erro.
-- Aplicar for...of e for aos vagões ganhou um conceito próprio, Percorrer os vagões, com duas revisões; uma fase guiada precisa ensinar um conceito, além de revisar os laços já aprendidos.
-- map e filter são acompanhados pelas molduras das arrows na linha do tempo. As jornadas leem cada preço e cada referência de ficha, além dos vagões, campos e setas da UI.
-- filter cria outra fileira, mas compartilha as fichas: uma previsão com mudança de preço evita transformar "lista nova" em "cópia profunda". No map de números, mudar a nova lista mantém a original intacta.
-- O desafio continua em outro contexto: playlist, votação, pet shop e pizzaria. As revisões são ações e previsões autossuficientes em situações próprias.
-- Um teste antigo das demonstrações de estruturas excedeu o timeout com build concorrente; repetido isoladamente e na rodada final, ficou verde. Motor, dependências e conteúdo previamente publicado não mudaram.
+- Motor suficiente após o merge do custo escondido (PR #33); nenhuma
+  improvisação de medição no conteúdo. Pilha e fila separadas antes da
+  publicação, porque os três ids antigos da zona ainda eram planejados.
+- `formaDaEstrutura` precisa ver entrada e saída: a lista nasce vazia e
+  recebe push antes de pop/shift. Bordas vazias e de um item são cobradas
+  por `funcaoPassa`, separadamente da animação.
+- Índice evita mover a fila, mas conserva os itens na lista: isso aparece
+  na fala. Orçamentos conferem o total com escondidos e têm prova de
+  folga para variáveis intermediárias; acertar bordas não prova eficiência.
+- Map guarda uma leitura: mudar o sensor sozinho não atualiza o par.
+  A estufa espera a entrada genérica e faz set na mesma chave; has
+  distingue ausência de zero. Objeto e Map têm treino explícito.
+- Na árvore, ramos de profundidade diferente rejeitam laços de níveis
+  fixos. Abrir Ver como árvore antes de rebobinar permite conferir os nós
+  visitados, junto com as molduras. Uma árvore já aberta não precisa de
+  outro evento de abertura no sozinho; validar a estrutura nova basta.
+  Subconjuntos de casos usam testarFuncao: a simulação prepara apenas os
+  validadores declarados na fase.
+- Jornadas ligadas às ações do TS via JSON, uma unidade por commit. Servidor
+  e navegador na mesma invocação; encerrar o processo Next diretamente
+  evita que um servidor antigo sobreviva ao encerramento do npm.

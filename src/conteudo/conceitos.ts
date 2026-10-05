@@ -17,6 +17,9 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"arvore-de-dados": {"nome": "Árvore de dados", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
+"percorrer-arvore": {"nome": "Percorrer a árvore", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
+
 "dicionario-map": {"nome": "Dicionário com Map", "resumo": "Map guarda pares: set escreve ou atualiza, get lê, has confere se a chave existe.", "temas": ["dados", "logica"]},
 "objeto-ou-map": {"nome": "Objeto ou Map", "resumo": "Objeto descreve campos de uma coisa; Map serve para pares dinâmicos com chaves que também podem ser números ou objetos.", "temas": ["dados", "logica"]},
 "busca-com-map": {"nome": "Buscar com Map", "resumo": "Montar um Map custa percorrer os dados uma vez; muitas consultas has evitam repetir includes numa lista grande.", "temas": ["dados", "logica", "desempenho"]},

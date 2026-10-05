@@ -57,3 +57,23 @@ após o merge do custo escondido (PR #33). Sem mudança no motor.
 
 - Verificação: 18.425 testes verdes; jornada nos três layouts, publicação,
   build e lint verdes.
+
+### Etapa 4 — Árvore
+
+- Raiz, nós, filhos e folhas da casa, com Ver como árvore, adição de um
+  cômodo e previsão que faz a ponte com pais e filhos do DOM.
+- Percurso recursivo da casa devolve nomes de lâmpadas; os aparelhos
+  correspondentes acendem na cena. Null, árvore sem lâmpadas, uma folha
+  e ramos mais profundos exercitam o caso de parada e o problema menor.
+- Desafio do centro cultural, com anexo e oficina em profundidades
+  diferentes, em tela composta. Dois conceitos e quatro revisões.
+- Prova contra percurso de profundidade fixa: acerta a casa de dois
+  níveis, mas perde uma lâmpada mais funda. Jornada abre a árvore e
+  confere nós destacados e molduras durante a recursão.
+
+- Verificação: rodada com 18.608 verificações, 18.607 inicialmente verdes
+  e uma falha na prova adicional (subconjunto não declarado na simulação).
+  Prova corrigida e os quatro testes específicos verdes; os 26 testes da
+  fase 1 verdes após remover a exigência redundante de reabrir a árvore
+  no sozinho. Jornada nos três layouts, confirmação final no desktop,
+  publicação, build e lint verdes.
