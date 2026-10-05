@@ -1,74 +1,95 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodadas-30-e-31.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-32.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 32: custo escondido dos métodos nativos
+## Rodada 33: zona Estruturas de dados
 
-Branch `claude/hidden-cost-native-methods-ahr2wf`, a partir de `e9a6ec0`
-da principal. Desbloqueia a zona Estruturas de dados (Pendências da
-rodada 31): o contador contava só o código do aluno, e consumir 1.000
-itens com `shift` (1.001 passos) parecia mais barato que por índice (2.002).
+Branch `codex/estruturas-dados`, a partir de `22a4b9f` da principal,
+após o merge do custo escondido (PR #33). Sem mudança no motor.
 
-### Etapa 1 — motor, contador, gráfico e palco
+### Etapa 1 — Pilha
 
-- `src/motor/executor/custoNativo.ts`: a tabela de custo de cada método
-  nativo do reino (shift/unshift, splice, indexOf/includes/lastIndexOf,
-  slice/concat/join/reverse/fill, espalhar, Array.from, Object.keys/values/
-  entries, new Set/new Map com iterável, sort sem comparador n x log2(n),
-  callbacks um por item visitado, textos). push, pop, Map, Set, índice e
-  chave: sem custo escondido.
-- Instrumentação: `lista.shift()` vira `__r.m(lista,"lista").shift()`. O
-  `__r.m` devolve um porteiro cujos getters leem o método na hora (antes
-  dos argumentos, como o original) e chamam com o this certo; só o método
-  nativo do reino soma custo (uma classe Fila com shift próprio não).
-  O espalhar e o primeiro argumento de `new Set`/`new Map` passam por
-  `__r.e`. Só chamadas escritas no código do aluno contam; cadeia
-  opcional e `super` ficam de fora. A mensagem "x.shift is not a function"
-  e o TypeError de null/undefined continuam os do navegador.
-- `ResultadoExecucao` ganhou `passosEscondidos` e `escondidosPorMetodo`;
-  `MedicaoPassos.passos` passou a ser o total, com `escondidos` à parte.
-  Os escondidos não criam fotos (linha do tempo e depurador) nem contam
-  para o limite de 100 mil passos da execução; na medição do gráfico,
-  contam para o limite de 2 milhões ("travaria").
-- `passosNoMaximo` conta o total; `contarEscondidos: false` conta só o
-  código (o ponto que travaria reprova mesmo assim). O detalhe diz
-  "N passos (M do código + K escondidos)".
-- Contador: "8 passos + 15 escondidos em `shift`" (os dois métodos que
-  mais pesaram). Gráfico: legenda "cada ponto é o total..."; detalhe e
-  tabela com os escondidos entre parênteses.
-- Palco: `movimentoDaLista` detecta o splice no meio (`meio`, sem mudar as
-  contagens de pilha/fila). Depois de shift, unshift e splice, cada vagão
-  que mudou de posição desliza do lugar antigo para o novo, em sequência
-  (classe `palco-deslizar`, `--deslize`); o vagão que sai pelo começo não
-  ocupa lugar enquanto some.
+- U1 separada da fila no mapa, sem ids anteriores publicados na zona.
+- Histórico do brilho da cozinha com push/pop pelo mesmo lado, previsão
+  do último vagão, função desfazer com null no vazio e bordas de um e
+  vários itens. Desafio da rota de volta em tela composta.
+- Dois conceitos com temas Dados e Lógica; quatro revisões próprias e
+  missão no Console real comparando pilha e fila.
+- Jornada pelo mapa ligada ao JSON das ações do conteúdo, negativas de
+  função constante e shift no lugar de pop; rastro confere os dois lados.
 
-### Etapa 2 — demonstrações, conteúdo publicado e guia
+- Verificação: 18.006 testes de conteúdo e duas provas específicas verdes;
+  jornada pelo mapa nos três layouts, publicação, build e lint verdes.
 
-- `/lab`: `lab-logica-u1-f10` (fila.js: consumirComShift x
-  consumirPorIndice) e `f11` (estoque.js: procurarNaLista com includes x
-  procurarNoMapa com Map.has). Medições em 1.000 itens: shift 501.501
-  (500.500 escondidos) x índice 2.002; includes 502.503 x Map 3.005.
-  Orçamentos do objetivo "melhorar": 10.000 e 20.000 passos (pelo menos 3
-  vezes a eficiente e 10 vezes abaixo da ingênua).
-- Conteúdo publicado: as cinco fases com `passosNoMaximo`
-  (algoritmos-essenciais u1-f2, u1-f3, u4-f1, u4-f2, u4-f3) rodadas com as
-  soluções de teste: 67, 67, 15, 1.001 e 1.001 passos, nenhum escondido
-  (as soluções não usam métodos nativos com custo). Nenhum orçamento
-  mudou; ids e ordem intactos.
-- Testes: `testes/conteudo/custoNativo.test.ts` (custo de cada método,
-  classe própria, mensagens de erro, rastro, medição, demonstrações e
-  sabotagem); `testes/estruturas.mjs` cobre f10 e f11 (contador, trem
-  deslizando, gráfico com a diferença certa e a legenda) nos três layouts.
-- Guia: seção 28.1 (o modelo, onde aparece, orçamento e quando usar
-  `contarEscondidos: false`).
+### Etapa 2 — Fila
 
-### Verificação
+- Esquina com semáforo, pedestre e painel de chamada; push entra pelo fim,
+  shift retira pelo começo, e os vagões restantes deslizam.
+- Comparação comShift x porIndice: o gráfico soma o trabalho escondido,
+  com ligação explícita a Algoritmos essenciais. O índice preserva os
+  itens na memória, limitação explicada ao aluno.
+- Dois conceitos e quatro revisões. Desafio das instruções de entrega
+  em ordem de chegada, preservando pedidos repetidos e cobrando vazio e
+  um item, em tela composta.
+- Orçamento de 20.000 passos em 1.000 itens, tanto no treino como no
+  desafio; prova automática de folga mínima de três vezes para a solução
+  com variáveis intermediárias e dez vezes abaixo da ingênua. As
+  sabotagens com shift acertam as bordas e falham no orçamento total.
 
-- `npm run testar:conteudo`: 17.824 testes em 46 arquivos, verdes. Build e
-  lint verdes.
-- `testes/estruturas.mjs` (com f10 e f11) verde nos três layouts no
-  desenvolvimento.
-- Bateria completa (`PARALELO=2 npm run bateria`, 166 execuções, build de
-  produção) uma vez, verde ("Tudo certo"), com console limpo; inclui as
-  jornadas das quatro unidades de Algoritmos essenciais nos três layouts.
+- Verificação: 18.191 testes verdes; jornada nos três layouts, publicação,
+  build e lint verdes.
+
+### Etapa 3 — Dicionário (Map)
+
+- Umidade por canteiro na estufa: dois sensores, água e atualização da
+  mesma chave quando a entrada genérica muda a leitura no segundo 2.
+- set/get/has, ausência, zero e escolha explícita: objeto para uma ficha
+  com campos conhecidos; Map para pares dinâmicos. Prática guiada e
+  sozinha das chaves numérica e textual, que permanecem distintas.
+- Gráfico naLista x noMapa, incluindo a montagem do Map, liga includes
+  ao trabalho escondido e has à consulta barata. A jornada verifica a
+  distância entre as curvas e a legenda do total.
+- Desafio dos bilhetes repetidos do cinema em tela composta, com vazio,
+  um item, zero, repetição e chaves de tipos diferentes; 20.000 passos
+  em 1.000 itens, com a mesma prova automatizada de folga da Fila.
+- Três conceitos com temas e seis itens próprios de revisão.
+
+- Verificação: 18.425 testes verdes; jornada nos três layouts, publicação,
+  build e lint verdes.
+
+### Etapa 4 — Árvore
+
+- Raiz, nós, filhos e folhas da casa, com Ver como árvore, adição de um
+  cômodo e previsão que faz a ponte com pais e filhos do DOM.
+- Percurso recursivo da casa devolve nomes de lâmpadas; os aparelhos
+  correspondentes acendem na cena. Null, árvore sem lâmpadas, uma folha
+  e ramos mais profundos exercitam o caso de parada e o problema menor.
+- Desafio do centro cultural, com anexo e oficina em profundidades
+  diferentes, em tela composta. Dois conceitos e quatro revisões.
+- Prova contra percurso de profundidade fixa: acerta a casa de dois
+  níveis, mas perde uma lâmpada mais funda. Jornada abre a árvore e
+  confere nós destacados e molduras durante a recursão.
+
+- Verificação: rodada com 18.608 verificações, 18.607 inicialmente verdes
+  e uma falha na prova adicional (subconjunto não declarado na simulação).
+  Prova corrigida e os quatro testes específicos verdes; os 26 testes da
+  fase 1 verdes após remover a exigência redundante de reabrir a árvore
+  no sozinho. Jornada nos três layouts, confirmação final no desktop,
+  publicação, build e lint verdes.
+
+### Fechamento
+
+- Quatro unidades publicadas, uma por commit; 12 fases, nove conceitos
+  com temas e 18 itens de revisão. Todas as jornadas pelo mapa passaram
+  nos três layouts; casos, previsões e validadores do JSON correspondem
+  aos dados do conteúdo. A Árvore teve confirmação final no desktop.
+- Publicar conteúdo, build e lint passaram ao fim de cada unidade.
+  Verificações de conteúdo consolidadas: 18.608, com reteste apenas da
+  prova específica e da fase afetadas na U4, conforme a economia de cota.
+- `npm run bateria:conteudo` executada uma vez no build de produção:
+  mapa, exploração, publicação e revisão verdes, com console limpo.
+- ATRITOS-FABRICA com rodada curta; ROADMAP com a zona em Feito,
+  Depuração em Próximo e a exportação dos aparelhos novos em Pendências.
+- Principal permaneceu em `22a4b9f`; a entrega segue pela branch
+  `codex/estruturas-dados` e pull request, sem push direto na principal.

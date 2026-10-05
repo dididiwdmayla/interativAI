@@ -17,6 +17,19 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"arvore-de-dados": {"nome": "Árvore de dados", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
+"percorrer-arvore": {"nome": "Percorrer a árvore", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
+
+"dicionario-map": {"nome": "Dicionário com Map", "resumo": "Map guarda pares: set escreve ou atualiza, get lê, has confere se a chave existe.", "temas": ["dados", "logica"]},
+"objeto-ou-map": {"nome": "Objeto ou Map", "resumo": "Objeto descreve campos de uma coisa; Map serve para pares dinâmicos com chaves que também podem ser números ou objetos.", "temas": ["dados", "logica"]},
+"busca-com-map": {"nome": "Buscar com Map", "resumo": "Montar um Map custa percorrer os dados uma vez; muitas consultas has evitam repetir includes numa lista grande.", "temas": ["dados", "logica", "desempenho"]},
+
+"fila-js": {"nome": "Fila", "resumo": "Numa fila, o primeiro item que entrou sai primeiro; push entra pelo fim e shift sai pelo começo.", "temas": ["dados", "logica"]},
+"fila-por-indice": {"nome": "Fila sem deslizar", "resumo": "Para atender uma lista grande, avançar um índice preserva a ordem sem deslocar todos os vagões a cada shift.", "temas": ["dados", "logica", "desempenho"]},
+
+"pilha-js": {"nome": "Pilha", "resumo": "Numa pilha, o último item que entrou é o primeiro a sair; push e pop usam o mesmo lado.", "temas": ["dados", "logica"]},
+"pilha-vazia": {"nome": "Pilha vazia", "resumo": "Antes de retirar de uma pilha, confira length; pop no vazio devolve undefined.", "temas": ["dados", "logica"]},
+
 "custo-em-passos": {"nome": "Custo em passos", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
 "crescimento-dos-passos": {"nome": "Crescimento dos passos", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
 "evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},

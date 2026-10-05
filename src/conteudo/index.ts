@@ -1,3 +1,7 @@
+import { FASES_ESTRUTURAS_U4, UNIDADE_ESTRUTURAS_U4 } from "./ilhas/logica/estruturas-de-dados/unidade-4/unidade";
+import { FASES_ESTRUTURAS_U3, UNIDADE_ESTRUTURAS_U3 } from "./ilhas/logica/estruturas-de-dados/unidade-3/unidade";
+import { FASES_ESTRUTURAS_U2, UNIDADE_ESTRUTURAS_U2 } from "./ilhas/logica/estruturas-de-dados/unidade-2/unidade";
+import { FASES_ESTRUTURAS_U1, UNIDADE_ESTRUTURAS_U1 } from "./ilhas/logica/estruturas-de-dados/unidade-1/unidade";
 import { FASES_ALGORITMOS_U4, UNIDADE_ALGORITMOS_U4 } from "./ilhas/logica/algoritmos-essenciais/unidade-4/unidade";
 import { FASES_ALGORITMOS_U3, UNIDADE_ALGORITMOS_U3 } from "./ilhas/logica/algoritmos-essenciais/unidade-3/unidade";
 import { FASES_ALGORITMOS_U2, UNIDADE_ALGORITMOS_U2 } from "./ilhas/logica/algoritmos-essenciais/unidade-2/unidade";
@@ -106,6 +110,10 @@ export const UNIDADES: readonly Unidade[] = [
   UNIDADE_ALGORITMOS_U2,
   UNIDADE_ALGORITMOS_U3,
   UNIDADE_ALGORITMOS_U4,
+  UNIDADE_ESTRUTURAS_U1,
+  UNIDADE_ESTRUTURAS_U2,
+  UNIDADE_ESTRUTURAS_U3,
+  UNIDADE_ESTRUTURAS_U4,
   UNIDADE_CONTRATO_LOGICA,
 ];
 
@@ -161,6 +169,10 @@ export const FASES: readonly Fase[] = [
   ...FASES_ALGORITMOS_U2,
   ...FASES_ALGORITMOS_U3,
   ...FASES_ALGORITMOS_U4,
+  ...FASES_ESTRUTURAS_U1,
+  ...FASES_ESTRUTURAS_U2,
+  ...FASES_ESTRUTURAS_U3,
+  ...FASES_ESTRUTURAS_U4,
   ...FASES_UNIDADE_CONTRATO_LOGICA,
 ];
 
