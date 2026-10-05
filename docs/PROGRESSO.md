@@ -142,3 +142,68 @@ não mudaram.
 - GitHub: os commits foram enviados pelo plugin (o git local não possui
   credencial de push), mantendo as árvores idênticas às validadas. A branch
   principal recebe as mudanças somente pelo pull request.
+
+## Rodada 31: preparar Estruturas de dados (parada por motor)
+
+Branch `codex/zona-estruturas-dados`, a partir de `d59f5bc` da principal.
+O pedido separa pilha, fila, Map e árvore em quatro unidades; o mapa atual
+prevê três, agrupando pilha e fila. Nenhum id novo foi publicado.
+
+### Etapa 0 — orçamentos e espera de estado
+
+- Busca binária: 500 passos, medidos em 5.000 itens nos dois validadores.
+  Em 1.000 itens, uma busca linear enxuta usa 2.003 passos: 500 ali não
+  ficaria 10 vezes abaixo dela. O tamanho maior concilia o limite pedido
+  com a regra. O gráfico didático continua em 10, 100 e 1.000 itens.
+- Repetidos adjacentes: 20.000 passos em 1.000 itens, na prática e no
+  desafio. Medição com variáveis intermediárias: 3.998 passos; comparar
+  todos os pares sem repetidos: 500.502. O limite tem folga maior que
+  três vezes e fica mais de dez vezes abaixo do caminho ingênuo.
+- Mantidos os 200 passos da demonstração com três itens: esse objetivo
+  apresenta o contador, sem selecionar algoritmo por eficiência.
+- Guia, seção 28: orçamento separa algoritmos, não estilos; mínimo de
+  três vezes a solução eficiente mais falante e dez vezes abaixo da
+  ingênua, na mesma entrada de pior caso. Prova automatizada cobre os
+  quatro validadores de eficiência e variáveis intermediárias.
+- Jornada: a inspeção do rastro presumiu o índice final enquanto a cena
+  também move a linha do tempo. Agora Home escolhe o início pela UI e
+  cada avanço espera `data-passo-atual` e `data-tocando="nao"`, em vez
+  de depender dos dois quadros da espera geral. Os limites não aumentam.
+  Sob carga, Recursão/paisagem reproduziu timeout ao procurar
+  `data-palco-erro`. Abrir o palco sozinho não bastou no primeiro
+  reteste: o aviso só aparece no passo de erro, e a cena pode selecionar
+  outro passo. A jornada agora abre o palco, pausa pelo Home e escolhe
+  End, esperando os estados de índice e cena antes de ler o aviso.
+  A mesma espera serve à inspeção do rastro.
+  As mensagens históricas não estavam disponíveis; a falha móvel foi
+  reproduzida nesta rodada, sem aumentar limites.
+- O Chromium do ambiente pediu `/favicon.ico` implicitamente, causando
+  404 e reprovando o console após uma jornada completa de Recursão.
+  Ícone SVG do Console, já existente no kit, cadastrado como `app/icon.svg`
+  pela convenção de metadata do Next. Sem cores literais nem exceção
+  nova à checagem de console.
+
+- Verificação da etapa: 17.805 testes em 45 arquivos; build e lint
+  verdes. Buscar, Ordenar, Recursão e Desempenho concluíram pelo mapa
+  em desktop, retrato e paisagem, com console limpo. Recursão/paisagem
+  falhou antes das esperas do passo final e passou após a correção;
+  desktop e retrato foram conferidos com a versão final da jornada.
+- `npm run bateria:conteudo`, uma vez no build de produção: mapa,
+  explorar, publicar e revisão verdes. Nenhuma mudança de motor;
+  `publicar:conteudo` não se aplica, pois não há unidade nova.
+
+### Parada — gráfico do custo de shift
+
+O contador instrumenta linhas do aluno, sem contabilizar o trabalho
+interno dos métodos nativos. A medição real em 1.000 itens dá 1.001
+passos para `function consumir(lista) { while (lista.length) lista.shift(); }`
+e 2.002 para `function consumir(lista) { let inicio = 0; while (inicio <
+lista.length) { const item = lista[inicio]; inicio++; } }`. Ambas crescem
+linearmente no gráfico, e shift parece mais barato. Isso não demonstra
+o custo de mover as posições de uma fila enorme.
+
+A regra de parada do pedido impede simular esse custo no conteúdo ou
+reimplementar shift para obter uma curva desejada. Produção das quatro
+unidades suspensa; pendência de motor registrada no ROADMAP. Não foram
+alterados currículo, ids publicados nem registro de revisão. Depuração
+continua depois de Estruturas; não há zona concluída para mover a Feito.

@@ -170,8 +170,8 @@ export const FASE_ALGORITMOS_U1_F2: Fase = {
       "tipo": "previsao",
       "modo": "sozinho",
       "enunciado": {
-        "mouse": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens.",
-        "toque": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens."
+        "mouse": "Complete a busca com while: true se existe, false se não. Cabe em 500 passos com 5.000 itens.",
+        "toque": "Complete a busca com while: true se existe, false se não. Cabe em 500 passos com 5.000 itens."
       },
       "validador": {
         "tipo": "todos",
@@ -262,8 +262,8 @@ export const FASE_ALGORITMOS_U1_F2: Fase = {
           },
           {
             "tipo": "passosNoMaximo",
-            "valor": 130,
-            "tamanho": 1000,
+            "valor": 500,
+            "tamanho": 5000,
             "funcao": "binaria"
           }
         ]

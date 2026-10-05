@@ -70,7 +70,7 @@ export const FASE_ALGORITMOS_U4_F3: Fase = {
       "expressao": "apontando"
     },
     {
-      "texto": "Planeje, trate vazio, um código e repetidos; até 4.500 passos com 1.000 códigos. Compare vizinhos sem ordenar novamente.",
+      "texto": "Planeje, trate vazio, um código e repetidos; até 20.000 passos com 1.000 códigos. Compare vizinhos sem ordenar novamente.",
       "expressao": "apontando"
     }
   ],
@@ -259,7 +259,7 @@ export const FASE_ALGORITMOS_U4_F3: Fase = {
           },
           {
             "tipo": "passosNoMaximo",
-            "valor": 4500,
+            "valor": 20000,
             "tamanho": 1000,
             "funcao": "repetiu"
           }

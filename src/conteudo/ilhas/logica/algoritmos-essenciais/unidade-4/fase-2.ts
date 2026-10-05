@@ -72,7 +72,7 @@ export const FASE_ALGORITMOS_U4_F2: Fase = {
       "expressao": "apontando"
     },
     {
-      "texto": "Comece pelos dois primeiros; depois avance comparando vizinhos. Com 1.000 códigos, caiba em 4.500 passos.",
+      "texto": "Comece pelos dois primeiros; depois avance comparando vizinhos. Com 1.000 códigos, caiba em 20.000 passos.",
       "expressao": "apontando"
     },
     {
@@ -214,8 +214,8 @@ export const FASE_ALGORITMOS_U4_F2: Fase = {
       "tipo": "previsao",
       "modo": "sozinho",
       "enunciado": {
-        "mouse": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados.",
-        "toque": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados."
+        "mouse": "Complete todos os vizinhos. Trate as bordas e caiba em 20.000 passos com 1.000 códigos ordenados.",
+        "toque": "Complete todos os vizinhos. Trate as bordas e caiba em 20.000 passos com 1.000 códigos ordenados."
       },
       "validador": {
         "tipo": "todos",
@@ -297,7 +297,7 @@ export const FASE_ALGORITMOS_U4_F2: Fase = {
           },
           {
             "tipo": "passosNoMaximo",
-            "valor": 4500,
+            "valor": 20000,
             "tamanho": 1000,
             "funcao": "conferir"
           }

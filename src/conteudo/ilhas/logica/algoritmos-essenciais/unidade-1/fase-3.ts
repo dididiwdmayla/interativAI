@@ -70,7 +70,7 @@ export const FASE_ALGORITMOS_U1_F3: Fase = {
       "expressao": "apontando"
     },
     {
-      "texto": "Use busca binária sem ordenar de novo. Planeje, teste vazio, um ingresso, repetidos e ausente; caiba em 130 passos com 1.000 itens.",
+      "texto": "Use busca binária sem ordenar de novo. Planeje, teste vazio, um ingresso, repetidos e ausente; caiba em 500 passos com 5.000 itens.",
       "expressao": "apontando"
     }
   ],
@@ -252,8 +252,8 @@ export const FASE_ALGORITMOS_U1_F3: Fase = {
           },
           {
             "tipo": "passosNoMaximo",
-            "valor": 130,
-            "tamanho": 1000,
+            "valor": 500,
+            "tamanho": 5000,
             "funcao": "ingresso"
           },
           {

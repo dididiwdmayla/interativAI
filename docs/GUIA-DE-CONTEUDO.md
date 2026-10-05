@@ -1636,6 +1636,12 @@ Estruturas de dados e Algoritmos essenciais. Motor:
   (entrou e saiu pelo mesmo lado) ou `fila` (entrou por um, saiu pelo
   outro), contando as execuções do objetivo, ou `arvore` (agora é um
   objeto com filhos objetos; pede `arvore-palco`).
+- **Orçamento de passos:** dê pelo menos 3 vezes de folga sobre a solução
+  eficiente mais "falante" (variáveis auxiliares, nomes intermediários e
+  linhas de explicação) e mantenha o limite pelo menos 10 vezes abaixo da
+  solução ingênua, medindo ambas na mesma entrada de pior caso. O limite
+  separa algoritmos, não estilos. Se as faixas não couberem, aumente o
+  tamanho da entrada ou escolha outra comparação; não aperte a solução certa.
 - **Ações:** `verComoArvore` (`nome`) e `medirDesempenho`. Eventos:
   `viuComoArvore` e `mediuDesempenho` (use `{ tipo: "evento", evento:
   "mediuDesempenho" }` para o objetivo de medir).
