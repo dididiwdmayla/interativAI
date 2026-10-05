@@ -29,6 +29,15 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 31, Etapa 0 de Estruturas de dados:** binária com orçamento de
+  500 passos em 5.000 itens e vizinhos com 20.000 em 1.000; regra de
+  folga de três vezes a solução eficiente e dez abaixo da ingênua no
+  guia, com prova automatizada. Jornada de Recursão abre o palco e
+  espera o passo final de erro e a cena pausada, sem aumentar limites.
+  17.805 testes, build e lint verdes; as quatro unidades de Algoritmos
+  nos três layouts e bateria de conteúdo verdes. A produção da zona
+  Estruturas foi interrompida pelo bloqueio documentado em Pendências.
+
 - **Quatro ambientes novos no kit de cenas:** garagem automática,
   cozinha de casa, esquina com semáforo de pedestres e estufa. Entradas
   genéricas instantâneas/gradativas e atores determinísticos, preservando
@@ -566,8 +575,21 @@ núcleo comum.
 
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
+- Zona Estruturas de dados: produção suspensa pela regra de parada do
+  pedido da rodada 31; falta contabilizar o custo nativo de `shift` no
+  gráfico de Desempenho. Nenhuma unidade nova foi publicada.
 
 ### Pendências
+
+- **Estruturas de dados, bloqueio de motor (rodada 31):** o gráfico conta
+  linhas executadas, sem o trabalho interno dos métodos nativos. Consumir
+  1.000 itens com `while (lista.length) lista.shift()` mede 1.001 passos;
+  percorrer por índice com uma variável intermediária mede 2.002. As duas
+  curvas são lineares, e a fila com shift parece mais barata. O pedido
+  exige mostrar esse custo no gráfico; não cabe inventar trabalho no
+  conteúdo. Definir e implementar uma medição honesta dos métodos nativos
+  antes de produzir a zona. Na retomada, separar pilha e fila em unidades
+  distintas (quatro no pedido; três no mapa atual, ainda não publicadas).
 
 - O Levar pro mundo dos contratos exporta apenas o kit anterior: os
   acontecimentos genéricos, atores e novos dispositivos ainda não têm
@@ -715,7 +737,8 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Estruturas de dados; depois, Depuração, já com
+1. Desbloquear a medição de `shift` no motor e produzir a zona Estruturas
+   de dados; depois, Depuração, já com
    cenas (regra de ritmo: toda unidade nova da Lógica tem pelo menos uma
    fase com cena, diferente das anteriores; guia, seção 30). A Depuração
    pode usar cenas com o depurador (o Observar e o Console pausados leem a

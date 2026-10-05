@@ -2,6 +2,23 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 31: Estruturas de dados — parada por motor
+
+- O gráfico não conta o custo interno de shift: em 1.000 itens, consumir
+  com shift mede 1.001 passos e percorrer por índice mede 2.002. A lição
+  exigida daria a impressão contrária; produção suspensa, sem inventar
+  uma curva ou reimplementar o método no conteúdo.
+- Para ter 500 passos na binária e dez vezes de distância da linear
+  enxuta, a entrada do validador passou a 5.000 itens. A regra do guia
+  agora protege também a solução eficiente com variáveis intermediárias.
+- O teste do rastro deve esperar o índice selecionado e a cena pausada:
+  a animação também altera o índice, e a espera geral não garante o alvo.
+  Recursão/paisagem também reproduziu timeout buscando o erro com a cena
+  ativa: o teste precisa abrir o palco e escolher o passo final de erro,
+  esperando o índice e a pausa da cena antes de ler o aviso.
+- O mapa junta pilha e fila; a retomada precisa seguir as quatro unidades
+  do pedido. Nenhum id de Estruturas está publicado.
+
 ## Rodada 30: zona Algoritmos essenciais
 
 - Nenhuma peça ou capacidade nova de motor foi necessária: quatro cenas
