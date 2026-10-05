@@ -627,5 +627,772 @@
       },
       "missaoDeCampo": "No Console de qualquer site, use uma lista como pilha com push/pop e outra como fila com push/shift. Veja quem sai primeiro."
     }
+  ],
+  "2": [
+    {
+      "id": "logica-estruturas-de-dados-u2-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u2",
+      "titulo": "Primeiro a chegar, primeiro a sair",
+      "conceitos": [
+        "fila-js"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "pilha-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Na esquina, o vermelho dos carros libera o pedestre. O painel chama os nomes na ordem de chegada; a pessoa desenhada representa a travessia.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "push entra pela direita; shift sai pela esquerda. Os outros vagões deslizam. pop chamaria o último: isso seria pilha.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "fila-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Em fila vazia, use push para Ana e Beto. Retire primeiro com shift; libere o pedestre e mostre o nome no painel.",
+            "toque": "Em fila vazia, use push para Ana e Beto. Retire primeiro com shift; libere o pedestre e mostre o nome no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "formaDaEstrutura",
+                "nome": "fila",
+                "forma": "fila"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "primeiro",
+                "valor": "Ana"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "fila",
+                "valor": [
+                  "Beto"
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "semaforo",
+                "propriedade": "cor",
+                "valor": "vermelho"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "Ana"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Use fila.push, fila.shift, semaforo.mudar(\"vermelho\") e painel.mostrar(primeiro).",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use fila.push, fila.shift, semaforo.mudar(\"vermelho\") e painel.mostrar(primeiro)."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "const fila = [];\nfila.push(\"Ana\");\nfila.push(\"Beto\");\nconst primeiro = fila.shift();\nsemaforo.mudar(\"vermelho\");\npainel.mostrar(primeiro);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Ana saiu pelo começo; Beto deslizou para a primeira posição.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const fila = [];\nfila.push(\"Ana\");\nfila.push(\"Beto\");\nconst primeiro = fila.shift();\nsemaforo.mudar(\"vermelho\");\npainel.mostrar(primeiro);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "fila-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Enfileire Ana, Beto e Cris. Retire duas pessoas em ordem; mostre segundo no painel e libere a travessia.",
+            "toque": "Enfileire Ana, Beto e Cris. Retire duas pessoas em ordem; mostre segundo no painel e libere a travessia."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "formaDaEstrutura",
+                "nome": "fila",
+                "forma": "fila"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "primeiro",
+                "valor": "Ana"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "segundo",
+                "valor": "Beto"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "fila",
+                "valor": [
+                  "Cris"
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "Beto"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "semaforo",
+                "propriedade": "cor",
+                "valor": "vermelho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "A segunda retirada deve chamar quem chegou depois de Ana."
+          },
+          "falaAoConcluir": {
+            "texto": "FIFO significa primeiro a entrar, primeiro a sair.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "const fila = [];\nfila.push(\"Ana\");\nfila.push(\"Beto\");\nfila.push(\"Cris\");\nconst primeiro = fila.shift();\nconst segundo = fila.shift();\nsemaforo.mudar(\"vermelho\");\npainel.mostrar(segundo);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Quem sai primeiro da fila após Ana, Beto e Cris entrarem com push?",
+            "opcoes": [
+              "Cris",
+              "Ana",
+              "Beto"
+            ],
+            "correta": 1,
+            "explicacao": "shift retira Ana, que entrou primeiro."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou.",
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "fila-esquina",
+        "titulo": "A ordem na travessia",
+        "ambiente": "esquina",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "ceu",
+            "x": 0,
+            "y": 0,
+            "altura": 110
+          },
+          {
+            "peca": "rua",
+            "x": 0,
+            "y": 103
+          },
+          {
+            "peca": "parede",
+            "x": 230,
+            "y": 15,
+            "largura": 80,
+            "altura": 90
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "semaforo",
+            "tipo": "semaforo",
+            "x": 75,
+            "y": 15
+          },
+          {
+            "id": "painel",
+            "tipo": "letreiro",
+            "x": 210,
+            "y": 32
+          }
+        ],
+        "linhaDoTempo": [],
+        "atores": [
+          {
+            "id": "pedestre",
+            "desenho": "pessoa",
+            "x": 145,
+            "y": 119,
+            "escala": 0.65,
+            "acoes": {
+              "atravessar": {
+                "duracaoMs": 2200,
+                "destino": {
+                  "x": 176,
+                  "y": 193
+                }
+              }
+            }
+          }
+        ],
+        "reacoes": [
+          {
+            "quando": {
+              "dispositivo": "semaforo",
+              "propriedade": "cor",
+              "valor": "vermelho"
+            },
+            "entao": {
+              "ator": "pedestre",
+              "acao": "atravessar"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "logica-estruturas-de-dados-u2-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-estruturas-de-dados-u2",
+      "titulo": "O trem inteiro trabalha",
+      "conceitos": [
+        "fila-por-indice"
+      ],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "fila-js",
+        "custo-em-passos",
+        "crescimento-dos-passos"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "fila-js",
+        "custo-em-passos",
+        "crescimento-dos-passos"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "estrutura.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "comShift"
+            },
+            {
+              "nome": "porIndice"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Como em Algoritmos essenciais, compare trabalho x tamanho. comShift soma removendo; porIndice soma em ordem sem remover.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "shift numa lista enorme move os vagões a cada retirada. O gráfico soma linhas e trabalho escondido: este é um modelo, não milissegundos.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O índice evita deslizar; a lista ainda guarda os itens atendidos. Para esta tarefa finita, basta avançar inicio.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "indice-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Escreva comShift e porIndice para somar os pedidos. Execute [2,5,8] e meça as duas curvas.",
+            "toque": "Escreva comShift e porIndice para somar os pedidos. Execute [2,5,8] e meça as duas curvas."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "porIndice",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": 7
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        5,
+                        8
+                      ]
+                    ],
+                    "esperado": 15
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        2
+                      ]
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "total",
+                "valor": 15
+              },
+              {
+                "tipo": "evento",
+                "evento": "mediuDesempenho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Na versão por índice, leia lista[inicio], some e avance inicio até length.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Na versão por índice, leia lista[inicio], some e avance inicio até length."
+            },
+            "solucao": {
+              "fala": "Compare a regra e o resultado no palco.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function comShift(lista) {\n  let soma = 0;\n  while (lista.length > 0) soma += lista.shift();\n  return soma;\n}\nfunction porIndice(lista) {\n  let soma = 0;\n  let inicio = 0;\n  while (inicio < lista.length) {\n    const item = lista[inicio];\n    soma += item;\n    inicio++;\n  }\n  return soma;\n}\nconst total = porIndice([2, 5, 8]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "medirDesempenho"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O gráfico inclui todo o trabalho escondido de shift.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function comShift(lista) {\n  let soma = 0;\n  while (lista.length > 0) soma += lista.shift();\n  return soma;\n}\nfunction porIndice(lista) {\n  let soma = 0;\n  let inicio = 0;\n  while (inicio < lista.length) {\n    const item = lista[inicio];\n    soma += item;\n    inicio++;\n  }\n  return soma;\n}\nconst total = porIndice([2, 5, 8]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "medirDesempenho"
+            }
+          ]
+        },
+        {
+          "id": "indice-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Troque a chamada para [3,7,9]. Guarde total e mantenha porIndice dentro de 20.000 passos em 1.000 itens.",
+            "toque": "Troque a chamada para [3,7,9]. Guarde total e mantenha porIndice dentro de 20.000 passos em 1.000 itens."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "porIndice",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": 7
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        5,
+                        8
+                      ]
+                    ],
+                    "esperado": 15
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        2
+                      ]
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "total",
+                "valor": 19
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "funcao": "porIndice",
+                "tamanho": 1000,
+                "valor": 20000
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que item é lido ou retirado agora? E se a estrutura estiver vazia?",
+            "dica": "Faça o início avançar, sem shift na função medida."
+          },
+          "falaAoConcluir": {
+            "texto": "Mesma ordem de atendimento com uma curva que cresce junto com a entrada.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function comShift(lista) {\n  let soma = 0;\n  while (lista.length > 0) soma += lista.shift();\n  return soma;\n}\nfunction porIndice(lista) {\n  let soma = 0;\n  let inicio = 0;\n  while (inicio < lista.length) {\n    const item = lista[inicio];\n    soma += item;\n    inicio++;\n  }\n  return soma;\n}\nconst total = porIndice([3, 7, 9]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Consumir 1.000 itens: qual faz mais trabalho total?",
+            "opcoes": [
+              "porIndice",
+              "Empatam",
+              "comShift"
+            ],
+            "correta": 2,
+            "explicacao": "Cada shift move a lista restante; o gráfico mostra esse trabalho."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Rebobine para ver por onde cada item passou e qual regra decidiu a ordem.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Troque os dados e teste também a estrutura vazia.",
+        "expressao": "curioso"
+      },
+      "missaoDeCampo": "No Console de qualquer site: let p=[]; p.push(\"A\",\"B\"); p.pop(); let f=[]; f.push(\"A\",\"B\"); f.shift(); Compare quem saiu e o que ficou.",
+      "apresentar": [
+        "contador-passos",
+        "grafico-passos"
+      ]
+    },
+    {
+      "id": "logica-estruturas-de-dados-u2-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-estruturas-de-dados-u2",
+      "titulo": "A central de entregas",
+      "conceitos": [],
+      "revisa": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "fila-js",
+        "fila-por-indice"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "objeto-js",
+        "funcao-js",
+        "return-js",
+        "for-of-js",
+        "fila-js",
+        "fila-por-indice"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "programa": {
+        "snippet": {
+          "nome": "desafio.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "atender"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Crie atender(lista): devolva \"Entregar \" + pedido na ordem de chegada, preservando repetidos. Evite deslizar os vagões.",
+          "expressao": "curioso"
+        }
+      ],
+      "partes": [
+        {
+          "id": "codigo",
+          "descricao": "Crie atender(lista): devolva \"Entregar \" + pedido na ordem de chegada, preservando repetidos. Evite deslizar os vagões.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "atender",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        "x"
+                      ]
+                    ],
+                    "esperado": [
+                      "Entregar x"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        "mesa 3",
+                        "mesa 1",
+                        "mesa 3"
+                      ]
+                    ],
+                    "esperado": [
+                      "Entregar mesa 3",
+                      "Entregar mesa 1",
+                      "Entregar mesa 3"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        8,
+                        1,
+                        5
+                      ]
+                    ],
+                    "esperado": [
+                      "Entregar 8",
+                      "Entregar 1",
+                      "Entregar 5"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "entregas",
+                "valor": [
+                  "Entregar mesa 3",
+                  "Entregar mesa 1",
+                  "Entregar mesa 3"
+                ]
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "funcao": "atender",
+                "tamanho": 1000,
+                "valor": 20000
+              }
+            ]
+          },
+          "revisarEm": "logica-estruturas-de-dados-u2-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function atender(lista) {\n  const resposta = [];\n  let inicio = 0;\n  while (inicio < lista.length) {\n    const pedido = lista[inicio];\n    resposta.push(\"Entregar \" + pedido);\n    inicio++;\n  }\n  return resposta;\n}\nconst entregas = atender([\"mesa 3\", \"mesa 1\", \"mesa 3\"]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "A regra funcionou com vazio, um item e caminhos diferentes. Sua estrutura atende o novo pedido.",
+          "expressao": "comemorando"
+        }
+      ],
+      "falaFinal": {
+        "texto": "No Console real, compare push/pop e push/shift com os mesmos itens.",
+        "expressao": "feliz"
+      },
+      "missaoDeCampo": "No Console de qualquer site, use uma lista como pilha com push/pop e outra como fila com push/shift. Veja quem sai primeiro."
+    }
   ]
 }

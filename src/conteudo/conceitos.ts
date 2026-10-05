@@ -17,6 +17,9 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"fila-js": {"nome": "Fila", "resumo": "Numa fila, o primeiro item que entrou sai primeiro; push entra pelo fim e shift sai pelo começo.", "temas": ["dados", "logica"]},
+"fila-por-indice": {"nome": "Fila sem deslizar", "resumo": "Para atender uma lista grande, avançar um índice preserva a ordem sem deslocar todos os vagões a cada shift.", "temas": ["dados", "logica", "desempenho"]},
+
 "pilha-js": {"nome": "Pilha", "resumo": "Numa pilha, o último item que entrou é o primeiro a sair; push e pop usam o mesmo lado.", "temas": ["dados", "logica"]},
 "pilha-vazia": {"nome": "Pilha vazia", "resumo": "Antes de retirar de uma pilha, confira length; pop no vazio devolve undefined.", "temas": ["dados", "logica"]},
 

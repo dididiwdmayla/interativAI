@@ -298,6 +298,11 @@
       "logica-estruturas-de-dados-u1-f2",
       "logica-estruturas-de-dados-u1-f3"
     ],
+    "logica-estruturas-de-dados-u2": [
+      "logica-estruturas-de-dados-u2-f1",
+      "logica-estruturas-de-dados-u2-f2",
+      "logica-estruturas-de-dados-u2-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1763,6 +1768,23 @@
         "codigo"
       ]
     },
+    "logica-estruturas-de-dados-u2-f1": {
+      "objetivos": [
+        "fila-guiado",
+        "fila-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u2-f2": {
+      "objetivos": [
+        "indice-guiado",
+        "indice-sozinho"
+      ]
+    },
+    "logica-estruturas-de-dados-u2-f3": {
+      "partes": [
+        "codigo"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1785,6 +1807,10 @@
     }
   },
   "itensRevisao": [
+    "fila-js-1",
+    "fila-js-2",
+    "fila-por-indice-1",
+    "fila-por-indice-2",
     "pilha-js-1",
     "pilha-js-2",
     "pilha-vazia-1",
