@@ -1,0 +1,4371 @@
+{
+  "1": [
+    {
+      "id": "logica-algoritmos-essenciais-u1-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u1",
+      "titulo": "A encomenda na prateleira",
+      "conceitos": [
+        "busca-linear"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao",
+        "contador-passos"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A prateleira guarda códigos na ordem de chegada. localizar(lista, alvo) devolve o primeiro índice; se não achar, -1.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Cada leitura lista[i] acende um vagão no palco. Volte pela linha do tempo para ver a busca.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O painel recebe texto com painel.mostrar(texto); ele anuncia a posição da encomenda.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "ficha",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Abra a ficha do painel e descubra mostrar(texto).",
+            "toque": "Abra a ficha do painel e descubra mostrar(texto)."
+          },
+          "validador": {
+            "tipo": "evento",
+            "evento": "abriuFicha"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Toque no painel da cena para ler os comandos.",
+            "linha": {
+              "alvo": "ferramenta",
+              "ferramenta": "ficha-dispositivo",
+              "fala": "O painel fica acima da prateleira."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "abrirFicha",
+                  "dispositivo": "painel"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "abrirFicha",
+              "dispositivo": "painel"
+            }
+          ],
+          "apresentar": [
+            "ficha-dispositivo"
+          ]
+        },
+        {
+          "id": "linear-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Preveja; escreva localizar com for e return. Ache o 7 e mostre POS 2 no painel.",
+            "toque": "Preveja; escreva localizar com for e return. Ache o 7 e mostre POS 2 no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "localizar",
+                "casos": [
+                  {
+                    "args": [
+                      [
+                        2,
+                        4,
+                        7,
+                        9
+                      ],
+                      7
+                    ],
+                    "esperado": 2
+                  },
+                  {
+                    "args": [
+                      [
+                        8
+                      ],
+                      8
+                    ],
+                    "esperado": 0
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "POS 2"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Compare lista[i] com alvo; se forem iguais, devolva i.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Compare lista[i] com alvo; se forem iguais, devolva i."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return 0;\n}\nconst encomendas = [2, 4, 7, 9];\nconst posicao = localizar(encomendas, 7);\npainel.mostrar(\"POS \" + posicao);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return 0;\n}\nconst encomendas = [2, 4, 7, 9];\nconst posicao = localizar(encomendas, 7);\npainel.mostrar(\"POS \" + posicao);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Quantas comparações até o 7 em [2, 4, 7, 9], parando ao achar?",
+            "opcoes": [
+              "1",
+              "4",
+              "3"
+            ],
+            "correta": 2,
+            "explicacao": "Você olha 2, 4 e 7. O contador do jogo conta linhas, não só comparações."
+          },
+          "apresentar": [
+            "contador-passos"
+          ]
+        },
+        {
+          "id": "linear-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Agora devolva -1 se não achar, inclusive em []. Em [9,2,9,7], ache o primeiro 9 e mostre POS 0.",
+            "toque": "Agora devolva -1 se não achar, inclusive em []. Em [9,2,9,7], ache o primeiro 9 e mostre POS 0."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "localizar",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      7
+                    ],
+                    "esperado": -1
+                  },
+                  {
+                    "args": [
+                      [
+                        9
+                      ],
+                      9
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        9,
+                        2,
+                        9,
+                        7
+                      ],
+                      9
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ],
+                      8
+                    ],
+                    "esperado": -1
+                  }
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "POS 0"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "A ausência só está confirmada depois do laço. O primeiro return encerra a função."
+          },
+          "falaAoConcluir": {
+            "texto": "A busca linear aceita qualquer ordem e para no primeiro encontro.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return -1;\n}\nconst encomendas = [9, 2, 9, 7];\nconst posicao = localizar(encomendas, 9);\nconst ausente = localizar(encomendas, 5);\npainel.mostrar(\"POS \" + posicao);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u1",
+        "titulo": "Retirada de encomendas",
+        "ambiente": "deposito",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "prateleira",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      },
+      "apresentar": [
+        "cena",
+        "velocidade-simulacao"
+      ]
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u1-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u1",
+      "titulo": "Descartar metade com segurança",
+      "conceitos": [
+        "busca-binaria",
+        "lista-ordenada"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "localizar",
+              "args": [
+                "$lista",
+                "$tamanho"
+              ]
+            },
+            {
+              "nome": "binaria",
+              "args": [
+                "$lista",
+                "$tamanho"
+              ]
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A busca binária exige números em ordem crescente. Compare o meio; alvo maior fica à direita, menor à esquerda.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "binaria(lista, alvo) devolve true ou false. Atualize os limites passando do meio, para a busca avançar.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "A aba Desempenho mede linhas executadas nesta simulação. No Chrome real ela mede tempo.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "meio-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Escreva binaria: trate [], compare o meio de [1,2,3,4,5,6,7] com 4 e guarde achou.",
+            "toque": "Escreva binaria: trate [], compare o meio de [1,2,3,4,5,6,7] com 4 e guarde achou."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "binaria",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      4
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7
+                      ],
+                      4
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "achou",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "O índice do meio é Math.floor((esquerda + direita) / 2).",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "O índice do meio é Math.floor((esquerda + direita) / 2)."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return -1;\n}\nfunction binaria(lista, alvo) {\n  if (lista.length === 0) return false;\n  const meio = Math.floor((lista.length - 1) / 2);\n  return lista[meio] === alvo;\n}\nconst achou = binaria([1,2,3,4,5,6,7],4);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return -1;\n}\nfunction binaria(lista, alvo) {\n  if (lista.length === 0) return false;\n  const meio = Math.floor((lista.length - 1) / 2);\n  return lista[meio] === alvo;\n}\nconst achou = binaria([1,2,3,4,5,6,7],4);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "binaria-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens.",
+            "toque": "Complete a busca com while: true se existe, false se não. Cabe em 130 passos com 1.000 itens."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "binaria",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      7
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ],
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ],
+                      6
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        3,
+                        5
+                      ],
+                      3
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7
+                      ],
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ],
+                      0
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ],
+                      4
+                    ],
+                    "esperado": false
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "while"
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "valor": 130,
+                "tamanho": 1000,
+                "funcao": "binaria"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Comece com esquerda=0 e direita=length-1; atualize um limite com meio+1 ou meio-1."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return -1;\n}\nfunction binaria(lista, alvo) {\n  let esquerda = 0;\n  let direita = lista.length - 1;\n  while (esquerda <= direita) {\n    const meio = Math.floor((esquerda + direita) / 2);\n    const atual = lista[meio];\n    if (atual === alvo) return true;\n    if (atual < alvo) esquerda = meio + 1;\n    else direita = meio - 1;\n  }\n  return false;\n}\nconst achou = binaria([1,2,3,4,5,6,7],7);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Em [8, 2, 6], dá para descartar metade com segurança usando a binária?",
+            "opcoes": [
+              "Não: a lista precisa estar ordenada",
+              "Sim: qualquer ordem serve",
+              "Sim: basta trocar o alvo"
+            ],
+            "correta": 0,
+            "explicacao": "Sem ordem, um alvo maior que o meio também pode estar à esquerda. Use linear ou ordene antes."
+          }
+        },
+        {
+          "id": "medir-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Na aba Desempenho, use Medir para comparar as duas buscas de 10 a 1.000 itens.",
+            "toque": "Na aba Desempenho, use Medir para comparar as duas buscas de 10 a 1.000 itens."
+          },
+          "validador": {
+            "tipo": "evento",
+            "evento": "mediuDesempenho"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Abra Desempenho e use Medir.",
+            "linha": {
+              "alvo": "ferramenta",
+              "ferramenta": "grafico-passos",
+              "fala": "Aqui as funções recebem listas crescentes e buscam o último valor."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "medirDesempenho"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "medirDesempenho"
+            }
+          ],
+          "apresentar": [
+            "grafico-passos"
+          ]
+        },
+        {
+          "id": "medir-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Mude a chamada do Snippet para buscar o 6, execute e meça novamente.",
+            "toque": "Mude a chamada do Snippet para buscar o 6, execute e meça novamente."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "achou",
+                "valor": true
+              },
+              {
+                "tipo": "evento",
+                "evento": "mediuDesempenho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Mantenha as funções e mude a lista da chamada; depois use Medir de novo."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function localizar(lista, alvo) {\n  for (let i = 0; i < lista.length; i++) {\n    const atual = lista[i];\n    if (atual === alvo) return i;\n  }\n  return -1;\n}\nfunction binaria(lista, alvo) {\n  let esquerda = 0;\n  let direita = lista.length - 1;\n  while (esquerda <= direita) {\n    const meio = Math.floor((esquerda + direita) / 2);\n    const atual = lista[meio];\n    if (atual === alvo) return true;\n    if (atual < alvo) esquerda = meio + 1;\n    else direita = meio - 1;\n  }\n  return false;\n}\nconst achou = binaria([1,2,3,4,5,6],6);"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "medirDesempenho"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u1-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u1",
+      "titulo": "Ingresso na lista do museu",
+      "conceitos": [],
+      "revisa": [
+        "busca-binaria",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "busca-binaria",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "ingresso",
+              "args": [
+                "$lista",
+                "$tamanho"
+              ]
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "O museu tem códigos de ingresso em ordem crescente. ingresso(codigos, numero) deve devolver true ou false.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Use busca binária sem ordenar de novo. Planeje, teste vazio, um ingresso, repetidos e ausente; caiba em 130 passos com 1.000 itens.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "Ingresso na lista do museu",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Definir os limites da lista ordenada"
+          },
+          {
+            "id": "p2",
+            "texto": "Comparar o meio com o ingresso",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Descartar a metade sem o alvo e repetir",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver false se os limites se cruzarem",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "ingresso",
+        "parametros": [
+          "codigos",
+          "numero"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u1-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u1-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "ingresso",
+                "casos": [
+                  {
+                    "args": [
+                      [],
+                      7
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ],
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        7,
+                        7,
+                        9
+                      ],
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8
+                      ],
+                      2
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8
+                      ],
+                      8
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8
+                      ],
+                      1
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "valor": 130,
+                "tamanho": 1000,
+                "funcao": "ingresso"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "while"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u1-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Ingresso na lista do museu\n// 1. Definir os limites da lista ordenada\n// 2. Comparar o meio com o ingresso\n// 3. Descartar a metade sem o alvo e repetir\n// 4. Devolver false se os limites se cruzarem\n\nfunction ingresso(lista, alvo) {\n  let esquerda = 0;\n  let direita = lista.length - 1;\n  while (esquerda <= direita) {\n    const meio = Math.floor((esquerda + direita) / 2);\n    const atual = lista[meio];\n    if (atual === alvo) return true;\n    if (atual < alvo) esquerda = meio + 1;\n    else direita = meio - 1;\n  }\n  return false;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  [],
+                  7
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    7
+                  ],
+                  7
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    1,
+                    7,
+                    7,
+                    9
+                  ],
+                  7
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u1-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[], 7",
+              "esperado": "false"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[7], 7",
+              "esperado": "true"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[1, 7, 7, 9], 7",
+              "esperado": "true"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "2": [
+    {
+      "id": "logica-algoritmos-essenciais-u2-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "A vitrine por preço",
+      "conceitos": [
+        "ordenacao-selecao"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Na vitrine da feira, organize os preços em ordem crescente. selecao(lista) muda a lista recebida e devolve essa mesma lista.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "A seleção acha o menor do trecho restante, troca com o início dele e avança uma posição.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Na linha do tempo, a leitura acende o vagão. A troca [lista[i],lista[j]] = [lista[j],lista[i]] acende os dois.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "selecao-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Ache o menor e troque com o primeiro. Ordene [9,1]; mostre MENOR 1 no painel.",
+            "toque": "Ache o menor e troque com o primeiro. Ordene [9,1]; mostre MENOR 1 no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "selecao",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "desestruturacao"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "MENOR 1"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Guarde o índice do menor em menor; depois troque os dois vagões.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Guarde o índice do menor em menor; depois troque os dois vagões."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function selecao(lista) {\n  if (lista.length < 2) return lista;\n  let menor = 0;\n  for (let j = 1; j < lista.length; j++) {\n    if (lista[j] < lista[menor]) menor = j;\n  }\n  [lista[0], lista[menor]] = [lista[menor], lista[0]];\n  return lista;\n}\nconst precos = [9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function selecao(lista) {\n  if (lista.length < 2) return lista;\n  let menor = 0;\n  for (let j = 1; j < lista.length; j++) {\n    if (lista[j] < lista[menor]) menor = j;\n  }\n  [lista[0], lista[menor]] = [lista[menor], lista[0]];\n  return lista;\n}\nconst precos = [9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "selecao-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Repita a seleção para cada posição. Ordene [10,9,1]; mostre MENOR 1, inclusive com bordas passando.",
+            "toque": "Repita a seleção para cada posição. Ordene [10,9,1]; mostre MENOR 1, inclusive com bordas passando."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "selecao",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "precos",
+                "valor": [
+                  1,
+                  9,
+                  10
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "MENOR 1"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "O laço externo fixa i; o interno busca o menor entre i+1 e o fim."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function selecao(lista) {\n  for (let i = 0; i < lista.length - 1; i++) {\n    let menor = i;\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[j] < lista[menor]) menor = j;\n    }\n    if (menor !== i) [lista[i], lista[menor]] = [lista[menor], lista[i]];\n  }\n  return lista;\n}\nconst precos = [10,9,1];\nselecao(precos);\npainel.mostrar(\"MENOR \" + precos[0]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Após só a primeira troca da seleção em [10,9,1], qual é a lista?",
+            "opcoes": [
+              "[1,10,9]",
+              "[1,9,10]",
+              "[10,1,9]"
+            ],
+            "correta": 1,
+            "explicacao": "O menor é 1 no índice 2. Troca com o 10; o restante ainda precisa de seleção."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u2",
+        "titulo": "Vitrine da feira",
+        "ambiente": "feira",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "balcao",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          },
+          {
+            "peca": "prateleira",
+            "x": 48,
+            "y": 73,
+            "variante": "potes"
+          },
+          {
+            "peca": "vitrine",
+            "x": 24,
+            "y": 65
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "Vizinhos fora de ordem",
+      "conceitos": [
+        "ordenacao-bolha"
+      ],
+      "revisa": [
+        "ordenacao-selecao",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "ordenacao-selecao",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A bolha compara vizinhos: se o da esquerda for maior, troca. Uma passada leva o maior ao fim.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "bolha(lista) também altera e devolve a lista recebida. Repita passadas encurtando o fim.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "bolha-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Faça uma passada comparando vizinhos. bolha([3,2]) deve devolver [2,3].",
+            "toque": "Faça uma passada comparando vizinhos. bolha([3,2]) deve devolver [2,3]."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "bolha",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        2
+                      ]
+                    ],
+                    "esperado": [
+                      2,
+                      3
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "desestruturacao"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Compare lista[j] com lista[j+1] e troque se a esquerda for maior.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Compare lista[j] com lista[j+1] e troque se a esquerda for maior."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function bolha(lista) {\n  for (let j = 0; j < lista.length - 1; j++) {\n    if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n  }\n  return lista;\n}\nconst pesos = [3,2];\nbolha(pesos);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function bolha(lista) {\n  for (let j = 0; j < lista.length - 1; j++) {\n    if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n  }\n  return lista;\n}\nconst pesos = [3,2];\nbolha(pesos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "bolha-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Complete as passadas: [3,2,1] vira [1,2,3]. Trate vazio, repetidos e lista já ordenada.",
+            "toque": "Complete as passadas: [3,2,1] vira [1,2,3]. Trate vazio, repetidos e lista já ordenada."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "bolha",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "pesos",
+                "valor": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Depois de uma passada, o maior está no fim; faça outra sem revisitá-lo."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function bolha(lista) {\n  for (let fim = lista.length - 1; fim > 0; fim--) {\n    for (let j = 0; j < fim; j++) {\n      if (lista[j] > lista[j + 1]) [lista[j], lista[j + 1]] = [lista[j + 1], lista[j]];\n    }\n  }\n  return lista;\n}\nconst pesos = [3,2,1];\nbolha(pesos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Uma única passada da esquerda para a direita em [3,2,1] termina como?",
+            "opcoes": [
+              "[2,1,3]",
+              "[1,2,3]",
+              "[3,1,2]"
+            ],
+            "correta": 0,
+            "explicacao": "Troca 3 com 2, depois 3 com 1. O 3 chega ao fim; ainda falta trocar 2 com 1."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f3",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "O sort compara texto",
+      "conceitos": [
+        "sort-numerico"
+      ],
+      "revisa": [
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "arrow-js",
+        "array-js",
+        "return-js"
+      ],
+      "prerequisitos": [
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "arrow-js",
+        "array-js",
+        "return-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "No JavaScript real, sort() sem comparador trata números como textos. \"10\" vem antes de \"9\".",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O comparador (a,b) => a-b é negativo quando a deve vir antes de b. Use uma cópia se não quiser mudar a original.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Por que aprender seleção e bolha? Para entender o custo e escolher quando usar o sort pronto. Ele não custa zero passos.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "sort-padrao",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Preveja e rode no Console: const errado = [10,9,1].sort().",
+            "toque": "Preveja e rode no Console: const errado = [10,9,1].sort()."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "valorVariavel",
+                "nome": "errado",
+                "valor": [
+                  1,
+                  10,
+                  9
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Rode sort sem argumentos e olhe a ordem dos vagões.",
+            "linha": {
+              "alvo": "console",
+              "fala": "Escreva o comando no Console."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "executarNoConsole",
+                  "codigo": "const errado = [10,9,1].sort();"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "executarNoConsole",
+              "codigo": "const errado = [10,9,1].sort();"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Qual lista [10,9,1].sort() devolve?",
+            "opcoes": [
+              "[10,9,1]",
+              "[1,9,10]",
+              "[1,10,9]"
+            ],
+            "correta": 2,
+            "explicacao": "Sem comparador, a ordem é de texto: \"1\", \"10\", \"9\"."
+          }
+        },
+        {
+          "id": "sort-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Crie numerica(lista): devolva uma cópia ordenada com sort e comparador. A original [20,3,11] deve continuar igual.",
+            "toque": "Crie numerica(lista): devolva uma cópia ordenada com sort e comparador. A original [20,3,11] deve continuar igual."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "numerica",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        7
+                      ]
+                    ],
+                    "esperado": [
+                      7
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        3,
+                        1,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      3,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        0,
+                        -5
+                      ]
+                    ],
+                    "esperado": [
+                      -5,
+                      -2,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "arrow"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "original",
+                "valor": [
+                  20,
+                  3,
+                  11
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "ordenada",
+                "valor": [
+                  3,
+                  11,
+                  20
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Copie com [...lista] e passe (a,b) => a-b para sort."
+          },
+          "falaAoConcluir": {
+            "texto": "O sort pronto é útil; entender as trocas ajuda a avaliar o trabalho que fica escondido.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function numerica(lista) {\n  return [...lista].sort((a, b) => a - b);\n}\nconst original = [20,3,11];\nconst ordenada = numerica(original);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u2-f4",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u2",
+      "titulo": "As distâncias do passeio",
+      "conceitos": [],
+      "revisa": [
+        "sort-numerico",
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "sort-numerico",
+        "ordenacao-selecao",
+        "ordenacao-bolha",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Uma guia turística recebe distâncias numéricas. roteiro(distancias) devolve uma cópia em ordem crescente.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Planeje e teste [] e [12] e [12,2,12]. Confira também negativos e [10,9,1]. Use sort com comparador numérico.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "As distâncias do passeio",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Receber as distâncias do passeio"
+          },
+          {
+            "id": "p2",
+            "texto": "Copiar a lista para preservar a entrada",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Ordenar os números com comparador",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver a cópia ordenada",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "roteiro",
+        "parametros": [
+          "distancias"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "roteiro",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        12
+                      ]
+                    ],
+                    "esperado": [
+                      12
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        12,
+                        2,
+                        12
+                      ]
+                    ],
+                    "esperado": [
+                      2,
+                      12,
+                      12
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        10,
+                        9,
+                        1
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        -1,
+                        0,
+                        -3
+                      ]
+                    ],
+                    "esperado": [
+                      -3,
+                      -1,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "metodo:sort"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "arrow"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: As distâncias do passeio\n// 1. Receber as distâncias do passeio\n// 2. Copiar a lista para preservar a entrada\n// 3. Ordenar os números com comparador\n// 4. Devolver a cópia ordenada\n\nfunction roteiro(lista) {\n  return [...lista].sort((a, b) => a - b);\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    12
+                  ]
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    12,
+                    2,
+                    12
+                  ]
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u2-f3",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "[]"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[12]",
+              "esperado": "[12]"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[12, 2, 12]",
+              "esperado": "[2, 12, 12]"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "3": [
+    {
+      "id": "logica-algoritmos-essenciais-u3-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "Volumes na expedição",
+      "conceitos": [
+        "recursao-js",
+        "caso-base-recursao"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A expedição conta volumes. contar(n) devolve n para inteiros positivos e 0 se n for zero ou negativo.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Recursão é a função chamar ela mesma. Cada chamada precisa de um problema menor e de um caso de parada.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Sem caso de parada ela nunca chega ao fim. O JavaScript interrompe com RangeError, e o jogo explica sem travar.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "sem-parada",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Execute function semFim(n) { return semFim(n); } e semFim(1). Observe a proteção.",
+            "toque": "Execute function semFim(n) { return semFim(n); } e semFim(1). Observe a proteção."
+          },
+          "validador": {
+            "tipo": "erroDoTipo",
+            "nome": "RangeError"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "A chamada não diminui n e não tem um return que pare de chamar.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "A chamada não diminui n e não tem um return que pare de chamar."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function semFim(n) {\n  return semFim(n);\n}\nsemFim(1);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A pilha de chamadas encheu: RangeError. A proteção cortou; essa função não terminou o trabalho.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function semFim(n) {\n  return semFim(n);\n}\nsemFim(1);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "recursao-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie contar com base n===0 e chamada contar(n-1). Conte 2 volumes e mostre TOTAL 2 no painel.",
+            "toque": "Crie contar com base n===0 e chamada contar(n-1). Conte 2 volumes e mostre TOTAL 2 no painel."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "contar",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      2
+                    ],
+                    "esperado": 2
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "return"
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "TOTAL 2"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Quando n é zero, devolva 0. Senão devolva 1 mais contar(n-1).",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Quando n é zero, devolva 0. Senão devolva 1 mais contar(n-1)."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function contar(n) {\n  if (n === 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(2);\npainel.mostrar(\"TOTAL \" + total);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O caso base devolve sem chamar. As outras molduras voltam somando um.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function contar(n) {\n  if (n === 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(2);\npainel.mostrar(\"TOTAL \" + total);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "recursao-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Inclua negativos na parada. Conte 4 volumes; mostre TOTAL 4 e reveja as molduras no palco.",
+            "toque": "Inclua negativos na parada. Conte 4 volumes; mostre TOTAL 4 e reveja as molduras no palco."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "contar",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      -1
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      1
+                    ],
+                    "esperado": 1
+                  },
+                  {
+                    "args": [
+                      4
+                    ],
+                    "esperado": 4
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "total",
+                "valor": 4
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "TOTAL 4"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Use n<=0; um n negativo também precisa parar."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function contar(n) {\n  if (n <= 0) return 0;\n  return 1 + contar(n - 1);\n}\nconst total = contar(4);\npainel.mostrar(\"TOTAL \" + total);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Na versão com n===0, chamar contar(-1) chega à parada ao subtrair 1?",
+            "opcoes": [
+              "Sim, na próxima chamada",
+              "Não: fica cada vez mais negativo",
+              "Sim, após duas chamadas"
+            ],
+            "correta": 1,
+            "explicacao": "-1 vira -2, depois -3. O caso de parada precisa ser alcançável."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u3",
+        "titulo": "Volumes da expedição",
+        "ambiente": "expedicao",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "mesa",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          },
+          {
+            "peca": "prateleira",
+            "x": 42,
+            "y": 53,
+            "variante": "potes"
+          },
+          {
+            "peca": "porta",
+            "x": 245,
+            "y": 65
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u3-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "Avançar pela lista",
+      "conceitos": [
+        "problema-menor-recursao"
+      ],
+      "revisa": [
+        "recursao-js",
+        "caso-base-recursao",
+        "array-js",
+        "indice-lista-js",
+        "return-js",
+        "funcao-js"
+      ],
+      "prerequisitos": [
+        "recursao-js",
+        "caso-base-recursao",
+        "array-js",
+        "indice-lista-js",
+        "return-js",
+        "funcao-js"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "somaRec(lista, indice=0) soma números. O índice começa em 0; a próxima chamada avança uma posição.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Quando indice chega a length, devolva 0. Sem avançar o índice, até uma lista de um item recorre para sempre.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "lista-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Comece somaRec com indice=0: em [] devolva 0; em [6] devolva 6.",
+            "toque": "Comece somaRec com indice=0: em [] devolva 0; em [6] devolva 6."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somaRec",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        6
+                      ]
+                    ],
+                    "esperado": 6
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "O caso de parada verifica indice>=lista.length antes de ler o vagão.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "O caso de parada verifica indice>=lista.length antes de ler o vagão."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice];\n}\nconst pontos = [6];\nconst soma = somaRec(pontos);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice];\n}\nconst pontos = [6];\nconst soma = somaRec(pontos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "lista-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Some o item atual com a chamada do próximo índice. Confira vazio, um item, repetidos e negativos.",
+            "toque": "Some o item atual com a chamada do próximo índice. Confira vazio, um item, repetidos e negativos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "somaRec",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        6
+                      ]
+                    ],
+                    "esperado": 6
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        5
+                      ]
+                    ],
+                    "esperado": 9
+                  },
+                  {
+                    "args": [
+                      [
+                        -3,
+                        0,
+                        4
+                      ]
+                    ],
+                    "esperado": 1
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "soma",
+                "valor": 9
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Devolva lista[indice] + somaRec(lista,indice+1)."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function somaRec(lista, indice = 0) {\n  if (indice >= lista.length) return 0;\n  return lista[indice] + somaRec(lista, indice + 1);\n}\nconst pontos = [2,2,5];\nconst soma = somaRec(pontos);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Se a chamada usar indice em vez de indice+1, o que acontece em [6]?",
+            "opcoes": [
+              "Lê o mesmo item sem chegar à parada",
+              "Devolve 6 uma vez",
+              "Pula o item"
+            ],
+            "correta": 0,
+            "explicacao": "O índice não avança; o problema não fica menor e a proteção corta."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u3-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u3",
+      "titulo": "As caixas da biblioteca",
+      "conceitos": [],
+      "revisa": [
+        "recursao-js",
+        "caso-base-recursao",
+        "problema-menor-recursao",
+        "objeto-js",
+        "acesso-objeto-js",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "recursao-js",
+        "caso-base-recursao",
+        "problema-menor-recursao",
+        "objeto-js",
+        "acesso-objeto-js",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A biblioteca recebe fichas de caixas: {quantidade: 3}. volumes(caixas) devolve a soma das quantidades, usando recursão.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "As quantidades são inteiros não negativos. Planeje e teste [], uma caixa, repetidos e uma caixa com zero.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "As caixas da biblioteca",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Parar com zero quando o índice alcançar o fim"
+          },
+          {
+            "id": "p2",
+            "texto": "Ler a quantidade da caixa atual",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Somar com a chamada do próximo índice",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver o total das chamadas",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "volumes",
+        "parametros": [
+          "caixas"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "volumes",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 4
+                        }
+                      ]
+                    ],
+                    "esperado": 4
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 2
+                        },
+                        {
+                          "quantidade": 2
+                        }
+                      ]
+                    ],
+                    "esperado": 4
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 0
+                        },
+                        {
+                          "quantidade": 3
+                        }
+                      ]
+                    ],
+                    "esperado": 3
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "quantidade": 1
+                        },
+                        {
+                          "quantidade": 5
+                        },
+                        {
+                          "quantidade": 2
+                        }
+                      ]
+                    ],
+                    "esperado": 8
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "if"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "return"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: As caixas da biblioteca\n// 1. Parar com zero quando o índice alcançar o fim\n// 2. Ler a quantidade da caixa atual\n// 3. Somar com a chamada do próximo índice\n// 4. Devolver o total das chamadas\n\nfunction volumes(caixas, indice = 0) {\n  if (indice >= caixas.length) return 0;\n  return caixas[indice].quantidade + volumes(caixas, indice + 1);\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "quantidade": 4
+                    }
+                  ]
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "quantidade": 2
+                    },
+                    {
+                      "quantidade": 2
+                    }
+                  ]
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u3-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "0"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{\"quantidade\": 4}]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{\"quantidade\": 2}, {\"quantidade\": 2}]",
+              "esperado": "4"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "4": [
+    {
+      "id": "logica-algoritmos-essenciais-u4-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u4",
+      "titulo": "A fila dobra de tamanho",
+      "conceitos": [
+        "custo-em-passos",
+        "crescimento-dos-passos"
+      ],
+      "revisa": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": "function lento(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}\nfunction rapido(lista) {\n  for (let i = 1; i < lista.length; i++) {\n    if (lista[i] === lista[i - 1]) return true;\n  }\n  return false;\n}\nconst pedidos = [1,2,3];\nconsole.log(lento(pedidos), rapido(pedidos));\npainel.mostrar(\"SEM DUPLICADO\");"
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "lento"
+            },
+            {
+              "nome": "rapido"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "A fila usa códigos numéricos em ordem crescente. As duas funções dizem se há repetidos: true ou false.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "lento compara cada par; rapido compara vizinhos. Só a lista ordenada garante que os iguais sejam vizinhos.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Rodou rápido no meu computador não prova que cresce bem. Veja 10, 100 e 1.000 itens; imagine o mesmo trabalho com um milhão.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "contar-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Execute os dois jeitos com [1,2,3]; confira false false e o contador. O painel deve dizer SEM DUPLICADO.",
+            "toque": "Execute os dois jeitos com [1,2,3]; confira false false e o contador. O painel deve dizer SEM DUPLICADO."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "saida",
+                "igual": [
+                  "false false"
+                ]
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "valor": 200
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "SEM DUPLICADO"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Execute o Snippet. O contador mostra linhas executadas nesta simulação.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Execute o Snippet. O contador mostra linhas executadas nesta simulação."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Com três pedidos, ambos cabem. Isso ainda não diz como vão crescer.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "grafico-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Preveja; na aba Desempenho, use Medir para testar 10, 100 e 1.000 itens.",
+            "toque": "Preveja; na aba Desempenho, use Medir para testar 10, 100 e 1.000 itens."
+          },
+          "validador": {
+            "tipo": "evento",
+            "evento": "mediuDesempenho"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Abra Desempenho e use Medir; acompanhe as duas linhas.",
+            "linha": {
+              "alvo": "ferramenta",
+              "ferramenta": "grafico-passos",
+              "fala": "Os tamanhos usam o mesmo tipo de lista, sem duplicados."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "medirDesempenho"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O gráfico testa esta distribuição de dados. Mais tamanhos ajudam a ver a tendência, sem medir tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "medirDesempenho"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Ao crescer de 10 para 1.000 pedidos distintos, qual linha dispara mais?",
+            "opcoes": [
+              "rapido: só vizinhos",
+              "As duas ficam iguais",
+              "lento: cada par"
+            ],
+            "correta": 2,
+            "explicacao": "Na lenta, cada item novo tem muitos pares novos. Na rápida, ele acrescenta só mais um vizinho."
+          }
+        },
+        {
+          "id": "contar-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Troque a fila para [1,2,2,3], mostre DUPLICADO no painel e meça de novo. Ambos devem responder true.",
+            "toque": "Troque a fila para [1,2,2,3], mostre DUPLICADO no painel e meça de novo. Ambos devem responder true."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "lento",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        8
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8,
+                        8
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        -2,
+                        0
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        1,
+                        1
+                      ]
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "rapido",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        8
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8,
+                        8
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        -2,
+                        0
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        1,
+                        1
+                      ]
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "pedidos",
+                "valor": [
+                  1,
+                  2,
+                  2,
+                  3
+                ]
+              },
+              {
+                "tipo": "saida",
+                "igual": [
+                  "true true"
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "painel",
+                "propriedade": "texto",
+                "valor": "DUPLICADO"
+              },
+              {
+                "tipo": "evento",
+                "evento": "mediuDesempenho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Mude a lista da chamada; preserve as funções que o gráfico mede."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function lento(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}\nfunction rapido(lista) {\n  for (let i = 1; i < lista.length; i++) {\n    if (lista[i] === lista[i - 1]) return true;\n  }\n  return false;\n}\nconst pedidos = [1,2,2,3];\nconsole.log(lento(pedidos), rapido(pedidos));\npainel.mostrar(\"DUPLICADO\");"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "medirDesempenho"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Deu rápido com quatro pedidos. Isso garante que um milhão também vai dar?",
+            "opcoes": [
+              "Não: veja como os passos crescem",
+              "Sim: a máquina decide tudo",
+              "Sim: true é uma resposta curta"
+            ],
+            "correta": 0,
+            "explicacao": "O tamanho da resposta não mede o trabalho feito para encontrá-la. Compare o crescimento."
+          }
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "cena": {
+        "id": "algoritmos-cena-u4",
+        "titulo": "Fila de pedidos",
+        "ambiente": "central-pedidos",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "parede",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 150,
+            "variante": "madeira"
+          },
+          {
+            "peca": "balcao",
+            "x": 35,
+            "y": 100
+          },
+          {
+            "peca": "planta",
+            "x": 275,
+            "y": 115
+          },
+          {
+            "peca": "janela",
+            "x": 40,
+            "y": 30
+          },
+          {
+            "peca": "quadro",
+            "x": 236,
+            "y": 92
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "painel",
+            "nome": "Painel do resultado",
+            "tipo": "letreiro",
+            "x": 170,
+            "y": 35
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u4-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-algoritmos-essenciais-u4",
+      "titulo": "Pares que não precisam voltar",
+      "conceitos": [
+        "evitar-trabalho-repetido"
+      ],
+      "revisa": [
+        "crescimento-dos-passos",
+        "custo-em-passos",
+        "busca-binaria",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "crescimento-dos-passos",
+        "custo-em-passos",
+        "busca-binaria",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "lento"
+            },
+            {
+              "nome": "conferir"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "Os códigos continuam ordenados. conferir(lista) deve encontrar repetidos sem comparar cada par.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Comece pelos dois primeiros; depois avance comparando vizinhos. Com 1.000 códigos, caiba em 4.500 passos.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O jogo limita cada execução a 100 mil passos ou 1,5 s. Esse freio mantém a aba viva; você vai melhorar o algoritmo.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "O gráfico conta código instrumentado. Métodos nativos escondem trabalho interno; não conclua que sort custa zero só pelo contador.",
+          "expressao": "apontando"
+        }
+      ],
+      "objetivos": [
+        {
+          "id": "limite-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Rode uma contagem até 200.000 e observe o freio do jogo.",
+            "toque": "Rode uma contagem até 200.000 e observe o freio do jogo."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "erroDoTipo",
+                "nome": "Parada do jogo"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "while"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Mesmo tendo um fim, a contagem passa do limite de trabalho do jogo.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Mesmo tendo um fim, a contagem passa do limite de trabalho do jogo."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "let voltas = 0;\nwhile (voltas < 200000) {\n  voltas++;\n}"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O jogo cortou a execução. Ter um fim não garante que o trabalho caiba no limite.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let voltas = 0;\nwhile (voltas < 200000) {\n  voltas++;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "vizinho-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Crie conferir: em [] false; em [4,4] true. Compare os dois primeiros vizinhos.",
+            "toque": "Crie conferir: em [] false; em [4,4] true. Compare os dois primeiros vizinhos."
+          },
+          "validador": {
+            "tipo": "funcaoPassa",
+            "nome": "conferir",
+            "casos": [
+              {
+                "args": [
+                  []
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  [
+                    4,
+                    4
+                  ]
+                ],
+                "esperado": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Se length<2 não há par; senão compare as posições 0 e 1.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Se length<2 não há par; senão compare as posições 0 e 1."
+            },
+            "solucao": {
+              "fala": "Uma versão para você comparar com a sua.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function lento(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}\nfunction conferir(lista) {\n  if (lista.length < 2) return false;\n  return lista[0] === lista[1];\n}\nconst repetido = conferir([4,4]);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function lento(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}\nfunction conferir(lista) {\n  if (lista.length < 2) return false;\n  return lista[0] === lista[1];\n}\nconst repetido = conferir([4,4]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "eficiente-sozinho",
+          "tipo": "previsao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados.",
+            "toque": "Complete todos os vizinhos. Trate as bordas e caiba em 4.500 passos com 1.000 códigos ordenados."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "conferir",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        8
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8,
+                        8
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        -2,
+                        0
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        1,
+                        1
+                      ]
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "valor": 4500,
+                "tamanho": 1000,
+                "funcao": "conferir"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "Comece i em 1, compare com i-1 e pare ao encontrar iguais."
+          },
+          "falaAoConcluir": {
+            "texto": "Confira o resultado e percorra a linha do tempo.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function lento(lista) {\n  for (let i = 0; i < lista.length; i++) {\n    for (let j = i + 1; j < lista.length; j++) {\n      if (lista[i] === lista[j]) return true;\n    }\n  }\n  return false;\n}\nfunction conferir(lista) {\n  for (let i = 1; i < lista.length; i++) {\n    if (lista[i] === lista[i - 1]) return true;\n  }\n  return false;\n}\nconst repetido = conferir([1,3,8,8]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Por que comparar apenas vizinhos é seguro aqui?",
+            "opcoes": [
+              "Porque há poucos pedidos",
+              "Porque a lista já está ordenada",
+              "Porque todo número é positivo"
+            ],
+            "correta": 1,
+            "explicacao": "Na lista ordenada, valores iguais ficam juntos. Sem essa garantia, precisaria de outro jeito."
+          }
+        },
+        {
+          "id": "comparar-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Use Medir outra vez e compare conferir com lento.",
+            "toque": "Use Medir outra vez e compare conferir com lento."
+          },
+          "validador": {
+            "tipo": "evento",
+            "evento": "mediuDesempenho"
+          },
+          "ajudas": {
+            "pergunta": "Qual caso faz esse caminho falhar?",
+            "dica": "As duas funções recebem listas de 10, 100 e 1.000 valores distintos."
+          },
+          "falaAoConcluir": {
+            "texto": "Menos passos não bastam: o resultado precisa passar nos casos de borda também.",
+            "expressao": "feliz"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "medirDesempenho"
+            }
+          ]
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      }
+    },
+    {
+      "id": "logica-algoritmos-essenciais-u4-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-algoritmos-essenciais-u4",
+      "titulo": "Os registros do observatório",
+      "conceitos": [],
+      "revisa": [
+        "evitar-trabalho-repetido",
+        "crescimento-dos-passos",
+        "custo-em-passos",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "prerequisitos": [
+        "evitar-trabalho-repetido",
+        "crescimento-dos-passos",
+        "custo-em-passos",
+        "lista-ordenada",
+        "array-js",
+        "funcao-js",
+        "return-js",
+        "for-js",
+        "while-js",
+        "plano-comentado",
+        "casos-de-borda"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "contador-passos",
+        "grafico-passos",
+        "quadro-de-passos",
+        "plano-no-codigo",
+        "casos-de-teste"
+      ],
+      "siteAlvo": "SITE_DO_PROGRAMA",
+      "programa": {
+        "snippet": {
+          "nome": "algoritmo.js",
+          "codigoInicial": ""
+        },
+        "desempenho": {
+          "funcoes": [
+            {
+              "nome": "repetiu"
+            }
+          ],
+          "tamanhos": [
+            10,
+            100,
+            1000
+          ],
+          "lista": "crescente"
+        }
+      },
+      "introducao": [
+        {
+          "texto": "O observatório recebe códigos de amostras, já em ordem crescente. repetiu(codigos) devolve true se algum código aparece mais de uma vez.",
+          "expressao": "apontando"
+        },
+        {
+          "texto": "Planeje, trate vazio, um código e repetidos; até 4.500 passos com 1.000 códigos. Compare vizinhos sem ordenar novamente.",
+          "expressao": "apontando"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "O mesmo JavaScript funciona no Console real. Aqui o palco deixa acompanhar cada passo.",
+          "expressao": "comemorando"
+        }
+      ],
+      "missaoDeCampo": "No Console de qualquer site, rode [10, 9, 1].sort(); depois [10, 9, 1].sort((a, b) => a - b). Compare as duas ordens.",
+      "falaFinal": {
+        "texto": "Experimente outra entrada e confira o caminho.",
+        "expressao": "feliz"
+      },
+      "areas": [
+        "plano",
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "plano": {
+        "modo": "ordenar",
+        "problema": "Os registros do observatório",
+        "cartoes": [
+          {
+            "id": "p1",
+            "texto": "Receber os códigos já ordenados"
+          },
+          {
+            "id": "p2",
+            "texto": "Percorrer comparando cada código com o anterior",
+            "depoisDe": [
+              "p1"
+            ]
+          },
+          {
+            "id": "p3",
+            "texto": "Devolver true ao encontrar vizinhos iguais",
+            "depoisDe": [
+              "p2"
+            ]
+          },
+          {
+            "id": "p4",
+            "texto": "Devolver false ao chegar ao fim",
+            "depoisDe": [
+              "p3"
+            ]
+          },
+          {
+            "id": "sobra",
+            "texto": "Devolver sempre a mesma resposta",
+            "sobra": true
+          }
+        ]
+      },
+      "testes": {
+        "funcao": "repetiu",
+        "parametros": [
+          "codigos"
+        ]
+      },
+      "partes": [
+        {
+          "id": "plano",
+          "descricao": "Planeje por dependências, sem a distração.",
+          "validador": {
+            "tipo": "ordemValida"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u4-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "porPasso",
+              "passo": "p1"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p2"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p3"
+            },
+            {
+              "tipo": "porPasso",
+              "passo": "p4"
+            }
+          ]
+        },
+        {
+          "id": "comentarios",
+          "descricao": "Leve o plano ao código como comentários.",
+          "validador": {
+            "tipo": "planoComentado"
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u4-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "levarPlanoProCodigo"
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "descricao": "Execute a função com as entradas e a saída pedidas.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "funcaoPassa",
+                "nome": "repetiu",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        8
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        2,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        2,
+                        3
+                      ]
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        3,
+                        8,
+                        8
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        -2,
+                        -2,
+                        0
+                      ]
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      [
+                        1,
+                        1,
+                        1
+                      ]
+                    ],
+                    "esperado": true
+                  }
+                ]
+              },
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "usouSintaxe",
+                "sintaxe": "for"
+              },
+              {
+                "tipo": "passosNoMaximo",
+                "valor": 4500,
+                "tamanho": 1000,
+                "funcao": "repetiu"
+              }
+            ]
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u4-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "// Plano: Os registros do observatório\n// 1. Receber os códigos já ordenados\n// 2. Percorrer comparando cada código com o anterior\n// 3. Devolver true ao encontrar vizinhos iguais\n// 4. Devolver false ao chegar ao fim\n\nfunction repetiu(lista) {\n  for (let i = 1; i < lista.length; i++) {\n    if (lista[i] === lista[i - 1]) return true;\n  }\n  return false;\n}"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "testes",
+          "descricao": "Crie e rode os casos: vazio, um item e repetidos.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "incluir": [
+              {
+                "args": [
+                  []
+                ],
+                "rotulo": "borda 1"
+              },
+              {
+                "args": [
+                  [
+                    8
+                  ]
+                ],
+                "rotulo": "borda 2"
+              },
+              {
+                "args": [
+                  [
+                    2,
+                    2,
+                    3
+                  ]
+                ],
+                "rotulo": "borda 3"
+              }
+            ],
+            "passando": true
+          },
+          "revisarEm": "logica-algoritmos-essenciais-u4-f2",
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[]",
+              "esperado": "false"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[8]",
+              "esperado": "false"
+            },
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[2, 2, 3]",
+              "esperado": "true"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

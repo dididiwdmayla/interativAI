@@ -272,6 +272,27 @@
       "logica-resolvendo-problemas-u4-f1",
       "logica-resolvendo-problemas-u4-f2"
     ],
+    "logica-algoritmos-essenciais-u1": [
+      "logica-algoritmos-essenciais-u1-f1",
+      "logica-algoritmos-essenciais-u1-f2",
+      "logica-algoritmos-essenciais-u1-f3"
+    ],
+    "logica-algoritmos-essenciais-u2": [
+      "logica-algoritmos-essenciais-u2-f1",
+      "logica-algoritmos-essenciais-u2-f2",
+      "logica-algoritmos-essenciais-u2-f3",
+      "logica-algoritmos-essenciais-u2-f4"
+    ],
+    "logica-algoritmos-essenciais-u3": [
+      "logica-algoritmos-essenciais-u3-f1",
+      "logica-algoritmos-essenciais-u3-f2",
+      "logica-algoritmos-essenciais-u3-f3"
+    ],
+    "logica-algoritmos-essenciais-u4": [
+      "logica-algoritmos-essenciais-u4-f1",
+      "logica-algoritmos-essenciais-u4-f2",
+      "logica-algoritmos-essenciais-u4-f3"
+    ],
     "logica-programa-de-verdade-u1": [
       "logica-programa-de-verdade-u1-f1",
       "logica-programa-de-verdade-u1-f2"
@@ -1627,6 +1648,99 @@
         "testes"
       ]
     },
+    "logica-algoritmos-essenciais-u1-f1": {
+      "objetivos": [
+        "ficha",
+        "linear-guiado",
+        "linear-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u1-f2": {
+      "objetivos": [
+        "meio-guiado",
+        "binaria-sozinho",
+        "medir-guiado",
+        "medir-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u1-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f1": {
+      "objetivos": [
+        "selecao-guiado",
+        "selecao-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f2": {
+      "objetivos": [
+        "bolha-guiado",
+        "bolha-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f3": {
+      "objetivos": [
+        "sort-padrao",
+        "sort-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u2-f4": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
+    "logica-algoritmos-essenciais-u3-f1": {
+      "objetivos": [
+        "sem-parada",
+        "recursao-guiado",
+        "recursao-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u3-f2": {
+      "objetivos": [
+        "lista-guiado",
+        "lista-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u3-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
+    "logica-algoritmos-essenciais-u4-f1": {
+      "objetivos": [
+        "contar-guiado",
+        "grafico-guiado",
+        "contar-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u4-f2": {
+      "objetivos": [
+        "limite-guiado",
+        "vizinho-guiado",
+        "eficiente-sozinho",
+        "comparar-sozinho"
+      ]
+    },
+    "logica-algoritmos-essenciais-u4-f3": {
+      "partes": [
+        "plano",
+        "comentarios",
+        "codigo",
+        "testes"
+      ]
+    },
     "logica-programa-de-verdade-u1-f1": {
       "objetivos": [
         "ficha-do-relogio",
@@ -1649,6 +1763,30 @@
     }
   },
   "itensRevisao": [
+    "custo-em-passos-1",
+    "custo-em-passos-2",
+    "crescimento-dos-passos-1",
+    "crescimento-dos-passos-2",
+    "evitar-trabalho-repetido-1",
+    "evitar-trabalho-repetido-2",
+    "recursao-js-1",
+    "recursao-js-2",
+    "caso-base-recursao-1",
+    "caso-base-recursao-2",
+    "problema-menor-recursao-1",
+    "problema-menor-recursao-2",
+    "ordenacao-selecao-1",
+    "ordenacao-selecao-2",
+    "ordenacao-bolha-1",
+    "ordenacao-bolha-2",
+    "sort-numerico-1",
+    "sort-numerico-2",
+    "busca-linear-1",
+    "busca-linear-2",
+    "busca-binaria-1",
+    "busca-binaria-2",
+    "lista-ordenada-1",
+    "lista-ordenada-2",
     "casos-de-borda-1",
     "casos-de-borda-2",
     "dependencias-passos-1",

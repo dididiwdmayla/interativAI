@@ -17,6 +17,22 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+"custo-em-passos": {"nome": "Custo em passos", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
+"crescimento-dos-passos": {"nome": "Crescimento dos passos", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
+"evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},
+
+"recursao-js": {"nome": "Recursão", "resumo": "Uma função chama ela mesma para resolver uma versão menor do problema; cada chamada ganha uma moldura.", "temas": ["logica"]},
+"caso-base-recursao": {"nome": "Caso de parada da recursão", "resumo": "O caso base devolve uma resposta sem nova chamada; sem alcançá-lo, a recursão continua até a proteção cortar.", "temas": ["logica"]},
+"problema-menor-recursao": {"nome": "Um problema menor a cada chamada", "resumo": "A cada chamada, diminuir o número ou avançar na lista aproxima a função do caso de parada.", "temas": ["logica", "desempenho"]},
+
+"ordenacao-selecao": {"nome": "Ordenação por seleção", "resumo": "Procurar o menor do trecho restante e colocá-lo na próxima posição da lista.", "temas": ["logica", "desempenho"]},
+"ordenacao-bolha": {"nome": "Ordenação por bolha", "resumo": "Comparar vizinhos e trocar os fora de ordem, levando o maior ao fim em cada passada.", "temas": ["logica", "desempenho"]},
+"sort-numerico": {"nome": "sort com números", "resumo": "O sort padrão compara como texto; o comparador (a, b) => a - b coloca números em ordem crescente.", "temas": ["logica", "desempenho"]},
+
+"busca-linear": {"nome": "Busca linear", "resumo": "Olhar um item por vez até achar o alvo ou chegar ao fim da lista.", "temas": ["logica", "desempenho"]},
+"busca-binaria": {"nome": "Busca binária", "resumo": "Numa lista ordenada, comparar o meio e descartar a metade que não pode conter o alvo.", "temas": ["logica", "desempenho"]},
+"lista-ordenada": {"nome": "Lista ordenada", "resumo": "Manter os valores em ordem para que a busca binária possa descartar uma metade com segurança.", "temas": ["logica", "desempenho"]},
+
 "casos-de-borda": {"nome": "Casos de borda", "resumo": "Testar vazio, zero, repetido e negativo para expor regras que um caso comum não verifica.", "temas": ["logica", "ferramentas"]},
 
 "dependencias-passos": {"nome": "Dependências dos passos", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},

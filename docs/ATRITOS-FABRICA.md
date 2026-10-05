@@ -2,6 +2,27 @@
 
 Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-11.md`.
 
+## Rodada 30: zona Algoritmos essenciais
+
+- Nenhuma peça ou capacidade nova de motor foi necessária: quatro cenas
+  com ambientes e missões diferentes usam o painel do kit como resultado,
+  além dos vagões e das molduras no palco. As funções de algoritmo não
+  dependem dos aparelhos; os comandos da cena ficam nas chamadas do Snippet.
+- O contador mede linhas executadas, não só comparações nem tempo de
+  relógio. O gráfico usa listas distintas de 10, 100 e 1.000 valores, e
+  explica a distribuição usada; métodos nativos têm trabalho interno que
+  o contador não mostra por inteiro.
+- Resultado e eficiência são conferidos separadamente: duas sabotagens
+  acertam as bordas, mas falham no orçamento (linear no lugar de binária;
+  todos os pares no lugar de vizinhos). Comparar vizinhos exige ordem.
+- Jornada pelo mapa com previsão, editor, gráfico, cena, plano e casos;
+  JSON vinculado às ações do TS. O palco de uma cena vira aba em retrato,
+  e voltar do gráfico exige a aba Fontes. Em Snippet longo no toque, o
+  teste foca o editor para evitar acertar a barra de símbolos; o rastro
+  usa o controle deslizante por teclado para evitar o indicador do Next.
+- Publicação e build por unidade; bateria de conteúdo uma vez no fim.
+  Nenhuma unidade anteriormente publicada foi alterada.
+
 ## Rodada 29 (motor): o formato contrato
 
 - Sem bloqueio para os próximos contratos: é um desafio com o campo
