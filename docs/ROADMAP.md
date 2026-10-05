@@ -37,8 +37,9 @@ núcleo comum.
   cenários alternativos; mostruário nos três temas e 36 capturas para
   revisão no celular em `docs/capturas/cenas-novas/`. Testes de conteúdo,
   jornadas novas nos três layouts, build, lint e bateria de conteúdo
-  passaram. Fechamento da bateria completa em andamento; detalhe em
-  `docs/PROGRESSO.md`.
+  passaram. Bateria completa executada: 166 jornadas; três falhas iniciais
+  resolvidas nos retestes, incluindo ajuste de foco no teste móvel de
+  Funções. Detalhe em `docs/PROGRESSO.md`.
 
 - **Zona Algoritmos essenciais completa (U1 a U4):** Buscar (linear e
   binária só em lista ordenada), Ordenar (seleção, bolha e sort numérico),
@@ -563,8 +564,8 @@ núcleo comum.
 
 ### Em andamento
 
-- Fechamento da bateria completa dos ambientes novos e retestes de
-  Recursão após timeout na execução paralela. Detalhes em `docs/PROGRESSO.md`.
+- Quatro ambientes concluídos; aguardando revisão visual das capturas
+  e do pull request.
 
 ### Pendências
 

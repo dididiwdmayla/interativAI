@@ -60,9 +60,19 @@ ligado. Teste específico acrescentado e 57 testes afetados verdes
 - Na revisão pelo navegador, uma prateleira da estufa com altura muito
   pequena produzia retângulos negativos. Corrigidos os dados, com novo
   teste da estufa e console limpo.
-- Bateria completa em andamento; duas jornadas de Recursão deram timeout
-  esperando o erro no palco sob execução paralela. Diagnóstico isolado
-  mostrou o RangeError correto; retestes pendentes ao fim da bateria.
+- Bateria completa executada uma vez: 166 jornadas, com 163 aprovações
+  iniciais. As duas falhas de Recursão passaram isoladamente, sem mudança
+  no produto. Em Funções U1/retrato, a lista de autocompletar interceptava
+  o clique central do teste; a jornada passou após usar foco no editor
+  móvel, como as demais jornadas. Retestes de Funções em retrato e
+  paisagem passaram; lint do teste ajustado também passou.
+- Build e lint finais passaram após a correção do timer. Revalidação
+  das cenas no build final passou nos três layouts.
+- Publicação pelo conector GitHub, verificando SHA de cada blob e árvore.
+  O Git local retornou `fatal: could not read Username for 'https://github.com': No such device or address`;
+  a tentativa com o helper do gh retornou `remote: Invalid username or token. Password authentication is not supported for Git operations.`
+  O gh confirmou `gh: Bad credentials (HTTP 401)`. O conector tem acesso
+  de escrita e preserva exatamente os arquivos testados.
 
 Decisões: umidade é entrada de teste, sem modelo físico de absorção;
 alarme tem aviso visual pulsante, sem áudio novo; semáforo grande controla

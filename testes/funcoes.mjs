@@ -82,7 +82,9 @@ async function rodar(codigo) {
     await tocar(abas.getByRole("tab", { name: "Fontes", exact: true }));
     if (movel) await tocar(pagina.getByRole("tab", { name: "Snippet", exact: true }));
     const editor = pagina.locator("[data-editor-snippet] .cm-content");
-    await editor.click();
+    // No celular, a lista de autocompletar pode cobrir o centro do editor.
+    if (movel) await editor.focus();
+    else await editor.click();
     await pagina.keyboard.press("ControlOrMeta+A");
     await pagina.keyboard.insertText(codigo);
     await tocar(pagina.locator("[data-executar-snippet]"));
