@@ -10,7 +10,7 @@
  */
 import type { ValorCena } from "./modelo";
 
-export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador", "relogio", "campainha"] as const;
+export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador", "relogio", "campainha", "sensorCarro", "geladeira", "alarme", "semaforo", "botao", "aspersor", "sensorUmidade", "sensorDia"] as const;
 
 export type TipoDispositivo = (typeof TIPOS_DISPOSITIVO)[number];
 
@@ -29,9 +29,10 @@ export type PropriedadeDispositivo = {
   explicacao: string;
   /** (Número) A faixa que vale. */
   faixa?: [number, number];
+  entradaTemporal?: boolean;
 };
 
-export type ComandoDispositivo = { nome: string; assinatura: string; explicacao: string };
+export type ComandoDispositivo = { nome: string; assinatura: string; explicacao: string; efeito?: { propriedade: string; valor?: ValorCena; argumento?: { valores: ValorCena[] } } };
 
 /** Uma etapa do caminho do comando (o "por dentro"): a peça e o que ela faz. */
 export type EtapaPorDentro = { peca: "codigo" | "placa" | "rele" | "driver" | "motor" | "resistencia" | "termometro" | "display" | "sensor" | "contato" | "dispositivo"; texto: string };
@@ -63,6 +64,63 @@ export const LETRAS_DO_LETREIRO = 16;
 export const FIM_POR_DENTRO = "Na trilha Automação você monta isso de verdade.";
 
 export const CATALOGO_DISPOSITIVOS: Record<TipoDispositivo, FichaDispositivo> = {
+  sensorCarro: {
+    tipo: "sensorCarro", nome: "Sensor de carro", classe: "SensorCarro", sentido: "entrada",
+    oQueFaz: "Detecta um carro esperando na entrada.", comandos: [],
+    propriedades: [{ nome: "temCarro", tipo: "booleano", escreve: false, doMundo: true, entradaTemporal: true,  explicacao: "Detecta um carro esperando na entrada." }],
+    inicial: { temCarro: false }, exemplo: nome => `console.log(${nome}.temCarro);`,
+    porDentro: [{ peca: "sensor", texto: "O laço no piso detecta a presença de metal." }, { peca: "placa", texto: "A plaquinha converte a leitura em um valor para o programa." }, { peca: "codigo", texto: "O código lê temCarro e decide o que fazer." }, { peca: "dispositivo", texto: "A leitura acompanha o estado do dispositivo no mundo." }],
+  },
+  geladeira: {
+    tipo: "geladeira", nome: "Geladeira", classe: "Geladeira", sentido: "entrada",
+    oQueFaz: "Informa se a porta está aberta.", comandos: [],
+    propriedades: [{ nome: "portaAberta", tipo: "booleano", escreve: false, doMundo: true, entradaTemporal: true,  explicacao: "Informa se a porta está aberta." }],
+    inicial: { portaAberta: false }, exemplo: nome => `console.log(${nome}.portaAberta);`,
+    porDentro: [{ peca: "sensor", texto: "Um contato magnético percebe se a porta encostou." }, { peca: "placa", texto: "A plaquinha converte a leitura em um valor para o programa." }, { peca: "codigo", texto: "O código lê portaAberta e decide o que fazer." }, { peca: "dispositivo", texto: "A leitura acompanha o estado do dispositivo no mundo." }],
+  },
+  botao: {
+    tipo: "botao", nome: "Botão de pedestre", classe: "Botao", sentido: "entrada",
+    oQueFaz: "Vale true enquanto alguém segura o botão.", comandos: [],
+    propriedades: [{ nome: "pressionado", tipo: "booleano", escreve: false, doMundo: true, entradaTemporal: true,  explicacao: "Vale true enquanto alguém segura o botão." }],
+    inicial: { pressionado: false }, exemplo: nome => `console.log(${nome}.pressionado);`,
+    porDentro: [{ peca: "sensor", texto: "O contato fecha enquanto o dedo aperta." }, { peca: "placa", texto: "A plaquinha converte a leitura em um valor para o programa." }, { peca: "codigo", texto: "O código lê pressionado e decide o que fazer." }, { peca: "dispositivo", texto: "A leitura acompanha o estado do dispositivo no mundo." }],
+  },
+  sensorUmidade: {
+    tipo: "sensorUmidade", nome: "Sensor de umidade", classe: "SensorUmidade", sentido: "entrada",
+    oQueFaz: "Mede a umidade da terra, de 0 a 100.", comandos: [],
+    propriedades: [{ nome: "valor", tipo: "número", escreve: false, doMundo: true, entradaTemporal: true, faixa: [0, 100], explicacao: "Mede a umidade da terra, de 0 a 100." }],
+    inicial: { valor: 65 }, exemplo: nome => `console.log(${nome}.valor);`,
+    porDentro: [{ peca: "sensor", texto: "A sonda mede uma propriedade elétrica que varia com a água na terra." }, { peca: "placa", texto: "A plaquinha converte a leitura em um valor para o programa." }, { peca: "codigo", texto: "O código lê valor e decide o que fazer." }, { peca: "dispositivo", texto: "A leitura acompanha o estado do dispositivo no mundo." }],
+  },
+  sensorDia: {
+    tipo: "sensorDia", nome: "Sensor de luz do dia", classe: "SensorDia", sentido: "entrada",
+    oQueFaz: "Informa se há luz do dia para regar.", comandos: [],
+    propriedades: [{ nome: "dia", tipo: "booleano", escreve: false, doMundo: true, entradaTemporal: true,  explicacao: "Informa se há luz do dia para regar." }],
+    inicial: { dia: true }, exemplo: nome => `console.log(${nome}.dia);`,
+    porDentro: [{ peca: "sensor", texto: "Um sensor de luz percebe a claridade externa." }, { peca: "placa", texto: "A plaquinha converte a leitura em um valor para o programa." }, { peca: "codigo", texto: "O código lê dia e decide o que fazer." }, { peca: "dispositivo", texto: "A leitura acompanha o estado do dispositivo no mundo." }],
+  },
+  alarme: {
+    tipo: "alarme", nome: "Alarme", classe: "Alarme", sentido: "saida", oQueFaz: "Avisa enquanto a porta fica aberta por tempo demais.",
+    comandos: [{ nome: "tocar", assinatura: "tocar()", explicacao: "Ativa o dispositivo.", efeito: { propriedade: "tocando", valor: true } }, { nome: "parar", assinatura: "parar()", explicacao: "Desativa o dispositivo.", efeito: { propriedade: "tocando", valor: false } }],
+    propriedades: [{ nome: "tocando", tipo: "booleano", escreve: false, doMundo: false, explicacao: "true enquanto está ativo." }],
+    inicial: { tocando: false }, exemplo: nome => `${nome}.tocar();\nesperar(1000);\n${nome}.parar();`,
+    porDentro: [{ peca: "codigo", texto: "O programa manda tocar()." }, { peca: "placa", texto: "A plaquinha envia a ordem para o circuito de saída." }, { peca: "driver", texto: "O circuito entrega energia ao componente." }, { peca: "dispositivo", texto: "Um pequeno alto-falante vibra; nesta cena o aviso também pulsa." }],
+  },
+  aspersor: {
+    tipo: "aspersor", nome: "Aspersor", classe: "Aspersor", sentido: "saida", oQueFaz: "Libera água sobre os canteiros quando recebe a ordem.",
+    comandos: [{ nome: "ligar", assinatura: "ligar()", explicacao: "Ativa o dispositivo.", efeito: { propriedade: "ligado", valor: true } }, { nome: "desligar", assinatura: "desligar()", explicacao: "Desativa o dispositivo.", efeito: { propriedade: "ligado", valor: false } }],
+    propriedades: [{ nome: "ligado", tipo: "booleano", escreve: false, doMundo: false, explicacao: "true enquanto está ativo." }],
+    inicial: { ligado: false }, exemplo: nome => `${nome}.ligar();\nesperar(1000);\n${nome}.desligar();`,
+    porDentro: [{ peca: "codigo", texto: "O programa manda ligar()." }, { peca: "placa", texto: "A plaquinha envia a ordem para o circuito de saída." }, { peca: "driver", texto: "O circuito entrega energia ao componente." }, { peca: "dispositivo", texto: "Uma válvula abre a passagem de água para o aspersor." }],
+  },
+  semaforo: {
+    tipo: "semaforo", nome: "Semáforo", classe: "Semaforo", sentido: "saida",
+    oQueFaz: "Controla a passagem dos carros: vermelho dá a vez ao pedestre; amarelo avisa antes da parada.",
+    comandos: [{ nome: "mudar", assinatura: 'mudar("verde")', explicacao: "Escolhe verde, amarelo ou vermelho.", efeito: { propriedade: "cor", argumento: { valores: ["verde", "amarelo", "vermelho"] } } }],
+    propriedades: [{ nome: "cor", tipo: "texto", escreve: false, doMundo: false, explicacao: "A cor acesa para os carros. O sinal de pedestre mostra a passagem correspondente." }],
+    inicial: { cor: "verde" }, exemplo: nome => `${nome}.mudar("amarelo");\nesperar(1000);\n${nome}.mudar("vermelho");`,
+    porDentro: [{ peca: "codigo", texto: "O programa escolhe a cor com mudar()." }, { peca: "placa", texto: "A plaquinha desliga as outras saídas e seleciona uma." }, { peca: "driver", texto: "O circuito alimenta o conjunto de LEDs escolhido." }, { peca: "dispositivo", texto: "O semáforo acende a cor e o sinal de pedestre correspondente." }],
+  },
   lampada: {
     tipo: "lampada",
     nome: "Lâmpada",
@@ -165,10 +223,12 @@ export const CATALOGO_DISPOSITIVOS: Record<TipoDispositivo, FichaDispositivo> = 
     sentido: "saida",
     oQueFaz: "Esquenta enquanto está ligado e esfria desligado; o termômetro dele conta a temperatura.",
     comandos: [
+      { nome: "assar", assinatura: "assar(ms)", explicacao: "Liga e desliga sozinho ao terminar o timer (1 a 60000 ms)." },
       { nome: "ligar", assinatura: "ligar()", explicacao: "Liga a resistência: o forno começa a esquentar." },
       { nome: "desligar", assinatura: "desligar()", explicacao: "Desliga a resistência: o forno esfria aos poucos." },
     ],
     propriedades: [
+      { nome: "restante", tipo: "número", escreve: false, doMundo: true, explicacao: "Milissegundos que faltam no timer, ou zero." },
       { nome: "ligado", tipo: "booleano", escreve: false, doMundo: false, explicacao: "true se a resistência está ligada." },
       { nome: "temperatura", tipo: "número", escreve: false, doMundo: true, explicacao: "Quantos graus o forno está agora (sobe uns 40 por segundo ligado)." },
     ],
@@ -248,12 +308,14 @@ export function propriedadesDoTipo(tipo: TipoDispositivo): string[] {
  * usado pelos validadores sequenciaNaCena e reagiu).
  */
 export const ACOES_DO_TIPO: Record<TipoDispositivo, readonly string[]> = {
+  sensorCarro: [], geladeira: [], botao: [], sensorUmidade: [], sensorDia: [],
+  alarme: ["tocar", "parar"], aspersor: ["ligar", "desligar"], semaforo: ["mudar"],
   lampada: ["ligar", "desligar", "brilho"],
   sensor: [],
   interruptor: [],
   portao: ["abrir", "fechar"],
   letreiro: ["mostrar", "apagar"],
-  forno: ["ligar", "desligar"],
+  forno: ["ligar", "desligar", "assar"],
   ventilador: ["velocidade", "desligar"],
   relogio: [],
   campainha: ["tocar"],

@@ -171,6 +171,8 @@ export class MotorCena {
   rastro(): RastroCena {
     const inicial = estadoInicialDaCena(this.dados);
     return {
+      atores: this.dados.atores,
+      reacoes: this.dados.reacoes,
       cenaId: this.dados.id,
       duracaoMs: this.dados.duracaoMs,
       linhaDoTempo: this.linhaDoTempo.map((item) => ({ ...item })),
@@ -206,13 +208,15 @@ export class MotorCena {
   /** O valor de agora: o estado que o código controla, ou o que o mundo mostra (sensores, temperatura). */
   private ler(id: string, propriedade: string): ValorCena | undefined {
     const doMundo = CATALOGO_DISPOSITIVOS[this.tipoDe(id)].propriedades.find((p) => p.nome === propriedade)?.doMundo;
-    if (!doMundo) return this.estado[id]?.[propriedade];
+    if (!doMundo && this.tipoDe(id) !== "forno") return this.estado[id]?.[propriedade];
     return estadoNoTempo(this.rastroLeve(), this.relogio)[id]?.[propriedade];
   }
 
   /** Um rastro sem cópias, só para ler o mundo agora. */
   private rastroLeve(): RastroCena {
     return {
+      atores: this.dados.atores,
+      reacoes: this.dados.reacoes,
       cenaId: this.dados.id,
       duracaoMs: this.dados.duracaoMs,
       linhaDoTempo: this.linhaDoTempo,
@@ -236,7 +240,7 @@ export class MotorCena {
   /** Muda o estado (só quando muda de verdade) e guarda no rastro. */
   private mudar(id: string, propriedade: string, valor: ValorCena, acao: string) {
     const atual = this.estado[id];
-    if (!atual || atual[propriedade] === valor) return;
+    if (!atual || (propriedade === "desligaEm" ? atual[propriedade] : this.ler(id, propriedade)) === valor) return;
     atual[propriedade] = valor;
     if (this.mudancas.length >= MAXIMO_MUDANCAS) {
       this.cortado = true;
@@ -282,14 +286,27 @@ export class MotorCena {
         },
       });
     }
+    for (const comando of ficha.comandos) {
+      const efeito = comando.efeito;
+      if (!efeito) continue;
+      metodo(comando.nome, (argumento) => {
+        if (efeito.argumento && !efeito.argumento.valores.some(v => v === argumento)) throw this.criarErro("RangeError", `${comando.nome}: use ${efeito.argumento.valores.join(", ")}.`);
+        this.mudar(id, efeito.propriedade, efeito.argumento ? argumento as ValorCena : efeito.valor!, comando.nome);
+      });
+    }
     switch (tipo) {
       case "lampada":
         metodo("ligar", () => this.mudar(id, "ligada", true, "ligar"));
         metodo("desligar", () => this.mudar(id, "ligada", false, "desligar"));
         break;
       case "forno":
-        metodo("ligar", () => this.mudar(id, "ligado", true, "ligar"));
-        metodo("desligar", () => this.mudar(id, "ligado", false, "desligar"));
+        metodo("assar", (ms) => {
+          const duracao = this.numeroNaFaixa(ms, "assar", 1, 60000, true);
+          this.mudar(id, "ligado", true, "ligar");
+          this.mudar(id, "desligaEm", this.relogio + duracao, "assar");
+        });
+        metodo("ligar", () => { if (Number(this.estado[id]?.desligaEm ?? 0) > 0) this.mudar(id, "desligaEm", 0, "timer"); this.mudar(id, "ligado", true, "ligar"); });
+        metodo("desligar", () => { if (Number(this.estado[id]?.desligaEm ?? 0) > 0) this.mudar(id, "desligaEm", 0, "timer"); this.mudar(id, "ligado", false, "desligar"); });
         break;
       case "portao":
         metodo("abrir", () => this.mudar(id, "aberto", true, "abrir"));

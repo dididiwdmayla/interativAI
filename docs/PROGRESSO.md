@@ -3,6 +3,30 @@
 Rodada anterior: `docs/arquivo/PROGRESSO-rodada-29.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
+## Cenas novas: acontecimentos genéricos e quatro ambientes
+
+Branch `feat/acontecimentos-quatro-ambientes`, a partir de `834b95a` da
+principal. A nova solicitação autoriza ampliar o motor na primeira etapa.
+Agente: Codex, baseado em GPT-6; variante exata e configuração de
+raciocínio não expostas para confirmação nesta sessão.
+
+### Etapa 1 — motor e cadastro dos dispositivos
+
+- Entradas instantâneas e graduais, regras de reação e atores com ações
+  declaradas nos dados, atrasos canceláveis e efeitos sobre sensores.
+- Estado determinístico no Node e na tela; filtros do depurador e
+  rebobinagem respeitados. Formatos antigos preservados.
+- Cadastro de sensor de carro, geladeira, alarme, semáforo, botão,
+  aspersor, umidade e luz do dia; comandos declarativos no catálogo.
+  Forno ganha timer `assar(ms)` e leitura `restante`.
+- Período visual ligado opcionalmente a uma entrada booleana.
+- Limite concreto: Levar pro mundo continua restrito ao kit anterior;
+  novos ambientes não serão usados em contratos exportáveis nesta rodada.
+- Verificações: 17.788 testes em 44 arquivos; build e lint verdes.
+  Jornadas de `lab-cenas-u1` nos três layouts verdes. Os comandos do
+  forno antigo mantêm o rastro anterior; o teste de tipo inexistente
+  passou a usar teletransporte, pois geladeira agora existe.
+
 ## Rodada 30: zona Algoritmos essenciais
 
 Branch `conteudo/algoritmos-essenciais`, a partir de

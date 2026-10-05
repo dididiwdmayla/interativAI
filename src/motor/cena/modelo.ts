@@ -13,6 +13,7 @@
  * reino do código), a tela (a animação), os validadores e as checagens usam
  * as mesmas funções. Ver o guia, seção 30.
  */
+import { aplicarEntradas, resolverAtores, type AtorCena, type RegraAtor, type EntradaCena } from "./acontecimentos";
 import { CATALOGO_DISPOSITIVOS, type TipoDispositivo } from "./catalogo";
 
 /** Um valor de dispositivo: ligada, aberto, texto do letreiro, velocidade... */
@@ -79,6 +80,7 @@ export type DispositivoCena = {
 
 /** O que acontece na cena sozinho, na linha do tempo (o código não controla). */
 export type AcontecimentoCena =
+  | EntradaCena
   /**
    * Uma pessoa chega em `chegaMs` (os sensores de presença passam a ver
    * gente) e vai embora em `saiMs` (sem `saiMs`, fica até o fim). Ela
@@ -101,6 +103,10 @@ export type DadosCena = {
   periodo: "dia" | "noite";
   /** Quanto tempo a cena dura (o loop de controle termina junto). De 2 a 60 segundos. */
   duracaoMs: number;
+  /** Período visual ligado a uma entrada booleana (true = dia). */
+  periodoPor?: { dispositivo: string; propriedade: string };
+  atores?: AtorCena[];
+  reacoes?: RegraAtor[];
   cenario: PecaCenario[];
   dispositivos: DispositivoCena[];
   linhaDoTempo: AcontecimentoCena[];
@@ -144,6 +150,8 @@ export type EstadoDispositivos = Record<string, Record<string, ValorCena>>;
  * Web Worker).
  */
 export type RastroCena = {
+  atores?: AtorCena[];
+  reacoes?: RegraAtor[];
   cenaId: string;
   duracaoMs: number;
   linhaDoTempo: AcontecimentoCena[];
@@ -180,6 +188,8 @@ export function estadoInicialDaCena(dados: DadosCena): EstadoDispositivos {
 /** A cena antes de qualquer código rodar: o rastro sem mudanças (a tela mostra o mundo andando sozinho). */
 export function rastroInicial(dados: DadosCena): RastroCena {
   return {
+    atores: dados.atores,
+    reacoes: dados.reacoes,
     cenaId: dados.id,
     duracaoMs: dados.duracaoMs,
     linhaDoTempo: dados.linhaDoTempo,
@@ -227,7 +237,7 @@ function apertosAte(linha: readonly AcontecimentoCena[], dispositivo: string, te
 
 /** Os instantes em que a linha do tempo muda alguma coisa (chegadas, saídas, interruptores). */
 export function instantesDaLinhaDoTempo(linha: readonly AcontecimentoCena[]): number[] {
-  const instantes = linha.flatMap((item) => (item.tipo === "pessoa" ? [item.chegaMs, ...(item.saiMs !== undefined ? [item.saiMs] : [])] : [item.noMs]));
+  const instantes = linha.flatMap((item) => (item.tipo === "pessoa" ? [item.chegaMs, ...(item.saiMs !== undefined ? [item.saiMs] : [])] : item.tipo === "interruptor" ? [item.noMs] : "em" in item ? [item.em] : [item.de, item.ate]));
   return [...new Set(instantes)].sort((a, b) => a - b);
 }
 
@@ -279,7 +289,7 @@ export function temperaturaDoForno(ligadoNoComeco: boolean, trocas: readonly { t
 /** Até onde as mudanças valem: as de execuções anteriores todas; as da execução, até o passo. */
 export type FiltroPasso = { execucao: number; passo: number };
 
-type OpcoesEstado = {
+export type OpcoesEstado = {
   /** Logo antes do instante: o que muda exatamente nele ainda não conta. */
   antes?: boolean;
   /** (Linha do tempo da execução) Só as mudanças até este passo. */
@@ -299,7 +309,7 @@ export function mudancaVale(mudanca: MudancaCena, tempoMs: number, opcoes: Opcoe
  * código até ali e o que os sensores veem na linha do tempo (gente, o
  * interruptor) e o que se calcula (a temperatura do forno).
  */
-export function estadoNoTempo(rastro: RastroCena, tempoMs: number, opcoes: OpcoesEstado = {}): EstadoDispositivos {
+export function estadoBaseNoTempo(rastro: RastroCena, tempoMs: number, opcoes: OpcoesEstado = {}): EstadoDispositivos {
   const estado: EstadoDispositivos = {};
   for (const { id } of rastro.dispositivos) estado[id] = { ...(rastro.inicial[id] ?? {}) };
   const trocasDoForno: Record<string, { tempoMs: number; ligado: boolean }[]> = {};
@@ -319,11 +329,32 @@ export function estadoNoTempo(rastro: RastroCena, tempoMs: number, opcoes: Opcoe
       estado[id].hora = horaNoTempo(Number(rastro.inicial[id]?.hora ?? 6), instante);
     }
     if (tipo === "forno") {
-      const trocas = trocasDoForno[id] ?? [];
+      const trocas = [...(trocasDoForno[id] ?? [])];
+      // Cada timer vale até a próxima operação no forno; a expiração também esfria.
+      const comandos = rastro.mudancas.filter(m => m.dispositivo === id && mudancaVale(m, tempoMs, opcoes));
+      for (let i = 0; i < comandos.length; i++) {
+        const m = comandos[i];
+        if (m.propriedade !== "desligaEm" || Number(m.valor) <= 0) continue;
+        const fim = Number(m.valor);
+        const cancelado = comandos.slice(i + 1).some(n => n.tempoMs < fim && (n.propriedade === "desligaEm" || n.propriedade === "ligado"));
+        if (!cancelado && (antes ? fim < tempoMs : fim <= tempoMs)) trocas.push({ tempoMs: fim, ligado: false });
+      }
+      trocas.sort((a, b) => a.tempoMs - b.tempoMs);
+      if (trocas.length) estado[id].ligado = trocas.at(-1)!.ligado;
+      estado[id].restante = Math.max(0, Number(estado[id].desligaEm ?? 0) - tempoMs);
+      delete estado[id].desligaEm;
       const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;
       estado[id].temperatura = temperaturaDoForno(rastro.inicial[id]?.ligado === true, trocas, instante);
     }
   }
+  aplicarEntradas(estado, rastro.linhaDoTempo, tempoMs, opcoes.antes);
+  return estado;
+}
+
+export function estadoNoTempo(rastro: RastroCena, tempoMs: number, opcoes: OpcoesEstado = {}): EstadoDispositivos {
+  const estado = estadoBaseNoTempo(rastro, tempoMs, opcoes);
+  const efeitos = resolverAtores(rastro, tempoMs, opcoes).efeitos;
+  aplicarEntradas(estado, [...rastro.linhaDoTempo.filter((e): e is EntradaCena => e.tipo === undefined), ...efeitos], tempoMs, opcoes.antes);
   return estado;
 }
 

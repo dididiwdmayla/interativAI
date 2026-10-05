@@ -66,7 +66,7 @@ describe("área cena: o formato e as sabotagens", () => {
       dispositivos: [
         { id: "esperar", tipo: "lampada", x: 0, y: 0 },
         { id: "luz", tipo: "lampada", x: 0, y: 0, inicial: { ligado: true } },
-        { id: "luz", tipo: "geladeira" as "lampada", x: 0, y: 0 },
+        { id: "luz", tipo: "teletransporte" as "lampada", x: 0, y: 0 },
       ],
       linhaDoTempo: [{ tipo: "pessoa", chegaMs: 5000, saiMs: 4000 }, { tipo: "interruptor", dispositivo: "luz", noMs: 100 }],
     };
@@ -77,7 +77,7 @@ describe("área cena: o formato e as sabotagens", () => {
     expect(texto).toContain('o dispositivo "esperar" usa um nome que o código já tem');
     expect(texto).toContain('começa com "ligado"');
     expect(texto).toContain('dispositivo com id repetido: "luz"');
-    expect(texto).toContain('"geladeira", que não existe no catálogo');
+    expect(texto).toContain('"teletransporte", que não existe no catálogo');
     expect(texto).toContain("antes de chegar");
     expect(texto).toContain('"luz" não é um interruptor');
   });

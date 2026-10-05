@@ -1,3 +1,4 @@
+import { DispositivoNovo } from "./DispositivosNovos";
 /*
  * O desenho de cada tipo de dispositivo, no estado do instante (o que a
  * simulação diz). O ponto (x, y) de cada um está em `caixaDoDispositivo`,
@@ -24,6 +25,10 @@ export function caixaDoDispositivo(dispositivo: DispositivoCena): Caixa {
   const e = dispositivo.escala ?? 1;
   const { x, y } = dispositivo;
   switch (dispositivo.tipo) {
+    case "geladeira": return { x, y, largura: 52 * e, altura: 88 * e };
+    case "semaforo": return { x, y, largura: 62 * e, altura: 108 * e };
+    case "sensorUmidade": return { x, y, largura: 30 * e, altura: 43 * e };
+    case "sensorCarro": case "alarme": case "botao": case "aspersor": case "sensorDia": return { x, y, largura: 30 * e, altura: 30 * e };
     case "lampada":
       return dispositivo.variante === "spot" ? { x: x - 12 * e, y: y - 6 * e, largura: 24 * e, altura: 16 * e } : { x: x - 16 * e, y: y - 16 * e, largura: 32 * e, altura: 26 * e };
     case "sensor":
@@ -52,6 +57,7 @@ export function centroDaLuz(dispositivo: DispositivoCena): { x: number; y: numbe
 }
 
 type Props = {
+  reduzido?: boolean;
   dispositivo: DispositivoCena;
   estado: EstadoDispositivos;
   rastro: RastroCena;
@@ -122,10 +128,11 @@ function Interruptor({ dispositivo, estado }: Props) {
   );
 }
 
-function Portao({ dispositivo, rastro, tempoMs, filtro }: Props) {
+function Portao({ dispositivo, rastro, tempoMs, filtro, reduzido }: Props) {
   const { x, y } = dispositivo;
   const e = dispositivo.escala ?? 1;
-  const abertura = aberturaDoPortao(rastro, dispositivo.id, tempoMs, filtro);
+  const posicao = aberturaDoPortao(rastro, dispositivo.id, tempoMs, filtro);
+  const abertura = reduzido ? (posicao >= 1 ? 1 : 0) : posicao;
   const deslize = abertura * 88;
   return (
     <g transform={`translate(${x} ${y}) scale(${e})`}>
@@ -308,6 +315,7 @@ function Campainha({ dispositivo, rastro, tempoMs, filtro }: Props) {
 }
 
 const DESENHOS = {
+  sensorCarro: DispositivoNovo, geladeira: DispositivoNovo, alarme: DispositivoNovo, semaforo: DispositivoNovo, botao: DispositivoNovo, aspersor: DispositivoNovo, sensorUmidade: DispositivoNovo, sensorDia: DispositivoNovo,
   lampada: Lampada,
   sensor: Sensor,
   interruptor: Interruptor,

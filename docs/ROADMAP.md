@@ -552,7 +552,8 @@ núcleo comum.
 
 ### Em andamento
 
-(nada no momento)
+- Quatro ambientes novos: motor genérico e atores autorizados; implementação
+  e verificações em andamento. Detalhes em `docs/PROGRESSO.md`.
 
 ### Pendências
 

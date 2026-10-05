@@ -1,3 +1,4 @@
+import { instantesDeValor, resolverAtores } from "./acontecimentos";
 /*
  * Os validadores das cenas programáveis (área cena), puros: olham o rastro
  * da simulação (as mudanças com o instante) e a linha do tempo do cenário.
@@ -104,7 +105,7 @@ export function conferirSequencia(validador: Extract<Validador, { tipo: "sequenc
  * era outro e no instante é este.
  */
 export function quandoAconteceu(rastro: RastroCena, quando: { dispositivo: string; propriedade: string; valor: ValorCena }): number[] {
-  const candidatos = new Set([...instantesDaLinhaDoTempo(rastro.linhaDoTempo), ...rastro.mudancas.map((m) => m.tempoMs)]);
+  const candidatos = new Set([...instantesDaLinhaDoTempo(rastro.linhaDoTempo), ...instantesDeValor(rastro.linhaDoTempo, quando), ...resolverAtores(rastro, rastro.duracaoMs).efeitos.map(e => e.em), ...rastro.mudancas.map((m) => m.tempoMs)]);
   return [...candidatos]
     .filter((t) => t <= rastro.duracaoMs)
     .sort((a, b) => a - b)
@@ -143,7 +144,9 @@ export function textoDaLinhaDoTempo(linha: readonly AcontecimentoCena[]): string
     .map((item) =>
       item.tipo === "pessoa"
         ? `alguém chega em ${textoDoTempo(item.chegaMs)}${item.saiMs !== undefined ? ` e sai em ${textoDoTempo(item.saiMs)}` : ""}`
-        : `${item.dispositivo} apertado em ${textoDoTempo(item.noMs)}`,
+        : item.tipo === "interruptor" ? `${item.dispositivo} apertado em ${textoDoTempo(item.noMs)}`
+        : "em" in item ? `${item.dispositivo}.${item.propriedade} = ${String(item.valor)} em ${textoDoTempo(item.em)}`
+        : `${item.dispositivo}.${item.propriedade}: ${item.valorInicial} a ${item.valorFinal}, de ${textoDoTempo(item.de)} a ${textoDoTempo(item.ate)}`,
     )
     .join(", ");
 }

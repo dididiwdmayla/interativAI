@@ -104,6 +104,10 @@
   --cor-grafico-2: #d6337f;
 
   /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-sinal-vermelho: #e14a62;
+  --cor-cena-sinal-amarelo: #efb83b;
+  --cor-cena-sinal-verde: #20a866;
+  --cor-cena-agua: #59bddd;
   --cor-cena-contorno: #3a1d4d;
   --cor-cena-parede: #f9dcea;
   --cor-cena-parede-sombra: #ecbfd7;
@@ -249,6 +253,10 @@
   --cor-grafico-2: #e0449a;
 
   /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-sinal-vermelho: #ff6685;
+  --cor-cena-sinal-amarelo: #ffe073;
+  --cor-cena-sinal-verde: #4df4a3;
+  --cor-cena-agua: #61d8fa;
   --cor-cena-contorno: #05040f;
   --cor-cena-parede: #3a3478;
   --cor-cena-parede-sombra: #2c275f;
@@ -394,6 +402,10 @@
   --cor-grafico-2: #d95926;
 
   /* Cenas programáveis (kit de peças da área cena): luz e sombra suaves */
+  --cor-cena-sinal-vermelho: #ed718e;
+  --cor-cena-sinal-amarelo: #f4cf72;
+  --cor-cena-sinal-verde: #63d9a1;
+  --cor-cena-agua: #80d6ec;
   --cor-cena-contorno: #010a06;
   --cor-cena-parede: #1f4d3c;
   --cor-cena-parede-sombra: #173b2e;

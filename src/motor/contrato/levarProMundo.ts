@@ -32,6 +32,7 @@ function acontecimentos(cena: DadosCena): Acontecimento[] {
         ...(item.saiMs !== undefined ? [{ ms: item.saiMs, texto: "Alguém foi embora.", tipo: "sai" as const }] : []),
       ];
     }
+    if (item.tipo !== "interruptor") throw new Error("O Levar pro mundo ainda não exporta acontecimentos genéricos de cena.");
     const alvo = cena.dispositivos.find((d) => d.id === item.dispositivo);
     return [{ ms: item.noMs, texto: `Alguém apertou ${alvo ? nomeDe(alvo).toLowerCase() : item.dispositivo}.`, tipo: "aperta", dispositivo: item.dispositivo }];
   });
@@ -46,6 +47,7 @@ function criarDispositivo(dispositivo: DispositivoCena): string {
   const inicial = { ...CATALOGO_DISPOSITIVOS[dispositivo.tipo].inicial, ...(dispositivo.inicial ?? {}) };
   const ini = (chave: string) => js(inicial[chave]);
   switch (dispositivo.tipo) {
+    default: throw new Error(`O Levar pro mundo ainda não exporta ${dispositivo.tipo}.`);
     case "lampada":
       return `lampada(${nome}, ${ini("ligada")}, ${ini("brilho")})`;
     case "sensor":
@@ -68,7 +70,7 @@ function criarDispositivo(dispositivo: DispositivoCena): string {
 }
 
 /** As fábricas dos dispositivos (só as dos tipos que a cena usa entram no arquivo). */
-const FABRICAS: Record<DispositivoCena["tipo"], string> = {
+const FABRICAS: Partial<Record<DispositivoCena["tipo"], string>> = {
   lampada: `
   function lampada(nome, ligada, brilho) {
     var objeto = {

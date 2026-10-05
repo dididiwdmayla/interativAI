@@ -1955,6 +1955,55 @@ padrão visual:
    e uma fase de laboratório usando a peça; `npm run testar:conteudo`
    (a regra `composicao` aceita a peça nova só depois do passo 1).
 
+### 30.8 Entradas genéricas e atores (extensão do motor)
+
+A linha do tempo também aceita entradas do mundo, sem criar um tipo de
+acontecimento para cada aparelho:
+
+```ts
+{ em: 1000, dispositivo: "geladeira", propriedade: "portaAberta", valor: true }
+{ de: 0, ate: 6000, dispositivo: "sensorUmidade", propriedade: "valor", valorInicial: 80, valorFinal: 20 }
+```
+
+Somente propriedades `doMundo` aceitam essas entradas; tipos, faixas e
+instantes são conferidos. A rampa interpola linearmente e mantém o valor
+final. A entrada que começou por último prevalece, inclusive sobre uma
+rampa; em empate, vence a última da lista. Os formatos antigos `pessoa`
+e `interruptor` continuam compatíveis; uma entrada explícita de
+`sensor.temGente` substitui a leitura automática de presença a partir do
+seu instante. `variosCenarios` troca a linha inteira, como antes.
+
+`atores` declara desenhos (`pessoa` ou `carro`), posição, escala opcional,
+`visivelQuando` opcional e ações com nomes livres. Cada ação declara
+`duracaoMs`, `destino: { x, y }` e, opcionalmente, `aoConcluir`: entradas
+`{ dispositivo, propriedade, valor }` aplicadas quando termina. Atores
+reagem a `reacoes`, por exemplo:
+
+```ts
+{
+  quando: { dispositivo: "portao", propriedade: "aberto", valor: true },
+  se: [{ dispositivo: "sensorCarro", propriedade: "temCarro", valor: true }],
+  atrasoMs: 1200,
+  entao: { ator: "carro", acao: "entrar" }
+}
+```
+
+A reação começa quando todas as condições passam a valer; precisa manter
+as condições durante o atraso. Os 1200 ms acompanham a abertura completa
+do portão. O ator não inicia outra ação enquanto se desloca. Uma nova
+borda pode disparar outra ação depois; a posição parte do último destino.
+Movimento, efeitos e sensores são calculados do rastro, sem relógio real,
+inclusive no Node, nos testes alternativos e ao rebobinar. Com movimento
+reduzido, o desenho troca de posição no fim, mantendo os mesmos tempos.
+
+`periodoPor: { dispositivo: "sensorDia", propriedade: "dia" }` liga o
+período visual a uma propriedade booleana: true é dia; false é noite.
+Sem esse campo, `periodo` continua fixo como nas cenas publicadas.
+
+O Levar pro mundo dos contratos ainda só exporta os dispositivos e
+acontecimentos anteriores. As extensões desta seção são para cenas no
+jogo e no laboratório, não para novos contratos exportáveis.
+
 ## 31. Contratos: o trabalho de fim de ilha
 
 Modelos: o contrato da Lógica, `logica-programa-de-verdade-u1`

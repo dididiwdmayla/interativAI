@@ -7,6 +7,9 @@
  * de verdade (uma máscara com um gradiente), com o brilho regulando o
  * tamanho. Tocar num dispositivo abre a ficha dele.
  */
+import { useReducedMotion } from "framer-motion";
+import { AtoresCena } from "./kit/AtoresCena";
+import { DispositivoNovo } from "./kit/DispositivosNovos";
 import { type KeyboardEvent, useId, useMemo } from "react";
 import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
 import {
@@ -31,6 +34,14 @@ import { cor } from "./kit/estilo";
 export function resumoDoDispositivo(dispositivo: DispositivoCena, estado: Record<string, ValorCena> | undefined): string {
   const e = estado ?? {};
   switch (dispositivo.tipo) {
+    case "sensorCarro": return e.temCarro ? "carro na entrada" : "entrada livre";
+    case "geladeira": return e.portaAberta ? "porta aberta" : "porta fechada";
+    case "alarme": return e.tocando ? "tocando" : "silencioso";
+    case "semaforo": return `carros: ${String(e.cor)}; pedestres: ${e.cor === "vermelho" ? "podem atravessar" : "esperem"}`;
+    case "botao": return e.pressionado ? "pressionado" : "solto";
+    case "aspersor": return e.ligado ? "regando" : "desligado";
+    case "sensorUmidade": return `umidade ${Math.round(Number(e.valor))}%`;
+    case "sensorDia": return e.dia ? "dia" : "noite";
     case "lampada":
       return e.ligada === true ? `acesa${e.brilho !== 100 ? `, brilho ${String(e.brilho)}` : ""}` : "apagada";
     case "sensor":
@@ -128,14 +139,16 @@ function Emissao({ dispositivo, estado, rastro, tempoMs, filtro }: { dispositivo
 
 export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDispositivo, destacado = null }: Props) {
   const id = `cena-${useId().replace(/:/g, "")}`;
+  const reduzido = useReducedMotion() === true;
+  const estado = estadoNoTempo(rastro, tempoMs, { filtro });
+  const periodo = dados.periodoPor ? (estado[dados.periodoPor.dispositivo]?.[dados.periodoPor.propriedade] === true ? "dia" : "noite") : dados.periodo;
   // O cenário não muda com o tempo: desenhado uma vez só (a cena redesenha a cada quadro da animação).
   const cenario = useMemo(
-    () => dados.cenario.map((peca, indice) => <PecaDoCenario key={indice} peca={peca} periodo={dados.periodo} id={id} />),
-    [dados.cenario, dados.periodo, id],
+    () => dados.cenario.map((peca, indice) => <PecaDoCenario key={indice} peca={peca} periodo={periodo} id={id} />),
+    [dados.cenario, periodo, id],
   );
-  const estado = estadoNoTempo(rastro, tempoMs, { filtro });
   const pessoas = pessoasNoDesenho(rastro.linhaDoTempo, tempoMs, rastro.duracaoMs);
-  const noite = dados.periodo === "noite";
+  const noite = periodo === "noite";
   const luzes = dados.dispositivos.flatMap((dispositivo) => {
     const atual = estado[dispositivo.id];
     if (dispositivo.tipo !== "lampada" || atual?.ligada !== true) return [];
@@ -160,6 +173,7 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
       data-cena={dados.id}
       data-tempo={Math.round(tempoMs)}
       data-luzes={luzes.length}
+      data-periodo={periodo}
     >
       <title>{`${dados.titulo}. ${resumo}`}</title>
       <defs>
@@ -196,12 +210,13 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
         {cenario}
         {dados.dispositivos.map((dispositivo) => (
           <g key={dispositivo.id} data-desenho={dispositivo.id}>
-            <DesenhoDispositivo dispositivo={dispositivo} estado={estado} rastro={rastro} tempoMs={tempoMs} filtro={filtro} />
+            <DesenhoDispositivo reduzido={reduzido} dispositivo={dispositivo} estado={estado} rastro={rastro} tempoMs={tempoMs} filtro={filtro} />
           </g>
         ))}
         {pessoas.map((pessoa) => (
           <PessoaCena key={pessoa.indice} pessoa={pessoa} tempoMs={tempoMs} />
         ))}
+        <AtoresCena rastro={rastro} estado={estado} tempoMs={tempoMs} filtro={filtro} reduzido={reduzido} />
         {/* A luz: o cone da lâmpada pendente e o brilho em volta. */}
         {luzes.map(({ dispositivo, brilho, centro, raio }) =>
           dispositivo.variante === "spot" ? null : (
@@ -218,6 +233,7 @@ export function CenaSvg({ dados, rastro, tempoMs, filtro = null, aoTocarDisposit
         {luzes.map(({ dispositivo, brilho, centro, raio }) => (
           <circle key={`brilho-${dispositivo.id}`} cx={centro.x} cy={centro.y} r={raio * 0.55} fill={`url(#${id}-brilho)`} opacity={(noite ? 1 : 0.55) * brilho} />
         ))}
+        {dados.dispositivos.filter(d => d.tipo === "semaforo" || d.tipo === "alarme").map(d => <DispositivoNovo key={`sinal-${d.id}`} dispositivo={d} estado={estado} tempoMs={tempoMs} reduzido={reduzido} />)}
         {dados.dispositivos.map((dispositivo) => (
           <Emissao key={`emissao-${dispositivo.id}`} dispositivo={dispositivo} estado={estado} rastro={rastro} tempoMs={tempoMs} filtro={filtro} />
         ))}
