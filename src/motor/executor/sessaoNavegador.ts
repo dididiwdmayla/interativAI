@@ -197,6 +197,8 @@ function resultadoDeEstouro(codigo: string, origem: OrigemCodigo, falha: string 
     passos: [],
     rastroCortado: false,
     totalPassos: 0,
+    passosEscondidos: 0,
+    escondidosPorMetodo: {},
     memoriaFinal: { quadros: [{ nome: "Global", chamada: 0, escopos: [] }], monte: {} },
     globais: [],
     sintaxes: [],

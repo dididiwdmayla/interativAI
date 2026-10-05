@@ -247,8 +247,8 @@ export function descreverValidador(validador: Validador): string {
       return `pelo menos ${validador.minimo} caso(s) de teste do aluno${validador.passando ? " passando" : ""}${validador.incluir?.length ? `, incluindo ${validador.incluir.map((exigido) => textoDoExigido(null, exigido)).join(" e ")}` : ""}`;
     case "passosNoMaximo":
       return validador.tamanho === undefined
-        ? `a última execução deu no máximo ${validador.valor} passos`
-        : `${validador.funcao ?? "a função medida"} dá no máximo ${validador.valor} passos com ${validador.tamanho} itens`;
+        ? `a última execução deu no máximo ${validador.valor} passos${validador.contarEscondidos === false ? " do código" : ""}`
+        : `${validador.funcao ?? "a função medida"} dá no máximo ${validador.valor} passos${validador.contarEscondidos === false ? " do código" : ""} com ${validador.tamanho} itens`;
     case "formaDaEstrutura":
       return `${validador.nome} é ${validador.forma === "arvore" ? "uma árvore" : `usada como ${validador.forma}`}`;
     case "estadoNaCena":
@@ -625,15 +625,22 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
         const execucoes = execucoesDoObjetivo(contexto);
         const ultima = execucoes[execucoes.length - 1];
         if (!ultima) return { passou: false, descricao, detalhe: "nada rodou desde o começo do objetivo" };
-        return { passou: !ultima.erro && ultima.totalPassos <= validador.valor, descricao, detalhe: `${textoDePassos(ultima.totalPassos)} passos${ultima.erro ? `, com ${ultima.erro.nome || "erro"}` : ""}` };
+        const escondidos = validador.contarEscondidos === false ? 0 : (ultima.passosEscondidos ?? 0);
+        const total = ultima.totalPassos + escondidos;
+        const textoEscondidos = escondidos ? ` (${textoDePassos(ultima.totalPassos)} do código + ${textoDePassos(escondidos)} escondidos)` : "";
+        return { passou: !ultima.erro && total <= validador.valor, descricao, detalhe: `${textoDePassos(total)} passos${textoEscondidos}${ultima.erro ? `, com ${ultima.erro.nome || "erro"}` : ""}` };
       }
       const medicao = contexto.programa?.medicoes?.[chaveMedicao(validador.funcao ?? "", validador.tamanho)];
       if (!medicao) return { passou: false, descricao, detalhe: "ainda não mediu (nada rodou ou a função não existe)" };
       if (medicao.erro) return { passou: false, descricao, detalhe: medicao.erro };
+      // A medição guarda o total; sem os escondidos, tira a parte dos métodos nativos.
+      const escondidos = medicao.escondidos ?? 0;
+      const passos = validador.contarEscondidos === false ? medicao.passos - escondidos : medicao.passos;
+      const textoEscondidos = escondidos && validador.contarEscondidos !== false ? ` (${textoDePassos(escondidos)} escondidos)` : "";
       return {
-        passou: !medicao.passouDoLimite && medicao.passos <= validador.valor,
+        passou: !medicao.passouDoLimite && passos <= validador.valor,
         descricao,
-        detalhe: medicao.passouDoLimite ? `passou de ${textoDePassos(medicao.passos)} passos (travaria)` : `${textoDePassos(medicao.passos)} passos`,
+        detalhe: medicao.passouDoLimite ? `passou de ${textoDePassos(medicao.passos)} passos (travaria)` : `${textoDePassos(passos)} passos${textoEscondidos}`,
       };
     }
     case "estadoNaCena": {

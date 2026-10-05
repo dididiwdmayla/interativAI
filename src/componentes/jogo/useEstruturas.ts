@@ -88,6 +88,10 @@ export function useEstruturas({ fase, barramento, programa, aoUsar }: Opcoes) {
     verComoArvore,
     /** O contador do palco (com a ferramenta): os passos da última execução, null antes de rodar. */
     // A abertura roda um código vazio (para a memória do preparo aparecer): não conta como execução.
-    contador: comContador ? { passos: programa.ultimo?.codigo.trim() ? programa.ultimo.totalPassos : null } : null,
+    contador: comContador
+      ? programa.ultimo?.codigo.trim()
+        ? { passos: programa.ultimo.totalPassos, escondidos: programa.ultimo.passosEscondidos, porMetodo: programa.ultimo.escondidosPorMetodo }
+        : { passos: null, escondidos: 0, porMetodo: {} }
+      : null,
   };
 }

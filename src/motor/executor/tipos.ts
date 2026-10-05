@@ -136,7 +136,16 @@ export type ResultadoExecucao = {
   passos: PassoRastro[];
   /** Passaram de LIMITES.fotos passos: o rastro guardou só os primeiros (e o fim). */
   rastroCortado: boolean;
+  /** Passos do código do jogador (cada comando executado, inclusive cada volta de laço). */
   totalPassos: number;
+  /**
+   * O trabalho por dentro dos métodos nativos (shift move todos os itens,
+   * includes examina um por um): ver custoNativo.ts. Não cria fotos no
+   * rastro nem conta para o limite de passos da execução.
+   */
+  passosEscondidos: number;
+  /** Os passos escondidos de cada método ("shift", "includes", "..."). */
+  escondidosPorMetodo: Record<string, number>;
   /** A memória no fim (mesmo com o rastro cortado). */
   memoriaFinal: FotoMemoria;
   /** Nomes globais declarados até agora na sessão, com o tipo de declaração. */
@@ -164,8 +173,12 @@ export function instanteDoPasso(resultado: { passos: readonly { tempoMs?: number
   return resultado.cena && tempoMs !== undefined ? { tempoMs, passo: indice } : undefined;
 }
 
-/** Uma medição do gráfico de desempenho: a função rodando com uma lista daquele tamanho. */
-export type MedicaoPassos = { funcao: string; tamanho: number; passos: number; passouDoLimite: boolean; erro: string | null };
+/**
+ * Uma medição do gráfico de desempenho: a função rodando com uma lista
+ * daquele tamanho. `passos` é o total (código mais escondidos); `escondidos`,
+ * a parte dos métodos nativos (opcional: medições antigas não têm).
+ */
+export type MedicaoPassos = { funcao: string; tamanho: number; passos: number; escondidos?: number; passouDoLimite: boolean; erro: string | null };
 
 /** Valor esperado num caso de teste de função (JSON). */
 export type ValorEsperado = null | boolean | number | string | ValorEsperado[] | { [chave: string]: ValorEsperado };

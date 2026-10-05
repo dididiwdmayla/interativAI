@@ -23,6 +23,12 @@ export type MovimentoLista = {
   escritos: number[];
   /** Duas posições que trocaram de valor entre si (o "swap" da ordenação). */
   troca: [number, number] | null;
+  /**
+   * (splice no meio) Um trecho saiu ou entrou depois de `posicao` e os itens
+   * de depois deslizaram: o palco anima o trem andando. As contagens de cima
+   * continuam as de antes (escritos e fim), para a forma pilha/fila.
+   */
+  meio: { posicao: number; removidos: number; inseridos: number } | null;
 };
 
 const iguais = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((x, i) => x === b[i]);
@@ -32,7 +38,7 @@ const iguais = (a: readonly string[], b: readonly string[]) => a.length === b.le
  * push; pelo começo, o unshift; sair pelo fim é o pop; pelo começo, o shift.
  */
 export function movimentoDaLista(antes: readonly string[], depois: readonly string[]): MovimentoLista {
-  const movimento: MovimentoLista = { entraramInicio: 0, entraramFim: 0, sairamInicio: 0, sairamFim: 0, escritos: [], troca: null };
+  const movimento: MovimentoLista = { entraramInicio: 0, entraramFim: 0, sairamInicio: 0, sairamFim: 0, escritos: [], troca: null, meio: null };
   const n0 = antes.length;
   const n1 = depois.length;
   if (n1 > n0) {
@@ -46,6 +52,14 @@ export function movimentoDaLista(antes: readonly string[], depois: readonly stri
   for (let i = 0; i < comum; i += 1) if (antes[i] !== depois[i]) movimento.escritos.push(i);
   if (n1 > n0) movimento.entraramFim = n1 - n0;
   if (n1 < n0) movimento.sairamFim = n0 - n1;
+  if (n0 !== n1) {
+    // splice: começo e fim iguais, um trecho no meio saiu ou entrou.
+    let comeco = 0;
+    while (comeco < comum && antes[comeco] === depois[comeco]) comeco += 1;
+    let fim = 0;
+    while (fim < comum - comeco && antes[n0 - 1 - fim] === depois[n1 - 1 - fim]) fim += 1;
+    if (comeco > 0 && fim > 0) movimento.meio = { posicao: comeco, removidos: n0 - comeco - fim, inseridos: n1 - comeco - fim };
+  }
   if (n0 === n1 && movimento.escritos.length === 2) {
     const [a, b] = movimento.escritos;
     if (antes[a] === depois[b] && antes[b] === depois[a]) movimento.troca = [a, b];

@@ -3,7 +3,9 @@
 /*
  * A aba Desempenho (zonas Algoritmos essenciais e Estruturas de dados): o
  * gráfico passos x tamanho. "Medir" roda cada função da fase com listas de
- * tamanhos diferentes e conta os passos (cada linha executada é um passo).
+ * tamanhos diferentes e conta os passos: cada linha executada, mais os
+ * escondidos nos métodos nativos (shift move todos os itens; ver
+ * custoNativo.ts). O gráfico usa o total, e a legenda explica.
  * Um jeito linear vira uma reta deitada; um quadrático, uma curva que
  * dispara. Duas séries no máximo (as cores validadas para daltonismo em
  * tokens.css), legenda sempre, o valor final escrito ao lado da linha,
@@ -16,6 +18,7 @@ import { IconeGraficoPassos } from "@/componentes/icones/IconeGraficoPassos";
 import { useTamanho } from "@/componentes/mapa/useTamanho";
 import type { IdFerramenta } from "@/ferramentas/ids";
 import { type ConfigDesempenho, crescimento, LIMITE_DA_MEDICAO, textoDePassos } from "@/motor/desempenho";
+import { metodosQueMaisPesaram } from "@/motor/executor/custoNativo";
 import type { MedicaoPassos } from "@/motor/executor/tipos";
 
 const CORES = ["var(--cor-grafico-1)", "var(--cor-grafico-2)"] as const;
@@ -44,7 +47,8 @@ function tetoRedondo(valor: number): number {
 function textoDoPonto(ponto: MedicaoPassos): string {
   if (ponto.erro) return `erro: ${ponto.erro}`;
   if (ponto.passouDoLimite) return `passou de ${textoDePassos(LIMITE_DA_MEDICAO)} passos (travaria)`;
-  return `${textoDePassos(ponto.passos)} passos`;
+  const escondidos = ponto.escondidos ?? 0;
+  return escondidos ? `${textoDePassos(ponto.passos)} passos (${textoDePassos(escondidos)} escondidos)` : `${textoDePassos(ponto.passos)} passos`;
 }
 
 function Grafico({ series, tamanhos }: { series: Serie[]; tamanhos: number[] }) {
@@ -227,6 +231,7 @@ export function PainelDesempenho({ config, medicoes, ocupado, aoMedir, aoAbrirCa
   }));
   const tamanhos = [...new Set((medicoes ?? []).map((m) => m.tamanho))].sort((a, b) => a - b);
   const erros = (medicoes ?? []).filter((m) => m.erro);
+  const comEscondidos = (medicoes ?? []).some((m) => (m.escondidos ?? 0) > 0);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-superficie" data-painel-desempenho>
@@ -273,6 +278,13 @@ export function PainelDesempenho({ config, medicoes, ocupado, aoMedir, aoAbrirCa
                 </li>
               ))}
             </ul>
+            {medicoes && (
+              <p className="text-xs leading-snug text-texto-suave" data-legenda-escondidos={comEscondidos ? "sim" : "nao"}>
+                {comEscondidos
+                  ? "Cada ponto é o total: os passos do seu código mais os escondidos dentro dos métodos prontos (shift, includes, splice...), que trabalham item por item por dentro."
+                  : "Cada ponto é o total: os passos do seu código mais os escondidos dentro dos métodos prontos (aqui, nenhum)."}
+              </p>
+            )}
             {!medicoes ? (
               <p className="text-xs text-texto-suave" data-desempenho-vazio>
                 Rode o Snippet (para as funções existirem) e toque em Medir.
@@ -298,12 +310,32 @@ export function PainelDesempenho({ config, medicoes, ocupado, aoMedir, aoAbrirCa
   );
 }
 
-/** O contador de passos do palco: quantos passos a última execução deu. */
-export function ContadorPassos({ passos }: { passos: number | null }) {
+/**
+ * O contador de passos do palco: quantos passos a última execução deu, e os
+ * escondidos nos métodos nativos à parte ("1.001 passos + 500.500
+ * escondidos em shift").
+ */
+export function ContadorPassos({ passos, escondidos = 0, porMetodo = {} }: { passos: number | null; escondidos?: number; porMetodo?: Readonly<Record<string, number>> }) {
+  const metodos = metodosQueMaisPesaram(porMetodo);
   return (
-    <p className="inline-flex items-center gap-1.5 rounded-full border-2 border-borda bg-superficie px-2.5 py-0.5 text-xs font-bold text-texto" data-contador-passos={passos ?? ""}>
+    <p
+      className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-2xl border-2 border-borda bg-superficie px-2.5 py-0.5 text-xs font-bold text-texto"
+      data-contador-passos={passos ?? ""}
+      data-contador-escondidos={passos === null ? "" : escondidos}
+    >
       <IconeContadorPassos tamanho={14} className="text-primaria" />
       {passos === null ? "Nenhum passo ainda" : `${textoDePassos(passos)} ${passos === 1 ? "passo" : "passos"}`}
+      {passos !== null && escondidos > 0 && (
+        <span className="font-semibold text-texto-suave">
+          {`+ ${textoDePassos(escondidos)} escondido${escondidos === 1 ? "" : "s"} em `}
+          {metodos.map((nome, i) => (
+            <span key={nome}>
+              {i > 0 && " e "}
+              <code className="font-mono font-bold text-texto">{nome}</code>
+            </span>
+          ))}
+        </span>
+      )}
     </p>
   );
 }

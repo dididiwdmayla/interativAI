@@ -350,9 +350,11 @@ export type Validador =
    * começou deu no máximo `valor` passos (trava). Com `tamanho`: a função
    * (`funcao`, padrão a primeira de `programa.desempenho.funcoes`), rodando
    * com uma lista desse tamanho, dá no máximo `valor` passos (medida de
-   * novo a cada execução, como o funcaoPassa).
+   * novo a cada execução, como o funcaoPassa). Conta o total: os passos do
+   * código e os escondidos dos métodos nativos (shift, includes...: guia,
+   * seção 28.1); `contarEscondidos: false` conta só os do código.
    */
-  | { tipo: "passosNoMaximo"; valor: number; tamanho?: number; funcao?: string }
+  | { tipo: "passosNoMaximo"; valor: number; tamanho?: number; funcao?: string; contarEscondidos?: boolean }
   /**
    * (Estruturas) A variável global `nome` foi usada como pilha (entra e sai
    * pelo mesmo lado: push e pop) ou como fila (entra por um lado e sai pelo

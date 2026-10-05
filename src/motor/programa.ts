@@ -34,6 +34,8 @@ export type ResumoExecucao = {
   resposta: ValorExibido | null;
   /** Quantos passos o programa deu (o contador do palco e o validador passosNoMaximo). */
   totalPassos: number;
+  /** Os passos escondidos dos métodos nativos (eventos antigos, salvos antes deles, não têm). */
+  passosEscondidos?: number;
   /** Por lista global: quantos itens entraram e saíram por cada lado (pilha ou fila). */
   estruturas: Record<string, ContagemEstrutura>;
 };
@@ -67,6 +69,7 @@ export function resumirExecucao(resultado: ResultadoExecucao): ResumoExecucao {
     sintaxes: resultado.sintaxes,
     resposta: resultado.origem === "console" && !resultado.erro ? resultado.resultado : null,
     totalPassos: resultado.totalPassos,
+    passosEscondidos: resultado.passosEscondidos,
     estruturas: contarEstruturas(resultado.passos, resultado.memoriaFinal),
   };
 }

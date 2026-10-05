@@ -294,6 +294,32 @@ body {
   animation: palco-trocar 0.7s ease-in-out;
 }
 
+/*
+ * O custo escondido no palco: depois de shift, unshift e splice, cada vagão
+ * que mudou de posição desliza do lugar antigo para o novo, um depois do
+ * outro (--deslize: quantas posições, positivo vindo da direita). O trem
+ * inteiro andando mostra o trabalho que o método faz por dentro.
+ */
+@keyframes palco-deslizar {
+  from {
+    transform: translateX(calc((100% + 0.25rem) * var(--deslize, 1)));
+  }
+  to {
+    transform: none;
+  }
+}
+
+.palco-deslizar {
+  animation: palco-deslizar 0.35s ease-in-out both;
+}
+
+/* O vagão que sai pelo começo não ocupa lugar: os outros deslizam até o lugar novo. */
+.palco-sair-solto {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
 /* Circuito lógico: a corrente andando nos fios acesos. */
 @keyframes corrente-no-fio {
   to {
