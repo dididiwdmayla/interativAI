@@ -65,3 +65,10 @@ itens com `shift` (1.001 passos) parecia mais barato que por índice (2.002).
 
 ### Verificação
 
+- `npm run testar:conteudo`: 17.824 testes em 46 arquivos, verdes. Build e
+  lint verdes.
+- `testes/estruturas.mjs` (com f10 e f11) verde nos três layouts no
+  desenvolvimento.
+- Bateria completa (`PARALELO=2 npm run bateria`, 166 execuções, build de
+  produção) uma vez, verde ("Tudo certo"), com console limpo; inclui as
+  jornadas das quatro unidades de Algoritmos essenciais nos três layouts.
