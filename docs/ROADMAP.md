@@ -29,6 +29,18 @@ núcleo comum.
 
 ### Feito
 
+- **Quatro ambientes novos no kit de cenas:** garagem automática,
+  cozinha de casa, esquina com semáforo de pedestres e estufa. Entradas
+  genéricas instantâneas/gradativas e atores determinísticos, preservando
+  os formatos anteriores. Oito dispositivos novos, timer do forno, seis
+  peças de cenário, bancada `lab-cenas-novas-u1` com quatro missões e
+  cenários alternativos; mostruário nos três temas e 36 capturas para
+  revisão no celular em `docs/capturas/cenas-novas/`. Testes de conteúdo,
+  jornadas novas nos três layouts, build, lint e bateria de conteúdo
+  passaram. Bateria completa executada: 166 jornadas; três falhas iniciais
+  resolvidas nos retestes, incluindo ajuste de foco no teste móvel de
+  Funções. Detalhe em `docs/PROGRESSO.md`.
+
 - **Zona Algoritmos essenciais completa (U1 a U4):** Buscar (linear e
   binária só em lista ordenada), Ordenar (seleção, bolha e sort numérico),
   Recursão (molduras e caso de parada) e Por que isso trava? (passos e
@@ -552,9 +564,14 @@ núcleo comum.
 
 ### Em andamento
 
-(nada no momento)
+- Quatro ambientes concluídos; aguardando revisão visual das capturas
+  e do pull request.
 
 ### Pendências
+
+- O Levar pro mundo dos contratos exporta apenas o kit anterior: os
+  acontecimentos genéricos, atores e novos dispositivos ainda não têm
+  exportação autônoma. As quatro demonstrações são fases de laboratório.
 
 - **Contratos (rodada 29), para depois:**
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar

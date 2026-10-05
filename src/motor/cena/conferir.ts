@@ -56,7 +56,7 @@ export function conferirCena(cena: DadosCena): string[] {
         continue;
       }
       const propriedade = ficha.propriedades.find((p) => p.nome === nome);
-      if (!propriedade || propriedade.doMundo) {
+      if (!propriedade || (propriedade.doMundo && !propriedade.entradaTemporal)) {
         problemas.push(`o dispositivo "${id}" começa com "${nome}", que não é do estado de ${ficha.nome.toLowerCase()}`);
         continue;
       }
@@ -64,10 +64,30 @@ export function conferirCena(cena: DadosCena): string[] {
       if (tipo !== propriedade.tipo) problemas.push(`o dispositivo "${id}" começa com ${nome} do tipo ${tipo} (é ${propriedade.tipo})`);
     }
   }
+  const atores = new Set<string>();
+  for (const ator of cena.atores ?? []) {
+    if (!KEBAB.test(ator.id) || atores.has(ator.id)) problemas.push(`ator inválido ou repetido: ${ator.id}`);
+    atores.add(ator.id);
+    if (![ator.x, ator.y, ator.escala ?? 1].every(Number.isFinite) || (ator.escala ?? 1) <= 0) problemas.push(`ator ${ator.id}: posição/escala inválida`);
+    if (!["pessoa", "carro"].includes(ator.desenho)) problemas.push(`ator ${ator.id}: desenho desconhecido`);
+    if (ator.visivelQuando) { const c = ator.visivelQuando; problemas.push(...conferirPropriedade(cena, ator.id, c.dispositivo, c.propriedade, c.valor)); }
+    for (const [nome, acao] of Object.entries(ator.acoes)) {
+      if (!KEBAB.test(nome) || !Number.isFinite(acao.duracaoMs) || acao.duracaoMs <= 0 || acao.duracaoMs > cena.duracaoMs || ![acao.destino.x, acao.destino.y].every(Number.isFinite)) problemas.push(`ator ${ator.id}: ação inválida`);
+      for (const c of acao.aoConcluir ?? []) problemas.push(...conferirEntrada(cena, ator.id, c.dispositivo, c.propriedade, c.valor));
+    }
+  }
+  for (const regra of cena.reacoes ?? []) {
+    const ator = cena.atores?.find(a => a.id === regra.entao.ator);
+    if (!ator?.acoes[regra.entao.acao]) problemas.push(`reação: ator/ação inexistente`);
+    if (!Number.isFinite(regra.atrasoMs ?? 0) || (regra.atrasoMs ?? 0) < 0 || (regra.atrasoMs ?? 0) > cena.duracaoMs) problemas.push(`reação: atraso inválido`);
+    for (const c of [regra.quando, ...(regra.se ?? [])]) problemas.push(...conferirPropriedade(cena, "reação", c.dispositivo, c.propriedade, c.valor));
+  }
+  if (cena.periodoPor) problemas.push(...conferirPropriedade(cena, "periodoPor", cena.periodoPor.dispositivo, cena.periodoPor.propriedade, true));
   problemas.push(...conferirLinhaDoTempo(cena, cena.linhaDoTempo));
   const temSensor = cena.dispositivos.some((d) => d.tipo === "sensor");
   const temPessoa = cena.linhaDoTempo.some((item) => item.tipo === "pessoa");
-  if (temSensor && !temPessoa) problemas.push("a cena tem sensor de presença, mas ninguém aparece na linha do tempo");
+  const temEntrada = cena.linhaDoTempo.some(e => e.tipo === undefined && cena.dispositivos.some(d => d.id === e.dispositivo && d.tipo === "sensor"));
+  if (temSensor && !temPessoa && !temEntrada) problemas.push("a cena tem sensor de presença, mas ninguém aparece na linha do tempo");
   return problemas;
 }
 
@@ -85,6 +105,15 @@ export function conferirLinhaDoTempo(cena: DadosCena, linha: readonly Acontecime
       if (!dentro(item.noMs)) problemas.push(`${onde}: o interruptor é apertado em ${item.noMs} ms, fora da cena`);
       const alvo = cena.dispositivos.find((d) => d.id === item.dispositivo);
       if (!alvo || alvo.tipo !== "interruptor") problemas.push(`${onde}: "${item.dispositivo}" não é um interruptor da cena`);
+    } else if (item.tipo === undefined && ("em" in item || "de" in item)) {
+      const valores = "em" in item ? [item.valor] : [item.valorInicial, item.valorFinal];
+      for (const valor of valores) problemas.push(...conferirEntrada(cena, onde, item.dispositivo, item.propriedade, valor));
+      if ("em" in item) {
+        if (!dentro(item.em)) problemas.push(`${onde}: instante fora da cena`);
+      } else {
+        if (!dentro(item.de) || !Number.isFinite(item.ate) || item.ate <= item.de || item.ate > cena.duracaoMs) problemas.push(`${onde}: intervalo gradual inválido`);
+        if (typeof item.valorInicial !== "number" || typeof item.valorFinal !== "number") problemas.push(`${onde}: mudança gradual exige números`);
+      }
     } else {
       problemas.push(`${onde}: acontecimento de tipo desconhecido`);
     }
@@ -105,6 +134,16 @@ function conferirPropriedade(cena: DadosCena, onde: string, dispositivo: string,
   if (!prop) return [`${onde}: ${ficha.nome.toLowerCase()} não tem a propriedade "${propriedade}" (tem ${ficha.propriedades.map((p) => p.nome).join(", ")})`];
   if (tipoDoValor(valor) !== prop.tipo) return [`${onde}: ${dispositivo}.${propriedade} é ${prop.tipo}, e o valor é ${tipoDoValor(valor)}`];
   return [];
+}
+
+/** Entradas externas só alteram propriedades do mundo, com tipo e faixa válidos. */
+function conferirEntrada(cena: DadosCena, onde: string, dispositivo: string, propriedade: string, valor: ValorCena): string[] {
+  const problemas = conferirPropriedade(cena, onde, dispositivo, propriedade, valor);
+  const alvo = cena.dispositivos.find(d => d.id === dispositivo);
+  const prop = alvo && CATALOGO_DISPOSITIVOS[alvo.tipo]?.propriedades.find(p => p.nome === propriedade);
+  if (prop && !prop.doMundo) problemas.push(`${onde}: ${dispositivo}.${propriedade} é controlada pelo código, não pelo mundo`);
+  if (typeof valor === "number" && (!Number.isFinite(valor) || (prop?.faixa && (valor < prop.faixa[0] || valor > prop.faixa[1])))) problemas.push(`${onde}: valor numérico fora da faixa`);
+  return problemas;
 }
 
 /** A ação existe no tipo do dispositivo (as que aparecem no rastro). */

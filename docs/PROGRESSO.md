@@ -3,6 +3,81 @@
 Rodada anterior: `docs/arquivo/PROGRESSO-rodada-29.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
+## Cenas novas: acontecimentos genéricos e quatro ambientes
+
+Branch `feat/acontecimentos-quatro-ambientes`, a partir de `834b95a` da
+principal. A nova solicitação autoriza ampliar o motor na primeira etapa.
+Agente: Codex, baseado em GPT-6; variante exata e configuração de
+raciocínio não expostas para confirmação nesta sessão.
+
+### Etapa 1 — motor e cadastro dos dispositivos
+
+- Entradas instantâneas e graduais, regras de reação e atores com ações
+  declaradas nos dados, atrasos canceláveis e efeitos sobre sensores.
+- Estado determinístico no Node e na tela; filtros do depurador e
+  rebobinagem respeitados. Formatos antigos preservados.
+- Cadastro de sensor de carro, geladeira, alarme, semáforo, botão,
+  aspersor, umidade e luz do dia; comandos declarativos no catálogo.
+  Forno ganha timer `assar(ms)` e leitura `restante`.
+- Período visual ligado opcionalmente a uma entrada booleana.
+- Limite concreto: Levar pro mundo continua restrito ao kit anterior;
+  novos ambientes não serão usados em contratos exportáveis nesta rodada.
+- Verificações: 17.788 testes em 44 arquivos; build e lint verdes.
+  Jornadas de `lab-cenas-u1` nos três layouts verdes. Os comandos do
+  forno antigo mantêm o rastro anterior; o teste de tipo inexistente
+  passou a usar teletransporte, pois geladeira agora existe.
+
+### Correção de fronteira da etapa 1
+
+A expiração do timer do forno é aplicada antes de uma nova ordem no mesmo
+instante. Assim, `assar(2000); esperar(2000); ligar()` mantém o forno
+ligado. Teste específico acrescentado e 57 testes afetados verdes
+(acontecimentos, motor anterior, composição e missões novas).
+
+### Etapa 2 — ambientes, missões e revisão visual
+
+- Garagem com carro que aguarda a abertura e libera o sensor ao entrar;
+  cozinha com porta, aviso pulsante e timer do forno; esquina com sinais
+  distintos para carro/pedestre e travessia; estufa com umidade gradual,
+  aspersor e transição visual de dia/noite.
+- Seis peças novas reutilizáveis: céu, garagem, cozinha, rua, estrutura
+  de estufa e canteiro. Tokens adicionais nos três temas.
+- Bancada `lab-cenas-novas-u1`, com quatro fases: uma missão por cena.
+  Essa composição mantém o contrato existente de uma cena por fase.
+  Todos usam `variosCenarios` e `porLinha`, com soluções testadas e
+  negativas contra horários decorados, contagem acumulada indevida,
+  botão ignorado, limite inclusivo incorreto e irrigação à noite.
+- Mostruário `/lab/cenas` com antes/durante/depois. 36 PNGs da execução
+  real das missões, em retrato, densidade 3×, nos três temas; índice em
+  `docs/capturas/cenas-novas/README.md`.
+- Jornadas novas nos três layouts: fichas e Por dentro, estados e atores,
+  cenários alternativos, movimento reduzido, temas e console limpo.
+- Verificações: 17.803 testes em 45 arquivos passaram; os 15 testes
+  específicos foram repetidos após dar tolerância de 100 ms à reação
+  do alarme e ao início da rega, preservando os limites estritos de
+  2 s e umidade 30. Build e lint passaram; bateria de conteúdo em
+  produção passou (mapa, explorar, publicar e revisão).
+- Na revisão pelo navegador, uma prateleira da estufa com altura muito
+  pequena produzia retângulos negativos. Corrigidos os dados, com novo
+  teste da estufa e console limpo.
+- Bateria completa executada uma vez: 166 jornadas, com 163 aprovações
+  iniciais. As duas falhas de Recursão passaram isoladamente, sem mudança
+  no produto. Em Funções U1/retrato, a lista de autocompletar interceptava
+  o clique central do teste; a jornada passou após usar foco no editor
+  móvel, como as demais jornadas. Retestes de Funções em retrato e
+  paisagem passaram; lint do teste ajustado também passou.
+- Build e lint finais passaram após a correção do timer. Revalidação
+  das cenas no build final passou nos três layouts.
+- Publicação pelo conector GitHub, verificando SHA de cada blob e árvore.
+  O Git local retornou `fatal: could not read Username for 'https://github.com': No such device or address`;
+  a tentativa com o helper do gh retornou `remote: Invalid username or token. Password authentication is not supported for Git operations.`
+  O gh confirmou `gh: Bad credentials (HTTP 401)`. O conector tem acesso
+  de escrita e preserva exatamente os arquivos testados.
+
+Decisões: umidade é entrada de teste, sem modelo físico de absorção;
+alarme tem aviso visual pulsante, sem áudio novo; semáforo grande controla
+carros, e o sinal menor corresponde à passagem dos pedestres.
+
 ## Rodada 30: zona Algoritmos essenciais
 
 Branch `conteudo/algoritmos-essenciais`, a partir de

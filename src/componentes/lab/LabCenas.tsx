@@ -6,6 +6,7 @@
  * temas de base. É o padrão visual que as próximas cenas seguem: quem
  * acrescenta uma peça confere aqui (guia, seção 30).
  */
+import { AMOSTRAS_CENAS_NOVAS } from "@/conteudo/laboratorio/amostrasCenasNovas";
 import type { ReactNode } from "react";
 import { CenaSvg } from "@/componentes/cena/CenaSvg";
 import { PecaDoCenario, TAMANHO_PADRAO } from "@/componentes/cena/kit/PecasCenario";
@@ -62,6 +63,7 @@ const AMOSTRAS: Amostra[] = [
 
 /** As cenas de referência num momento bom: o quarto aceso e a vitrine acesa com a pessoa na frente. */
 const REFERENCIAS: Amostra[] = [
+  ...AMOSTRAS_CENAS_NOVAS,
   { rotulo: CENA_QUARTO.titulo, dados: CENA_QUARTO, rastro: { ...rastroInicial(CENA_QUARTO), mudancas: [{ tempoMs: 0, dispositivo: "lampada", propriedade: "ligada", valor: true, acao: "ligar", execucao: 1, passo: null }, { tempoMs: 0, dispositivo: "ventilador", propriedade: "velocidade", valor: 2, acao: "velocidade", execucao: 1, passo: null }], fimCodigoMs: 0, relogioMs: 6000 }, tempoMs: 400 },
   { rotulo: CENA_VITRINE.titulo, dados: CENA_VITRINE, rastro: { ...rastroInicial(CENA_VITRINE), mudancas: [{ tempoMs: 3000, dispositivo: "luz", propriedade: "ligada", valor: true, acao: "ligar", execucao: 1, passo: null }], fimCodigoMs: 10_000, relogioMs: 10_000 }, tempoMs: 4500 },
 ];
