@@ -595,7 +595,7 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Depuração: U1 publicada; U2 em validação; produção sequencial com um commit por
+- Zona Depuração: U1 e U2 publicadas; U3 em validação; produção sequencial com um commit por
   unidade, incluindo Observar variáveis como U4.
 
 - Quatro ambientes concluídos; aguardando revisão visual das capturas

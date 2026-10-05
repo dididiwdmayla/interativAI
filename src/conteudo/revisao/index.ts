@@ -1,3 +1,4 @@
+import { ITENS_DEPURACAO_U3 } from "./depuracao-u3";
 import { ITENS_DEPURACAO_U2 } from "./depuracao-u2";
 import { ITENS_DEPURACAO_U1 } from "./depuracao-u1";
 import { ITENS_ESTRUTURAS_U4 } from "./estruturas-u4";
@@ -226,6 +227,7 @@ export const ITENS_REVISAO: readonly ItemRevisao[] = [
   ...ITENS_ESTRUTURAS_U2,
   ...ITENS_DEPURACAO_U1,
   ...ITENS_DEPURACAO_U2,
+  ...ITENS_DEPURACAO_U3,
   ...ITENS_ESTRUTURAS_U1,
   ...ITENS_ALGORITMOS_U4,
   ...ITENS_ALGORITMOS_U3,

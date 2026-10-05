@@ -1892,5 +1892,1320 @@
         ]
       }
     }
+  ],
+  "3": [
+    {
+      "id": "logica-depuracao-u3-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u3",
+      "titulo": "Entre na troca de cor",
+      "conceitos": [
+        "passar-por-cima",
+        "entrar-e-sair"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function proxima(cor) {\n  const ordem = [\"verde\", \"amarelo\", \"vermelho\"];\n  const i = ordem.indexOf(cor);\n  return ordem[(i + 2) % ordem.length];\n}\nconst cor = proxima(\"verde\");\nsinal.mudar(cor);\nesperar(1000);"
+        }
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "O sinal deveria ir de verde a amarelo, mas pula direto ao vermelho. Hipótese: a função avança posições demais.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Passar por cima roda a chamada inteira; Entrar mostra as linhas da função; Sair volta para quem chamou. A Pilha de chamadas mostra esse caminho.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "chamada-guiada",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Pause na chamada da linha 6 e passe por cima; observe cor ao voltar.",
+            "toque": "Pause na chamada da linha 6 e passe por cima; observe cor ao voltar."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "usouControle",
+                "controle": "passar-por-cima"
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 7
+              },
+              {
+                "tipo": "observou",
+                "expressao": "cor",
+                "valor": "vermelho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Passar por cima roda proxima inteira e volta à próxima linha de fora.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Passar por cima roda proxima inteira e volta à próxima linha de fora."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 6
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "cor"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A chamada terminou sem mostrar seu cálculo. Agora vamos investigar por dentro.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 0
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "cor"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Onde pôr o ponto para escolher como seguir a chamada?",
+            "opcoes": [
+              "Na linha 6, antes da chamada",
+              "Só depois da linha 8",
+              "No fim da execução"
+            ],
+            "correta": 0,
+            "explicacao": "Na linha 6 você pode escolher Passar por cima ou Entrar antes de a chamada rodar."
+          }
+        },
+        {
+          "id": "passos-guiados",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Pause na linha 6; entre, avance duas linhas e observe i. Saia e observe cor.",
+            "toque": "Pause na linha 6; entre, avance duas linhas e observe i. Saia e observe cor."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 2
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "entrar"
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "passar-por-cima"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 0
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "sair"
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 7
+              },
+              {
+                "tipo": "observou",
+                "expressao": "cor",
+                "valor": "vermelho"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Use Entrar, duas vezes Passar por cima e Sair; observe i antes do return e cor ao voltar.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Use Entrar, duas vezes Passar por cima e Sair; observe i antes do return e cor ao voltar."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 6
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 6
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "entrar"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "i"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "sair"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "cor"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "i era 0 e a função devolveu vermelho. +2 pulou a posição do amarelo.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "entrar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "i"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "sair"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "cor"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Se passar por cima da linha 6, onde a função fica visível?",
+            "opcoes": [
+              "Linha 2, dentro dela",
+              "Em nenhuma chamada",
+              "Na linha 7, já terminou"
+            ],
+            "correta": 2,
+            "explicacao": "Passar por cima executa toda proxima e pausa na próxima linha de fora."
+          },
+          "apresentar": [
+            "pilha-de-chamadas"
+          ]
+        },
+        {
+          "id": "cor-guiada",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome, retire o ponto e conserte a função; o sinal deve mostrar amarelo.",
+            "toque": "Retome, retire o ponto e conserte a função; o sinal deve mostrar amarelo."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "proxima",
+                "casos": [
+                  {
+                    "args": [
+                      "verde"
+                    ],
+                    "esperado": "amarelo"
+                  },
+                  {
+                    "args": [
+                      "amarelo"
+                    ],
+                    "esperado": "vermelho"
+                  },
+                  {
+                    "args": [
+                      "vermelho"
+                    ],
+                    "esperado": "verde"
+                  }
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "sinal",
+                "propriedade": "cor",
+                "valor": "amarelo",
+                "noTempo": 500
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Uma posição adiante usa i + 1; confirme as três transições.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Uma posição adiante usa i + 1; confirme as três transições."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 6
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function proxima(cor) {\n  const ordem = [\"verde\", \"amarelo\", \"vermelho\"];\n  const i = ordem.indexOf(cor);\n  return ordem[(i + 1) % ordem.length];\n}\nconst cor = proxima(\"verde\");\nsinal.mudar(cor);\nesperar(1000);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A cena e os casos conferem a mesma regra.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function proxima(cor) {\n  const ordem = [\"verde\", \"amarelo\", \"vermelho\"];\n  const i = ordem.indexOf(cor);\n  return ordem[(i + 1) % ordem.length];\n}\nconst cor = proxima(\"verde\");\nsinal.mudar(cor);\nesperar(1000);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "passos-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue o salto partindo de amarelo. Entre, avance, observe o índice e saia para conferir cor.",
+            "toque": "Investigue o salto partindo de amarelo. Entre, avance, observe o índice e saia para conferir cor."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 2
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "entrar"
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "passar-por-cima"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 1
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "sair"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "cor",
+                "valor": "verde"
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Siga a chamada até sua devolução. Qual cor deveria vir após amarelo?"
+          },
+          "falaAoConcluir": {
+            "texto": "O mesmo salto aparece em outra entrada; não é só um desenho errado.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function proxima(cor) {\n  const ordem = [\"verde\", \"amarelo\", \"vermelho\"];\n  const i = ordem.indexOf(cor);\n  return ordem[(i + 2) % ordem.length];\n}\nconst cor = proxima(\"amarelo\");\nsinal.mudar(cor);\nesperar(1000);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "entrar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "i"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "sair"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "cor"
+            }
+          ]
+        },
+        {
+          "id": "cor-sozinha",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Conserte a transição de amarelo a vermelho e teste as demais cores.",
+            "toque": "Conserte a transição de amarelo a vermelho e teste as demais cores."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "proxima",
+                "casos": [
+                  {
+                    "args": [
+                      "verde"
+                    ],
+                    "esperado": "amarelo"
+                  },
+                  {
+                    "args": [
+                      "amarelo"
+                    ],
+                    "esperado": "vermelho"
+                  },
+                  {
+                    "args": [
+                      "vermelho"
+                    ],
+                    "esperado": "verde"
+                  }
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "sinal",
+                "propriedade": "cor",
+                "valor": "vermelho",
+                "noTempo": 500
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Confira a função por entradas distintas, não só a cor final."
+          },
+          "falaAoConcluir": {
+            "texto": "Você seguiu o valor até o instante do defeito e confirmou o ajuste.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function proxima(cor) {\n  const ordem = [\"verde\", \"amarelo\", \"vermelho\"];\n  const i = ordem.indexOf(cor);\n  return ordem[(i + 1) % ordem.length];\n}\nconst cor = proxima(\"amarelo\");\nsinal.mudar(cor);\nesperar(1000);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "cena": {
+        "id": "depuracao-esquina",
+        "titulo": "O amarelo foi pulado",
+        "ambiente": "esquina",
+        "periodo": "dia",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "ceu",
+            "x": 0,
+            "y": 0,
+            "altura": 110
+          },
+          {
+            "peca": "parede",
+            "x": 5,
+            "y": 27,
+            "largura": 74,
+            "altura": 90,
+            "variante": "tijolos"
+          },
+          {
+            "peca": "janela",
+            "x": 17,
+            "y": 40,
+            "largura": 26,
+            "altura": 32
+          },
+          {
+            "peca": "parede",
+            "x": 226,
+            "y": 10,
+            "largura": 87,
+            "altura": 107
+          },
+          {
+            "peca": "rua",
+            "x": 0,
+            "y": 103,
+            "largura": 320,
+            "altura": 97
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "sinal",
+            "tipo": "semaforo",
+            "x": 155,
+            "y": 20
+          }
+        ],
+        "linhaDoTempo": []
+      }
+    },
+    {
+      "id": "logica-depuracao-u3-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u3",
+      "titulo": "Imprimir não devolve",
+      "conceitos": [
+        "retorno-no-depurador"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function dobro(n) {\n  const resultado = n * 2;\n  console.log(resultado);\n}\nconst entrega = dobro(3);\nconsole.log(entrega);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "dobro mostra 6, mas entrega fica undefined. Hipótese: a função calcula e imprime, sem devolver.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "O Escopo Local mostra resultado dentro da chamada. Depois de Sair, essa variável some; só o return entrega algo a quem chamou.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "retorno-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Entre em dobro, avance e observe resultado. Saia e confira entrega === undefined.",
+            "toque": "Entre em dobro, avance e observe resultado. Saia e confira entrega === undefined."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "usouControle",
+                "controle": "entrar"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "resultado",
+                "valor": 6
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "sair"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "entrega === undefined",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Pare na linha 5; entre e avance. Compare o valor local com a entrega depois de Sair.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Pare na linha 5; entre e avance. Compare o valor local com a entrega depois de Sair."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "entrar"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "resultado"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "sair"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "entrega === undefined"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O cálculo existe na função, mas não foi devolvido.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "entrar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "resultado"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "sair"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "entrega === undefined"
+            }
+          ]
+        },
+        {
+          "id": "return-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome, tire o ponto e conserte a devolução de dobro.",
+            "toque": "Retome, tire o ponto e conserte a devolução de dobro."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "dobro",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      3
+                    ],
+                    "esperado": 6
+                  },
+                  {
+                    "args": [
+                      -4
+                    ],
+                    "esperado": -8
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "return faz o valor atravessar a fronteira da função.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "return faz o valor atravessar a fronteira da função."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function dobro(n) {\n  const resultado = n * 2;\n  return resultado;\n}\nconst entrega = dobro(3);\nconsole.log(entrega);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A função agora entrega valores; imprimir era só mostrar.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function dobro(n) {\n  const resultado = n * 2;\n  return resultado;\n}\nconst entrega = dobro(3);\nconsole.log(entrega);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "retorno-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue a mesma falha com n = -4. Observe o valor local e a entrega.",
+            "toque": "Investigue a mesma falha com n = -4. Observe o valor local e a entrega."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "usouControle",
+                "controle": "entrar"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "resultado",
+                "valor": -8
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "sair"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "entrega === undefined",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "A observação permanece; procure a fronteira entre cálculo e devolução."
+          },
+          "falaAoConcluir": {
+            "texto": "A pista se repetiu com negativo; a hipótese continua válida.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function dobro(n) {\n  const resultado = n * 2;\n  console.log(resultado);\n}\nconst entrega = dobro(-4);\nconsole.log(entrega);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "entrar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "resultado"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "sair"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "entrega === undefined"
+            }
+          ]
+        },
+        {
+          "id": "return-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Retome e conserte a entrega; teste zero e negativos.",
+            "toque": "Retome e conserte a entrega; teste zero e negativos."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "dobro",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      -4
+                    ],
+                    "esperado": -8
+                  },
+                  {
+                    "args": [
+                      7
+                    ],
+                    "esperado": 14
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Não declare uma global no lugar de devolver: cada chamada precisa de sua resposta."
+          },
+          "falaAoConcluir": {
+            "texto": "Cada chamada tem seus locais e sua devolução, como no JavaScript real.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function dobro(n) {\n  const resultado = n * 2;\n  return resultado;\n}\nconst entrega = dobro(-4);\nconsole.log(entrega);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-depuracao-u3-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-depuracao-u3",
+      "titulo": "O recibo do cinema",
+      "conceitos": [],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas",
+        "casos-de-teste"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function desconto(preco) {\n  const valor = preco * 0.2;\n  console.log(preco - valor);\n}\nconst pago = desconto(50);\nconsole.log(pago);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "introducao": [
+        {
+          "texto": "desconto(preco) deve devolver o preço com 20% de desconto. O recibo de 50 precisa mostrar 40, mas o valor recebido está errado.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Investigue uma chamada com os controles, compare os valores e confirme o conserto pelos testes.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "partes": [
+        {
+          "id": "investigar",
+          "descricao": "Siga uma chamada e registre a evidência antes de editar.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "usouControle",
+                "controle": "entrar"
+              },
+              {
+                "tipo": "usouControle",
+                "controle": "sair"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "pago === undefined",
+                "valor": true
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "entrar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "sair"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "pago === undefined"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u3-f2"
+        },
+        {
+          "id": "codigo",
+          "descricao": "Entregue desconto correto para zero, preços pequenos e grandes.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "desconto",
+                "casos": [
+                  {
+                    "args": [
+                      0
+                    ],
+                    "esperado": 0
+                  },
+                  {
+                    "args": [
+                      5
+                    ],
+                    "esperado": 4
+                  },
+                  {
+                    "args": [
+                      125
+                    ],
+                    "esperado": 100
+                  }
+                ]
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function desconto(preco) {\n  const valor = preco * 0.2;\n  return preco - valor;\n}\nconst pago = desconto(50);\nconsole.log(pago);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u3-f2"
+        },
+        {
+          "id": "testes",
+          "descricao": "Rode os casos visíveis e um preço novo escolhido por você.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "125",
+              "esperado": "100"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u3-f2"
+        }
+      ],
+      "missaoDeCampo": "No Chrome, abra DevTools > Sources > Snippets, crie um Snippet curto e execute. Marque um ponto no número da linha; use F10, F11 e Shift+F11 e confira Scope e Watch.",
+      "testes": {
+        "funcao": "desconto",
+        "parametros": [
+          "preco"
+        ],
+        "inicial": [
+          {
+            "entrada": "0",
+            "esperado": "0"
+          },
+          {
+            "entrada": "50",
+            "esperado": "40"
+          }
+        ]
+      }
+    }
   ]
 }

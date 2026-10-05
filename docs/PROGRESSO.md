@@ -39,3 +39,17 @@ conforme o pedido. O contrato continua no fim da Ilha Lógica.
   layouts verdes, com leitura dos valores efetivamente vistos na pausa;
   teste móvel abre Observar e recolhe a cena em retrato. Publicação,
   build e lint verdes.
+
+### Etapa 3 — Passo a passo
+
+- Esquina com semáforo: Passar por cima mostra o salto de cor; Entrar
+  e Sair acompanham o índice local até a cor entregue ao chamador.
+- Função que imprime, mas não devolve: o cálculo local existe enquanto
+  a chamada recebe undefined. A borda negativa repete a investigação.
+- Desafio do recibo do cinema em contexto novo, com casos visíveis e
+  escondidos. Três conceitos com temas e seis itens de revisão.
+- As primeiras checagens apontaram que a segunda prática precisava
+  declarar a habilidade nova; Investigar o retorno foi catalogado.
+- Validação: 19.262 testes de conteúdo verdes sem reteste; jornadas
+  nos três layouts com valores vistos nas pausas e Pilha de chamadas
+  conferida; publicação, build e lint verdes.
