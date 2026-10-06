@@ -258,6 +258,24 @@ export function descreverAcao(acao: Acao): string {
       return `tirarDaLinha ${acao.estacao} ${acao.evento}`;
     case "pendurarPlaquinha":
       return `pendurarPlaquinha ${acao.estacao} ${acao.plaquinha} em ${acao.evento}`;
+    case "rodarLinguagem":
+      return `rodarLinguagem ${acao.estacao} ${acao.linguagem}`;
+    case "cantarCoral":
+      return `cantarCoral ${acao.estacao}`;
+    case "tocarParte":
+      return `tocarParte ${acao.estacao} ${acao.parte ?? "(apagar)"} em ${acao.linguagem}`;
+    case "escreverNaLinguagem":
+      return `escreverNaLinguagem ${acao.estacao} ${acao.linguagem} (${acao.codigo.split("\n").length} linhas)`;
+    case "ligarCartao":
+      return `ligarCartao ${acao.estacao} ${acao.cartao} em ${acao.alvo ?? "(mesa)"}`;
+    case "porNaOrdem":
+      return `porNaOrdem ${acao.estacao} ${acao.item}${acao.posicao !== undefined ? ` na posição ${acao.posicao}` : ""}`;
+    case "tirarDaOrdem":
+      return `tirarDaOrdem ${acao.estacao} ${acao.item}`;
+    case "mexerNoCircuito":
+      return `mexerNoCircuito ${acao.estacao} ${JSON.stringify(acao.mudanca)}`;
+    case "comandoNaEstacao":
+      return `comandoNaEstacao ${acao.estacao} "${acao.comando}"`;
   }
 }
 
@@ -601,7 +619,16 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
     case "definirCor":
     case "porNaLinha":
     case "tirarDaLinha":
-    case "pendurarPlaquinha": {
+    case "pendurarPlaquinha":
+    case "rodarLinguagem":
+    case "cantarCoral":
+    case "tocarParte":
+    case "escreverNaLinguagem":
+    case "ligarCartao":
+    case "porNaOrdem":
+    case "tirarDaOrdem":
+    case "mexerNoCircuito":
+    case "comandoNaEstacao": {
       const exposicao = painel.exposicao;
       if (!exposicao) throw new ErroAcao(`${acao.tipo} só existe numa fase com a área exposicao`);
       if (!exposicao.mexer(acao)) throw new ErroAcao(`não deu para ${descreverAcao(acao)} (estação, peça ou cartão que não existe, ou nada a fazer?)`);

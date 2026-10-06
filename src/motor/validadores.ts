@@ -31,6 +31,9 @@ import { chaveLinhaDoTempo, textoDoTempo, textoDoValorCena } from "./cena/modelo
 import { conferirEstado, conferirReacao, conferirSequencia, textoDaLinhaDoTempo } from "./cena/validar";
 import { ehContrato, partesVisiveis } from "./contrato/modelo";
 import * as museu from "./exposicao/modelo";
+import * as cartoes from "./exposicao/cartoes";
+import * as circuitoMuseu from "./exposicao/circuitoMuseu";
+import * as comparador from "./exposicao/comparador";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -279,6 +282,20 @@ export function descreverValidador(validador: Validador): string {
       return `a linha do tempo ${validador.estacao} tem ${validador.eventos ? validador.eventos.join(", ") : "todos os cartões"} na ordem certa`;
     case "plaquinhasCertas":
       return `${validador.eventos ? `as plaquinhas de ${validador.eventos.join(", ")}` : "cada plaquinha"} de ${validador.estacao} no cartão certo`;
+    case "linguagensRodadas":
+      return `${validador.linguagens ? validador.linguagens.join(", ") : "todas as linguagens"} rodaram em ${validador.estacao}`;
+    case "parteVista":
+      return `a parte ${validador.parte} acesa em ${validador.estacao}${validador.linguagens ? ` (tocada em ${validador.linguagens.join(" ou ")})` : ""}`;
+    case "cartoesLigados":
+      return `${validador.cartoes ? `os cartões ${validador.cartoes.join(", ")}` : "todos os cartões"} de ${validador.estacao} no lugar certo`;
+    case "ordemCerta":
+      return `${validador.itens ? validador.itens.join(", ") : "todos os itens"} de ${validador.estacao} na ordem certa`;
+    case "circuitoNaEstacao":
+      return `o circuito de ${validador.estacao}${validador.esperado ? ` dá a tabela pedida (${validador.esperado.length} linha(s))` : ""}${validador.agora ? " com as chaves e as lâmpadas pedidas" : ""}`;
+    case "circuitoLembra":
+      return `o circuito de ${validador.estacao} lembra: ${validador.liga} acende ${validador.saida} e ela fica; ${validador.desliga} apaga`;
+    case "marcoNaEstacao":
+      return `${validador.estacao} chegou em "${validador.marco}"`;
     case "casosDoAluno":
       return `pelo menos ${validador.minimo} caso(s) de teste do aluno${validador.passando ? " passando" : ""}${validador.incluir?.length ? `, incluindo ${validador.incluir.map((exigido) => textoDoExigido(null, exigido)).join(" e ")}` : ""}`;
     case "passosNoMaximo":
@@ -683,6 +700,47 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
       const { passou, detalhe } = museu.plaquinhasCertas(achado.estacao, achado.estado, validador.eventos);
       return { passou, descricao, detalhe };
+    }
+    case "linguagensRodadas": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "comparador");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      return { ...comparador.linguagensRodadas(achado.estacao, achado.estado, validador.linguagens), descricao };
+    }
+    case "parteVista": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "comparador");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      return { ...comparador.parteVista(achado.estado, validador.parte, validador.linguagens), descricao };
+    }
+    case "cartoesLigados": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "ligar");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      return { ...cartoes.cartoesLigados(achado.estacao, achado.estado, validador.cartoes), descricao };
+    }
+    case "ordemCerta": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "ordem");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      return { ...cartoes.ordemCerta(achado.estacao, achado.estado, validador.itens), descricao };
+    }
+    case "circuitoNaEstacao": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "circuito");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const tabela = validador.esperado ? circuitoMuseu.circuitoDaTabela(achado.estado.circuito, validador.esperado) : null;
+      const agora = validador.agora ? circuitoMuseu.circuitoAgora(achado.estado, validador.agora.entradas, validador.agora.saidas) : null;
+      const falhou = [tabela, agora].find((r) => r && !r.passou);
+      return { passou: !falhou, descricao, detalhe: falhou?.detalhe ?? [tabela?.detalhe, agora?.detalhe].filter(Boolean).join("; ") };
+    }
+    case "circuitoLembra": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "circuito");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      return { ...circuitoMuseu.circuitoLembra(achado.estado.circuito, validador.saida, validador.liga, validador.desliga), descricao };
+    }
+    case "marcoNaEstacao": {
+      if (!contexto.exposicao) return { passou: false, descricao, detalhe: "só numa fase com a área exposicao" };
+      const estacao = museu.estacaoDo(contexto.exposicao.dados, validador.estacao);
+      const estado = museu.estadoDaEstacao(contexto.exposicao.estado, validador.estacao);
+      if (!estacao || !estado || !museu.ehEstacaoSimulacao(estacao) || estado.tipo !== estacao.tipo) return { passou: false, descricao, detalhe: `a exposição não tem a simulação "${validador.estacao}"` };
+      const marcos = museu.marcosDaEstacao(estacao, estado as museu.EstadoSimulacao);
+      return { passou: marcos.includes(validador.marco), descricao, detalhe: marcos.length ? `marcos: ${lista(marcos.slice(-10))}` : "nenhum marco ainda" };
     }
     case "casosDoAluno": {
       if (!contexto.casos) return { passou: false, descricao, detalhe: "só numa fase com a área testes" };

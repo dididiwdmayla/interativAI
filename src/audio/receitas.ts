@@ -65,7 +65,10 @@ function estaloDeRele(s: Sintetizador, inicio: number, forca = 1): void {
 /** Notas do arpejo de 8 bits (uma escala pentatônica alegre). */
 const PENTATONICA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
 
-const RECEITAS_DO_MUSEU: Readonly<Record<Extract<IdEfeito, `fala-${string}` | `epoca-${string}` | "furar-cartao" | "acender-bit" | "encaixar-cartao" | "proxima-geracao">, Receita>> = {
+const RECEITAS_DO_MUSEU: Readonly<Record<Extract<
+    IdEfeito,
+    `fala-${string}` | `epoca-${string}` | "furar-cartao" | "acender-bit" | "encaixar-cartao" | "proxima-geracao" | "rodar-programa" | "coral" | "plugar-cabo" | "ciclo-processador" | "pacote-pulo" | "pacote-oceano"
+  >, Receita>> = {
   // A voz de cada época: um tique por pedaço da fala (com limite de taxa no componente).
   "fala-tear": (s) => tocDeMadeira(s, 0, 0.7),
   "fala-engrenagem": (s) => tiqueDeEngrenagem(s, 0, 0.8),
@@ -163,6 +166,40 @@ const RECEITAS_DO_MUSEU: Readonly<Record<Extract<IdEfeito, `fala-${string}` | `e
     [130.81, 196, 261.63].forEach((frequencia) => s.tom({ frequencia, inicio: 0.9, duracao: 2.2, ganho: V * 0.3, forma: "sine", ataque: 0.4 }));
     [1046.5, 1318.51, 1567.98, 2093].forEach((frequencia) => s.tom({ frequencia, inicio: 1.1, duracao: 1.8, ganho: V * 0.18, forma: "sine", ataque: 0.3 }));
     s.ruido({ inicio: 1.0, duracao: 1.4, ganho: V * 0.12, filtro: "highpass", frequencia: 6000, q: 0.7, ataque: 0.4 });
+  },
+
+  // As salas 3 a 6.
+  // Rodar um programa: três bipes rápidos subindo, como um computador "pensando".
+  "rodar-programa": (s) => {
+    [880, 1174.66, 1567.98].forEach((frequencia, i) => s.tom({ frequencia, inicio: i * 0.05, duracao: 0.05, ganho: V * 0.3, forma: "square", ataque: 0.004 }));
+  },
+  // O fim do coral: a família inteira na mesma nota, cada um com o seu timbre de época.
+  coral: (s) => {
+    const notas = [261.63, 329.63, 392, 523.25];
+    (["triangle", "square", "sawtooth", "sine"] as const).forEach((forma, i) =>
+      notas.forEach((frequencia) => s.tom({ frequencia: frequencia * (i === 3 ? 2 : 1), inicio: i * 0.06, duracao: 1.4, ganho: V * 0.12, forma, ataque: 0.05 })),
+    );
+    tocDeMadeira(s, 0, 0.6);
+    estaloDeRele(s, 0.05, 0.6);
+  },
+  // Plugar um cabo no painel do gigante: o tranco do plugue e o relé.
+  "plugar-cabo": (s) => {
+    s.tom({ frequencia: 110, frequenciaFinal: 70, inicio: 0, duracao: 0.09, ganho: V * 0.7, forma: "sine", ataque: 0.003 });
+    s.ruido({ inicio: 0, duracao: 0.04, ganho: V * 0.4, filtro: "lowpass", frequencia: 1800, q: 0.8 });
+    estaloDeRele(s, 0.06, 0.8);
+  },
+  // Uma etapa do ciclo do processador: o tique do relógio.
+  "ciclo-processador": (s) => {
+    s.tom({ frequencia: 1320, inicio: 0, duracao: 0.03, ganho: V * 0.3, forma: "square", ataque: 0.003 });
+    s.tom({ frequencia: 660, inicio: 0.04, duracao: 0.03, ganho: V * 0.2, forma: "square", ataque: 0.003 });
+  },
+  // O pacote pula de um roteador para outro.
+  "pacote-pulo": (s) => s.tom({ frequencia: 700, frequenciaFinal: 1400, inicio: 0, duracao: 0.08, ganho: V * 0.35, forma: "sine", ataque: 0.004 }),
+  // O pacote atravessa o oceano pelo cabo submarino: um mergulho com bolhas.
+  "pacote-oceano": (s) => {
+    s.tom({ frequencia: 900, frequenciaFinal: 180, inicio: 0, duracao: 0.5, ganho: V * 0.35, forma: "sine", ataque: 0.01 });
+    [0.15, 0.27, 0.36, 0.5].forEach((inicio, i) => s.tom({ frequencia: variar(500 + i * 120, 0.1), frequenciaFinal: 900 + i * 150, inicio, duracao: 0.06, ganho: V * 0.18, forma: "sine", ataque: 0.004 }));
+    s.tom({ frequencia: 180, frequenciaFinal: 900, inicio: 0.6, duracao: 0.4, ganho: V * 0.3, forma: "sine", ataque: 0.01 });
   },
 };
 

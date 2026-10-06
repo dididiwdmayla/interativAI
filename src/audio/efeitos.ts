@@ -63,6 +63,13 @@ export const IDS_EFEITOS = [
   "acender-bit",
   "encaixar-cartao",
   "proxima-geracao",
+  // ...e as salas 3 a 6 (rodada 38).
+  "rodar-programa",
+  "coral",
+  "plugar-cabo",
+  "ciclo-processador",
+  "pacote-pulo",
+  "pacote-oceano",
 ] as const;
 
 export type IdEfeito = (typeof IDS_EFEITOS)[number];

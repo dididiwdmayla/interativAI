@@ -17,6 +17,20 @@ import { EstacaoCamadas } from "./EstacaoCamadas";
 import { EstacaoCor } from "./EstacaoCor";
 import { EstacaoLinhaDoTempo } from "./EstacaoLinhaDoTempo";
 import { EstacaoTear } from "./EstacaoTear";
+import type { ExtrasComparador } from "@/componentes/jogo/useExposicao";
+import { EstacaoAbaRede } from "./EstacaoAbaRede";
+import { EstacaoArquivos } from "./EstacaoArquivos";
+import { EstacaoCidade } from "./EstacaoCidade";
+import { EstacaoCircuitoMuseu } from "./EstacaoCircuitoMuseu";
+import { EstacaoClique } from "./EstacaoClique";
+import { EstacaoComparador } from "./EstacaoComparador";
+import { EstacaoLigar } from "./EstacaoLigar";
+import { EstacaoMemoria } from "./EstacaoMemoria";
+import { EstacaoOrdem } from "./EstacaoOrdem";
+import { EstacaoPacote } from "./EstacaoPacote";
+import { EstacaoProcessador } from "./EstacaoProcessador";
+import { EstacaoSistema } from "./EstacaoSistema";
+import { EstacaoTraducao } from "./EstacaoTraducao";
 
 type Props = {
   dados: DadosExposicao;
@@ -33,11 +47,14 @@ type Props = {
   /** O layout do jogo: em pé, o anfitrião fica em cima e menor; deitado, numa coluna estreita. */
   layout: "desktop" | "retrato" | "paisagem";
   aoAbrirCard?: (id: IdFerramenta) => void;
+  /** O comparador: as saídas desta visita, a carga do Python e o coral. */
+  extras?: ExtrasComparador;
 };
 
 function ConteudoDaEstacao({
   estacao,
   estado,
+  extras,
   ...resto
 }: {
   estacao: Estacao;
@@ -45,16 +62,30 @@ function ConteudoDaEstacao({
   mexer: Props["mexer"];
   toque: boolean;
   destaque: { peca?: string } | null;
+  extras?: ExtrasComparador;
 }) {
   if (estacao.tipo === "tear" && estado.tipo === "tear") return <EstacaoTear estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "bits" && estado.tipo === "bits") return <EstacaoBits estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "camadas" && estado.tipo === "camadas") return <EstacaoCamadas estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "cor" && estado.tipo === "cor") return <EstacaoCor estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "linha-do-tempo" && estado.tipo === "linha-do-tempo") return <EstacaoLinhaDoTempo estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "comparador" && estado.tipo === "comparador") return <EstacaoComparador estacao={estacao} estado={estado} extras={extras} {...resto} />;
+  if (estacao.tipo === "ligar" && estado.tipo === "ligar") return <EstacaoLigar estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "ordem" && estado.tipo === "ordem") return <EstacaoOrdem estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "circuito" && estado.tipo === "circuito") return <EstacaoCircuitoMuseu estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "traducao" && estado.tipo === "traducao") return <EstacaoTraducao estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "memoria" && estado.tipo === "memoria") return <EstacaoMemoria estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "processador" && estado.tipo === "processador") return <EstacaoProcessador estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "sistema" && estado.tipo === "sistema") return <EstacaoSistema estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "arquivos" && estado.tipo === "arquivos") return <EstacaoArquivos estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "clique" && estado.tipo === "clique") return <EstacaoClique estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "pacote" && estado.tipo === "pacote") return <EstacaoPacote estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "aba-rede" && estado.tipo === "aba-rede") return <EstacaoAbaRede estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "cidade" && estado.tipo === "cidade") return <EstacaoCidade estacao={estacao} estado={estado} {...resto} />;
   return null;
 }
 
-export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, concluida, feitas = [], layout, aoAbrirCard }: Props) {
+export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, concluida, feitas = [], layout, aoAbrirCard, extras }: Props) {
   const estreita = layout === "retrato";
   const deitado = layout === "paisagem";
   const aberta = dados.estacoes.find((estacao) => estacao.id === estado.aberta) ?? dados.estacoes[0];
@@ -133,6 +164,7 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
                   mexer={mexer}
                   toque={toque}
                   destaque={destaque?.estacao === aberta.id ? { peca: destaque.peca } : null}
+                  extras={extras}
                 />
               </div>
             </AlvoFerramenta>

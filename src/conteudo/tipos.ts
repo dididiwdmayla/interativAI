@@ -24,6 +24,8 @@ import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
 import type { DadosExposicao } from "@/motor/exposicao/modelo";
+import type { LinhaEsperada, MudancaCircuito } from "@/motor/exposicao/circuitoMuseu";
+import type { Linguagem } from "@/motor/linguagens/tipos";
 import type { AreaTrabalho } from "@/motor/composicao";
 import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
 import type { AcontecimentoCena, DadosCena, ValorCena } from "@/motor/cena/modelo";
@@ -366,6 +368,28 @@ export type Validador =
   /** (Exposição, linha do tempo com plaquinhas) Cada plaquinha do "o que mudou" está no cartão certo. Com `eventos`, só nesses cartões. */
   | { tipo: "plaquinhasCertas"; estacao: string; eventos?: string[] }
   /*
+   * Salas 3 a 6 (rodada 38). Os validadores de saída (saida, semErro,
+   * erroDoTipo) também valem no comparador: rodar JavaScript ou Python gera
+   * executouCodigo com a saída de verdade (as simuladas, com a declarada).
+   */
+  /** (Comparador) Estas linguagens (sem a lista: todas) já rodaram. */
+  | { tipo: "linguagensRodadas"; estacao: string; linguagens?: Linguagem[] }
+  /** (Comparador) A parte acesa agora é esta (com `linguagens`: tocada numa destas). */
+  | { tipo: "parteVista"; estacao: string; parte: string; linguagens?: Linguagem[] }
+  /** (Ligar) Os cartões (sem a lista: todos) estão no alvo certo. */
+  | { tipo: "cartoesLigados"; estacao: string; cartoes?: string[] }
+  /** (Ordem) Os itens (sem a lista: todos) estão na fila, na ordem certa entre eles. */
+  | { tipo: "ordemCerta"; estacao: string; itens?: string[] }
+  /**
+   * (Circuito do museu) O circuito dá a tabela `esperado` (só as saídas
+   * citadas) e, com `agora`, as chaves e as lâmpadas de agora batem.
+   */
+  | { tipo: "circuitoNaEstacao"; estacao: string; esperado?: LinhaEsperada[]; agora?: { entradas: Record<string, boolean>; saidas: Record<string, boolean> } }
+  /** (Circuito do museu) A memória com realimentação: `liga` acende a `saida` e ela fica acesa sozinha; `desliga` apaga. */
+  | { tipo: "circuitoLembra"; estacao: string; saida: string; liga: string; desliga: string }
+  /** (Simulação do museu) A estação tem este marco agora (cada tipo diz os seus: src/motor/exposicao/simulacoes). */
+  | { tipo: "marcoNaEstacao"; estacao: string; marco: string }
+  /*
    * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
    * src/motor/desempenho.ts. Ver o guia, seção 28.
    */
@@ -641,7 +665,33 @@ export type Acao =
   /** (Linha do tempo) Tira o cartão da linha (volta para a caixa). */
   | { tipo: "tirarDaLinha"; estacao: string; evento: string }
   /** (Linha do tempo com plaquinhas) Pendura a plaquinha do "o que mudou" do evento `plaquinha` no cartão `evento`. */
-  | { tipo: "pendurarPlaquinha"; estacao: string; evento: string; plaquinha: string };
+  | { tipo: "pendurarPlaquinha"; estacao: string; evento: string; plaquinha: string }
+  /*
+   * Salas 3 a 6 (rodada 38): comparador-de-linguagens, cartoes-de-ligar,
+   * ordem-dos-cartoes, painel-de-cabos e uma ferramenta por simulação.
+   */
+  /**
+   * (Comparador) O Rodar de uma linguagem: JavaScript e Python rodam de
+   * verdade, as outras mostram a saída declarada. Gera executouCodigo (com a
+   * saída) e mexeuNaExposicao quando termina.
+   */
+  | { tipo: "rodarLinguagem"; estacao: string; linguagem: Linguagem }
+  /** (Comparador) O coral: todas as linguagens cantam o programa, na voz da época. */
+  | { tipo: "cantarCoral"; estacao: string }
+  /** (Comparador) Toca numa linha da parte `parte` na linguagem dada: a parte acende em todas (null apaga). */
+  | { tipo: "tocarParte"; estacao: string; parte: string | null; linguagem: Linguagem }
+  /** (Comparador) Escreve o código da linguagem editável. */
+  | { tipo: "escreverNaLinguagem"; estacao: string; linguagem: Linguagem; codigo: string }
+  /** (Ligar) Põe o cartão no alvo (null: devolve para a mesa). */
+  | { tipo: "ligarCartao"; estacao: string; cartao: string; alvo: string | null }
+  /** (Ordem) Põe (ou muda de lugar) o item na fila, na `posicao` (a partir de 0; padrão: no fim). */
+  | { tipo: "porNaOrdem"; estacao: string; item: string; posicao?: number }
+  /** (Ordem) Tira o item da fila. */
+  | { tipo: "tirarDaOrdem"; estacao: string; item: string }
+  /** (Circuito do museu) Uma mudança no circuito: portão, fio, soltar, chave, apagar ou mover. */
+  | { tipo: "mexerNoCircuito"; estacao: string; mudanca: MudancaCircuito }
+  /** (Simulação do museu) Um comando ("passo", "vez:musica", "pular:roteador-1"; cada tipo diz os seus). */
+  | { tipo: "comandoNaEstacao"; estacao: string; comando: string };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */

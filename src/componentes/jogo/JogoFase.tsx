@@ -2643,6 +2643,7 @@ export function JogoFase({
                   feitas={estacoesFeitas}
                   layout={layout}
                   aoAbrirCard={abrirCard}
+                  extras={exposicao.extras}
                 />
               ) : null,
             testes: casos.ativo ? (

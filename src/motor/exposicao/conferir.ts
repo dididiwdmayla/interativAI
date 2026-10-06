@@ -3,7 +3,11 @@
  * chama daqui, em src/conteudo/checagens.ts). Puro.
  */
 import type { IdFerramenta } from "@/ferramentas/ids";
-import { type DadosExposicao, ehIdAntepassado, type Estacao, IDS_ANTEPASSADOS, normalizarHex, type TipoEstacao } from "./modelo";
+import { type DadosExposicao, ehEstacaoSimulacao, ehIdAntepassado, type Estacao, IDS_ANTEPASSADOS, normalizarHex, type TipoEstacao } from "./modelo";
+import { conferirLigar, conferirOrdem } from "./cartoes";
+import { conferirCircuito } from "./circuitoMuseu";
+import { conferirComparador } from "./comparador";
+import { modeloDa } from "./simulacoes";
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -14,6 +18,19 @@ export const FERRAMENTA_DA_ESTACAO: Record<TipoEstacao, IdFerramenta> = {
   camadas: "camadas-da-maquina",
   cor: "mesa-de-cores",
   "linha-do-tempo": "linha-do-tempo-museu",
+  comparador: "comparador-de-linguagens",
+  ligar: "cartoes-de-ligar",
+  ordem: "ordem-dos-cartoes",
+  circuito: "painel-de-cabos",
+  traducao: "compilar-interpretar",
+  memoria: "caixas-da-memoria",
+  processador: "processador-de-brinquedo",
+  sistema: "gerente-do-sistema",
+  arquivos: "arvore-de-pastas",
+  clique: "caminho-do-clique",
+  pacote: "mapa-dos-cabos",
+  "aba-rede": "aba-rede-previa",
+  cidade: "cidade-do-codigo",
 };
 
 export const FIGURAS_DE_EVENTO = [...IDS_ANTEPASSADOS, "cartao", "transistor", "chip", "ia"] as const;
@@ -109,6 +126,20 @@ function conferirEstacao(estacao: Estacao): string[] {
       if ((fixos ?? []).length >= eventos.length - 1) p.push(`${onde}: fixos demais (sobra no máximo um cartão para pôr)`);
       break;
     }
+    case "comparador":
+      p.push(...conferirComparador(estacao, onde));
+      break;
+    case "ligar":
+      p.push(...conferirLigar(estacao, onde));
+      break;
+    case "ordem":
+      p.push(...conferirOrdem(estacao, onde));
+      break;
+    case "circuito":
+      p.push(...conferirCircuito(estacao, onde));
+      break;
+    default:
+      if (ehEstacaoSimulacao(estacao)) p.push(...modeloDa(estacao).conferir(estacao, onde));
   }
   return p;
 }
