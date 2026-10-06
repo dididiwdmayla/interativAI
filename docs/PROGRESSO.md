@@ -1,95 +1,99 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodada-32.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-33.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 33: zona Estruturas de dados
+## Rodada 34: zona Depuração
 
-Branch `codex/estruturas-dados`, a partir de `22a4b9f` da principal,
-após o merge do custo escondido (PR #33). Sem mudança no motor.
+Branch `codex/zona-depuracao`, a partir de `984c37a` da principal.
+Sem alteração de motor; U1 a U3 publicadas e U4 em rascunho bloqueado,
+separando Observar conforme o pedido. O contrato continua no fim da Ilha Lógica.
 
-### Etapa 1 — Pilha
+### Etapa 1 — Ler a mensagem de erro
 
-- U1 separada da fila no mapa, sem ids anteriores publicados na zona.
-- Histórico do brilho da cozinha com push/pop pelo mesmo lado, previsão
-  do último vagão, função desfazer com null no vazio e bordas de um e
-  vários itens. Desafio da rota de volta em tela composta.
-- Dois conceitos com temas Dados e Lógica; quatro revisões próprias e
-  missão no Console real comparando pilha e fila.
-- Jornada pelo mapa ligada ao JSON das ações do conteúdo, negativas de
-  função constante e shift no lugar de pop; rastro confere os dois lados.
+- Cozinha com propriedade somente leitura: TypeError é pista de uma
+  operação inválida; conserto usa o comando do aparelho.
+- Dicionário de SyntaxError, ReferenceError e TypeError; laço com uma
+  volta a mais mostra a diferença entre linha da falha e causa.
+- Desafio das etiquetas de viagem com três erros sucessivos, casos
+  visíveis e bordas escondidas (vazio, um item e nomes repetidos).
+- Dois conceitos novos com temas Lógica e Ferramentas, quatro revisões
+  próprias e revisão explícita de funções, escopo, listas e decisões.
+- Validação: 18.792 verificações de conteúdo; três falhas iniciais
+  (ordem do registro e timeout da bancada) resolvidas com reteste dos
+  afetados. Jornada da unidade nos três layouts, publicação, build e
+  lint verdes. Publicação exigiu apresentar as ferramentas de cena
+  nesta zona, que fica antes de Algoritmos no currículo.
 
-- Verificação: 18.006 testes de conteúdo e duas provas específicas verdes;
-  jornada pelo mapa nos três layouts, publicação, build e lint verdes.
+### Etapa 2 — Pontos de parada
 
-### Etapa 2 — Fila
-
-- Esquina com semáforo, pedestre e painel de chamada; push entra pelo fim,
-  shift retira pelo começo, e os vagões restantes deslizam.
-- Comparação comShift x porIndice: o gráfico soma o trabalho escondido,
-  com ligação explícita a Algoritmos essenciais. O índice preserva os
-  itens na memória, limitação explicada ao aluno.
-- Dois conceitos e quatro revisões. Desafio das instruções de entrega
-  em ordem de chegada, preservando pedidos repetidos e cobrando vazio e
-  um item, em tela composta.
-- Orçamento de 20.000 passos em 1.000 itens, tanto no treino como no
-  desafio; prova automática de folga mínima de três vezes para a solução
-  com variáveis intermediárias e dez vezes abaixo da ingênua. As
-  sabotagens com shift acertam as bordas e falham no orçamento total.
-
-- Verificação: 18.191 testes verdes; jornada nos três layouts, publicação,
+- Garagem com atribuição na condição: portão abre e não fecha; valores
+  observados antes do conserto revelam a decisão alterada.
+- Soma com uma volta a mais, sem erro vermelho, e desafio da carga com
+  índice inicial errado. Comparar índice e tamanho confirma a hipótese.
+- Três conceitos com temas, seis revisões; casos escondidos rejeitam
+  solução constante e investigação é necessária mesmo com código certo.
+- Conteúdo: 19.028 verificações, com dois casos antigos sensíveis à carga
+  (bancada e recursão infinita) verdes no reteste isolado. As quatro
+  provas específicas e 81 checagens afetadas passaram. Jornadas nos três
+  layouts verdes, com leitura dos valores efetivamente vistos na pausa;
+  teste móvel abre Observar e recolhe a cena em retrato. Publicação,
   build e lint verdes.
 
-### Etapa 3 — Dicionário (Map)
+### Etapa 3 — Passo a passo
 
-- Umidade por canteiro na estufa: dois sensores, água e atualização da
-  mesma chave quando a entrada genérica muda a leitura no segundo 2.
-- set/get/has, ausência, zero e escolha explícita: objeto para uma ficha
-  com campos conhecidos; Map para pares dinâmicos. Prática guiada e
-  sozinha das chaves numérica e textual, que permanecem distintas.
-- Gráfico naLista x noMapa, incluindo a montagem do Map, liga includes
-  ao trabalho escondido e has à consulta barata. A jornada verifica a
-  distância entre as curvas e a legenda do total.
-- Desafio dos bilhetes repetidos do cinema em tela composta, com vazio,
-  um item, zero, repetição e chaves de tipos diferentes; 20.000 passos
-  em 1.000 itens, com a mesma prova automatizada de folga da Fila.
-- Três conceitos com temas e seis itens próprios de revisão.
+- Esquina com semáforo: Passar por cima mostra o salto de cor; Entrar
+  e Sair acompanham o índice local até a cor entregue ao chamador.
+- Função que imprime, mas não devolve: o cálculo local existe enquanto
+  a chamada recebe undefined. A borda negativa repete a investigação.
+- Desafio do recibo do cinema em contexto novo, com casos visíveis e
+  escondidos. Três conceitos com temas e seis itens de revisão.
+- As primeiras checagens apontaram que a segunda prática precisava
+  declarar a habilidade nova; Investigar o retorno foi catalogado.
+- Validação: 19.262 testes de conteúdo verdes sem reteste; jornadas
+  nos três layouts com valores vistos nas pausas e Pilha de chamadas
+  conferida; publicação, build e lint verdes.
 
-- Verificação: 18.425 testes verdes; jornada nos três layouts, publicação,
-  build e lint verdes.
+### Etapa 4 — Observar variáveis
 
-### Etapa 4 — Árvore
+- Estufa com noite seca e dia úmido: comparar pedido e entradas, avançar
+  até o comando e ver o aspersor ligado no instante do defeito.
+- Tipo de código numérico recebido como texto e declaração local que
+  esconde o saldo de fora. Os treinos mudam entrada e momento da cena.
+- Desafio da biblioteca: pop encolhe a lista enquanto o índice avança,
+  perdendo nomes; conserto preserva ordem, repetidos e lista vazia.
+- Dois conceitos com temas e quatro revisões; casos incluem "007",
+  vazio, repetidos e nomes diferentes para rejeitar inversão da ordem.
+- Revisão final reforçou o caso escondido da U1 com nomes distintos.
+  Seus ids e ordem ficaram preservados; as três jornadas repetidas passaram.
+- A condição e o comando foram separados em linhas com bloco; o aluno
+  acompanha as duas operações antes de conferir o aparelho.
+  As 30 checagens afetadas e provas novas passaram.
+- 19.446 testes de conteúdo passaram antes da revisão de formatação;
+  28 checagens afetadas passaram depois. Isso não comprovou a cena visual.
+- As jornadas da U4 falharam nos três layouts: Watch está na pausa, mas
+  o desenho avança. Reprodução mínima da U3 confirma: pausa na linha 6,
+  cena em 4.000 ms/vermelho em vez de 0 ms/verde. O motor não envia o
+  foco da pausa à cena. Não alterado: aplicada a regra de parada do pedido.
+- U4, seus itens de revisão e fixtures ficam para retomada, fora dos
+  registros ativos e sem publicação. Currículo travado por `requerMotor`.
+  ROADMAP registra causa, reprodução e critérios do conserto. PR em
+  rascunho; a zona e a Ilha Lógica ainda não estão completas.
 
-- Raiz, nós, filhos e folhas da casa, com Ver como árvore, adição de um
-  cômodo e previsão que faz a ponte com pais e filhos do DOM.
-- Percurso recursivo da casa devolve nomes de lâmpadas; os aparelhos
-  correspondentes acendem na cena. Null, árvore sem lâmpadas, uma folha
-  e ramos mais profundos exercitam o caso de parada e o problema menor.
-- Desafio do centro cultural, com anexo e oficina em profundidades
-  diferentes, em tela composta. Dois conceitos e quatro revisões.
-- Prova contra percurso de profundidade fixa: acerta a casa de dois
-  níveis, mas perde uma lâmpada mais funda. Jornada abre a árvore e
-  confere nós destacados e molduras durante a recursão.
+- Ao retirar U4, o glossário detectou seus conceitos sem fase ativa.
+  Fontes, revisões e conceitos movidos para `docs/rascunhos/depuracao-u4/`
+  como texto, fora do catálogo e da compilação; sem falsos verbetes ativos.
 
-- Verificação: rodada com 18.608 verificações, 18.607 inicialmente verdes
-  e uma falha na prova adicional (subconjunto não declarado na simulação).
-  Prova corrigida e os quatro testes específicos verdes; os 26 testes da
-  fase 1 verdes após remover a exigência redundante de reabrir a árvore
-  no sozinho. Jornada nos três layouts, confirmação final no desktop,
-  publicação, build e lint verdes.
+### Fechamento da interrupção
 
-### Fechamento
-
-- Quatro unidades publicadas, uma por commit; 12 fases, nove conceitos
-  com temas e 18 itens de revisão. Todas as jornadas pelo mapa passaram
-  nos três layouts; casos, previsões e validadores do JSON correspondem
-  aos dados do conteúdo. A Árvore teve confirmação final no desktop.
-- Publicar conteúdo, build e lint passaram ao fim de cada unidade.
-  Verificações de conteúdo consolidadas: 18.608, com reteste apenas da
-  prova específica e da fase afetadas na U4, conforme a economia de cota.
-- `npm run bateria:conteudo` executada uma vez no build de produção:
-  mapa, exploração, publicação e revisão verdes, com console limpo.
-- ATRITOS-FABRICA com rodada curta; ROADMAP com a zona em Feito,
-  Depuração em Próximo e a exportação dos aparelhos novos em Pendências.
-- Principal permaneceu em `22a4b9f`; a entrega segue pela branch
-  `codex/estruturas-dados` e pull request, sem push direto na principal.
+- Jornada U1 repetida em desktop, retrato e paisagem: verde.
+- `testar:conteudo -- --maxWorkers=1`: 19.264 testes, única falha no
+  glossário ao deixar conceitos U4 sem fases. Após separar o rascunho,
+  58 checagens de glossário, Depuração, currículo, revisão e temas passaram.
+- `publicar:conteudo`, build e lint verdes. `bateria:conteudo` rodada uma
+  vez em produção: mapa, explorar, publicar e revisão passaram. Não foi
+  rodada bateria completa de motor.
+- U1/U2/U3 em commits próprios; fechamento com rascunho U4 e bloqueio
+  em commit separado. Branch enviada por PR em rascunho, sem push na
+  principal. Próximo: consertar a sincronização, retomar U4 e validar
+  U2/U3/U4 nos três layouts antes de concluir a ilha; depois Opus: Origens.

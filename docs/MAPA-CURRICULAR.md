@@ -676,20 +676,40 @@ Modelo: `/lab/fases?fase=lab-resolver-u1-f1` e `f2`.
 
 ### Zona Depuração (`depuracao`)
 
-Missão de campo: abrir o Console de um site qualquer, procurar uma
-mensagem vermelha e tentar entender o que ela diz.
+Depurar é investigar com método: reproduzir, formar uma hipótese, pausar
+e olhar, confirmar ou descartar, consertar e testar de novo. Programas
+curtos cabem nas primeiras 1.000 fotos da memória do depurador.
 
-- **U1. Ler a mensagem de erro** (`logica-depuracao-u1`): o nome do erro
-  (`ReferenceError`, `TypeError`, `SyntaxError`), a mensagem e a linha;
-  o dicionário de erros de iniciante; validadores `erroDoTipo` e
-  `semErro`. Desafio: um programa com três erros para consertar na ordem
-  em que aparecem. Confusões: "erro vermelho é que estraguei o
-  computador"; "a linha do erro é sempre onde está o problema".
-- **U2. Pontos de parada** (`logica-depuracao-u2`, depurador da aba
-  Fontes): parar numa linha e olhar os valores.
-- **U3. Passo a passo** (`logica-depuracao-u3`, depurador da aba
-  Fontes): próxima linha, entrar e sair de função, observar
-  variáveis.
+Missão de campo: no Chrome real, criar um Snippet em Sources > Snippets,
+colocar um ponto no número da linha e executar passo a passo; comparar
+Scope e Watch com os valores previstos.
+
+- **U1. Ler a mensagem de erro (pronta)** (`logica-depuracao-u1`):
+  SyntaxError, ReferenceError e TypeError; nome, mensagem e linha como
+  pistas. A luz e o forno da cozinha mostram operações inválidas; a
+  leitura além do fim mostra a diferença entre pista e causa. Desafio:
+  etiquetas de viagem com três erros sucessivos e testes escondidos.
+- **U2. Pontos de parada (pronta)** (`logica-depuracao-u2`): pausar antes
+  da linha, comparar valores com uma hipótese e descobrir bugs
+  silenciosos. Garagem com atribuição na condição e portão que não
+  fecha; soma além do fim. Desafio: carga do depósito sem a primeira caixa.
+- **U3. Passo a passo (pronta)** (`logica-depuracao-u3`): Passar por cima,
+  Entrar e Sair, Pilha de chamadas e comparação entre valor local e
+  retorno. Semáforo da esquina que pula o amarelo; função que imprime
+  sem devolver. Desafio: recibo do cinema com retorno ausente.
+- **U4. Observar variáveis (rascunho bloqueado)** (`logica-depuracao-u4`): expressões,
+  tipo e escopo no instante da pausa. Irrigação que liga à noite e no
+  dia úmido, texto contra número e variável local escondendo a de fora.
+  Desafio: biblioteca perde nomes ao modificar a lista durante o percurso.
+
+A zona ainda não está completa: o desenho da cena avança enquanto o
+depurador está pausado. U4 depende da sincronização descrita nas
+Pendências do ROADMAP; seus arquivos não estão registrados nem publicados.
+
+Toda unidade combina guiado e sozinho na mesma fase, desafio em
+contexto novo com tela composta e testes, conceitos com temas e duas
+revisões por conceito. Investigar é obrigatório antes de encerrar a caça;
+consertos de função passam também pelas bordas escondidas.
 
 ### Zona Algoritmos essenciais (`algoritmos-essenciais`)
 

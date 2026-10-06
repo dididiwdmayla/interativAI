@@ -4,6 +4,15 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["depuracao.mjs", "desktop", "3"],
+  ["depuracao.mjs", "retrato", "3"],
+  ["depuracao.mjs", "paisagem", "3"],
+  ["depuracao.mjs", "desktop", "2"],
+  ["depuracao.mjs", "retrato", "2"],
+  ["depuracao.mjs", "paisagem", "2"],
+  ["depuracao.mjs", "desktop", "1"],
+  ["depuracao.mjs", "retrato", "1"],
+  ["depuracao.mjs", "paisagem", "1"],
   ["estruturas-zona.mjs", "desktop", "4"],
   ["estruturas-zona.mjs", "retrato", "4"],
   ["estruturas-zona.mjs", "paisagem", "4"],

@@ -1,0 +1,3 @@
+// Inserir no catálogo apenas ao registrar a U4.
+  "observar-expressoes": {"nome": "Observar expressões", "resumo": "Observar acompanha valores e condições no instante de cada pausa sem alterar o código investigado.", "temas": ["logica", "ferramentas"]},
+  "escopo-na-pausa": {"nome": "Escopo na pausa", "resumo": "Escopo separa as variáveis locais, de bloco e de fora para revelar qual caixinha a linha pausada lê.", "temas": ["logica", "ferramentas"]},

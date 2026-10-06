@@ -17,6 +17,17 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  "retorno-no-depurador": {"nome": "Investigar o retorno", "resumo": "Comparar o valor local com o que chega a quem chamou distingue cálculo, impressão e retorno ausente.", "temas": ["logica", "ferramentas"]},
+  "passar-por-cima": {"nome": "Passar por cima", "resumo": "Passar por cima executa a linha inteira, incluindo uma chamada, e para na próxima linha do mesmo nível.", "temas": ["logica", "ferramentas"]},
+  "entrar-e-sair": {"nome": "Entrar e sair de função", "resumo": "Entrar segue a chamada por dentro; Sair termina essa chamada e volta ao código que pediu sua resposta.", "temas": ["logica", "ferramentas"]},
+
+  "ponto-de-parada": {"nome": "Ponto de parada", "resumo": "Marcar uma linha permite pausar antes dela executar e olhar a memória daquele instante.", "temas": ["logica", "ferramentas"]},
+  "hipotese-de-bug": {"nome": "Hipótese de bug", "resumo": "Uma explicação provisória do defeito precisa ser confirmada ou descartada pelos valores observados.", "temas": ["logica", "ferramentas"]},
+  "bug-silencioso": {"nome": "Bug silencioso", "resumo": "Um programa pode terminar sem erro e ainda devolver o resultado errado; casos de teste revelam a diferença.", "temas": ["logica", "ferramentas"]},
+
+  "dicionario-de-erros": {"nome": "Dicionário de erros", "resumo": "SyntaxError aponta escrita inválida, ReferenceError um nome indisponível e TypeError uma operação incompatível com o valor.", "temas": ["logica", "ferramentas"]},
+  "causa-do-erro": {"nome": "Pista e causa", "resumo": "A linha apontada mostra onde a falha apareceu; a causa pode estar antes, como no limite de um laço.", "temas": ["logica", "ferramentas"]},
+
 "arvore-de-dados": {"nome": "Árvore de dados", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
 "percorrer-arvore": {"nome": "Percorrer a árvore", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
 
