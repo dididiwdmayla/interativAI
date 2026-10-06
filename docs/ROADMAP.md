@@ -48,7 +48,7 @@ núcleo comum.
   teste de regressão), seis itens de revisão e dois clientes no kit. A zona
   Depuração e a Ilha Lógica ficam completas, com o contrato da padaria no
   fim. `fimDeIlha: false` tira a comemoração de fim de ilha dos chamados.
-  Guia, seção 31.10. Detalhe e validação em `docs/PROGRESSO.md`.
+  Guia, seção 31.10. Bateria completa (199 testes) e de conteúdo verdes. Detalhe e validação em `docs/PROGRESSO.md`.
 
 - **Depuração, conteúdo U1 a U3:** Ler a mensagem de erro, Pontos de
   parada e Passo a passo, uma unidade por commit, nove fases, oito

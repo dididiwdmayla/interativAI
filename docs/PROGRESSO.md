@@ -66,4 +66,4 @@ contrato.
 
 - `testar:conteudo -- --maxWorkers=1`: 19.725 testes verdes.
 - Jornadas U4, U5 e U6 nos três layouts; publicação, build e lint verdes.
-- Bateria completa uma vez no fim (resultado no relatório e no ROADMAP).
+- Bateria completa (`npm run bateria`, 199 testes, `PARALELO=2`) verde, sem falhas, em duas partes: um reinício do container interrompeu a primeira depois de 126 testes; os 73 restantes rodaram com `FILTRO`. `bateria:conteudo` (mapa, explorar, publicar e revisão) verde.
