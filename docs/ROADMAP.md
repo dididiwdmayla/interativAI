@@ -29,6 +29,21 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 36, Etapa 1: currículo ampliado** (só currículo, nada publicado
+  mudou): Orientação a objetos (zona `objetos`, a primeira da Páginas
+  vivas) e Programação assíncrona (`assincrono`, antes de Eventos e do
+  fetch); a **Ilha Python** depois de Rede e Servidor (fundamentos,
+  orientação a objetos, dados e "Outras linguagens" com C, Java/C# e o
+  conceito que é o mesmo), com arte no mundo; LGPD e ética na Rede e
+  Servidor (ponte com a privacidade da IA); no Ofício, Pensando sistemas,
+  Como equipes trabalham, Da máquina à produção e Carreira (a última
+  zona). Todas com `requerMotor`. Inglês técnico como fio contínuo:
+  `termoIngles` no `Conceito` (o glossário mostra e busca os dois) e a
+  regra no guia (seção 1). A entrevista com o cliente entrou como motor
+  futuro (`entrevista-cliente` em `src/curriculo/motores.ts`). No museu,
+  as salas 4 e 6 (planejadas) trocaram de lugar. Justificativas no
+  `MAPA-CURRICULAR.md`.
+
 - **Rodada 35, cena pausada, U4 e os dois chamados (zona Depuração
   completa):** com o depurador pausado, a cena mostra o instante da pausa
   (tempo e estado dos aparelhos, filtrados por execução e passo, batendo
@@ -636,8 +651,9 @@ núcleo comum.
   - Não há um cartão de diagnóstico dedicado no formato contrato: o quadro de
     plano agrupado faz o papel (guia, 31.10). Um tipo próprio só vale se mais
     contratos pedirem diagnóstico.
-  - O catálogo de conceitos não tem `termoIngles`; os três conceitos novos
-    entram só com nome, resumo e temas.
+  - O catálogo de conceitos ganhou `termoIngles` na rodada 36, mas os
+    conceitos antigos (inclusive os três da Depuração) ainda estão sem o
+    termo (ROADMAP, Próximo).
 
 - **Testes sob carga (Depuração):** a checagem conjunta das bancadas
   tem limite de 5 s, e a prova de recursão infinita espera estourar a

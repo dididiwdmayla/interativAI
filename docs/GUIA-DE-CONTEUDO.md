@@ -142,6 +142,23 @@ Ruim: "Aplique visibility hidden no nó para ocultá-lo do render tree."
 
 Ruim: "Muito bem!!! Você é incrível!!!" (vazio: diga O QUE ele acertou)
 
+**Inglês técnico (regra para conteúdo novo, rodada 36).** A documentação,
+os erros e as ferramentas de verdade falam inglês; o jogo prepara para
+isso sem virar aula de inglês:
+
+- **todo conceito novo tem `termoIngles`** (`src/conteudo/conceitos.ts`):
+  o nome como aparece na documentação ("bit", "breakpoint", "event
+  loop"). O glossário mostra os dois e a busca acha pelos dois;
+- na primeira vez que o termo aparece numa fala, diga os dois: "o ponto de
+  parada (em inglês, breakpoint)". Depois, use o nome em português;
+- **de vez em quando, uma missão de campo pede ler um trecho curto da
+  documentação original** (MDN, docs do Python) e achar uma coisa nele
+  ("abra a página do `Array.prototype.push` na MDN em inglês e ache o que
+  ele devolve: procure por Return value"). Uma por zona, mais ou menos;
+  diga onde procurar, nunca peça para traduzir o texto inteiro;
+- os conceitos antigos ainda não têm o termo: preencher fica para uma
+  tarefa de conteúdo (ROADMAP).
+
 **Falas não têm versão de toque.** Só os enunciados têm `mouse` e
 `toque`. Por isso, nas falas (ajudas, conclusões), escreva de um jeito
 neutro: "Use Esconder nele", "Duplique ele", e não "clique com o botão

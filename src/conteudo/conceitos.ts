@@ -12,7 +12,11 @@
  * - nome curto, como o jogador falaria;
  * - resumo em UMA frase de leigo, sem jargão sem explicação;
  * - temas: pelo menos um (src/curriculo/temas.ts). Eles acendem o conceito
- *   na lente de temas do mapa e no glossário.
+ *   na lente de temas do mapa e no glossário;
+ * - termoIngles: o nome como aparece na documentação em inglês ("bit",
+ *   "event loop", "breakpoint"). Opcional nos conceitos antigos (preencher é
+ *   uma tarefa de conteúdo), obrigatório nos novos a partir da rodada 36
+ *   (guia, seção 1). O glossário mostra os dois e a busca acha pelos dois.
  */
 import type { IdTema } from "@/curriculo/temas";
 
@@ -1318,11 +1322,18 @@ const CATALOGO = {
       "dados"
     ]
   },
-} as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[] }>;
+} as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[]; termoIngles?: string }>;
 
 export type IdConceito = keyof typeof CATALOGO;
 
-export type Conceito = { id: IdConceito; nome: string; resumo: string; temas: readonly IdTema[] };
+export type Conceito = {
+  id: IdConceito;
+  nome: string;
+  resumo: string;
+  temas: readonly IdTema[];
+  /** O termo da documentação em inglês (ausente nos conceitos antigos que ainda não foram preenchidos). */
+  termoIngles?: string;
+};
 
 export const IDS_CONCEITOS = Object.keys(CATALOGO) as IdConceito[];
 

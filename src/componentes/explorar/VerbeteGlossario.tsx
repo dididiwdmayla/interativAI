@@ -46,7 +46,14 @@ export function VerbeteGlossario({ entrada, destinos }: Props) {
       data-verbete={conceito.id}
       className="scroll-mt-28 rounded-3xl border-2 border-borda bg-superficie p-4 shadow-[0_4px_0_var(--cor-sombra)] target:border-primaria"
     >
-      <h2 className="text-lg font-black text-texto">{conceito.nome}</h2>
+      <h2 className="text-lg font-black text-texto">
+        {conceito.nome}
+        {conceito.termoIngles && (
+          <span className="ml-2 align-middle text-xs font-bold text-texto-suave" data-termo-ingles>
+            em inglês: <span lang="en" className="font-codigo">{conceito.termoIngles}</span>
+          </span>
+        )}
+      </h2>
       <p className="mt-0.5 text-[15px] font-bold leading-snug text-texto">{conceito.resumo}</p>
       <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={`Temas de ${conceito.nome}`}>
         {conceito.temas.map((id) => {

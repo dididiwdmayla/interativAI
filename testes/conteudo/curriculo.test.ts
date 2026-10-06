@@ -19,14 +19,15 @@ const [U1] = UNIDADES;
 
 describe("currículo em dados", () => {
   it("ilhas na ordem do mapa, Origens sempre aberta e Frameworks opcional", () => {
-    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio"]);
+    expect(ILHAS_DA_ROTA.map((ilha) => ilha.id)).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "python", "ia", "oficio"]);
     expect(ILHAS_OPCIONAIS.map((ilha) => ilha.id)).toEqual(["frameworks"]);
     expect(CURRICULO.find((ilha) => ilha.id === "origens")?.sempreAberta).toBe(true);
   });
 
-  it("a ilha IA fica entre Rede e Servidor e Ofício, com a IA ao vivo como motor", () => {
+  it("a ilha Python vem depois de Rede e Servidor, e a IA entre Python e Ofício, com a IA ao vivo como motor", () => {
     const ids = CURRICULO.map((ilha) => ilha.id);
-    expect(ids.indexOf("ia")).toBe(ids.indexOf("rede-servidor") + 1);
+    expect(ids.indexOf("python")).toBe(ids.indexOf("rede-servidor") + 1);
+    expect(ids.indexOf("ia")).toBe(ids.indexOf("python") + 1);
     expect(ids.indexOf("oficio")).toBe(ids.indexOf("ia") + 1);
     const ia = CURRICULO.find((ilha) => ilha.id === "ia");
     expect(ia?.zonas.map((zona) => zona.id)).toEqual([
@@ -51,7 +52,9 @@ describe("currículo em dados", () => {
     ]) {
       expect(localNoCurriculo(id), id).toBeDefined();
     }
-    expect(localNoCurriculo("origens-museu-u6")?.unidade.titulo).toBe("Por baixo do capô");
+    // Rodada 36: as salas 4 e 6 (planejadas, sem conteúdo) trocaram de lugar para o corredor seguir as épocas.
+    expect(localNoCurriculo("origens-museu-u4")?.unidade.titulo).toBe("Por baixo do capô");
+    expect(localNoCurriculo("origens-museu-u6")?.unidade.titulo).toBe("Onde a programação vive");
     expect(localNoCurriculo("logica-algoritmos-essenciais-u4")?.zona.nome).toBe("Algoritmos essenciais");
     expect(localNoCurriculo("rede-servidor-seguranca-u3")?.zona.nome).toBe("Segurança");
   });
@@ -93,14 +96,16 @@ describe("currículo em dados", () => {
   });
 
   it("portões lógicos, a parte B da Lógica e o contrato prontos: nenhum motor da Lógica segue planejado", () => {
-    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual([]);
+    // Só a entrevista com o cliente (do Ofício) segue planejada; nenhuma unidade da Lógica usa motor planejado.
+    expect(MOTORES_PLANEJADOS.map((motor) => motor.id)).toEqual(["entrevista-cliente"]);
+    expect(MOTORES_PLANEJADOS.flatMap((motor) => motor.usadoEm).filter((uso) => uso.unidadeId.startsWith("logica-"))).toEqual([]);
     for (const id of ["logica-resolvendo-problemas-u1", "logica-resolvendo-problemas-u3", "logica-depuracao-u2", "logica-depuracao-u3", "logica-estruturas-de-dados-u3"]) {
       expect(localNoCurriculo(id)?.unidade.requerMotor, id).toBeUndefined();
     }
     expect(localNoCurriculo("logica-programa-de-verdade-u1")?.unidade.requerMotor).toBeUndefined();
     expect(localNoCurriculo("logica-decisoes-u2")?.indice).toBe(1);
     expect(localNoCurriculo("logica-decisoes-u2")?.unidade.requerMotor).toBeUndefined();
-    expect(localNoCurriculo("origens-museu-u6")?.unidade.requerMotor).not.toContain("circuito-logico");
+    expect(localNoCurriculo("origens-museu-u4")?.unidade.requerMotor ?? "").not.toContain("circuito-logico");
     expect(conferirMotoresPlanejados(MOTORES_PLANEJADOS, CURRICULO, ILHAS_FUTURAS, TRILHAS)).toEqual([]);
   });
 });

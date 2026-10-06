@@ -21,6 +21,20 @@ ensinados pela intuição, com exemplos e sem fórmula. E acrescentar o que
 o programador de hoje precisa no dia a dia: TypeScript, testes, Git em
 equipe, segurança e trabalhar com IA com critério.
 
+### Fio contínuo: inglês técnico (rodada 36)
+
+A documentação, as mensagens de erro e as ferramentas de verdade falam
+inglês. Em vez de uma zona de inglês, o inglês técnico atravessa o jogo:
+
+- todo conceito tem o termo em inglês (`termoIngles` em
+  `src/conteudo/conceitos.ts`), e o glossário mostra os dois e busca pelos
+  dois ("ponto de parada" e "breakpoint");
+- de vez em quando, uma missão de campo pede ler um trecho curto da
+  documentação original (MDN, Python docs) e achar uma coisa nele;
+- conteúdo novo segue a regra do guia (seção 1, "Inglês técnico");
+- os conceitos antigos ainda não têm o termo: preencher é uma tarefa de
+  conteúdo (ROADMAP, Próximo).
+
 ## Meta geral
 
 Levar uma pessoa do zero até o nível de dev júnior web (front e back), de
@@ -58,31 +72,50 @@ dados: `TRILHAS` em `src/curriculo/trilhas.ts` e `ILHAS_FUTURAS` em
 
 Id no currículo: `origens`, zona `museu`.
 
-**Requer motor:** tipos de atividade linha do tempo, comparador de
-linguagens executável e diagrama de rede.
+O museu é um corredor de épocas (rodada 36): cada época tem um antepassado
+do computadorzinho, que acorda quando o aluno chega perto, e cada sala é
+uma unidade com exposições interativas (área `exposicao` da tela composta,
+guia, seção 32) e um pequeno desafio no fim. No fim do corredor, depois do
+computadorzinho, fica o lugar da próxima geração: quem termina a sala 2
+entra na árvore da família.
 
-Salas (a sala 6 entrou na rodada 9, depois das outras, para manter os
-ids):
+Salas, na ordem do corredor (as salas 4 e 6 trocaram de lugar na rodada
+36, antes de ter conteúdo, para o corredor seguir as épocas e as salas 3 a
+5 ficarem na ordem da parte 2):
 
-1. **Como o computador entende** (`origens-museu-u1`): bits, instruções,
-   da linguagem de máquina às linguagens que a gente escreve.
-2. **Linha do tempo** (`origens-museu-u2`): dos cartões perfurados à IA.
-3. **Por que existem tantas linguagens** (`origens-museu-u3`): o mesmo
-   programa em várias linguagens, lado a lado, rodando.
-4. **Onde a programação vive** (`origens-museu-u4`): o dia a dia e as
-   carreiras.
-5. **Front, back e o caminho de um clique** (`origens-museu-u5`): visão
-   geral.
-6. **Por baixo do capô** (`origens-museu-u6`): memória, processador,
-   sistema operacional, arquivos, binário e hexadecimal (ligado às cores
-   do CSS: `#ff8800` é hexadecimal) e a internet física (cabos,
-   servidores, pacotes). Aqui também moram os **quebra-cabeças maiores
-   com portões lógicos** (ideia aprovada na rodada 12): somar dois números
-   só com portões E, OU e NÃO e montar uma memória simples com
+1. **Como o computador entende** (`origens-museu-u1`, pronta na rodada
+   36, anfitriã: a tecelã do tear de Jacquard): cartões perfurados que
+   tecem um desenho (binário sem saber que é), bits ligados e desligados
+   virando números e letras, a instrução e as camadas, da linguagem de
+   máquina até a que a gente escreve, e o hexadecimal montando uma cor (a
+   ponte com as cores do CSS da Ilha Sites: `#ff8800` é hexadecimal).
+2. **Linha do tempo** (`origens-museu-u2`, pronta na rodada 36, anfitriã:
+   a sonhadora de engrenagens): dos cartões perfurados à IA, pondo
+   acontecimentos e máquinas na ordem e descobrindo o que cada um mudou.
+   Fatos conferidos; sem datas inventadas (na dúvida, a década).
+3. **Por que existem tantas linguagens** (`origens-museu-u3`, anfitrião: o
+   terminal verde): o mesmo programa em várias linguagens, lado a lado,
+   rodando. **Requer motor:** comparador de linguagens executável.
+4. **Por baixo do capô** (`origens-museu-u4`, anfitrião: o computador
+   pessoal bege, com o gigante de válvulas de visita): memória,
+   processador, sistema operacional e arquivos, e os **quebra-cabeças
+   maiores com portões lógicos** (ideia aprovada na rodada 12): somar dois
+   números só com portões E, OU e NÃO e montar uma memória simples com
    realimentação (a saída voltando para a entrada, o mesmo princípio do
    selo da contatora dos comandos elétricos). O tipo de fase
-   `circuito-logico` ficou pronto na rodada 17, já com realimentação;
-   **requer motor:** os tipos de atividade do museu.
+   `circuito-logico` ficou pronto na rodada 17, já com realimentação; o
+   binário e o hexadecimal foram para a sala 1. **Requer motor:** a
+   exposição "o computador aberto" (peças que se tocam e se explicam).
+5. **Front, back e o caminho de um clique** (`origens-museu-u5`,
+   anfitriã: a internet): visão geral, dos cabos e servidores aos pacotes.
+   **Requer motor:** diagrama de rede.
+6. **Onde a programação vive** (`origens-museu-u6`, anfitrião: o
+   celular): o dia a dia e as carreiras (ponte para a zona Carreira do
+   Ofício). **Requer motor:** a exposição "o dia de alguém" (apps e
+   aparelhos que se abrem para mostrar o código de dentro).
+
+O gigante de válvulas (anos 1940) não tem sala própria: aparece de visita
+nas salas 1 e 4 e guarda o corredor entre as engrenagens e o terminal.
 
 ---
 
@@ -798,17 +831,33 @@ existe e continua travada por um `requerMotor` que nomeia o tipo.
 
 ## Ilha 3: Páginas vivas
 
-Id no currículo: `paginas-vivas`. Uma unidade planejada por zona.
+Id no currículo: `paginas-vivas`. Uma unidade planejada por zona (três nas
+duas primeiras).
 
 **Requer motor:** JS do jogador rodando no site-alvo; aba Aplicação.
 
 Zonas:
 
-1. DOM pelo código (`dom`).
-2. Eventos (`eventos`).
-3. Formulários (`formularios`): inputs, labels, validação.
-4. Guardar dados (`guardar-dados`): localStorage e a aba Aplicação.
-5. Projeto-ponte (`projeto-ponte`): um app de lista de tarefas feito fora
+1. **Objetos e classes** (`objetos`, rodada 36): classes e objetos (u1),
+   encapsulamento (u2), herança e composição (u3). Fica no começo da ilha
+   porque os elementos da página **são** objetos com métodos
+   (`elemento.classList.add`, `lista.append`): quem já sabe o que é um
+   objeto com métodos lê o DOM como mais um objeto. A Lógica ensina objeto
+   como ficha de dados; aqui ele ganha comportamento. **Requer motor:**
+   classes no executor e no palco da memória (`class`, `new`, `this`,
+   `extends`).
+2. DOM pelo código (`dom`).
+3. **Programação assíncrona** (`assincrono`, rodada 36): o loop de
+   eventos na intuição (u1, a fila do que chega depois), temporizadores
+   (u2, `setTimeout` e `setInterval`) e promessas com `async/await` (u3).
+   Fica antes de Eventos (um clique é um aviso que chega depois) e do
+   `fetch` da Rede e Servidor (a resposta chega depois). **Requer motor:**
+   executor com tempo assíncrono (o relógio simulado das cenas é o ponto
+   de partida) e a fila do loop de eventos visível no palco.
+4. Eventos (`eventos`).
+5. Formulários (`formularios`): inputs, labels, validação.
+6. Guardar dados (`guardar-dados`): localStorage e a aba Aplicação.
+7. Projeto-ponte (`projeto-ponte`): um app de lista de tarefas feito fora
    do jogo.
 
 ---
@@ -831,15 +880,51 @@ Zonas (na ordem do mapa):
 5. Login e autenticação (`login-e-autenticacao`): sessões e tokens.
 6. Segurança (`seguranca`): senhas e hash (u1), chaves e segredos (u2),
    injeção e XSS (u3).
-7. Front e back juntos (`front-e-back`): projeto.
+7. **LGPD e ética** (`lgpd-e-etica`, rodada 36): dados pessoais e
+   consentimento (u1) e o que pode e o que não pode (u2: guardar só o
+   necessário, por quanto tempo, com quem dividir, atender quem pede para
+   apagar). Depois de Segurança (proteger os dados) e antes do projeto
+   (que guarda dados de gente de verdade). Ponte com a zona Custo e
+   privacidade da ilha IA: o que não se cola num prompt é, em boa parte, o
+   que a LGPD protege.
+8. Front e back juntos (`front-e-back`): projeto.
 
 ---
 
-## Ilha 5: IA
+## Ilha 5: Python (rodada 36)
 
-Id no currículo: `ia`. Fica entre Rede e Servidor e Ofício: depois de
-saber como um site e um servidor funcionam, dá para julgar o que a IA
-escreve.
+Id no currículo: `python`. Fica logo depois de Rede e Servidor: com a web
+inteira na mão (front e back em JavaScript), a segunda linguagem mostra
+que **o conceito é o mesmo e só a escrita muda**. Vem antes da IA porque
+julgar código gerado em mais de uma linguagem pede ter lido mais de uma.
+Por enquanto só na trilha Web (a Automação industrial pode querer a ilha
+quando ganhar zonas).
+
+**Requer motor:** Python no navegador (Pyodide), com o Console e o palco da
+memória falando Python.
+
+Zonas:
+
+1. Fundamentos em Python (`fundamentos`): o mesmo, em Python (u1:
+   variáveis, textos, contas, print), decisões e repetição (u2: a
+   indentação é a regra) e funções, listas e dicionários (u3).
+2. Orientação a objetos (`objetos`): classes em Python (u1: `__init__` e
+   `self`, ao lado das classes do JavaScript da Páginas vivas).
+3. Dados (`dados`): arquivos e CSV (u1) e gráficos simples (u2). **Requer
+   motor também:** arquivos de mentirinha e gráficos.
+4. **Outras linguagens** (`outras-linguagens`, a última): em comparação, C
+   (u1: memória e compilar), Java ou C# (u2: tipos declarados e classes em
+   tudo) e "o conceito é o mesmo, muda a escrita" (u3). **Requer motor:**
+   comparador de linguagens, com a memória do C e a compilação simuladas
+   (o comparador da sala 3 do museu é o mesmo motor, em versão de vitrine).
+
+---
+
+## Ilha 6: IA
+
+Id no currículo: `ia`. Fica entre Python e Ofício: depois de saber como um
+site e um servidor funcionam (e de ler mais de uma linguagem), dá para
+julgar o que a IA escreve.
 
 **Requer motor: IA ao vivo.** Nas fases guiadas, o código roteirizado
 aparece no editor como se estivesse sendo digitado, de forma
@@ -862,7 +947,7 @@ Zonas:
 
 ---
 
-## Ilha 6: Ofício
+## Ilha 7: Ofício
 
 Id no currículo: `oficio`. Unidades planejadas por zona, e o projeto
 final na zona Deploy.
@@ -877,11 +962,49 @@ Zonas (na ordem do mapa):
 5. Ler código dos outros (`ler-codigo-dos-outros`).
 6. TypeScript (`typescript`).
 7. Testes automatizados (`testes-automatizados`).
-8. Variáveis de ambiente (`variaveis-de-ambiente`).
-9. IA com critério (`ia-com-criterio`): usar a IA no projeto de verdade,
-   aplicando o que a ilha IA ensinou.
-10. Deploy (`deploy`): publicar (u1) e o **projeto final** (u2).
-11. Portfólio e aprender sozinho (`portfolio`).
+8. **Pensando sistemas** (`pensando-sistemas`, rodada 36): camadas e
+   responsabilidades (u1), código limpo (u2) e arquitetura na intuição
+   (u3). Depois dos testes: com testes protegendo, dá para reorganizar sem
+   medo. **Requer motor:** projeto com vários arquivos (o mesmo de Ler
+   código dos outros).
+9. **Como equipes trabalham** (`como-equipes-trabalham`, rodada 36):
+   tarefas e estimativa (u1), revisão e o básico do ágil (u2). **Requer
+   motor:** quadro de tarefas e revisão simulados, sobre o git em equipe.
+10. Variáveis de ambiente (`variaveis-de-ambiente`).
+11. **Da máquina à produção** (`da-maquina-a-producao`, rodada 36):
+    integração contínua (u1), contêineres e logs (u2), no básico. Depois
+    das variáveis de ambiente e antes do deploy (é o caminho do código até
+    o servidor). **Requer motor:** esteira de CI, contêiner e logs
+    simulados.
+12. IA com critério (`ia-com-criterio`): usar a IA no projeto de verdade,
+    aplicando o que a ilha IA ensinou.
+13. Deploy (`deploy`): publicar (u1) e o **projeto final** (u2).
+14. Portfólio e aprender sozinho (`portfolio`).
+15. **Carreira** (`carreira`, rodada 36, a última): entrevista técnica
+    (u1: programar na frente de alguém, pensando em voz alta), portfólio
+    que conta história (u2) e o caminho freelancer (u3: descobrir o
+    problema numa conversa, orçamento, contrato e cliente), ligado à zona
+    Ser encontrado da Ilha Sites. **Requer motor:** `entrevista-cliente`
+    (abaixo) e a entrevista técnica simulada.
+
+### Motor futuro: entrevista com o cliente (`entrevista-cliente`)
+
+Registrado em `src/curriculo/motores.ts`. O aluno conversa com o dono do
+negócio para descobrir o problema antes de programar, com o Gemini
+interpretando o cliente. Regras:
+
+- as **perguntas sugeridas resolvem o caso sozinhas**, sem IA: dá para
+  descobrir todos os fatos necessários sem escrever nada;
+- a **pergunta livre é extra**: um modelo leve interpreta o cliente;
+- o cliente tem **tempo limitado** ("umas 10 perguntas"), com a despedida
+  quando acaba;
+- há **limite por aluno no servidor** (a chave do Gemini nunca vai para o
+  cliente);
+- os **fatos descobertos vêm de uma ficha escrita no conteúdo**: o modelo
+  só pode contar o que está na ficha, nunca inventar fato novo.
+
+Primeiro uso: `oficio-carreira-u3`. Depois, os contratos das ilhas
+seguintes podem abrir com a entrevista no lugar do briefing pronto.
 
 **Critério final do núcleo:** o projeto do Ofício (`oficio-deploy-u2`),
 um app completo, front e back, feito a partir de uma página em branco,

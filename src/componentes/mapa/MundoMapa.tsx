@@ -28,7 +28,7 @@ import { caminhoSuave, type Ponto } from "./geometria";
 import { useTamanho } from "./useTamanho";
 
 /** Tamanho do desenho do mundo da trilha Web (as posições abaixo usam estas medidas). */
-const LARGURA_WEB = 1840;
+const LARGURA_WEB = 2090;
 const ALTURA = 820;
 
 /** Onde cada ilha fica no mundo da trilha Web, na ordem da rota. Frameworks fica afastada. */
@@ -38,9 +38,10 @@ const POSICOES_WEB: Record<string, Ponto> = {
   logica: { x: 680, y: 530 },
   "paginas-vivas": { x: 930, y: 280 },
   "rede-servidor": { x: 1180, y: 530 },
-  ia: { x: 1430, y: 280 },
-  oficio: { x: 1680, y: 530 },
-  frameworks: { x: 1450, y: 700 },
+  python: { x: 1430, y: 280 },
+  ia: { x: 1680, y: 530 },
+  oficio: { x: 1930, y: 280 },
+  frameworks: { x: 1700, y: 730 },
 };
 
 /** O Porto da revisão: um ponto fixo no mar, embaixo, perto do começo da rota. */

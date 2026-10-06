@@ -40,7 +40,7 @@ describe("trilhas em dados", () => {
 
   it("Web é a padrão e ativa, com as ilhas do mapa de hoje; Jogos e Automação em construção", () => {
     expect(TRILHA_PADRAO).toBe("web");
-    expect(trilhaDoId("web").ilhas).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio", "frameworks"]);
+    expect(trilhaDoId("web").ilhas).toEqual(["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "python", "ia", "oficio", "frameworks"]);
     expect(TRILHAS.map((trilha) => [trilha.id, trilha.status])).toEqual([
       ["web", "ativa"],
       ["jogos", "em-construcao"],

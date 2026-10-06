@@ -6,6 +6,7 @@ import { ArteLogica } from "./ArteLogica";
 import { ArteOficio } from "./ArteOficio";
 import { ArteOrigens } from "./ArteOrigens";
 import { ArtePaginasVivas } from "./ArtePaginasVivas";
+import { ArtePython } from "./ArtePython";
 import { ArteRede } from "./ArteRede";
 import { ArteSites } from "./ArteSites";
 
@@ -18,6 +19,7 @@ export const ARTE_DAS_ILHAS: Record<string, ComponentType> = {
   logica: ArteLogica,
   "paginas-vivas": ArtePaginasVivas,
   "rede-servidor": ArteRede,
+  python: ArtePython,
   ia: ArteIA,
   oficio: ArteOficio,
   frameworks: ArteFrameworks,

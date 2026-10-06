@@ -61,6 +61,7 @@ describe("ilhas", () => {
       ["logica", "bloqueada"],
       ["paginas-vivas", "construcao"],
       ["rede-servidor", "construcao"],
+      ["python", "construcao"],
       ["ia", "construcao"],
       ["oficio", "construcao"],
       ["frameworks", "construcao"],
