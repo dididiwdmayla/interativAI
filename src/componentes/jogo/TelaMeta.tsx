@@ -7,7 +7,15 @@ import { Botao } from "@/componentes/ui/Botao";
 import { Modal } from "@/componentes/ui/Modal";
 import type { FaseDesafio, Unidade } from "@/conteudo/tipos";
 import { documentoInteiroInicial } from "@/lib/documentoSiteAlvo";
-import { circuitosDoDesafio, composicaoDoDesafio, estadoFinalDoDesafio, memoriasDoDesafio, type RetratoComposicao } from "@/motor/simulacao";
+import {
+  circuitosDoDesafio,
+  composicaoDoDesafio,
+  estadoFinalDoDesafio,
+  type LinhaDaSaida,
+  memoriasDoDesafio,
+  metaDoContrato,
+  retratoTemConteudo,
+} from "@/motor/simulacao";
 import { ehContrato } from "@/motor/contrato/modelo";
 import { faseComposta } from "@/motor/composicao";
 import { MiniComposicao } from "@/componentes/composicao/MiniComposicao";
@@ -40,6 +48,35 @@ function MiniPalco({ foto, legenda }: { foto: ReturnType<typeof memoriasDoDesafi
   );
 }
 
+/**
+ * (Contrato sem cena) A saída do programa antes ou depois do conserto: o que
+ * ele escreve no console e o que fica nas variáveis. O que o conserto mudou
+ * fica em destaque (no antes, o que estava errado; no depois, o certo).
+ */
+function MiniSaida({ linhas, legenda }: { linhas: LinhaDaSaida[]; legenda: "Antes" | "Depois" }) {
+  return (
+    <figure className="flex min-w-0 flex-1 flex-col gap-1" data-mini-saida={legenda}>
+      <figcaption className="text-xs font-black uppercase tracking-wide text-texto-suave">{legenda}</figcaption>
+      <div className="flex min-h-28 flex-col gap-1 overflow-hidden rounded-xl border-2 border-borda bg-codigo-fundo p-2">
+        <p className="text-[10px] font-black uppercase tracking-wide text-texto-suave">O que o programa devolve</p>
+        <ul className="flex flex-col gap-1 font-mono text-[11px] leading-snug text-codigo-texto">
+          {linhas.map((linha) => (
+            <li
+              key={`${linha.rotulo}-${linha.texto}`}
+              data-mudou={linha.mudou ? "sim" : "nao"}
+              className={`break-all rounded-md px-1.5 py-0.5 ${
+                linha.mudou ? (legenda === "Antes" ? "bg-erro/15 font-bold text-texto" : "bg-sucesso/15 font-bold text-texto") : ""
+              }`}
+            >
+              <span className="text-texto-suave">{linha.rotulo === "console" ? ">" : `${linha.rotulo}:`}</span> {linha.texto}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </figure>
+  );
+}
+
 export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Props) {
   const deCircuito = desafio.circuito !== undefined;
   // Desafio composto: o antes e o depois das áreas (o plano, o código e os casos de teste).
@@ -48,13 +85,13 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
   const semPagina = deProgramas || deCircuito || composto;
   // Contrato: a meta mostra só o mundo (a cena) antes e depois; o código é o aluno que escreve.
   const deContrato = ehContrato(desafio);
+  // Contrato: a cena antes (com o sistema que o cliente já tem) e depois; sem cena, a saída do programa; sem nada, nem a seção.
+  const doContrato = useMemo(() => (deContrato && aberta ? metaDoContrato(desafio) : null), [aberta, deContrato, desafio]);
   const composicao = useMemo(() => {
     if (!composto || !aberta) return null;
-    const retratos = composicaoDoDesafio(desafio);
-    if (!deContrato) return retratos;
-    const soCena = (retrato: RetratoComposicao): RetratoComposicao => ({ ...retrato, plano: null, codigo: null, casos: null });
-    return { antes: soCena(retratos.antes), depois: soCena(retratos.depois) };
-  }, [aberta, composto, deContrato, desafio]);
+    if (deContrato) return doContrato?.tipo === "cena" ? { antes: doContrato.antes, depois: doContrato.depois } : null;
+    return composicaoDoDesafio(desafio);
+  }, [aberta, composto, deContrato, doContrato, desafio]);
   const depois = useMemo(() => (semPagina ? { body: "", css: null } : estadoFinalDoDesafio(desafio)), [semPagina, desafio]);
   // Desafio de programa: o palco antes e depois (a memória que as soluções das partes deixam).
   const memorias = useMemo(() => (deProgramas && aberta ? memoriasDoDesafio(desafio) : null), [aberta, deProgramas, desafio]);
@@ -86,21 +123,31 @@ export function TelaMeta({ aberta, unidade, desafio, noDesafio, aoComecar }: Pro
           </p>
         </div>
       </div>
+      {/* Antes e depois: só com algo de verdade para mostrar (nunca caixas vazias). */}
       {composto ? (
-        <div className="mt-4 flex gap-3">
-          <MiniComposicao retrato={composicao?.antes ?? null} legenda="Antes" />
-          <MiniComposicao retrato={composicao?.depois ?? null} legenda="Depois" />
-        </div>
+        doContrato?.tipo === "saida" ? (
+          <div className="mt-4 flex gap-3" data-meta-antes-depois="saida">
+            <MiniSaida linhas={doContrato.antes} legenda="Antes" />
+            <MiniSaida linhas={doContrato.depois} legenda="Depois" />
+          </div>
+        ) : composicao && (retratoTemConteudo(composicao.antes) || retratoTemConteudo(composicao.depois)) ? (
+          <div className="mt-4 flex gap-3" data-meta-antes-depois={deContrato ? "cena" : "composicao"}>
+            <MiniComposicao retrato={composicao.antes} legenda="Antes" />
+            <MiniComposicao retrato={composicao.depois} legenda="Depois" />
+          </div>
+        ) : null
       ) : deCircuito ? (
         <div className="mt-4 flex gap-3">
           <MiniBancada circuito={circuitos?.antes ?? null} legenda="Antes" />
           <MiniBancada circuito={circuitos?.depois ?? null} legenda="Depois" />
         </div>
       ) : deProgramas ? (
-        <div className="mt-4 flex gap-3">
-          <MiniPalco foto={memorias?.antes ?? null} legenda="Antes" />
-          <MiniPalco foto={memorias?.depois ?? null} legenda="Depois" />
-        </div>
+        memorias && (memorias.antes || memorias.depois) ? (
+          <div className="mt-4 flex gap-3">
+            <MiniPalco foto={memorias.antes} legenda="Antes" />
+            <MiniPalco foto={memorias.depois} legenda="Depois" />
+          </div>
+        ) : null
       ) : (
       <div className="mt-4 flex gap-3">
         <MiniPrevia head={head} body={antes} css={css ?? null} documentoInteiro={inteiro} legenda="Antes" rotulo={`${titulo}, antes`} />

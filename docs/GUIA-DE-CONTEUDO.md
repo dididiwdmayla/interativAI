@@ -519,7 +519,16 @@ A meta (antes/depois do site do desafio) aparece:
 
 Só aparece quando a unidade tem `meta.desafioId`. A checagem confere que
 ele aponta para uma fase do tipo `desafio`, da mesma unidade, e que ela é
-a última da lista. Preencher `meta.desafioId` numa unidade já jogada não
+a última da lista.
+
+O antes e o depois saem do desafio (rodada 37): o site, a bancada, a
+memória ou as áreas da tela composta. Num **contrato**, nunca o código:
+com cena, a cena antes (com o programa que o cliente já tem rodando; sem
+programa, o mundo parado) e depois das soluções; sem cena, a **saída do
+programa** antes e depois do conserto (o console e as variáveis do
+programa, com o que mudou em destaque). Quando não há o que mostrar (um
+contrato em branco e sem cena), a seção não aparece: nunca caixas vazias
+(`metaDoContrato`, em `src/motor/simulacao.ts`). Preencher `meta.desafioId` numa unidade já jogada não
 muda nada para quem tem progresso nela, mas muda a entrada de quem começa
 do zero: confira os testes de navegador que abrem o jogo do zero (eles
 usam `pularMeta`, seção 11).
@@ -1900,7 +1909,11 @@ Uma cena nova é montar peças, não desenhar. `DadosCena`:
   - `prateleira` (64 x 30; `livros`, `paes` ou `potes`);
   - `balcao` (120 x 46; `padaria`, com pães atrás do vidro);
   - `toldo` (200 x 26) e `vitrine` (150 x 84: o vidro com reflexo; ponha
-    o que fica dentro dela ANTES, no `cenario`).
+    o que fica dentro dela ANTES, no `cenario`);
+  - comércio (rodada 37): `balcao` com as variantes `mercadinho` (a
+    esteira e a faixa de estrelas) e `salao` (a recepção, com o
+    caderninho), `cesta` (34 x 24, a cesta de compras cheia), `espelho`
+    (44 x 58) e `cadeira` (42 x 56, a do salão).
 - `dispositivos` (1 a 6): `{ id, tipo, x, y, escala?, variante?, inicial? }`.
   O `id` é o NOME DA VARIÁVEL no código (`lampada`, `luz`, `sensor`) e não
   pode ser um nome que o código já tem (`esperar`, `console`...). O ponto
@@ -1941,6 +1954,18 @@ Cada tipo tem a ficha no `catalogo.ts` (o aluno abre tocando nele):
 | `aspersor` | `ligar()`, `desligar()` | `ligado` |
 | `sensorUmidade` | nenhum | `valor` (entrada numérica de 0 a 100) |
 | `sensorDia` | nenhum | `dia` (entrada booleana, também controla o período visual com `periodoPor`) |
+| `registradora` | `mostrar(texto)`, `apagar()` | `texto` (o visor do caixa, até 12 letras, alinhado à direita) |
+| `telaApp` | `mostrar(texto)`, `mostrarAgenda(lista, titulo)`, `apagar()` | `texto` e `conflitos` (calculados do que a tela mostra) |
+
+A **tela de aplicativo** (`telaApp`) é a cena de um software: o
+"dispositivo" de um programa é a tela dele. `mostrar` põe um recado (até
+24 letras); `mostrarAgenda` desenha uma linha por marcação `{ horario,
+cliente }` (horário inteiro de 0 a 23), em ordem de horário, até 8 linhas,
+com o título curto do dia; o horário que aparece mais de uma vez fica em
+vermelho, e `conflitos` diz quantos horários se repetem. Marcação sem
+horário ou sem cliente é `TypeError` com a marcação e o que falta. Por
+dentro, ela guarda o que mostra num texto só (`conteudo`), e o desenho, o
+`texto` e os `conflitos` saem dele (`src/motor/cena/telaApp.ts`).
 
 O forno também aceita `assar(ms)` (1 a 60.000): liga e desliga sozinho
 quando o timer acaba; `restante` informa os milissegundos restantes.
@@ -2032,10 +2057,21 @@ passa antes de a cena rodar.
   nas unidades fora do `publicados.json`: as publicadas antes ficam
   isentas. Fase de revisão e item de revisão não contam.
 - **Cada cena nova é diferente das anteriores**: outro ambiente, outro
-  dispositivo ou outra missão. O `testar:conteudo` avisa (sem falhar)
-  quando uma fase repete a cena de outra no mesmo ambiente, com os mesmos
-  tipos de dispositivo e a mesma missão (aviso `[aviso de cena]` na saída).
-  Reaproveitar o mesmo cenário com outra missão vale.
+  dispositivo ou outra missão. Dentro da mesma unidade, reaproveitar o
+  lugar é o normal (a fase 1 apresenta, o desafio usa); uma repetição
+  exata (mesmo ambiente, mesmos dispositivos, mesma missão) vira aviso
+  `[aviso de cena]` na saída do `testar:conteudo`.
+- **Entre unidades diferentes, a mesma cena reprova** (regra
+  `cena-repetida-entre-unidades`, rodada 37): o mesmo ambiente com os
+  mesmos tipos de aparelho na missão (sem validador de cena, todos os da
+  cena). Foi o que deixou os dois chamados com a mesma vitrine, que não
+  combinava com nenhum deles. Monte um lugar que combine com o caso. Os
+  pares publicados antes da regra e conferidos ficam em
+  `CENAS_REPETIDAS_CONFERIDAS` (`src/conteudo/checagens.ts`): hoje só a
+  estufa da Depuração U4 e de Estruturas U3.
+- **Unidade de software usa a tela de aplicativo como cena** (`telaApp`):
+  o programa escreve nela, e é ela que conta para a regra de ritmo. Num
+  caixa ou balcão, a registradora (`registradora`) mostra o total.
 
 ### 30.7 Como acrescentar peças ao kit
 
@@ -2315,6 +2351,13 @@ fecha nas consoantes (`formaDaLetra`).
 
 ### 31.8 Levar pro mundo
 
+Regra (rodada 37): o arquivo leva **todos** os aparelhos da cena; se o
+exportador não sabe levar um deles, o contrato não oferece o botão (a
+regra `contrato` reprova `levarProMundo` nesse caso). A registradora e a
+tela de aplicativo já saem do jogo (a agenda aparece no console, com o
+horário repetido marcado); os aparelhos e as entradas genéricas da seção
+30.8 ainda não.
+
 Nas ilhas com código, a conclusão do contrato tem o "Levar pro mundo": um
 .js com o programa do aluno e uma versão simples dos aparelhos da cena, que
 escrevem no console o que fariam ("[07:00] Luz da vitrine: ligada"), no
@@ -2350,12 +2393,20 @@ Modelos: `logica-depuracao-u5` (o estoque do Mercadinho Estrela) e
 sistema, o aluno conserta um que já existe, como num serviço de verdade.
 
 - **Unidade curta:** uma fase de aquecimento (prática, que ensina o
-  conceito e usa uma cena de vitrine, por causa da regra de ritmo, seção
-  30.6) e o contrato. O contrato pode ser sem cena: o software é o próprio
-  programa, com palco, console e casos de teste.
+  conceito, com uma cena que combine com o caso) e o contrato. Cenas
+  próprias (rodada 37): o caixa do Mercadinho Estrela (o balcão com a
+  esteira, a cesta e a registradora, cujo visor mostra o total) e a
+  recepção do Salão Girassol (o espelho, a cadeira e a tela do aplicativo
+  no balcão), que o contrato da agenda também usa: a terça aparece com o
+  horário marcado em dobro em vermelho até o conserto. O contrato do
+  estoque segue sem cena (o software é o próprio programa, com palco,
+  console e casos de teste) e a meta mostra a saída do programa antes e
+  depois (seção 3.10).
 - **`fimDeIlha: false`** no `contrato`: a entrega não mostra a
-  comemoração de fim de ilha (que é do trabalho que fecha a ilha) e não
-  tem Levar pro mundo. A zona termina com o contrato da padaria.
+  comemoração de fim de ilha (que é do trabalho que fecha a ilha). A zona
+  termina com o contrato da padaria. O Levar pro mundo segue a regra da
+  seção 31.8: a agenda oferece (`agenda-do-salao.js`, a agenda no console);
+  o estoque, sem cena e sem nada que o programa escreva, não.
 - **O cliente é vago:** "às vezes dá errado, não sei quando". O defeito
   real depende de uma condição que o briefing não diz (a entrega digitada
   como texto; o horário ocupado só ser notado se for o primeiro da lista).

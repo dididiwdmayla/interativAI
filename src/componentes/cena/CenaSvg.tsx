@@ -12,6 +12,7 @@ import { AtoresCena } from "./kit/AtoresCena";
 import { DispositivoNovo } from "./kit/DispositivosNovos";
 import { type KeyboardEvent, useId, useMemo } from "react";
 import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
+import { lerConteudoDaTela } from "@/motor/cena/telaApp";
 import {
   ALTURA_CENA,
   type DadosCena,
@@ -60,6 +61,17 @@ export function resumoDoDispositivo(dispositivo: DispositivoCena, estado: Record
       return `marca ${String(e.hora ?? 0)}h`;
     case "campainha":
       return Number(e.toques ?? 0) > 0 ? `tocou ${String(e.toques)} ${Number(e.toques) === 1 ? "vez" : "vezes"}` : "quieta";
+    case "registradora":
+      return e.texto ? `o visor mostra "${String(e.texto)}"` : "visor apagado";
+    case "telaApp": {
+      const conteudo = lerConteudoDaTela(e.conteudo);
+      if (!conteudo) return "tela apagada";
+      if (conteudo.tipo === "recado") return `mostra "${conteudo.recado}"`;
+      const repetidos = Number(e.conflitos ?? 0);
+      return `agenda${conteudo.titulo ? ` de ${conteudo.titulo}` : ""} com ${conteudo.linhas.length} ${conteudo.linhas.length === 1 ? "marcação" : "marcações"}${
+        repetidos ? `, ${repetidos} ${repetidos === 1 ? "horário repetido" : "horários repetidos"}` : ""
+      }`;
+    }
   }
 }
 

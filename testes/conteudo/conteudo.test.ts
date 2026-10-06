@@ -16,8 +16,9 @@ describe("conteúdo: regras gerais", () => {
   for (const regra of REGRAS_GERAIS) {
     it(regra.nome, () => semProblemas(regra.checar(contexto)));
   }
-  // Regra de ritmo (guia, seção 30): uma cena que repete outra não quebra, mas aparece como aviso.
-  it("avisa as cenas que repetem outra (não falha)", () => {
+  // Regra de ritmo (guia, seção 30.6): dentro da unidade, uma cena que repete outra vira aviso;
+  // entre unidades, reprova (a regra geral "cena-repetida-entre-unidades").
+  it("avisa as cenas que repetem outra na mesma unidade (não falha)", () => {
     const avisos = cenasRepetidas(FASES);
     for (const aviso of avisos) console.warn(`[aviso de cena] ${aviso}`);
     expect(Array.isArray(avisos)).toBe(true);

@@ -1,4 +1,5 @@
 import { DispositivoNovo } from "./DispositivosNovos";
+import { Registradora, TAMANHO_REGISTRADORA, TAMANHO_TELA_APP, TelaApp } from "./DispositivosDeSoftware";
 /*
  * O desenho de cada tipo de dispositivo, no estado do instante (o que a
  * simulação diz). O ponto (x, y) de cada um está em `caixaDoDispositivo`,
@@ -17,7 +18,8 @@ export type Caixa = { x: number; y: number; largura: number; altura: number };
  * - lâmpada pendente: (x, y) é a lâmpada, o fio desce do teto;
  * - lâmpada "spot": (x, y) é a luminária presa no teto ou no toldo;
  * - sensor e interruptor: (x, y) é o centro;
- * - portão, letreiro e forno: (x, y) é o canto de cima à esquerda (o
+ * - portão, letreiro, forno, registradora e tela de aplicativo: (x, y) é o
+ *   canto de cima à esquerda (o
  *   portão ocupa uns 200 de largura: a passagem e o muro onde a folha entra);
  * - ventilador: (x, y) é o meio da base, no chão (ou na mesa).
  */
@@ -47,6 +49,10 @@ export function caixaDoDispositivo(dispositivo: DispositivoCena): Caixa {
       return { x: x - 13 * e, y: y - 13 * e, largura: 26 * e, altura: 26 * e };
     case "campainha":
       return { x: x - 11 * e, y: y - 12 * e, largura: 22 * e, altura: 24 * e };
+    case "registradora":
+      return { x, y, largura: TAMANHO_REGISTRADORA.largura * e, altura: TAMANHO_REGISTRADORA.altura * e };
+    case "telaApp":
+      return { x, y, largura: TAMANHO_TELA_APP.largura * e, altura: TAMANHO_TELA_APP.altura * e };
   }
 }
 
@@ -325,6 +331,8 @@ const DESENHOS = {
   ventilador: Ventilador,
   relogio: Relogio,
   campainha: Campainha,
+  registradora: Registradora,
+  telaApp: TelaApp,
 } as const;
 
 export function DesenhoDispositivo(props: Props) {

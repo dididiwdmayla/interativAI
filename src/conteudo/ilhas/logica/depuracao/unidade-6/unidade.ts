@@ -1,8 +1,8 @@
 /*
  * Depuração, U6: o segundo chamado, um software com defeito. Na fase 1, o
  * aquecimento (o conserto que quebra o resto e o teste de regressão); na
- * fase 2, o contrato da agenda do Salão Girassol, sem cena: o software é o
- * próprio programa, com palco, console e casos de teste.
+ * fase 2, o contrato da agenda do Salão Girassol. As duas usam a recepção
+ * do salão: a cena de um software é a tela dele (o aplicativo no balcão).
  */
 import type { Fase, Unidade } from "@/conteudo/tipos";
 import { FASE_DEPURACAO_U6_F1 } from "./fase-1";

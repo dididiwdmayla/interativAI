@@ -35,7 +35,8 @@ import { materializarSiteAlvo } from "./siteDoJogo";
 import { avaliarDetalhado, type ContextoValidacao, type ResultadoValidador } from "./validadores";
 import { criarNucleoSincrono } from "./executor/fabrica";
 import { type FotoMemoria, instanteDoPasso, type OrigemCodigo, type ResultadoExecucao } from "./executor/tipos";
-import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import { chaveFuncaoPassa, type EstadoPrograma, medicoesDaFase, memoriaParaExibido, resumirExecucao, testesDeFuncaoDaFase } from "./programa";
+import { textoPrevia } from "./executor/formatar";
 import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
@@ -647,4 +648,84 @@ export function composicaoDoDesafio(fase: FaseDesafio): { antes: RetratoComposic
     }
   }
   return { antes, depois: retratoDaComposicao(fase, simulacao) };
+}
+
+/** Uma linha da saída de um programa na meta: o console ou uma variável do programa, com o valor como o Console mostra. */
+export type LinhaDaSaida = { rotulo: string; texto: string; mudou: boolean };
+
+/**
+ * (Contrato) O antes e o depois da meta de um trabalho:
+ * - com cena, a cena antes (com o programa que o cliente já tem rodando; sem
+ *   programa, o mundo parado) e depois das soluções. Nunca o código;
+ * - sem cena, a saída do programa antes e depois do conserto: o que ele
+ *   escreve no console e o que fica nas variáveis dele;
+ * - null quando não há o que mostrar (a meta esconde a seção, nada de caixa vazia).
+ */
+export type MetaDoContrato =
+  | { tipo: "cena"; antes: RetratoComposicao; depois: RetratoComposicao }
+  | { tipo: "saida"; antes: LinhaDaSaida[]; depois: LinhaDaSaida[] }
+  | null;
+
+/** O que o programa da última execução deixou: as linhas do console, as variáveis do programa e o erro. */
+function saidaDoPrograma(simulacao: Simulacao): Omit<LinhaDaSaida, "mudou">[] {
+  const execucao = simulacao.programa().ultimaExecucao;
+  if (!execucao) return [];
+  const linhas = execucao.saidas.map((saida) => ({ rotulo: "console", texto: saida.texto }));
+  const memoria = execucao.memoriaFinal;
+  const global = memoria?.quadros[0]?.escopos.find((escopo) => escopo.tipo === "global");
+  for (const variavel of global?.variaveis ?? []) {
+    if (variavel.declaracao === "funcao" || variavel.declaracao === "classe" || variavel.valor.t === "funcao" || !memoria) continue;
+    linhas.push({ rotulo: variavel.nome, texto: textoPrevia(memoriaParaExibido(variavel.valor, memoria.monte)) });
+  }
+  if (execucao.erro) linhas.push({ rotulo: "erro", texto: execucao.erro.mensagem });
+  return linhas;
+}
+
+/** O código que a fase já traz (o sistema do cliente, num chamado), ou nada. */
+function codigoQueJaVem(fase: FaseDesafio): string {
+  return fase.programa?.snippet?.codigoInicial?.trim() ?? "";
+}
+
+export function metaDoContrato(fase: FaseDesafio): MetaDoContrato {
+  const comSolucoes = () => {
+    const simulacao = criarSimulacao(fase);
+    for (const parte of fase.partes) {
+      try {
+        simulacao.executar(parte.solucaoDeTeste);
+      } catch {
+        // Conteúdo quebrado: npm run testar:conteudo mostra o motivo.
+      }
+    }
+    return simulacao;
+  };
+  const comOQueJaVem = () => {
+    const simulacao = criarSimulacao(fase);
+    if (codigoQueJaVem(fase)) {
+      try {
+        simulacao.executar([{ tipo: "executarSnippet" }]);
+      } catch {
+        // Um sistema que nem roda ainda mostra o mundo parado.
+      }
+    }
+    return simulacao;
+  };
+  const soCena = (retrato: RetratoComposicao): RetratoComposicao => ({ ...retrato, plano: null, codigo: null, casos: null, memoria: null });
+  if (cenaDaFase(fase)) {
+    return { tipo: "cena", antes: soCena(retratoDaComposicao(fase, comOQueJaVem())), depois: soCena(retratoDaComposicao(fase, comSolucoes())) };
+  }
+  if (!fase.programa?.snippet || !codigoQueJaVem(fase)) return null;
+  const antes = saidaDoPrograma(comOQueJaVem());
+  const depois = saidaDoPrograma(comSolucoes());
+  if (!antes.length && !depois.length) return null;
+  const textoEm = (linhas: Omit<LinhaDaSaida, "mudou">[], rotulo: string) => linhas.find((linha) => linha.rotulo === rotulo)?.texto;
+  return {
+    tipo: "saida",
+    antes: antes.map((linha) => ({ ...linha, mudou: textoEm(depois, linha.rotulo) !== linha.texto })),
+    depois: depois.map((linha) => ({ ...linha, mudou: textoEm(antes, linha.rotulo) !== linha.texto })),
+  };
+}
+
+/** O retrato tem alguma coisa para a meta mostrar? (Sem nada, a seção não aparece.) */
+export function retratoTemConteudo(retrato: RetratoComposicao | null): boolean {
+  return !!retrato && (retrato.cena !== null || retrato.plano !== null || retrato.codigo !== null || retrato.casos !== null || retrato.exposicao !== null);
 }

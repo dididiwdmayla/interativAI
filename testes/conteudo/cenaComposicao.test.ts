@@ -10,7 +10,7 @@ import { areasDaFase, cenaDaFase } from "@/motor/composicao";
 import { REGRAS_DE_FASE } from "@/conteudo/checagens";
 import { FASE_DEMO_RESOLVER } from "@/conteudo/laboratorio/bancadaResolver";
 import type { Fase, FasePratica, Unidade, Validador } from "@/conteudo/tipos";
-import { cenasRepetidas, unidadesSemCena } from "@/motor/cena/ritmo";
+import { cenasRepetidas, cenasRepetidasEntreUnidades, unidadesSemCena } from "@/motor/cena/ritmo";
 import { FASES, UNIDADES } from "@/conteudo";
 import { PUBLICADOS } from "@/conteudo/publicados";
 import { abasDoLayout } from "@/componentes/composicao/TelaComposta";
@@ -152,5 +152,28 @@ describe("regra de ritmo das cenas", () => {
     const avisos = cenasRepetidas([a, repetida, outroAmbiente, outraMissao]);
     expect(avisos).toHaveLength(1);
     expect(avisos[0]).toContain('a cena da fase "logica-x-u2-f1" repete a da fase "logica-x-u1-f1"');
+  });
+
+  it("a mesma cena em unidades diferentes reprova (o mesmo ambiente com os mesmos aparelhos na missão); na mesma unidade, não", () => {
+    const a = comCena("logica-x-u1-f1", "logica-x-u1", VITRINE);
+    // Outra unidade, a mesma vitrine e a mesma missão: reprova, mesmo com um aparelho a mais que a missão nem usa.
+    const outraUnidade = comCena("logica-x-u2-f1", "logica-x-u2", { ...VITRINE, id: "vitrine-2", dispositivos: [...VITRINE.dispositivos, { id: "relogio", tipo: "relogio", x: 290, y: 30 }] });
+    const mesmaUnidade = comCena("logica-x-u1-f2", "logica-x-u1", VITRINE);
+    const outroLugar = comCena("logica-x-u3-f1", "logica-x-u3", { ...VITRINE, id: "loja", ambiente: "loja" });
+    const problemas = cenasRepetidasEntreUnidades([a, mesmaUnidade, outraUnidade, outroLugar]);
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toContain('a cena da fase "logica-x-u2-f1" repete a da fase "logica-x-u1-f1", de outra unidade');
+    // Um par publicado e conferido segue valendo.
+    expect(cenasRepetidasEntreUnidades([a, outraUnidade], new Set(["logica-x-u1-f1|logica-x-u2-f1"]))).toEqual([]);
+  });
+
+  it("os dois chamados da Depuração têm cenas próprias: o caixa do mercadinho e a tela do aplicativo do salão", () => {
+    const daUnidade = (id: string) => FASES.filter((fase) => fase.unidadeId === id).map((fase) => cenaDaFase(fase)).filter((cena) => cena !== null);
+    const [caixa] = daUnidade("logica-depuracao-u5");
+    expect(caixa?.ambiente).toBe("mercadinho");
+    expect(caixa?.dispositivos.map((d) => d.tipo)).toEqual(["registradora"]);
+    const salao = daUnidade("logica-depuracao-u6");
+    expect(salao.map((cena) => cena?.ambiente)).toEqual(["salao", "salao"]);
+    expect(salao.every((cena) => cena?.dispositivos.some((d) => d.tipo === "telaApp"))).toBe(true);
   });
 });

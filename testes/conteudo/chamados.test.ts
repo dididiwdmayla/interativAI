@@ -15,7 +15,10 @@ import { CODIGO_COM_DEFEITO as DEFEITO_AGENDA, CODIGO_CONSERTADO as CONSERTO_AGE
 import { FASES_DEPURACAO_U6 } from "@/conteudo/ilhas/logica/depuracao/unidade-6/unidade";
 import type { Acao } from "@/conteudo/tipos";
 import { escolhaCerta, type FaseContrato, partesVisiveis } from "@/motor/contrato/modelo";
-import { criarSimulacao } from "@/motor/simulacao";
+import { criarSimulacao, metaDoContrato } from "@/motor/simulacao";
+import { estadoNoTempo } from "@/motor/cena/modelo";
+import { cenaDaFase } from "@/motor/composicao";
+import { programaParaLevar } from "@/motor/contrato/levarProMundo";
 
 const CHAMADOS = [
   { unidade: "logica-depuracao-u5", fase: FASE_DEPURACAO_U5_F2 as FaseContrato, defeito: DEFEITO_ESTOQUE, conserto: CONSERTO_ESTOQUE, parteDoConserto: "fecha", parteNova: "fecha-e-ignora" },
@@ -42,7 +45,16 @@ describe.each(CHAMADOS)("o chamado $unidade", ({ unidade, fase, defeito, consert
     const registrada = UNIDADES.find((u) => u.id === unidade);
     expect(registrada?.zona).toBe("Depuração");
     expect(registrada?.meta.desafioId).toBe(fase.id);
-    expect(fase.contrato.levarProMundo).toBeUndefined();
+  });
+
+  it("Levar pro mundo: só quando o arquivo leva todos os aparelhos da cena (a agenda sai do jogo; o estoque, sem cena, não oferece o botão)", () => {
+    const cena = cenaDaFase(fase);
+    if (!cena) {
+      expect(fase.contrato.levarProMundo).toBeUndefined();
+      return;
+    }
+    expect(fase.contrato.levarProMundo?.arquivo).toMatch(/\.js$/);
+    expect(() => programaParaLevar({ contrato: fase.contrato, cena, codigo: conserto })).not.toThrow();
   });
 
   it("o programa do cliente, do jeito que chegou, cai nos casos escondidos: o defeito é real", () => {
@@ -159,5 +171,77 @@ describe("a jornada de navegador dos chamados", () => {
         partes: contrato.partes.map((p) => ({ id: p.id, validador: p.validador, solucaoDeTeste: p.solucaoDeTeste })),
       });
     }
+  });
+});
+
+describe("o Levar pro mundo da agenda do salão (a tela do aplicativo sai do jogo)", () => {
+  const rodarFora = async (codigo: string) => {
+    const { execFileSync } = await import("node:child_process");
+    const { mkdtempSync, writeFileSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const fase = FASE_DEPURACAO_U6_F2 as FaseContrato;
+    const arquivo = join(mkdtempSync(join(tmpdir(), "levar-")), "agenda-do-salao.js");
+    writeFileSync(arquivo, programaParaLevar({ contrato: fase.contrato, cena: cenaDaFase(fase), codigo }));
+    return execFileSync(process.execPath, [arquivo], { encoding: "utf8" });
+  };
+
+  it("com o defeito, a agenda de terça aparece no console com o horário das 10h marcado duas vezes", async () => {
+    const saida = await rodarFora(DEFEITO_AGENDA);
+    expect(saida).toContain("Tela da agenda: agenda de Terça");
+    expect(saida).toMatch(/10h\s+Dani\s+<- 10h marcado 2 vezes!/);
+  });
+
+  it("consertada, a mesma terça sai sem horário repetido", async () => {
+    const saida = await rodarFora(CONSERTO_AGENDA);
+    expect(saida).toMatch(/9h\s+Ana/);
+    expect(saida).toMatch(/10h\s+Bia/);
+    expect(saida).not.toContain("marcado 2 vezes");
+    expect(saida).not.toContain("Dani");
+  });
+});
+
+describe("a tela do aplicativo na cena (o motor)", () => {
+  const fase = FASE_DEPURACAO_U6_F2 as FaseContrato;
+  const conflitosDepois = (codigo: string) => {
+    const simulacao = criarSimulacao(fase);
+    simulacao.comecarObjetivo(null);
+    simulacao.executar(rodar(codigo));
+    return simulacao.avaliar({ tipo: "estadoNaCena", dispositivo: "tela", propriedade: "conflitos", valor: 1 }).passou;
+  };
+  it("o código que chegou deixa um horário repetido na tela; o conserto, nenhum", () => {
+    expect(conflitosDepois(DEFEITO_AGENDA)).toBe(true);
+    expect(conflitosDepois(CONSERTO_AGENDA)).toBe(false);
+  });
+  it("uma marcação sem horário de verdade é um erro claro (TypeError), não uma tela quebrada", () => {
+    const simulacao = criarSimulacao(fase);
+    simulacao.comecarObjetivo(null);
+    simulacao.executar(rodar('tela.mostrarAgenda([{ horario: "dez", cliente: "Ana" }]);'));
+    expect(simulacao.programa().ultimaExecucao?.erro?.mensagem ?? "").toMatch(/horario: um número inteiro de 0 a 23/);
+  });
+});
+
+describe("a meta dos chamados (o antes e o depois de verdade, ou nada)", () => {
+  it("o estoque (sem cena): a saída do programa antes e depois do conserto, com o que mudou em destaque", () => {
+    const meta = metaDoContrato(FASE_DEPURACAO_U5_F2);
+    if (meta?.tipo !== "saida") throw new Error(`esperava a saída do programa, veio ${meta?.tipo ?? "nada"}`);
+    expect(meta.antes).toContainEqual({ rotulo: "sexta", texto: "{arroz: 10, feijao: '64'}", mudou: true });
+    expect(meta.depois).toContainEqual({ rotulo: "sexta", texto: "{arroz: 10, feijao: 10}", mudou: true });
+    expect(meta.depois).toContainEqual({ rotulo: "segunda", texto: "{arroz: 7, feijao: 6}", mudou: false });
+  });
+
+  it("a agenda (com a tela do aplicativo): antes, a terça com o horário repetido; depois, sem", () => {
+    const meta = metaDoContrato(FASE_DEPURACAO_U6_F2);
+    if (meta?.tipo !== "cena") throw new Error(`esperava a cena, veio ${meta?.tipo ?? "nada"}`);
+    const tela = (retrato: typeof meta.antes) => (retrato.cena ? estadoNoTempo(retrato.cena.rastro, retrato.cena.tempoMs).tela : null);
+    expect(tela(meta.antes)).toMatchObject({ texto: "Terça: 9h Ana, 10h Bia, 10h Dani", conflitos: 1 });
+    expect(tela(meta.depois)).toMatchObject({ texto: "Terça: 9h Ana, 10h Bia", conflitos: 0 });
+    // Nunca o código nem o plano: a meta de um contrato mostra o mundo.
+    for (const retrato of [meta.antes, meta.depois]) expect([retrato.codigo, retrato.plano, retrato.casos]).toEqual([null, null, null]);
+  });
+
+  it("um contrato que começa em branco e sem cena não tem antes e depois: a meta esconde a seção", () => {
+    const vazio = { ...FASE_DEPURACAO_U5_F2, programa: { snippet: { nome: "novo.js", codigoInicial: "" } } };
+    expect(metaDoContrato(vazio)).toBeNull();
   });
 });

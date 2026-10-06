@@ -126,7 +126,7 @@
        },
        {
         "tipo": "estadoNaCena",
-        "dispositivo": "letreiro",
+        "dispositivo": "caixa",
         "propriedade": "texto",
         "valor": "R$ 25",
         "noTempo": 1500
@@ -144,7 +144,7 @@
       },
       {
        "tipo": "definirSnippet",
-       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);"
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\ncaixa.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\ncaixa.mostrar(\"R$ \" + terca);\nesperar(1000);"
       },
       {
        "tipo": "executarSnippet"
@@ -181,7 +181,7 @@
      "solucaoDeTeste": [
       {
        "tipo": "definirSnippet",
-       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\ncaixa.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\ncaixa.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
       },
       {
        "tipo": "alternarPontoDeParada",
@@ -310,7 +310,7 @@
       },
       {
        "tipo": "definirSnippet",
-       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso >= 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso >= 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\ncaixa.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\ncaixa.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
       },
       {
        "tipo": "executarSnippet"
@@ -1077,7 +1077,7 @@
        },
        {
         "tipo": "estadoNaCena",
-        "dispositivo": "letreiro",
+        "dispositivo": "tela",
         "propriedade": "texto",
         "valor": "Taxa R$ 10",
         "noTempo": 1500
@@ -1095,7 +1095,7 @@
       },
       {
        "tipo": "definirSnippet",
-       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);"
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\ntela.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\ntela.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);"
       },
       {
        "tipo": "executarSnippet"
@@ -1132,7 +1132,7 @@
      "solucaoDeTeste": [
       {
        "tipo": "definirSnippet",
-       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\ntela.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\ntela.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
       },
       {
        "tipo": "alternarPontoDeParada",
@@ -1249,7 +1249,7 @@
       },
       {
        "tipo": "definirSnippet",
-       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas >= 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas >= 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\ntela.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\ntela.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
       },
       {
        "tipo": "executarSnippet"
@@ -1595,7 +1595,7 @@
       },
       {
        "tipo": "definirSnippet",
-       "codigo": "function agendar(agenda, pedido) {\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });"
+       "codigo": "function agendar(agenda, pedido) {\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });\ntela.mostrarAgenda(terca, \"Terça\");"
       },
       {
        "tipo": "executarSnippet"
@@ -2032,7 +2032,7 @@
      "solucaoDeTeste": [
       {
        "tipo": "definirSnippet",
-       "codigo": "// Plano: Relatório do conserto\n// 1. O que estava errado\n//   1.1 O programa decide olhando só a primeira marcação da lista, não todas\n// 2. Como foi achado\n//   2.1 Comparei o pedido que a agenda recusou com o que marcou em dobro\n//   2.2 Parei na linha do if e observei a comparação a cada pausa\n// 3. Como foi testado\n//   3.1 Testei o horário ocupado na primeira, na segunda e na última posição\n//   3.2 Rodei de novo os casos antigos: lista vazia e horários livres\n\nfunction agendar(agenda, pedido) {\n  if (pedido.horario < 9 || pedido.horario >= 18) {\n    return agenda;\n  }\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });"
+       "codigo": "// Plano: Relatório do conserto\n// 1. O que estava errado\n//   1.1 O programa decide olhando só a primeira marcação da lista, não todas\n// 2. Como foi achado\n//   2.1 Comparei o pedido que a agenda recusou com o que marcou em dobro\n//   2.2 Parei na linha do if e observei a comparação a cada pausa\n// 3. Como foi testado\n//   3.1 Testei o horário ocupado na primeira, na segunda e na última posição\n//   3.2 Rodei de novo os casos antigos: lista vazia e horários livres\n\nfunction agendar(agenda, pedido) {\n  if (pedido.horario < 9 || pedido.horario >= 18) {\n    return agenda;\n  }\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });\ntela.mostrarAgenda(terca, \"Terça\");"
       },
       {
        "tipo": "executarSnippet"

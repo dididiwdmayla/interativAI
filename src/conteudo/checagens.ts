@@ -19,7 +19,7 @@ import { conferirDadosExposicao, FERRAMENTA_DA_ESTACAO } from "@/motor/exposicao
 import { ehAcaoExposicao, ESTACAO_DA_ACAO, estacaoDo, normalizarHex, type TipoEstacao } from "@/motor/exposicao/modelo";
 import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
 import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
-import { unidadesSemCena } from "@/motor/cena/ritmo";
+import { cenasRepetidasEntreUnidades, unidadesSemCena } from "@/motor/cena/ritmo";
 import { lerCaso, MAXIMO_CASOS } from "@/motor/casos/modelo";
 import { conferirPlataformas, PLATAFORMAS_MARKETING, type PlataformaMarketing, rotuloConferido } from "./plataformas-marketing";
 import { ITENS_REVISAO } from "./revisao";
@@ -623,7 +623,22 @@ export const REGRAS_GERAIS: readonly RegraGeral[] = [
     nome: "regra de ritmo: toda unidade nova da Lógica tem pelo menos uma fase com cena (as publicadas ficam isentas)",
     checar: ({ unidades, fases }) => unidadesSemCena(unidades, fases, new Set(Object.keys(PUBLICADOS.unidades))),
   },
+  {
+    id: "cena-repetida-entre-unidades",
+    nome: "a mesma cena (o ambiente e os aparelhos da missão) não aparece em unidades diferentes",
+    checar: ({ fases }) => cenasRepetidasEntreUnidades(fases, CENAS_REPETIDAS_CONFERIDAS),
+  },
 ];
+
+/**
+ * Pares de fases de unidades diferentes com a mesma cena, publicados antes da
+ * regra (rodada 37) e conferidos: seguem valendo. Par novo não entra aqui:
+ * monte um lugar que combine com o caso. Formato "fase anterior|fase".
+ * - A estufa: a Depuração (U4, o defeito na condição da rega) e Estruturas de
+ *   dados (U3, o Map dos canteiros) usam a mesma estufa com o aspersor.
+ *   Trocar uma delas quando uma rodada de conteúdo mexer nessas unidades.
+ */
+export const CENAS_REPETIDAS_CONFERIDAS: ReadonlySet<string> = new Set(["logica-depuracao-u4-f1|logica-estruturas-de-dados-u3-f1"]);
 
 /**
  * Quem escreve previsões em volume tende a pôr a certa sempre na mesma
