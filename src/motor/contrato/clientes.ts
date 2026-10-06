@@ -52,6 +52,18 @@ export const CLIENTES = {
     negocio: "Estúdio de música no quarto",
     aparencia: { pele: "escura", cabelo: "cacheado", corCabelo: "preto", roupa: "camisa", corRoupa: "verde", acessorios: ["brincos"] },
   },
+  "seu-tonho": {
+    id: "seu-tonho",
+    nome: "Seu Tonho",
+    negocio: "Mercadinho Estrela",
+    aparencia: { pele: "media", cabelo: "careca", corCabelo: "grisalho", roupa: "camisa", corRoupa: "azul", acessorios: ["bigode", "oculos"] },
+  },
+  "dona-zelia": {
+    id: "dona-zelia",
+    nome: "Dona Zélia",
+    negocio: "Salão Girassol",
+    aparencia: { pele: "clara", cabelo: "longo", corCabelo: "ruivo", roupa: "jaleco", corRoupa: "roxo", acessorios: ["brincos"] },
+  },
 } as const satisfies Record<string, Cliente>;
 
 export type IdCliente = keyof typeof CLIENTES;

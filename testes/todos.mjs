@@ -1,9 +1,22 @@
 // Roda os testes de navegador que não dependem de configuração do tutor.
 // Precisa do jogo no ar (npm run dev ou npm start) em URL_JOGO (padrão :3000).
 // PARALELO=n roda n arquivos ao mesmo tempo (padrão 1, um atrás do outro).
+// FILTRO=regex roda só os testes cuja linha ("arquivo argumentos") casa com ela.
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["depuracao-cena-bloqueio.mjs", "desktop"],
+  ["depuracao-cena-bloqueio.mjs", "retrato"],
+  ["depuracao-cena-bloqueio.mjs", "paisagem"],
+  ["depuracao.mjs", "desktop", "4"],
+  ["depuracao.mjs", "retrato", "4"],
+  ["depuracao.mjs", "paisagem", "4"],
+  ["chamados.mjs", "desktop", "6"],
+  ["chamados.mjs", "retrato", "6"],
+  ["chamados.mjs", "paisagem", "6"],
+  ["chamados.mjs", "desktop", "5"],
+  ["chamados.mjs", "retrato", "5"],
+  ["chamados.mjs", "paisagem", "5"],
   ["depuracao.mjs", "desktop", "3"],
   ["depuracao.mjs", "retrato", "3"],
   ["depuracao.mjs", "paisagem", "3"],
@@ -218,7 +231,8 @@ function rodar([arquivo, ...argumentos]) {
 }
 
 const falhas = [];
-const fila = [...TESTES];
+const FILTRO = process.env.FILTRO ? new RegExp(process.env.FILTRO) : null;
+const fila = TESTES.filter((teste) => !FILTRO || FILTRO.test(teste.join(" ")));
 await Promise.all(
   Array.from({ length: PARALELO }, async () => {
     while (fila.length > 0) {

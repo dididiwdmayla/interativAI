@@ -287,6 +287,19 @@
       "logica-depuracao-u3-f2",
       "logica-depuracao-u3-f3"
     ],
+    "logica-depuracao-u4": [
+      "logica-depuracao-u4-f1",
+      "logica-depuracao-u4-f2",
+      "logica-depuracao-u4-f3"
+    ],
+    "logica-depuracao-u5": [
+      "logica-depuracao-u5-f1",
+      "logica-depuracao-u5-f2"
+    ],
+    "logica-depuracao-u6": [
+      "logica-depuracao-u6-f1",
+      "logica-depuracao-u6-f2"
+    ],
     "logica-algoritmos-essenciais-u1": [
       "logica-algoritmos-essenciais-u1-f1",
       "logica-algoritmos-essenciais-u1-f2",
@@ -1756,6 +1769,71 @@
         "testes"
       ]
     },
+    "logica-depuracao-u4-f1": {
+      "objetivos": [
+        "observar-guiado",
+        "regar-guiado",
+        "observar-sozinho",
+        "regar-sozinho"
+      ]
+    },
+    "logica-depuracao-u4-f2": {
+      "objetivos": [
+        "tipo-guiado",
+        "tipo-conserto",
+        "escopo-guiado",
+        "escopo-conserto",
+        "escopo-sozinho",
+        "escopo-sozinho-conserto",
+        "tipo-sozinho",
+        "tipo-sozinho-conserto"
+      ]
+    },
+    "logica-depuracao-u4-f3": {
+      "partes": [
+        "investigar",
+        "codigo",
+        "testes"
+      ]
+    },
+    "logica-depuracao-u5-f1": {
+      "objetivos": [
+        "reproduzir-guiado",
+        "causa-guiado",
+        "conserto-guiado",
+        "reproduzir-sozinho",
+        "conserto-sozinho"
+      ]
+    },
+    "logica-depuracao-u5-f2": {
+      "partes": [
+        "reproduzir",
+        "causa",
+        "fecha",
+        "testes",
+        "relatorio",
+        "fecha-e-ignora"
+      ]
+    },
+    "logica-depuracao-u6-f1": {
+      "objetivos": [
+        "regressao-guiado",
+        "casos-guiado",
+        "conserto-guiado",
+        "regressao-sozinho",
+        "conserto-sozinho"
+      ]
+    },
+    "logica-depuracao-u6-f2": {
+      "partes": [
+        "reproduzir",
+        "causa",
+        "agenda",
+        "testes",
+        "relatorio",
+        "agenda-expediente"
+      ]
+    },
     "logica-algoritmos-essenciais-u1-f1": {
       "objetivos": [
         "ficha",
@@ -1971,6 +2049,16 @@
     "entrar-e-sair-2",
     "retorno-no-depurador-1",
     "retorno-no-depurador-2",
+    "observar-expressoes-1",
+    "observar-expressoes-2",
+    "escopo-na-pausa-1",
+    "escopo-na-pausa-2",
+    "reproduzir-o-defeito-1",
+    "reproduzir-o-defeito-2",
+    "causa-raiz-1",
+    "causa-raiz-2",
+    "teste-de-regressao-1",
+    "teste-de-regressao-2",
     "pilha-js-1",
     "pilha-js-2",
     "pilha-vazia-1",

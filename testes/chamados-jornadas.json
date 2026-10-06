@@ -1,0 +1,2045 @@
+{
+ "5": {
+  "pratica": {
+   "id": "logica-depuracao-u5-f1",
+   "cena": "mercadinho-caixa",
+   "objetivos": [
+    {
+     "id": "reproduzir-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "pausouNaLinha",
+        "linha": 3
+       },
+       {
+        "tipo": "observou",
+        "expressao": "quantidade",
+        "valor": 5
+       },
+       {
+        "tipo": "observou",
+        "expressao": "quantidade",
+        "valor": 3
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "responderPrevisao",
+       "opcao": 1
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "observar",
+       "expressao": "quantidade"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "causa-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "observou",
+      "expressao": "quantidade > 3",
+      "valor": false
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "responderPrevisao",
+       "opcao": 2
+      },
+      {
+       "tipo": "observar",
+       "expressao": "quantidade > 3"
+      }
+     ]
+    },
+    {
+     "id": "conserto-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "totalComDesconto",
+        "casos": [
+         {
+          "args": [
+           2,
+           10
+          ],
+          "esperado": 20
+         },
+         {
+          "args": [
+           3,
+           10
+          ],
+          "esperado": 25
+         },
+         {
+          "args": [
+           4,
+           10
+          ],
+          "esperado": 35
+         },
+         {
+          "args": [
+           5,
+           10
+          ],
+          "esperado": 45
+         },
+         {
+          "args": [
+           3,
+           20
+          ],
+          "esperado": 55
+         },
+         {
+          "args": [
+           0,
+           10
+          ],
+          "esperado": 0
+         }
+        ]
+       },
+       {
+        "tipo": "estadoNaCena",
+        "dispositivo": "letreiro",
+        "propriedade": "texto",
+        "valor": "R$ 25",
+        "noTempo": 1500
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    },
+    {
+     "id": "reproduzir-sozinho",
+     "modo": "sozinho",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "pausouNaLinha",
+        "linha": 9
+       },
+       {
+        "tipo": "observou",
+        "expressao": "peso",
+        "valor": 12
+       },
+       {
+        "tipo": "observou",
+        "expressao": "peso",
+        "valor": 10
+       },
+       {
+        "tipo": "observou",
+        "expressao": "peso > 10",
+        "valor": false
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso > 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 9
+      },
+      {
+       "tipo": "observar",
+       "expressao": "peso"
+      },
+      {
+       "tipo": "observar",
+       "expressao": "peso > 10"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "conserto-sozinho",
+     "modo": "sozinho",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "frete",
+        "casos": [
+         {
+          "args": [
+           9
+          ],
+          "esperado": 15
+         },
+         {
+          "args": [
+           10
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           11
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           12
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           0
+          ],
+          "esperado": 15
+         }
+        ]
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "totalComDesconto",
+        "casos": [
+         {
+          "args": [
+           2,
+           10
+          ],
+          "esperado": 20
+         },
+         {
+          "args": [
+           3,
+           10
+          ],
+          "esperado": 25
+         },
+         {
+          "args": [
+           4,
+           10
+          ],
+          "esperado": 35
+         },
+         {
+          "args": [
+           5,
+           10
+          ],
+          "esperado": 45
+         },
+         {
+          "args": [
+           3,
+           20
+          ],
+          "esperado": 55
+         },
+         {
+          "args": [
+           0,
+           10
+          ],
+          "esperado": 0
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 9
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function totalComDesconto(quantidade, preco) {\n  const bruto = quantidade * preco;\n  if (quantidade >= 3) {\n    return bruto - 5;\n  }\n  return bruto;\n}\nfunction frete(peso) {\n  if (peso >= 10) {\n    return 0;\n  }\n  return 15;\n}\nconst segunda = totalComDesconto(5, 10);\nletreiro.mostrar(\"R$ \" + segunda);\nesperar(1000);\nconst terca = totalComDesconto(3, 10);\nletreiro.mostrar(\"R$ \" + terca);\nesperar(1000);\nconst leve = frete(12);\nconst borda = frete(10);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    }
+   ]
+  },
+  "contrato": {
+   "id": "logica-depuracao-u5-f2",
+   "escolha": {
+    "cartoes": [
+     "causa",
+     "fecha",
+     "relatorio"
+    ],
+    "lacunas": {
+     "causa": [
+      0
+     ],
+     "fecha": [
+      0,
+      1
+     ],
+     "relatorio": [
+      0
+     ]
+    }
+   },
+   "depoisDe": [
+    "fecha"
+   ],
+   "novas": [
+    {
+     "parte": "fecha-e-ignora",
+     "substitui": "fecha"
+    }
+   ],
+   "partes": [
+    {
+     "id": "reproduzir",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "observou",
+        "expressao": "mov.tipo",
+        "valor": "venda"
+       },
+       {
+        "tipo": "observou",
+        "expressao": "mov.tipo",
+        "valor": "entrega"
+       },
+       {
+        "tipo": "observou",
+        "expressao": "typeof mov.quantidade",
+        "valor": "string"
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "observar",
+       "expressao": "mov.tipo"
+      },
+      {
+       "tipo": "observar",
+       "expressao": "typeof mov.quantidade"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "causa",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "passoNoPlano",
+        "passo": "causa-texto",
+        "grupo": "errado"
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-leitor"
+        }
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-venda"
+        }
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-caderno"
+        }
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "porPasso",
+       "passo": "causa-texto",
+       "grupo": "errado"
+      }
+     ]
+    },
+    {
+     "id": "fecha",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "todos",
+        "validadores": [
+         {
+          "tipo": "passoNoPlano",
+          "passo": "causa-texto",
+          "grupo": "errado"
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-leitor"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-venda"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-caderno"
+          }
+         }
+        ]
+       },
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "fecharDia",
+        "casos": [
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 3
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 7
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": 5
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 15
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": "5"
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 15
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10,
+            "feijao": 6
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 3
+            },
+            {
+             "codigo": "feijao",
+             "tipo": "entrega",
+             "quantidade": "4"
+            },
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": "2"
+            },
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 1
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 8,
+           "feijao": 10
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           []
+          ],
+          "esperado": {
+           "arroz": 10
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 4
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 4
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 0
+          }
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function fecharDia(estoque, movimentos) {\n  for (const mov of movimentos) {\n    const quantidade = Number(mov.quantidade);\n    if (mov.tipo === \"venda\") {\n      estoque[mov.codigo] = estoque[mov.codigo] - quantidade;\n    } else {\n      estoque[mov.codigo] = estoque[mov.codigo] + quantidade;\n    }\n  }\n  return estoque;\n}\nconst segunda = fecharDia({ arroz: 10, feijao: 6 }, [{ codigo: \"arroz\", tipo: \"venda\", quantidade: 3 }]);\nconst sexta = fecharDia({ arroz: 10, feijao: 6 }, [{ codigo: \"feijao\", tipo: \"entrega\", quantidade: \"4\" }]);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    },
+    {
+     "id": "testes",
+     "validador": {
+      "tipo": "casosDoAluno",
+      "minimo": 4,
+      "passando": true,
+      "incluir": [
+       {
+        "args": [
+         {
+          "arroz": 10
+         },
+         [
+          {
+           "codigo": "arroz",
+           "tipo": "entrega",
+           "quantidade": "5"
+          }
+         ]
+        ],
+        "esperado": {
+         "arroz": 15
+        },
+        "rotulo": "a entrega digitada como texto"
+       },
+       {
+        "args": [
+         {
+          "arroz": 10
+         },
+         []
+        ],
+        "esperado": {
+         "arroz": 10
+        },
+        "rotulo": "o dia sem nenhum movimento"
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "escreverCaso",
+       "entrada": "{ arroz: 10 }, [{ codigo: \"arroz\", tipo: \"venda\", quantidade: 3 }]",
+       "esperado": "{ arroz: 7 }"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "{ arroz: 10 }, [{ codigo: \"arroz\", tipo: \"entrega\", quantidade: \"5\" }]",
+       "esperado": "{ arroz: 15 }"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "{ arroz: 10, feijao: 6 }, [{ codigo: \"feijao\", tipo: \"entrega\", quantidade: \"4\" }, { codigo: \"arroz\", tipo: \"venda\", quantidade: 2 }]",
+       "esperado": "{ arroz: 8, feijao: 10 }"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "{ arroz: 10 }, []",
+       "esperado": "{ arroz: 10 }"
+      },
+      {
+       "tipo": "rodarCasos"
+      }
+     ]
+    },
+    {
+     "id": "relatorio",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "ordemValida"
+       },
+       {
+        "tipo": "planoComentado"
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "porPasso",
+       "passo": "achou-comparar",
+       "grupo": "achado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "achou-observar",
+       "grupo": "achado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "testou-novo",
+       "grupo": "testado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "testou-antigos",
+       "grupo": "testado"
+      },
+      {
+       "tipo": "levarPlanoProCodigo"
+      }
+     ]
+    },
+    {
+     "id": "fecha-e-ignora",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "todos",
+        "validadores": [
+         {
+          "tipo": "passoNoPlano",
+          "passo": "causa-texto",
+          "grupo": "errado"
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-leitor"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-venda"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-caderno"
+          }
+         }
+        ]
+       },
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "fecharDia",
+        "casos": [
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 3
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 7
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": 5
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 15
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": "5"
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 15
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10,
+            "feijao": 6
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 3
+            },
+            {
+             "codigo": "feijao",
+             "tipo": "entrega",
+             "quantidade": "4"
+            },
+            {
+             "codigo": "arroz",
+             "tipo": "entrega",
+             "quantidade": "2"
+            },
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 1
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 8,
+           "feijao": 10
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           []
+          ],
+          "esperado": {
+           "arroz": 10
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 4
+           },
+           [
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 4
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 0
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "sal",
+             "tipo": "venda",
+             "quantidade": 2
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 10
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10
+           },
+           [
+            {
+             "codigo": "sal",
+             "tipo": "entrega",
+             "quantidade": "2"
+            },
+            {
+             "codigo": "arroz",
+             "tipo": "venda",
+             "quantidade": 1
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 9
+          }
+         },
+         {
+          "args": [
+           {
+            "arroz": 10,
+            "feijao": 6
+           },
+           [
+            {
+             "codigo": "feijao",
+             "tipo": "venda",
+             "quantidade": 6
+            },
+            {
+             "codigo": "x9",
+             "tipo": "venda",
+             "quantidade": 1
+            }
+           ]
+          ],
+          "esperado": {
+           "arroz": 10,
+           "feijao": 0
+          }
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "definirSnippet",
+       "codigo": "// Plano: Relatório do conserto\n// 1. O que estava errado\n//   1.1 A quantidade da entrega chega como texto e o + junta em vez de somar\n// 2. Como foi achado\n//   2.1 Comparei o dia que fecha certo com o dia da entrega que falhava\n//   2.2 Parei na linha da conta e observei o tipo da quantidade\n// 3. Como foi testado\n//   3.1 Rodei o dia da entrega digitada e o estoque fechou certo\n//   3.2 Rodei de novo os dias antigos, só com venda e com entrega em número\n\nfunction fecharDia(estoque, movimentos) {\n  for (const mov of movimentos) {\n    if (estoque[mov.codigo] !== undefined) {\n      const quantidade = Number(mov.quantidade);\n      if (mov.tipo === \"venda\") {\n        estoque[mov.codigo] = estoque[mov.codigo] - quantidade;\n      } else {\n        estoque[mov.codigo] = estoque[mov.codigo] + quantidade;\n      }\n    }\n  }\n  return estoque;\n}\nconst segunda = fecharDia({ arroz: 10, feijao: 6 }, [{ codigo: \"arroz\", tipo: \"venda\", quantidade: 3 }]);\nconst sexta = fecharDia({ arroz: 10, feijao: 6 }, [{ codigo: \"feijao\", tipo: \"entrega\", quantidade: \"4\" }]);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "6": {
+  "pratica": {
+   "id": "logica-depuracao-u6-f1",
+   "cena": "salao-recepcao",
+   "objetivos": [
+    {
+     "id": "regressao-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "pausouNaLinha",
+        "linha": 2
+       },
+       {
+        "tipo": "observou",
+        "expressao": "pessoas",
+        "valor": 4
+       },
+       {
+        "tipo": "observou",
+        "expressao": "pessoas",
+        "valor": 5
+       },
+       {
+        "tipo": "observou",
+        "expressao": "pessoas === 4",
+        "valor": false
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "responderPrevisao",
+       "opcao": 0
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 2
+      },
+      {
+       "tipo": "observar",
+       "expressao": "pessoas"
+      },
+      {
+       "tipo": "observar",
+       "expressao": "pessoas === 4"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "casos-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "observou",
+      "expressao": "pessoas >= 4",
+      "valor": true
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "responderPrevisao",
+       "opcao": 1
+      },
+      {
+       "tipo": "observar",
+       "expressao": "pessoas >= 4"
+      }
+     ]
+    },
+    {
+     "id": "conserto-guiado",
+     "modo": "guiado",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "taxa",
+        "casos": [
+         {
+          "args": [
+           1
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           3
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           4
+          ],
+          "esperado": 10
+         },
+         {
+          "args": [
+           5
+          ],
+          "esperado": 10
+         },
+         {
+          "args": [
+           8
+          ],
+          "esperado": 10
+         }
+        ]
+       },
+       {
+        "tipo": "estadoNaCena",
+        "dispositivo": "letreiro",
+        "propriedade": "texto",
+        "valor": "Taxa R$ 10",
+        "noTempo": 1500
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 2
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    },
+    {
+     "id": "regressao-sozinho",
+     "modo": "sozinho",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "pausouNaLinha",
+        "linha": 8
+       },
+       {
+        "tipo": "observou",
+        "expressao": "visitas",
+        "valor": 5
+       },
+       {
+        "tipo": "observou",
+        "expressao": "visitas",
+        "valor": 6
+       },
+       {
+        "tipo": "observou",
+        "expressao": "visitas === 5",
+        "valor": false
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas === 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 8
+      },
+      {
+       "tipo": "observar",
+       "expressao": "visitas"
+      },
+      {
+       "tipo": "observar",
+       "expressao": "visitas === 5"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "conserto-sozinho",
+     "modo": "sozinho",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "brinde",
+        "casos": [
+         {
+          "args": [
+           0
+          ],
+          "esperado": false
+         },
+         {
+          "args": [
+           4
+          ],
+          "esperado": false
+         },
+         {
+          "args": [
+           5
+          ],
+          "esperado": true
+         },
+         {
+          "args": [
+           6
+          ],
+          "esperado": true
+         },
+         {
+          "args": [
+           10
+          ],
+          "esperado": true
+         }
+        ]
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "taxa",
+        "casos": [
+         {
+          "args": [
+           1
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           3
+          ],
+          "esperado": 0
+         },
+         {
+          "args": [
+           4
+          ],
+          "esperado": 10
+         },
+         {
+          "args": [
+           5
+          ],
+          "esperado": 10
+         },
+         {
+          "args": [
+           8
+          ],
+          "esperado": 10
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 8
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function taxa(pessoas) {\n  if (pessoas >= 4) {\n    return 10;\n  }\n  return 0;\n}\nfunction brinde(visitas) {\n  if (visitas >= 5) {\n    return true;\n  }\n  return false;\n}\nconst reclamada = taxa(4);\nletreiro.mostrar(\"Taxa R$ \" + reclamada);\nesperar(1000);\nconst antiga = taxa(5);\nletreiro.mostrar(\"Taxa R$ \" + antiga);\nesperar(1000);\nconst nova = brinde(5);\nconst velha = brinde(6);"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    }
+   ]
+  },
+  "contrato": {
+   "id": "logica-depuracao-u6-f2",
+   "escolha": {
+    "cartoes": [
+     "causa",
+     "agenda",
+     "relatorio"
+    ],
+    "lacunas": {
+     "causa": [
+      0
+     ],
+     "agenda": [
+      0,
+      0
+     ],
+     "relatorio": [
+      0
+     ]
+    }
+   },
+   "depoisDe": [
+    "agenda"
+   ],
+   "novas": [
+    {
+     "parte": "agenda-expediente",
+     "substitui": "agenda"
+    }
+   ],
+   "partes": [
+    {
+     "id": "reproduzir",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "observou",
+        "expressao": "pedido.horario",
+        "valor": 9
+       },
+       {
+        "tipo": "observou",
+        "expressao": "pedido.horario",
+        "valor": 10
+       },
+       {
+        "tipo": "observou",
+        "expressao": "agenda[i].horario === pedido.horario",
+        "valor": false
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "observar",
+       "expressao": "pedido.horario"
+      },
+      {
+       "tipo": "observar",
+       "expressao": "agenda[i].horario === pedido.horario"
+      },
+      {
+       "tipo": "executarSnippet"
+      },
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      }
+     ]
+    },
+    {
+     "id": "causa",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "passoNoPlano",
+        "passo": "causa-primeira",
+        "grupo": "errado"
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-comparacao"
+        }
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-ordem"
+        }
+       },
+       {
+        "tipo": "nao",
+        "validador": {
+         "tipo": "passoNoPlano",
+         "passo": "causa-pressa"
+        }
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "porPasso",
+       "passo": "causa-primeira",
+       "grupo": "errado"
+      }
+     ]
+    },
+    {
+     "id": "agenda",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "todos",
+        "validadores": [
+         {
+          "tipo": "passoNoPlano",
+          "passo": "causa-primeira",
+          "grupo": "errado"
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-comparacao"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-ordem"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-pressa"
+          }
+         }
+        ]
+       },
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "agendar",
+        "casos": [
+         {
+          "args": [
+           [],
+           {
+            "horario": 10,
+            "cliente": "Ana"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 10,
+            "cliente": "Ana"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            }
+           ],
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 9,
+            "cliente": "Caio"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 10,
+            "cliente": "Dani"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            },
+            {
+             "horario": 11,
+             "cliente": "Cris"
+            }
+           ],
+           {
+            "horario": 11,
+            "cliente": "Duda"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 11,
+            "cliente": "Cris"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 11,
+            "cliente": "Ana"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 11,
+            "cliente": "Ana"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "controlarDepurador",
+       "controle": "retomar"
+      },
+      {
+       "tipo": "alternarPontoDeParada",
+       "linha": 3
+      },
+      {
+       "tipo": "definirSnippet",
+       "codigo": "function agendar(agenda, pedido) {\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    },
+    {
+     "id": "testes",
+     "validador": {
+      "tipo": "casosDoAluno",
+      "minimo": 4,
+      "passando": true,
+      "incluir": [
+       {
+        "args": [
+         [],
+         {
+          "horario": 10,
+          "cliente": "Ana"
+         }
+        ],
+        "esperado": [
+         {
+          "horario": 10,
+          "cliente": "Ana"
+         }
+        ],
+        "rotulo": "a agenda vazia"
+       },
+       {
+        "args": [
+         [
+          {
+           "horario": 9,
+           "cliente": "Ana"
+          },
+          {
+           "horario": 10,
+           "cliente": "Bia"
+          }
+         ],
+         {
+          "horario": 10,
+          "cliente": "Dani"
+         }
+        ],
+        "esperado": [
+         {
+          "horario": 9,
+          "cliente": "Ana"
+         },
+         {
+          "horario": 10,
+          "cliente": "Bia"
+         }
+        ],
+        "rotulo": "o horário ocupado na segunda posição"
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "escreverCaso",
+       "entrada": "[], { horario: 10, cliente: \"Ana\" }",
+       "esperado": "[{ horario: 10, cliente: \"Ana\" }]"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" }",
+       "esperado": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }]"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" }",
+       "esperado": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }]"
+      },
+      {
+       "tipo": "escreverCaso",
+       "entrada": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 11, cliente: \"Ana\" }",
+       "esperado": "[{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }, { horario: 11, cliente: \"Ana\" }]"
+      },
+      {
+       "tipo": "rodarCasos"
+      }
+     ]
+    },
+    {
+     "id": "relatorio",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "ordemValida"
+       },
+       {
+        "tipo": "planoComentado"
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "porPasso",
+       "passo": "achou-comparar",
+       "grupo": "achado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "achou-observar",
+       "grupo": "achado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "testou-novo",
+       "grupo": "testado"
+      },
+      {
+       "tipo": "porPasso",
+       "passo": "testou-antigos",
+       "grupo": "testado"
+      },
+      {
+       "tipo": "levarPlanoProCodigo"
+      }
+     ]
+    },
+    {
+     "id": "agenda-expediente",
+     "validador": {
+      "tipo": "todos",
+      "validadores": [
+       {
+        "tipo": "todos",
+        "validadores": [
+         {
+          "tipo": "passoNoPlano",
+          "passo": "causa-primeira",
+          "grupo": "errado"
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-comparacao"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-ordem"
+          }
+         },
+         {
+          "tipo": "nao",
+          "validador": {
+           "tipo": "passoNoPlano",
+           "passo": "causa-pressa"
+          }
+         }
+        ]
+       },
+       {
+        "tipo": "semErro"
+       },
+       {
+        "tipo": "funcaoPassa",
+        "nome": "agendar",
+        "casos": [
+         {
+          "args": [
+           [],
+           {
+            "horario": 10,
+            "cliente": "Ana"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 10,
+            "cliente": "Ana"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            }
+           ],
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 9,
+            "cliente": "Caio"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 10,
+            "cliente": "Dani"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            },
+            {
+             "horario": 11,
+             "cliente": "Cris"
+            }
+           ],
+           {
+            "horario": 11,
+            "cliente": "Duda"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 11,
+            "cliente": "Cris"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            },
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 11,
+            "cliente": "Ana"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           },
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 11,
+            "cliente": "Ana"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            }
+           ],
+           {
+            "horario": 8,
+            "cliente": "Bia"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 9,
+             "cliente": "Ana"
+            }
+           ],
+           {
+            "horario": 18,
+            "cliente": "Bia"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           }
+          ]
+         },
+         {
+          "args": [
+           [],
+           {
+            "horario": 22,
+            "cliente": "Caio"
+           }
+          ],
+          "esperado": []
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 17,
+            "cliente": "Bia"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 17,
+            "cliente": "Bia"
+           }
+          ]
+         },
+         {
+          "args": [
+           [
+            {
+             "horario": 10,
+             "cliente": "Bia"
+            }
+           ],
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           }
+          ],
+          "esperado": [
+           {
+            "horario": 10,
+            "cliente": "Bia"
+           },
+           {
+            "horario": 9,
+            "cliente": "Ana"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "solucaoDeTeste": [
+      {
+       "tipo": "definirSnippet",
+       "codigo": "// Plano: Relatório do conserto\n// 1. O que estava errado\n//   1.1 O programa decide olhando só a primeira marcação da lista, não todas\n// 2. Como foi achado\n//   2.1 Comparei o pedido que a agenda recusou com o que marcou em dobro\n//   2.2 Parei na linha do if e observei a comparação a cada pausa\n// 3. Como foi testado\n//   3.1 Testei o horário ocupado na primeira, na segunda e na última posição\n//   3.2 Rodei de novo os casos antigos: lista vazia e horários livres\n\nfunction agendar(agenda, pedido) {\n  if (pedido.horario < 9 || pedido.horario >= 18) {\n    return agenda;\n  }\n  for (let i = 0; i < agenda.length; i++) {\n    if (agenda[i].horario === pedido.horario) {\n      return agenda;\n    }\n  }\n  agenda.push(pedido);\n  return agenda;\n}\nconst segunda = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 9, cliente: \"Caio\" });\nconst terca = agendar([{ horario: 9, cliente: \"Ana\" }, { horario: 10, cliente: \"Bia\" }], { horario: 10, cliente: \"Dani\" });"
+      },
+      {
+       "tipo": "executarSnippet"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

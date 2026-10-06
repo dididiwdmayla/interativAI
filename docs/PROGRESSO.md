@@ -1,99 +1,69 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodada-33.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-34.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 34: zona Depuração
+## Rodada 35: conserto da cena pausada, U4 e os dois chamados
 
-Branch `codex/zona-depuracao`, a partir de `984c37a` da principal.
-Sem alteração de motor; U1 a U3 publicadas e U4 em rascunho bloqueado,
-separando Observar conforme o pedido. O contrato continua no fim da Ilha Lógica.
+Branch `ccr-0642213a-vae9cs`, a partir da principal depois do merge da
+zona Depuração (U1 a U3). A zona Depuração e a Ilha Lógica ficam completas,
+com o contrato da padaria no fim.
 
-### Etapa 1 — Ler a mensagem de erro
+### Etapa 1 — A cena no instante da pausa (motor)
 
-- Cozinha com propriedade somente leitura: TypeError é pista de uma
-  operação inválida; conserto usa o comando do aparelho.
-- Dicionário de SyntaxError, ReferenceError e TypeError; laço com uma
-  volta a mais mostra a diferença entre linha da falha e causa.
-- Desafio das etiquetas de viagem com três erros sucessivos, casos
-  visíveis e bordas escondidas (vazio, um item e nomes repetidos).
-- Dois conceitos novos com temas Lógica e Ferramentas, quatro revisões
-  próprias e revisão explícita de funções, escopo, listas e decisões.
-- Validação: 18.792 verificações de conteúdo; três falhas iniciais
-  (ordem do registro e timeout da bancada) resolvidas com reteste dos
-  afetados. Jornada da unidade nos três layouts, publicação, build e
-  lint verdes. Publicação exigiu apresentar as ferramentas de cena
-  nesta zona, que fica antes de Algoritmos no currículo.
+- Causa: `JogoFase.tsx` só mandava o foco à cena ao mover a linha do tempo
+  à mão; os controles do depurador não o atualizavam, e `AreaCena` tocava o
+  rastro inteiro assim que a execução chegava.
+- Conserto: a pausa vira um foco da cena (`focoDaPausa`: tempo do passo e
+  filtro de execução/passo, que distingue comandos com o mesmo tempo). A
+  cena para nesse instante e acompanha pausa, Passar por cima, Entrar e
+  Sair. Retomar (ou terminar o programa) manda a cena tocar do instante da
+  pausa até o fim (`FocoCena.tocar`); uma execução nova só limpa o pedido
+  antigo e a cena recomeça do começo. `useDepurador` ganhou `aoTerminar`.
+- `testes/depuracao-cena-bloqueio.mjs` virou a prova: pausa em 0 ms/verde,
+  Passar por cima (comando ainda não rodou: 0 ms/verde), depois do comando
+  (0 ms/vermelho) e Retomar tocando até 4.000 ms. Verde nos três layouts e
+  na bateria. Jornadas U2 e U3 repetidas nos três layouts: verdes.
 
-### Etapa 2 — Pontos de parada
+### Etapa 2 — U4, Observar variáveis
 
-- Garagem com atribuição na condição: portão abre e não fecha; valores
-  observados antes do conserto revelam a decisão alterada.
-- Soma com uma volta a mais, sem erro vermelho, e desafio da carga com
-  índice inicial errado. Comparar índice e tamanho confirma a hipótese.
-- Três conceitos com temas, seis revisões; casos escondidos rejeitam
-  solução constante e investigação é necessária mesmo com código certo.
-- Conteúdo: 19.028 verificações, com dois casos antigos sensíveis à carga
-  (bancada e recursão infinita) verdes no reteste isolado. As quatro
-  provas específicas e 81 checagens afetadas passaram. Jornadas nos três
-  layouts verdes, com leitura dos valores efetivamente vistos na pausa;
-  teste móvel abre Observar e recolhe a cena em retrato. Publicação,
-  build e lint verdes.
+- O rascunho de `docs/rascunhos/depuracao-u4/` virou conteúdo: fases,
+  unidade, revisão e os dois conceitos no catálogo; `requerMotor` saiu do
+  currículo; os testes de conteúdo passaram a esperar a unidade registrada.
+- 19.446 testes de conteúdo verdes; jornada U4 nos três layouts, cobrando o
+  instante da cena (2.000 ms na pausa do sozinho); publicada.
 
-### Etapa 3 — Passo a passo
+### Etapas 3 e 4 — Os dois chamados (U5 e U6)
 
-- Esquina com semáforo: Passar por cima mostra o salto de cor; Entrar
-  e Sair acompanham o índice local até a cor entregue ao chamador.
-- Função que imprime, mas não devolve: o cálculo local existe enquanto
-  a chamada recebe undefined. A borda negativa repete a investigação.
-- Desafio do recibo do cinema em contexto novo, com casos visíveis e
-  escondidos. Três conceitos com temas e seis itens de revisão.
-- As primeiras checagens apontaram que a segunda prática precisava
-  declarar a habilidade nova; Investigar o retorno foi catalogado.
-- Validação: 19.262 testes de conteúdo verdes sem reteste; jornadas
-  nos três layouts com valores vistos nas pausas e Pilha de chamadas
-  conferida; publicação, build e lint verdes.
+Formato contrato (guia, seção 31.10), uma unidade por chamado: aquecimento e
+contrato.
 
-### Etapa 4 — Observar variáveis
+- **U5, o estoque que não fecha** (Seu Tonho, Mercadinho Estrela). Aquecimento
+  no caixa, com a cena do letreiro: reproduzir o defeito (o desconto some só
+  com 3 itens), causa raiz e conserto da causa, e o frete repete o método.
+  Contrato: o fechamento soma texto nos dias de entrega ("4" vira "64").
+  Mudança depois do conserto: produto fora do estoque virava NaN.
+- **U6, a agenda do salão** (Dona Zélia, Salão Girassol), sem cena no
+  contrato. Aquecimento na recepção: o conserto que quebra o resto e o teste
+  de regressão. Contrato: o laço decide na primeira marcação da lista, então
+  só recusa o horário ocupado se for o primeiro. Mudança: expediente das 9h
+  às 18h, com as bordas.
+- Nos dois: diagnóstico com cartões no quadro de plano agrupado (a causa certa
+  entre três hipóteses plausíveis; o conserto só vale depois do diagnóstico),
+  relatório do conserto (o que estava errado, como foi achado e como foi
+  testado) que vai para o topo do Snippet, casos escondidos que já
+  funcionavam e `reproduzir` sem depender do número da linha.
+- Conceitos novos com temas Lógica e Ferramentas: reproduzir o defeito, causa
+  raiz e teste de regressão, com dois itens de revisão cada (`termoIngles`
+  ainda não existe no catálogo). Dois clientes novos no kit.
+- Sabotagens provadas em `testes/conteudo/chamados.test.ts`: resultado
+  decorado, `Number(a + b)`, recusar tudo, olhar só a última marcação,
+  trocar o limite do expediente e conserto certo sem diagnóstico.
+- Motor/regras tocados só para caber o formato: `contrato.fimDeIlha: false`
+  (sem a comemoração de fim de ilha) e `FILTRO` na bateria.
 
-- Estufa com noite seca e dia úmido: comparar pedido e entradas, avançar
-  até o comando e ver o aspersor ligado no instante do defeito.
-- Tipo de código numérico recebido como texto e declaração local que
-  esconde o saldo de fora. Os treinos mudam entrada e momento da cena.
-- Desafio da biblioteca: pop encolhe a lista enquanto o índice avança,
-  perdendo nomes; conserto preserva ordem, repetidos e lista vazia.
-- Dois conceitos com temas e quatro revisões; casos incluem "007",
-  vazio, repetidos e nomes diferentes para rejeitar inversão da ordem.
-- Revisão final reforçou o caso escondido da U1 com nomes distintos.
-  Seus ids e ordem ficaram preservados; as três jornadas repetidas passaram.
-- A condição e o comando foram separados em linhas com bloco; o aluno
-  acompanha as duas operações antes de conferir o aparelho.
-  As 30 checagens afetadas e provas novas passaram.
-- 19.446 testes de conteúdo passaram antes da revisão de formatação;
-  28 checagens afetadas passaram depois. Isso não comprovou a cena visual.
-- As jornadas da U4 falharam nos três layouts: Watch está na pausa, mas
-  o desenho avança. Reprodução mínima da U3 confirma: pausa na linha 6,
-  cena em 4.000 ms/vermelho em vez de 0 ms/verde. O motor não envia o
-  foco da pausa à cena. Não alterado: aplicada a regra de parada do pedido.
-- U4, seus itens de revisão e fixtures ficam para retomada, fora dos
-  registros ativos e sem publicação. Currículo travado por `requerMotor`.
-  ROADMAP registra causa, reprodução e critérios do conserto. PR em
-  rascunho; a zona e a Ilha Lógica ainda não estão completas.
+### Validação
 
-- Ao retirar U4, o glossário detectou seus conceitos sem fase ativa.
-  Fontes, revisões e conceitos movidos para `docs/rascunhos/depuracao-u4/`
-  como texto, fora do catálogo e da compilação; sem falsos verbetes ativos.
-
-### Fechamento da interrupção
-
-- Jornada U1 repetida em desktop, retrato e paisagem: verde.
-- `testar:conteudo -- --maxWorkers=1`: 19.264 testes, única falha no
-  glossário ao deixar conceitos U4 sem fases. Após separar o rascunho,
-  58 checagens de glossário, Depuração, currículo, revisão e temas passaram.
-- `publicar:conteudo`, build e lint verdes. `bateria:conteudo` rodada uma
-  vez em produção: mapa, explorar, publicar e revisão passaram. Não foi
-  rodada bateria completa de motor.
-- U1/U2/U3 em commits próprios; fechamento com rascunho U4 e bloqueio
-  em commit separado. Branch enviada por PR em rascunho, sem push na
-  principal. Próximo: consertar a sincronização, retomar U4 e validar
-  U2/U3/U4 nos três layouts antes de concluir a ilha; depois Opus: Origens.
+- `testar:conteudo -- --maxWorkers=1`: 19.725 testes verdes.
+- Jornadas U4, U5 e U6 nos três layouts; publicação, build e lint verdes.
+- Bateria completa (`npm run bateria`, 199 testes, `PARALELO=2`) verde, sem falhas, em duas partes: um reinício do container interrompeu a primeira depois de 126 testes; os 73 restantes rodaram com `FILTRO`. `bateria:conteudo` (mapa, explorar, publicar e revisão) verde.

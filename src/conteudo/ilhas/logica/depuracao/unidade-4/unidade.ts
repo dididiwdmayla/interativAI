@@ -1,4 +1,3 @@
-// Rascunho não registrado: aguarda sincronização cena/pausa (ROADMAP, Pendências).
 import type { Fase, Unidade } from "@/conteudo/tipos";
 import { FASE_DEPURACAO_U4_F1 } from "./fase-1";
 import { FASE_DEPURACAO_U4_F2 } from "./fase-2";

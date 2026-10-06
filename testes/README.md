@@ -260,6 +260,8 @@ a insuficiência de um caso feliz e o progresso concluído na ilha.
 
 - `node testes/estruturas-zona.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa da zona Estruturas, previsões, bordas, vagões pelos lados certos, custo escondido no gráfico e árvore.
 
-- Depuração: `node testes/depuracao.mjs [desktop|retrato|paisagem] [1|2|3]`: jornada pelo mapa com editor, erros sucessivos, pausas, controles, Observar e casos de teste. Dados em `depuracao-jornadas.json`, conferidos contra o conteúdo.
+- Depuração: `node testes/depuracao.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa com editor, erros sucessivos, pausas, controles, Observar e casos de teste. Dados em `depuracao-jornadas.json`, conferidos contra o conteúdo.
 
-- Bloqueio da cena na pausa: `node testes/depuracao-cena-bloqueio.mjs desktop`. Reprodução que falha no motor atual; não integra a bateria. A jornada `depuracao.mjs ... 4` e seus dados são rascunhos para retomar após o conserto (U4 não registrada nem publicada).
+- Cena pausada: `node testes/depuracao-cena-bloqueio.mjs [desktop|retrato|paisagem]`. Com o depurador pausado, a cena mostra o instante da pausa (tempo e aparelhos); Passar por cima avança até o novo instante e Retomar toca dali até o fim. Integra a bateria.
+- Chamados da Depuração: `node testes/chamados.mjs [desktop|retrato|paisagem] [5|6]`: o aquecimento (a cena no instante da pausa) e o contrato inteiro (briefing, cartões, diagnóstico, mudança, relatório e entrega sem comemoração de ilha). Dados em `chamados-jornadas.json`, conferidos contra o conteúdo por `testes/conteudo/chamados.test.ts`.
+- `FILTRO=regex node testes/todos.mjs` roda só os testes da bateria cuja linha casa com a regex (por exemplo `FILTRO="chamados|depuracao"`).

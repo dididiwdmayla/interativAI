@@ -91,6 +91,11 @@ export type DadosContrato = {
   };
   /** O programa fora do jogo (ilhas com código): o nome do arquivo baixado. */
   levarProMundo?: { arquivo: string };
+  /**
+   * `false`: o contrato é um chamado no meio da ilha (a zona Depuração), não o
+   * trabalho que a fecha. A entrega não tem a comemoração de fim de ilha.
+   */
+  fimDeIlha?: false;
 };
 
 /** Um desafio que é um contrato. */

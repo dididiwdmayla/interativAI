@@ -48,6 +48,12 @@ type Opcoes = {
   editorRef: RefObject<ApiEditor | null>;
   salvo: ProgramaSalvo | null;
   aoUsar?: (ferramenta: IdFerramenta) => void;
+  /**
+   * O programa terminou depois de uma pausa. `retomadoEmMs` é o instante da cena em que a
+   * pausa estava quando o aluno retomou (a cena toca dali); null quando uma execução nova
+   * substituiu a pausa (a cena recomeça do começo, sem tocar o rastro antigo).
+   */
+  aoTerminar?: (retomadoEmMs: number | null) => void;
 };
 
 /** Atalhos do Chrome (Windows/Linux e Mac): F8, F10, F11, Shift+F11 ou Ctrl (Cmd) com \, ', ; e Shift+;. */
@@ -61,7 +67,7 @@ function controleDoAtalho(evento: KeyboardEvent): ControleDepurador | null {
   return null;
 }
 
-export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoUsar }: Opcoes) {
+export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoUsar, aoTerminar }: Opcoes) {
   const ativo = faseComDepurador(fase);
   const [pontos, setPontos] = useState<number[]>(() => salvo?.pontos ?? []);
   const pontosAtual = useRef(pontos);
@@ -71,9 +77,11 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
   const sessaoAtual = useRef<SessaoDepuracao | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<Record<string, ResultadoAvaliacao>>({});
   const aoUsarAtual = useRef(aoUsar);
+  const aoTerminarAtual = useRef(aoTerminar);
   useEffect(() => {
     aoUsarAtual.current = aoUsar;
-  }, [aoUsar]);
+    aoTerminarAtual.current = aoTerminar;
+  }, [aoTerminar, aoUsar]);
   const { mostrarSaidas, concluir, avaliarNaFoto, definirDepuracao } = programa;
 
   const trocarPontos = useCallback((novos: number[]) => {
@@ -126,13 +134,17 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
   );
 
   /** O programa termina: as saídas que faltam, o erro (se houver) e o evento da execução. */
-  const terminar = useCallback(() => {
-    const atual = sessaoAtual.current;
-    if (!atual) return;
-    trocarSessao(null);
-    setAvaliacoes({});
-    void concluir(atual.resultado, atual.mostradas);
-  }, [concluir, trocarSessao]);
+  const terminar = useCallback(
+    (retomando = false) => {
+      const atual = sessaoAtual.current;
+      if (!atual) return;
+      trocarSessao(null);
+      setAvaliacoes({});
+      aoTerminarAtual.current?.(retomando ? (atual.resultado.passos[atual.pausa.indice]?.tempoMs ?? null) : null);
+      void concluir(atual.resultado, atual.mostradas);
+    },
+    [concluir, trocarSessao],
+  );
 
   const controlar = useCallback(
     (controle: ControleDepurador): boolean => {
@@ -142,7 +154,7 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
       barramento.emitir({ tipo: "usouControleDepurador", controle });
       const proxima = proximaPausa(atual.resultado.passos, atual.pausa.indice, controle, pontosAtual.current);
       if (!proxima) {
-        terminar();
+        terminar(true);
         return true;
       }
       const quadros = atual.resultado.passos[proxima.indice].memoria.quadros.length;
@@ -169,7 +181,7 @@ export function useDepurador({ fase, barramento, programa, editorRef, salvo, aoU
         const foto = atual.resultado.passos[atual.pausa.indice].memoria;
         return avaliarNaFoto([codigo], foto, atual.quadro, instanteDoPasso(atual.resultado, atual.pausa.indice)).then((r) => r[0] ?? { expressao: codigo, erro: "não deu para avaliar" });
       },
-      encerrar: terminar,
+      encerrar: () => terminar(),
     };
     definirDepuracao(ganchos);
     return () => definirDepuracao(null);

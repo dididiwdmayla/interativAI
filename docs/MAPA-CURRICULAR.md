@@ -697,14 +697,28 @@ Scope e Watch com os valores previstos.
   Entrar e Sair, Pilha de chamadas e comparação entre valor local e
   retorno. Semáforo da esquina que pula o amarelo; função que imprime
   sem devolver. Desafio: recibo do cinema com retorno ausente.
-- **U4. Observar variáveis (rascunho bloqueado)** (`logica-depuracao-u4`): expressões,
+- **U4. Observar variáveis (pronta)** (`logica-depuracao-u4`): expressões,
   tipo e escopo no instante da pausa. Irrigação que liga à noite e no
   dia úmido, texto contra número e variável local escondendo a de fora.
   Desafio: biblioteca perde nomes ao modificar a lista durante o percurso.
+- **U5. Chamado: o estoque que não fecha (pronta)** (`logica-depuracao-u5`):
+  o primeiro chamado, no formato contrato. Aquecimento no caixa do
+  Mercadinho Estrela (reproduzir o defeito e causa raiz, com a cena do
+  letreiro no instante da pausa); contrato do Seu Tonho: o fechamento do
+  estoque soma texto junto nos dias de entrega. Diagnóstico com cartões,
+  conserto sem quebrar o resto, relatório do conserto e, depois do
+  conserto, produto fora do estoque virando NaN.
+- **U6. Chamado: a agenda do salão (pronta)** (`logica-depuracao-u6`): o
+  segundo chamado, um software com defeito, sem cena no contrato.
+  Aquecimento na recepção do Salão Girassol (o conserto que quebra o
+  resto e o teste de regressão); contrato da Dona Zélia: a agenda só
+  recusa o horário ocupado se ele for o primeiro da lista. Mesmo
+  processo, e a mudança traz o expediente das 9h às 18h, com as bordas.
 
-A zona ainda não está completa: o desenho da cena avança enquanto o
-depurador está pausado. U4 depende da sincronização descrita nas
-Pendências do ROADMAP; seus arquivos não estão registrados nem publicados.
+A zona está completa. Os chamados não têm comemoração de fim de ilha
+(`fimDeIlha: false`): o contrato da padaria continua sendo o fim da Ilha
+Lógica. Conceitos novos dos chamados: reproduzir o defeito, causa raiz e
+teste de regressão.
 
 Toda unidade combina guiado e sozinho na mesma fase, desafio em
 contexto novo com tela composta e testes, conceitos com temas e duas

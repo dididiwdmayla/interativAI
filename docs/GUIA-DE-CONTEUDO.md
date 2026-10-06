@@ -59,7 +59,7 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
 31. Contratos: o trabalho de fim de ilha (31.1 as etapas, 31.2 o campo
     contrato, 31.3 o briefing, 31.4 requisitos, 31.5 a mudança, 31.6 o kit
     de clientes, 31.7 validadores e fábrica, 31.8 Levar pro mundo, 31.9
-    checklist)
+    checklist, 31.10 chamados de manutenção)
 
 Arquivos que você vai usar:
 
@@ -1552,6 +1552,14 @@ Depuração. O motor mora em `src/motor/depurador.ts`.
   (`controle`) e `observar` (`expressao`). Eventos:
   `alternouPontoDeParada`, `pausouNoDepurador`, `usouControleDepurador`,
   `adicionouObservacao` e `observouValor`.
+- **A cena na pausa (fase com cena):** o desenho da cena mostra o instante
+  da pausa, o mesmo do palco, do Observar e do Console: o tempo e o estado
+  de cada aparelho nesse passo (o comando da linha pausada ainda não
+  rodou). Passar por cima, Entrar e Sair levam a cena até o novo instante;
+  Retomar toca a animação do instante da pausa até o fim. Mexer na linha
+  do tempo da execução com o programa pausado não muda o instante da
+  pausa. Pausas com o mesmo tempo (vários comandos em 0 ms) se distinguem
+  pelo passo, não só pelo relógio. Prova: `testes/depuracao-cena-bloqueio.mjs`.
 - **Previsão casa bem:** "na primeira pausa na linha 8, quanto vale
   total?" (resposta: o valor de ANTES da linha). É a confusão número um.
 - **Limite:** o depurador anda pelo rastro da execução, que guarda até
@@ -2309,3 +2317,48 @@ ilha (o site com interação, o sistema com dados).
       mundo.
 - [ ] `testar:conteudo` verde (a jogada do contrato inteiro) e a jornada de
       navegador nos três layouts.
+
+### 31.10 Chamados de manutenção (contrato no meio da ilha)
+
+Modelos: `logica-depuracao-u5` (o estoque do Mercadinho Estrela) e
+`logica-depuracao-u6` (a agenda do Salão Girassol), em
+`src/conteudo/ilhas/logica/depuracao/`; peças comuns em `chamados.ts`.
+É o mesmo formato contrato, com o trabalho invertido: em vez de criar um
+sistema, o aluno conserta um que já existe, como num serviço de verdade.
+
+- **Unidade curta:** uma fase de aquecimento (prática, que ensina o
+  conceito e usa uma cena de vitrine, por causa da regra de ritmo, seção
+  30.6) e o contrato. O contrato pode ser sem cena: o software é o próprio
+  programa, com palco, console e casos de teste.
+- **`fimDeIlha: false`** no `contrato`: a entrega não mostra a
+  comemoração de fim de ilha (que é do trabalho que fecha a ilha) e não
+  tem Levar pro mundo. A zona termina com o contrato da padaria.
+- **O cliente é vago:** "às vezes dá errado, não sei quando". O defeito
+  real depende de uma condição que o briefing não diz (a entrega digitada
+  como texto; o horário ocupado só ser notado se for o primeiro da lista).
+- **Diagnóstico com cartões:** o quadro de plano (modo `agrupar`) é o
+  relatório do conserto, com três passos grandes (O que estava errado,
+  Como foi achado, Como foi testado). A causa raiz é escolhida num grupo
+  entre cartões de hipóteses plausíveis (`sobra`). A parte `causa` confere
+  com `passoNoPlano` na certa e `nao(passoNoPlano)` em cada distração: o
+  cliente pede, num cartão de requisito, que a causa seja dita antes de
+  consertar. A parte do conserto vem depois dela no checklist.
+- **Entrega com o relatório:** a parte `relatorio` pede `ordemValida` e
+  `planoComentado`: os cartões que sobraram (como foi achado e testado)
+  entram no quadro e o relatório vai para o topo do Snippet, em
+  comentários. As soluções em camadas que redefinem o código depois dele
+  precisam repetir o bloco (use `linhasDoPlano` para gerar o mesmo texto).
+- **Investigar sem depender do número da linha:** o plano no código
+  desloca as linhas. Em contrato, `reproduzir` usa `observou` com valor
+  (`typeof mov.quantidade`, a comparação do if), sem `pausouNaLinha`.
+- **Conserto sem quebrar o resto:** o `funcaoPassa` do conserto tem casos
+  escondidos que já funcionavam (o dia só de venda, a lista vazia) e o que
+  falhava. Consertos de sintoma ("devolver o resultado da sexta",
+  `Number(a + b)`, recusar tudo) têm que cair neles; os testes
+  `testes/conteudo/chamados.test.ts` provam isso com sabotagens.
+- **A mudança** pode ser um segundo sintoma ou uma regra nova que o
+  cliente descobre depois do primeiro conserto: a parte nova toma o lugar
+  da do conserto (`substitui`) e junta os casos antigos aos novos.
+- **Clientes novos** no kit (`seu-tonho`, `dona-zelia`), como na seção 31.6.
+- **Conceitos do chamado:** reproduzir o defeito, causa raiz e teste de
+  regressão, cada um com dois itens de revisão.
