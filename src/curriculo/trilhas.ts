@@ -34,7 +34,7 @@ export const TRILHAS: readonly Trilha[] = [
     id: "web",
     nome: "Web",
     descricao: "Criar sites e aplicativos que rodam no navegador, da página ao servidor, e publicar pro mundo usar.",
-    ilhas: ["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "ia", "oficio", "frameworks"],
+    ilhas: ["origens", "sites", "logica", "paginas-vivas", "rede-servidor", "python", "ia", "oficio", "frameworks"],
     status: "ativa",
   },
   {

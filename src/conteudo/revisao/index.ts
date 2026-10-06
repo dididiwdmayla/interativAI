@@ -1,3 +1,4 @@
+import { ITENS_ORIGENS } from "./origens";
 import { ITENS_DEPURACAO_U6 } from "./depuracao-u6";
 import { ITENS_DEPURACAO_U5 } from "./depuracao-u5";
 import { ITENS_DEPURACAO_U4 } from "./depuracao-u4";
@@ -225,6 +226,7 @@ import { ITENS_INDICE_DE_QUALIDADE } from "./indice-de-qualidade";
 import type { IdConceito, ItemRevisao } from "../tipos";
 
 export const ITENS_REVISAO: readonly ItemRevisao[] = [
+  ...ITENS_ORIGENS,
   ...ITENS_ESTRUTURAS_U4,
   ...ITENS_ESTRUTURAS_U3,
   ...ITENS_ESTRUTURAS_U2,

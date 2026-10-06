@@ -6,6 +6,7 @@
  * trilha e a setinha chamam quando o jogador faz a ação à mão; nos testes,
  * é o núcleo (src/motor/nucleoPainel.ts) rodando num Document solto.
  */
+import type { AcaoExposicao } from "./exposicao/modelo";
 import type { Acao } from "@/conteudo/tipos";
 import { elementoDoNo } from "@/lib/arvore";
 import { caminhoDoNo, ehTexto, filhosVisiveis, raizDaArvore } from "@/lib/dom";
@@ -107,6 +108,13 @@ export type PainelDasAcoes = {
     abrirFicha: (dispositivo: string) => boolean;
     verPorDentro: (dispositivo: string) => boolean;
     mudarVelocidade: (velocidade: 1 | 2 | 4) => void;
+  };
+  /**
+   * (Área exposicao) Mexe numa estação do museu: as mesmas mudanças da tela
+   * (src/motor/exposicao/modelo.ts). Devolve false se a ação não existe ali.
+   */
+  exposicao?: {
+    mexer: (acao: AcaoExposicao) => boolean;
   };
   /** (Estruturas e desempenho) Ver como árvore e o Medir da aba Desempenho: só nas fases com as ferramentas. */
   estruturas?: {
@@ -232,6 +240,24 @@ export function descreverAcao(acao: Acao): string {
       return `verPorDentro ${acao.dispositivo}`;
     case "velocidadeCena":
       return `velocidadeCena ${acao.velocidade}x`;
+    case "abrirEstacao":
+      return `abrirEstacao ${acao.estacao}`;
+    case "furarCartao":
+      return `furarCartao ${acao.estacao} linha ${acao.linha} coluna ${acao.coluna}${acao.furado === undefined ? "" : acao.furado ? " (furar)" : " (tapar)"}`;
+    case "alternarBit":
+      return `alternarBit ${acao.estacao} lâmpada ${acao.indice}${acao.ligado === undefined ? "" : acao.ligado ? " (ligar)" : " (desligar)"}`;
+    case "descerCamada":
+      return `descerCamada ${acao.estacao}`;
+    case "escolherLinha":
+      return `escolherLinha ${acao.estacao} ${acao.linha}`;
+    case "definirCor":
+      return `definirCor ${acao.estacao} ${acao.valor}`;
+    case "porNaLinha":
+      return `porNaLinha ${acao.estacao} ${acao.evento}${acao.posicao !== undefined ? ` na posição ${acao.posicao}` : ""}`;
+    case "tirarDaLinha":
+      return `tirarDaLinha ${acao.estacao} ${acao.evento}`;
+    case "pendurarPlaquinha":
+      return `pendurarPlaquinha ${acao.estacao} ${acao.plaquinha} em ${acao.evento}`;
   }
 }
 
@@ -565,6 +591,20 @@ export function executarAcao(acao: Acao, painel: PainelDasAcoes): void {
       const cena = painel.cena;
       if (!cena) throw new ErroAcao("velocidadeCena só existe numa fase com a área cena");
       cena.mudarVelocidade(acao.velocidade);
+      return;
+    }
+    case "abrirEstacao":
+    case "furarCartao":
+    case "alternarBit":
+    case "descerCamada":
+    case "escolherLinha":
+    case "definirCor":
+    case "porNaLinha":
+    case "tirarDaLinha":
+    case "pendurarPlaquinha": {
+      const exposicao = painel.exposicao;
+      if (!exposicao) throw new ErroAcao(`${acao.tipo} só existe numa fase com a área exposicao`);
+      if (!exposicao.mexer(acao)) throw new ErroAcao(`não deu para ${descreverAcao(acao)} (estação, peça ou cartão que não existe, ou nada a fazer?)`);
       return;
     }
   }

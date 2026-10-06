@@ -2,7 +2,7 @@
 // ilha (pontos, card, Jogar), museu das Origens, comemoração ao concluir
 // uma unidade e os três layouts.
 // Uso: node testes/mapa.mjs [desktop|retrato|paisagem]
-import { CURRICULO, planejadasDaIlha, prontasDaIlha, unidadesDaIlha } from "./curriculo.mjs";
+import { CURRICULO, ehPronta, planejadasDaIlha, prontasDaIlha, unidadesDaIlha } from "./curriculo.mjs";
 import { abrir, conferir, errosRelevantes, progressoComFase, pularMeta, URL_JOGO } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -143,10 +143,12 @@ async function tocar(localizador) {
   // Museu das Origens.
   await pagina.goto(`${URL_JOGO}/ilha/origens`);
   await pagina.locator("[data-mapa=museu]").waitFor();
-  const salas = unidadesDaIlha("origens").length;
-  conferir((await pagina.locator("[data-sala]").count()) === salas, `${MODO}: museu com as ${salas} salas`);
-  conferir((await pagina.locator("[data-antepassado]").count()) === 3, `${MODO}: os 3 antepassados na entrada`);
-  conferir((await pagina.getByText("Em breve").count()) >= salas, `${MODO}: as portas dizem Em breve`);
+  // O corredor de épocas (rodada 36): oito épocas, uma porta para cada sala; as planejadas dizem Em breve.
+  const salas = unidadesDaIlha("origens");
+  conferir((await pagina.locator("[data-epoca]").count()) === 8, `${MODO}: o corredor tem as oito épocas`);
+  conferir((await pagina.locator('[data-porta-sala^="origens-museu-"]').count()) === salas.length, `${MODO}: museu com as ${salas.length} salas`);
+  const planejadas = salas.filter((sala) => !ehPronta(sala.id)).length;
+  conferir((await pagina.locator('[data-estado-sala="planejada"]').count()) === planejadas, `${MODO}: as ${planejadas} salas sem conteúdo dizem Em breve`);
 
   conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
   await navegador.close();

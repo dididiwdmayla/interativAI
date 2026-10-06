@@ -16,7 +16,10 @@
  * - "snippet": `programa.snippet` (o código do aluno);
  * - "palco": `programa` (o palco da memória e a linha do tempo);
  * - "testes": o campo `testes` (os casos de teste que o aluno escreve e
- *   roda contra a própria função).
+ *   roda contra a própria função);
+ * - "exposicao": o campo `exposicao` (uma sala do Museu das Origens, com o
+ *   antepassado anfitrião e as estações interativas). Ela ocupa a tela
+ *   inteira: é a única área da fase.
  *
  * Os tipos antigos (prática de DevTools, programa, circuito, ordenar-passos)
  * continuam com as telas deles: a composição só vale para a fase que declara
@@ -29,9 +32,10 @@ import type { Fase, FaseDesafio, FasePratica } from "@/conteudo/tipos";
 import type { DadosOrdenar } from "./ordenar/modelo";
 import type { DadosCasos } from "./casos/modelo";
 import type { DadosCena } from "./cena/modelo";
+import type { DadosExposicao } from "./exposicao/modelo";
 
 /** As áreas de trabalho que uma fase composta pode declarar, na ordem em que aparecem na tela. */
-export const AREAS_TRABALHO = ["cena", "plano", "snippet", "palco", "testes"] as const;
+export const AREAS_TRABALHO = ["cena", "plano", "snippet", "palco", "testes", "exposicao"] as const;
 
 export type AreaTrabalho = (typeof AREAS_TRABALHO)[number];
 
@@ -72,5 +76,11 @@ export function casosDaFase(fase: Fase): DadosCasos | null {
 /** A cena programável da fase (área cena): o cenário, os dispositivos e a linha do tempo. Null sem a área. */
 export function cenaDaFase(fase: Fase): DadosCena | null {
   if (temArea(fase, "cena") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.cena ?? null;
+  return null;
+}
+
+/** A exposição do museu da fase (área exposicao). Null sem a área. */
+export function exposicaoDaFase(fase: Fase): DadosExposicao | null {
+  if (temArea(fase, "exposicao") && (fase.tipo === "pratica" || fase.tipo === "desafio")) return fase.exposicao ?? null;
   return null;
 }

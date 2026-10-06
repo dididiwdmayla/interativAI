@@ -570,10 +570,15 @@ function carregarEfeito(url: string): Promise<AudioBuffer | null> {
   return promessa;
 }
 
-/** Último efeito tocado e de onde veio, em <html> (usado pelos testes de navegador). */
+/**
+ * Último efeito tocado e de onde veio, em <html>, e o aviso `efeito-tocado`
+ * de cada um (usados pelos testes de navegador: no museu, o som da época
+ * toca logo depois da porta).
+ */
 function marcarEfeitoNaPagina(id: IdEfeito, fonte: "arquivo" | "sintetizado"): void {
   document.documentElement.dataset.ultimoEfeito = id;
   document.documentElement.dataset.ultimoEfeitoFonte = fonte;
+  document.dispatchEvent(new CustomEvent("efeito-tocado", { detail: { id, fonte } }));
 }
 
 function tocarSintetizado(id: IdEfeito): void {

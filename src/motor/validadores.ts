@@ -30,6 +30,7 @@ import { chaveMedicao, textoDePassos } from "./desempenho";
 import { chaveLinhaDoTempo, textoDoTempo, textoDoValorCena } from "./cena/modelo";
 import { conferirEstado, conferirReacao, conferirSequencia, textoDaLinhaDoTempo } from "./cena/validar";
 import { ehContrato, partesVisiveis } from "./contrato/modelo";
+import * as museu from "./exposicao/modelo";
 
 /** O que um validador pode olhar. */
 export type ContextoValidacao = {
@@ -60,7 +61,23 @@ export type ContextoValidacao = {
   snippet?: string;
   /** (Fase composta, área testes) A função dos casos e os casos do aluno agora, com os resultados da última rodada. */
   casos?: { dados: DadosCasos; estado: EstadoCasos };
+  /** (Fase composta, área exposicao) A exposição do museu e o estado de cada estação agora. */
+  exposicao?: { dados: museu.DadosExposicao; estado: museu.EstadoExposicao };
 };
+
+/** A estação pedida pelo validador, do tipo certo, com o estado dela (ou o motivo de não dar). */
+function estacaoDoValidador<T extends museu.TipoEstacao>(
+  contexto: ContextoValidacao,
+  id: string,
+  tipo: T,
+): { estacao: Extract<museu.Estacao, { tipo: T }>; estado: Extract<museu.EstadoEstacao, { tipo: T }> } | { motivo: string } {
+  if (!contexto.exposicao) return { motivo: "só numa fase com a área exposicao" };
+  const estacao = museu.estacaoDo(contexto.exposicao.dados, id);
+  const estado = museu.estadoDaEstacao(contexto.exposicao.estado, id);
+  if (!estacao || !estado) return { motivo: `a exposição não tem a estação "${id}"` };
+  if (estacao.tipo !== tipo || estado.tipo !== tipo) return { motivo: `a estação "${id}" é do tipo ${estacao.tipo}, não ${tipo}` };
+  return { estacao: estacao as Extract<museu.Estacao, { tipo: T }>, estado: estado as Extract<museu.EstadoEstacao, { tipo: T }> };
+}
 
 /** As execuções desde que o objetivo começou (eventos `executouCodigo`). */
 function execucoesDoObjetivo(contexto: ContextoValidacao): ResumoExecucao[] {
@@ -243,6 +260,25 @@ export function descreverValidador(validador: Validador): string {
       return "nenhum passo que sobra está no plano";
     case "planoComentado":
       return "o plano está no código como comentários, na ordem certa";
+    case "tecidoIgual":
+      return `o tecido do tear ${validador.estacao} está igual ao desenho pedido${validador.linhas ? ` nos cartões ${validador.linhas.map((l) => l + 1).join(", ")}` : ""}`;
+    case "bitsValem":
+      return `as lâmpadas de ${validador.estacao} mostram ${validador.valor}`;
+    case "camadaAberta":
+      return `a camada ${validador.camada} de ${validador.estacao} está aberta`;
+    case "linhaEscolhida":
+      return `a linha escolhida em ${validador.estacao} é ${[validador.linha, ...(validador.ou ?? [])].join(" ou ")}`;
+    case "corHex":
+      return `a cor de ${validador.estacao} é ${
+        validador.valor ??
+        Object.entries(validador.canais ?? {})
+          .map(([canal, [de, ate]]) => `${canal} de ${de} a ${ate}`)
+          .join(", ")
+      }`;
+    case "linhaEmOrdem":
+      return `a linha do tempo ${validador.estacao} tem ${validador.eventos ? validador.eventos.join(", ") : "todos os cartões"} na ordem certa`;
+    case "plaquinhasCertas":
+      return `${validador.eventos ? `as plaquinhas de ${validador.eventos.join(", ")}` : "cada plaquinha"} de ${validador.estacao} no cartão certo`;
     case "casosDoAluno":
       return `pelo menos ${validador.minimo} caso(s) de teste do aluno${validador.passando ? " passando" : ""}${validador.incluir?.length ? `, incluindo ${validador.incluir.map((exigido) => textoDoExigido(null, exigido)).join(" e ")}` : ""}`;
     case "passosNoMaximo":
@@ -600,6 +636,53 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       if (achados === 0) return { passou: false, descricao, detalhe: "nenhum passo do plano está no código como comentário" };
       const conferencia = conferirOrdem(contexto.ordenar.dados, estado);
       return { passou: conferencia.valida, descricao, detalhe: conferencia.valida ? "o plano está no código, na ordem certa" : `nos comentários do código: ${conferencia.motivo}` };
+    }
+    case "tecidoIgual": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "tear");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const diferentes = museu.diferencasDoTecido(achado.estacao, achado.estado, validador.linhas);
+      return { passou: diferentes === 0, descricao, detalhe: diferentes ? `${diferentes} furo(s) diferente(s) do desenho` : "igual ao desenho" };
+    }
+    case "bitsValem": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "bits");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const valor = museu.valorDosBits(achado.estado.bits);
+      return { passou: valor === validador.valor, descricao, detalhe: `${achado.estado.bits} vale ${valor}` };
+    }
+    case "camadaAberta": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "camadas");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const indice = achado.estacao.camadas.findIndex((camada) => camada.id === validador.camada);
+      if (indice < 0) return { passou: false, descricao, detalhe: `a estação não tem a camada "${validador.camada}"` };
+      return { passou: achado.estado.abertas > indice, descricao, detalhe: `${achado.estado.abertas} camada(s) aberta(s)` };
+    }
+    case "linhaEscolhida": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "camadas");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const aceitas = [validador.linha, ...(validador.ou ?? [])];
+      const escolhida = achado.estado.escolhida;
+      return { passou: escolhida !== null && aceitas.includes(escolhida), descricao, detalhe: escolhida ? `escolhida: ${escolhida}` : "nenhuma linha escolhida" };
+    }
+    case "corHex": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "cor");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const hex = achado.estado.hex;
+      if (validador.valor !== undefined && museu.normalizarHex(validador.valor) !== hex) return { passou: false, descricao, detalhe: `a cor é ${hex}` };
+      const canais = museu.canaisDaCor(hex);
+      const fora = (Object.entries(validador.canais ?? {}) as [keyof typeof canais, [number, number]][]).filter(([canal, [de, ate]]) => canais[canal] < de || canais[canal] > ate);
+      return { passou: fora.length === 0, descricao, detalhe: `a cor é ${hex} (r ${canais.r}, g ${canais.g}, b ${canais.b})` };
+    }
+    case "linhaEmOrdem": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "linha-do-tempo");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const { passou, detalhe } = museu.linhaEmOrdem(achado.estacao, achado.estado.linha, validador.eventos);
+      return { passou, descricao, detalhe };
+    }
+    case "plaquinhasCertas": {
+      const achado = estacaoDoValidador(contexto, validador.estacao, "linha-do-tempo");
+      if ("motivo" in achado) return { passou: false, descricao, detalhe: achado.motivo };
+      const { passou, detalhe } = museu.plaquinhasCertas(achado.estacao, achado.estado, validador.eventos);
+      return { passou, descricao, detalhe };
     }
     case "casosDoAluno": {
       if (!contexto.casos) return { passou: false, descricao, detalhe: "só numa fase com a área testes" };

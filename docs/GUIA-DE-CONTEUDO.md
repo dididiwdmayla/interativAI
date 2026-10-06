@@ -60,6 +60,11 @@ Leia só as seções que a tarefa pedir (regra de economia de cota do
     contrato, 31.3 o briefing, 31.4 requisitos, 31.5 a mudança, 31.6 o kit
     de clientes, 31.7 validadores e fábrica, 31.8 Levar pro mundo, 31.9
     checklist, 31.10 chamados de manutenção)
+32. O Museu das Origens: a área exposicao e os antepassados (32.1 a sala
+    é uma fase composta, 32.2 as estações, 32.3 validadores e ações, 32.4
+    o anfitrião e as falas, 32.5 os antepassados, 32.6 o corredor e a
+    próxima geração, 32.7 como criar uma sala nova, 32.8 como criar um
+    tipo de estação novo)
 
 Arquivos que você vai usar:
 
@@ -142,6 +147,23 @@ Ruim: "Aplique visibility hidden no nó para ocultá-lo do render tree."
 
 Ruim: "Muito bem!!! Você é incrível!!!" (vazio: diga O QUE ele acertou)
 
+**Inglês técnico (regra para conteúdo novo, rodada 36).** A documentação,
+os erros e as ferramentas de verdade falam inglês; o jogo prepara para
+isso sem virar aula de inglês:
+
+- **todo conceito novo tem `termoIngles`** (`src/conteudo/conceitos.ts`):
+  o nome como aparece na documentação ("bit", "breakpoint", "event
+  loop"). O glossário mostra os dois e a busca acha pelos dois;
+- na primeira vez que o termo aparece numa fala, diga os dois: "o ponto de
+  parada (em inglês, breakpoint)". Depois, use o nome em português;
+- **de vez em quando, uma missão de campo pede ler um trecho curto da
+  documentação original** (MDN, docs do Python) e achar uma coisa nele
+  ("abra a página do `Array.prototype.push` na MDN em inglês e ache o que
+  ele devolve: procure por Return value"). Uma por zona, mais ou menos;
+  diga onde procurar, nunca peça para traduzir o texto inteiro;
+- os conceitos antigos ainda não têm o termo: preencher fica para uma
+  tarefa de conteúdo (ROADMAP).
+
 **Falas não têm versão de toque.** Só os enunciados têm `mouse` e
 `toque`. Por isso, nas falas (ajudas, conclusões), escreva de um jeito
 neutro: "Use Esconder nele", "Duplique ele", e não "clique com o botão
@@ -219,8 +241,9 @@ testar sozinho. Os tipos estão comentados em `src/conteudo/tipos.ts`.
 
 Dois tipos: `pratica` (objetivos em sequência) e `desafio` (checklist de
 partes). O registro de tipos (`src/motor/tiposDeFase.ts`) já está pronto
-para tipos futuros (linha do tempo, comparador, diagrama de rede), mas
-eles ainda não existem: não use.
+para tipos futuros (comparador de linguagens, diagrama de rede), mas
+eles ainda não existem: não use. A linha do tempo existe desde a rodada
+36, como estação da área `exposicao` do museu (seção 32).
 
 Campos comuns: `id` (`"sites-elementos-u3-f1"`, nunca mude depois de
 publicado), `unidadeId`, `titulo` (até 40), `conceitos`, `revisa`,
@@ -2362,3 +2385,156 @@ sistema, o aluno conserta um que já existe, como num serviço de verdade.
 - **Clientes novos** no kit (`seu-tonho`, `dona-zelia`), como na seção 31.6.
 - **Conceitos do chamado:** reproduzir o defeito, causa raiz e teste de
   regressão, cada um com dois itens de revisão.
+
+---
+
+## 32. O Museu das Origens: a área exposicao e os antepassados
+
+O museu (`/ilha/origens`) é um corredor de épocas. Cada época tem um
+antepassado do computadorzinho, e quase toda época recebe uma **sala**: uma
+unidade da zona `museu` com exposições interativas e um pequeno desafio no
+fim, no modelo pedagógico de sempre (guiado, sozinho, desafio em contexto
+novo), mas com cara de museu: explorar, tocar, descobrir. As salas 1 e 2
+são o modelo (`src/conteudo/ilhas/origens/museu/`).
+
+### 32.1 A sala é uma fase composta
+
+Uma fase do museu é uma `pratica` (ou um `desafio`) com
+`areas: ["exposicao"]` e o campo `exposicao`. A área ocupa a tela inteira
+(é sempre a única), sem programa, e usa `siteAlvo: SITE_DO_PROGRAMA`. A
+tela mostra a placa da peça, o antepassado anfitrião falando no jeito da
+época dele e as estações (no desafio, várias, em abas). O computadorzinho
+continua no lugar de sempre, com o enunciado, a escada de ajuda e a
+conversa. Tudo o que vale para fase de prática vale aqui: objetivos
+guiados e sozinho, previsões, `apresentar`, conclusão, missão de campo.
+
+```ts
+{
+  id: "origens-museu-u1-f1", tipo: "pratica", unidadeId: "origens-museu-u1",
+  areas: ["exposicao"],
+  siteAlvo: SITE_DO_PROGRAMA,
+  usaFerramentas: ["tear-de-cartoes"],
+  exposicao: {
+    anfitriao: "tecela",
+    placa: { titulo: "O tear de Jacquard", texto: "Início dos anos 1800. ..." },
+    falas: { abrir: "...", porEtapa: { "furar-linha-cheia": "..." }, concluir: "..." },
+    estacoes: [{ id: "tear-flor", tipo: "tear", titulo: "O tear da árvore", modelo: ["..#..", ".###."], inicial: ["..#..", "....."] }],
+  },
+  objetivos: [ ... ],
+}
+```
+
+### 32.2 As estações
+
+Modelo puro em `src/motor/exposicao/modelo.ts`; a tela de cada uma em
+`src/componentes/museu/exposicao/`. Cada tipo tem a sua ferramenta (que
+precisa estar em `usaFerramentas` e ser apresentada na primeira vez):
+
+| Tipo | O que é | Ferramenta |
+| --- | --- | --- |
+| `tear` | cartões que tecem um desenho: `modelo` (uma linha por cartão, `#` furo, `.` sem furo), `inicial`, `mostrarBinario` | `tear-de-cartoes` |
+| `bits` | lâmpadas ou válvulas (`aparencia`), `quantos` 4 ou 8, `pesos`, `letra` (só com 8: a tabela ASCII) | `lampadas-de-bits` |
+| `camadas` | o mesmo programa em 2 a 4 camadas; cada linha diz `de` quais linhas da camada de cima ela veio | `camadas-da-maquina` |
+| `cor` | `#rrggbb` com setinhas por dígito, o CSS que usa a cor (`css`) e uma `amostra` | `mesa-de-cores` |
+| `linha-do-tempo` | `eventos` JÁ NA ORDEM CERTA (a tela embaralha), `fixos` (âncoras), `plaquinhas` (o "o que mudou" solto) | `linha-do-tempo-museu` |
+
+Na linha do tempo: cada cartão no lugar certo (em relação aos outros da
+linha) mostra a época e o que mudou; com `plaquinhas`, mostra só a época
+e as frases ficam soltas para pendurar. **Fatos conferidos e sem data
+inventada:** na dúvida, a década ("anos 1940"); a checagem reclama de uma
+época que pareça data exata. Não ponha dois cartões da mesma década na
+mesma linha (a ordem tem que ser clara). Os eventos das salas ficam em
+`unidade-2/eventos.ts`, com a fonte de cada fato no comentário.
+
+### 32.3 Validadores e ações
+
+Validadores (olham o estado de agora: desfazer desmarca a parte do
+desafio): `tecidoIgual` (com `linhas` para só alguns cartões),
+`bitsValem`, `camadaAberta`, `linhaEscolhida`, `corHex` (`valor` ou
+`canais` com faixas), `linhaEmOrdem` (com `eventos` para um subconjunto) e
+`plaquinhasCertas` (com `eventos`). Ações (o que o aluno faz; as soluções
+passam pelas mesmas funções da tela): `abrirEstacao`, `furarCartao`
+(`furado` opcional: sem ele, alterna), `alternarBit` (`ligado` opcional),
+`descerCamada`, `escolherLinha`, `definirCor`, `porNaLinha` (`posicao`
+opcional), `tirarDaLinha` e `pendurarPlaquinha`. Todas geram
+`mexeuNaExposicao`. O degrau 3 aponta com
+`{ alvo: "exposicao", estacao, peca?, fala }` (a peça: `"2-0"` é o furo da
+linha 2, coluna 0; `"1"` a lâmpada 1; o id de uma linha ou de um cartão;
+`"descer"`; `"r"`, `"g"` ou `"b"`). O objetivo novo abre sozinho a
+estação que o validador dele olha.
+
+A Revisão do dia não aceita a área exposicao: os itens dos conceitos do
+museu são previsões sobre uma vitrine pequena (`src/conteudo/revisao/origens.ts`).
+
+### 32.4 O anfitrião e as falas
+
+`anfitriao` é um antepassado (abaixo). `falas.abrir` aparece quando a fase
+abre; `falas.porEtapa[id]` quando aquele objetivo começa (na prática) ou
+quando aquela parte é feita (no desafio); `falas.concluir` no fim. Até 160
+caracteres, no **jeito de falar do anfitrião** (a tecelã é avó paciente, o
+gigante fala ALTO, o terminal é seco e rabugento, o PC bege é animado, a
+internet é tagarela, o celular é curto). A fala do anfitrião conversa com o
+computadorzinho, não repete o enunciado.
+
+### 32.5 Os antepassados
+
+Ficha em dados: `src/motor/exposicao/antepassados.ts` (nome, máquina,
+época, parentesco, sala, jeito de falar, saudação, aviso de em breve,
+boas-vindas e a reação do computadorzinho). Desenho em
+`src/componentes/museu/antepassados/`: cada um usa as peças comuns
+(`Olhos`, `Boca`, `Braco`), pisca, respira, a boca acompanha o texto
+(abre nas vogais) e dorme em silhueta. O jeito de falar mora em
+`FalaAntepassado.tsx`: trama (letra a letra, com a lançadeira), engrenagens
+(girando), válvulas (palavra a palavra, cada palavra acende uma válvula),
+terminal (maiúsculas sem acento, com o cursor; o leitor de tela ouve com
+acento), 8 bits (quadro azul), modem (o texto sai do chiado) e notificação
+(uma por frase). Cada época tem os seus sons sintetizados
+(`fala-*` e `epoca-*` em `src/audio/receitas.ts`). Cores só por tokens
+(`--cor-ante-*` e `--cor-museu-*`, nos três temas). Mostruário:
+`/lab/antepassados`.
+
+### 32.6 O corredor e a próxima geração
+
+`src/componentes/museu/corredor/`: o corredor corre de lado no computador
+e desce no celular; a parede do fundo anda mais devagar. A regra das portas
+(`src/lib/museu.ts`) sai do currículo e do progresso: sala com conteúdo
+mostra Entrar, Continuar ou Jogar de novo; sem conteúdo, Em breve; as salas
+seguem em sequência. No fim fica a árvore da família, com o lugar da
+próxima geração: ele abre quando a sala 2 (`SALA_DA_PROXIMA_GERACAO`)
+termina; o aluno monta o retrato com o kit de clientes e entra para a
+família (`proximaGeracao` no progresso).
+
+### 32.7 Como criar uma sala nova (sem quebrar o padrão)
+
+1. Leia a sala no `MAPA-CURRICULAR.md` (Ilha 0) e tire o `requerMotor` da
+   unidade em `src/curriculo/curriculo.ts` só se as estações que ela pede
+   já existem (senão, é trabalho de motor: 32.8).
+2. Crie `src/conteudo/ilhas/origens/museu/unidade-N/` com as fases e o
+   `unidade.ts`, como as salas 1 e 2: 2 a 4 exposições e o desafio, que
+   junta as estações em abas e aponta `revisarEm` para a exposição guiada.
+3. O anfitrião é o antepassado da ficha que tem `sala` igual à unidade; os
+   outros podem aparecer de visita numa exposição (como o gigante na sala
+   1). Escreva as falas no jeito dele.
+4. Conceitos novos com temas (`fundamentos` quase sempre) e `termoIngles`;
+   dois itens de revisão por conceito (previsões, 32.3).
+5. Registre em `src/conteudo/index.ts` (o museu vem antes de Sites, na
+   ordem do currículo), rode `npm run testar:conteudo`, publique
+   (`npm run publicar:conteudo`) e rode `node testes/museu.mjs` nos três
+   layouts (a jornada joga todas as salas publicadas pela porta do
+   corredor).
+6. Se a sala nova precisa abrir o lugar da próxima geração em vez da sala
+   2, mude `SALA_DA_PROXIMA_GERACAO` (e diga no relatório).
+
+### 32.8 Como criar um tipo de estação novo
+
+Trabalho de motor: o tipo e o estado em `modelo.ts` (com o estado inicial,
+a forma salva, as mudanças e `aplicarAcaoExposicao`), as ações e os
+validadores em `src/conteudo/tipos.ts`, `executarAcao.ts` e
+`validadores.ts`, a conferência dos dados em `exposicao/conferir.ts` e na
+checagem `exposicao-do-museu`, a leitura do progresso salvo
+(`src/lib/progresso.ts`), a ferramenta em `src/ferramentas` (com ícone e
+`FERRAMENTA_DA_ESTACAO`), a tela em `src/componentes/museu/exposicao/`
+(com a peça de mexer em `NucleoDaEstacao`, o alvo das apresentações) e a
+miniatura da meta (`MiniComposicao`). As salas 3 a 5 pedem três estações
+novas: o comparador de linguagens executável, o computador aberto com os
+portões e o diagrama de rede.

@@ -45,7 +45,129 @@ function teclaMecanica(s: Sintetizador, { ruido, toc, forca }: { ruido: number; 
   s.tom({ frequencia: variar(toc, 0.05), inicio: 0.002, duracao: 0.03, ganho: variar(V * 0.45 * forca, 0.2), ataque: 0.005 });
 }
 
+/** Um "toc" de madeira (o tear batendo a trama). */
+function tocDeMadeira(s: Sintetizador, inicio: number, forca = 1): void {
+  s.tom({ frequencia: variar(210, 0.06), frequenciaFinal: 150, inicio, duracao: 0.06, ganho: V * 0.5 * forca, forma: "triangle", ataque: 0.004 });
+  s.ruido({ inicio, duracao: 0.03, ganho: V * 0.3 * forca, filtro: "lowpass", frequencia: 1200, q: 0.8 });
+}
+
+/** O tique de uma engrenagem (relojoaria). */
+function tiqueDeEngrenagem(s: Sintetizador, inicio: number, forca = 1): void {
+  s.ruido({ inicio, duracao: 0.012, ganho: V * 0.45 * forca, filtro: "highpass", frequencia: 3800, q: 0.9 });
+  s.tom({ frequencia: variar(1900, 0.05), inicio, duracao: 0.02, ganho: V * 0.15 * forca, forma: "sine", ataque: 0.004 });
+}
+
+/** O estalo de um relé (os computadores de válvulas). */
+function estaloDeRele(s: Sintetizador, inicio: number, forca = 1): void {
+  s.ruido({ inicio, duracao: 0.016, ganho: V * 0.5 * forca, frequencia: variar(2400, 0.1), q: 3 });
+}
+
+/** Notas do arpejo de 8 bits (uma escala pentatônica alegre). */
+const PENTATONICA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+
+const RECEITAS_DO_MUSEU: Readonly<Record<Extract<IdEfeito, `fala-${string}` | `epoca-${string}` | "furar-cartao" | "acender-bit" | "encaixar-cartao" | "proxima-geracao">, Receita>> = {
+  // A voz de cada época: um tique por pedaço da fala (com limite de taxa no componente).
+  "fala-tear": (s) => tocDeMadeira(s, 0, 0.7),
+  "fala-engrenagem": (s) => tiqueDeEngrenagem(s, 0, 0.8),
+  "fala-valvula": (s) => {
+    estaloDeRele(s, 0, 0.8);
+    s.tom({ frequencia: 110, inicio: 0, duracao: 0.14, ganho: V * 0.12, forma: "sawtooth", ataque: 0.01 });
+    s.tom({ frequencia: variar(880, 0.04), inicio: 0.01, duracao: 0.06, ganho: V * 0.12, forma: "sine", ataque: 0.005 });
+  },
+  "fala-terminal": (s) => {
+    s.ruido({ inicio: 0, duracao: 0.01, ganho: V * 0.35, frequencia: 3500, q: 2 });
+    s.tom({ frequencia: 1200, inicio: 0.005, duracao: 0.022, ganho: V * 0.16, forma: "square", ataque: 0.004 });
+  },
+  "fala-8bit": (s) => {
+    const nota = PENTATONICA[Math.floor(Math.random() * PENTATONICA.length)];
+    s.tom({ frequencia: nota, inicio: 0, duracao: 0.045, ganho: V * 0.22, forma: "square", ataque: 0.004 });
+  },
+  "fala-modem": (s) => {
+    s.fm({ frequencia: variar(1300, 0.15), frequenciaFinal: variar(2100, 0.1), inicio: 0, duracao: 0.04, ganho: V * 0.14, razao: 1.5, indice: 1.2 });
+  },
+  "fala-notificacao": (s) => {
+    s.tom({ frequencia: 1318.51, inicio: 0, duracao: 0.14, ganho: V * 0.4, forma: "sine", ataque: 0.004 });
+    s.tom({ frequencia: 1760, inicio: 0.08, duracao: 0.22, ganho: V * 0.4, forma: "sine", ataque: 0.004 });
+  },
+
+  // Cada antepassado acordando no corredor: a assinatura da época dele.
+  // A tecelã: a lançadeira passando, a batida da trama e uma caixinha de música.
+  "epoca-tecela": (s) => {
+    s.ruido({ inicio: 0, duracao: 0.35, ganho: V * 0.25, frequencia: 600, frequenciaFinal: 2400, q: 1.5, ataque: 0.08 });
+    tocDeMadeira(s, 0.36, 1);
+    tocDeMadeira(s, 0.52, 0.8);
+    [783.99, 987.77, 1174.66, 1567.98].forEach((frequencia, i) => s.tom({ frequencia, inicio: 0.7 + i * 0.13, duracao: 0.5, ganho: V * 0.3, forma: "sine", ataque: 0.004 }));
+  },
+  // A sonhadora: a catraca acelerando e um sino de relógio.
+  "epoca-engrenagens": (s) => {
+    [0, 0.14, 0.26, 0.36, 0.44, 0.51, 0.57, 0.62, 0.66].forEach((inicio) => tiqueDeEngrenagem(s, inicio, 1));
+    s.tom({ frequencia: 1567.98, inicio: 0.75, duracao: 1.1, ganho: V * 0.35, forma: "sine", ataque: 0.004 });
+    s.tom({ frequencia: 3135.96, inicio: 0.75, duracao: 0.6, ganho: V * 0.1, forma: "sine", ataque: 0.004 });
+  },
+  // O gigante: o zumbido ligando, as válvulas esquentando e os relés estalando.
+  "epoca-valvulas": (s) => {
+    s.tom({ frequencia: 45, frequenciaFinal: 110, inicio: 0, duracao: 1.2, ganho: V * 0.3, forma: "sawtooth", ataque: 0.3 });
+    s.tom({ frequencia: 220, frequenciaFinal: 440, inicio: 0.2, duracao: 0.8, ganho: V * 0.18, forma: "triangle", ataque: 0.3 });
+    [0.35, 0.42, 0.5, 0.71, 0.76, 0.95, 1.02].forEach((inicio) => estaloDeRele(s, inicio, 1));
+  },
+  // O terminal: o tubo de imagem ligando e três bipes secos.
+  "epoca-terminal": (s) => {
+    s.tom({ frequencia: 70, frequenciaFinal: 38, inicio: 0, duracao: 0.25, ganho: V * 0.9, forma: "sine", ataque: 0.005 });
+    s.tom({ frequencia: 7800, inicio: 0.05, duracao: 0.6, ganho: V * 0.03, forma: "sine", ataque: 0.1 });
+    [0.45, 0.62, 0.79].forEach((inicio) => s.tom({ frequencia: 1000, inicio, duracao: 0.07, ganho: V * 0.35, forma: "square", ataque: 0.004 }));
+  },
+  // O PC bege: a leitura do disquete e o arpejo de 8 bits de "pronto".
+  "epoca-pc": (s) => {
+    [0, 0.06, 0.1, 0.18, 0.22, 0.3].forEach((inicio) => s.ruido({ inicio, duracao: 0.03, ganho: V * 0.35, frequencia: 900, q: 4 }));
+    s.tom({ frequencia: 65, inicio: 0, duracao: 0.4, ganho: V * 0.25, forma: "square", ataque: 0.01 });
+    [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((frequencia, i) => s.tom({ frequencia, inicio: 0.5 + i * 0.07, duracao: 0.09, ganho: V * 0.35, forma: "square", ataque: 0.004 }));
+  },
+  // A internet discada: os tons de discar, o chiado do modem e a conexão.
+  "epoca-internet": (s) => {
+    [
+      [697, 1209],
+      [770, 1336],
+      [852, 1477],
+    ].forEach(([baixa, alta], i) => {
+      s.tom({ frequencia: baixa, inicio: i * 0.11, duracao: 0.08, ganho: V * 0.25, forma: "sine", ataque: 0.004 });
+      s.tom({ frequencia: alta, inicio: i * 0.11, duracao: 0.08, ganho: V * 0.25, forma: "sine", ataque: 0.004 });
+    });
+    s.fm({ frequencia: 1000, frequenciaFinal: 2300, inicio: 0.4, duracao: 0.35, ganho: V * 0.22, razao: 1.37, indice: 2.4 });
+    s.ruido({ inicio: 0.75, duracao: 0.3, ganho: V * 0.3, filtro: "bandpass", frequencia: 2200, q: 0.6 });
+    s.tom({ frequencia: 1046.5, inicio: 1.1, duracao: 0.4, ganho: V * 0.3, forma: "triangle", ataque: 0.01 });
+  },
+  // O celular: a vibração e o toque de notificação.
+  "epoca-celular": (s) => {
+    [0, 0.09, 0.18, 0.4, 0.49, 0.58].forEach((inicio) => s.tom({ frequencia: 150, inicio, duracao: 0.07, ganho: V * 0.35, forma: "sawtooth", ataque: 0.005 }));
+    [1174.66, 1567.98, 2093].forEach((frequencia, i) => s.tom({ frequencia, inicio: 0.8 + i * 0.09, duracao: 0.3, ganho: V * 0.35, forma: "sine", ataque: 0.004 }));
+  },
+
+  // As peças das exposições.
+  "furar-cartao": (s) => {
+    s.ruido({ inicio: 0, duracao: 0.05, ganho: V * 0.6, filtro: "lowpass", frequencia: 2500, q: 0.8 });
+    s.tom({ frequencia: 160, frequenciaFinal: 80, inicio: 0, duracao: 0.08, ganho: V * 0.6, forma: "sine", ataque: 0.004 });
+  },
+  "acender-bit": (s) => {
+    estaloDeRele(s, 0, 0.7);
+    s.tom({ frequencia: 660, frequenciaFinal: 880, inicio: 0.01, duracao: 0.09, ganho: V * 0.35, forma: "triangle", ataque: 0.005 });
+  },
+  "encaixar-cartao": (s) => {
+    tocDeMadeira(s, 0, 0.9);
+    tocDeMadeira(s, 0.07, 0.6);
+  },
+  // O lugar da próxima geração ocupado: um acorde que cresce, a família inteira junta e um brilho.
+  "proxima-geracao": (s) => {
+    [261.63, 329.63, 392, 493.88, 523.25, 659.25, 783.99, 1046.5].forEach((frequencia, i) =>
+      s.tom({ frequencia, inicio: i * 0.12, duracao: 1.6 - i * 0.08, ganho: V * 0.32, forma: "triangle", ataque: 0.02 }),
+    );
+    [130.81, 196, 261.63].forEach((frequencia) => s.tom({ frequencia, inicio: 0.9, duracao: 2.2, ganho: V * 0.3, forma: "sine", ataque: 0.4 }));
+    [1046.5, 1318.51, 1567.98, 2093].forEach((frequencia) => s.tom({ frequencia, inicio: 1.1, duracao: 1.8, ganho: V * 0.18, forma: "sine", ataque: 0.3 }));
+    s.ruido({ inicio: 1.0, duracao: 1.4, ganho: V * 0.12, filtro: "highpass", frequencia: 6000, q: 0.7, ataque: 0.4 });
+  },
+};
+
 export const RECEITAS: Readonly<Record<IdEfeito, Receita>> = {
+  ...RECEITAS_DO_MUSEU,
   tecla: (s) => teclaMecanica(s, { ruido: 3000, toc: 190, forca: 1 }),
   "tecla-espaco": (s) => teclaMecanica(s, { ruido: 1500, toc: 125, forca: 1.2 }),
   "tecla-enter": (s) => {

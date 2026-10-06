@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MuseuOrigens } from "@/componentes/mapa/MuseuOrigens";
+import { CorredorMuseu } from "@/componentes/museu/corredor/CorredorMuseu";
 import { TelaIlha } from "@/componentes/mapa/ilha/TelaIlha";
 import { ilhaDoId, TODAS_AS_ILHAS } from "@/curriculo";
 
@@ -23,5 +23,5 @@ export default async function PaginaIlha({ params }: Props) {
   const { id } = await params;
   const ilha = ilhaDoId(id);
   if (!ilha) notFound();
-  return ilha.sempreAberta ? <MuseuOrigens ilhaId={ilha.id} /> : <TelaIlha ilhaId={ilha.id} />;
+  return ilha.sempreAberta ? <CorredorMuseu ilhaId={ilha.id} /> : <TelaIlha ilhaId={ilha.id} />;
 }

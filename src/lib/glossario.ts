@@ -49,12 +49,12 @@ export function normalizarBusca(texto: string): string {
     .trim();
 }
 
-/** Busca pelo nome e pelo resumo, ignorando acento e maiúscula. Busca vazia devolve tudo. */
+/** Busca pelo nome, pelo termo em inglês e pelo resumo, ignorando acento e maiúscula. Busca vazia devolve tudo. */
 export function buscarNoGlossario(entradas: readonly EntradaGlossario[], busca: string): EntradaGlossario[] {
   const termo = normalizarBusca(busca);
   if (termo.length === 0) return [...entradas];
   return entradas.filter((entrada) =>
-    normalizarBusca(`${entrada.conceito.nome} ${entrada.conceito.resumo} ${entrada.conceito.id}`).includes(termo),
+    normalizarBusca(`${entrada.conceito.nome} ${entrada.conceito.termoIngles ?? ""} ${entrada.conceito.resumo} ${entrada.conceito.id}`).includes(termo),
   );
 }
 

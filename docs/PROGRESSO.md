@@ -1,69 +1,120 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodada-34.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-35.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 35: conserto da cena pausada, U4 e os dois chamados
+## Rodada 36: Origens, parte 1 (museu, antepassados, salas 1 e 2) e currículo ampliado
 
-Branch `ccr-0642213a-vae9cs`, a partir da principal depois do merge da
-zona Depuração (U1 a U3). A zona Depuração e a Ilha Lógica ficam completas,
-com o contrato da padaria no fim.
+Branch `ccr-955e3134-89aw6g`, a partir da principal depois do merge da
+rodada 35.
 
-### Etapa 1 — A cena no instante da pausa (motor)
+### Etapa 1 — Currículo ampliado (commit próprio)
 
-- Causa: `JogoFase.tsx` só mandava o foco à cena ao mover a linha do tempo
-  à mão; os controles do depurador não o atualizavam, e `AreaCena` tocava o
-  rastro inteiro assim que a execução chegava.
-- Conserto: a pausa vira um foco da cena (`focoDaPausa`: tempo do passo e
-  filtro de execução/passo, que distingue comandos com o mesmo tempo). A
-  cena para nesse instante e acompanha pausa, Passar por cima, Entrar e
-  Sair. Retomar (ou terminar o programa) manda a cena tocar do instante da
-  pausa até o fim (`FocoCena.tocar`); uma execução nova só limpa o pedido
-  antigo e a cena recomeça do começo. `useDepurador` ganhou `aoTerminar`.
-- `testes/depuracao-cena-bloqueio.mjs` virou a prova: pausa em 0 ms/verde,
-  Passar por cima (comando ainda não rodou: 0 ms/verde), depois do comando
-  (0 ms/vermelho) e Retomar tocando até 4.000 ms. Verde nos três layouts e
-  na bateria. Jornadas U2 e U3 repetidas nos três layouts: verdes.
+- `src/curriculo/curriculo.ts`, `MAPA-CURRICULAR.md` e ROADMAP, todas as
+  zonas novas com `requerMotor` e o lugar justificado no mapa curricular:
+  - Páginas vivas: **Objetos e classes** (primeira zona: os elementos da
+    página são objetos com métodos) e **Programação assíncrona** (depois do
+    DOM, antes de Eventos e do fetch).
+  - **Ilha Python** (`python`) logo depois de Rede e Servidor e antes da
+    IA: fundamentos, orientação a objetos, dados (arquivos, CSV, gráficos) e
+    "Outras linguagens" (C, Java/C# e o conceito que é o mesmo). Arte nova
+    no mundo (`ArtePython`), o mundo da trilha Web ficou 250 px mais largo.
+  - Rede e Servidor: **LGPD e ética** (depois de Segurança, antes do
+    projeto), com ponte para a privacidade da IA.
+  - Ofício: **Pensando sistemas** e **Como equipes trabalham** (depois de
+    Testes automatizados), **Da máquina à produção** (antes do deploy) e
+    **Carreira** (a última).
+  - Inglês técnico como fio contínuo: `termoIngles` no `Conceito` (o
+    glossário mostra "em inglês: ..." e a busca acha pelos dois), regra no
+    guia (seção 1).
+  - `entrevista-cliente` registrado em `MOTORES_PLANEJADOS`, com as regras
+    do prompt (perguntas sugeridas resolvem sozinhas, pergunta livre extra,
+    umas 10 perguntas, limite por aluno no servidor, modelo leve, fatos da
+    ficha escrita no conteúdo), usado por `oficio-carreira-u3`.
+  - Museu: as salas 4 e 6 (planejadas) trocaram de lugar (u4 Por baixo do
+    capô, u6 Onde a programação vive), para as salas 3 a 5 ficarem na ordem
+    da parte 2 e o corredor seguir as épocas.
 
-### Etapa 2 — U4, Observar variáveis
+### Etapa 2 — O motor do museu e os antepassados
 
-- O rascunho de `docs/rascunhos/depuracao-u4/` virou conteúdo: fases,
-  unidade, revisão e os dois conceitos no catálogo; `requerMotor` saiu do
-  currículo; os testes de conteúdo passaram a esperar a unidade registrada.
-- 19.446 testes de conteúdo verdes; jornada U4 nos três layouts, cobrando o
-  instante da cena (2.000 ms na pausa do sozinho); publicada.
+- **Área `exposicao`** na composição (`src/motor/exposicao/modelo.ts`):
+  cinco estações (tear, bits, camadas, cor, linha do tempo), estado puro,
+  `aplicarAcaoExposicao` usado pela tela, pelas soluções e pela simulação.
+  Sete validadores e nove ações (`src/conteudo/tipos.ts`), o evento
+  `mexeuNaExposicao`, a checagem `exposicao-do-museu` (dados, ferramenta de
+  cada estação, validadores e ações só nas peças que existem), o progresso
+  salvo (`EstadoFaseSalvo.exposicao`), o degrau 3 `alvo: "exposicao"`, o
+  contexto do tutor e a miniatura da meta.
+- **Antepassados** (`src/componentes/museu/antepassados/`): tecelã (tear
+  de Jacquard como avó, com a corrente de cartões andando), sonhadora de
+  engrenagens (metade de latão, metade planta tracejada), gigante de
+  válvulas (as válvulas acendem por palavra, bigode de cabos), terminal
+  verde (rabugento, braços cruzados), computador bege (acena com um
+  disquete), internet discada (globo tagarela sobre o modem) e celular.
+  Piscam, respiram, a boca acompanha o texto e dormem em silhueta.
+  `FalaAntepassado` dá o jeito de cada época (trama, engrenagens, válvulas,
+  terminal sem acento, 8 bits, modem, notificações), com sons sintetizados
+  novos (`fala-*`, `epoca-*`, peças e `proxima-geracao`).
+- Tokens `--cor-museu-*` e `--cor-ante-*` nos três temas; mostruário
+  `/lab/antepassados`.
 
-### Etapas 3 e 4 — Os dois chamados (U5 e U6)
+### Etapa 3 — O corredor e a próxima geração
 
-Formato contrato (guia, seção 31.10), uma unidade por chamado: aquecimento e
-contrato.
+- `/ilha/origens` (`src/componentes/museu/corredor/`): corredor de lado no
+  computador e descendo no celular (em pé e deitado), parede do fundo em
+  profundidade, as oito épocas com faixa, quadro, holofote e pedestal. O
+  antepassado acorda quando 60% da época aparece (IntersectionObserver),
+  com o som dele, e fala do jeito da época; o computadorzinho guia e reage
+  ("Essa é a minha bisavó!"). As portas (`src/lib/museu.ts`) saem do
+  currículo e do progresso.
+- A árvore da família no fim: com a sala 2 concluída, o corredor leva até
+  ela, o lugar acende, o aluno monta o retrato (kit de clientes: pele,
+  cabelo, cor, roupa, óculos e a assinatura) e entra; confete, o acorde da
+  próxima geração e as boas-vindas de cada parente, das raízes ao
+  computadorzinho. `Progresso.proximaGeracao` guarda o retrato.
 
-- **U5, o estoque que não fecha** (Seu Tonho, Mercadinho Estrela). Aquecimento
-  no caixa, com a cena do letreiro: reproduzir o defeito (o desconto some só
-  com 3 itens), causa raiz e conserto da causa, e o frete repete o método.
-  Contrato: o fechamento soma texto nos dias de entrega ("4" vira "64").
-  Mudança depois do conserto: produto fora do estoque virava NaN.
-- **U6, a agenda do salão** (Dona Zélia, Salão Girassol), sem cena no
-  contrato. Aquecimento na recepção: o conserto que quebra o resto e o teste
-  de regressão. Contrato: o laço decide na primeira marcação da lista, então
-  só recusa o horário ocupado se for o primeiro. Mudança: expediente das 9h
-  às 18h, com as bordas.
-- Nos dois: diagnóstico com cartões no quadro de plano agrupado (a causa certa
-  entre três hipóteses plausíveis; o conserto só vale depois do diagnóstico),
-  relatório do conserto (o que estava errado, como foi achado e como foi
-  testado) que vai para o topo do Snippet, casos escondidos que já
-  funcionavam e `reproduzir` sem depender do número da linha.
-- Conceitos novos com temas Lógica e Ferramentas: reproduzir o defeito, causa
-  raiz e teste de regressão, com dois itens de revisão cada (`termoIngles`
-  ainda não existe no catálogo). Dois clientes novos no kit.
-- Sabotagens provadas em `testes/conteudo/chamados.test.ts`: resultado
-  decorado, `Number(a + b)`, recusar tudo, olhar só a última marcação,
-  trocar o limite do expediente e conserto certo sem diagnóstico.
-- Motor/regras tocados só para caber o formato: `contrato.fimDeIlha: false`
-  (sem a comemoração de fim de ilha) e `FILTRO` na bateria.
+### Etapa 4 — As salas 1 e 2
+
+- Sala 1, **Como o computador entende** (5 fases): o tear (furar cartões
+  tece o desenho), uns e zeros (o cartão revela os bits; válvulas com
+  pesos 8, 4, 2, 1), as camadas (JavaScript, instruções, linguagem de
+  máquina, numa máquina de brinquedo declarada na placa), letras e cores
+  (um byte vira A; #ff0000 e #ff8800 na mesa de cores, com o CSS do botão)
+  e o desafio da oficina (estrela, letra B, amarelo). Missões: folha
+  quadriculada, `(12).toString(2)` no Console, a aba Fontes, o seletor de
+  cores do Estilos e a página `hex-color` da MDN em inglês.
+- Sala 2, **Linha do tempo** (3 fases): dos cartões às válvulas, do chip
+  ao bolso (com as plaquinhas do que mudou) e o desafio da família inteira.
+  Fatos conferidos e anotados em `unidade-2/eventos.ts`; épocas por
+  década, sem dois cartões da mesma década na mesma linha.
+- 12 conceitos novos com temas e `termoIngles`; 24 itens de revisão
+  (previsões sobre vitrines). Unidades publicadas.
+
+### Decisões tomadas sem regra clara
+
+- O museu é área da composição, não tipo de fase novo (ganha a escada de
+  ajuda, as estrelas, o desafio com Rever e a meta sem tela nova).
+- A ilha Python ficou entre Rede e Servidor e IA, só na trilha Web.
+- `FASE_INICIAL` continua a primeira de Sites (o museu vem antes na lista,
+  fora da rota). Os testes que tomavam a primeira unidade como a de Sites
+  passaram a procurá-la.
+- O gigante de válvulas não tem sala; o PC bege recebe a sala 4.
+- Falas neutras de gênero na cerimônia ("Agora você também programa",
+  "Boas-vindas").
 
 ### Validação
 
-- `testar:conteudo -- --maxWorkers=1`: 19.725 testes verdes.
-- Jornadas U4, U5 e U6 nos três layouts; publicação, build e lint verdes.
-- Bateria completa (`npm run bateria`, 199 testes, `PARALELO=2`) verde, sem falhas, em duas partes: um reinício do container interrompeu a primeira depois de 126 testes; os 73 restantes rodaram com `FILTRO`. `bateria:conteudo` (mapa, explorar, publicar e revisão) verde.
+- `npm run testar:conteudo`: 49 arquivos, 21.319 testes verdes.
+- `npm run lint` e `npm run build` verdes.
+- `testes/museu.mjs` (corredor, salas 1 e 2 jogadas pela interface, a
+  cerimônia e menos movimento) verde nos três layouts; `testes/mapa.mjs`
+  atualizado para o corredor.
+- Bateria completa (`PARALELO=4`, servidor de produção): 202 execuções, 200
+  verdes e 2 falhas.
+  - `audio.mjs`: no corredor, o som da primeira época toca logo depois da
+    porta e tomava o `data-ultimo-efeito` antes do teste ler. O motor de
+    áudio passou a avisar cada efeito (`efeito-tocado`) e o teste confere a
+    porta por esse aviso. Rodado de novo: verde (e `museu.mjs` desktop).
+  - `unidades.mjs retrato`: o duplo toque da U4F1 não abre o campo de
+    edição. Reproduz igual num build da principal (sem a rodada 36), então
+    não é desta rodada; ficou em Pendências no ROADMAP.

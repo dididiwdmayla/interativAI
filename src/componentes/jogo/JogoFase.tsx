@@ -52,6 +52,9 @@ import { LinhaDoTempo } from "@/componentes/palco/LinhaDoTempo";
 import { usePrograma } from "./usePrograma";
 import { useDepurador } from "./useDepurador";
 import { useEstruturas } from "./useEstruturas";
+import { useExposicao } from "./useExposicao";
+import { SalaExposicao } from "@/componentes/museu/exposicao/SalaExposicao";
+import { falaDoAnfitriao, resumoDaEstacao } from "@/motor/exposicao/modelo";
 import { useOrdenar } from "./useOrdenar";
 import { useCasos } from "./useCasos";
 import { lerCaso } from "@/motor/casos/modelo";
@@ -490,6 +493,8 @@ export function JogoFase({
   const casos = useCasos({ fase, barramento, programa, salvo: salvo?.casos ?? null, aoUsar: sinalizarUso });
   // Estruturas e desempenho: ver como árvore, o contador de passos e o gráfico da aba Desempenho.
   const estruturas = useEstruturas({ fase, barramento, programa, aoUsar: sinalizarUso });
+  // Fase do museu (área exposicao): as estações da sala.
+  const exposicao = useExposicao({ fase, barramento, salvo: salvo?.exposicao ?? null });
   const { editorSnippetRef } = programa;
   /** "Levar o plano pro código": o bloco de comentários entra no topo do Snippet (ou é atualizado), sem apagar código. */
   const quadroAgora = ordenar.ordenarAgora;
@@ -981,6 +986,7 @@ export function JogoFase({
       ordenar: ordenar.ativo ? { porPasso: ordenar.porPasso, tirarPasso: ordenar.tirarPasso, rodarPlano: ordenar.rodarPlano } : undefined,
       plano: planoNoCodigo ? { levarProCodigo: levarPlanoProCodigo, verPassoNoCodigo: acenderPasso } : undefined,
       casos: casos.ativo ? { escrever: casos.escrever, apagar: casos.apagar, rodar: casos.rodar } : undefined,
+      exposicao: exposicao.ativo ? { mexer: exposicao.mexer } : undefined,
       cena: dadosCena ? { abrirFicha: abrirFichaCena, verPorDentro: verPorDentroCena, mudarVelocidade: mudarVelocidadeCena } : undefined,
       estruturas:
         estruturas.comArvore || estruturas.comGrafico
@@ -1016,6 +1022,8 @@ export function JogoFase({
       casos.escrever,
       casos.apagar,
       casos.rodar,
+      exposicao.ativo,
+      exposicao.mexer,
       depurador.ativo,
       depurador.alternarPontoDeParada,
       depurador.controlar,
@@ -1141,6 +1149,7 @@ export function JogoFase({
   );
   const { circuitoAgora } = circuito;
   const { casosAgora } = casos;
+  const { exposicaoAgora } = exposicao;
   const { ordenarAgora, setDestaque: destacarNoOrdenar } = ordenar;
   /** Degrau 3 no quadro: pisca o cartão (ou o plano); na fase composta, a área do plano aparece. */
   const destacarNoQuadro = useCallback(
@@ -1158,6 +1167,7 @@ export function JogoFase({
       ...(ordenarAgora() ? { ordenar: ordenarAgora() ?? undefined } : {}),
       ...(fase.programa?.snippet ? { snippet: textoSnippet() } : {}),
       ...(casosAgora() ? { casos: casosAgora() ?? undefined } : {}),
+      ...(exposicaoAgora() ? { exposicao: exposicaoAgora() ?? undefined } : {}),
     };
     if (!comDispositivo) return doSimulador;
     const estado = dispositivoAtual.current;
@@ -1167,7 +1177,7 @@ export function JogoFase({
       dispositivo: estado,
       tela: estado.ligado ? { largura: atual.larguraLayout, altura: atual.alturaLayout } : undefined,
     };
-  }, [casosAgora, circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, fase.programa, obterDocumento, ordenarAgora, textoSnippet]);
+  }, [casosAgora, circuitoAgora, comDispositivo, dadosCampanha, depuradorAtivo, estadoDoDepurador, estadoDoPrograma, exposicaoAgora, fase.programa, obterDocumento, ordenarAgora, textoSnippet]);
 
   // Ctrl+Shift+M (Cmd+Shift+M no Mac) liga e desliga a barra, como no Chrome.
   useEffect(() => {
@@ -1206,6 +1216,8 @@ export function JogoFase({
     destacarNoOrdenar: destacarNoQuadro,
     ordenarSalvo: ordenar.estado,
     casosSalvos: casos.estado,
+    destacarNaExposicao: exposicao.setDestaque,
+    exposicaoSalva: exposicao.estado,
   });
   const { estado, objetivo, previsaoPendente, pulsarFerramenta, falar } = motor;
 
@@ -1302,6 +1314,24 @@ export function JogoFase({
   const ferramentaEmCena = apresentacoes.atual ? FERRAMENTAS[apresentacoes.atual] : null;
 
   const abrirCard = useCallback((id: IdFerramenta | null) => setCaixa({ aberta: true, foco: id }), []);
+  // Museu: o que o anfitrião diz agora (pelo objetivo ou pelas partes feitas) e as estações já cumpridas no desafio.
+  const falaSala = exposicao.dados
+    ? falaDoAnfitriao(
+        exposicao.dados,
+        temObjetivos(fase)
+          ? { tipo: "objetivos", ids: fase.objetivos.map((item) => item.id), atual: estado.concluidos }
+          : { tipo: "partes", ids: fase.tipo === "desafio" ? fase.partes.map((parte) => parte.id) : [], feitas: estado.partesFeitas },
+        estado.etapa === "concluida",
+      )
+    : "";
+  // Prática do museu: o objetivo novo abre a estação dele (a que o validador olha).
+  const estacaoDoObjetivo = objetivo && "estacao" in objetivo.validador ? objetivo.validador.estacao : objetivo?.validador.tipo === "todos" ? objetivo.validador.validadores.find((v) => "estacao" in v)?.estacao : undefined;
+  const abrirEstacao = exposicao.abrir;
+  useEffect(() => {
+    if (estacaoDoObjetivo) abrirEstacao(estacaoDoObjetivo);
+  }, [abrirEstacao, estacaoDoObjetivo]);
+  const estacoesFeitas =
+    fase.tipo === "desafio" ? fase.partes.flatMap((parte) => (estado.partesFeitas.includes(parte.id) && "estacao" in parte.validador ? [parte.validador.estacao] : [])) : [];
 
   /** Mostra o trecho do selecionado quando o código aparece de novo. */
   const trocarSegmento = (novo: "arvore" | "estilos" | "codigo") => {
@@ -1512,8 +1542,13 @@ export function JogoFase({
                     : "rodou e nenhum dispositivo mudou"
               }`
             : "";
+          // Museu: a placa da sala e como está cada estação.
+          const museu = exposicao.exposicaoAgora();
+          const sala = museu
+            ? `// A sala do museu: ${museu.dados.placa.titulo}\n${museu.dados.estacoes.map((e) => `// ${resumoDaEstacao(e, museu.estado.estacoes[e.id] ?? null)}`).join("\n")}`
+            : "";
           return {
-            codigo: [cena, plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
+            codigo: [sala, cena, plano, testes, doCodigo?.codigo ?? ""].filter(Boolean).join("\n\n"),
             erro: doCodigo?.erro ?? "",
             variaveis: doCodigo?.variaveis ?? "",
           };
@@ -2595,6 +2630,21 @@ export function JogoFase({
             ) : null,
             snippet: painelDevtools,
             palco: telaPalco,
+            exposicao:
+              exposicao.ativo && exposicao.dados && exposicao.estado ? (
+                <SalaExposicao
+                  dados={exposicao.dados}
+                  estado={exposicao.estado}
+                  mexer={exposicao.mexer}
+                  toque={toque}
+                  destaque={exposicao.destaque}
+                  fala={falaSala}
+                  concluida={estado.etapa === "concluida"}
+                  feitas={estacoesFeitas}
+                  layout={layout}
+                  aoAbrirCard={abrirCard}
+                />
+              ) : null,
             testes: casos.ativo ? (
               <AlvoFerramenta ids={["casos-de-teste"]} className="flex min-h-0 flex-1 flex-col">
                 <AreaCasos

@@ -1,3 +1,5 @@
+import { FASES_ORIGENS_U1, UNIDADE_ORIGENS_U1 } from "./ilhas/origens/museu/unidade-1/unidade";
+import { FASES_ORIGENS_U2, UNIDADE_ORIGENS_U2 } from "./ilhas/origens/museu/unidade-2/unidade";
 import { FASES_DEPURACAO_U6, UNIDADE_DEPURACAO_U6 } from "./ilhas/logica/depuracao/unidade-6/unidade";
 import { FASES_DEPURACAO_U5, UNIDADE_DEPURACAO_U5 } from "./ilhas/logica/depuracao/unidade-5/unidade";
 import { FASES_DEPURACAO_U4, UNIDADE_DEPURACAO_U4 } from "./ilhas/logica/depuracao/unidade-4/unidade";
@@ -66,6 +68,9 @@ import { FASES_UNIDADE_REPETICAO_U3, UNIDADE_REPETICAO_U3 } from "./ilhas/logica
 import type { Fase, Unidade } from "./tipos";
 
 export const UNIDADES: readonly Unidade[] = [
+  // Museu das Origens (sempre aberto, fora da rota): primeiro na ordem do currículo.
+  UNIDADE_ORIGENS_U1,
+  UNIDADE_ORIGENS_U2,
   UNIDADE_1,
   UNIDADE_2,
   UNIDADE_3,
@@ -131,6 +136,8 @@ export const UNIDADES: readonly Unidade[] = [
 
 /** Todas as fases, na ordem das unidades. */
 export const FASES: readonly Fase[] = [
+  ...FASES_ORIGENS_U1,
+  ...FASES_ORIGENS_U2,
   ...FASES_UNIDADE_1,
   ...FASES_UNIDADE_2,
   ...FASES_UNIDADE_3,
@@ -194,7 +201,8 @@ export const FASES: readonly Fase[] = [
   ...FASES_UNIDADE_CONTRATO_LOGICA,
 ];
 
-export const FASE_INICIAL: Fase = FASES[0];
+/** A primeira fase da rota (Sites, U1): o museu vem antes na lista, mas fica fora da rota. */
+export const FASE_INICIAL: Fase = FASES.find((fase) => fase.unidadeId === "sites-elementos-u1") ?? FASES[0];
 
 export function faseDoId(id: string): Fase | undefined {
   return FASES.find((fase) => fase.id === id);

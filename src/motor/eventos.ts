@@ -107,7 +107,9 @@ export type EventoFase =
   /** (Contrato) Releu o documento do cliente. */
   | { tipo: "leuDocumento" }
   /** (Contrato) Baixou o programa para rodar fora do jogo (Levar pro mundo). */
-  | { tipo: "levouProMundo" };
+  | { tipo: "levouProMundo" }
+  /** (Exposição do museu) Mexeu numa estação: `acao` é o tipo da ação (furarCartao, alternarBit...). */
+  | { tipo: "mexeuNaExposicao"; estacao: string; acao: string };
 
 /**
  * Para onde um link levaria:
@@ -173,4 +175,5 @@ export const TIPOS_EVENTO: readonly TipoEvento[] = [
   "conferiuRequisitos",
   "leuDocumento",
   "levouProMundo",
+  "mexeuNaExposicao",
 ];

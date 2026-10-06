@@ -11,6 +11,11 @@ import type { IlhaCurriculo } from "./tipos";
 
 const MOTOR_PAGINAS_VIVAS = "JS do jogador rodando no site-alvo e aba Aplicação";
 const MOTOR_REDE = "aba Rede, servidor simulado e diagrama de requisições";
+const MOTOR_OBJETOS = "classes no executor e no palco da memória (class, new, this, extends, com o objeto e os métodos dele visíveis)";
+const MOTOR_ASSINCRONO =
+  "executor com tempo assíncrono: setTimeout, promessas e async/await no relógio simulado, com a fila do loop de eventos visível no palco";
+const MOTOR_PYTHON = "Python no navegador (Pyodide), com o Console e o palco da memória falando Python";
+const MOTOR_ENTREVISTA = "entrevista-cliente";
 const MOTOR_IA =
   "IA ao vivo: nas fases guiadas, código roteirizado aparecendo como se fosse digitado no editor, de forma determinística e com um bug plantado fixo; nas livres, o Gemini escrevendo ao vivo e o jogador aceitando, rejeitando ou corrigindo cada trecho";
 
@@ -24,7 +29,7 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "museu",
         nome: "Museu",
         icone: "museu",
-        requerMotor: "tipos de atividade linha do tempo, comparador de linguagens executável e diagrama de rede",
+        // As salas 1 e 2 têm motor desde a rodada 36 (área exposicao); as outras pedem exposições novas.
         unidades: [
           {
             id: "origens-museu-u1",
@@ -43,26 +48,28 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Por que existem tantas linguagens",
             meta: "Ver o mesmo programa em várias linguagens, lado a lado, rodando.",
             temas: ["fundamentos", "logica"],
+            requerMotor: "exposição comparador de linguagens executável (o mesmo programa lado a lado, rodando)",
           },
           {
             id: "origens-museu-u4",
-            titulo: "Onde a programação vive",
-            meta: "Descobrir onde a programação aparece no dia a dia e quais carreiras existem.",
-            temas: ["fundamentos"],
+            titulo: "Por baixo do capô",
+            meta: "Espiar o computador por dentro: memória, processador, sistema, arquivos e os portões lógicos que fazem contas.",
+            temas: ["fundamentos", "desempenho", "logica"],
+            requerMotor: "exposição do computador aberto (peças que se tocam e se explicam), junto dos quebra-cabeças de portões lógicos",
           },
           {
             id: "origens-museu-u5",
             titulo: "Front, back e o caminho de um clique",
-            meta: "Ter a visão geral do que é front, do que é back e do caminho de um clique.",
+            meta: "Ter a visão geral do que é front, do que é back e do caminho de um clique, dos cabos aos servidores.",
             temas: ["fundamentos", "interfaces", "servidores"],
+            requerMotor: "exposição diagrama de rede (o caminho de um clique, dos cabos aos servidores)",
           },
           {
             id: "origens-museu-u6",
-            titulo: "Por baixo do capô",
-            meta: "Espiar o computador por dentro: memória, processador, sistema, arquivos, binário e hexadecimal, e os cabos da internet.",
-            temas: ["fundamentos", "desempenho", "logica"],
-            // O circuito-logico ficou pronto na rodada 17 (com realimentação): falta o resto do museu.
-            requerMotor: "tipos de atividade do museu (linha do tempo, comparador de linguagens e diagrama)",
+            titulo: "Onde a programação vive",
+            meta: "Descobrir onde a programação aparece no dia a dia e quais carreiras existem.",
+            temas: ["fundamentos"],
+            requerMotor: "exposição o dia de alguém (aparelhos e apps que se abrem para mostrar o código de dentro)",
           },
         ],
       },
@@ -569,6 +576,35 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
     id: "paginas-vivas",
     nome: "Páginas vivas",
     zonas: [
+      // Primeiro, porque os elementos da página SÃO objetos com métodos
+      // (elemento.classList.add): quem já sabe o que é um objeto com métodos
+      // lê o DOM como mais um objeto, e não como mágica.
+      {
+        id: "objetos",
+        nome: "Objetos e classes",
+        icone: "console",
+        requerMotor: MOTOR_OBJETOS,
+        unidades: [
+          {
+            id: "paginas-vivas-objetos-u1",
+            titulo: "Classes e objetos",
+            meta: "Criar vários objetos do mesmo molde com uma classe, cada um com os seus dados e os seus métodos.",
+            temas: ["logica", "dados"],
+          },
+          {
+            id: "paginas-vivas-objetos-u2",
+            titulo: "Encapsulamento",
+            meta: "Esconder o que é de dentro do objeto e deixar só os métodos que os outros podem usar.",
+            temas: ["logica", "seguranca"],
+          },
+          {
+            id: "paginas-vivas-objetos-u3",
+            titulo: "Herança e composição",
+            meta: "Reaproveitar um molde estendendo outro ou juntando objetos menores, e saber quando cada um vale.",
+            temas: ["logica"],
+          },
+        ],
+      },
       {
         id: "dom",
         nome: "DOM pelo código",
@@ -580,6 +616,34 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "DOM pelo código",
             meta: "Mudar a página pelo código: achar elementos e trocar textos, classes e estilos.",
             temas: ["interfaces", "logica"],
+          },
+        ],
+      },
+      // Antes de eventos (um clique é um aviso que chega depois) e do fetch da
+      // Rede e Servidor (a resposta chega depois): o "depois" vem primeiro.
+      {
+        id: "assincrono",
+        nome: "Programação assíncrona",
+        icone: "console",
+        requerMotor: MOTOR_ASSINCRONO,
+        unidades: [
+          {
+            id: "paginas-vivas-assincrono-u1",
+            titulo: "O loop de eventos",
+            meta: "Entender pela intuição por que o código não espera parado e o que é a fila do loop de eventos.",
+            temas: ["logica", "desempenho"],
+          },
+          {
+            id: "paginas-vivas-assincrono-u2",
+            titulo: "Temporizadores",
+            meta: "Agendar trabalho para depois com setTimeout e setInterval, e cancelar quando não precisar mais.",
+            temas: ["logica", "interfaces"],
+          },
+          {
+            id: "paginas-vivas-assincrono-u3",
+            titulo: "Promessas e async/await",
+            meta: "Esperar uma resposta que chega depois com promessas e async/await, tratando o caso em que ela falha.",
+            temas: ["logica", "apis"],
           },
         ],
       },
@@ -753,6 +817,29 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
           },
         ],
       },
+      // Depois de Segurança (proteger os dados) e antes do projeto (que guarda
+      // dados de gente de verdade): o que se PODE fazer com eles. Ponte com a
+      // zona Custo e privacidade da ilha IA.
+      {
+        id: "lgpd-e-etica",
+        nome: "LGPD e ética",
+        icone: "seguranca",
+        requerMotor: MOTOR_REDE,
+        unidades: [
+          {
+            id: "rede-servidor-lgpd-e-etica-u1",
+            titulo: "Dados pessoais e consentimento",
+            meta: "Reconhecer o que é dado pessoal e pedir consentimento de verdade, sem caixinha marcada por padrão.",
+            temas: ["seguranca", "dados"],
+          },
+          {
+            id: "rede-servidor-lgpd-e-etica-u2",
+            titulo: "O que pode e o que não pode",
+            meta: "Decidir o que o sistema pode guardar, por quanto tempo e com quem dividir, e atender quem pede para apagar.",
+            temas: ["seguranca", "dados", "servidores"],
+          },
+        ],
+      },
       {
         id: "front-e-back",
         nome: "Front e back juntos",
@@ -764,6 +851,102 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Front e back juntos",
             meta: "Ligar uma página ao próprio servidor num projeto completo.",
             temas: ["apis", "servidores", "interfaces"],
+          },
+        ],
+      },
+    ],
+  },
+  // Depois de Rede e Servidor: com a web inteira na mão (front e back em
+  // JavaScript), a segunda linguagem mostra que o conceito é o mesmo e só a
+  // escrita muda. Vem antes da IA porque julgar código gerado em mais de uma
+  // linguagem pede ter lido mais de uma.
+  {
+    id: "python",
+    nome: "Python",
+    zonas: [
+      {
+        id: "fundamentos",
+        nome: "Fundamentos em Python",
+        icone: "console",
+        requerMotor: MOTOR_PYTHON,
+        unidades: [
+          {
+            id: "python-fundamentos-u1",
+            titulo: "O mesmo, em Python",
+            meta: "Escrever em Python o que você já faz em JavaScript: variáveis, textos, contas e print.",
+            temas: ["logica"],
+          },
+          {
+            id: "python-fundamentos-u2",
+            titulo: "Decisões e repetição",
+            meta: "Usar if, for e while em Python, onde a indentação é a regra e não o enfeite.",
+            temas: ["logica"],
+          },
+          {
+            id: "python-fundamentos-u3",
+            titulo: "Funções, listas e dicionários",
+            meta: "Organizar o programa em funções e guardar dados em listas e dicionários do Python.",
+            temas: ["logica", "dados"],
+          },
+        ],
+      },
+      {
+        id: "objetos",
+        nome: "Orientação a objetos",
+        icone: "console",
+        requerMotor: MOTOR_PYTHON,
+        unidades: [
+          {
+            id: "python-objetos-u1",
+            titulo: "Classes em Python",
+            meta: "Criar classes com __init__ e self, e reconhecer a mesma ideia das classes do JavaScript.",
+            temas: ["logica", "dados"],
+          },
+        ],
+      },
+      {
+        id: "dados",
+        nome: "Dados",
+        icone: "aplicacao",
+        requerMotor: `${MOTOR_PYTHON}; arquivos de mentirinha e gráficos simples`,
+        unidades: [
+          {
+            id: "python-dados-u1",
+            titulo: "Arquivos e CSV",
+            meta: "Ler e escrever arquivos e planilhas CSV para responder perguntas sobre os dados.",
+            temas: ["dados"],
+          },
+          {
+            id: "python-dados-u2",
+            titulo: "Gráficos simples",
+            meta: "Transformar uma tabela num gráfico simples que conta o que os números dizem.",
+            temas: ["dados", "interfaces"],
+          },
+        ],
+      },
+      {
+        id: "outras-linguagens",
+        nome: "Outras linguagens",
+        icone: "fontes",
+        requerMotor: "comparador de linguagens (o mesmo programa lado a lado), com a memória do C e a compilação simuladas",
+        unidades: [
+          {
+            id: "python-outras-linguagens-u1",
+            titulo: "C: memória e compilar",
+            meta: "Ver um programa em C ser compilado e cuidar da memória que o JavaScript e o Python cuidam por você.",
+            temas: ["fundamentos", "desempenho"],
+          },
+          {
+            id: "python-outras-linguagens-u2",
+            titulo: "Java e C#",
+            meta: "Ler um programa em Java ou C#, com tipos declarados e classes em tudo, e achar o que você já conhece.",
+            temas: ["logica"],
+          },
+          {
+            id: "python-outras-linguagens-u3",
+            titulo: "O conceito é o mesmo",
+            meta: "Comparar o mesmo problema em várias linguagens e aprender uma linguagem nova pelo que muda na escrita.",
+            temas: ["fundamentos", "logica"],
           },
         ],
       },
@@ -965,6 +1148,54 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
           },
         ],
       },
+      // Depois de testes: com código de verdade e testes para proteger,
+      // dá para reorganizar sem medo. A engenharia vem na intuição.
+      {
+        id: "pensando-sistemas",
+        nome: "Pensando sistemas",
+        icone: "componentes",
+        requerMotor: "projeto com vários arquivos, navegável dentro do jogo (o mesmo de Ler código dos outros)",
+        unidades: [
+          {
+            id: "oficio-pensando-sistemas-u1",
+            titulo: "Camadas e responsabilidades",
+            meta: "Separar o projeto em camadas, cada parte com uma responsabilidade só.",
+            temas: ["ferramentas", "logica"],
+          },
+          {
+            id: "oficio-pensando-sistemas-u2",
+            titulo: "Código limpo",
+            meta: "Deixar o código fácil de ler e de mudar: nomes que explicam, funções pequenas e nada repetido à toa.",
+            temas: ["ferramentas", "logica"],
+          },
+          {
+            id: "oficio-pensando-sistemas-u3",
+            titulo: "Arquitetura na intuição",
+            meta: "Desenhar como as partes de um sistema conversam antes de escrever, e mudar o desenho quando o problema muda.",
+            temas: ["ferramentas", "servidores"],
+          },
+        ],
+      },
+      {
+        id: "como-equipes-trabalham",
+        nome: "Como equipes trabalham",
+        icone: "git",
+        requerMotor: "quadro de tarefas e revisão de código simulados (sobre o git em equipe simulado)",
+        unidades: [
+          {
+            id: "oficio-como-equipes-trabalham-u1",
+            titulo: "Tarefas e estimativa",
+            meta: "Quebrar um pedido em tarefas que cabem num dia e estimar com honestidade, dizendo o que não se sabe.",
+            temas: ["ferramentas"],
+          },
+          {
+            id: "oficio-como-equipes-trabalham-u2",
+            titulo: "Revisão e o básico do ágil",
+            meta: "Revisar e ser revisado com cuidado, e entender o ciclo curto de planejar, fazer, mostrar e ajustar.",
+            temas: ["ferramentas"],
+          },
+        ],
+      },
       {
         id: "variaveis-de-ambiente",
         nome: "Variáveis de ambiente",
@@ -976,6 +1207,28 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Variáveis de ambiente",
             meta: "Guardar configurações e segredos fora do código com variáveis de ambiente.",
             temas: ["seguranca", "servidores", "ferramentas"],
+          },
+        ],
+      },
+      // Depois das variáveis de ambiente (a configuração fora do código) e
+      // antes do deploy: o caminho do código até o servidor, no básico.
+      {
+        id: "da-maquina-a-producao",
+        nome: "Da máquina à produção",
+        icone: "terminal",
+        requerMotor: "esteira de integração contínua, contêiner e logs simulados",
+        unidades: [
+          {
+            id: "oficio-da-maquina-a-producao-u1",
+            titulo: "Integração contínua",
+            meta: "Fazer os testes rodarem sozinhos a cada mudança e barrar o que quebra antes de chegar no ar.",
+            temas: ["ferramentas", "servidores"],
+          },
+          {
+            id: "oficio-da-maquina-a-producao-u2",
+            titulo: "Contêineres e logs",
+            meta: "Empacotar o app para rodar igual em qualquer máquina e ler os logs para descobrir o que aconteceu no servidor.",
+            temas: ["ferramentas", "servidores"],
           },
         ],
       },
@@ -1024,6 +1277,35 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Portfólio e aprender sozinho",
             meta: "Montar o portfólio com os seus projetos e um plano para continuar aprendendo sozinho.",
             temas: ["ferramentas"],
+          },
+        ],
+      },
+      // A última zona do núcleo: levar o que se aprendeu para o trabalho.
+      // Ligada à zona Ser encontrado da Ilha Sites (o freelancer precisa
+      // ser achado) e à Portfólio, logo antes.
+      {
+        id: "carreira",
+        nome: "Carreira",
+        icone: "publicar",
+        requerMotor: `${MOTOR_ENTREVISTA} (entrevista com o cliente) e entrevista técnica simulada`,
+        unidades: [
+          {
+            id: "oficio-carreira-u1",
+            titulo: "Entrevista técnica",
+            meta: "Programar na frente de alguém pensando em voz alta, perguntando antes de começar e testando no fim.",
+            temas: ["ferramentas", "logica"],
+          },
+          {
+            id: "oficio-carreira-u2",
+            titulo: "Portfólio que conta história",
+            meta: "Apresentar os seus projetos dizendo o problema, o que você decidiu e o que aprendeu.",
+            temas: ["ferramentas", "presenca-digital"],
+          },
+          {
+            id: "oficio-carreira-u3",
+            titulo: "O caminho freelancer",
+            meta: "Descobrir o problema do cliente numa conversa, fazer o orçamento e fechar um contrato claro.",
+            temas: ["ferramentas", "presenca-digital"],
           },
         ],
       },
