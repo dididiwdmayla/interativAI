@@ -436,7 +436,16 @@ export function JogoFase({
   /** (Fase composta) A linha do comentário do passo que o aluno tocou no plano: continua acesa depois das ajudas. */
   const linhaApontada = useRef<number | null>(null);
   // O depurador da aba Fontes (pontos de parada, controles, Escopo, Observar e Pilha de chamadas).
-  const depurador = useDepurador({ fase, barramento, programa, editorRef: programa.editorSnippetRef, salvo: salvo?.programa ?? null, aoUsar: sinalizarUso });
+  const depurador = useDepurador({
+    fase,
+    barramento,
+    programa,
+    editorRef: programa.editorSnippetRef,
+    salvo: salvo?.programa ?? null,
+    aoUsar: sinalizarUso,
+    // Retomar: a cena continua a animação do instante da pausa. Uma execução nova só limpa o pedido antigo.
+    aoTerminar: (retomadoEmMs) => setFocoCena(retomadoEmMs === null ? null : { tempoMs: retomadoEmMs, filtro: null, chave: Date.now(), tocar: true }),
+  });
   const [destaqueConsole, setDestaqueConsole] = useState(false);
   // Fase de circuito lógico: a bancada (o circuito é a fonte única de verdade dela).
   const circuito = useCircuito({ fase, barramento, salvo: salvo?.circuito ?? null, aoUsar: sinalizarUso });
@@ -525,6 +534,14 @@ export function JogoFase({
   const passoEscolhido = pausaNoPalco ?? (escolhaDePasso && escolhaDePasso.de === programa.ultimo ? escolhaDePasso.indice : null);
   const indicePasso = passoEscolhido ?? passosDoRastro.length - 1;
   const passoNoPalco = passosDoRastro[indicePasso] ?? null;
+  // Pausado no depurador: a cena fica parada no instante da pausa, com o estado dos aparelhos daquele passo.
+  const execucaoDaPausa = depurador.sessao && depurador.sessao.resultado === programa.ultimo ? depurador.sessao.resultado : null;
+  const indiceDaPausa = depurador.sessao?.pausa.indice ?? 0;
+  const focoDaPausa = useMemo<FocoCena | null>(() => {
+    const tempoMs = execucaoDaPausa?.passos[indiceDaPausa]?.tempoMs;
+    if (!execucaoDaPausa?.cena || tempoMs === undefined) return null;
+    return { tempoMs, filtro: { execucao: execucaoDaPausa.cena.execucao, passo: indiceDaPausa }, chave: indiceDaPausa };
+  }, [execucaoDaPausa, indiceDaPausa]);
   const fotoNoPalco = passoNoPalco?.memoria ?? programa.ultimo?.memoriaFinal ?? null;
   const fotoAnteriorNoPalco = passoEscolhido !== null ? (passosDoRastro[passoEscolhido - 1]?.memoria ?? programa.memoriaAnterior) : programa.memoriaAnterior;
   const irParaPasso = (indice: number) => {
@@ -2500,7 +2517,7 @@ export function JogoFase({
                   temposDosPassos={temposDosPassos}
                   variantes={variantesCena}
                   aoPassar={seguirCena}
-                  foco={focoCena}
+                  foco={focoDaPausa ?? focoCena}
                   mostrarTitulo={layout === "desktop"}
                   ficha={fichaCena}
                   aoTocarDispositivo={(id) => {

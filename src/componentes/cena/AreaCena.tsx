@@ -23,7 +23,13 @@ const SEM_PASSOS: readonly (number | undefined)[] = [];
 export type VelocidadeCena = (typeof VELOCIDADES)[number];
 
 /** Ir para um instante de fora (a linha do tempo da execução escolheu um passo). `chave` muda a cada pedido. */
-export type FocoCena = { tempoMs: number; filtro: FiltroPasso | null; chave: number };
+export type FocoCena = {
+  tempoMs: number;
+  filtro: FiltroPasso | null;
+  chave: number;
+  /** Retomar: a cena toca dali até o fim da execução (sem filtro), em vez de parar no instante. */
+  tocar?: boolean;
+};
 
 type Props = {
   dados: DadosCena;
@@ -145,9 +151,11 @@ export function AreaCena({
   if (foco !== focoVisto) {
     setFocoVisto(foco);
     if (foco) {
-      setTocando(false);
+      const fim = foco.tocar && rastroDaExecucao ? fimDaAnimacao(rastroDaExecucao) : foco.tempoMs;
       setFiltro(foco.filtro);
       setTempoMs(foco.tempoMs);
+      setAte(Math.max(fim, foco.tempoMs));
+      setTocando(Boolean(foco.tocar) && fim > foco.tempoMs);
     }
   }
 
