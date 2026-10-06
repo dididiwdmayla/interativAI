@@ -473,6 +473,18 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             meta: "Comparar valor, tipo e escopo em cada pausa e confirmar a hipótese antes de consertar.",
             temas: ["logica", "ferramentas"],
           },
+          {
+            id: "logica-depuracao-u5",
+            titulo: "Chamado: o estoque que não fecha",
+            meta: "Atender um chamado de verdade: reproduzir um defeito vago, achar a causa e consertar sem quebrar o resto.",
+            temas: ["logica", "ferramentas"],
+          },
+          {
+            id: "logica-depuracao-u6",
+            titulo: "Chamado: a agenda do salão",
+            meta: "Consertar um software com defeito, provar o conserto com os casos antigos e entregar o relatório.",
+            temas: ["logica", "ferramentas"],
+          },
         ],
       },
       {

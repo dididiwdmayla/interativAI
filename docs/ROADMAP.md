@@ -29,13 +29,31 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 35, cena pausada, U4 e os dois chamados (zona Depuração
+  completa):** com o depurador pausado, a cena mostra o instante da pausa
+  (tempo e estado dos aparelhos, filtrados por execução e passo, batendo
+  com o palco, o Observar e o Console); Passar por cima, Entrar e Sair
+  levam a cena ao novo instante e Retomar toca dali até o fim
+  (`testes/depuracao-cena-bloqueio.mjs`, nos três layouts e na bateria).
+  **U4, Observar variáveis**, saiu do rascunho (estufa, tipo e escopo, lista
+  modificada no percurso), sem `requerMotor`. **Dois chamados** no formato
+  contrato, uma unidade por chamado: **U5, o estoque que não fecha** (Seu
+  Tonho, Mercadinho Estrela: a entrega digitada como texto soma junto; depois
+  do conserto, produto fora do estoque virava NaN) e **U6, a agenda do
+  salão** (Dona Zélia: o laço só recusava o horário ocupado se fosse o
+  primeiro da lista; depois, o expediente das 9h às 18h). Aquecimento com
+  cena em cada um; diagnóstico com cartões (quadro de plano agrupado), relatório
+  do conserto nos comentários do código e casos escondidos que preservam o
+  que já funcionava. Três conceitos novos (reproduzir o defeito, causa raiz e
+  teste de regressão), seis itens de revisão e dois clientes no kit. A zona
+  Depuração e a Ilha Lógica ficam completas, com o contrato da padaria no
+  fim. `fimDeIlha: false` tira a comemoração de fim de ilha dos chamados.
+  Guia, seção 31.10. Detalhe e validação em `docs/PROGRESSO.md`.
+
 - **Depuração, conteúdo U1 a U3:** Ler a mensagem de erro, Pontos de
   parada e Passo a passo, uma unidade por commit, nove fases, oito
   conceitos e 16 revisões. Jornadas nos três layouts, publicação, build
-  e lint passaram. A zona e a Ilha Lógica ainda não estão completas:
-  a inspeção visual da cena revelou o bloqueio descrito em Pendências.
-  U4 permanece em rascunho; o contrato continua no fim do currículo.
-  Bateria de conteúdo em produção verde; detalhe e retestes no PROGRESSO.
+  e lint passaram; bateria de conteúdo em produção verde.
 
 - **Zona Estruturas de dados completa (U1 a U4):** Pilha, Fila,
   Dicionário (Map) e Árvore, na ordem do mapa e um commit por unidade.
@@ -603,33 +621,23 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Depuração interrompida pela regra de parada: U1 a U3 publicadas,
-  U4 em rascunho sem registro/publicação. PR em rascunho até o motor
-  sincronizar a cena com a pausa; não declarar a Ilha Lógica completa.
-
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
 
 ### Pendências
 
-- **Bloqueio de Depuração — cena visual fora da foto da pausa:** Observar
-  lê a memória correta, mas AreaCena reproduz o rastro inteiro. Em U3-f1,
-  ponto na linha 6: antes de `proxima("verde")`, o desenho chega a 4.000 ms
-  com sinal vermelho; o estado da pausa é 0 ms com sinal verde. Na U4-f1,
-  Watch mostra noite seca (false/20), mas o desenho já avança para dia
-  úmido. As três jornadas da U4 falham ao cobrar o instante da cena.
-  Reprodução: servidor e `node testes/depuracao-cena-bloqueio.mjs desktop`
-  na mesma invocação (`URL_JOGO=http://127.0.0.1:3000`). Não integra a
-  bateria verde: é uma prova do bloqueio, a promover quando corrigido.
-  `JogoFase.tsx` só envia `focoCena` ao mover a linha do tempo manualmente;
-  os controles de depuração não o atualizam. `AreaCena.tsx` inicia a
-  animação com rastro novo; `useDepurador` consulta a foto corretamente.
-  Conserto exigido: cada pausa/Passar/Entrar/Sair deve focar tempo **e**
-  filtro de execução/passo (comandos diferentes podem ter o mesmo tempo),
-  segurar a animação e preservar retomada/linha do tempo. Conferir aparelho
-  e entradas nos três layouts em U2/U3/U4. Não improvisar espera no conteúdo.
-  A U4, seus quatro itens de revisão e os dados da jornada ficam em
-  rascunho em `docs/rascunhos/depuracao-u4/`, fora dos índices e catálogo; `requerMotor` mantém a unidade travada.
+- **Depuração, para depois (rodada 35):**
+  - A passagem de uma pausa para a seguinte (Passar por cima, Entrar, Sair)
+    leva a cena por salto, como a linha do tempo faz; só Retomar toca a
+    animação. Animar o trecho entre as duas pausas fica como melhoria.
+  - Os chamados não têm Levar pro mundo e usam `fimDeIlha: false`; o Levar
+    pro mundo do software sem cena (o programa e o relatório num .js) é uma
+    ideia para o contrato das próximas ilhas.
+  - Não há um cartão de diagnóstico dedicado no formato contrato: o quadro de
+    plano agrupado faz o papel (guia, 31.10). Um tipo próprio só vale se mais
+    contratos pedirem diagnóstico.
+  - O catálogo de conceitos não tem `termoIngles`; os três conceitos novos
+    entram só com nome, resumo e temas.
 
 - **Testes sob carga (Depuração):** a checagem conjunta das bancadas
   tem limite de 5 s, e a prova de recursão infinita espera estourar a
@@ -656,9 +664,8 @@ núcleo comum.
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
     pro mundo de cada ilha (o site com interação, o sistema com dados): o
     da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
-  - Enquanto a U4 de Depuração está bloqueada, o contrato abre depois de
-    Estruturas de dados; a fase 1 da unidade
-    apresenta os aparelhos específicos da padaria.
+  - O contrato da padaria abre depois de Estruturas de dados; a fase 1 da
+    unidade apresenta os aparelhos específicos da padaria.
   - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
     casos de teste (o divisor arrasta). Em pé, a cena aberta aperta o
     código; ela recolhe sozinha só com o teclado aberto.
@@ -794,12 +801,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Corrigir a sincronização visual cena/depurador (Pendências), retomar
-   a U4 e repetir as jornadas de investigação U2/U3/U4 nos três layouts.
-   Depois publicar U4 e concluir Depuração/Ilha Lógica, com contrato no fim.
-2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
-   comparador de linguagens e diagrama).
-3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
+1. Opus: Origens, parte 1 (os tipos de atividade do Museu: linha do
+   tempo, comparador de linguagens e diagrama).
+2. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
    ao vivo, que reaproveita a tela composta com a especificação e o código
    gerado; Ofício, com os arquivos do projeto e os testes automatizados),
    intercalados com conteúdo, e a trilha Automação industrial a partir do

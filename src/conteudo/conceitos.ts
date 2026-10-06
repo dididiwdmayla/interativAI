@@ -17,6 +17,9 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  "reproduzir-o-defeito": {"nome": "Reproduzir o defeito", "resumo": "Antes de procurar a causa, ache um caso que funciona e um que falha e compare as entradas: o que muda entre eles é a pista.", "temas": ["logica", "ferramentas"]},
+  "causa-raiz": {"nome": "Causa raiz", "resumo": "O sintoma é o que aparece errado; a causa raiz é a decisão no código que o produz. Consertar só o sintoma deixa o defeito vivo.", "temas": ["logica", "ferramentas"]},
+  "teste-de-regressao": {"nome": "Teste de regressão", "resumo": "Depois de consertar, rode de novo os casos antigos junto com o novo: um conserto bom não quebra o que já funcionava.", "temas": ["logica", "ferramentas"]},
   "observar-expressoes": {"nome": "Observar expressões", "resumo": "Observar acompanha valores e condições no instante de cada pausa sem alterar o código investigado.", "temas": ["logica", "ferramentas"]},
   "escopo-na-pausa": {"nome": "Escopo na pausa", "resumo": "Escopo separa as variáveis locais, de bloco e de fora para revelar qual caixinha a linha pausada lê.", "temas": ["logica", "ferramentas"]},
   "retorno-no-depurador": {"nome": "Investigar o retorno", "resumo": "Comparar o valor local com o que chega a quem chamou distingue cálculo, impressão e retorno ausente.", "temas": ["logica", "ferramentas"]},

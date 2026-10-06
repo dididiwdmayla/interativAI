@@ -3010,7 +3010,7 @@ export function JogoFase({
               tempoMs: estadoContrato.tempoMs,
             })}
             aoEntregar={comClique(motor.entregar)}
-            comemoracao={<ComemoracaoIlha ilha={local.unidade.ilha} cliente={contrato.contrato.cliente} projeto={contrato.contrato.projeto} />}
+            comemoracao={contrato.contrato.fimDeIlha === false ? undefined : <ComemoracaoIlha ilha={local.unidade.ilha} cliente={contrato.contrato.cliente} projeto={contrato.contrato.projeto} />}
           />
           {levaJs && (
             <DialogoLevarProMundoJs

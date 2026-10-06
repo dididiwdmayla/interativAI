@@ -1,20 +1,24 @@
 # Atritos da fábrica
 
-Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-33.md`.
+Rodada anterior: `docs/arquivo/ATRITOS-FABRICA-rodada-34.md`.
 
-## Rodada 34: zona Depuração
+## Rodada 35: conserto da cena pausada, U4 e os chamados
 
-- Simulação e Watch corretos não provam que o desenho corresponde à pausa.
-  Cobrar tempo e estado do aparelho revelou a cena animando o rastro inteiro;
-  bloqueio reproduzido também na U3. U4 retirada dos registros, sem adaptar
-  o conteúdo para mascarar o motor. Pendência antes de concluir a ilha.
-- Comandos com o mesmo tempo pedem filtro de execução/passo, além de ms.
-  Separar condição e comando em linhas permite pausar antes de cada operação.
-- Casos escondidos com nomes diferentes rejeitam inversão; nomes repetidos
-  sozinhos podem esconder esse conserto errado. U1 reforçada sem mudar ids.
-- Guiado e sozinho compartilham a habilidade; jornadas comparam as ações do
-  TS e leem Watch/Pilha pela UI. U4 e revisão permanecem rascunhos.
-- Conteúdo sem navegadores concorrentes e `--maxWorkers=1` evitou falhas
-  antigas sensíveis à carga. Servidor e navegador na mesma invocação.
-- Catálogo alimenta o glossário: conceito de rascunho sem fase ativa falha.
-  U4 guardada como texto em docs/rascunhos, incluindo catálogo/revisões.
+- O teste do bloqueio só cobria a pausa inicial. Foi ampliado para Passar por
+  cima e Retomar, o caminho que o motor ainda não cobria; uma prova de
+  sincronização precisa andar com os controles, não só olhar a primeira pausa.
+- A regra de ritmo das cenas (toda unidade nova da Lógica tem cena) pega um
+  chamado sem cena antes do `publicar:conteudo`. Resolvido pondo a cena no
+  aquecimento; o contrato pode ficar sem ela.
+- Não há cartão de diagnóstico no formato contrato: a etapa de requisitos
+  trata de "o que o cliente pediu". O quadro de plano agrupado serviu de
+  diagnóstico e de relatório, e a parte do conserto só marca depois dele.
+- O plano levado para o código desloca as linhas: investigar com
+  `pausouNaLinha` quebraria. Em contrato, `observou` com valor basta.
+- Servidor `next start` deixa um processo filho vivo quando só o pai é
+  morto: depois de um build novo, ele serve o site velho. Encerrar o
+  `next-server` junto no script de teste.
+- Contrato novo repete a jornada da padaria quase inteira: copiar
+  `contrato-logica.mjs` e tirar o Levar pro mundo foi o caminho curto. A
+  jornada espera o diálogo da entrega sair antes de abrir a conclusão (dois
+  diálogos "Continuar" ao mesmo tempo).

@@ -4,7 +4,8 @@ import { FASES, UNIDADES } from '@/conteudo';
 import { CURRICULO } from '@/curriculo/curriculo';
 import type { Fase } from '@/conteudo/tipos';
 import { criarSimulacao } from '@/motor/simulacao';
-const fases = FASES.filter(f => f.unidadeId.startsWith('logica-depuracao-'));
+// U1 a U4 são as unidades de investigação; U5 e U6 são os chamados (contrato), testados em chamados.test.ts.
+const fases = FASES.filter(f => /^logica-depuracao-u[1-4]$/.test(f.unidadeId));
 const jornadas = JSON.parse(readFileSync('testes/depuracao-jornadas.json', 'utf8')) as Record<string, Fase[]>;
 it('jornada usa os mesmos dados, ações e previsões das fases', () => {
   for (const fase of fases) expect(jornadas[fase.unidadeId.at(-1)!].find(f => f.id === fase.id)).toEqual(fase);
@@ -67,6 +68,6 @@ it('a U4 está registrada, sem requerMotor, e o contrato permanece no fim da Ilh
   expect(u4.requerMotor).toBeUndefined();
   expect(registradas.has(u4.id)).toBe(true);
   expect(percurso.filter(u => !u.requerMotor).every(u => registradas.has(u.id))).toBe(true);
-  expect(ilha.zonas.find(z => z.id === 'depuracao')!.unidades.map(u => u.id)).toEqual([1,2,3,4].map(n => `logica-depuracao-u${n}`));
+  expect(ilha.zonas.find(z => z.id === 'depuracao')!.unidades.map(u => u.id)).toEqual([1,2,3,4,5,6].map(n => `logica-depuracao-u${n}`));
   expect(percurso.at(-1)!.id).toBe('logica-programa-de-verdade-u1');
 });
