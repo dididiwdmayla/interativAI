@@ -29,6 +29,33 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 37, o mapa e as ilhas por dentro, e os dois chamados.** Detalhe
+  em `docs/PROGRESSO.md`; capturas em `docs/capturas/rodada-37/`.
+  - **Etapa 1, o mundo no celular:** a ilha que aparecia sem arte e sem
+    nome (as ondas animadas dentro do SVG faziam o Chrome repintar o mundo
+    inteiro a cada quadro) ficou consertada: o que se mexe vai pelo
+    compositor, cada ilha tem camada própria e para fora da tela. O mundo
+    cabe na altura com margens iguais nos três layouts (zigue-zague fundo
+    em pé, achatado deitado; Frameworks no fim da rota, o Porto em cima das
+    Origens). Teste novo `testes/mundo.mjs` (pixels da arte e do nome ao
+    rolar, e a repintura).
+  - **Etapa 2, o interior das ilhas:** zonas recortadas pela grama (sem
+    vazar), contorno orgânico com espuma, pedrinhas, mato, relevo e luz;
+    cada zona com tom, textura, cerca viva e placa; enfeites com a cara de
+    cada ilha (prédios em < e > na Sites, engrenagens e circuitos na
+    Lógica...); trilha de terra, ponto atual brilhando, bloqueado de pedra;
+    um enfeite animado por ilha, a espuma e o brilho, por CSS, respeitando
+    menos movimento. 16 tokens novos nos três temas.
+  - **Etapa 3, os chamados:** a meta mostra o antes e o depois de verdade
+    (a cena com o defeito e consertada; sem cena, a saída do programa) ou
+    nada. Kit novo: a registradora (o visor do caixa) e a tela de
+    aplicativo (a agenda com o horário repetido em vermelho), mais balcão
+    do mercadinho e do salão, cesta, espelho e cadeira. U5 com o caixa do
+    Mercadinho; U6 com a recepção do salão no aquecimento e no contrato.
+    A mesma cena em unidades diferentes reprova; o Levar pro mundo só
+    aparece com todos os aparelhos exportáveis (a agenda oferece, o
+    estoque não).
+
 - **Rodada 36, Origens parte 1: o museu, os antepassados e as salas 1 e 2**
   (mais o currículo ampliado). Detalhe em `docs/PROGRESSO.md`.
   - **Etapa 1, currículo ampliado** (só currículo, nada publicado mudou):
@@ -656,10 +683,29 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 36 (Origens, parte 1): aguardando a revisão do pull request,
-  jogando o museu (o corredor, as salas 1 e 2 e a árvore da família).
+- Rodada 37 (o mapa, as ilhas e os chamados): aguardando a revisão do pull
+  request, jogando no Android em pé o mundo (rolar de ponta a ponta e
+  voltar), o interior das ilhas e os dois chamados.
 
 ### Pendências
+
+- **Rodada 37, para depois:**
+  - O sumiço das ilhas foi reproduzido pela medida de repintura do Chrome
+    (a causa), não no Android em si: o ambiente de teste é um Chromium sem
+    GPU. Vale conferir num celular de verdade, rolando o mundo.
+  - Cada ilha do mundo é uma camada do compositor (`will-change`): umas 10
+    camadas pequenas; num aparelho com pouca memória de vídeo, vale olhar.
+  - A estufa aparece igual na Depuração U4 e em Estruturas U3
+    (`CENAS_REPETIDAS_CONFERIDAS`): trocar uma delas quando uma rodada de
+    conteúdo mexer nessas unidades.
+  - A registradora e a tela de aplicativo não brilham sozinhas à noite
+    (não entram na `Emissao` da cena): nenhuma cena noturna usa elas hoje.
+  - O Levar pro mundo de um contrato sem cena (o estoque) continua
+    pendente: o programa não escreve nada no console, então o .js sairia
+    mudo.
+  - Deitado, a ilha ocupa a altura da tela e o caminho fica quase reto
+    (a placa de cada zona tem a faixa de cima); com a barra de temas aberta,
+    sobra pouca altura.
 
 - **`unidades.mjs retrato` quebrado também na principal (achado na rodada
   36):** o duplo toque em `#nav-integrantes` (U4F1, objetivo 3) seleciona o
@@ -689,9 +735,10 @@ núcleo comum.
   - A passagem de uma pausa para a seguinte (Passar por cima, Entrar, Sair)
     leva a cena por salto, como a linha do tempo faz; só Retomar toca a
     animação. Animar o trecho entre as duas pausas fica como melhoria.
-  - Os chamados não têm Levar pro mundo e usam `fimDeIlha: false`; o Levar
-    pro mundo do software sem cena (o programa e o relatório num .js) é uma
-    ideia para o contrato das próximas ilhas.
+  - Os chamados usam `fimDeIlha: false`. Desde a rodada 37, a agenda (com
+    a tela do aplicativo) tem Levar pro mundo; o do software sem cena (o
+    programa e o relatório num .js) continua uma ideia para o contrato das
+    próximas ilhas.
   - Não há um cartão de diagnóstico dedicado no formato contrato: o quadro de
     plano agrupado faz o papel (guia, 31.10). Um tipo próprio só vale se mais
     contratos pedirem diagnóstico.
@@ -715,10 +762,11 @@ núcleo comum.
     linhas no palco estreito, o vagão que muda de linha desliza na
     horizontal (aproximação).
 
-- **Levar pro mundo:** ainda não exporta os dispositivos novos das cenas,
-  nem seus acontecimentos genéricos e atores. O exportador dos contratos
-  cobre apenas o kit anterior; as novas cenas da zona não são contratos
-  exportáveis.
+- **Levar pro mundo:** ainda não exporta os dispositivos da seção 30.8
+  (geladeira, semáforo, aspersor...), nem os acontecimentos genéricos e os
+  atores. A registradora e a tela de aplicativo já saem (rodada 37). Um
+  contrato com um aparelho que não sai não oferece o botão (a regra
+  `contrato` cobra).
 
 - **Contratos (rodada 29), para depois:**
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
