@@ -29,20 +29,40 @@ núcleo comum.
 
 ### Feito
 
-- **Rodada 36, Etapa 1: currículo ampliado** (só currículo, nada publicado
-  mudou): Orientação a objetos (zona `objetos`, a primeira da Páginas
-  vivas) e Programação assíncrona (`assincrono`, antes de Eventos e do
-  fetch); a **Ilha Python** depois de Rede e Servidor (fundamentos,
-  orientação a objetos, dados e "Outras linguagens" com C, Java/C# e o
-  conceito que é o mesmo), com arte no mundo; LGPD e ética na Rede e
-  Servidor (ponte com a privacidade da IA); no Ofício, Pensando sistemas,
-  Como equipes trabalham, Da máquina à produção e Carreira (a última
-  zona). Todas com `requerMotor`. Inglês técnico como fio contínuo:
-  `termoIngles` no `Conceito` (o glossário mostra e busca os dois) e a
-  regra no guia (seção 1). A entrevista com o cliente entrou como motor
-  futuro (`entrevista-cliente` em `src/curriculo/motores.ts`). No museu,
-  as salas 4 e 6 (planejadas) trocaram de lugar. Justificativas no
-  `MAPA-CURRICULAR.md`.
+- **Rodada 36, Origens parte 1: o museu, os antepassados e as salas 1 e 2**
+  (mais o currículo ampliado). Detalhe em `docs/PROGRESSO.md`.
+  - **Etapa 1, currículo ampliado** (só currículo, nada publicado mudou):
+    Orientação a objetos (zona `objetos`, a primeira da Páginas vivas) e
+    Programação assíncrona (`assincrono`, antes de Eventos e do fetch); a
+    **Ilha Python** depois de Rede e Servidor (fundamentos, orientação a
+    objetos, dados e "Outras linguagens" com C, Java/C# e o conceito que é
+    o mesmo), com arte no mundo; LGPD e ética na Rede e Servidor (ponte
+    com a privacidade da IA); no Ofício, Pensando sistemas, Como equipes
+    trabalham, Da máquina à produção e Carreira (a última zona). Todas com
+    `requerMotor`. Inglês técnico como fio contínuo: `termoIngles` no
+    `Conceito` (o glossário mostra e busca os dois) e a regra no guia
+    (seção 1). A entrevista com o cliente entrou como motor futuro
+    (`entrevista-cliente` em `src/curriculo/motores.ts`). No museu, as
+    salas 4 e 6 (planejadas) trocaram de lugar.
+  - **Motor do museu:** área `exposicao` da tela composta
+    (`src/motor/exposicao`), com cinco estações (tear de cartões, lâmpadas
+    de bits, camadas da máquina, mesa de cores em hexadecimal e linha do
+    tempo com plaquinhas do que mudou), validadores, ações, simulação,
+    checagem `exposicao-do-museu`, progresso salvo, ajuda que aponta a peça
+    e uma ferramenta por estação. Os **sete antepassados** em SVG (piscam,
+    respiram, a boca acompanha o texto, dormem em silhueta), cada um com o
+    seu jeito de falar e os sons da época; mostruário `/lab/antepassados`.
+  - **O museu:** `/ilha/origens` virou um corredor de épocas com
+    profundidade (de lado no computador, descendo no celular), as
+    silhuetas acordam conforme o aluno chega perto, o computadorzinho guia
+    e reage, as portas das salas, e no fim a árvore da família com o lugar
+    da próxima geração (aberto ao terminar a sala 2: o aluno monta o
+    retrato e entra para a família).
+  - **Salas 1 e 2 publicadas:** Como o computador entende (tear, uns e
+    zeros, camadas, letras e cores, desafio) e Linha do tempo (dos cartões
+    às válvulas, do chip ao bolso, desafio). 12 conceitos com `termoIngles`,
+    24 itens de revisão. Jornada `testes/museu.mjs` (corredor, as duas
+    salas pela interface e a cerimônia) nos três layouts; guia, seção 32.
 
 - **Rodada 35, cena pausada, U4 e os dois chamados (zona Depuração
   completa):** com o depurador pausado, a cena mostra o instante da pausa
@@ -172,8 +192,8 @@ núcleo comum.
   easter egg.
 - Fábrica: formato declarativo, `testar:conteudo`, congelamento
   (`publicar:conteudo`), guia, template, atritos.
-- Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (vazio),
-  desbloqueios.
+- Mapa: mundo, ilhas, zonas, unidades, Museu das Origens (corredor de
+  épocas desde a rodada 36), desbloqueios.
 - Conteúdo: **Ilha Sites completa** — Elementos (U1 a U6), Estilos (E1 a
   E5), Layout (L1 a L4), Responsivo (R1 e R2) e Publicar (P1 e P2).
 - Rodada 9 (painel Estilos, modo documento, ROADMAP):
@@ -636,10 +656,29 @@ núcleo comum.
 
 ### Em andamento
 
-- Quatro ambientes concluídos; aguardando revisão visual das capturas
-  e do pull request.
+- Rodada 36 (Origens, parte 1): aguardando a revisão do pull request,
+  jogando o museu (o corredor, as salas 1 e 2 e a árvore da família).
 
 ### Pendências
+
+- **Museu das Origens (rodada 36), para depois:**
+  - A estação de camadas usa uma máquina de brinquedo (PEGA, SOMA, GUARDA
+    e bits inventados), declarada na placa como simplificada. Se um dia a
+    sala 4 mostrar um processador de verdade, as instruções mudam lá.
+  - A Revisão do dia não aceita a área exposicao: os 24 itens do museu são
+    previsões sobre vitrines (mini-sites). Uma revisão com estação de
+    verdade pede o `ItemRevisao` com áreas.
+  - Os antepassados acordam de novo a cada visita (é a graça do corredor);
+    quem volta muitas vezes ouve as assinaturas de novo. Um "já se
+    conhecem" no progresso é opção, se incomodar.
+  - O lugar da próxima geração abre com a sala 2 (`SALA_DA_PROXIMA_GERACAO`
+    em `src/lib/museu.ts`); as salas da parte 2 não mudam isso.
+  - O gigante de válvulas não tem sala própria (aparece de visita nas salas
+    1 e 4); o computador bege é o anfitrião previsto da sala 4.
+  - Os sons do museu são todos sintetizados; a assinatura da próxima
+    geração é um bom candidato a arquivo gravado (`proxima-geracao`).
+  - A ilha Python entrou no mundo com arte e sem música (toca silêncio,
+    como Frameworks): a faixa entra quando a ilha tiver conteúdo.
 
 - **Depuração, para depois (rodada 35):**
   - A passagem de uma pausa para a seguinte (Passar por cima, Entrar, Sair)
@@ -817,14 +856,16 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: Origens, parte 1 (os tipos de atividade do Museu: linha do
-   tempo, comparador de linguagens e diagrama).
-2. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA
-   ao vivo, que reaproveita a tela composta com a especificação e o código
-   gerado; Ofício, com os arquivos do projeto e os testes automatizados),
+1. Opus: Origens, parte 2 (as salas 3 a 5: o comparador de linguagens
+   executável, por baixo do capô com os portões e o caminho de um clique
+   com o diagrama de rede; guia, seções 32.7 e 32.8).
+2. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
+   e as missões de campo que leem documentação original (guia, seção 1).
+3. Depois: motores das outras ilhas (Páginas vivas, com objetos e o tempo
+   assíncrono; Rede e Servidor; Python no navegador; IA ao vivo; Ofício),
    intercalados com conteúdo, e a trilha Automação industrial a partir do
    protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no
-   `PROJETO.md`; o "Por dentro" das cenas já aponta para ela).
+   `PROJETO.md`).
 
 ## Decisões aprovadas
 

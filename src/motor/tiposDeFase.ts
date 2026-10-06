@@ -13,8 +13,10 @@
  * não é um tipo novo: o tipo continua o mesmo e a tela é composta pelas
  * áreas de trabalho que a fase pede.
  *
- * Para um tipo novo (ex.: "linha-do-tempo", "comparador",
- * "diagrama-rede"): crie a variante em `Fase` (src/conteudo/tipos.ts),
+ * O museu (rodada 36) não é tipo novo: é a área `exposicao` da composição
+ * (src/motor/exposicao), com a linha do tempo como uma das estações.
+ *
+ * Para um tipo novo (ex.: "comparador", "diagrama-rede"): crie a variante em `Fase` (src/conteudo/tipos.ts),
  * registre aqui com a tela que ele usa, ensine o Jogo a montar essa tela
  * e acrescente as checagens dele em src/conteudo/checagens.ts.
  */
