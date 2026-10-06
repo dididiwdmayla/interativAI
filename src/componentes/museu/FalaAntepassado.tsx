@@ -197,7 +197,7 @@ export function FalaAntepassado({ id, texto, expressao = "feliz", tamanho = 96, 
               <span className="block h-full rounded-full bg-[var(--cor-ante-led)]" style={{ width: `${Math.round((fala.passos / Math.max(1, fala.total)) * 100)}%` }} />
             </span>
           </div>
-          {linhaReservada(<span className={falando ? "font-codigo" : ""}>{falando ? fala.embaralhado : visivel}</span>)}
+          {linhaReservada(<span className={falando ? "text-texto-suave" : ""}>{falando ? fala.embaralhado : visivel}</span>)}
         </div>
       );
       break;

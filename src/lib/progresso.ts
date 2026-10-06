@@ -1,3 +1,4 @@
+import { type Acessorio, ACESSORIOS, type AparenciaCliente, CABELOS, CORES_CABELO, CORES_ROUPA, PELES, ROUPAS } from "@/motor/contrato/clientes";
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
 import type { EstadoEstacao, EstadoExposicao } from "@/motor/exposicao/modelo";
@@ -130,6 +131,20 @@ export type Progresso = {
    * fases já concluídas entram na fila na primeira visita ao mapa.
    */
   revisao: EstadoRevisao;
+  /**
+   * Museu das Origens: o retrato do aluno no lugar da próxima geração, na
+   * árvore da família (depois da sala 2). null enquanto o lugar está vazio.
+   */
+  proximaGeracao: RetratoDoAluno | null;
+};
+
+/** O retrato do aluno na árvore da família: as peças do kit e a assinatura. */
+export type RetratoDoAluno = {
+  aparencia: AparenciaCliente;
+  /** Como o aluno assina na placa (até 24 letras). Vazio: "Você". */
+  nome: string;
+  /** Quando entrou para a família (ms). */
+  desde: number;
 };
 
 /**
@@ -187,6 +202,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   projetos: {},
   ilhasComemoradas: [],
   revisao: REVISAO_PADRAO,
+  proximaGeracao: null,
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -468,6 +484,32 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     projetos: lerRegistro(bruto.projetos, lerProjeto),
     ilhasComemoradas: [...new Set(listaDeTextos(bruto.ilhasComemoradas))],
     revisao: lerEstadoRevisao(bruto.revisao),
+    proximaGeracao: lerRetratoDoAluno(bruto.proximaGeracao),
+  };
+}
+
+/** Tamanho máximo da assinatura na placa da árvore da família. */
+export const MAXIMO_NOME_RETRATO = 24;
+
+function umaDas<T extends string>(lista: readonly T[], valor: unknown, padrao: T): T {
+  return typeof valor === "string" && (lista as readonly string[]).includes(valor) ? (valor as T) : padrao;
+}
+
+function lerRetratoDoAluno(valor: unknown): RetratoDoAluno | null {
+  if (!ehObjeto(valor) || !ehObjeto(valor.aparencia)) return null;
+  const peca = valor.aparencia;
+  const acessorios = Array.isArray(peca.acessorios) ? [...new Set(peca.acessorios.filter((item): item is Acessorio => (ACESSORIOS as readonly unknown[]).includes(item)))].slice(0, 2) : [];
+  return {
+    aparencia: {
+      pele: umaDas(PELES, peca.pele, "media"),
+      cabelo: umaDas(CABELOS, peca.cabelo, "curto"),
+      corCabelo: umaDas(CORES_CABELO, peca.corCabelo, "castanho"),
+      roupa: umaDas(ROUPAS, peca.roupa, "camisa"),
+      corRoupa: umaDas(CORES_ROUPA, peca.corRoupa, "azul"),
+      ...(acessorios.length ? { acessorios } : {}),
+    },
+    nome: typeof valor.nome === "string" ? valor.nome.trim().slice(0, MAXIMO_NOME_RETRATO) : "",
+    desde: ehNumero(valor.desde) ? valor.desde : 0,
   };
 }
 

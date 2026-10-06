@@ -35,7 +35,17 @@ type Props = {
   aoAbrirCard?: (id: IdFerramenta) => void;
 };
 
-function ConteudoDaEstacao({ estacao, estado, ...resto }: { estacao: Estacao; estado: EstadoEstacao; mexer: Props["mexer"]; toque: boolean; destaque: { peca?: string } | null }) {
+function ConteudoDaEstacao({
+  estacao,
+  estado,
+  ...resto
+}: {
+  estacao: Estacao;
+  estado: EstadoEstacao;
+  mexer: Props["mexer"];
+  toque: boolean;
+  destaque: { peca?: string } | null;
+}) {
   if (estacao.tipo === "tear" && estado.tipo === "tear") return <EstacaoTear estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "bits" && estado.tipo === "bits") return <EstacaoBits estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "camadas" && estado.tipo === "camadas") return <EstacaoCamadas estacao={estacao} estado={estado} {...resto} />;
@@ -106,8 +116,9 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
             </div>
           )}
           {aberta && estadoAberta && (
+            // O "?" da ferramenta fica na caixa da estação; o alvo das apresentações é a peça de mexer (NucleoDaEstacao).
             <AlvoFerramenta
-              ids={[FERRAMENTA_DA_ESTACAO[aberta.tipo]]}
+              ids={[]}
               marcador={FERRAMENTA_DA_ESTACAO[aberta.tipo]}
               aoAbrirCard={aoAbrirCard}
               classeMarcador="right-2 top-2"

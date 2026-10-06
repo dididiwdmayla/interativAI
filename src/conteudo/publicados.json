@@ -1,6 +1,18 @@
 {
   "aviso": "Ids publicados: nunca mude nem apague (isso apaga o progresso de quem já jogou). Atualize só com npm run publicar:conteudo.",
   "unidades": {
+    "origens-museu-u1": [
+      "origens-museu-u1-f1",
+      "origens-museu-u1-f2",
+      "origens-museu-u1-f3",
+      "origens-museu-u1-f4",
+      "origens-museu-u1-f5"
+    ],
+    "origens-museu-u2": [
+      "origens-museu-u2-f1",
+      "origens-museu-u2-f2",
+      "origens-museu-u2-f3"
+    ],
     "sites-elementos-u1": [
       "sites-elementos-u1-f1",
       "sites-elementos-u1-f2",
@@ -347,6 +359,64 @@
     ]
   },
   "fases": {
+    "origens-museu-u1-f1": {
+      "objetivos": [
+        "furar-linha-cheia",
+        "um-furo",
+        "coracao-sozinho"
+      ]
+    },
+    "origens-museu-u1-f2": {
+      "objetivos": [
+        "cartao-1011",
+        "valvulas-5",
+        "maior-numero",
+        "valvulas-12"
+      ]
+    },
+    "origens-museu-u1-f3": {
+      "objetivos": [
+        "descer",
+        "ate-a-maquina",
+        "achar-soma"
+      ]
+    },
+    "origens-museu-u1-f4": {
+      "objetivos": [
+        "letra-a",
+        "vermelho",
+        "laranja"
+      ]
+    },
+    "origens-museu-u1-f5": {
+      "partes": [
+        "estrela",
+        "letra",
+        "amarelo"
+      ]
+    },
+    "origens-museu-u2-f1": {
+      "objetivos": [
+        "depois-do-tear",
+        "valvula-transistor",
+        "jeitos-de-programar"
+      ]
+    },
+    "origens-museu-u2-f2": {
+      "objetivos": [
+        "pc-e-web",
+        "web-celular",
+        "plaquinha-tear",
+        "plaquinhas-sozinho"
+      ]
+    },
+    "origens-museu-u2-f3": {
+      "partes": [
+        "antigos",
+        "novos",
+        "mudou"
+      ]
+    },
     "sites-elementos-u1-f1": {
       "objetivos": [
         "selecionar-manchete",
@@ -2019,6 +2089,30 @@
     }
   },
   "itensRevisao": [
+    "bit-1",
+    "bit-2",
+    "binario-1",
+    "binario-2",
+    "instrucao-de-maquina-1",
+    "instrucao-de-maquina-2",
+    "linguagem-de-maquina-1",
+    "linguagem-de-maquina-2",
+    "linguagem-de-programacao-1",
+    "linguagem-de-programacao-2",
+    "byte-1",
+    "byte-2",
+    "hexadecimal-1",
+    "hexadecimal-2",
+    "cartao-perfurado-1",
+    "cartao-perfurado-2",
+    "historia-da-computacao-1",
+    "historia-da-computacao-2",
+    "transistor-1",
+    "transistor-2",
+    "computador-pessoal-1",
+    "computador-pessoal-2",
+    "web-1",
+    "web-2",
     "arvore-de-dados-1",
     "arvore-de-dados-2",
     "percorrer-arvore-1",

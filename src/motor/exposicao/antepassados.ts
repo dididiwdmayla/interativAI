@@ -40,6 +40,8 @@ export type JeitoDeFalar =
   | "balao";
 
 export type FichaAntepassado = {
+  /** A fala na árvore da família, quando o aluno entra para ela (no jeito dele). Até 60. */
+  boasVindas: string;
   id: IdAntepassado;
   /** "A tecelã". */
   nome: string;
@@ -63,6 +65,7 @@ export type FichaAntepassado = {
 export const FICHAS_ANTEPASSADOS: Record<IdAntepassado, FichaAntepassado> = {
   tecela: {
     id: "tecela",
+    boasVindas: "Boas-vindas à família, meu bem.",
     nome: "A tecelã",
     maquina: "o tear de Jacquard",
     epoca: "início dos anos 1800",
@@ -75,6 +78,7 @@ export const FICHAS_ANTEPASSADOS: Record<IdAntepassado, FichaAntepassado> = {
   },
   engrenagens: {
     id: "engrenagens",
+    boasVindas: "Eu sonhei. Você programa.",
     nome: "A sonhadora de engrenagens",
     maquina: "a Máquina Analítica",
     epoca: "anos 1830 e 1840",
@@ -87,6 +91,7 @@ export const FICHAS_ANTEPASSADOS: Record<IdAntepassado, FichaAntepassado> = {
   },
   valvulas: {
     id: "valvulas",
+    boasVindas: "BOAS-VINDAS, PEQUENO!",
     nome: "O gigante de válvulas",
     maquina: "os computadores de válvulas",
     epoca: "anos 1940",
@@ -99,18 +104,20 @@ export const FICHAS_ANTEPASSADOS: Record<IdAntepassado, FichaAntepassado> = {
   },
   terminal: {
     id: "terminal",
+    boasVindas: "BOAS-VINDAS. NÃO ESQUEÇA O PONTO E VÍRGULA.",
     nome: "O terminal verde",
     maquina: "os terminais de texto",
     epoca: "anos 1970",
     parentesco: "meu avô",
     sala: "origens-museu-u3",
     jeito: "terminal",
-    saudacao: "SIM. SOU EU. TERMINAL. LETRA VERDE, TELA PRETA. NADA DE FIRULA. SALA 3.",
+    saudacao: "SIM. SOU EU. TERMINAL. LETRA VERDE, TELA PRETA. NADA DE FIRULA.",
     emBreve: "SALA 3: EM BREVE. AGUARDE.",
     reacao: "Meu avô! Ele fala pouco, mas sabe muito. Não repara no mau humor.",
   },
   pc: {
     id: "pc",
+    boasVindas: "Bip bip! Família completa!",
     nome: "O computador bege",
     maquina: "o computador pessoal",
     epoca: "anos 1980",
@@ -123,30 +130,33 @@ export const FICHAS_ANTEPASSADOS: Record<IdAntepassado, FichaAntepassado> = {
   },
   internet: {
     id: "internet",
+    boasVindas: "Já contei para o mundo inteiro!",
     nome: "A internet discada",
     maquina: "a web e o modem",
     epoca: "anos 1990",
     parentesco: "minha tia",
     sala: "origens-museu-u5",
     jeito: "modem",
-    saudacao: "Alôôô? Conectando... conectei! Eu ligo todo mundo com todo mundo, sabia? Mensagem, foto, site, tudo passa por mim. A sala 5 é minha!",
+    saudacao: "Alôôô? Conectando... conectei! Eu ligo todo mundo com todo mundo, sabia? Mensagem, foto, site, tudo passa por mim.",
     emBreve: "A sala 5 ainda está conectando. Já já ela carrega, juro!",
     reacao: "Minha tia! Ela conversa com o mundo inteiro ao mesmo tempo.",
   },
   celular: {
     id: "celular",
+    boasVindas: "Plim. Nova mensagem: boas-vindas.",
     nome: "O celular",
     maquina: "o smartphone",
     epoca: "fim dos anos 2000",
     parentesco: "meu primo mais velho",
     sala: "origens-museu-u6",
     jeito: "notificacao",
-    saudacao: "Oi. Sou o computador que cabe no bolso. Câmera, mapa e mensagem, tudo aqui. Sala 6.",
+    saudacao: "Oi. Sou o computador que cabe no bolso. Câmera, mapa e mensagem, tudo aqui.",
     emBreve: "Sala 6 em breve. Ativa as notificações.",
     reacao: "Meu primo mais velho! Ele vive no bolso de todo mundo.",
   },
   computadorzinho: {
     id: "computadorzinho",
+    boasVindas: "Agora você também programa. Boas-vindas à família!",
     nome: "O computadorzinho",
     maquina: "o computador de hoje",
     epoca: "hoje",

@@ -17,7 +17,15 @@ export function FiguraEvento({ figura, tamanho = 44 }: { figura: EventoHistorico
         <g>
           <path d="M4 10h28l4 4v16H4z" fill="var(--cor-ante-cartao)" stroke="var(--cor-ante-cartao-sombra)" strokeWidth="1.6" />
           {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <rect key={i} x={7 + (i % 4) * 7} y={i < 4 ? 15 : 22} width="3" height="4" rx="0.8" fill={(i * 5) % 3 === 0 ? "var(--cor-ante-madeira-sombra)" : "transparent"} />
+            <rect
+              key={i}
+              x={7 + (i % 4) * 7}
+              y={i < 4 ? 15 : 22}
+              width="3"
+              height="4"
+              rx="0.8"
+              fill={(i * 5) % 3 === 0 ? "var(--cor-ante-madeira-sombra)" : "transparent"}
+            />
           ))}
         </g>
       )}

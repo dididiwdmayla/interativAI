@@ -54,7 +54,6 @@ export const FASE_ORIGENS_U1_F4: Fase = {
         toque: "No byte, acenda as lâmpadas que somam 65 e veja a letra que aparece.",
       },
       validador: { tipo: "bitsValem", estacao: "byte", valor: 65 },
-      apresentar: ["lampadas-de-bits"],
       ajudas: {
         pergunta: "Os pesos de um byte vão de 128 até 1. Quais dois somam 65?",
         dica: "Um byte são 8 bits: guarda de 0 a 255. Numa tabela que todo computador usa, o 65 é a letra A maiúscula.",

@@ -44,3 +44,10 @@ export async function opcaoDaPrevisao(pagina, { acertar = true } = {}) {
   const indice = acertar ? previsao.correta : previsao.opcoes.findIndex((_, i) => i !== previsao.correta);
   return pagina.locator('[data-previsao] button').nth(indice);
 }
+
+/** Uma fase do conteúdo (os dados reais, transpilados do TS), pelo id. */
+export function faseDoConteudo(id) {
+  const fase = carregarDados().fases.get(id);
+  if (!fase) throw new Error(`fase "${id}" não está no conteúdo`);
+  return fase;
+}

@@ -9,6 +9,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { IconeCamadas } from "@/componentes/icones/IconeCamadas";
 import { type EstacaoCamadas as DadosCamadas, type EstadoCamadas, linhasLigadas } from "@/motor/exposicao/modelo";
+import { NucleoDaEstacao } from "./NucleoDaEstacao";
 import type { PropsEstacao } from "./tipos";
 
 export function EstacaoCamadas({ estacao, estado, mexer, toque, destaque }: PropsEstacao<DadosCamadas, EstadoCamadas>) {
@@ -43,7 +44,13 @@ export function EstacaoCamadas({ estacao, estado, mexer, toque, destaque }: Prop
                           <button
                             type="button"
                             aria-pressed={escolhida}
-                            onClick={() => mexer({ tipo: "escolherLinha", estacao: estacao.id, linha: linha.id })}
+                            onClick={() =>
+                              mexer({
+                                tipo: "escolherLinha",
+                                estacao: estacao.id,
+                                linha: linha.id,
+                              })
+                            }
                             className={`w-full rounded-lg border-2 px-2 py-1 text-left text-sm leading-snug pointer-coarse:min-h-11 ${camada.codigo === false ? "font-bold" : "font-codigo"} ${
                               escolhida ? "border-primaria bg-selecao" : acesa ? "border-secundaria bg-selecao" : "border-transparent hover:bg-hover"
                             } ${pisca ? "animate-pulse ring-4 ring-destaque" : ""}`}
@@ -67,17 +74,21 @@ export function EstacaoCamadas({ estacao, estado, mexer, toque, destaque }: Prop
         );
       })}
       {podeDescer && (
-        <button
-          type="button"
-          onClick={() => mexer({ tipo: "descerCamada", estacao: estacao.id })}
-          className={`inline-flex min-h-11 items-center justify-center gap-2 self-center rounded-full border-2 border-primaria bg-primaria px-4 text-sm font-black text-sobre-primaria hover:brightness-110 ${destaque?.peca === "descer" ? "animate-pulse ring-4 ring-destaque" : ""}`}
-          data-descer-camada
-        >
-          <IconeCamadas tamanho={16} />
-          Descer uma camada
-        </button>
+        <NucleoDaEstacao tipo="camadas" className="self-center">
+          <button
+            type="button"
+            onClick={() => mexer({ tipo: "descerCamada", estacao: estacao.id })}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-primaria bg-primaria px-4 text-sm font-black text-sobre-primaria hover:brightness-110 ${destaque?.peca === "descer" ? "animate-pulse ring-4 ring-destaque" : ""}`}
+            data-descer-camada
+          >
+            <IconeCamadas tamanho={16} />
+            Descer uma camada
+          </button>
+        </NucleoDaEstacao>
       )}
-      {!podeDescer && <p className="text-center text-xs font-bold text-texto-suave">{toque ? "Toque" : "Clique"} numa linha para ver o que ela vira lá embaixo.</p>}
+      {!podeDescer && (
+        <p className="text-center text-xs font-bold text-texto-suave">{toque ? "Toque" : "Clique"} numa linha para ver o que ela vira lá embaixo.</p>
+      )}
     </div>
   );
 }
