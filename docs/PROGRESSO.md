@@ -109,4 +109,12 @@ rodada 35.
 - `testes/museu.mjs` (corredor, salas 1 e 2 jogadas pela interface, a
   cerimônia e menos movimento) verde nos três layouts; `testes/mapa.mjs`
   atualizado para o corredor.
-- Bateria completa: ver a seção do resultado abaixo.
+- Bateria completa (`PARALELO=4`, servidor de produção): 202 execuções, 200
+  verdes e 2 falhas.
+  - `audio.mjs`: no corredor, o som da primeira época toca logo depois da
+    porta e tomava o `data-ultimo-efeito` antes do teste ler. O motor de
+    áudio passou a avisar cada efeito (`efeito-tocado`) e o teste confere a
+    porta por esse aviso. Rodado de novo: verde (e `museu.mjs` desktop).
+  - `unidades.mjs retrato`: o duplo toque da U4F1 não abre o campo de
+    edição. Reproduz igual num build da principal (sem a rodada 36), então
+    não é desta rodada; ficou em Pendências no ROADMAP.

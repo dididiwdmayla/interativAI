@@ -661,6 +661,11 @@ núcleo comum.
 
 ### Pendências
 
+- **`unidades.mjs retrato` quebrado também na principal (achado na rodada
+  36):** o duplo toque em `#nav-integrantes` (U4F1, objetivo 3) seleciona o
+  elemento mas não abre o campo de edição (`editarValorAtributo`, linha
+  167). Reproduz igual na principal antes da rodada 36; desktop e paisagem
+  passam. Investigar o duplo toque do `TextoEditavel` em retrato.
 - **Museu das Origens (rodada 36), para depois:**
   - A estação de camadas usa uma máquina de brinquedo (PEGA, SOMA, GUARDA
     e bits inventados), declarada na placa como simplificada. Se um dia a

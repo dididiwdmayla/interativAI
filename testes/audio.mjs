@@ -126,9 +126,16 @@ const esperarEfeito = async (pagina, id) => {
   await esperarFaixa(pagina, "mapa");
   conferir(true, "navegação: de volta ao mundo, a faixa mapa entra no lugar da sites");
 
+  // No corredor, o primeiro antepassado acorda logo depois da porta: vale o aviso de cada efeito, não só o último.
+  await pagina.evaluate(() => {
+    window.__efeitosTocados = [];
+    document.addEventListener("efeito-tocado", (e) => window.__efeitosTocados.push(e.detail));
+  });
   await pagina.locator('[data-ilha="origens"]').first().click();
   await pagina.locator("[data-mapa=museu]").waitFor();
-  conferir((await esperarEfeito(pagina, "abrir-museu")) === "arquivo", "navegação: o museu abre com a porta gravada");
+  await pagina.waitForFunction(() => window.__efeitosTocados.some((e) => e.id === "abrir-museu"), null, { timeout: 10000 });
+  const porta = await pagina.evaluate(() => window.__efeitosTocados.find((e) => e.id === "abrir-museu").fonte);
+  conferir(porta === "arquivo", "navegação: o museu abre com a porta gravada");
   await esperarFaixa(pagina, "origens");
   conferir(true, "navegação: o Museu das Origens toca a faixa origens");
 
