@@ -17,6 +17,8 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  "observar-expressoes": {"nome": "Observar expressões", "resumo": "Observar acompanha valores e condições no instante de cada pausa sem alterar o código investigado.", "temas": ["logica", "ferramentas"]},
+  "escopo-na-pausa": {"nome": "Escopo na pausa", "resumo": "Escopo separa as variáveis locais, de bloco e de fora para revelar qual caixinha a linha pausada lê.", "temas": ["logica", "ferramentas"]},
   "retorno-no-depurador": {"nome": "Investigar o retorno", "resumo": "Comparar o valor local com o que chega a quem chamou distingue cálculo, impressão e retorno ausente.", "temas": ["logica", "ferramentas"]},
   "passar-por-cima": {"nome": "Passar por cima", "resumo": "Passar por cima executa a linha inteira, incluindo uma chamada, e para na próxima linha do mesmo nível.", "temas": ["logica", "ferramentas"]},
   "entrar-e-sair": {"nome": "Entrar e sair de função", "resumo": "Entrar segue a chamada por dentro; Sair termina essa chamada e volta ao código que pediu sua resposta.", "temas": ["logica", "ferramentas"]},

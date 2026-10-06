@@ -1,4 +1,3 @@
-// Rascunho não registrado: aguarda sincronização cena/pausa (ROADMAP, Pendências).
 /* Duas situações por conceito. A revisão não aceita cenas; as previsões transferem o método a outros programas. */
 import type { ItemRevisao } from "@/conteudo/tipos";
 export const ITENS_DEPURACAO_U4: readonly ItemRevisao[] = [

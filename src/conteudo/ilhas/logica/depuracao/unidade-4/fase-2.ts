@@ -1,4 +1,3 @@
-// Rascunho não registrado: aguarda sincronização cena/pausa (ROADMAP, Pendências).
 /* Caça ao bug: reproduzir, hipótese, evidência e conserto com bordas. */
 import type { Fase } from "@/conteudo/tipos";
 export const FASE_DEPURACAO_U4_F2: Fase = {

@@ -51,7 +51,7 @@ it('listas de nomes diferentes rejeitam consertos que invertem a ordem', () => {
     ['logica-depuracao-u4-f3', 'function ativos(itens) { return itens.filter(item => item.ativo).map(item => item.nome).reverse(); }'],
   ]) {
     const fase = fases.find(f => f.id === id);
-    if (!fase) continue; // A U4 permanece em rascunho enquanto a cena não acompanha a pausa.
+    if (!fase) throw new Error(`fase ${id} não registrada`);
     if (fase.tipo !== 'desafio') throw new Error('Desafio esperado');
     const sim = criarSimulacao(fase);
     sim.executar([{tipo:'definirSnippet',codigo}, {tipo:'executarSnippet'}]);
@@ -59,13 +59,13 @@ it('listas de nomes diferentes rejeitam consertos que invertem a ordem', () => {
   }
 });
 
-it('U4 bloqueada não é registrada e o contrato permanece no fim da Ilha Lógica', () => {
+it('a U4 está registrada, sem requerMotor, e o contrato permanece no fim da Ilha Lógica', () => {
   const ilha = CURRICULO.find(i => i.id === 'logica')!;
   const registradas = new Set(UNIDADES.map(u => u.id));
   const percurso = ilha.zonas.flatMap(z => z.unidades);
   const u4 = percurso.find(u => u.id === "logica-depuracao-u4")!;
-  expect(u4.requerMotor).toContain("foto da pausa");
-  expect(registradas.has(u4.id)).toBe(false);
+  expect(u4.requerMotor).toBeUndefined();
+  expect(registradas.has(u4.id)).toBe(true);
   expect(percurso.filter(u => !u.requerMotor).every(u => registradas.has(u.id))).toBe(true);
   expect(ilha.zonas.find(z => z.id === 'depuracao')!.unidades.map(u => u.id)).toEqual([1,2,3,4].map(n => `logica-depuracao-u${n}`));
   expect(percurso.at(-1)!.id).toBe('logica-programa-de-verdade-u1');

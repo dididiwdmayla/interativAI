@@ -469,7 +469,6 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
           },
           {
             id: "logica-depuracao-u4",
-            requerMotor: "sincronizar a cena visual com a foto da pausa do depurador",
             titulo: "Observar variáveis",
             meta: "Comparar valor, tipo e escopo em cada pausa e confirmar a hipótese antes de consertar.",
             temas: ["logica", "ferramentas"],
