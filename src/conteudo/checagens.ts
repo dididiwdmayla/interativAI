@@ -1121,9 +1121,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const problemas: string[] = [];
       const programa = fase.programa;
       const deCodigo = new Set(["valorVariavel", "respostaDoConsole", "saida", "semErro", "erroDoTipo", "usouSintaxe", "funcaoPassa"]);
+      // O comparador do museu roda JavaScript e Python de verdade: a saída e o erro valem nele (os validadores de saída).
+      const deSaida = new Set(["saida", "semErro", "erroDoTipo"]);
+      const comComparador = exposicaoDaFase(fase)?.estacoes.some((estacao) => estacao.tipo === "comparador") ?? false;
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
-          if (deCodigo.has(item.tipo) && !programa) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa (campo programa)`);
+          if (deCodigo.has(item.tipo) && !programa && !(comComparador && deSaida.has(item.tipo))) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa (campo programa) ou com o comparador do museu (saida, semErro e erroDoTipo)`);
           if (programa && "seletor" in item) problemas.push(`${onde}: fase de programa não tem página; o validador ${item.tipo} olha a página`);
           if (item.tipo === "saida" && item.contem === undefined && item.igual === undefined) problemas.push(`${onde}: saida sem contem nem igual`);
           if (item.tipo === "funcaoPassa") {

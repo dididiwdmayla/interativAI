@@ -29,7 +29,7 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
         id: "museu",
         nome: "Museu",
         icone: "museu",
-        // As salas 1 e 2 têm motor desde a rodada 36 (área exposicao); as outras pedem exposições novas.
+        // As salas 1 e 2 têm motor desde a rodada 36 (área exposicao); as salas 3 a 6, desde a rodada 38.
         unidades: [
           {
             id: "origens-museu-u1",
@@ -48,28 +48,24 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             titulo: "Por que existem tantas linguagens",
             meta: "Ver o mesmo programa em várias linguagens, lado a lado, rodando.",
             temas: ["fundamentos", "logica"],
-            requerMotor: "exposição comparador de linguagens executável (o mesmo programa lado a lado, rodando)",
           },
           {
             id: "origens-museu-u4",
             titulo: "Por baixo do capô",
             meta: "Espiar o computador por dentro: memória, processador, sistema, arquivos e os portões lógicos que fazem contas.",
             temas: ["fundamentos", "desempenho", "logica"],
-            requerMotor: "exposição do computador aberto (peças que se tocam e se explicam), junto dos quebra-cabeças de portões lógicos",
           },
           {
             id: "origens-museu-u5",
             titulo: "Front, back e o caminho de um clique",
             meta: "Ter a visão geral do que é front, do que é back e do caminho de um clique, dos cabos aos servidores.",
             temas: ["fundamentos", "interfaces", "servidores"],
-            requerMotor: "exposição diagrama de rede (o caminho de um clique, dos cabos aos servidores)",
           },
           {
             id: "origens-museu-u6",
             titulo: "Onde a programação vive",
             meta: "Descobrir onde a programação aparece no dia a dia e quais carreiras existem.",
             temas: ["fundamentos"],
-            requerMotor: "exposição o dia de alguém (aparelhos e apps que se abrem para mostrar o código de dentro)",
           },
         ],
       },

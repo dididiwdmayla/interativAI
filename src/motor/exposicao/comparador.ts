@@ -170,7 +170,11 @@ export function conferirComparador(estacao: EstacaoComparador, onde: string): st
       if (linha.parte && !partes.some((x) => x.id === linha.parte)) p.push(`${qual}, linha ${i + 1}: a parte "${linha.parte}" não existe`);
     }
     if (!programa.saida.length) p.push(`${qual}: a saida está vazia`);
-    for (const parte of partes) if (!programa.linhas.some((l) => l.parte === parte.id)) p.push(`${qual}: não tem nenhuma linha da parte "${parte.id}"`);
+  }
+  // Uma parte só existe para comparar: precisa aparecer em pelo menos dois programas (a moldura do C e do Java, por exemplo).
+  for (const parte of partes) {
+    const em = programas.filter((programa) => programa.linhas.some((l) => l.parte === parte.id)).length;
+    if (em < 2) p.push(`${onde}: a parte "${parte.id}" aparece em ${em} programa(s) (pelo menos 2, para comparar)`);
   }
   if (estacao.editavel !== undefined && FICHAS_LINGUAGENS[estacao.editavel]?.roda !== "executa") p.push(`${onde}: editavel precisa ser uma linguagem que roda de verdade (javascript ou python)`);
   if (estacao.editavel !== undefined && !programas.some((x) => x.linguagem === estacao.editavel)) p.push(`${onde}: editavel "${estacao.editavel}" não tem programa`);

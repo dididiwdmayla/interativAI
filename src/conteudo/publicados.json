@@ -13,6 +13,33 @@
       "origens-museu-u2-f2",
       "origens-museu-u2-f3"
     ],
+    "origens-museu-u3": [
+      "origens-museu-u3-f1",
+      "origens-museu-u3-f2",
+      "origens-museu-u3-f3",
+      "origens-museu-u3-f4",
+      "origens-museu-u3-f5"
+    ],
+    "origens-museu-u4": [
+      "origens-museu-u4-f1",
+      "origens-museu-u4-f2",
+      "origens-museu-u4-f3",
+      "origens-museu-u4-f4",
+      "origens-museu-u4-f5",
+      "origens-museu-u4-f6",
+      "origens-museu-u4-f7"
+    ],
+    "origens-museu-u5": [
+      "origens-museu-u5-f1",
+      "origens-museu-u5-f2",
+      "origens-museu-u5-f3",
+      "origens-museu-u5-f4",
+      "origens-museu-u5-f5"
+    ],
+    "origens-museu-u6": [
+      "origens-museu-u6-f1",
+      "origens-museu-u6-f2"
+    ],
     "sites-elementos-u1": [
       "sites-elementos-u1-f1",
       "sites-elementos-u1-f2",
@@ -415,6 +442,149 @@
         "antigos",
         "novos",
         "mudou"
+      ]
+    },
+    "origens-museu-u3-f1": {
+      "objetivos": [
+        "rodar-js",
+        "rodar-python",
+        "o-desconto",
+        "no-cobol",
+        "coral"
+      ]
+    },
+    "origens-museu-u3-f2": {
+      "objetivos": [
+        "javascript",
+        "as-outras"
+      ]
+    },
+    "origens-museu-u3-f3": {
+      "objetivos": [
+        "rode-os-dois",
+        "o-laco",
+        "ate-onde",
+        "onde-acaba",
+        "cinco-fornadas"
+      ]
+    },
+    "origens-museu-u3-f4": {
+      "objetivos": [
+        "compilar",
+        "interpretar",
+        "de-novo",
+        "primeiro-degrau",
+        "escada"
+      ]
+    },
+    "origens-museu-u3-f5": {
+      "partes": [
+        "decisao-java",
+        "rodar-python",
+        "servicos",
+        "escada"
+      ]
+    },
+    "origens-museu-u4-f1": {
+      "objetivos": [
+        "rodar-linhas",
+        "onde-mora",
+        "frete-novo"
+      ]
+    },
+    "origens-museu-u4-f2": {
+      "objetivos": [
+        "buscar",
+        "acumulador",
+        "ate-o-fim"
+      ]
+    },
+    "origens-museu-u4-f3": {
+      "objetivos": [
+        "a-vez",
+        "todos",
+        "automatico"
+      ]
+    },
+    "origens-museu-u4-f4": {
+      "objetivos": [
+        "abrir-pasta",
+        "a-receita",
+        "como-arvore"
+      ]
+    },
+    "origens-museu-u4-f5": {
+      "objetivos": [
+        "a-soma",
+        "vai-um",
+        "um-mais-um"
+      ]
+    },
+    "origens-museu-u4-f6": {
+      "objetivos": [
+        "vai-um-com-e",
+        "soma-sem-xou",
+        "o-selo",
+        "lembrou"
+      ]
+    },
+    "origens-museu-u4-f7": {
+      "partes": [
+        "processador",
+        "gerente",
+        "arquivos",
+        "alarme"
+      ]
+    },
+    "origens-museu-u5-f1": {
+      "objetivos": [
+        "clicar",
+        "ate-a-pagina",
+        "dns-fora",
+        "servidor-lento"
+      ]
+    },
+    "origens-museu-u5-f2": {
+      "objetivos": [
+        "o-comeco",
+        "o-resto",
+        "frente-e-fundos",
+        "o-resto-dos-lados"
+      ]
+    },
+    "origens-museu-u5-f3": {
+      "objetivos": [
+        "primeiro-pulo",
+        "ate-o-servidor",
+        "outro-caminho"
+      ]
+    },
+    "origens-museu-u5-f4": {
+      "objetivos": [
+        "gravar",
+        "o-documento",
+        "o-mais-lento",
+        "o-que-falhou"
+      ]
+    },
+    "origens-museu-u5-f5": {
+      "partes": [
+        "quebras",
+        "lados",
+        "cabo",
+        "status"
+      ]
+    },
+    "origens-museu-u6-f1": {
+      "objetivos": [
+        "semaforo",
+        "todos"
+      ]
+    },
+    "origens-museu-u6-f2": {
+      "partes": [
+        "quem",
+        "tem-codigo"
       ]
     },
     "sites-elementos-u1-f1": {
@@ -2113,6 +2283,50 @@
     "computador-pessoal-2",
     "web-1",
     "web-2",
+    "sintaxe-1",
+    "sintaxe-2",
+    "ferramenta-certa-1",
+    "ferramenta-certa-2",
+    "indentacao-1",
+    "indentacao-2",
+    "compilador-1",
+    "compilador-2",
+    "interpretador-1",
+    "interpretador-2",
+    "alto-e-baixo-nivel-1",
+    "alto-e-baixo-nivel-2",
+    "memoria-ram-1",
+    "memoria-ram-2",
+    "endereco-de-memoria-1",
+    "endereco-de-memoria-2",
+    "processador-1",
+    "processador-2",
+    "sistema-operacional-1",
+    "sistema-operacional-2",
+    "sistema-de-arquivos-1",
+    "sistema-de-arquivos-2",
+    "meio-somador-1",
+    "meio-somador-2",
+    "realimentacao-1",
+    "realimentacao-2",
+    "dns-1",
+    "dns-2",
+    "pacote-de-rede-1",
+    "pacote-de-rede-2",
+    "roteador-1",
+    "roteador-2",
+    "front-e-back-1",
+    "front-e-back-2",
+    "cabo-submarino-1",
+    "cabo-submarino-2",
+    "aba-rede-1",
+    "aba-rede-2",
+    "codigo-de-status-1",
+    "codigo-de-status-2",
+    "software-embarcado-1",
+    "software-embarcado-2",
+    "carreiras-em-programacao-1",
+    "carreiras-em-programacao-2",
     "arvore-de-dados-1",
     "arvore-de-dados-2",
     "percorrer-arvore-1",

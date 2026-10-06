@@ -27,7 +27,7 @@ const CSS_VITRINE = `body {
 `;
 
 /** Uma vitrine do museu com uma placa e a peça (texto). */
-function vitrine(url: string, placa: string, peca: string): ItemRevisao["siteAlvo"] {
+export function vitrine(url: string, placa: string, peca: string): ItemRevisao["siteAlvo"] {
   return {
     url,
     titulo: "Museu das Origens",
@@ -38,7 +38,7 @@ function vitrine(url: string, placa: string, peca: string): ItemRevisao["siteAlv
 
 const ENUNCIADO = { mouse: "Olhe a vitrine e escolha sua previsão.", toque: "Olhe a vitrine e escolha sua previsão." };
 
-function item(id: string, conceito: IdConceito, siteAlvo: ItemRevisao["siteAlvo"], previsao: NonNullable<ItemRevisao["previsao"]>, ajudas: ItemRevisao["ajudas"]): ItemRevisao {
+export function item(id: string, conceito: IdConceito, siteAlvo: ItemRevisao["siteAlvo"], previsao: NonNullable<ItemRevisao["previsao"]>, ajudas: ItemRevisao["ajudas"]): ItemRevisao {
   return { id, conceito, tipo: "previsao", enunciado: ENUNCIADO, siteAlvo, previsao, ajudas, solucaoDeTeste: [{ tipo: "responderPrevisao", opcao: previsao.correta }] };
 }
 
