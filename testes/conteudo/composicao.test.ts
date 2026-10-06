@@ -43,7 +43,8 @@ describe("composição de áreas: o formato", () => {
 
   it("as zonas anteriores à resolução preservam suas telas publicadas", () => {
     const inicio = UNIDADES.findIndex((unidade) => unidade.id === "logica-resolvendo-problemas-u1");
-    const anteriores = new Set(UNIDADES.slice(0, inicio).map((unidade) => unidade.id));
+    // O museu (Origens, rodada 36) nasceu composto, com a área exposicao: não era uma tela publicada antes.
+    const anteriores = new Set(UNIDADES.slice(0, inicio).filter((unidade) => !unidade.id.startsWith("origens-")).map((unidade) => unidade.id));
     expect(FASES.filter((fase) => anteriores.has(fase.unidadeId) && faseComposta(fase)).map((fase) => fase.id)).toEqual([]);
   });
 });
@@ -254,7 +255,7 @@ describe("o desafio composto", () => {
 
   it("a meta mostra as áreas antes e depois", () => {
     const { antes, depois } = composicaoDoDesafio(FASE_DEMO_DESAFIO_RESOLVER);
-    expect(antes).toEqual({ cena: null, plano: [], codigo: "", casos: [], memoria: null });
+    expect(antes).toEqual({ cena: null, plano: [], codigo: "", casos: [], memoria: null, exposicao: null });
     expect(depois.plano).toEqual(["Começar a contagem em zero", "Olhar cada nota da lista", "Se a nota for 6 ou mais, contar mais um", "Devolver a contagem"]);
     expect(depois.codigo?.startsWith("// Plano: Contar quantos passaram\n// 1. Começar a contagem em zero")).toBe(true);
     expect(depois.casos?.map((caso) => [caso.chamada, caso.esperado, caso.passou])).toEqual([

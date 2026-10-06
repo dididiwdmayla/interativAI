@@ -72,6 +72,12 @@ export const IDS_FERRAMENTAS = [
   "cena",
   "ficha-dispositivo",
   "velocidade-simulacao",
+  // Exposições do Museu das Origens: uma ferramenta por tipo de estação
+  "tear-de-cartoes",
+  "lampadas-de-bits",
+  "camadas-da-maquina",
+  "mesa-de-cores",
+  "linha-do-tempo-museu",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

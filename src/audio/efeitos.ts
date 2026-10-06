@@ -42,6 +42,27 @@ export const IDS_EFEITOS = [
   "entrar-mapa",
   "viagem-ilha",
   "abrir-museu",
+  // Museu das Origens: a voz de cada época (um tique por pedaço da fala)...
+  "fala-tear",
+  "fala-engrenagem",
+  "fala-valvula",
+  "fala-terminal",
+  "fala-8bit",
+  "fala-modem",
+  "fala-notificacao",
+  // ...o som de cada antepassado acordando no corredor...
+  "epoca-tecela",
+  "epoca-engrenagens",
+  "epoca-valvulas",
+  "epoca-terminal",
+  "epoca-pc",
+  "epoca-internet",
+  "epoca-celular",
+  // ...as peças das exposições e o lugar da próxima geração.
+  "furar-cartao",
+  "acender-bit",
+  "encaixar-cartao",
+  "proxima-geracao",
 ] as const;
 
 export type IdEfeito = (typeof IDS_EFEITOS)[number];
@@ -64,6 +85,7 @@ export const EFEITOS_GRANDES: readonly IdEfeito[] = [
   "entrar-mapa",
   "viagem-ilha",
   "abrir-museu",
+  "proxima-geracao",
 ];
 
 export type FonteEfeito =

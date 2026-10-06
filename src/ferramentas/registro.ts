@@ -54,6 +54,11 @@ import { IconeMedicao } from "@/componentes/icones/IconeMedicao";
 import { IconeSincronia } from "@/componentes/icones/IconeSincronia";
 import { IconeTrilha } from "@/componentes/icones/IconeTrilha";
 import { IconeTutor } from "@/componentes/icones/IconeTutor";
+import { IconeBits } from "@/componentes/icones/IconeBits";
+import { IconeCamadas } from "@/componentes/icones/IconeCamadas";
+import { IconeLinhaDoTempoMuseu } from "@/componentes/icones/IconeLinhaDoTempoMuseu";
+import { IconeMesaCores } from "@/componentes/icones/IconeMesaCores";
+import { IconeTear } from "@/componentes/icones/IconeTear";
 import type { PropsIcone } from "@/componentes/icones/tipos";
 import { DemoApagar } from "./demos/DemoApagar";
 import { DemoArvore } from "./demos/DemoArvore";
@@ -1228,6 +1233,85 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
       mouse: "Clique em 2x.",
       toque: "Toque em 2x.",
     },
+    uso: "sinal",
+  },
+  // Exposições do Museu das Origens (área exposicao): peças de museu, não do Chrome.
+  "tear-de-cartoes": {
+    id: "tear-de-cartoes",
+    nome: "Tear de cartões",
+    Icone: IconeTear,
+    alvo: seletorFerramenta("tear-de-cartoes"),
+    oQueFaz: "Cada cartão é uma linha do tecido: onde tem furo, o fio sobe e a cor aparece; onde não tem, o fio fica embaixo.",
+    praQueServe: "Furando os cartões certos, o tear tece o desenho sozinho, linha por linha. O cartão manda e a máquina obedece.",
+    comoUsarAqui: {
+      mouse: "Clique num lugar do cartão para furar. Clique de novo para tapar o furo.",
+      toque: "Toque num lugar do cartão para furar. Toque de novo para tapar o furo.",
+    },
+    noF12DeVerdade:
+      "não existe no F12: é peça de museu. Mas a ideia ficou. Furo ou sem furo são só duas possibilidades, e é assim que o computador guarda tudo, inclusive esta página.",
+    experimente: { mouse: "Clique num lugar do cartão.", toque: "Toque num lugar do cartão." },
+    uso: "sinal",
+  },
+  "lampadas-de-bits": {
+    id: "lampadas-de-bits",
+    nome: "Lâmpadas de bits",
+    Icone: IconeBits,
+    alvo: seletorFerramenta("lampadas-de-bits"),
+    oQueFaz: "Lâmpadas que só acendem ou apagam. Cada uma vale um peso (1, 2, 4, 8...) e o número é a soma das acesas.",
+    praQueServe: "Com quatro lâmpadas dá para mostrar de 0 a 15; com oito, de 0 a 255, e cada número desses pode ser uma letra.",
+    comoUsarAqui: {
+      mouse: "Clique numa lâmpada para acender ou apagar. O número aparece embaixo.",
+      toque: "Toque numa lâmpada para acender ou apagar. O número aparece embaixo.",
+    },
+    noF12DeVerdade: "no Console, (5).toString(2) mostra o 5 em bits (\"101\"), e parseInt(\"101\", 2) faz o caminho de volta.",
+    experimente: { mouse: "Clique numa lâmpada.", toque: "Toque numa lâmpada." },
+    uso: "sinal",
+  },
+  "camadas-da-maquina": {
+    id: "camadas-da-maquina",
+    nome: "Camadas da máquina",
+    Icone: IconeCamadas,
+    alvo: seletorFerramenta("camadas-da-maquina"),
+    oQueFaz: "Mostra o mesmo programa em camadas: o que a gente escreve, as instruções e a linguagem de máquina, os uns e zeros.",
+    praQueServe: "Descer uma camada é traduzir. Tocar numa linha acende o que ela vira lá embaixo: uma linha nossa vira várias instruções.",
+    comoUsarAqui: {
+      mouse: "Clique em Descer uma camada para traduzir. Clique numa linha para ver o que ela vira.",
+      toque: "Toque em Descer uma camada para traduzir. Toque numa linha para ver o que ela vira.",
+    },
+    noF12DeVerdade:
+      "o F12 mostra a camada de cima, na aba Fontes. A tradução para a máquina acontece sozinha, dentro do navegador, enquanto a página roda.",
+    experimente: { mouse: "Clique em Descer uma camada.", toque: "Toque em Descer uma camada." },
+    uso: "sinal",
+  },
+  "mesa-de-cores": {
+    id: "mesa-de-cores",
+    nome: "Mesa de cores",
+    Icone: IconeMesaCores,
+    alvo: seletorFerramenta("mesa-de-cores"),
+    oQueFaz: "Monta uma cor em hexadecimal: dois dígitos de vermelho, dois de verde e dois de azul, de 00 (nada) a ff (tudo).",
+    praQueServe: "É o mesmo #ff8800 do CSS. Cada par de dígitos é um número de 0 a 255 contando de 16 em 16, com letras de a a f depois do 9.",
+    comoUsarAqui: {
+      mouse: "Clique nas setinhas de cada dígito para subir ou descer. A cor e o CSS mudam na hora.",
+      toque: "Toque nas setinhas de cada dígito para subir ou descer. A cor e o CSS mudam na hora.",
+    },
+    noF12DeVerdade:
+      "no painel Estilos da aba Elementos, ao lado de cada cor há um quadradinho: clicar nele abre o seletor de cores, e Shift + clique troca o jeito de escrever (hexadecimal, rgb, hsl).",
+    experimente: { mouse: "Clique numa setinha.", toque: "Toque numa setinha." },
+    uso: "sinal",
+  },
+  "linha-do-tempo-museu": {
+    id: "linha-do-tempo-museu",
+    nome: "Linha do tempo",
+    Icone: IconeLinhaDoTempoMuseu,
+    alvo: seletorFerramenta("linha-do-tempo-museu"),
+    oQueFaz: "Cartões de máquinas e acontecimentos para pôr na ordem em que aconteceram, do mais antigo ao mais novo.",
+    praQueServe: "Cartão no lugar certo mostra a época e o que ele mudou. Uma invenção quase sempre precisa das de antes.",
+    comoUsarAqui: {
+      mouse: "Clique num cartão da caixa e depois no lugar da linha. As setas mudam de lugar; o x devolve para a caixa.",
+      toque: "Toque num cartão da caixa e depois no lugar da linha. As setas mudam de lugar; o x devolve para a caixa.",
+    },
+    noF12DeVerdade: "não existe no F12: é a história que explica por que o F12 é do jeito que é.",
+    experimente: { mouse: "Clique num cartão da caixa.", toque: "Toque num cartão da caixa." },
     uso: "sinal",
   },
 };

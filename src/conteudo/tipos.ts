@@ -23,6 +23,7 @@ import type { CasoFuncao, ValorEsperado } from "@/motor/executor/tipos";
 import type { Circuito, TipoPortao } from "@/motor/circuito/modelo";
 import type { ControleDepurador } from "@/motor/depurador";
 import type { DadosOrdenar } from "@/motor/ordenar/modelo";
+import type { DadosExposicao } from "@/motor/exposicao/modelo";
 import type { AreaTrabalho } from "@/motor/composicao";
 import type { CasoExigido, DadosCasos } from "@/motor/casos/modelo";
 import type { AcontecimentoCena, DadosCena, ValorCena } from "@/motor/cena/modelo";
@@ -342,6 +343,29 @@ export type Validador =
    */
   | { tipo: "casosDoAluno"; minimo: number; incluir?: CasoExigido[]; passando?: boolean }
   /*
+   * Exposições do museu (área exposicao): src/motor/exposicao/modelo.ts.
+   * Olham a exposição de agora (desfazer a mudança desmarca a parte de um
+   * desafio). `estacao` é o id da estação.
+   */
+  /** (Exposição, tear) O tecido está igual ao desenho pedido (cada furo no lugar). Com `linhas`, só esses cartões (a partir de 0). */
+  | { tipo: "tecidoIgual"; estacao: string; linhas?: number[] }
+  /** (Exposição, bits) As lâmpadas mostram este número. */
+  | { tipo: "bitsValem"; estacao: string; valor: number }
+  /** (Exposição, camadas) A camada já foi aberta (o aluno desceu até ela). */
+  | { tipo: "camadaAberta"; estacao: string; camada: string }
+  /** (Exposição, camadas) A linha escolhida agora é esta (ou, com `ou`, uma destas). */
+  | { tipo: "linhaEscolhida"; estacao: string; linha: string; ou?: string[] }
+  /**
+   * (Exposição, cor) A cor montada é `valor` (hexadecimal, maiúscula ou
+   * minúscula, com 3 ou 6 dígitos) ou, com `canais`, cada canal (de 0 a
+   * 255) dentro da faixa pedida: `{ r: [200, 255], g: [0, 60] }`.
+   */
+  | { tipo: "corHex"; estacao: string; valor?: string; canais?: Partial<Record<"r" | "g" | "b", [number, number]>> }
+  /** (Exposição, linha do tempo) Os eventos (todos, sem a lista) estão na linha, na ordem certa entre eles. */
+  | { tipo: "linhaEmOrdem"; estacao: string; eventos?: string[] }
+  /** (Exposição, linha do tempo com plaquinhas) Cada plaquinha do "o que mudou" está no cartão certo. Com `eventos`, só nesses cartões. */
+  | { tipo: "plaquinhasCertas"; estacao: string; eventos?: string[] }
+  /*
    * Estruturas e desempenho (fase de programa): src/motor/estruturas.ts e
    * src/motor/desempenho.ts. Ver o guia, seção 28.
    */
@@ -594,7 +618,30 @@ export type Acao =
   /** (Área cena) O botão "Por dentro" da ficha do dispositivo. Gera `viuPorDentro`. Pede ficha-dispositivo. */
   | { tipo: "verPorDentro"; dispositivo: string }
   /** (Área cena) Escolhe a velocidade da simulação (1x, 2x ou 4x). Gera `mudouVelocidade`. Pede velocidade-simulacao. */
-  | { tipo: "velocidadeCena"; velocidade: 1 | 2 | 4 };
+  | { tipo: "velocidadeCena"; velocidade: 1 | 2 | 4 }
+  /*
+   * Exposições do museu (área exposicao). Cada uma pede a ferramenta da
+   * estação (tear-de-cartoes, lampadas-de-bits, camadas-da-maquina,
+   * mesa-de-cores, linha-do-tempo-museu) e gera `mexeuNaExposicao`.
+   */
+  /** (Exposição) Abre a estação (no desafio, as estações ficam em abas). */
+  | { tipo: "abrirEstacao"; estacao: string }
+  /** (Tear) Fura (ou tapa) o furo `coluna` do cartão `linha` (a partir de 0). Sem `furado`, alterna. */
+  | { tipo: "furarCartao"; estacao: string; linha: number; coluna: number; furado?: boolean }
+  /** (Bits) Liga ou desliga a lâmpada `indice` (0 é a da esquerda, a de maior peso). Sem `ligado`, alterna. */
+  | { tipo: "alternarBit"; estacao: string; indice: number; ligado?: boolean }
+  /** (Camadas) O botão "Descer uma camada": traduz para a camada de baixo. */
+  | { tipo: "descerCamada"; estacao: string }
+  /** (Camadas) Toca numa linha de uma camada aberta: ela e as ligadas acendem. */
+  | { tipo: "escolherLinha"; estacao: string; linha: string }
+  /** (Cor) A cor da mesa de cores, em hexadecimal (os botões dos dígitos chegam no mesmo lugar). */
+  | { tipo: "definirCor"; estacao: string; valor: string }
+  /** (Linha do tempo) Põe (ou muda de lugar) o cartão na linha, na `posicao` (a partir de 0; padrão: no fim). */
+  | { tipo: "porNaLinha"; estacao: string; evento: string; posicao?: number }
+  /** (Linha do tempo) Tira o cartão da linha (volta para a caixa). */
+  | { tipo: "tirarDaLinha"; estacao: string; evento: string }
+  /** (Linha do tempo com plaquinhas) Pendura a plaquinha do "o que mudou" do evento `plaquinha` no cartão `evento`. */
+  | { tipo: "pendurarPlaquinha"; estacao: string; evento: string; plaquinha: string };
 
 /* ------------------------------------------------------------------ */
 /* Objetivos                                                          */
@@ -619,7 +666,9 @@ export type AjudaLinha =
   /** (Circuito) Pisca uma peça da bancada (ou, sem `peca`, a paleta de portões). */
   | { alvo: "circuito"; peca?: string; fala: string }
   /** (Ordenar) Pisca um cartão (onde ele estiver) ou, sem `passo`, o plano. */
-  | { alvo: "ordenar"; passo?: string; fala: string };
+  | { alvo: "ordenar"; passo?: string; fala: string }
+  /** (Exposição) Pisca a estação (ou, com `peca`, uma peça dela: "1-3" é o furo da linha 1, coluna 3; "2" a lâmpada 2; o id de uma linha da camada ou de um cartão; "descer"; "r", "g" ou "b" na cor). */
+  | { alvo: "exposicao"; estacao: string; peca?: string; fala: string };
 
 /** Degrau 4: a solução aplicada na frente do jogador (custa 1 estrela). */
 export type SolucaoAjuda = {
@@ -854,8 +903,9 @@ export type ComposicaoDaFase = {
    * controla, campo `cena`), "plano" (o quadro de passos, campo `plano`),
    * "snippet" (o código: aba Fontes com o Snippet e o Console, pede
    * programa.snippet), "palco" (o palco da memória com a linha do tempo) e
-   * "testes" (os casos de teste do aluno, campo `testes`). Sem o campo, a
-   * fase usa a tela de sempre do tipo dela.
+   * "testes" (os casos de teste do aluno, campo `testes`) e "exposicao" (a
+   * sala do museu, campo `exposicao`, sempre sozinha). Sem o campo, a fase
+   * usa a tela de sempre do tipo dela.
    */
   areas?: AreaTrabalho[];
   /**
@@ -877,6 +927,12 @@ export type ComposicaoDaFase = {
    * `{ entrada: "[8, 6]", esperado: "7" }`).
    */
   testes?: DadosCasos;
+  /**
+   * (Área exposicao) A exposição do Museu das Origens: o antepassado que
+   * recebe o aluno, a placa e as estações interativas (tear, bits, camadas,
+   * cor, linha do tempo). Ver src/motor/exposicao e o guia, seção 32.
+   */
+  exposicao?: DadosExposicao;
 };
 
 /** Micro-passos: objetivos guiados e sozinho, em sequência. */

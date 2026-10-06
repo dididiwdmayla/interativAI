@@ -13,6 +13,7 @@ import { type EstadoFaseSalvo, type Progresso, type ProgramaSalvo, PROJETO_VAZIO
 import type { Circuito } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
 import type { EstadoCasos } from "@/motor/casos/modelo";
+import type { EstadoExposicao } from "@/motor/exposicao/modelo";
 import { agendarRastreado, type TemporizadorRastreado } from "@/lib/pendencias";
 import type { Barramento } from "@/motor/barramento";
 import {
@@ -80,7 +81,7 @@ type Opcoes = {
   /** Tela de toque: os enunciados usam "toque" em vez de "clique". */
   toque: boolean;
   /** O resto do que os validadores olham: a tela da prévia e o modo dispositivo (lidos na hora). */
-  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa" | "circuito" | "ordenar" | "snippet" | "casos">;
+  extraValidacao?: () => Pick<ContextoValidacao, "tela" | "dispositivo" | "campanha" | "programa" | "circuito" | "ordenar" | "snippet" | "casos" | "exposicao">;
   /** (Fase de programa) Degrau 3: pisca linhas do Snippet ou a linha do Console; null apaga. */
   destacarNoPrograma?: (alvo: number[] | "console" | null) => void;
   /** (Fase de programa) O que rodou e o Snippet, para salvar junto com a fase. */
@@ -95,6 +96,10 @@ type Opcoes = {
   ordenarSalvo?: EstadoOrdenar | null;
   /** (Área testes) Os casos do aluno de agora, para salvar junto com a fase. */
   casosSalvos?: EstadoCasos | null;
+  /** (Área exposicao) Degrau 3: pisca uma estação (ou uma peça dela); null apaga. */
+  destacarNaExposicao?: (alvo: { estacao: string; peca?: string } | null) => void;
+  /** (Área exposicao) As estações de agora, para salvar junto com a fase. */
+  exposicaoSalva?: EstadoExposicao | null;
 };
 
 const ESPERA_VERIFICAR_MS = 700;
@@ -135,6 +140,8 @@ export function useMotorFase({
   destacarNoOrdenar,
   ordenarSalvo = null,
   casosSalvos = null,
+  destacarNaExposicao,
+  exposicaoSalva = null,
 }: Opcoes) {
   const [estado, setEstado] = useState<EstadoMotor>(() =>
     criarEstadoInicial(fase, salvo, toque, { modo, mostrarMeta }),
@@ -197,8 +204,9 @@ export function useMotorFase({
     destacarNoPrograma?.(null);
     destacarNoCircuito?.(null);
     destacarNoOrdenar?.(null);
+    destacarNaExposicao?.(null);
     setPulsarFerramenta(null);
-  }, [destacarNaArvore, destacarNoCircuito, destacarNoEstilos, destacarNoOrdenar, destacarNoPrograma, editorRef, limparDestaqueCss]);
+  }, [destacarNaArvore, destacarNaExposicao, destacarNoCircuito, destacarNoEstilos, destacarNoOrdenar, destacarNoPrograma, editorRef, limparDestaqueCss]);
 
   /** O que os validadores olham agora: documento vivo, inicial, seleção e eventos. */
   const contextoValidacao = useCallback((): ContextoValidacao | null => {
@@ -255,6 +263,7 @@ export function useMotorFase({
               circuito: circuitoSalvo,
               ordenar: ordenarSalvo,
               casos: casosSalvos,
+              exposicao: exposicaoSalva,
               contrato: atual.contrato ? comTempo(atual.contrato) : null,
             },
           },
@@ -281,7 +290,7 @@ export function useMotorFase({
         };
       });
     },
-    [casosSalvos, circuitoSalvo, comTempo, cssAtual, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
+    [casosSalvos, circuitoSalvo, comTempo, cssAtual, exposicaoSalva, fase, htmlAtual, modo, mostrarMeta, ordenarSalvo, programaSalvo, projeto],
   );
 
   useEffect(() => {
@@ -624,6 +633,8 @@ export function useMotorFase({
       destacarNoCircuito?.(linha.peca ?? "paleta");
     } else if (linha.alvo === "ordenar") {
       destacarNoOrdenar?.(linha.passo ?? "plano");
+    } else if (linha.alvo === "exposicao") {
+      destacarNaExposicao?.({ estacao: linha.estacao, peca: linha.peca });
     } else {
       setPulsarFerramenta(linha.ferramenta);
     }

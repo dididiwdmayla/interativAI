@@ -9,6 +9,7 @@ import { IconeCerto } from "@/componentes/icones/IconeCerto";
 import { acharBlocoDoPlano } from "@/motor/plano/comentarios";
 import type { RetratoComposicao } from "@/motor/simulacao";
 import { CenaSvg } from "@/componentes/cena/CenaSvg";
+import { canaisDaCor, valorDosBits } from "@/motor/exposicao/modelo";
 
 /** O código da miniatura: o bloco do plano vira uma linha só (o plano já aparece em cima), para a função caber. */
 function codigoResumido(codigo: string): string {
@@ -27,6 +28,50 @@ export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposica
     <figure className="flex min-w-0 flex-1 flex-col gap-1" data-mini-composicao={legenda}>
       <figcaption className="text-xs font-black uppercase tracking-wide text-texto-suave">{legenda}</figcaption>
       <div className="flex h-72 min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]">
+        {retrato?.exposicao &&
+          retrato.exposicao.dados.estacoes.map((estacao) => {
+            const estado = retrato.exposicao?.estado.estacoes[estacao.id];
+            if (!estado) return null;
+            return (
+              <section key={estacao.id} className="rounded-lg border-2 border-borda bg-superficie px-2 py-1" data-mini-estacao={estacao.id}>
+                <p className="text-[10px] font-black uppercase tracking-wide text-texto-suave">{estacao.titulo}</p>
+                {estado.tipo === "tear" && (
+                  <div className="inline-block rounded border border-borda bg-[var(--cor-ante-cartao)] p-0.5" aria-hidden="true">
+                    {estado.furos.map((linha, l) => (
+                      <div key={l} className="flex">
+                        {[...linha].map((c, k) => (
+                          <span key={k} className={`h-2 w-2 ${c === "#" ? "bg-[var(--cor-ante-fio-a)]" : ""}`} />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {estado.tipo === "bits" && (
+                  <p className="font-mono font-bold text-texto">
+                    {estado.bits} = {valorDosBits(estado.bits)}
+                  </p>
+                )}
+                {estado.tipo === "cor" && (
+                  <p className="flex items-center gap-1 font-mono font-bold text-texto">
+                    {/* A cor do aluno é dado do conteúdo (como os sites-alvo), não do tema. */}
+                    <span className="inline-block h-3 w-3 rounded border border-borda" style={{ background: estado.hex }} />
+                    {estado.hex} (r {canaisDaCor(estado.hex).r})
+                  </p>
+                )}
+                {estado.tipo === "camadas" && <p className="font-bold text-texto">{estado.abertas} camada(s) aberta(s)</p>}
+                {estado.tipo === "linha-do-tempo" &&
+                  (estado.linha.length && estacao.tipo === "linha-do-tempo" ? (
+                    <ol className="list-inside list-decimal font-bold text-texto">
+                      {estado.linha.map((id) => (
+                        <li key={id}>{estacao.eventos.find((e) => e.id === id)?.titulo ?? id}</li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="text-texto-suave">Linha vazia: os cartões estão na caixa.</p>
+                  ))}
+              </section>
+            );
+          })}
         {retrato?.cena && (
           <section className="h-28 shrink-0 overflow-hidden rounded-lg border-2 border-borda bg-superficie" data-mini-cena={retrato.cena.dados.id}>
             <CenaSvg dados={retrato.cena.dados} rastro={retrato.cena.rastro} tempoMs={retrato.cena.tempoMs} />

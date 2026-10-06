@@ -100,5 +100,20 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
       return "ficha-dispositivo";
     case "velocidadeCena":
       return "velocidade-simulacao";
+    case "furarCartao":
+      return "tear-de-cartoes";
+    case "alternarBit":
+      return "lampadas-de-bits";
+    case "descerCamada":
+    case "escolherLinha":
+      return "camadas-da-maquina";
+    case "definirCor":
+      return "mesa-de-cores";
+    case "porNaLinha":
+    case "tirarDaLinha":
+    case "pendurarPlaquinha":
+      return "linha-do-tempo-museu";
+    case "abrirEstacao":
+      return null;
   }
 }

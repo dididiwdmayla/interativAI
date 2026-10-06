@@ -14,7 +14,9 @@
 import { circuitoDaFase, temObjetivos } from "@/motor/tiposDeFase";
 import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from "@/motor/depurador";
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
-import { AREAS_TRABALHO, casosDaFase, cenaDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { AREAS_TRABALHO, casosDaFase, cenaDaFase, exposicaoDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
+import { conferirDadosExposicao, FERRAMENTA_DA_ESTACAO } from "@/motor/exposicao/conferir";
+import { ehAcaoExposicao, ESTACAO_DA_ACAO, estacaoDo, normalizarHex, type TipoEstacao } from "@/motor/exposicao/modelo";
 import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
 import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
 import { unidadesSemCena } from "@/motor/cena/ritmo";
@@ -231,6 +233,105 @@ function acoesRoteirizadas(fase: Fase): { onde: string; acoes: readonly Acao[] }
     }
   });
   return lista;
+}
+
+/** Os validadores das exposições do museu e o tipo de estação que cada um olha. */
+const VALIDADORES_DE_EXPOSICAO: Partial<Record<Validador["tipo"], TipoEstacao>> = {
+  tecidoIgual: "tear",
+  bitsValem: "bits",
+  camadaAberta: "camadas",
+  linhaEscolhida: "camadas",
+  corHex: "cor",
+  linhaEmOrdem: "linha-do-tempo",
+  plaquinhasCertas: "linha-do-tempo",
+};
+
+/**
+ * A exposição do museu (área exposicao): os dados, a ferramenta de cada
+ * estação, e os validadores, as ações e as linhas de ajuda só nas estações
+ * que existem (com as peças que existem).
+ */
+function conferirExposicaoDaFase(fase: Fase): string[] {
+  const problemas: string[] = [];
+  const dados = exposicaoDaFase(fase);
+  const comCampo = (fase.tipo === "pratica" || fase.tipo === "desafio") && fase.exposicao !== undefined;
+  if (comCampo && !dados) problemas.push('a fase tem exposicao, mas não declara a área "exposicao" em areas');
+  if (temArea(fase, "exposicao") && !comCampo) problemas.push('a área "exposicao" pede o campo exposicao (o anfitrião, a placa e as estações)');
+  const etapas = temObjetivos(fase) ? fase.objetivos.map((o) => o.id) : fase.tipo === "desafio" ? fase.partes.map((p) => p.id) : [];
+  if (dados) {
+    problemas.push(...conferirDadosExposicao(dados, etapas).map((p) => `exposição: ${p}`));
+    if (fase.siteAlvo.body.trim() || fase.siteAlvo.head.trim()) problemas.push("fase do museu usa siteAlvo: SITE_DO_PROGRAMA (sem página: a tela é a sala)");
+  }
+  const tipos = new Set(dados?.estacoes.map((e) => e.tipo) ?? []);
+  for (const [tipo, ferramenta] of Object.entries(FERRAMENTA_DA_ESTACAO) as [TipoEstacao, IdFerramenta][]) {
+    if (tipos.has(tipo) && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`a estação do tipo "${tipo}" pede "${ferramenta}" em usaFerramentas`);
+    if (!tipos.has(tipo) && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a exposição não tem estação do tipo "${tipo}"`);
+  }
+  const estacaoDoTipo = (onde: string, id: string, tipo: TipoEstacao | null) => {
+    if (!dados) {
+      problemas.push(`${onde}: pede a área "exposicao"`);
+      return null;
+    }
+    const estacao = estacaoDo(dados, id);
+    if (!estacao) problemas.push(`${onde}: a exposição não tem a estação "${id}"`);
+    else if (tipo && estacao.tipo !== tipo) problemas.push(`${onde}: a estação "${id}" é do tipo ${estacao.tipo}, não ${tipo}`);
+    else return estacao;
+    return null;
+  };
+  for (const { onde, validador } of validadoresDe(fase)) {
+    for (const item of achatarValidador(validador)) {
+      const tipo = VALIDADORES_DE_EXPOSICAO[item.tipo];
+      if (!tipo || !("estacao" in item)) continue;
+      const estacao = estacaoDoTipo(`${onde} (${item.tipo})`, item.estacao, tipo);
+      if (!estacao) continue;
+      if (item.tipo === "bitsValem" && estacao.tipo === "bits" && (!Number.isInteger(item.valor) || item.valor < 0 || item.valor >= 2 ** estacao.quantos)) {
+        problemas.push(`${onde}: bitsValem ${item.valor} não cabe em ${estacao.quantos} lâmpadas`);
+      }
+      if (item.tipo === "camadaAberta" && estacao.tipo === "camadas" && !estacao.camadas.some((c) => c.id === item.camada)) problemas.push(`${onde}: camadaAberta cita a camada "${item.camada}", que não existe`);
+      if (item.tipo === "linhaEscolhida" && estacao.tipo === "camadas") {
+        for (const linha of [item.linha, ...(item.ou ?? [])]) if (!estacao.camadas.some((c) => c.linhas.some((l) => l.id === linha))) problemas.push(`${onde}: linhaEscolhida cita a linha "${linha}", que não existe`);
+      }
+      if (item.tipo === "corHex") {
+        if (item.valor === undefined && !item.canais) problemas.push(`${onde}: corHex pede valor ou canais`);
+        if (item.valor !== undefined && !normalizarHex(item.valor)) problemas.push(`${onde}: corHex "${item.valor}" não é hexadecimal`);
+        for (const [canal, [de, ate]] of Object.entries(item.canais ?? {})) if (de < 0 || ate > 255 || de > ate) problemas.push(`${onde}: o canal ${canal} vai de 0 a 255 (de <= até)`);
+      }
+      if (item.tipo === "linhaEmOrdem" && estacao.tipo === "linha-do-tempo") {
+        for (const id of item.eventos ?? []) if (!estacao.eventos.some((e) => e.id === id)) problemas.push(`${onde}: linhaEmOrdem cita o cartão "${id}", que não existe`);
+      }
+      if (item.tipo === "plaquinhasCertas" && estacao.tipo === "linha-do-tempo" && !estacao.plaquinhas) problemas.push(`${onde}: plaquinhasCertas pede plaquinhas: true na estação`);
+      if (item.tipo === "plaquinhasCertas" && estacao.tipo === "linha-do-tempo") {
+        for (const id of item.eventos ?? []) if (!estacao.eventos.some((e) => e.id === id)) problemas.push(`${onde}: plaquinhasCertas cita o cartão "${id}", que não existe`);
+      }
+      if (item.tipo === "tecidoIgual" && estacao.tipo === "tear") {
+        for (const linha of item.linhas ?? []) if (!Number.isInteger(linha) || linha < 0 || linha >= estacao.modelo.length) problemas.push(`${onde}: tecidoIgual cita o cartão ${linha}, fora do tear`);
+      }
+    }
+  }
+  for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
+    for (const acao of acoes) {
+      if (!ehAcaoExposicao(acao)) continue;
+      const estacao = estacaoDoTipo(`${onde} (${acao.tipo})`, acao.estacao, ESTACAO_DA_ACAO[acao.tipo]);
+      if (!estacao) continue;
+      if (acao.tipo === "furarCartao" && estacao.tipo === "tear" && (acao.linha < 0 || acao.linha >= estacao.modelo.length || acao.coluna < 0 || acao.coluna >= (estacao.modelo[0]?.length ?? 0))) {
+        problemas.push(`${onde}: furarCartao fora do cartão (linha ${acao.linha}, coluna ${acao.coluna})`);
+      }
+      if (acao.tipo === "alternarBit" && estacao.tipo === "bits" && (acao.indice < 0 || acao.indice >= estacao.quantos)) problemas.push(`${onde}: alternarBit ${acao.indice} fora das ${estacao.quantos} lâmpadas`);
+      if (acao.tipo === "escolherLinha" && estacao.tipo === "camadas" && !estacao.camadas.some((c) => c.linhas.some((l) => l.id === acao.linha))) problemas.push(`${onde}: escolherLinha cita a linha "${acao.linha}", que não existe`);
+      if (acao.tipo === "definirCor" && !normalizarHex(acao.valor)) problemas.push(`${onde}: definirCor "${acao.valor}" não é hexadecimal`);
+      if ((acao.tipo === "porNaLinha" || acao.tipo === "tirarDaLinha" || acao.tipo === "pendurarPlaquinha") && estacao.tipo === "linha-do-tempo") {
+        const ids = [acao.evento, ...(acao.tipo === "pendurarPlaquinha" ? [acao.plaquinha] : [])];
+        for (const id of ids) if (!estacao.eventos.some((e) => e.id === id)) problemas.push(`${onde}: ${acao.tipo} cita o cartão "${id}", que não existe`);
+        if (acao.tipo !== "pendurarPlaquinha" && estacao.fixos?.includes(acao.evento)) problemas.push(`${onde}: ${acao.tipo} mexe no cartão fixo "${acao.evento}"`);
+        if (acao.tipo === "pendurarPlaquinha" && !estacao.plaquinhas) problemas.push(`${onde}: pendurarPlaquinha pede plaquinhas: true na estação`);
+      }
+    }
+  }
+  objetivosDe(fase).forEach((objetivo, indice) => {
+    if (objetivo.modo !== "guiado" || objetivo.ajudas.linha.alvo !== "exposicao") return;
+    estacaoDoTipo(`${nomeObjetivo(objetivo, indice)} ajudas.linha`, objetivo.ajudas.linha.estacao, null);
+  });
+  return problemas;
 }
 
 const VALIDADORES_DE_CSS: ReadonlySet<Validador["tipo"]> = new Set(["valorEfetivo", "declaracao", "regraExiste", "riscada", "variavelCss", "temMediaQuery"]);
@@ -1201,6 +1302,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const areas = fase.areas;
       for (const area of areas) if (!(AREAS_TRABALHO as readonly string[]).includes(area)) problemas.push(`área de trabalho desconhecida: "${area}"`);
       problemas.push(...repetidos(areas).map((area) => `a área "${area}" aparece mais de uma vez`));
+      // A sala do museu ocupa a tela inteira: é a única área (a checagem "exposicao-do-museu" confere o resto).
+      if (areas.includes("exposicao")) {
+        if (areas.length > 1) problemas.push('a área "exposicao" é sempre a única da fase (a sala ocupa a tela inteira)');
+        if (fase.programa) problemas.push('a área "exposicao" não tem programa (o museu não roda código)');
+        return problemas;
+      }
       // O código é o centro da composição: o plano vira comentários nele e o palco mostra o que ele faz.
       if (!areas.includes("snippet")) problemas.push('fase composta pede a área "snippet" (o código do aluno)');
       if (areas.includes("snippet") && !fase.programa?.snippet) problemas.push('a área "snippet" pede programa.snippet');
@@ -1226,8 +1333,10 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
         });
         if ((inicial ?? []).length > MAXIMO_CASOS) problemas.push(`testes.inicial tem mais de ${MAXIMO_CASOS} casos`);
       }
-      const ferramentaDaArea: Record<(typeof AREAS_TRABALHO)[number], IdFerramenta> = { cena: "cena", plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
+      // A exposição tem uma ferramenta por tipo de estação (conferida na checagem "exposicao-do-museu").
+      const ferramentaDaArea: Record<Exclude<(typeof AREAS_TRABALHO)[number], "exposicao">, IdFerramenta> = { cena: "cena", plano: "quadro-de-passos", snippet: "snippet", palco: "palco-memoria", testes: "casos-de-teste" };
       for (const area of AREAS_TRABALHO) {
+        if (area === "exposicao") continue;
         const ferramenta = ferramentaDaArea[area];
         if (areas.includes(area) && !fase.usaFerramentas.includes(ferramenta)) problemas.push(`a área "${area}" pede "${ferramenta}" em usaFerramentas`);
         if (!areas.includes(area) && fase.usaFerramentas.includes(ferramenta)) problemas.push(`usaFerramentas tem "${ferramenta}", mas a fase não declara a área "${area}"`);
@@ -1237,6 +1346,11 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       if (planoNoCodigo && !fase.usaFerramentas.includes("plano-no-codigo")) problemas.push('com as áreas "plano" e "snippet", o botão Levar pro código aparece: ponha "plano-no-codigo" em usaFerramentas');
       return problemas;
     },
+  },
+  {
+    id: "exposicao-do-museu",
+    nome: "exposição do museu (área exposicao): anfitrião, placa, falas e estações bem formadas, a ferramenta de cada estação, e validadores e ações só nas estações que existem",
+    checar: (fase) => conferirExposicaoDaFase(fase),
   },
   {
     id: "ordenar-passos",

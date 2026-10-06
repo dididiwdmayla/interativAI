@@ -40,7 +40,8 @@ import { chamadasDaMedicao } from "./desempenho";
 import { ehArvore } from "./estruturas";
 import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
-import { casosDaFase, cenaDaFase, quadroDaFase, temArea } from "./composicao";
+import { casosDaFase, cenaDaFase, exposicaoDaFase, quadroDaFase, temArea } from "./composicao";
+import * as museu from "./exposicao/modelo";
 import { cenariosDaFase } from "./cena/validar";
 import { type DadosCena, type RastroCena, rastroInicial } from "./cena/modelo";
 import * as casosDoAluno from "./casos/modelo";
@@ -162,6 +163,9 @@ export function criarSimulacao(fase: Fase) {
   // Fase composta com a área testes: os casos do aluno, rodados contra a função do Snippet.
   const dadosCasos = casosDaFase(fase);
   let casos: casosDoAluno.EstadoCasos | null = dadosCasos ? casosDoAluno.estadoInicialCasos(dadosCasos) : null;
+  // Fase composta com a área exposicao: as estações do museu.
+  const dadosExposicao = exposicaoDaFase(fase);
+  let exposicao: museu.EstadoExposicao | null = dadosExposicao ? museu.estadoInicialExposicao(dadosExposicao) : null;
   // Fase composta com plano e Snippet: o plano vira comentários no código, e mexer no plano atualiza o bloco.
   const planoNoCodigo = temArea(fase, "plano") && temArea(fase, "snippet") && dadosOrdenar !== null;
   const acompanharPlano = () => {
@@ -408,6 +412,19 @@ export function criarSimulacao(fase: Fase) {
             },
           }
         : undefined,
+    exposicao:
+      dadosExposicao && exposicao
+        ? {
+            mexer: (acao) => {
+              if (!exposicao) return false;
+              const novo = museu.aplicarAcaoExposicao(dadosExposicao, exposicao, acao);
+              if (!novo) return false;
+              exposicao = novo;
+              if (acao.tipo !== "abrirEstacao") eventos.push({ tipo: "mexeuNaExposicao", estacao: acao.estacao, acao: acao.tipo });
+              return true;
+            },
+          }
+        : undefined,
     // Área cena: abrir a ficha, ver o "por dentro" e trocar a velocidade (fora da tela, só os eventos).
     cena: dadosCena
       ? {
@@ -471,6 +488,7 @@ export function criarSimulacao(fase: Fase) {
       ordenar: dadosOrdenar && ordenar ? { dados: dadosOrdenar, estado: ordenar } : undefined,
       snippet: fase.programa?.snippet ? snippet : undefined,
       casos: dadosCasos && casos ? { dados: dadosCasos, estado: casos } : undefined,
+      exposicao: dadosExposicao && exposicao ? { dados: dadosExposicao, estado: exposicao } : undefined,
     };
   };
 
@@ -504,6 +522,8 @@ export function criarSimulacao(fase: Fase) {
     ordenar: () => ordenar,
     /** (Área testes) Os casos do aluno agora, com os resultados da última rodada. */
     casos: () => casos,
+    /** (Área exposicao) As estações do museu agora. */
+    exposicao: () => exposicao,
   };
 }
 
@@ -572,6 +592,8 @@ export type RetratoComposicao = {
   casos: { chamada: string; esperado: string; passou: boolean | null }[] | null;
   /** A memória depois da última execução (null: nada rodou ou sem programa). */
   memoria: FotoMemoria | null;
+  /** (Área exposicao) As estações do museu e o estado de cada uma (null: sem a área). */
+  exposicao: { dados: museu.DadosExposicao; estado: museu.EstadoExposicao } | null;
 };
 
 /**
@@ -601,6 +623,11 @@ function retratoDaComposicao(fase: Fase, simulacao: Simulacao): RetratoComposica
         ? casos.casos.map((caso) => ({ chamada: `${dadosCasos.funcao}(${caso.entrada})`, esperado: caso.esperado, passou: casos.resultados[caso.id]?.passou ?? null }))
         : null,
     memoria: simulacao.programa().ultimaExecucao?.memoriaFinal ?? null,
+    exposicao: (() => {
+      const dadosExposicao = exposicaoDaFase(fase);
+      const estadoExposicao = simulacao.exposicao();
+      return dadosExposicao && estadoExposicao ? { dados: dadosExposicao, estado: estadoExposicao } : null;
+    })(),
   };
 }
 

@@ -1,5 +1,6 @@
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
+import type { EstadoEstacao, EstadoExposicao } from "@/motor/exposicao/modelo";
 import type { EscolhaRequisitos, EstadoContrato, EtapaContrato } from "@/motor/contrato/modelo";
 import { type EstadoCasos, MAXIMO_CASOS, MAXIMO_TEXTO_CASO, type ResultadoCaso } from "@/motor/casos/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
@@ -60,6 +61,12 @@ export type EstadoFaseSalvo = {
   casos?: EstadoCasos | null;
   /** (Contrato) A etapa, a lista de requisitos escolhida, a mudança e o tempo de trabalho. null nas outras fases. */
   contrato?: EstadoContrato | null;
+  /**
+   * (Fase do museu, área exposicao) O estado de cada estação e a aberta. A
+   * fase confere a forma contra os dados dela ao abrir (estadoValidoExposicao).
+   * null nas outras fases (e em progresso antigo).
+   */
+  exposicao?: EstadoExposicao | null;
 };
 
 export type ProgramaSalvo = {
@@ -261,7 +268,40 @@ function lerEstadoFase(valor: unknown): EstadoFaseSalvo | null {
     ordenar: lerOrdenarSalvo(valor.ordenar),
     casos: lerCasosSalvo(valor.casos),
     contrato: lerContratoSalvo(valor.contrato),
+    exposicao: lerExposicaoSalva(valor.exposicao),
   };
+}
+
+/** A forma do estado de uma estação (o conteúdo, a fase confere contra os dados dela). */
+function lerEstacaoSalva(valor: unknown): EstadoEstacao | null {
+  if (!ehObjeto(valor)) return null;
+  switch (valor.tipo) {
+    case "tear":
+      return Array.isArray(valor.furos) && valor.furos.length <= 8 ? { tipo: "tear", furos: listaDeTextos(valor.furos).map((t) => t.slice(0, 8)) } : null;
+    case "bits":
+      return typeof valor.bits === "string" ? { tipo: "bits", bits: valor.bits.slice(0, 8) } : null;
+    case "camadas":
+      return ehNumero(valor.abertas) ? { tipo: "camadas", abertas: Math.round(valor.abertas), escolhida: typeof valor.escolhida === "string" ? valor.escolhida : null } : null;
+    case "cor":
+      return typeof valor.hex === "string" ? { tipo: "cor", hex: valor.hex.slice(0, 7) } : null;
+    case "linha-do-tempo": {
+      const plaquinhas: Record<string, string> = {};
+      if (ehObjeto(valor.plaquinhas)) for (const [cartao, placa] of Object.entries(valor.plaquinhas)) if (typeof placa === "string") plaquinhas[cartao] = placa;
+      return { tipo: "linha-do-tempo", linha: [...new Set(listaDeTextos(valor.linha))].slice(0, 10), plaquinhas };
+    }
+    default:
+      return null;
+  }
+}
+
+function lerExposicaoSalva(valor: unknown): EstadoExposicao | null {
+  if (!ehObjeto(valor) || !ehObjeto(valor.estacoes) || typeof valor.aberta !== "string") return null;
+  const estacoes: Record<string, EstadoEstacao> = {};
+  for (const [id, estado] of Object.entries(valor.estacoes).slice(0, 4)) {
+    const lido = lerEstacaoSalva(estado);
+    if (lido) estacoes[id] = lido;
+  }
+  return { estacoes, aberta: valor.aberta };
 }
 
 const ETAPAS_CONTRATO: readonly EtapaContrato[] = ["briefing", "requisitos", "trabalho", "entrega"];
