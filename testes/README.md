@@ -260,4 +260,6 @@ a insuficiência de um caso feliz e o progresso concluído na ilha.
 
 - `node testes/estruturas-zona.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa da zona Estruturas, previsões, bordas, vagões pelos lados certos, custo escondido no gráfico e árvore.
 
-- Depuração: `node testes/depuracao.mjs [desktop|retrato|paisagem] [1|2|3|4]`: jornada pelo mapa com editor, erros sucessivos, pausas, controles, Observar e casos de teste. Dados em `depuracao-jornadas.json`, conferidos contra o conteúdo.
+- Depuração: `node testes/depuracao.mjs [desktop|retrato|paisagem] [1|2|3]`: jornada pelo mapa com editor, erros sucessivos, pausas, controles, Observar e casos de teste. Dados em `depuracao-jornadas.json`, conferidos contra o conteúdo.
+
+- Bloqueio da cena na pausa: `node testes/depuracao-cena-bloqueio.mjs desktop`. Reprodução que falha no motor atual; não integra a bateria. A jornada `depuracao.mjs ... 4` e seus dados são rascunhos para retomar após o conserto (U4 não registrada nem publicada).

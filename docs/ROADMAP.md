@@ -29,6 +29,14 @@ núcleo comum.
 
 ### Feito
 
+- **Depuração, conteúdo U1 a U3:** Ler a mensagem de erro, Pontos de
+  parada e Passo a passo, uma unidade por commit, nove fases, oito
+  conceitos e 16 revisões. Jornadas nos três layouts, publicação, build
+  e lint passaram. A zona e a Ilha Lógica ainda não estão completas:
+  a inspeção visual da cena revelou o bloqueio descrito em Pendências.
+  U4 permanece em rascunho; o contrato continua no fim do currículo.
+  Bateria de conteúdo em produção verde; detalhe e retestes no PROGRESSO.
+
 - **Zona Estruturas de dados completa (U1 a U4):** Pilha, Fila,
   Dicionário (Map) e Árvore, na ordem do mapa e um commit por unidade.
   12 fases, nove conceitos com temas e 18 itens de revisão; cozinha,
@@ -595,13 +603,39 @@ núcleo comum.
 
 ### Em andamento
 
-- Zona Depuração: U1 e U2 publicadas; U3 em validação; produção sequencial com um commit por
-  unidade, incluindo Observar variáveis como U4.
+- Zona Depuração interrompida pela regra de parada: U1 a U3 publicadas,
+  U4 em rascunho sem registro/publicação. PR em rascunho até o motor
+  sincronizar a cena com a pausa; não declarar a Ilha Lógica completa.
 
 - Quatro ambientes concluídos; aguardando revisão visual das capturas
   e do pull request.
 
 ### Pendências
+
+- **Bloqueio de Depuração — cena visual fora da foto da pausa:** Observar
+  lê a memória correta, mas AreaCena reproduz o rastro inteiro. Em U3-f1,
+  ponto na linha 6: antes de `proxima("verde")`, o desenho chega a 4.000 ms
+  com sinal vermelho; o estado da pausa é 0 ms com sinal verde. Na U4-f1,
+  Watch mostra noite seca (false/20), mas o desenho já avança para dia
+  úmido. As três jornadas da U4 falham ao cobrar o instante da cena.
+  Reprodução: servidor e `node testes/depuracao-cena-bloqueio.mjs desktop`
+  na mesma invocação (`URL_JOGO=http://127.0.0.1:3000`). Não integra a
+  bateria verde: é uma prova do bloqueio, a promover quando corrigido.
+  `JogoFase.tsx` só envia `focoCena` ao mover a linha do tempo manualmente;
+  os controles de depuração não o atualizam. `AreaCena.tsx` inicia a
+  animação com rastro novo; `useDepurador` consulta a foto corretamente.
+  Conserto exigido: cada pausa/Passar/Entrar/Sair deve focar tempo **e**
+  filtro de execução/passo (comandos diferentes podem ter o mesmo tempo),
+  segurar a animação e preservar retomada/linha do tempo. Conferir aparelho
+  e entradas nos três layouts em U2/U3/U4. Não improvisar espera no conteúdo.
+  A U4, seus quatro itens de revisão e os dados da jornada ficam em
+  rascunho em `docs/rascunhos/depuracao-u4/`, fora dos índices e catálogo; `requerMotor` mantém a unidade travada.
+
+- **Testes sob carga (Depuração):** a checagem conjunta das bancadas
+  tem limite de 5 s, e a prova de recursão infinita espera estourar a
+  pilha antes da proteção de 1,5 s. Com testes e navegadores simultâneos,
+  ambos falharam nesta rodada e passaram isolados. Rodar conteúdo sem
+  jornadas concorrentes, com `--maxWorkers=1`, estabilizou essas provas; revisar a estabilidade dessas provas sem afrouxar o motor.
 
 - **Custo escondido (rodada 32), para depois:**
   - Fora do modelo (contam 0 escondidos): `flat`, `Object.assign`,
@@ -622,7 +656,7 @@ núcleo comum.
   - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
     pro mundo de cada ilha (o site com interação, o sistema com dados): o
     da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
-  - Enquanto a zona Depuração não existe, o contrato abre depois de
+  - Enquanto a U4 de Depuração está bloqueada, o contrato abre depois de
     Estruturas de dados; a fase 1 da unidade
     apresenta os aparelhos específicos da padaria.
   - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
@@ -760,10 +794,9 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Zona Depuração, com cenas e o depurador (o Observar e o Console
-   pausados leem a cena no instante da pausa). Regra de ritmo: toda
-   unidade nova da Lógica tem uma cena diferente (guia, seção 30).
-   A zona fica antes do contrato no mapa.
+1. Corrigir a sincronização visual cena/depurador (Pendências), retomar
+   a U4 e repetir as jornadas de investigação U2/U3/U4 nos três layouts.
+   Depois publicar U4 e concluir Depuração/Ilha Lógica, com contrato no fim.
 2. Opus: Origens (os tipos de atividade do Museu: linha do tempo,
    comparador de linguagens e diagrama).
 3. Depois: motores das outras ilhas (Páginas vivas; Rede e Servidor; IA

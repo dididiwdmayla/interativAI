@@ -467,6 +467,13 @@ export const CURRICULO: readonly IlhaCurriculo[] = [
             meta: "Andar uma linha de cada vez, observar as variáveis e achar onde o valor fica errado.",
             temas: ["logica", "ferramentas"],
           },
+          {
+            id: "logica-depuracao-u4",
+            requerMotor: "sincronizar a cena visual com a foto da pausa do depurador",
+            titulo: "Observar variáveis",
+            meta: "Comparar valor, tipo e escopo em cada pausa e confirmar a hipótese antes de consertar.",
+            temas: ["logica", "ferramentas"],
+          },
         ],
       },
       {

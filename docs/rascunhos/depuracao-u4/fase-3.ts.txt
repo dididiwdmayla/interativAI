@@ -1,0 +1,305 @@
+// Rascunho não registrado: aguarda sincronização cena/pausa (ROADMAP, Pendências).
+/* Caça ao bug: reproduzir, hipótese, evidência e conserto com bordas. */
+import type { Fase } from "@/conteudo/tipos";
+export const FASE_DEPURACAO_U4_F3: Fase = {
+  "id": "logica-depuracao-u4-f3",
+  "tipo": "desafio",
+  "unidadeId": "logica-depuracao-u4",
+  "titulo": "A lista da biblioteca",
+  "conceitos": [],
+  "revisa": [
+    "ler-mensagem-de-erro",
+    "funcao-js",
+    "return-js",
+    "escopo-bloco-js",
+    "array-js",
+    "for-js",
+    "igualdade-estrita",
+    "dicionario-de-erros",
+    "causa-do-erro",
+    "ponto-de-parada",
+    "hipotese-de-bug",
+    "bug-silencioso",
+    "passar-por-cima",
+    "entrar-e-sair",
+    "retorno-no-depurador",
+    "observar-expressoes",
+    "escopo-na-pausa"
+  ],
+  "prerequisitos": [
+    "ler-mensagem-de-erro",
+    "funcao-js",
+    "return-js",
+    "escopo-bloco-js",
+    "array-js",
+    "for-js",
+    "igualdade-estrita",
+    "dicionario-de-erros",
+    "causa-do-erro",
+    "ponto-de-parada",
+    "hipotese-de-bug",
+    "bug-silencioso",
+    "passar-por-cima",
+    "entrar-e-sair",
+    "retorno-no-depurador",
+    "observar-expressoes",
+    "escopo-na-pausa"
+  ],
+  "usaFerramentas": [
+    "console",
+    "snippet",
+    "palco-memoria",
+    "linha-do-tempo",
+    "pontos-de-parada",
+    "controles-depurador",
+    "painel-escopo",
+    "painel-observar",
+    "pilha-de-chamadas",
+    "casos-de-teste"
+  ],
+  "siteAlvo": {
+    "url": "console",
+    "titulo": "Palco da memória",
+    "head": "",
+    "body": ""
+  },
+  "programa": {
+    "snippet": {
+      "nome": "investigacao.js",
+      "codigoInicial": "function ativos(itens) {\n  const nomes = [];\n  for (let i = 0; i < itens.length; i++) {\n    const item = itens.pop();\n    if (item.ativo) nomes.push(item.nome);\n  }\n  return nomes;\n}\nconst nomes = ativos([{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]);"
+    }
+  },
+  "areas": [
+    "snippet",
+    "palco",
+    "testes"
+  ],
+  "introducao": [
+    {
+      "texto": "ativos(itens) deve devolver só nomes com ativo=true, na ordem, incluindo repetidos. A biblioteca perdeu um nome ativo no resultado.",
+      "expressao": "curioso"
+    },
+    {
+      "texto": "Escolha sua hipótese, investigue antes de editar e confirme o conserto nos casos comuns e nas bordas.",
+      "expressao": "curioso"
+    }
+  ],
+  "conclusao": [
+    {
+      "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+      "expressao": "curioso"
+    }
+  ],
+  "falaFinal": {
+    "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+    "expressao": "curioso"
+  },
+  "partes": [
+    {
+      "id": "investigar",
+      "descricao": "Pause e registre valores que expliquem o resultado errado.",
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "pausouNaLinha",
+            "linha": 4
+          },
+          {
+            "tipo": "observou",
+            "expressao": "i",
+            "valor": 1
+          },
+          {
+            "tipo": "observou",
+            "expressao": "itens.length",
+            "valor": 2
+          },
+          {
+            "tipo": "observou",
+            "expressao": "itens[0].ativo",
+            "valor": true
+          }
+        ]
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 4
+        },
+        {
+          "tipo": "observar",
+          "expressao": "i"
+        },
+        {
+          "tipo": "observar",
+          "expressao": "itens.length"
+        },
+        {
+          "tipo": "observar",
+          "expressao": "itens[0].ativo"
+        },
+        {
+          "tipo": "executarSnippet"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "retomar"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "retomar"
+        }
+      ],
+      "revisarEm": "logica-depuracao-u4-f2"
+    },
+    {
+      "id": "codigo",
+      "descricao": "Entregue só os nomes ativos, preservando ordem e repetições.",
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "semErro"
+          },
+          {
+            "tipo": "funcaoPassa",
+            "nome": "ativos",
+            "casos": [
+              {
+                "args": [
+                  []
+                ],
+                "esperado": []
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "nome": "x",
+                      "ativo": false
+                    }
+                  ]
+                ],
+                "esperado": []
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "nome": "a",
+                      "ativo": true
+                    },
+                    {
+                      "nome": "b",
+                      "ativo": false
+                    },
+                    {
+                      "nome": "c",
+                      "ativo": false
+                    }
+                  ]
+                ],
+                "esperado": [
+                  "a"
+                ]
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "nome": "x",
+                      "ativo": true
+                    },
+                    {
+                      "nome": "x",
+                      "ativo": true
+                    }
+                  ]
+                ],
+                "esperado": [
+                  "x",
+                  "x"
+                ]
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "nome": "a",
+                      "ativo": true
+                    },
+                    {
+                      "nome": "b",
+                      "ativo": true
+                    },
+                    {
+                      "nome": "c",
+                      "ativo": true
+                    }
+                  ]
+                ],
+                "esperado": [
+                  "a",
+                  "b",
+                  "c"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 4
+        },
+        {
+          "tipo": "definirSnippet",
+          "codigo": "function ativos(itens) {\n  const nomes = [];\n  for (const item of itens) {\n    if (item.ativo) nomes.push(item.nome);\n  }\n  return nomes;\n}\nconst nomes = ativos([{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]);"
+        },
+        {
+          "tipo": "executarSnippet"
+        }
+      ],
+      "revisarEm": "logica-depuracao-u4-f2"
+    },
+    {
+      "id": "testes",
+      "descricao": "Teste vazio, inativos consecutivos e pelo menos uma entrada nova.",
+      "validador": {
+        "tipo": "casosDoAluno",
+        "minimo": 3,
+        "passando": true
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "escreverCaso",
+          "entrada": "[{nome: \"z\", ativo: true}]",
+          "esperado": "[\"z\"]"
+        },
+        {
+          "tipo": "rodarCasos"
+        }
+      ],
+      "revisarEm": "logica-depuracao-u4-f2"
+    }
+  ],
+  "missaoDeCampo": "No Chrome, abra DevTools > Sources > Snippets, crie um Snippet curto e execute. Marque um ponto no número da linha; use F10, F11 e Shift+F11 e confira Scope e Watch.",
+  "testes": {
+    "funcao": "ativos",
+    "parametros": [
+      "itens"
+    ],
+    "inicial": [
+      {
+        "entrada": "[]",
+        "esperado": "[]"
+      },
+      {
+        "entrada": "[{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]",
+        "esperado": "[\"a\"]"
+      }
+    ]
+  }
+};

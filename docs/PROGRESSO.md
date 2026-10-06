@@ -6,8 +6,8 @@ Status consolidado: `docs/ROADMAP.md`.
 ## Rodada 34: zona Depuração
 
 Branch `codex/zona-depuracao`, a partir de `984c37a` da principal.
-Sem alteração de motor; quatro unidades, separando Observar como U4
-conforme o pedido. O contrato continua no fim da Ilha Lógica.
+Sem alteração de motor; U1 a U3 publicadas e U4 em rascunho bloqueado,
+separando Observar conforme o pedido. O contrato continua no fim da Ilha Lógica.
 
 ### Etapa 1 — Ler a mensagem de erro
 
@@ -53,3 +53,47 @@ conforme o pedido. O contrato continua no fim da Ilha Lógica.
 - Validação: 19.262 testes de conteúdo verdes sem reteste; jornadas
   nos três layouts com valores vistos nas pausas e Pilha de chamadas
   conferida; publicação, build e lint verdes.
+
+### Etapa 4 — Observar variáveis
+
+- Estufa com noite seca e dia úmido: comparar pedido e entradas, avançar
+  até o comando e ver o aspersor ligado no instante do defeito.
+- Tipo de código numérico recebido como texto e declaração local que
+  esconde o saldo de fora. Os treinos mudam entrada e momento da cena.
+- Desafio da biblioteca: pop encolhe a lista enquanto o índice avança,
+  perdendo nomes; conserto preserva ordem, repetidos e lista vazia.
+- Dois conceitos com temas e quatro revisões; casos incluem "007",
+  vazio, repetidos e nomes diferentes para rejeitar inversão da ordem.
+- Revisão final reforçou o caso escondido da U1 com nomes distintos.
+  Seus ids e ordem ficaram preservados; as três jornadas repetidas passaram.
+- A condição e o comando foram separados em linhas com bloco; o aluno
+  acompanha as duas operações antes de conferir o aparelho.
+  As 30 checagens afetadas e provas novas passaram.
+- 19.446 testes de conteúdo passaram antes da revisão de formatação;
+  28 checagens afetadas passaram depois. Isso não comprovou a cena visual.
+- As jornadas da U4 falharam nos três layouts: Watch está na pausa, mas
+  o desenho avança. Reprodução mínima da U3 confirma: pausa na linha 6,
+  cena em 4.000 ms/vermelho em vez de 0 ms/verde. O motor não envia o
+  foco da pausa à cena. Não alterado: aplicada a regra de parada do pedido.
+- U4, seus itens de revisão e fixtures ficam para retomada, fora dos
+  registros ativos e sem publicação. Currículo travado por `requerMotor`.
+  ROADMAP registra causa, reprodução e critérios do conserto. PR em
+  rascunho; a zona e a Ilha Lógica ainda não estão completas.
+
+- Ao retirar U4, o glossário detectou seus conceitos sem fase ativa.
+  Fontes, revisões e conceitos movidos para `docs/rascunhos/depuracao-u4/`
+  como texto, fora do catálogo e da compilação; sem falsos verbetes ativos.
+
+### Fechamento da interrupção
+
+- Jornada U1 repetida em desktop, retrato e paisagem: verde.
+- `testar:conteudo -- --maxWorkers=1`: 19.264 testes, única falha no
+  glossário ao deixar conceitos U4 sem fases. Após separar o rascunho,
+  58 checagens de glossário, Depuração, currículo, revisão e temas passaram.
+- `publicar:conteudo`, build e lint verdes. `bateria:conteudo` rodada uma
+  vez em produção: mapa, explorar, publicar e revisão passaram. Não foi
+  rodada bateria completa de motor.
+- U1/U2/U3 em commits próprios; fechamento com rascunho U4 e bloqueio
+  em commit separado. Branch enviada por PR em rascunho, sem push na
+  principal. Próximo: consertar a sincronização, retomar U4 e validar
+  U2/U3/U4 nos três layouts antes de concluir a ilha; depois Opus: Origens.

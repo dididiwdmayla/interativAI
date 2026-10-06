@@ -789,6 +789,26 @@
                       "b",
                       "a"
                     ]
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "a"
+                        },
+                        {
+                          "nome": "b"
+                        },
+                        {
+                          "nome": "c"
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "a",
+                      "b",
+                      "c"
+                    ]
                   }
                 ]
               }
@@ -3203,6 +3223,1595 @@
           {
             "entrada": "50",
             "esperado": "40"
+          }
+        ]
+      }
+    }
+  ],
+  "4": [
+    {
+      "id": "logica-depuracao-u4-f1",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u4",
+      "titulo": "Olhe a decisão e suas entradas",
+      "conceitos": [
+        "observar-expressoes"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas",
+        "cena",
+        "ficha-dispositivo",
+        "velocidade-simulacao"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function precisaRegar(dia, valor) {\n  return dia || valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+        }
+      },
+      "areas": [
+        "cena",
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "A irrigação deve ligar só de dia e com umidade abaixo de 30. À noite, a terra seca fez o pedido ficar true. Hipótese: uma condição está anulando a outra.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Observar compara expressões em cada pausa, sem mexer no código. Veja a decisão, a hora do mundo e a leitura do sensor no mesmo instante.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "observar-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Pause na linha 5, observe entradas e pedido. Use Passar por cima até a linha 8 e observe agua.ligado.",
+            "toque": "Pause na linha 5, observe entradas e pedido. Use Passar por cima até a linha 8 e observe agua.ligado."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 5
+              },
+              {
+                "tipo": "observou",
+                "expressao": "pedido",
+                "valor": true
+              },
+              {
+                "tipo": "observou",
+                "expressao": "sensorDia.dia",
+                "valor": false
+              },
+              {
+                "tipo": "observou",
+                "expressao": "umidade.valor",
+                "valor": 20
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 8
+              },
+              {
+                "tipo": "observou",
+                "expressao": "agua.ligado",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "As observações mostram a cena no instante da pausa, não o fim da animação.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "As observações mostram a cena no instante da pausa, não o fim da animação."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "pedido"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "sensorDia.dia"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "umidade.valor"
+                },
+                {
+                  "tipo": "executarSnippet"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "passar-por-cima"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "agua.ligado"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "pedido=true mesmo de noite: || aceita uma condição só. O pedido exige as duas.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 2
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "observar",
+              "expressao": "pedido"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "sensorDia.dia"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "umidade.valor"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "agua.ligado"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Antes de executar a linha 5, a água já recebeu ligar()?",
+            "opcoes": [
+              "Sim, por estar seco",
+              "Sim, pelo sensor",
+              "Não, essa linha ainda não rodou"
+            ],
+            "correta": 2,
+            "explicacao": "A pausa é antes da linha; o pedido foi calculado, mas o comando ainda não rodou."
+          }
+        },
+        {
+          "id": "regar-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome e conserte a regra. Teste dia, noite e umidade no limite.",
+            "toque": "Retome e conserte a regra. Teste dia, noite e umidade no limite."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "precisaRegar",
+                "casos": [
+                  {
+                    "args": [
+                      false,
+                      20
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      true,
+                      20
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      true,
+                      30
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      true,
+                      80
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      false,
+                      0
+                    ],
+                    "esperado": false
+                  }
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "agua",
+                "propriedade": "ligado",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "A regra precisa de dia && valor < 30, não de uma condição isolada.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "A regra precisa de dia && valor < 30, não de uma condição isolada."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O teste escondido inclui 30: abaixo de 30 é diferente de até 30.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "observar-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue o dia úmido: observe entradas e pedido, avance até a linha 9 e confira agua.ligado.",
+            "toque": "Investigue o dia úmido: observe entradas e pedido, avance até a linha 9 e confira agua.ligado."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 6
+              },
+              {
+                "tipo": "observou",
+                "expressao": "pedido",
+                "valor": true
+              },
+              {
+                "tipo": "observou",
+                "expressao": "sensorDia.dia",
+                "valor": true
+              },
+              {
+                "tipo": "observou",
+                "expressao": "umidade.valor",
+                "valor": 80
+              },
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 9
+              },
+              {
+                "tipo": "observou",
+                "expressao": "agua.ligado",
+                "valor": true
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Compare duas situações opostas: noite seca e dia úmido."
+          },
+          "falaAoConcluir": {
+            "texto": "A outra condição também pode disparar sozinha; as duas precisam ser obrigatórias.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function precisaRegar(dia, valor) {\n  return dia || valor < 30;\n}\nesperar(2000);\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            }
+          ]
+        },
+        {
+          "id": "regar-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Conserte e confirme que a água continua desligada no dia úmido.",
+            "toque": "Conserte e confirme que a água continua desligada no dia úmido."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "precisaRegar",
+                "casos": [
+                  {
+                    "args": [
+                      false,
+                      20
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      true,
+                      20
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      true,
+                      30
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      true,
+                      80
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      false,
+                      0
+                    ],
+                    "esperado": false
+                  }
+                ]
+              },
+              {
+                "tipo": "estadoNaCena",
+                "dispositivo": "agua",
+                "propriedade": "ligado",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Reproduza antes de alterar e execute de novo após a correção."
+          },
+          "falaAoConcluir": {
+            "texto": "O mesmo conserto protege situações diferentes.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 6
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nesperar(2000);\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ],
+      "cena": {
+        "id": "depuracao-estufa",
+        "titulo": "Água à noite",
+        "ambiente": "estufa",
+        "periodo": "noite",
+        "duracaoMs": 4000,
+        "cenario": [
+          {
+            "peca": "ceu",
+            "x": 0,
+            "y": 0,
+            "altura": 170
+          },
+          {
+            "peca": "piso",
+            "x": 0,
+            "y": 149,
+            "altura": 51,
+            "variante": "madeira"
+          },
+          {
+            "peca": "estufa",
+            "x": 17,
+            "y": 10,
+            "largura": 284,
+            "altura": 162
+          },
+          {
+            "peca": "canteiro",
+            "x": 28,
+            "y": 125,
+            "largura": 119,
+            "altura": 53
+          },
+          {
+            "peca": "canteiro",
+            "x": 178,
+            "y": 127,
+            "largura": 112,
+            "altura": 49
+          }
+        ],
+        "dispositivos": [
+          {
+            "id": "agua",
+            "tipo": "aspersor",
+            "x": 170,
+            "y": 115
+          },
+          {
+            "id": "sensorDia",
+            "tipo": "sensorDia",
+            "x": 70,
+            "y": 45,
+            "inicial": {
+              "dia": false
+            }
+          },
+          {
+            "id": "umidade",
+            "tipo": "sensorUmidade",
+            "x": 110,
+            "y": 150,
+            "inicial": {
+              "valor": 20
+            }
+          }
+        ],
+        "linhaDoTempo": [
+          {
+            "dispositivo": "sensorDia",
+            "propriedade": "dia",
+            "em": 2000,
+            "valor": true
+          },
+          {
+            "dispositivo": "umidade",
+            "propriedade": "valor",
+            "em": 2000,
+            "valor": 80
+          }
+        ],
+        "periodoPor": {
+          "dispositivo": "sensorDia",
+          "propriedade": "dia"
+        }
+      }
+    },
+    {
+      "id": "logica-depuracao-u4-f2",
+      "tipo": "pratica",
+      "unidadeId": "logica-depuracao-u4",
+      "titulo": "Tipo e alcance na pausa",
+      "conceitos": [
+        "escopo-na-pausa"
+      ],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador",
+        "observar-expressoes"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador",
+        "observar-expressoes"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function liberar(codigo) {\n  return codigo === 7;\n}\nconst acesso = liberar(\"7\");\nconsole.log(acesso);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco"
+      ],
+      "introducao": [
+        {
+          "texto": "A mesma aparência pode esconder tipos diferentes: \"7\" é texto e 7 é número. Observe typeof junto com a comparação.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "No Escopo, Local e Script podem ter nomes iguais. O mais próximo é o lido naquela função; alterar a cópia local não altera a de fora.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "objetivos": [
+        {
+          "id": "tipo-guiado",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Pause no return de liberar e observe typeof codigo e codigo === 7.",
+            "toque": "Pause no return de liberar e observe typeof codigo e codigo === 7."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 2
+              },
+              {
+                "tipo": "observou",
+                "expressao": "typeof codigo",
+                "valor": "string"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "codigo === 7",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "O parâmetro aparece em Local; observe o tipo antes de decidir converter.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "O parâmetro aparece em Local; observe o tipo antes de decidir converter."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 2
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "typeof codigo"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "codigo === 7"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "O texto \"7\" falha na igualdade estrita com o número 7.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 2
+            },
+            {
+              "tipo": "observar",
+              "expressao": "typeof codigo"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "codigo === 7"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "tipo-conserto",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome, retire o ponto e aceite códigos numéricos em texto ou número.",
+            "toque": "Retome, retire o ponto e aceite códigos numéricos em texto ou número."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "liberar",
+                "casos": [
+                  {
+                    "args": [
+                      "7"
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      "8"
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      ""
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      "007"
+                    ],
+                    "esperado": true
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Converta explicitamente com Number antes de comparar.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Converta explicitamente com Number antes de comparar."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 2
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "function liberar(codigo) {\n  return Number(codigo) === 7;\n}\nconst acesso = liberar(\"7\");\nconsole.log(acesso);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A intenção foi preservada sem trocar === por uma comparação ambígua.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function liberar(codigo) {\n  return Number(codigo) === 7;\n}\nconst acesso = liberar(\"7\");\nconsole.log(acesso);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "escopo-guiado",
+          "tipo": "previsao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Investigue creditar: pause na linha 5 e observe saldo local e valor.",
+            "toque": "Investigue creditar: pause na linha 5 e observe saldo local e valor."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 5
+              },
+              {
+                "tipo": "observou",
+                "expressao": "saldo",
+                "valor": 5
+              },
+              {
+                "tipo": "observou",
+                "expressao": "valor",
+                "valor": 5
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Compare saldo em Local com saldo em Script no painel Escopo.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "Compare saldo em Local com saldo em Script no painel Escopo."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  let saldo = 0;\n  saldo += valor;\n  return saldo;\n}\ncreditar(5);\nconsole.log(saldo);"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "saldo"
+                },
+                {
+                  "tipo": "observar",
+                  "expressao": "valor"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "Local tem saldo=5; Script tem saldo=0. O nome duplicado escondeu a caixinha externa.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "responderPrevisao",
+              "opcao": 1
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  let saldo = 0;\n  saldo += valor;\n  return saldo;\n}\ncreditar(5);\nconsole.log(saldo);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "observar",
+              "expressao": "saldo"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "valor"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "previsao": {
+            "pergunta": "Dentro de creditar, qual saldo será lido na linha 5?",
+            "opcoes": [
+              "Só o de Script, que vale 0",
+              "O Local, que vale 5",
+              "Os dois somados"
+            ],
+            "correta": 1,
+            "explicacao": "O nome local esconde o de fora; o Escopo separa as duas caixinhas."
+          }
+        },
+        {
+          "id": "escopo-conserto",
+          "tipo": "acao",
+          "modo": "guiado",
+          "enunciado": {
+            "mouse": "Retome e remova a declaração local que esconde o saldo externo; execute.",
+            "toque": "Retome e remova a declaração local que esconde o saldo externo; execute."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "saldo",
+                "valor": 5
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "A função deve atualizar a variável de fora, sem criar outra com o mesmo nome.",
+            "linha": {
+              "alvo": "snippet",
+              "linhas": [
+                1
+              ],
+              "fala": "A função deve atualizar a variável de fora, sem criar outra com o mesmo nome."
+            },
+            "solucao": {
+              "fala": "Compare a pista com sua hipótese e teste de novo.",
+              "acoes": [
+                {
+                  "tipo": "controlarDepurador",
+                  "controle": "retomar"
+                },
+                {
+                  "tipo": "alternarPontoDeParada",
+                  "linha": 5
+                },
+                {
+                  "tipo": "definirSnippet",
+                  "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  saldo += valor;\n  return saldo;\n}\ncreditar(5);\nconsole.log(saldo);"
+                },
+                {
+                  "tipo": "executarSnippet"
+                }
+              ]
+            }
+          },
+          "falaAoConcluir": {
+            "texto": "A causa estava na declaração, não na linha que imprimia 0.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  saldo += valor;\n  return saldo;\n}\ncreditar(5);\nconsole.log(saldo);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "escopo-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue o crédito de 9: compare saldo e valor no momento antes do return.",
+            "toque": "Investigue o crédito de 9: compare saldo e valor no momento antes do return."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 5
+              },
+              {
+                "tipo": "observou",
+                "expressao": "saldo",
+                "valor": 9
+              },
+              {
+                "tipo": "observou",
+                "expressao": "valor",
+                "valor": 9
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Os nomes observados permanecem. Confira Local e Script com a nova entrada."
+          },
+          "falaAoConcluir": {
+            "texto": "O saldo de fora continuaria 0; a evidência se repete.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  let saldo = 0;\n  saldo += valor;\n  return saldo;\n}\ncreditar(9);\nconsole.log(saldo);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "escopo-sozinho-conserto",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Retome e faça o crédito atualizar saldo de fora para 9.",
+            "toque": "Retome e faça o crédito atualizar saldo de fora para 9."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "valorVariavel",
+                "nome": "saldo",
+                "valor": 9
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Remova só a declaração que esconde a variável necessária."
+          },
+          "falaAoConcluir": {
+            "texto": "Um ajuste específico, apoiado pela hipótese, evita mudar outras regras.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "let saldo = 0;\nfunction creditar(valor) {\n  saldo += valor;\n  return saldo;\n}\ncreditar(9);\nconsole.log(saldo);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "tipo-sozinho",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Investigue liberar(\"007\"): compare tipo e igualdade antes de editar.",
+            "toque": "Investigue liberar(\"007\"): compare tipo e igualdade antes de editar."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 2
+              },
+              {
+                "tipo": "observou",
+                "expressao": "typeof codigo",
+                "valor": "string"
+              },
+              {
+                "tipo": "observou",
+                "expressao": "codigo === 7",
+                "valor": false
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "O programa de teste voltou ao defeito; as expressões ainda estão no Observar."
+          },
+          "falaAoConcluir": {
+            "texto": "A hipótese de diferença de tipo foi confirmada novamente.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function liberar(codigo) {\n  return codigo === 7;\n}\nconst acesso = liberar(\"007\");\nconsole.log(acesso);"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 2
+            },
+            {
+              "tipo": "observar",
+              "expressao": "typeof codigo"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "codigo === 7"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        },
+        {
+          "id": "tipo-sozinho-conserto",
+          "tipo": "acao",
+          "modo": "sozinho",
+          "enunciado": {
+            "mouse": "Corrija liberar e confirme entradas válidas, inválidas e vazias.",
+            "toque": "Corrija liberar e confirme entradas válidas, inválidas e vazias."
+          },
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "liberar",
+                "casos": [
+                  {
+                    "args": [
+                      "7"
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      7
+                    ],
+                    "esperado": true
+                  },
+                  {
+                    "args": [
+                      "sete"
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      ""
+                    ],
+                    "esperado": false
+                  },
+                  {
+                    "args": [
+                      "007"
+                    ],
+                    "esperado": true
+                  }
+                ]
+              }
+            ]
+          },
+          "ajudas": {
+            "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+            "dica": "Conversão explícita e casos diferentes confirmam o conserto."
+          },
+          "falaAoConcluir": {
+            "texto": "Você comparou valor, tipo e alcance em vez de mexer no chute.",
+            "expressao": "curioso"
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 2
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function liberar(codigo) {\n  return Number(codigo) === 7;\n}\nconst acesso = liberar(\"007\");\nconsole.log(acesso);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logica-depuracao-u4-f3",
+      "tipo": "desafio",
+      "unidadeId": "logica-depuracao-u4",
+      "titulo": "A lista da biblioteca",
+      "conceitos": [],
+      "revisa": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador",
+        "observar-expressoes",
+        "escopo-na-pausa"
+      ],
+      "prerequisitos": [
+        "ler-mensagem-de-erro",
+        "funcao-js",
+        "return-js",
+        "escopo-bloco-js",
+        "array-js",
+        "for-js",
+        "igualdade-estrita",
+        "dicionario-de-erros",
+        "causa-do-erro",
+        "ponto-de-parada",
+        "hipotese-de-bug",
+        "bug-silencioso",
+        "passar-por-cima",
+        "entrar-e-sair",
+        "retorno-no-depurador",
+        "observar-expressoes",
+        "escopo-na-pausa"
+      ],
+      "usaFerramentas": [
+        "console",
+        "snippet",
+        "palco-memoria",
+        "linha-do-tempo",
+        "pontos-de-parada",
+        "controles-depurador",
+        "painel-escopo",
+        "painel-observar",
+        "pilha-de-chamadas",
+        "casos-de-teste"
+      ],
+      "siteAlvo": {
+        "url": "console",
+        "titulo": "Palco da memória",
+        "head": "",
+        "body": ""
+      },
+      "programa": {
+        "snippet": {
+          "nome": "investigacao.js",
+          "codigoInicial": "function ativos(itens) {\n  const nomes = [];\n  for (let i = 0; i < itens.length; i++) {\n    const item = itens.pop();\n    if (item.ativo) nomes.push(item.nome);\n  }\n  return nomes;\n}\nconst nomes = ativos([{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]);"
+        }
+      },
+      "areas": [
+        "snippet",
+        "palco",
+        "testes"
+      ],
+      "introducao": [
+        {
+          "texto": "ativos(itens) deve devolver só nomes com ativo=true, na ordem, incluindo repetidos. A biblioteca perdeu um nome ativo no resultado.",
+          "expressao": "curioso"
+        },
+        {
+          "texto": "Escolha sua hipótese, investigue antes de editar e confirme o conserto nos casos comuns e nas bordas.",
+          "expressao": "curioso"
+        }
+      ],
+      "conclusao": [
+        {
+          "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+          "expressao": "curioso"
+        }
+      ],
+      "falaFinal": {
+        "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+        "expressao": "curioso"
+      },
+      "partes": [
+        {
+          "id": "investigar",
+          "descricao": "Pause e registre valores que expliquem o resultado errado.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "pausouNaLinha",
+                "linha": 4
+              },
+              {
+                "tipo": "observou",
+                "expressao": "i",
+                "valor": 1
+              },
+              {
+                "tipo": "observou",
+                "expressao": "itens.length",
+                "valor": 2
+              },
+              {
+                "tipo": "observou",
+                "expressao": "itens[0].ativo",
+                "valor": true
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "observar",
+              "expressao": "i"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "itens.length"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "itens[0].ativo"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u4-f2"
+        },
+        {
+          "id": "codigo",
+          "descricao": "Entregue só os nomes ativos, preservando ordem e repetições.",
+          "validador": {
+            "tipo": "todos",
+            "validadores": [
+              {
+                "tipo": "semErro"
+              },
+              {
+                "tipo": "funcaoPassa",
+                "nome": "ativos",
+                "casos": [
+                  {
+                    "args": [
+                      []
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "x",
+                          "ativo": false
+                        }
+                      ]
+                    ],
+                    "esperado": []
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "a",
+                          "ativo": true
+                        },
+                        {
+                          "nome": "b",
+                          "ativo": false
+                        },
+                        {
+                          "nome": "c",
+                          "ativo": false
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "a"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "x",
+                          "ativo": true
+                        },
+                        {
+                          "nome": "x",
+                          "ativo": true
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "x",
+                      "x"
+                    ]
+                  },
+                  {
+                    "args": [
+                      [
+                        {
+                          "nome": "a",
+                          "ativo": true
+                        },
+                        {
+                          "nome": "b",
+                          "ativo": true
+                        },
+                        {
+                          "nome": "c",
+                          "ativo": true
+                        }
+                      ]
+                    ],
+                    "esperado": [
+                      "a",
+                      "b",
+                      "c"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 4
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function ativos(itens) {\n  const nomes = [];\n  for (const item of itens) {\n    if (item.ativo) nomes.push(item.nome);\n  }\n  return nomes;\n}\nconst nomes = ativos([{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u4-f2"
+        },
+        {
+          "id": "testes",
+          "descricao": "Teste vazio, inativos consecutivos e pelo menos uma entrada nova.",
+          "validador": {
+            "tipo": "casosDoAluno",
+            "minimo": 3,
+            "passando": true
+          },
+          "solucaoDeTeste": [
+            {
+              "tipo": "escreverCaso",
+              "entrada": "[{nome: \"z\", ativo: true}]",
+              "esperado": "[\"z\"]"
+            },
+            {
+              "tipo": "rodarCasos"
+            }
+          ],
+          "revisarEm": "logica-depuracao-u4-f2"
+        }
+      ],
+      "missaoDeCampo": "No Chrome, abra DevTools > Sources > Snippets, crie um Snippet curto e execute. Marque um ponto no número da linha; use F10, F11 e Shift+F11 e confira Scope e Watch.",
+      "testes": {
+        "funcao": "ativos",
+        "parametros": [
+          "itens"
+        ],
+        "inicial": [
+          {
+            "entrada": "[]",
+            "esperado": "[]"
+          },
+          {
+            "entrada": "[{nome: \"a\", ativo: true}, {nome: \"b\", ativo: false}, {nome: \"c\", ativo: false}]",
+            "esperado": "[\"a\"]"
           }
         ]
       }

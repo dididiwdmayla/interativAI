@@ -1,0 +1,602 @@
+// Rascunho não registrado: aguarda sincronização cena/pausa (ROADMAP, Pendências).
+/* Caça ao bug: reproduzir, hipótese, evidência e conserto com bordas. */
+import type { Fase } from "@/conteudo/tipos";
+export const FASE_DEPURACAO_U4_F1: Fase = {
+  "id": "logica-depuracao-u4-f1",
+  "tipo": "pratica",
+  "unidadeId": "logica-depuracao-u4",
+  "titulo": "Olhe a decisão e suas entradas",
+  "conceitos": [
+    "observar-expressoes"
+  ],
+  "revisa": [
+    "ler-mensagem-de-erro",
+    "funcao-js",
+    "return-js",
+    "escopo-bloco-js",
+    "array-js",
+    "for-js",
+    "igualdade-estrita",
+    "dicionario-de-erros",
+    "causa-do-erro",
+    "ponto-de-parada",
+    "hipotese-de-bug",
+    "bug-silencioso",
+    "passar-por-cima",
+    "entrar-e-sair",
+    "retorno-no-depurador"
+  ],
+  "prerequisitos": [
+    "ler-mensagem-de-erro",
+    "funcao-js",
+    "return-js",
+    "escopo-bloco-js",
+    "array-js",
+    "for-js",
+    "igualdade-estrita",
+    "dicionario-de-erros",
+    "causa-do-erro",
+    "ponto-de-parada",
+    "hipotese-de-bug",
+    "bug-silencioso",
+    "passar-por-cima",
+    "entrar-e-sair",
+    "retorno-no-depurador"
+  ],
+  "usaFerramentas": [
+    "console",
+    "snippet",
+    "palco-memoria",
+    "linha-do-tempo",
+    "pontos-de-parada",
+    "controles-depurador",
+    "painel-escopo",
+    "painel-observar",
+    "pilha-de-chamadas",
+    "cena",
+    "ficha-dispositivo",
+    "velocidade-simulacao"
+  ],
+  "siteAlvo": {
+    "url": "console",
+    "titulo": "Palco da memória",
+    "head": "",
+    "body": ""
+  },
+  "programa": {
+    "snippet": {
+      "nome": "investigacao.js",
+      "codigoInicial": "function precisaRegar(dia, valor) {\n  return dia || valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+    }
+  },
+  "areas": [
+    "cena",
+    "snippet",
+    "palco"
+  ],
+  "introducao": [
+    {
+      "texto": "A irrigação deve ligar só de dia e com umidade abaixo de 30. À noite, a terra seca fez o pedido ficar true. Hipótese: uma condição está anulando a outra.",
+      "expressao": "curioso"
+    },
+    {
+      "texto": "Observar compara expressões em cada pausa, sem mexer no código. Veja a decisão, a hora do mundo e a leitura do sensor no mesmo instante.",
+      "expressao": "curioso"
+    }
+  ],
+  "conclusao": [
+    {
+      "texto": "Você reproduziu, comparou pistas com uma hipótese e testou o conserto. Investigar com método evita criar bugs novos.",
+      "expressao": "curioso"
+    }
+  ],
+  "falaFinal": {
+    "texto": "Um resultado sem erro também pode estar errado. Confira exemplos e bordas antes de encerrar.",
+    "expressao": "curioso"
+  },
+  "objetivos": [
+    {
+      "id": "observar-guiado",
+      "tipo": "previsao",
+      "modo": "guiado",
+      "enunciado": {
+        "mouse": "Pause na linha 5, observe entradas e pedido. Use Passar por cima até a linha 8 e observe agua.ligado.",
+        "toque": "Pause na linha 5, observe entradas e pedido. Use Passar por cima até a linha 8 e observe agua.ligado."
+      },
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "pausouNaLinha",
+            "linha": 5
+          },
+          {
+            "tipo": "observou",
+            "expressao": "pedido",
+            "valor": true
+          },
+          {
+            "tipo": "observou",
+            "expressao": "sensorDia.dia",
+            "valor": false
+          },
+          {
+            "tipo": "observou",
+            "expressao": "umidade.valor",
+            "valor": 20
+          },
+          {
+            "tipo": "pausouNaLinha",
+            "linha": 8
+          },
+          {
+            "tipo": "observou",
+            "expressao": "agua.ligado",
+            "valor": true
+          }
+        ]
+      },
+      "ajudas": {
+        "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+        "dica": "As observações mostram a cena no instante da pausa, não o fim da animação.",
+        "linha": {
+          "alvo": "snippet",
+          "linhas": [
+            1
+          ],
+          "fala": "As observações mostram a cena no instante da pausa, não o fim da animação."
+        },
+        "solucao": {
+          "fala": "Compare a pista com sua hipótese e teste de novo.",
+          "acoes": [
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "observar",
+              "expressao": "pedido"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "sensorDia.dia"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "umidade.valor"
+            },
+            {
+              "tipo": "executarSnippet"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "controlarDepurador",
+              "controle": "passar-por-cima"
+            },
+            {
+              "tipo": "observar",
+              "expressao": "agua.ligado"
+            }
+          ]
+        }
+      },
+      "falaAoConcluir": {
+        "texto": "pedido=true mesmo de noite: || aceita uma condição só. O pedido exige as duas.",
+        "expressao": "curioso"
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "responderPrevisao",
+          "opcao": 2
+        },
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 5
+        },
+        {
+          "tipo": "observar",
+          "expressao": "pedido"
+        },
+        {
+          "tipo": "observar",
+          "expressao": "sensorDia.dia"
+        },
+        {
+          "tipo": "observar",
+          "expressao": "umidade.valor"
+        },
+        {
+          "tipo": "executarSnippet"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "passar-por-cima"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "passar-por-cima"
+        },
+        {
+          "tipo": "observar",
+          "expressao": "agua.ligado"
+        }
+      ],
+      "previsao": {
+        "pergunta": "Antes de executar a linha 5, a água já recebeu ligar()?",
+        "opcoes": [
+          "Sim, por estar seco",
+          "Sim, pelo sensor",
+          "Não, essa linha ainda não rodou"
+        ],
+        "correta": 2,
+        "explicacao": "A pausa é antes da linha; o pedido foi calculado, mas o comando ainda não rodou."
+      }
+    },
+    {
+      "id": "regar-guiado",
+      "tipo": "acao",
+      "modo": "guiado",
+      "enunciado": {
+        "mouse": "Retome e conserte a regra. Teste dia, noite e umidade no limite.",
+        "toque": "Retome e conserte a regra. Teste dia, noite e umidade no limite."
+      },
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "semErro"
+          },
+          {
+            "tipo": "funcaoPassa",
+            "nome": "precisaRegar",
+            "casos": [
+              {
+                "args": [
+                  false,
+                  20
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  true,
+                  20
+                ],
+                "esperado": true
+              },
+              {
+                "args": [
+                  true,
+                  30
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  true,
+                  80
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  false,
+                  0
+                ],
+                "esperado": false
+              }
+            ]
+          },
+          {
+            "tipo": "estadoNaCena",
+            "dispositivo": "agua",
+            "propriedade": "ligado",
+            "valor": false
+          }
+        ]
+      },
+      "ajudas": {
+        "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+        "dica": "A regra precisa de dia && valor < 30, não de uma condição isolada.",
+        "linha": {
+          "alvo": "snippet",
+          "linhas": [
+            1
+          ],
+          "fala": "A regra precisa de dia && valor < 30, não de uma condição isolada."
+        },
+        "solucao": {
+          "fala": "Compare a pista com sua hipótese e teste de novo.",
+          "acoes": [
+            {
+              "tipo": "controlarDepurador",
+              "controle": "retomar"
+            },
+            {
+              "tipo": "alternarPontoDeParada",
+              "linha": 5
+            },
+            {
+              "tipo": "definirSnippet",
+              "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+            },
+            {
+              "tipo": "executarSnippet"
+            }
+          ]
+        }
+      },
+      "falaAoConcluir": {
+        "texto": "O teste escondido inclui 30: abaixo de 30 é diferente de até 30.",
+        "expressao": "curioso"
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "controlarDepurador",
+          "controle": "retomar"
+        },
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 5
+        },
+        {
+          "tipo": "definirSnippet",
+          "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+        },
+        {
+          "tipo": "executarSnippet"
+        }
+      ]
+    },
+    {
+      "id": "observar-sozinho",
+      "tipo": "acao",
+      "modo": "sozinho",
+      "enunciado": {
+        "mouse": "Investigue o dia úmido: observe entradas e pedido, avance até a linha 9 e confira agua.ligado.",
+        "toque": "Investigue o dia úmido: observe entradas e pedido, avance até a linha 9 e confira agua.ligado."
+      },
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "pausouNaLinha",
+            "linha": 6
+          },
+          {
+            "tipo": "observou",
+            "expressao": "pedido",
+            "valor": true
+          },
+          {
+            "tipo": "observou",
+            "expressao": "sensorDia.dia",
+            "valor": true
+          },
+          {
+            "tipo": "observou",
+            "expressao": "umidade.valor",
+            "valor": 80
+          },
+          {
+            "tipo": "pausouNaLinha",
+            "linha": 9
+          },
+          {
+            "tipo": "observou",
+            "expressao": "agua.ligado",
+            "valor": true
+          }
+        ]
+      },
+      "ajudas": {
+        "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+        "dica": "Compare duas situações opostas: noite seca e dia úmido."
+      },
+      "falaAoConcluir": {
+        "texto": "A outra condição também pode disparar sozinha; as duas precisam ser obrigatórias.",
+        "expressao": "curioso"
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "definirSnippet",
+          "codigo": "function precisaRegar(dia, valor) {\n  return dia || valor < 30;\n}\nesperar(2000);\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+        },
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 6
+        },
+        {
+          "tipo": "executarSnippet"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "passar-por-cima"
+        },
+        {
+          "tipo": "controlarDepurador",
+          "controle": "passar-por-cima"
+        }
+      ]
+    },
+    {
+      "id": "regar-sozinho",
+      "tipo": "acao",
+      "modo": "sozinho",
+      "enunciado": {
+        "mouse": "Conserte e confirme que a água continua desligada no dia úmido.",
+        "toque": "Conserte e confirme que a água continua desligada no dia úmido."
+      },
+      "validador": {
+        "tipo": "todos",
+        "validadores": [
+          {
+            "tipo": "semErro"
+          },
+          {
+            "tipo": "funcaoPassa",
+            "nome": "precisaRegar",
+            "casos": [
+              {
+                "args": [
+                  false,
+                  20
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  true,
+                  20
+                ],
+                "esperado": true
+              },
+              {
+                "args": [
+                  true,
+                  30
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  true,
+                  80
+                ],
+                "esperado": false
+              },
+              {
+                "args": [
+                  false,
+                  0
+                ],
+                "esperado": false
+              }
+            ]
+          },
+          {
+            "tipo": "estadoNaCena",
+            "dispositivo": "agua",
+            "propriedade": "ligado",
+            "valor": false
+          }
+        ]
+      },
+      "ajudas": {
+        "pergunta": "Que hipótese esses valores permitem confirmar ou descartar?",
+        "dica": "Reproduza antes de alterar e execute de novo após a correção."
+      },
+      "falaAoConcluir": {
+        "texto": "O mesmo conserto protege situações diferentes.",
+        "expressao": "curioso"
+      },
+      "solucaoDeTeste": [
+        {
+          "tipo": "controlarDepurador",
+          "controle": "retomar"
+        },
+        {
+          "tipo": "alternarPontoDeParada",
+          "linha": 6
+        },
+        {
+          "tipo": "definirSnippet",
+          "codigo": "function precisaRegar(dia, valor) {\n  return dia && valor < 30;\n}\nesperar(2000);\nconst pedido = precisaRegar(sensorDia.dia, umidade.valor);\nif (pedido) {\n  agua.ligar();\n}\nesperar(1000);"
+        },
+        {
+          "tipo": "executarSnippet"
+        }
+      ]
+    }
+  ],
+  "cena": {
+    "id": "depuracao-estufa",
+    "titulo": "Água à noite",
+    "ambiente": "estufa",
+    "periodo": "noite",
+    "duracaoMs": 4000,
+    "cenario": [
+      {
+        "peca": "ceu",
+        "x": 0,
+        "y": 0,
+        "altura": 170
+      },
+      {
+        "peca": "piso",
+        "x": 0,
+        "y": 149,
+        "altura": 51,
+        "variante": "madeira"
+      },
+      {
+        "peca": "estufa",
+        "x": 17,
+        "y": 10,
+        "largura": 284,
+        "altura": 162
+      },
+      {
+        "peca": "canteiro",
+        "x": 28,
+        "y": 125,
+        "largura": 119,
+        "altura": 53
+      },
+      {
+        "peca": "canteiro",
+        "x": 178,
+        "y": 127,
+        "largura": 112,
+        "altura": 49
+      }
+    ],
+    "dispositivos": [
+      {
+        "id": "agua",
+        "tipo": "aspersor",
+        "x": 170,
+        "y": 115
+      },
+      {
+        "id": "sensorDia",
+        "tipo": "sensorDia",
+        "x": 70,
+        "y": 45,
+        "inicial": {
+          "dia": false
+        }
+      },
+      {
+        "id": "umidade",
+        "tipo": "sensorUmidade",
+        "x": 110,
+        "y": 150,
+        "inicial": {
+          "valor": 20
+        }
+      }
+    ],
+    "linhaDoTempo": [
+      {
+        "dispositivo": "sensorDia",
+        "propriedade": "dia",
+        "em": 2000,
+        "valor": true
+      },
+      {
+        "dispositivo": "umidade",
+        "propriedade": "valor",
+        "em": 2000,
+        "valor": 80
+      }
+    ],
+    "periodoPor": {
+      "dispositivo": "sensorDia",
+      "propriedade": "dia"
+    }
+  }
+};

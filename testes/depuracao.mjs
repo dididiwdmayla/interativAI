@@ -91,6 +91,21 @@ for(const fase of fases){
    for(const v of vs.filter(v=>v.tipo==='observou'&&v.valor!==undefined)){
     conferir((observados.get(v.expressao) ?? []).some(valor => valor.includes(String(v.valor))),`Observar mostrou ${v.expressao} = ${v.valor} durante a investigação`);
    }
+   if(n==='4' && fase.cena && vs.some(v => v.tipo==='observou' && v.expressao==='agua.ligado')) {
+    if(toque)await fecharBalao(pagina);
+    if(modo==='paisagem')await area('cena');
+    if(modo==='retrato' && !await pagina.locator('[data-area-trabalho="cena"]').isVisible())await tocar(pagina.locator('[data-alternar-cena]'));
+    const cena=pagina.locator(`[data-cena="${fase.cena.id}"]`);
+    await cena.waitFor({state:'visible'});
+    const tempo = await cena.getAttribute('data-tempo');
+    const tocando = await pagina.locator('[data-area-cena]').getAttribute('data-tocando');
+    const ligado = await cena.locator('[data-dispositivo="agua"]').getAttribute('data-ligado');
+    conferir(tempo===(o.id==='observar-sozinho'?'2000':'0'),`cena mostra o instante da pausa: esperado ${o.id==='observar-sozinho'?'2000':'0'} ms; desenho em ${tempo} ms, tocando=${tocando}, agua.ligado=${ligado}`);
+    for(const v of vs.filter(v=>v.tipo==='observou' && v.expressao.includes('.'))) {
+     const [id,prop]=v.expressao.split('.');
+     if(fase.cena.dispositivos.some(d=>d.id===id))conferir(await cena.locator(`[data-dispositivo="${id}"]`).getAttribute(`data-${prop}`)===String(v.valor),`cena e Observar concordam: ${v.expressao} = ${v.valor}`);
+    }
+   }
    if(i<fase.objetivos.length-1)await conversa('Próximo objetivo');
   }
  }

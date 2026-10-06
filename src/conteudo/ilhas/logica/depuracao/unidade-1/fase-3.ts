@@ -167,6 +167,26 @@ export const FASE_DEPURACAO_U1_F3: Fase = {
                   "b",
                   "a"
                 ]
+              },
+              {
+                "args": [
+                  [
+                    {
+                      "nome": "a"
+                    },
+                    {
+                      "nome": "b"
+                    },
+                    {
+                      "nome": "c"
+                    }
+                  ]
+                ],
+                "esperado": [
+                  "a",
+                  "b",
+                  "c"
+                ]
               }
             ]
           }

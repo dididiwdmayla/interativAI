@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
-import { FASES } from '@/conteudo';
+import { FASES, UNIDADES } from '@/conteudo';
+import { CURRICULO } from '@/curriculo/curriculo';
 import type { Fase } from '@/conteudo/tipos';
 import { criarSimulacao } from '@/motor/simulacao';
 const fases = FASES.filter(f => f.unidadeId.startsWith('logica-depuracao-'));
@@ -43,4 +44,29 @@ it('as execuções investigadas cabem nas primeiras mil fotos da memória', () =
       if (execucao) expect(execucao.rastroCortado, `${fase.id}/${alvo.id}`).toBe(false);
     }
   }
+});
+it('listas de nomes diferentes rejeitam consertos que invertem a ordem', () => {
+  for (const [id, codigo] of [
+    ['logica-depuracao-u1-f3', 'function etiquetas(itens) { return itens.map(item => item.nome).reverse(); }'],
+    ['logica-depuracao-u4-f3', 'function ativos(itens) { return itens.filter(item => item.ativo).map(item => item.nome).reverse(); }'],
+  ]) {
+    const fase = fases.find(f => f.id === id);
+    if (!fase) continue; // A U4 permanece em rascunho enquanto a cena não acompanha a pausa.
+    if (fase.tipo !== 'desafio') throw new Error('Desafio esperado');
+    const sim = criarSimulacao(fase);
+    sim.executar([{tipo:'definirSnippet',codigo}, {tipo:'executarSnippet'}]);
+    expect(sim.avaliar(fase.partes.find(p => p.id === 'codigo')!.validador).passou, id).toBe(false);
+  }
+});
+
+it('U4 bloqueada não é registrada e o contrato permanece no fim da Ilha Lógica', () => {
+  const ilha = CURRICULO.find(i => i.id === 'logica')!;
+  const registradas = new Set(UNIDADES.map(u => u.id));
+  const percurso = ilha.zonas.flatMap(z => z.unidades);
+  const u4 = percurso.find(u => u.id === "logica-depuracao-u4")!;
+  expect(u4.requerMotor).toContain("foto da pausa");
+  expect(registradas.has(u4.id)).toBe(false);
+  expect(percurso.filter(u => !u.requerMotor).every(u => registradas.has(u.id))).toBe(true);
+  expect(ilha.zonas.find(z => z.id === 'depuracao')!.unidades.map(u => u.id)).toEqual([1,2,3,4].map(n => `logica-depuracao-u${n}`));
+  expect(percurso.at(-1)!.id).toBe('logica-programa-de-verdade-u1');
 });
