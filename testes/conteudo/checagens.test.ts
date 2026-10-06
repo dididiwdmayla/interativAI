@@ -192,7 +192,8 @@ describe("revisarEm aponta para a fase guiada", () => {
 
 describe("meta.desafioId", () => {
   it("apontar para o desafio de outra unidade falha", () => {
-    const [u1, u2] = UNIDADES;
+    const u1 = UNIDADES.find((unidade) => unidade.id === "sites-elementos-u1") ?? UNIDADES[0];
+    const u2 = UNIDADES.find((unidade) => unidade.id === "sites-elementos-u2") ?? UNIDADES[1];
     const unidades = [{ ...u1, meta: { ...u1.meta, desafioId: "sites-elementos-u2-f4" } }, u2];
     const problemas = regraGeral("meta-e-desafio").checar({ unidades, fases: FASES });
     expect(problemas.join("\n")).toContain('meta.desafioId "sites-elementos-u2-f4" é da unidade "sites-elementos-u2", não da "sites-elementos-u1"');

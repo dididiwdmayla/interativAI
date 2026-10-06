@@ -21,6 +21,21 @@
 import type { IdTema } from "@/curriculo/temas";
 
 const CATALOGO = {
+  // Museu das Origens, sala 1 (rodada 36): como o computador entende.
+  "bit": {"nome": "Bit", "termoIngles": "bit", "resumo": "A menor informação que existe no computador: só duas possibilidades, como furo ou sem furo, ligado ou desligado, 1 ou 0.", "temas": ["fundamentos"]},
+  "binario": {"nome": "Números em binário", "termoIngles": "binary", "resumo": "Contar só com 0 e 1: cada posição vale o dobro da vizinha (1, 2, 4, 8...) e o número é a soma das posições ligadas.", "temas": ["fundamentos"]},
+  "instrucao-de-maquina": {"nome": "Instrução", "termoIngles": "instruction", "resumo": "Uma ordem pequena que o processador sabe cumprir, como pegar, somar ou guardar um número. Um programa vira milhares delas em fila.", "temas": ["fundamentos"]},
+  "linguagem-de-maquina": {"nome": "Linguagem de máquina", "termoIngles": "machine code", "resumo": "As instruções escritas em bits, do jeito que o processador lê. Quase ninguém escreve assim: um tradutor faz isso pela gente.", "temas": ["fundamentos"]},
+  "linguagem-de-programacao": {"nome": "Linguagem de programação", "termoIngles": "programming language", "resumo": "Um jeito de escrever ordens que gente consegue ler, como JavaScript. Um tradutor (compilador ou interpretador) passa para a máquina.", "temas": ["fundamentos", "logica"]},
+  "byte": {"nome": "Byte", "termoIngles": "byte", "resumo": "Um grupo de 8 bits. Guarda um número de 0 a 255, que pode ser uma letra, um pedaço de uma cor ou de qualquer outra coisa.", "temas": ["fundamentos", "dados"]},
+  "hexadecimal": {"nome": "Hexadecimal", "termoIngles": "hexadecimal", "resumo": "Contar de 16 em 16, com os dígitos de 0 a 9 e de a a f. Dois dígitos guardam um byte inteiro: de 00 (0) a ff (255).", "temas": ["fundamentos", "interfaces"]},
+  // Museu das Origens, sala 2 (rodada 36): a linha do tempo.
+  "cartao-perfurado": {"nome": "Cartão perfurado", "termoIngles": "punched card", "resumo": "Um cartão com furos que guardava informação e ordens: do tear de Jacquard aos computadores, foi usado por mais de um século.", "temas": ["fundamentos"]},
+  "historia-da-computacao": {"nome": "Linha do tempo da computação", "termoIngles": "history of computing", "resumo": "Cada máquina aproveitou a de antes: cartões, válvulas, transistores, chips, o computador em casa, a web, o celular e a IA.", "temas": ["fundamentos"]},
+  "transistor": {"nome": "Transistor", "termoIngles": "transistor", "resumo": "Uma chavinha elétrica sem vidro e sem partes que se mexem, que trocou a válvula: menor, mais fria e mais barata. Um chip tem bilhões.", "temas": ["fundamentos", "desempenho"]},
+  "computador-pessoal": {"nome": "Computador pessoal", "termoIngles": "personal computer (PC)", "resumo": "O computador que cabe numa mesa e é de uma pessoa só. Tirou a computação das empresas e levou para as casas e escolas.", "temas": ["fundamentos"]},
+  "web": {"nome": "Web", "termoIngles": "World Wide Web", "resumo": "Páginas ligadas por links, abertas num navegador. Roda em cima da internet, a rede que liga os computadores do mundo.", "temas": ["fundamentos", "interfaces", "servidores"]},
+
   "reproduzir-o-defeito": {"nome": "Reproduzir o defeito", "resumo": "Antes de procurar a causa, ache um caso que funciona e um que falha e compare as entradas: o que muda entre eles é a pista.", "temas": ["logica", "ferramentas"]},
   "causa-raiz": {"nome": "Causa raiz", "resumo": "O sintoma é o que aparece errado; a causa raiz é a decisão no código que o produz. Consertar só o sintoma deixa o defeito vivo.", "temas": ["logica", "ferramentas"]},
   "teste-de-regressao": {"nome": "Teste de regressão", "resumo": "Depois de consertar, rode de novo os casos antigos junto com o novo: um conserto bom não quebra o que já funcionava.", "temas": ["logica", "ferramentas"]},

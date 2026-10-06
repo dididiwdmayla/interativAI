@@ -106,7 +106,8 @@ describe("o mapa segue a trilha", () => {
     expect(ilhaAtual({ progresso: PROGRESSO_PADRAO }).id).toBe("sites");
     expect(ilhaAtual({ progresso: comTrilha("automacao") }).id).toBe("eletronica");
     // A fase aberta é de Sites, que não está na trilha Jogos: vale a primeira da rota dela.
-    expect(ilhaAtual({ progresso: comTrilha("jogos", { faseAtual: UNIDADES[0].fases[0] }) }).id).toBe("logica");
+    const sitesU1 = UNIDADES.find((unidade) => unidade.id === "sites-elementos-u1") ?? UNIDADES[0];
+    expect(ilhaAtual({ progresso: comTrilha("jogos", { faseAtual: sitesU1.fases[0] }) }).id).toBe("logica");
   });
 
   it("ilhas futuras ficam em construção; Sites continua aberta pelo endereço, em qualquer trilha", () => {
@@ -116,7 +117,7 @@ describe("o mapa segue a trilha", () => {
   });
 
   it("o progresso é da ilha: o que foi concluído vale em todas as trilhas", () => {
-    const [U1] = UNIDADES;
+    const U1 = UNIDADES.find((unidade) => unidade.id === "sites-elementos-u1") ?? UNIDADES[0];
     const feito = { fasesConcluidas: U1.fases };
     const naWeb = progressoDeUnidades(unidadesDaTrilha(trilhaDoId("web")), comTrilha("web", feito));
     const naJogos = progressoDeUnidades(unidadesDaTrilha(trilhaDoId("jogos")), comTrilha("jogos", feito));

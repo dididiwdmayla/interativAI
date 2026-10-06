@@ -18,7 +18,8 @@ import {
 } from "@/lib/mapa";
 import { PROGRESSO_PADRAO, type Progresso } from "@/lib/progresso";
 
-const [U1, U2, U3, U4, U5, U6, E1] = UNIDADES;
+// As unidades de Sites, na ordem (o museu das Origens vem antes em UNIDADES).
+const [U1, U2, U3, U4, U5, U6, E1] = UNIDADES.filter((unidade) => unidade.id.startsWith("sites-"));
 const ilha = (id: string): IlhaCurriculo => {
   const achada = ilhaDoId(id);
   if (!achada) throw new Error(id);
@@ -53,10 +54,10 @@ const LOGICA_FALSA: Unidade = {
 };
 
 describe("ilhas", () => {
-  it("do zero: Sites aberta, Lógica trancada (tem unidade pronta), as sem unidade pronta em construção (Origens inclusive)", () => {
+  it("do zero: Origens (sempre aberta, com as salas 1 e 2) e Sites abertas, Lógica trancada, as sem unidade pronta em construção", () => {
     const fonte = { progresso: PROGRESSO_PADRAO };
     expect(CURRICULO.map((item) => [item.id, estadoDaIlha(item, fonte)])).toEqual([
-      ["origens", "construcao"],
+      ["origens", "disponivel"],
       ["sites", "disponivel"],
       ["logica", "bloqueada"],
       ["paginas-vivas", "construcao"],

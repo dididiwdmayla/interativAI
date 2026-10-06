@@ -15,7 +15,8 @@ import {
 import { MOTORES_PLANEJADOS } from "@/curriculo/motores";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 
-const [U1] = UNIDADES;
+// A U1 de Sites (o museu vem antes em UNIDADES, mas os exemplos daqui são de Sites).
+const U1 = UNIDADES.find((unidade) => unidade.id === "sites-elementos-u1") ?? UNIDADES[0];
 
 describe("currículo em dados", () => {
   it("ilhas na ordem do mapa, Origens sempre aberta e Frameworks opcional", () => {
