@@ -35,26 +35,65 @@ import { BarraMapa } from "../BarraMapa";
 import { trechosSuaves } from "../geometria";
 import { useTamanho } from "../useTamanho";
 import { CardUnidade } from "./CardUnidade";
-import { desenharIlha } from "./desenhoIlha";
+import { ChaoDaIlha, TONS_DAS_ZONAS } from "./ChaoDaIlha";
+import { desenharIlha, type Enfeite, type RegiaoZona } from "./desenhoIlha";
+import { pecaAnimadaDaIlha } from "./EnfeitesIlha";
 import { PontoUnidade } from "./PontoUnidade";
 
-/** A borda da ilha acesa (ilha completa): um contorno que pulsa em volta da terra. */
-function BordaAcesa({ terra, px }: { terra: { x: number; y: number; largura: number; altura: number; raio: number }; px: (valor: number) => number }) {
-  const animar = useAnimarMapa();
+/**
+ * Uma camada de HTML do tamanho do desenho com um contorno da ilha: a
+ * espuma que respira e a borda acesa da ilha completa. Só a opacidade anima,
+ * pelo compositor (o desenho grande da ilha não repinta).
+ */
+function CamadaDoContorno({
+  caminho,
+  largura,
+  altura,
+  escala,
+  className,
+  traco,
+  ...dados
+}: {
+  caminho: string;
+  largura: number;
+  altura: number;
+  escala: number;
+  className: string;
+  traco: { cor: string; largura: number; tracejado?: string };
+} & Record<`data-${string}`, string | boolean>) {
   return (
-    <motion.rect
-      x={px(terra.x - 8)}
-      y={px(terra.y - 8)}
-      width={px(terra.largura + 16)}
-      height={px(terra.altura + 16)}
-      rx={px(terra.raio + 8)}
-      fill="none"
-      stroke="var(--cor-destaque)"
-      strokeWidth={px(8)}
-      data-borda-acesa
-      animate={animar ? { opacity: [0.45, 1, 0.45] } : { opacity: 0.8 }}
-      transition={animar ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" } : undefined}
-    />
+    <div aria-hidden="true" className={`pointer-events-none absolute inset-0 ${className}`} {...dados}>
+      <svg viewBox={`0 0 ${largura} ${altura}`} width={largura} height={altura} className="block">
+        <path
+          d={caminho}
+          transform={`scale(${escala})`}
+          fill="none"
+          stroke={traco.cor}
+          strokeWidth={traco.largura}
+          strokeDasharray={traco.tracejado}
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/** O enfeite da ilha que se mexe (o mais perto do computadorzinho), numa camada própria. */
+function EnfeiteAnimado({ ilhaId, enfeite, px }: { ilhaId: string; enfeite: Enfeite; px: (valor: number) => number }) {
+  const peca = pecaAnimadaDaIlha(ilhaId);
+  if (!peca) return null;
+  const lado = px(56 * enfeite.escala);
+  return (
+    <div
+      aria-hidden="true"
+      className={`enfeite-${peca.animacao} pointer-events-none absolute`}
+      style={{ left: px(enfeite.x) - lado / 2, top: px(enfeite.y) - lado / 2, width: lado, height: lado }}
+      data-enfeite-animado={peca.animacao}
+    >
+      <svg viewBox="-28 -28 56 56" width="100%" height="100%" className="block overflow-visible">
+        {peca.desenho()}
+      </svg>
+    </div>
   );
 }
 
@@ -97,6 +136,45 @@ function PlacaConstrucao() {
       </svg>
       Em construção
     </span>
+  );
+}
+
+/**
+ * A placa de uma zona: o quadro de madeira com o ícone (no tom da zona), o
+ * nome e as plaquinhas, num poste. Fica no alto da zona, do lado que não tem
+ * o primeiro ponto (lá em cima dele para o computadorzinho).
+ */
+function PlacaDaZona({ regiao, px }: { regiao: RegiaoZona; px: (valor: number) => number }) {
+  const { zona, placa } = regiao;
+  const direita = placa.lado === "direita";
+  return (
+    <div
+      className={`pointer-events-none absolute flex flex-col ${direita ? "-translate-x-full items-end" : "items-start"}`}
+      style={{ left: px(placa.x), top: px(placa.y), maxWidth: px(placa.larguraMaxima) }}
+      data-zona={zona.id}
+      data-placa-zona={placa.lado}
+    >
+      <div className="flex flex-col gap-1 rounded-xl border-[3px] border-madeira bg-superficie py-1 pl-1 pr-2.5 shadow-[0_3px_0_var(--cor-sombra)]">
+        <span className="flex items-center gap-1.5">
+          <span
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border-2 border-madeira"
+            style={{ background: TONS_DAS_ZONAS[regiao.indice % TONS_DAS_ZONAS.length] }}
+          >
+            <IconeZona icone={zona.icone} tamanho={17} className="text-texto" />
+          </span>
+          <span className="min-w-0 text-sm font-black leading-tight text-texto" data-nome-zona>
+            {zona.nome}
+          </span>
+        </span>
+        {(zona.opcional || zona.requerMotor) && (
+          <span className="flex flex-wrap gap-1 pl-0.5">
+            {zona.opcional && <PlacaOpcional />}
+            {zona.requerMotor && <PlacaConstrucao />}
+          </span>
+        )}
+      </div>
+      <span aria-hidden="true" className={`h-3 w-1.5 rounded-b bg-madeira ${direita ? "mr-5" : "ml-5"}`} />
+    </div>
   );
 }
 
@@ -178,15 +256,24 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
   const estadoIlha = estadoDaIlha(ilha, fonte);
   const lente = resolverLente(progresso.lente);
 
-  const desenho = useMemo(() => desenharIlha(ilha, vertical, larguraTela), [ilha, vertical, larguraTela]);
+  const desenho = useMemo(() => desenharIlha(ilha, vertical, larguraTela, alturaTela), [ilha, vertical, larguraTela, alturaTela]);
   // Deitado ou no desktop, o caminho cabe na altura (sem encolher os pontos).
-  const escala = desenho.vertical || alturaTela === 0 ? 1 : Math.min(1.15, Math.max(0.6, alturaTela / desenho.altura));
+  const escala = desenho.escala;
   const px = (valor: number) => valor * escala;
 
   const estados = desenho.pontos.map((ponto) => estadoDaUnidade(ilha, ponto.zona, ponto.item, fonte));
   const conteudoDe = (item: UnidadeCurriculo) => UNIDADES.find((unidade) => unidade.id === item.id);
   const atual = pontoAtual(ilha, fonte);
   const indiceAtual = Math.max(0, desenho.pontos.findIndex((ponto) => ponto.item.id === atual.id));
+  // A peça que se mexe: o enfeite mais perto do ponto atual (uma só por ilha; com menos movimento, fica parada).
+  const enfeiteAnimado = useMemo(() => {
+    const alvo = desenho.pontos[indiceAtual];
+    if (!alvo || !pecaAnimadaDaIlha(ilha.id)) return null;
+    return desenho.enfeites.reduce<Enfeite | null>(
+      (melhor, enfeite) => (!melhor || Math.hypot(enfeite.x - alvo.x, enfeite.y - alvo.y) < Math.hypot(melhor.x - alvo.x, melhor.y - alvo.y) ? enfeite : melhor),
+      null,
+    );
+  }, [desenho, indiceAtual, ilha.id]);
 
   // Festa: unidades concluídas desde a última visita. A última delas acende.
   const [comemoracao] = useState(() => {
@@ -333,8 +420,28 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
       <BarraMapa caminho={["Mundo", `Ilha ${ilha.nome}`]} voltar={<BotaoVoltarAoMundo />} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo={`Mapa da ilha ${ilha.nome}. Arraste ou role para ver o caminho inteiro.`}>
-          <div className="relative" style={{ width: larguraDesenho, height: alturaDesenho }}>
+          <div className="relative" style={{ width: larguraDesenho, height: alturaDesenho }} data-ilha-desenho>
             <Oceano largura={larguraDesenho} altura={alturaDesenho} escala={1} />
+            <CamadaDoContorno
+              caminho={desenho.contorno.espuma}
+              largura={larguraDesenho}
+              altura={alturaDesenho}
+              escala={escala}
+              className="espuma-respira"
+              traco={{ cor: "var(--cor-espuma)", largura: 3, tracejado: "16 10" }}
+              data-espuma
+            />
+            {completa && (
+              <CamadaDoContorno
+                caminho={desenho.contorno.espuma}
+                largura={larguraDesenho}
+                altura={alturaDesenho}
+                escala={escala}
+                className="anel-ilha"
+                traco={{ cor: "var(--cor-destaque)", largura: 8 }}
+                data-borda-acesa
+              />
+            )}
             <svg
               viewBox={`0 0 ${larguraDesenho} ${alturaDesenho}`}
               width={larguraDesenho}
@@ -342,60 +449,25 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
               className="absolute inset-0"
               aria-hidden="true"
             >
-              <rect
-                x={px(desenho.terra.x)}
-                y={px(desenho.terra.y)}
-                width={px(desenho.terra.largura)}
-                height={px(desenho.terra.altura)}
-                rx={px(desenho.terra.raio)}
-                fill="var(--cor-areia)"
-                stroke="var(--cor-areia-sombra)"
-                strokeWidth="4"
-              />
-              {completa && <BordaAcesa terra={desenho.terra} px={px} />}
-              <rect
-                x={px(desenho.terra.x + 18)}
-                y={px(desenho.terra.y + 18)}
-                width={px(desenho.terra.largura - 36)}
-                height={px(desenho.terra.altura - 36)}
-                rx={px(desenho.terra.raio - 18)}
-                fill="var(--cor-grama)"
-              />
-              {desenho.regioes.map((regiao, indice) => (
-                <rect
-                  key={regiao.zona.id}
-                  x={px(regiao.x)}
-                  y={px(regiao.y)}
-                  width={px(regiao.largura)}
-                  height={px(regiao.altura)}
-                  rx="28"
-                  fill={indice % 2 === 0 ? "var(--cor-grama-sombra)" : "var(--cor-areia)"}
-                  opacity={regiao.zona.requerMotor ? 0.28 : 0.4}
-                  stroke="var(--cor-superficie)"
-                  strokeWidth="3"
-                  strokeDasharray="10 10"
-                />
-              ))}
+              <ChaoDaIlha ilhaId={ilha.id} desenho={desenho} px={px} enfeiteAnimado={enfeiteAnimado} />
               {trechos.map((trecho, indice) => {
                 const andado = estados[indice] === "concluida";
                 const desenhando = comemoracao !== null && desenho.pontos[indice].item.id === comemoracao.acendendo;
+                // Depois do ponto atual, o caminho ainda é só uma trilha apagada.
+                const adiante = indice >= indiceAtual;
                 return (
-                  <g key={indice}>
-                    <path d={trecho} fill="none" stroke="var(--cor-areia-sombra)" strokeWidth="12" strokeLinecap="round" />
-                    <path
-                      d={trecho}
-                      fill="none"
-                      stroke="var(--cor-superficie)"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeDasharray="2 12"
-                    />
+                  <g key={indice} opacity={adiante ? 0.75 : 1}>
+                    <path d={trecho} fill="none" stroke="var(--cor-caminho-borda)" strokeWidth={px(17)} strokeLinecap="round" />
+                    <path d={trecho} fill="none" stroke="var(--cor-caminho)" strokeWidth={px(11)} strokeLinecap="round" />
+                    {!andado && (
+                      <path d={trecho} fill="none" stroke="var(--cor-caminho-borda)" strokeWidth={px(3.5)} strokeLinecap="round" strokeDasharray={`${px(2)} ${px(11)}`} />
+                    )}
                     {andado && (
                       <motion.path
                         d={trecho}
                         fill="none"
                         stroke="var(--cor-primaria)"
-                        strokeWidth="7"
+                        strokeWidth={px(7)}
                         strokeLinecap="round"
                         data-trecho-andado={indice}
                         initial={desenhando && animar ? { pathLength: 0 } : false}
@@ -407,21 +479,10 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                 );
               })}
             </svg>
+            {enfeiteAnimado && <EnfeiteAnimado ilhaId={ilha.id} enfeite={enfeiteAnimado} px={px} />}
 
             {desenho.regioes.map((regiao) => (
-              <div
-                key={regiao.zona.id}
-                className="pointer-events-none absolute flex flex-wrap items-center gap-1.5"
-                style={{ left: px(regiao.x) + 14, top: px(regiao.y) + 10, maxWidth: px(regiao.largura) - 28 }}
-                data-zona={regiao.zona.id}
-              >
-                <span className="flex items-center gap-1.5 rounded-full bg-superficie px-2.5 py-1 text-sm font-black text-texto shadow-[0_3px_0_var(--cor-sombra)]">
-                  <IconeZona icone={regiao.zona.icone} tamanho={18} className="text-primaria" />
-                  {regiao.zona.nome}
-                </span>
-                {regiao.zona.opcional && <PlacaOpcional />}
-                {regiao.zona.requerMotor && <PlacaConstrucao />}
-              </div>
+              <PlacaDaZona key={regiao.zona.id} regiao={regiao} px={px} />
             ))}
 
             {desenho.pontos.map((ponto, indice) => {
@@ -435,6 +496,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
                   x={px(ponto.x)}
                   y={px(ponto.y)}
                   acendendo={comemoracao?.acendendo === ponto.item.id}
+                  atual={indice === indiceAtual && estados[indice] !== "concluida"}
                   lente={lente ? (unidadeNaLente(ponto.item, lente) ? "acesa" : "apagada") : null}
                   aoAbrir={() => {
                     tocarEfeito("clique");

@@ -77,6 +77,23 @@
   --cor-terminal-fundo: #1d3328;
   --cor-terminal-texto: #7dffb0;
 
+  /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
+  --cor-espuma: #ffffff;
+  --cor-pedrinha: #eadbc8;
+  --cor-pedrinha-sombra: #cfb79c;
+  --cor-mato: #4fae72;
+  --cor-mato-claro: #86d69e;
+  --cor-relevo-claro: #c6f2d1;
+  --cor-relevo-escuro: #7fcb98;
+  --cor-luz: #fffbe0;
+  --cor-zona-1: #bde9c5;
+  --cor-zona-2: #d7edb0;
+  --cor-zona-3: #b6e2df;
+  --cor-zona-4: #e8e0b3;
+  --cor-zona-textura: #3f9864;
+  --cor-caminho: #f7d9a8;
+  --cor-caminho-borda: #d5a868;
+
   /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
   --cor-caixa-margem: #fbc79a;
   --cor-caixa-borda: #fde39b;
@@ -279,6 +296,23 @@
   --cor-terminal-fundo: #05040f;
   --cor-terminal-texto: #38f28b;
 
+  /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
+  --cor-espuma: #7ff3ff;
+  --cor-pedrinha: #5d52b5;
+  --cor-pedrinha-sombra: #372e7c;
+  --cor-mato: #2fa98a;
+  --cor-mato-claro: #4fdab3;
+  --cor-relevo-claro: #2c8f78;
+  --cor-relevo-escuro: #123f36;
+  --cor-luz: #faf45a;
+  --cor-zona-1: #1c6a5a;
+  --cor-zona-2: #23506f;
+  --cor-zona-3: #3a3d78;
+  --cor-zona-4: #4f5a35;
+  --cor-zona-textura: #5ce0ff;
+  --cor-caminho: #4c419a;
+  --cor-caminho-borda: #2b245f;
+
   /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
   --cor-caixa-margem: #a95a1c;
   --cor-caixa-borda: #9e8420;
@@ -478,6 +512,23 @@
   --cor-pedra-sombra: #0a2a1f;
   --cor-terminal-fundo: #010a06;
   --cor-terminal-texto: #3dff8f;
+
+  /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
+  --cor-espuma: #3dff8f;
+  --cor-pedrinha: #2c7259;
+  --cor-pedrinha-sombra: #133f30;
+  --cor-mato: #3aa874;
+  --cor-mato-claro: #63d89b;
+  --cor-relevo-claro: #45a97a;
+  --cor-relevo-escuro: #1c5c40;
+  --cor-luz: #ffc94d;
+  --cor-zona-1: #2b7f59;
+  --cor-zona-2: #286e69;
+  --cor-zona-3: #3d7646;
+  --cor-zona-4: #5c7a35;
+  --cor-zona-textura: #9dffc6;
+  --cor-caminho: #25694f;
+  --cor-caminho-borda: #0f3a2b;
 
   /* Modelo de caixa (aba Calculado e destaque na prévia), as cores clássicas do Chrome */
   --cor-caixa-margem: #9a5a26;

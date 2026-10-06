@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS } from "./curriculo.mjs";
 import { corEmRgb, lerPng } from "./png.mjs";
-import { abrir, conferir, doisQuadros, errosRelevantes } from "./util.mjs";
+import { abrir, conferir, doisQuadros, errosRelevantes, URL_JOGO } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "retrato";
 const TAMANHOS = {
@@ -219,6 +219,52 @@ await pagina.waitForTimeout(1500);
 const reduzido = pinturas.reduce((soma, a) => soma + a, 0) / 1.5;
 if (process.env.MEDIR) console.log(`${MODO}: com menos movimento, ${(reduzido / tela).toFixed(1)} telas/s`);
 conferir(reduzido <= tela * 1, `${MODO}: com menos movimento, o mapa quase não repinta (${(reduzido / tela).toFixed(1)} telas por segundo)`);
+
+// ------------------------------------------------ o interior das ilhas
+// Sites e Lógica: as zonas ficam recortadas pela grama, nenhuma placa, nome,
+// ponto ou o computadorzinho encosta em outro, e parado nada repinta a ilha inteira.
+await pagina.emulateMedia({ reducedMotion: "no-preference" });
+for (const ilhaId of ["sites", "logica"]) {
+  await pagina.goto(`${URL_JOGO}/ilha/${ilhaId}`);
+  await pagina.locator(`[data-mapa=ilha][data-ilha=${ilhaId}]`).waitFor();
+  await pagina.locator("[data-mascote-no-ponto]").waitFor();
+  await pagina.waitForTimeout(2200); // o computadorzinho termina de andar até o ponto atual
+  const ilha = await pagina.evaluate(() => {
+    const desenho = document.querySelector("[data-ilha-desenho]");
+    const regioes = [...desenho.querySelectorAll("[data-regiao-zona]")];
+    const recortadas = regioes.every((regiao) => regiao.parentElement?.getAttribute("clip-path")?.startsWith("url(#grama-"));
+    const caixas = [
+      ...[...desenho.querySelectorAll("[data-placa-zona]")].map((el) => ({ id: `placa ${el.getAttribute("data-zona")}`, el })),
+      ...[...desenho.querySelectorAll("[data-unidade]")].map((el) => ({ id: `ponto ${el.getAttribute("data-unidade")}`, el })),
+      ...[...desenho.querySelectorAll("[data-nome-unidade]")].map((el) => ({ id: `nome ${el.getAttribute("data-nome-unidade")}`, el })),
+      ...[...desenho.querySelectorAll("[data-mascote-no-ponto] > *")].map((el) => ({ id: "computadorzinho", el })),
+    ].map(({ id, el }) => ({ id, r: el.getBoundingClientRect() }));
+    const encostam = [];
+    for (const [i, a] of caixas.entries()) {
+      for (const b of caixas.slice(i + 1)) {
+        // O nome é colado ao ponto dele (é o rótulo do ponto): esse par não conta.
+        if (a.id.split(" ")[1] && a.id.split(" ")[1] === b.id.split(" ")[1]) continue;
+        const folga = 1;
+        if (a.r.left < b.r.right - folga && b.r.left < a.r.right - folga && a.r.top < b.r.bottom - folga && b.r.top < a.r.bottom - folga) encostam.push(`${a.id} x ${b.id}`);
+      }
+    }
+    return { regioes: regioes.length, recortadas, encostam, placas: caixas.filter((c) => c.id.startsWith("placa")).length };
+  });
+  conferir(ilha.regioes > 1 && ilha.recortadas, `${MODO}: ${ilhaId}: as ${ilha.regioes} zonas ficam recortadas pela grama (não vazam para a areia)`);
+  conferir(ilha.placas === ilha.regioes, `${MODO}: ${ilhaId}: uma placa por zona`);
+  conferir(ilha.encostam.length === 0, `${MODO}: ${ilhaId}: placas, pontos, nomes e o computadorzinho não se encostam ${JSON.stringify(ilha.encostam.slice(0, 4))}`);
+  const telaIlha = await pagina.getByRole("region", { name: /Mapa da ilha/ }).evaluate((el) => el.clientWidth * el.clientHeight);
+  pinturas.length = 0;
+  await cdp.send("LayerTree.enable");
+  await pagina.waitForTimeout(500);
+  pinturas.length = 0;
+  await pagina.waitForTimeout(2000);
+  await cdp.send("LayerTree.disable");
+  const maiorIlha = Math.max(0, ...pinturas);
+  const porSegundoIlha = pinturas.reduce((soma, a) => soma + a, 0) / 2;
+  if (process.env.MEDIR) console.log(`${MODO}: ${ilhaId}: maior ${((maiorIlha / telaIlha) * 100).toFixed(0)}%, ${(porSegundoIlha / telaIlha).toFixed(1)} telas/s`);
+  conferir(maiorIlha <= telaIlha * 0.3 && porSegundoIlha <= telaIlha * 8, `${MODO}: ${ilhaId}: parado, a ilha repinta pouco (maior ${((maiorIlha / telaIlha) * 100).toFixed(0)}%, ${(porSegundoIlha / telaIlha).toFixed(1)} telas/s)`);
+}
 
 conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

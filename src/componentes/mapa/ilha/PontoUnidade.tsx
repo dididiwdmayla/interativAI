@@ -20,6 +20,8 @@ type Props = {
   acendendo: boolean;
   /** Lente de tema acesa: a unidade é do tema (acesa) ou não (apagada). Null sem lente. */
   lente?: "acesa" | "apagada" | null;
+  /** É o ponto do computadorzinho (a próxima unidade): brilha. */
+  atual?: boolean;
   aoAbrir: () => void;
 };
 
@@ -44,13 +46,13 @@ function Andaime() {
  * disponível (pulsando), bloqueada (cadeado) ou planejada (andaime e
  * "Em breve"). O botão tem pelo menos 52 px.
  */
-export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, lente = null, aoAbrir }: Props) {
+export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, lente = null, atual = false, aoAbrir }: Props) {
   const animar = useAnimarMapa();
   const { item } = ponto;
   const fundo = {
     concluida: "bg-sucesso border-sucesso",
     disponivel: "bg-primaria border-primaria text-sobre-primaria",
-    bloqueada: "bg-painel border-borda text-texto-suave",
+    bloqueada: "bg-pedra border-pedra-sombra text-texto-suave",
     planejada: "bg-areia border-dashed border-madeira",
   }[estado];
   const lado = ponto.lado;
@@ -63,6 +65,14 @@ export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, lente =
   return (
     <div className={`absolute transition-opacity ${lente === "apagada" ? "opacity-35" : ""}`} style={{ left: x, top: y }}>
       <div className="relative -translate-x-1/2 -translate-y-1/2">
+        {atual && (
+          <span
+            aria-hidden="true"
+            data-brilho-atual
+            className="brilho-ponto-atual absolute -inset-5 rounded-full"
+            style={{ background: "radial-gradient(circle, var(--cor-destaque) 0%, transparent 68%)" }}
+          />
+        )}
         {lente === "acesa" && (
           <span aria-hidden="true" className="absolute -inset-2 rounded-full border-4 border-destaque shadow-[0_0_0_3px_var(--cor-superficie)]" />
         )}
@@ -102,7 +112,10 @@ export function PontoUnidade({ ponto, estado, estrelas, x, y, acendendo, lente =
           {estado === "planejada" && <Andaime />}
         </motion.button>
         <span className={`pointer-events-none absolute flex w-36 flex-col gap-0.5 ${etiqueta}`}>
-          <span className="rounded-lg bg-superficie/90 px-1.5 py-0.5 text-xs font-black leading-tight text-texto shadow-[0_2px_0_var(--cor-sombra)]">
+          <span
+            className="rounded-lg bg-superficie/90 px-1.5 py-0.5 text-xs font-black leading-tight text-texto shadow-[0_2px_0_var(--cor-sombra)]"
+            data-nome-unidade={item.id}
+          >
             {item.titulo}
           </span>
           {estado === "concluida" && <EstrelasFase quantidade={estrelas} tamanho={13} />}
