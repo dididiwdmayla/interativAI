@@ -139,4 +139,12 @@ Origens, parte 1. Capturas antes e depois em `docs/capturas/rodada-37/`.
 - `mundo.mjs`, `mapa.mjs`, `chamados.mjs` (U5 e U6), nos três layouts;
   `explorar.mjs`, `ser-encontrado.mjs`, `contrato-logica.mjs` e
   `cenas-novas.mjs` verdes.
-- Bateria completa: ver abaixo.
+- Bateria completa (`PARALELO=4`, servidor de produção): 205 execuções,
+  203 verdes e 2 falhas, nenhuma desta rodada.
+  - `unidades.mjs retrato`: o duplo toque da U4F1 (`editarValorAtributo`,
+    linha 167), a pendência já registrada na rodada 36 (reproduz na
+    principal).
+  - `algoritmos.mjs retrato 3`: o tempo esgotou na navegação da linha do
+    tempo (Home e End) com quatro navegadores ao mesmo tempo. Rodado
+    sozinho: verde. Código que esta rodada não tocou; ficou em Pendências
+    ("Testes sob carga").

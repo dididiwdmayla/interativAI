@@ -746,6 +746,9 @@ núcleo comum.
     conceitos antigos (inclusive os três da Depuração) ainda estão sem o
     termo (ROADMAP, Próximo).
 
+- **Testes sob carga (Algoritmos, rodada 37):** `algoritmos.mjs retrato 3`
+  esgotou o tempo na navegação da linha do tempo (Home e End até o passo
+  do erro) com a bateria em `PARALELO=4`; sozinho, passa.
 - **Testes sob carga (Depuração):** a checagem conjunta das bancadas
   tem limite de 5 s, e a prova de recursão infinita espera estourar a
   pilha antes da proteção de 1,5 s. Com testes e navegadores simultâneos,
