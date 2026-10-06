@@ -362,3 +362,108 @@ html:fullscreen .h-dvh > header {
     opacity: 0;
   }
 }
+
+/*
+ * Mapa (mundo e ilhas): o que se mexe sozinho mexe só transform e opacity,
+ * pelo compositor, para o desenho grande não repintar a cada quadro (no
+ * celular, o desenho repintado sem parar deixava pedaços do mapa em branco).
+ */
+.ondas-do-mar {
+  animation: ondas-deriva var(--duracao, 6s) ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes ondas-deriva {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(var(--deriva, 18px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ondas-do-mar {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+.brilho-ilha {
+  opacity: 0.3;
+  animation: brilho-pulsar 2.6s ease-in-out infinite;
+}
+
+.anel-ilha {
+  opacity: 0.85;
+  animation: anel-pulsar 2.2s ease-in-out infinite;
+}
+
+.nevoa-deriva {
+  animation: nevoa-deriva 7s ease-in-out infinite;
+}
+
+@keyframes brilho-pulsar {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes anel-pulsar {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes nevoa-deriva {
+  0%,
+  100% {
+    transform: translateX(calc(-1 * var(--deriva, 6px)));
+  }
+  50% {
+    transform: translateX(var(--deriva, 6px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brilho-ilha,
+  .anel-ilha,
+  .nevoa-deriva {
+    animation: none;
+  }
+}
+
+.barquinho-balanca {
+  transform-origin: 50% 66%;
+  animation: barquinho-balanca 3s ease-in-out infinite;
+}
+
+@keyframes barquinho-balanca {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barquinho-balanca {
+    animation: none;
+  }
+}
+
+/* A arte de cada ilha do mundo: uma camada própria (repinta só a ilha). */
+.camada-ilha {
+  will-change: transform;
+}

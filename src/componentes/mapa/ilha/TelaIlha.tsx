@@ -334,6 +334,7 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo={`Mapa da ilha ${ilha.nome}. Arraste ou role para ver o caminho inteiro.`}>
           <div className="relative" style={{ width: larguraDesenho, height: alturaDesenho }}>
+            <Oceano largura={larguraDesenho} altura={alturaDesenho} escala={1} />
             <svg
               viewBox={`0 0 ${larguraDesenho} ${alturaDesenho}`}
               width={larguraDesenho}
@@ -341,7 +342,6 @@ function IlhaCarregada({ ilha }: { ilha: IlhaCurriculo }) {
               className="absolute inset-0"
               aria-hidden="true"
             >
-              <Oceano largura={larguraDesenho} altura={alturaDesenho} />
               <rect
                 x={px(desenho.terra.x)}
                 y={px(desenho.terra.y)}

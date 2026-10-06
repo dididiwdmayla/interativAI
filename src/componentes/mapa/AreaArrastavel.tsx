@@ -63,6 +63,7 @@ export function AreaArrastavel({ rotulo, children, className = "", ref }: Props)
       ref={area}
       role="region"
       aria-label={rotulo}
+      data-area-arrastavel
       tabIndex={0}
       className={`relative min-h-0 flex-1 overflow-auto overscroll-contain [touch-action:pan-x_pan-y] ${className}`}
       onPointerDown={(evento) => {

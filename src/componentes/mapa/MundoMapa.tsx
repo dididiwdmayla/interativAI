@@ -2,14 +2,14 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useMusicaDaTela } from "@/audio/ganchos";
 import { audioLiberado, tocarEfeito, tocarHover } from "@/audio/motor";
 import { IconeCadeado } from "@/componentes/icones/IconeCadeado";
 import { TelaCarregando } from "@/componentes/jogo/TelaCarregando";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { UNIDADES } from "@/conteudo";
-import { ilhasDaTrilha, statusDaUnidade, type Trilha, unidadesDaIlha, unidadesObrigatoriasDaIlha } from "@/curriculo";
+import { ilhasDaTrilha, statusDaUnidade, unidadesDaIlha, unidadesObrigatoriasDaIlha } from "@/curriculo";
 import { resolverLente, unidadeNaLente } from "@/lib/lentes";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import { useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
@@ -21,49 +21,12 @@ import { ArtePorto } from "./arte/ArtePorto";
 import { ARTE_DAS_ILHAS, ArteFutura } from "./arte";
 import { AndaimesIlha, BrilhoIlha, NevoaIlha } from "./arte/MarcasDeEstado";
 import { Oceano } from "./arte/Oceano";
-import { useAnimarMapa } from "./arte/useAnimarMapa";
+import { GrupoAnimadoNaTela } from "./arte/useAnimarMapa";
 import { type ApiAreaArrastavel, AreaArrastavel } from "./AreaArrastavel";
 import { BarraMapa } from "./BarraMapa";
+import { desenhoDoMundo } from "./desenhoMundo";
 import { caminhoSuave, type Ponto } from "./geometria";
 import { useTamanho } from "./useTamanho";
-
-/** Tamanho do desenho do mundo da trilha Web (as posições abaixo usam estas medidas). */
-const LARGURA_WEB = 2090;
-const ALTURA = 820;
-
-/** Onde cada ilha fica no mundo da trilha Web, na ordem da rota. Frameworks fica afastada. */
-const POSICOES_WEB: Record<string, Ponto> = {
-  origens: { x: 180, y: 480 },
-  sites: { x: 430, y: 280 },
-  logica: { x: 680, y: 530 },
-  "paginas-vivas": { x: 930, y: 280 },
-  "rede-servidor": { x: 1180, y: 530 },
-  python: { x: 1430, y: 280 },
-  ia: { x: 1680, y: 530 },
-  oficio: { x: 1930, y: 280 },
-  frameworks: { x: 1700, y: 730 },
-};
-
-/** O Porto da revisão: um ponto fixo no mar, embaixo, perto do começo da rota. */
-const POSICAO_PORTO: Ponto = { x: 330, y: 700 };
-
-/** O desenho do mundo de uma trilha: largura e onde cada ilha fica. */
-function desenhoDoMundo(trilha: Trilha, ilhas: readonly IlhaCurriculo[]): { largura: number; posicao: (ilha: IlhaCurriculo) => Ponto } {
-  if (trilha.id === "web") {
-    return { largura: LARGURA_WEB, posicao: (ilha) => POSICOES_WEB[ilha.id] ?? { x: LARGURA_WEB - 160, y: 700 } };
-  }
-  // Outras trilhas: as ilhas em zigue-zague, na ordem da trilha.
-  const rota = ilhas.filter((ilha) => !ilha.opcional);
-  const largura = Math.max(LARGURA_WEB, 360 + (rota.length - 1) * 250);
-  return {
-    largura,
-    posicao: (ilha) => {
-      const indice = rota.indexOf(ilha);
-      if (indice < 0) return { x: largura - 390, y: 700 };
-      return { x: 180 + indice * 250, y: indice % 2 === 0 ? 480 : 280 };
-    },
-  };
-}
 
 const ROTULO_ESTADO: Record<EstadoIlha, string> = {
   disponivel: "Aberta",
@@ -71,21 +34,55 @@ const ROTULO_ESTADO: Record<EstadoIlha, string> = {
   bloqueada: "Bloqueada",
 };
 
-/** Barquinho de papel na rota, balançando. */
-function Barquinho({ x, y }: Ponto) {
-  const animar = useAnimarMapa();
+/** A caixa de desenho da arte de uma ilha, em volta do centro dela (unidades do desenho). */
+const CAIXA_DA_ARTE = { x: -160, y: -130, largura: 320, altura: 230 };
+
+/**
+ * A arte de uma ilha numa camada própria do compositor, centrada no ponto
+ * dela: a animação de uma ilha repinta só essa camada, e o resto do mapa
+ * (o mar, a rota, as outras ilhas) fica pintado.
+ */
+function CamadaDaArte({
+  x,
+  y,
+  escala,
+  apagada = false,
+  children,
+  ...dados
+}: Ponto & { escala: number; apagada?: boolean; children: ReactNode } & Record<`data-${string}`, string | boolean>) {
+  const { x: cx, y: cy, largura, altura } = CAIXA_DA_ARTE;
   return (
-    <g transform={`translate(${x} ${y})`}>
-      <motion.g
-        animate={animar ? { rotate: [-4, 4, -4], y: [0, -3, 0] } : undefined}
-        transition={animar ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : undefined}
-      >
+    <div
+      aria-hidden="true"
+      className="camada-ilha pointer-events-none absolute"
+      style={{ left: (x + cx) * escala, top: (y + cy) * escala, width: largura * escala, height: altura * escala, opacity: apagada ? 0.35 : 1 }}
+    >
+      <svg viewBox={`${cx} ${cy} ${largura} ${altura}`} width="100%" height="100%" className="block overflow-visible">
+        <GrupoAnimadoNaTela {...dados}>{children}</GrupoAnimadoNaTela>
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Barquinho de papel na rota, balançando. Em HTML, em cima do desenho: o
+ * balanço é do compositor (transform), sem repintar o mapa.
+ */
+function Barquinho({ x, y, escala }: Ponto & { escala: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute"
+      style={{ left: (x - 30) * escala, top: (y - 40) * escala, width: 60 * escala, height: 60 * escala }}
+      data-barquinho
+    >
+      <svg viewBox="-30 -40 60 60" width="100%" height="100%" className="barquinho-balanca block overflow-visible">
         <path d="M-22 0h44l-9 12h-26z" fill="var(--cor-madeira)" />
         <path d="M0-32v31" stroke="var(--cor-madeira)" strokeWidth="2.5" />
         <path d="M2-30l18 26H2z" fill="var(--cor-superficie)" stroke="var(--cor-borda)" strokeWidth="1.5" />
         <path d="M-2-28l-14 24h14z" fill="var(--cor-primaria)" />
-      </motion.g>
-    </g>
+      </svg>
+    </div>
   );
 }
 
@@ -123,10 +120,9 @@ function MundoCarregado() {
   const contaNaLente = (ilha: IlhaCurriculo): number | null =>
     lente ? unidadesDaIlha(ilha).filter((item) => unidadeNaLente(item, lente)).length : null;
   const ilhasDoMundo = ilhasDaTrilha(trilha);
-  const { largura: LARGURA, posicao: posicaoDa } = desenhoDoMundo(trilha, ilhasDoMundo);
-  // O mundo cobre a tela e rola o resto (no celular, arrasta de lado).
-  const escala =
-    larguraTela > 0 ? Math.min(1.35, Math.max(0.55, alturaTela / ALTURA, larguraTela / LARGURA)) : 1;
+  // As ilhas cabem na altura, com a mesma margem em cima e embaixo; o resto rola de lado.
+  const desenho = desenhoDoMundo(trilha, ilhasDoMundo, larguraTela, alturaTela);
+  const { largura: LARGURA, altura: ALTURA, escala, posicao: posicaoDa, porto: POSICAO_PORTO } = desenho;
   const atual = ilhaAtual(fonte);
   // Do mundo, o provável é ir para a ilha onde o computadorzinho está.
   useMusicaDaTela(null, { tipo: "ilha", ilhaId: atual.id });
@@ -167,7 +163,16 @@ function MundoCarregado() {
       <BarraMapa caminho={["Mundo"]} lentes />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo="Mapa do mundo. Arraste ou role para ver todas as ilhas.">
-          <div className="relative" style={{ width: LARGURA * escala, height: ALTURA * escala }}>
+          <div className="relative" style={{ width: LARGURA * escala, height: ALTURA * escala }} data-mundo-desenho data-escala={escala.toFixed(3)}>
+            <Oceano largura={LARGURA} altura={ALTURA} escala={escala} />
+            {/* O brilho das ilhas abertas, embaixo do desenho (pulsa pelo compositor). */}
+            {ilhasDoMundo.map((ilha) =>
+              estadoDaIlha(ilha, fonte) === "disponivel" ? (
+                <div key={ilha.id} className={contaNaLente(ilha) === 0 ? "opacity-35" : undefined}>
+                  <BrilhoIlha {...posicaoDa(ilha)} escala={escala} completa={ilhaCompleta(ilha, fonte)} />
+                </div>
+              ) : null,
+            )}
             <svg
               viewBox={`0 0 ${LARGURA} ${ALTURA}`}
               width={LARGURA * escala}
@@ -175,7 +180,6 @@ function MundoCarregado() {
               className="absolute inset-0"
               aria-hidden="true"
             >
-              <Oceano largura={LARGURA} altura={ALTURA} />
               {/* A rota entre as ilhas, na ordem do currículo. */}
               <path d={caminhoSuave(pontosDaRota)} fill="none" stroke="var(--cor-mar-fundo)" strokeWidth="16" strokeLinecap="round" opacity="0.6" />
               <path
@@ -201,26 +205,32 @@ function MundoCarregado() {
                   />
                 );
               })}
-              <Barquinho {...posicaoBarco} />
-              {comPorto && (
-                <g transform={`translate(${POSICAO_PORTO.x} ${POSICAO_PORTO.y})`} data-porto-arte>
-                  <ArtePorto comItens={itensDeHoje > 0} />
-                </g>
-              )}
-              {ilhasDoMundo.map((ilha) => {
-                const { x, y } = posicaoDa(ilha);
-                const estado = estadoDaIlha(ilha, fonte);
-                const Arte = ARTE_DAS_ILHAS[ilha.id] ?? ArteFutura;
-                return (
-                  <g key={ilha.id} transform={`translate(${x} ${y})`} data-ilha-arte={ilha.id} opacity={contaNaLente(ilha) === 0 ? 0.35 : 1}>
-                    {estado === "disponivel" && <BrilhoIlha completa={ilhaCompleta(ilha, fonte)} />}
-                    <Arte />
-                    {estado === "construcao" && <AndaimesIlha />}
-                    {estado === "bloqueada" && <NevoaIlha />}
-                  </g>
-                );
-              })}
             </svg>
+            {/*
+              A arte de cada ilha (e do Porto) numa camada própria: o que se mexe
+              nela (engrenagens, sinais, a fumaça) repinta só a ilha, e nunca o
+              mapa inteiro. Fora da tela, para.
+            */}
+            {comPorto && (
+              <CamadaDaArte {...POSICAO_PORTO} escala={escala} data-porto-arte>
+                <ArtePorto comItens={itensDeHoje > 0} />
+              </CamadaDaArte>
+            )}
+            {ilhasDoMundo.map((ilha) => {
+              const estado = estadoDaIlha(ilha, fonte);
+              const Arte = ARTE_DAS_ILHAS[ilha.id] ?? ArteFutura;
+              return (
+                <CamadaDaArte key={ilha.id} {...posicaoDa(ilha)} escala={escala} data-ilha-arte={ilha.id} apagada={contaNaLente(ilha) === 0}>
+                  <Arte />
+                  {estado === "construcao" && <AndaimesIlha />}
+                </CamadaDaArte>
+              );
+            })}
+            <Barquinho {...posicaoBarco} escala={escala} />
+            {/* A névoa das ilhas bloqueadas, em cima do desenho (desliza pelo compositor). */}
+            {ilhasDoMundo.map((ilha) =>
+              estadoDaIlha(ilha, fonte) === "bloqueada" ? <NevoaIlha key={ilha.id} {...posicaoDa(ilha)} escala={escala} /> : null,
+            )}
 
             {ilhasDoMundo.map((ilha) => {
               const { x, y } = posicaoDa(ilha);
@@ -250,8 +260,14 @@ function MundoCarregado() {
                 height: 170 * escala,
               };
               const etiqueta = (
-                <span className="pointer-events-none absolute left-1/2 top-full flex -translate-x-1/2 -translate-y-2 flex-col items-center gap-1 whitespace-nowrap">
-                  <span className="rounded-full border-2 border-borda bg-superficie px-3 py-0.5 text-sm font-black text-texto shadow-[0_3px_0_var(--cor-sombra)]">
+                <span
+                  className="pointer-events-none absolute left-1/2 top-full flex -translate-x-1/2 -translate-y-2 flex-col items-center gap-1 whitespace-nowrap"
+                  data-etiqueta-ilha={ilha.id}
+                >
+                  <span
+                    className="rounded-full border-2 border-borda bg-superficie px-3 py-0.5 text-sm font-black text-texto shadow-[0_3px_0_var(--cor-sombra)]"
+                    data-nome-ilha={ilha.id}
+                  >
                     {ilha.nome}
                   </span>
                   <span className="flex items-center gap-1">
@@ -331,7 +347,7 @@ function MundoCarregado() {
                   height: 110 * escala,
                 }}
               >
-                <span className="pointer-events-none absolute left-1/2 top-full flex -translate-x-1/2 -translate-y-3 items-center gap-1 whitespace-nowrap">
+                <span className="pointer-events-none absolute left-1/2 top-full flex -translate-x-1/2 -translate-y-3 flex-col items-center gap-1 whitespace-nowrap">
                   <span className="rounded-full border-2 border-borda bg-superficie px-3 py-0.5 text-sm font-black text-texto shadow-[0_3px_0_var(--cor-sombra)]">
                     Porto da revisão
                   </span>
