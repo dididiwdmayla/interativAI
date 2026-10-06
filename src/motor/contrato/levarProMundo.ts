@@ -11,7 +11,7 @@
  * as instruções curtas no topo. Puro: o jogo baixa, os testes rodam no Node e
  * no navegador.
  */
-import { CATALOGO_DISPOSITIVOS, LETRAS_DO_LETREIRO } from "../cena/catalogo";
+import { CATALOGO_DISPOSITIVOS, LETRAS_DO_LETREIRO, LETRAS_DO_VISOR, TELA_APP } from "../cena/catalogo";
 import { type AcontecimentoCena, type DadosCena, type DispositivoCena, FORNO, RELOGIO } from "../cena/modelo";
 import { clienteDe } from "./clientes";
 import type { DadosContrato } from "./modelo";
@@ -66,6 +66,10 @@ function criarDispositivo(dispositivo: DispositivoCena): string {
       return `relogio(${ini("hora")})`;
     case "campainha":
       return `campainha(${nome})`;
+    case "registradora":
+      return `registradora(${nome}, ${ini("texto")})`;
+    case "telaApp":
+      return `telaApp(${nome})`;
   }
 }
 
@@ -159,6 +163,57 @@ const FABRICAS: Partial<Record<DispositivoCena["tipo"], string>> = {
   function relogio(horaNoComeco) {
     var objeto = {};
     Object.defineProperty(objeto, "hora", { enumerable: true, get: function () { aindaRoda(); return (horaNoComeco + Math.floor(relogioMs / ${RELOGIO.msPorHora})) % 24; }, set: function () { soLeitura("hora"); } });
+    return objeto;
+  }`,
+  registradora: `
+  function registradora(nome, texto) {
+    var objeto = {
+      mostrar: function (novo) {
+        aindaRoda();
+        if (novo === undefined) throw new TypeError('mostrar precisa do texto, como mostrar("R$ 25").');
+        novo = String(novo).slice(0, ${LETRAS_DO_VISOR});
+        if (novo !== texto) { texto = novo; avisar(texto ? nome + ': "' + texto + '"' : nome + ": apagado"); }
+      },
+      apagar: function () { aindaRoda(); if (texto) { texto = ""; avisar(nome + ": apagado"); } }
+    };
+    Object.defineProperty(objeto, "texto", { enumerable: true, get: function () { aindaRoda(); return texto; }, set: function () { soLeitura("texto", "mostrar(texto) ou apagar()"); } });
+    return objeto;
+  }`,
+  telaApp: `
+  function telaApp(nome) {
+    var texto = "";
+    var conflitos = 0;
+    function horario(h) { return (h < 10 ? " " : "") + h + "h"; }
+    var objeto = {
+      mostrar: function (recado) {
+        aindaRoda();
+        if (recado === undefined) throw new TypeError('mostrar precisa do recado, como mostrar("Bom dia!").');
+        texto = String(recado).slice(0, ${TELA_APP.letrasDoRecado});
+        conflitos = 0;
+        avisar(texto ? nome + ': "' + texto + '"' : nome + ": apagada");
+      },
+      mostrarAgenda: function (lista, titulo) {
+        aindaRoda();
+        if (!Array.isArray(lista)) throw new TypeError("mostrarAgenda precisa de uma lista de marcações, como mostrarAgenda(agenda).");
+        var linhas = lista.map(function (item, i) {
+          if (typeof item !== "object" || item === null) throw new TypeError("A marcação " + i + " da lista não é um objeto { horario, cliente }.");
+          if (typeof item.horario !== "number" || item.horario % 1 !== 0 || item.horario < 0 || item.horario > 23) throw new TypeError("A marcação " + i + " precisa de horario: um número inteiro de 0 a 23.");
+          if (typeof item.cliente !== "string") throw new TypeError("A marcação " + i + ' precisa de cliente: um texto, como "Ana".');
+          return { horario: item.horario, cliente: item.cliente, ordem: i };
+        }).sort(function (a, b) { return a.horario - b.horario || a.ordem - b.ordem; });
+        var vezes = {};
+        linhas.forEach(function (linha) { vezes[linha.horario] = (vezes[linha.horario] || 0) + 1; });
+        conflitos = Object.keys(vezes).filter(function (h) { return vezes[h] > 1; }).length;
+        texto = (titulo ? titulo + ": " : "") + (linhas.map(function (linha) { return linha.horario + "h " + linha.cliente; }).join(", ") || "agenda vazia");
+        var desenho = linhas.map(function (linha) {
+          return "    " + horario(linha.horario) + "  " + linha.cliente + (vezes[linha.horario] > 1 ? "   <- " + linha.horario + "h marcado " + vezes[linha.horario] + " vezes!" : "");
+        });
+        avisar(nome + ": agenda" + (titulo ? " de " + titulo : "") + (linhas.length ? "\\n" + desenho.join("\\n") : " vazia"));
+      },
+      apagar: function () { aindaRoda(); if (texto) { texto = ""; conflitos = 0; avisar(nome + ": apagada"); } }
+    };
+    Object.defineProperty(objeto, "texto", { enumerable: true, get: function () { aindaRoda(); return texto; }, set: function () { soLeitura("texto", "mostrar(texto) ou mostrarAgenda(lista)"); } });
+    Object.defineProperty(objeto, "conflitos", { enumerable: true, get: function () { aindaRoda(); return conflitos; }, set: function () { soLeitura("conflitos"); } });
     return objeto;
   }`,
   campainha: `

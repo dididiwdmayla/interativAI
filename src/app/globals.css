@@ -41,6 +41,7 @@
   --color-grama: var(--cor-grama);
   --color-madeira: var(--cor-madeira);
   --color-pedra: var(--cor-pedra);
+  --color-pedra-sombra: var(--cor-pedra-sombra);
   --color-nevoa: var(--cor-nevoa);
   --color-caixa-margem: var(--cor-caixa-margem);
   --color-caixa-borda: var(--cor-caixa-borda);
@@ -360,5 +361,193 @@ html:fullscreen .h-dvh > header {
   to {
     top: 100%;
     opacity: 0;
+  }
+}
+
+/*
+ * Mapa (mundo e ilhas): o que se mexe sozinho mexe só transform e opacity,
+ * pelo compositor, para o desenho grande não repintar a cada quadro (no
+ * celular, o desenho repintado sem parar deixava pedaços do mapa em branco).
+ */
+.ondas-do-mar {
+  animation: ondas-deriva var(--duracao, 6s) ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes ondas-deriva {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(var(--deriva, 18px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ondas-do-mar {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+.brilho-ilha {
+  opacity: 0.3;
+  animation: brilho-pulsar 2.6s ease-in-out infinite;
+}
+
+.anel-ilha {
+  opacity: 0.85;
+  animation: anel-pulsar 2.2s ease-in-out infinite;
+}
+
+.nevoa-deriva {
+  animation: nevoa-deriva 7s ease-in-out infinite;
+}
+
+@keyframes brilho-pulsar {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes anel-pulsar {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes nevoa-deriva {
+  0%,
+  100% {
+    transform: translateX(calc(-1 * var(--deriva, 6px)));
+  }
+  50% {
+    transform: translateX(var(--deriva, 6px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brilho-ilha,
+  .anel-ilha,
+  .nevoa-deriva {
+    animation: none;
+  }
+}
+
+.barquinho-balanca {
+  transform-origin: 50% 66%;
+  animation: barquinho-balanca 3s ease-in-out infinite;
+}
+
+@keyframes barquinho-balanca {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barquinho-balanca {
+    animation: none;
+  }
+}
+
+/* A arte de cada ilha do mundo: uma camada própria (repinta só a ilha). */
+.camada-ilha {
+  will-change: transform;
+}
+
+/* Interior das ilhas: a espuma respira, um enfeite por ilha se mexe e o ponto atual brilha. */
+.espuma-respira {
+  opacity: 0.75;
+  animation: espuma-respira 4.5s ease-in-out infinite;
+}
+
+.enfeite-girar > svg {
+  animation: enfeite-girar 16s linear infinite;
+}
+
+.enfeite-pulsar > svg {
+  transform-origin: 50% 50%;
+  animation: enfeite-pulsar 2.4s ease-in-out infinite;
+}
+
+.enfeite-sinal [data-sinal] {
+  animation: enfeite-sinal 1.8s ease-in-out infinite;
+}
+
+.brilho-ponto-atual {
+  animation: brilho-ponto-atual 2.2s ease-in-out infinite;
+}
+
+@keyframes espuma-respira {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes enfeite-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes enfeite-pulsar {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes enfeite-sinal {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes brilho-ponto-atual {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .espuma-respira,
+  .enfeite-girar > svg,
+  .enfeite-pulsar > svg,
+  .enfeite-sinal [data-sinal],
+  .brilho-ponto-atual {
+    animation: none;
   }
 }

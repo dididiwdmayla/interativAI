@@ -6,7 +6,9 @@
  * antiga) e a entrega. A simulação do contrato inteiro (o antes e o depois
  * da mudança) mora em src/conteudo/checagens.ts (jogarContrato).
  */
+import { cenaDaFase } from "../composicao";
 import { ehIdCliente } from "./clientes";
+import { programaParaLevar } from "./levarProMundo";
 import { ehExpressaoCliente } from "./expressoes";
 import { type FalaCliente, type FaseContrato, idsDasNovas, MARCA_LACUNA } from "./modelo";
 
@@ -135,6 +137,12 @@ export function conferirContrato(fase: FaseContrato): string[] {
   if (contrato.levarProMundo) {
     if (!/^[a-z0-9]+(-[a-z0-9]+)*\.js$/.test(contrato.levarProMundo.arquivo)) problemas.push(`levarProMundo.arquivo "${contrato.levarProMundo.arquivo}": nome em kebab-case terminando em .js`);
     if (!fase.programa?.snippet) problemas.push("levarProMundo precisa de programa.snippet (é o código do aluno que sai do jogo)");
+    // O arquivo leva todos os aparelhos da cena: um que o exportador não sabe levar tira o botão (guia, seção 31.8).
+    try {
+      programaParaLevar({ contrato, cena: cenaDaFase(fase), codigo: fase.programa?.snippet?.codigoInicial ?? "" });
+    } catch (erro) {
+      problemas.push(`levarProMundo: ${erro instanceof Error ? erro.message : String(erro)} Sem isso, o contrato não oferece o botão (tire o levarProMundo).`);
+    }
   }
   return problemas;
 }

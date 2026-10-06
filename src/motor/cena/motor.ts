@@ -17,7 +17,8 @@
  * Os objetos moram no reino do código (o Web Worker no jogo, o vm do Node
  * nos testes); os erros são os do reino (TypeError, RangeError).
  */
-import { CATALOGO_DISPOSITIVOS, LETRAS_DO_LETREIRO, type TipoDispositivo } from "./catalogo";
+import { CATALOGO_DISPOSITIVOS, LETRAS_DO_LETREIRO, LETRAS_DO_VISOR, type TipoDispositivo } from "./catalogo";
+import { guardarAgenda, guardarRecado } from "./telaApp";
 import {
   type AcontecimentoCena,
   type DadosCena,
@@ -319,6 +320,22 @@ export class MotorCena {
           this.mudar(id, "texto", limpo, limpo ? "mostrar" : "apagar");
         });
         metodo("apagar", () => this.mudar(id, "texto", "", "apagar"));
+        break;
+      case "registradora":
+        metodo("mostrar", (texto) => {
+          if (texto === undefined) throw this.criarErro("TypeError", 'mostrar precisa do texto, como mostrar("R$ 25").');
+          const limpo = String(texto).slice(0, LETRAS_DO_VISOR);
+          this.mudar(id, "texto", limpo, limpo ? "mostrar" : "apagar");
+        });
+        metodo("apagar", () => this.mudar(id, "texto", "", "apagar"));
+        break;
+      case "telaApp":
+        metodo("mostrar", (texto) => {
+          const conteudo = guardarRecado(texto, this.criarErro);
+          this.mudar(id, "conteudo", conteudo, conteudo ? "mostrar" : "apagar");
+        });
+        metodo("mostrarAgenda", (lista, titulo) => this.mudar(id, "conteudo", guardarAgenda(lista, titulo, this.criarErro), "mostrarAgenda"));
+        metodo("apagar", () => this.mudar(id, "conteudo", "", "apagar"));
         break;
       case "ventilador":
         metodo("desligar", () => this.mudar(id, "velocidade", 0, "desligar"));

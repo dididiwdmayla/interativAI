@@ -693,17 +693,38 @@ resposta da última expressão, as saídas do console e o erro.
   abre quando as anteriores têm tudo pronto concluído, e as unidades
   prontas da zona vão em sequência. Unidade: planejada (sem conteúdo),
   concluída (todas as fases), disponível ou bloqueada.
-- Mundo (`MundoMapa`): mar com ondas SVG, ilhas na ordem do currículo
-  ligadas por uma rota pontilhada com um barquinho, Frameworks afastada e
-  marcada "Opcional", arte própria de cada ilha em SVG
-  (`componentes/mapa/arte/`, só tokens) e o estado dela (brilho, andaimes
-  com o computadorzinho dormindo, névoa com cadeado). O computadorzinho
-  fica na ilha da última fase aberta. Dá para arrastar (mouse) e rolar
-  (dedo, rodinha, teclado): `AreaArrastavel`.
+- Mundo (`MundoMapa`): mar com ondas, ilhas na ordem do currículo
+  ligadas por uma rota pontilhada com um barquinho, Frameworks no fim
+  (rota mais clara) e marcada "Opcional", o Porto em cima das Origens,
+  arte própria de cada ilha em SVG (`componentes/mapa/arte/`, só tokens)
+  e o estado dela (brilho, andaimes com o computadorzinho dormindo, névoa
+  com cadeado). O computadorzinho fica na ilha da última fase aberta. Dá
+  para arrastar (mouse) e rolar (dedo, rodinha, teclado): `AreaArrastavel`.
+  - O desenho (`desenhoMundo.ts`, puro e testado) é um zigue-zague de duas
+    linhas que cabe na altura da tela com a mesma margem em cima e
+    embaixo: fundo em pé, achatado deitado; numa tela mais larga que o
+    mundo, o mar sobra igual dos dois lados.
+  - Desempenho (rodada 37): o que se mexe sozinho mexe só transform e
+    opacity, pelo compositor (as ondas, o brilho, o anel, a névoa e o
+    barquinho são camadas de HTML com animação CSS); a arte de cada ilha
+    tem camada própria e as animações dela param fora da tela
+    (`GrupoAnimadoNaTela`; a visibilidade nunca depende disso). Antes, as
+    ondas dentro do SVG faziam o Chrome repintar o mapa inteiro a cada
+    quadro, e no celular uma ilha aparecia sem arte e sem nome até sair da
+    tela e voltar. `testes/mundo.mjs` confere os pixels e a repintura.
 - Ilha (`TelaIlha`, `/ilha/[id]`): zonas como regiões ao longo de um
-  caminho sinuoso (horizontal no desktop e deitado, vertical em pé), com
-  o ícone da aba do DevTools da zona e a placa "Em construção" nas zonas
-  com `requerMotor` (sem o texto técnico). Pontos de 52 px: concluída
+  caminho sinuoso (horizontal no desktop e deitado, vertical em pé). O
+  desenho (`ilha/desenhoIlha.ts`, puro e testado, em px de tela) dá o
+  contorno orgânico (areia com pedrinhas, espuma, sombra na água), as
+  zonas dividindo a grama (recortadas por ela: não vazam), cada uma com
+  tom, textura, cerca viva na divisa e placa de madeira com o ícone e o
+  nome (`PlacaDaZona`, no alto da zona, longe do primeiro ponto e do
+  computadorzinho), relevo e luz suave, e os lugares livres para os
+  enfeites da ilha (`EnfeitesIlha.tsx`: prédios em < e > na Sites,
+  engrenagens e trilhas de circuito na Lógica...). Um enfeite por ilha se
+  mexe (perto do computadorzinho), mais a espuma e o brilho do ponto atual,
+  por CSS. A placa "Em construção" fica nas zonas com `requerMotor` (sem o
+  texto técnico). Pontos de 52 px: concluída
   (carinha feliz e estrelas), disponível (pulsando), bloqueada (cadeado),
   planejada (andaime, "Em breve"). O card mostra título, meta, estrelas e
   Jogar / Continuar / Jogar de novo (a próxima fase não concluída; "Jogar

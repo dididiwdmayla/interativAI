@@ -1,35 +1,38 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { useAnimarMapa } from "./useAnimarMapa";
 
-/** Brilho suave atrás de uma ilha disponível. Centro em (0, 0). */
-export function BrilhoIlha({ completa = false }: { completa?: boolean }) {
-  const animar = useAnimarMapa();
+type NoMapa = {
+  /** O centro da ilha, em unidades do desenho do mundo. */
+  x: number;
+  y: number;
+  /** Quantos px vale uma unidade do desenho. */
+  escala: number;
+};
+
+/** Uma elipse do desenho (centro e raios em unidades) como caixa em px. */
+function caixa({ x, y, escala }: NoMapa, rx: number, ry: number, dy = 0) {
+  return { left: (x - rx) * escala, top: (y + dy - ry) * escala, width: 2 * rx * escala, height: 2 * ry * escala };
+}
+
+/**
+ * Brilho suave atrás de uma ilha disponível (e o anel aceso da ilha
+ * completa). Em HTML, embaixo do desenho: pulsa só a opacidade, pelo
+ * compositor, sem repintar o mapa.
+ */
+export function BrilhoIlha({ completa = false, ...no }: NoMapa & { completa?: boolean }) {
   return (
     <>
-      <motion.ellipse
-        cx="0"
-        cy="10"
-        rx="132"
-        ry="84"
-        fill="var(--cor-destaque)"
-        animate={animar ? { opacity: [0.18, 0.4, 0.18] } : { opacity: 0.3 }}
-        transition={animar ? { duration: 2.6, repeat: Infinity, ease: "easeInOut" } : undefined}
-      />
+      <div aria-hidden="true" className="brilho-ilha pointer-events-none absolute rounded-[50%] bg-destaque" style={caixa(no, 132, 84, 10)} />
       {/* Ilha completa: um anel aceso em volta, além do brilho. */}
       {completa && (
-        <motion.ellipse
-          cx="0"
-          cy="10"
-          rx="146"
-          ry="96"
-          fill="none"
-          stroke="var(--cor-destaque)"
-          strokeWidth="6"
+        <div
+          aria-hidden="true"
           data-ilha-acesa
-          animate={animar ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.85 }}
-          transition={animar ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : undefined}
+          className="anel-ilha pointer-events-none absolute rounded-[50%] border-destaque"
+          style={{ ...caixa(no, 149, 99, 10), borderWidth: 6 * no.escala }}
         />
       )}
     </>
@@ -88,20 +91,29 @@ export function CadeadoMapa({ x, y, tamanho = 1 }: { x: number; y: number; taman
   );
 }
 
-/** Névoa por cima da ilha bloqueada, com o cadeado. */
-export function NevoaIlha() {
-  const animar = useAnimarMapa();
+/**
+ * Névoa por cima da ilha bloqueada, com o cadeado. Em HTML, em cima do
+ * desenho: a névoa desliza pelo compositor (transform), sem repintar o mapa.
+ */
+export function NevoaIlha(no: NoMapa) {
+  const area = { left: (no.x - 150) * no.escala, top: (no.y - 90) * no.escala, width: 300 * no.escala, height: 160 * no.escala };
+  const caixaDoDesenho = "-150 -90 300 160";
   return (
-    <g>
-      <motion.g
-        animate={animar ? { x: [-6, 6, -6] } : { x: 0 }}
-        transition={animar ? { duration: 7, repeat: Infinity, ease: "easeInOut" } : undefined}
+    <div aria-hidden="true" className="pointer-events-none absolute" style={area} data-nevoa>
+      <svg
+        viewBox={caixaDoDesenho}
+        width="100%"
+        height="100%"
+        className="nevoa-deriva absolute inset-0"
+        style={{ "--deriva": `${6 * no.escala}px` } as CSSProperties}
       >
         <ellipse cx="-40" cy="-10" rx="70" ry="42" fill="var(--cor-nevoa)" opacity="0.85" />
         <ellipse cx="40" cy="-24" rx="66" ry="40" fill="var(--cor-nevoa)" opacity="0.8" />
         <ellipse cx="0" cy="22" rx="104" ry="36" fill="var(--cor-nevoa)" opacity="0.85" />
-      </motion.g>
-      <CadeadoMapa x={0} y={-8} tamanho={1.4} />
-    </g>
+      </svg>
+      <svg viewBox={caixaDoDesenho} width="100%" height="100%" className="absolute inset-0">
+        <CadeadoMapa x={0} y={-8} tamanho={1.4} />
+      </svg>
+    </div>
   );
 }

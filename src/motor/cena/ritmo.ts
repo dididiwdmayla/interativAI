@@ -2,9 +2,12 @@
  * A regra de ritmo das cenas (guia, seção 30): a partir das cenas
  * programáveis, toda unidade NOVA da Lógica tem pelo menos uma fase com
  * cena (as publicadas antes ficam isentas), e cada cena nova é diferente
- * das anteriores: outro ambiente, outro dispositivo ou outra missão. Uma
- * cena que repete outra não quebra a checagem: vira aviso, para quem
- * produz o conteúdo decidir.
+ * das anteriores: outro ambiente, outro dispositivo ou outra missão.
+ *
+ * Dentro de uma unidade, repetir a cena com outra missão é o normal (a
+ * fase 1 apresenta o lugar, o desafio usa): uma repetição exata vira aviso.
+ * Entre unidades diferentes, a mesma cena reprova (rodada 37: os dois
+ * chamados usavam a mesma vitrine, que não combinava com nenhum deles).
  */
 import type { Fase, Unidade, Validador } from "@/conteudo/tipos";
 import { cenaDaFase } from "../composicao";
@@ -69,4 +72,47 @@ export function cenasRepetidas(fases: readonly Fase[]): string[] {
     } else vistas.push({ fase, chave });
   }
   return avisos;
+}
+
+/**
+ * A cena de uma fase, para comparar entre unidades: o ambiente e os tipos dos
+ * aparelhos que a missão usa (sem missão de cena, todos os da cena). Duas
+ * fases de unidades diferentes com a mesma chave mostram o mesmo lugar
+ * fazendo a mesma coisa.
+ */
+function chaveEntreUnidades(fase: Fase): string | null {
+  const cena = cenaDaFase(fase);
+  if (!cena) return null;
+  const tipoDe = new Map(cena.dispositivos.map((d) => [d.id, d.tipo]));
+  const usados = new Set<string>();
+  for (const parte of missaoDaFase(fase)) {
+    const id = /^(?:estado|sequência|reação) ([A-Za-z_$][\w$]*)/.exec(parte)?.[1];
+    const tipo = id ? tipoDe.get(id) : undefined;
+    if (tipo) usados.add(tipo);
+  }
+  const tipos = usados.size ? [...usados] : cena.dispositivos.map((d) => d.tipo);
+  return `${cena.ambiente} | ${[...new Set(tipos)].sort().join(", ")}`;
+}
+
+/**
+ * Problemas: a mesma cena (o mesmo ambiente, com os mesmos tipos de aparelho
+ * na missão) em unidades diferentes. `excecoes` são pares já publicados e
+ * conferidos ("faseA|faseB"), que seguem valendo.
+ */
+export function cenasRepetidasEntreUnidades(fases: readonly Fase[], excecoes: ReadonlySet<string> = new Set()): string[] {
+  const vistas = new Map<string, Fase>();
+  const problemas: string[] = [];
+  for (const fase of fases) {
+    if (!fase.unidadeId.startsWith("logica-")) continue;
+    const chave = chaveEntreUnidades(fase);
+    if (!chave) continue;
+    const anterior = vistas.get(chave);
+    if (anterior && anterior.unidadeId !== fase.unidadeId && !excecoes.has(`${anterior.id}|${fase.id}`)) {
+      problemas.push(
+        `a cena da fase "${fase.id}" repete a da fase "${anterior.id}", de outra unidade (ambiente e aparelhos da missão: ${chave}): monte um lugar que combine com o caso (guia, seção 30.6)`,
+      );
+    }
+    if (!anterior) vistas.set(chave, fase);
+  }
+  return problemas;
 }

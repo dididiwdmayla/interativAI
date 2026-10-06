@@ -12,8 +12,12 @@ const UNIDADE = `logica-depuracao-u${n}`;
 const JORNADA = JSON.parse(readFileSync(new URL('./chamados-jornadas.json', import.meta.url)))[n];
 const [largura, altura] = { desktop: [1440,900], retrato: [390,844], paisagem: [844,390] }[modo];
 const toque = modo !== 'desktop';
-// O que a cena deve mostrar no instante da pausa e no fim do conserto (letreiro da cena do aquecimento).
-const CENA = { 5: { pausa: ['1000', 'R$ 45'], fim: 'R$ 25', guiado: 'reproduzir-guiado', conserto: 'conserto-guiado' }, 6: { pausa: ['1000', 'Taxa R$ 10'], fim: 'Taxa R$ 10', guiado: 'regressao-guiado', conserto: 'conserto-guiado' } }[n];
+// O que a cena do aquecimento deve mostrar no instante da pausa e no fim do conserto: o visor da
+// registradora do mercadinho (U5) e a tela do aplicativo do salão (U6).
+const CENA = {
+ 5: { dispositivo: 'caixa', nome: 'o visor', pausa: ['1000', 'R$ 45'], fim: 'R$ 25', guiado: 'reproduzir-guiado', conserto: 'conserto-guiado' },
+ 6: { dispositivo: 'tela', nome: 'a tela', pausa: ['1000', 'Taxa R$ 10'], fim: 'Taxa R$ 10', guiado: 'regressao-guiado', conserto: 'conserto-guiado' },
+}[n];
 const depoisDeste = Number(n) === 5 ? ['logica-depuracao-u5', 'logica-depuracao-u6'] : ['logica-depuracao-u6'];
 const prontas = [...obrigatoriasProntasDaIlha('sites'), ...obrigatoriasProntasDaIlha('logica')].map(u => u.id).filter(id => !depoisDeste.includes(id) && id !== 'logica-programa-de-verdade-u1');
 const ferramentas = [...readFileSync(new URL('../src/ferramentas/ids.ts', import.meta.url), 'utf8').matchAll(/^ {2}"([a-z-]+)",$/gm)].map(m => m[1]);
@@ -99,17 +103,20 @@ async function ouvirCliente() {
  }
  await pagina.locator('[data-conversa-cliente]').waitFor({ state: 'detached' }); await pronto();
 }
-async function conclusao(falas, botao) {
+async function conclusao(botao, antesDeSair = async () => {}) {
  await pagina.locator('[data-conclusao]').waitFor(); await modalAssentado();
- for (let i = 0; i < falas; i++) await tocar(pagina.getByRole('dialog').getByRole('button', { name: 'Continuar', exact: true }));
+ const continuar = pagina.getByRole('dialog').getByRole('button', { name: 'Continuar', exact: true });
+ for (let i = 0; i < 6 && await continuar.isVisible().catch(() => false); i++) await tocar(continuar);
+ await antesDeSair();
  await tocar(pagina.getByRole('button', { name: botao, exact: true }));
 }
 const objetivoAtual = () => pagina.locator('[data-jogo-fase]').getAttribute('data-objetivo-atual');
-async function lerCena(id) {
+async function lerCena(id, dispositivo = CENA.dispositivo) {
  await verCena();
  const cena = pagina.locator(`[data-cena="${id}"]`); await cena.waitFor({ state: 'visible' });
  await pagina.locator('[data-area-cena][data-tocando="nao"]').waitFor({ timeout: 15000 });
- return { tempo: await cena.getAttribute('data-tempo'), texto: await cena.locator('[data-dispositivo="letreiro"]').getAttribute('data-texto') };
+ const aparelho = cena.locator(`[data-dispositivo="${dispositivo}"]`);
+ return { tempo: await cena.getAttribute('data-tempo'), texto: await aparelho.getAttribute('data-texto'), conflitos: await aparelho.getAttribute('data-conflitos') };
 }
 
 // ---------------------------------------------------------------- pelo mapa
@@ -120,7 +127,19 @@ await tocar(pagina.getByRole('dialog').getByRole('button', { name: 'Jogar', exac
 
 // ---------------------------------------------------------------- fase 1: o aquecimento, com a cena
 await pagina.locator(`[data-jogo-fase="${JORNADA.pratica.id}"]`).waitFor(); await pronto();
-const meta = pagina.locator('[data-meta]'); if (await meta.isVisible().catch(() => false)) await tocar(pagina.getByRole('button', { name: 'Bora!' }));
+const meta = pagina.locator('[data-meta]');
+conferir(await meta.isVisible().catch(() => false), `${modo} U${n}: a unidade abre com a meta`);
+// A meta tem antes e depois de verdade: a saída do programa do estoque (U5) e a cena da agenda (U6), nunca caixas vazias.
+const antesDepois = pagina.locator('[data-meta-antes-depois]');
+conferir(await antesDepois.getAttribute('data-meta-antes-depois') === (Number(n) === 5 ? 'saida' : 'cena'), `${modo} U${n}: a meta mostra o antes e o depois (${await antesDepois.getAttribute('data-meta-antes-depois')})`);
+if (Number(n) === 5) {
+ conferir(await pagina.locator('[data-mini-saida="Antes"] [data-mudou="sim"]').textContent() === "sexta: {arroz: 10, feijao: '64'}", `${modo} U5: no antes, a sexta com o feijão "64" em destaque`);
+ conferir(await pagina.locator('[data-mini-saida="Depois"] [data-mudou="sim"]').textContent() === 'sexta: {arroz: 10, feijao: 10}', `${modo} U5: no depois, a sexta certa em destaque`);
+} else {
+ conferir(await pagina.locator('[data-mini-composicao="Antes"] [data-dispositivo="tela"]').getAttribute('data-conflitos') === '1', `${modo} U6: no antes, a terça com um horário repetido`);
+ conferir(await pagina.locator('[data-mini-composicao="Depois"] [data-dispositivo="tela"]').getAttribute('data-conflitos') === '0', `${modo} U6: no depois, nenhum`);
+}
+await tocar(pagina.getByRole('button', { name: 'Bora!' }));
 await introducao();
 for (const [i, o] of JORNADA.pratica.objetivos.entries()) {
  await pagina.waitForFunction(alvo => document.querySelector('[data-jogo-fase]')?.getAttribute('data-objetivo-atual') === alvo, o.id);
@@ -130,17 +149,17 @@ for (const [i, o] of JORNADA.pratica.objetivos.entries()) {
  conferirObservados(o.id, o.validador);
  if (o.id === CENA.guiado) {
   const cena = await lerCena(JORNADA.pratica.cena);
-  conferir(cena.tempo === CENA.pausa[0] && cena.texto === CENA.pausa[1], `${modo} U${n}: a cena mostra o instante da pausa: ${cena.tempo} ms, letreiro "${cena.texto}" (esperado ${CENA.pausa[0]} ms, "${CENA.pausa[1]}")`);
+  conferir(cena.tempo === CENA.pausa[0] && cena.texto === CENA.pausa[1], `${modo} U${n}: a cena mostra o instante da pausa: ${cena.tempo} ms, ${CENA.nome} com "${cena.texto}" (esperado ${CENA.pausa[0]} ms, "${CENA.pausa[1]}")`);
  }
  if (o.id === CENA.conserto) {
   const cena = await lerCena(JORNADA.pratica.cena);
-  conferir(cena.texto === CENA.fim, `${modo} U${n}: depois do conserto, a cena termina com o letreiro "${cena.texto}" (esperado "${CENA.fim}")`);
+  conferir(cena.texto === CENA.fim, `${modo} U${n}: depois do conserto, a cena termina com ${CENA.nome} mostrando "${cena.texto}" (esperado "${CENA.fim}")`);
  }
  if (i < JORNADA.pratica.objetivos.length - 1) await conversa('Próximo objetivo');
 }
 await conversa('Ver resultado');
 await pagina.locator('[data-conclusao]').waitFor(); await modalAssentado();
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 6; i++) {
  const proxima = pagina.getByRole('button', { name: 'Próxima fase', exact: true });
  if (await proxima.isVisible().catch(() => false)) { await tocar(proxima); break; }
  await tocar(pagina.getByRole('dialog').getByRole('button', { name: 'Continuar', exact: true }));
@@ -162,6 +181,9 @@ await pagina.locator('[data-requisitos]').waitFor({ state: 'detached' }); await 
 conferir(await objetivoAtual() === 'contrato-trabalho', `${modo} U${n}: a lista certa começa o trabalho`);
 
 let mudou = false;
+// U6: o contrato tem a tela do aplicativo no balcão; depois do conserto, a terça sai sem horário repetido
+// (o antes, com o horário em vermelho, a meta já conferiu: na jornada o programa com defeito fica pausado).
+const telaDoContrato = Number(n) === 6 ? { agenda: '0' } : null;
 for (const parte of JORNADA.contrato.partes) {
  observados = new Map();
  await acoes(parte.solucaoDeTeste);
@@ -170,6 +192,11 @@ for (const parte of JORNADA.contrato.partes) {
   mudou = true;
   conferir(JORNADA.contrato.depoisDe.every(id => JORNADA.contrato.partes.findIndex(p => p.id === id) <= JORNADA.contrato.partes.indexOf(parte)), `${modo} U${n}: a mensagem de mudança chega depois do conserto pronto`);
   await ouvirCliente();
+ }
+ // Depois da mensagem do cliente (que chega logo depois do conserto), a tela.
+ if (telaDoContrato && parte.id in telaDoContrato) {
+  const cena = await lerCena('salao-recepcao', 'tela');
+  conferir(cena.conflitos === telaDoContrato[parte.id], `${modo} U${n} ${parte.id}: a tela do aplicativo mostra ${cena.conflitos} horário(s) repetido(s) na terça (esperado ${telaDoContrato[parte.id]}): "${cena.texto}"`);
  }
 }
 conferir(mudou, `${modo} U${n}: o cliente mudou o pedido no meio do trabalho`);
@@ -187,7 +214,11 @@ for (let i = 0; i < 2; i++) await tocar(pagina.locator('[data-reacao-continuar]'
 await pagina.getByLabel('Entrega do trabalho').waitFor({ state: 'detached' });
 await pagina.locator('[data-conclusao]').waitFor();
 conferir(await pagina.locator('[data-comemoracao-ilha]').count() === 0, `${modo} U${n}: um chamado no meio da ilha não tem a comemoração de fim de ilha`);
-await conclusao(2, 'Voltar pra ilha');
+await conclusao('Voltar pra ilha', async () => {
+ // O Levar pro mundo só aparece quando o arquivo leva todos os aparelhos da cena: a agenda (U6) sim; o estoque, sem cena, não.
+ const levar = await pagina.locator('[data-levar-programa]').isVisible().catch(() => false);
+ conferir(levar === (Number(n) === 6), `${modo} U${n}: o Levar pro mundo ${Number(n) === 6 ? 'aparece (a agenda sai do jogo)' : 'não aparece (sem cena)'}`);
+});
 await pagina.locator('[data-mapa=ilha]').waitFor();
 conferir(await pagina.locator(`[data-unidade="${UNIDADE}"]`).getAttribute('data-estado') === 'concluida', `${modo} U${n}: chamado concluído e salvo`);
 conferir(errosRelevantes(erros).length === 0, `${modo} U${n}: console limpo (${errosRelevantes(erros).join(' | ')})`);

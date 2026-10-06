@@ -7,6 +7,7 @@ import { Ceu, Garagem, Cozinha, Rua, Estufa, Canteiro } from "./AmbientesNovos";
 import type { ReactNode } from "react";
 import type { PecaCenario } from "@/motor/cena/modelo";
 import { CONTORNO, cor, SombraNoChao } from "./estilo";
+import { BalcaoMercadinho, BalcaoSalao, Cadeira, Cesta, Espelho } from "./PecasDeComercio";
 
 /** O tamanho padrão de cada peça (largura x altura). */
 export const TAMANHO_PADRAO: Record<PecaCenario["peca"], [number, number]> = {
@@ -24,6 +25,9 @@ export const TAMANHO_PADRAO: Record<PecaCenario["peca"], [number, number]> = {
   tapete: [96, 16],
   toldo: [200, 26],
   vitrine: [150, 84],
+  cesta: [34, 24],
+  espelho: [44, 58],
+  cadeira: [42, 56],
 };
 
 type PropsPeca = { x: number; y: number; l: number; a: number; variante?: string; periodo: "dia" | "noite"; id: string };
@@ -280,7 +284,10 @@ function Planta({ x, y, l, a }: PropsPeca) {
   );
 }
 
-function Balcao({ x, y, l, a, variante }: PropsPeca) {
+function Balcao(props: PropsPeca) {
+  const { x, y, l, a, variante } = props;
+  if (variante === "mercadinho") return <BalcaoMercadinho {...props} />;
+  if (variante === "salao") return <BalcaoSalao {...props} />;
   if (variante === "padaria") {
     const vitrine = a * 0.5;
     return (
@@ -386,6 +393,9 @@ const DESENHOS: Record<PecaCenario["peca"], (props: PropsPeca) => ReactNode> = {
   tapete: Tapete,
   toldo: Toldo,
   vitrine: Vitrine,
+  cesta: Cesta,
+  espelho: Espelho,
+  cadeira: Cadeira,
 };
 
 /** Uma peça do cenário, no lugar e tamanho que a cena pede (espelhada, se pedir). */

@@ -5,7 +5,10 @@
 import { describe, expect, it } from "vitest";
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ilhaDoId, localNoCurriculo } from "@/curriculo";
+import { CURRICULO, ilhaDoId, ilhasDaTrilha, localNoCurriculo, TRILHAS } from "@/curriculo";
+import { desenhoDoMundo } from "@/componentes/mapa/desenhoMundo";
+import { dentroDoArredondado, encolher } from "@/componentes/mapa/geometria";
+import { type Caixa, caixaDaPlaca, caixaDoMascote, caixaDoNome, desenharIlha } from "@/componentes/mapa/ilha/desenhoIlha";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import {
   acaoDaUnidade,
@@ -245,4 +248,118 @@ describe("zona opcional", () => {
     expect(ultima.opcional).toBe(true);
     expect(SITES.zonas.filter((item) => item.opcional)).toHaveLength(1);
   });
+});
+
+describe("o desenho do mundo (src/componentes/mapa/desenhoMundo.ts)", () => {
+  // As telas do jogo: em pé (390 x 844 menos as barras), deitado, o computador pequeno e o grande.
+  const TELAS = [
+    { nome: "em pé", largura: 390, altura: 740 },
+    { nome: "deitado", largura: 844, altura: 306 },
+    { nome: "computador pequeno", largura: 1024, altura: 596 },
+    { nome: "computador", largura: 1440, altura: 796 },
+    { nome: "monitor largo", largura: 2560, altura: 1300 },
+  ];
+  for (const trilha of TRILHAS) {
+    const ilhas = ilhasDaTrilha(trilha);
+    for (const tela of TELAS) {
+      it(`trilha ${trilha.id}, ${tela.nome}: cabe na altura com a mesma margem em cima e embaixo`, () => {
+        const desenho = desenhoDoMundo(trilha, ilhas, tela.largura, tela.altura);
+        const ys = ilhas.map((ilha) => desenho.posicao(ilha).y);
+        // Em cima: a arte (até 86 acima do centro; o pier do Porto, 52); embaixo: a etiqueta (70 abaixo e mais 44 px).
+        const topo = Math.min(Math.min(...ys) - 86, desenho.porto.y - 52) * desenho.escala;
+        const base = desenho.altura * desenho.escala - ((Math.max(...ys) + 70) * desenho.escala + 44);
+        expect(desenho.altura * desenho.escala).toBeLessThanOrEqual(tela.altura + 0.5);
+        expect(topo).toBeGreaterThanOrEqual(9);
+        expect(Math.abs(topo - base)).toBeLessThan(1);
+        // O mundo cobre a tela (o mar sobra igual dos dois lados num monitor largo).
+        expect(desenho.largura * desenho.escala).toBeGreaterThanOrEqual(tela.largura - 0.5);
+        const xs = ilhas.map((ilha) => desenho.posicao(ilha).x);
+        expect(Math.min(...xs) - 118).toBeGreaterThanOrEqual(0);
+        expect(Math.max(...xs) + 118).toBeLessThanOrEqual(desenho.largura);
+      });
+      it(`trilha ${trilha.id}, ${tela.nome}: as ilhas não se encostam (nem as etiquetas nas artes)`, () => {
+        const desenho = desenhoDoMundo(trilha, ilhas, tela.largura, tela.altura);
+        const etiquetaPx = { largura: 140, altura: 44 };
+        const caixas = ilhas.flatMap((ilha) => {
+          const { x, y } = desenho.posicao(ilha);
+          const metade = etiquetaPx.largura / 2 / desenho.escala;
+          return [
+            { id: `${ilha.id} (arte)`, x0: x - 118, x1: x + 118, y0: y - 86, y1: y + 76 },
+            { id: `${ilha.id} (etiqueta)`, x0: x - metade, x1: x + metade, y0: y + 70, y1: y + 70 + etiquetaPx.altura / desenho.escala },
+          ];
+        });
+        // O Porto da revisão: o pier e a etiqueta ("Porto da revisão" e, embaixo, "3 hoje").
+        const porto = desenho.porto;
+        const metadePorto = 70 / desenho.escala;
+        caixas.push(
+          { id: "porto (arte)", x0: porto.x - 100, x1: porto.x + 104, y0: porto.y - 52, y1: porto.y + 51 },
+          { id: "porto (etiqueta)", x0: porto.x + 20 - metadePorto, x1: porto.x + 20 + metadePorto, y0: porto.y + 50 - 12 / desenho.escala, y1: porto.y + 50 + 40 / desenho.escala },
+        );
+        for (const a of caixas) {
+          for (const b of caixas) {
+            if (a === b || a.id.split(" ")[0] === b.id.split(" ")[0]) continue;
+            const encosta = a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+            expect(encosta, `${a.id} encosta em ${b.id}`).toBe(false);
+          }
+        }
+      });
+    }
+  }
+});
+
+describe("o desenho de cada ilha por dentro (src/componentes/mapa/ilha/desenhoIlha.ts)", () => {
+  const encosta = (a: Caixa, b: Caixa) => a.x < b.x + b.largura && b.x < a.x + a.largura && a.y < b.y + b.altura && b.y < a.y + a.altura;
+  const TELAS = [
+    { nome: "em pé", vertical: true, largura: 390, altura: 740 },
+    { nome: "em pé, celular estreito", vertical: true, largura: 320, altura: 568 },
+    { nome: "deitado", vertical: false, largura: 844, altura: 306 },
+    { nome: "computador", vertical: false, largura: 1440, altura: 796 },
+  ];
+  for (const ilhaCurriculo of CURRICULO.filter((item) => item.zonas.length > 0 && item.id !== "origens")) {
+    for (const tela of TELAS) {
+      const desenho = desenharIlha(ilhaCurriculo, tela.vertical, tela.largura, tela.altura);
+      it(`${ilhaCurriculo.id}, ${tela.nome}: as zonas dividem o chão em ordem e cada ponto fica na zona dele`, () => {
+        for (const [i, regiao] of desenho.regioes.entries()) {
+          const proxima = desenho.regioes[i + 1];
+          if (proxima) expect(tela.vertical ? regiao.y + regiao.altura : regiao.x + regiao.largura).toBeCloseTo(tela.vertical ? proxima.y : proxima.x);
+          for (const ponto of desenho.pontos.filter((p) => p.zona === regiao.zona)) {
+            expect(ponto.x >= regiao.x && ponto.x <= regiao.x + regiao.largura && ponto.y >= regiao.y && ponto.y <= regiao.y + regiao.altura).toBe(true);
+          }
+        }
+      });
+      it(`${ilhaCurriculo.id}, ${tela.nome}: placas, nomes e o lugar do computadorzinho não se encostam`, () => {
+        const e = desenho.escala;
+        const placas = desenho.regioes.map((regiao) => ({ id: `placa ${regiao.zona.id}`, caixa: caixaDaPlaca(regiao, e) }));
+        const nomes = desenho.pontos.map((ponto) => ({ id: `nome ${ponto.item.id}`, caixa: caixaDoNome(ponto, e) }));
+        const pontos = desenho.pontos.map((ponto) => ({ id: `ponto ${ponto.item.id}`, caixa: { x: ponto.x - 30 / e, y: ponto.y - 30 / e, largura: 60 / e, altura: 60 / e } }));
+        const mascotes = desenho.pontos.map((ponto) => ({ id: `computadorzinho em ${ponto.item.id}`, caixa: caixaDoMascote(ponto, e) }));
+        for (const placa of placas) {
+          for (const outro of [...nomes, ...pontos, ...mascotes]) expect(encosta(placa.caixa, outro.caixa), `${placa.id} encosta em ${outro.id}`).toBe(false);
+          // A placa fica dentro do chão (nem no mar, nem na areia).
+          expect(placa.caixa.x).toBeGreaterThanOrEqual(desenho.grama.x - 1);
+          expect(placa.caixa.x + placa.caixa.largura).toBeLessThanOrEqual(desenho.grama.x + desenho.grama.largura + 1);
+        }
+        for (const a of nomes) {
+          for (const b of [...nomes, ...pontos]) {
+            if (b.id.endsWith(a.id.slice(5))) continue;
+            expect(encosta(a.caixa, b.caixa), `${a.id} encosta em ${b.id}`).toBe(false);
+          }
+        }
+      });
+      it(`${ilhaCurriculo.id}, ${tela.nome}: os enfeites ficam dentro da grama, sem cobrir nada`, () => {
+        expect(desenho.enfeites.length).toBeGreaterThan(0);
+        const seguro = encolher(desenho.grama, 6);
+        for (const enfeite of desenho.enfeites) {
+          const caixa = { x: enfeite.x - 24, y: enfeite.y - 24, largura: 48, altura: 48 };
+          for (const canto of [
+            { x: caixa.x, y: caixa.y },
+            { x: caixa.x + 48, y: caixa.y },
+            { x: caixa.x, y: caixa.y + 48 },
+            { x: caixa.x + 48, y: caixa.y + 48 },
+          ]) expect(dentroDoArredondado(seguro, canto)).toBe(true);
+          expect(desenho.ocupado.some((ocupada) => encosta(caixa, ocupada))).toBe(false);
+        }
+      });
+    }
+  }
 });

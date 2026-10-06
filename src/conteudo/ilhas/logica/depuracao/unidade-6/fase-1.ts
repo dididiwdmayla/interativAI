@@ -12,42 +12,22 @@
  * confere também a taxa (o segundo conserto não pode quebrar o primeiro).
  */
 import type { FasePratica, Validador } from "@/conteudo/tipos";
-import type { DadosCena } from "@/motor/cena/modelo";
 import { casosDe, curioso, enunciado, FERRAMENTAS_INVESTIGACAO, SABE_DEPURACAO, SITE_DE_CONSOLE, soltarPonto } from "../chamados";
+import { CENA_SALAO } from "./cena";
 
 const CODIGO_TAXA = ["function taxa(pessoas) {", "  if (pessoas === 4) {", "    return 10;", "  }", "  return 0;", "}"].join("\n");
 const CODIGO_BRINDE = ["function brinde(visitas) {", "  if (visitas === 5) {", "    return true;", "  }", "  return false;", "}"].join("\n");
 const GRUPOS = [
   "const reclamada = taxa(4);",
-  'letreiro.mostrar("Taxa R$ " + reclamada);',
+  'tela.mostrar("Taxa R$ " + reclamada);',
   "esperar(1000);",
   "const antiga = taxa(5);",
-  'letreiro.mostrar("Taxa R$ " + antiga);',
+  'tela.mostrar("Taxa R$ " + antiga);',
   "esperar(1000);",
 ].join("\n");
 
-/** A fachada do Salão Girassol: o letreiro mostra a taxa de cada grupo e o relógio marca o expediente. */
-const CENA_SALAO: DadosCena = {
-  id: "salao-recepcao",
-  titulo: "A recepção do Salão Girassol",
-  ambiente: "vitrine",
-  periodo: "dia",
-  duracaoMs: 4_000,
-  cenario: [
-    { peca: "parede", x: 0, y: 0, largura: 320, altura: 156 },
-    { peca: "parede", x: 22, y: 54, largura: 176, altura: 88 },
-    { peca: "vitrine", x: 22, y: 54, largura: 176, altura: 88 },
-    { peca: "toldo", x: 12, y: 32, largura: 196, altura: 24 },
-    { peca: "porta", x: 228, y: 70, largura: 46, altura: 82, variante: "vidro" },
-    { peca: "piso", x: 0, y: 152, largura: 320, altura: 48, variante: "calcada" },
-  ],
-  dispositivos: [
-    { id: "letreiro", tipo: "letreiro", x: 54, y: 4, nome: "Letreiro da recepção" },
-    { id: "relogio", tipo: "relogio", x: 292, y: 30, inicial: { hora: 9 }, nome: "Relógio" },
-  ],
-  linhaDoTempo: [],
-};
-const LETREIRO_CERTO: Validador = { tipo: "estadoNaCena", dispositivo: "letreiro", propriedade: "texto", valor: "Taxa R$ 10", noTempo: 1_500 };
+/** A tela do aplicativo no balcão mostra a taxa do grupo de 4 depois do conserto. */
+const TELA_CERTA: Validador = { tipo: "estadoNaCena", dispositivo: "tela", propriedade: "texto", valor: "Taxa R$ 10", noTempo: 1_500 };
 const CODIGO_INICIAL = [CODIGO_TAXA, CODIGO_BRINDE, GRUPOS].join("\n");
 
 const TAXA_CERTA = CODIGO_TAXA.replace("pessoas === 4", "pessoas >= 4");
@@ -85,6 +65,7 @@ export const FASE_DEPURACAO_U6_F1: FasePratica = {
   introducao: [
     curioso("No Salão Girassol, a taxa de serviço vale para grupos de 4 pessoas ou mais. Uma colega consertou o grupo de 4, que não pagava, e agora os grupos de 5 reclamam."),
     curioso("Consertar um defeito pode quebrar outra coisa. A defesa é rodar, depois de cada conserto, o caso novo junto com os casos antigos."),
+    curioso("A tela no balcão é o aplicativo do salão: o programa escreve nela. Toque nela para abrir a ficha."),
   ],
   conclusao: [curioso("O conserto bom passa no caso novo e nos antigos. Rodar tudo de novo depois de mexer é o teste de regressão.")],
   falaFinal: curioso("Agora o chamado do salão: um aplicativo de agenda que marca duas clientes no mesmo horário."),
@@ -163,7 +144,7 @@ export const FASE_DEPURACAO_U6_F1: FasePratica = {
       tipo: "acao",
       modo: "guiado",
       enunciado: enunciado("Conserte a taxa sem quebrar os grupos que funcionavam. Os casos escondidos testam 1, 3, 4, 5 e 8 pessoas."),
-      validador: { tipo: "todos", validadores: [{ tipo: "semErro" }, casosDe("taxa", CASOS_TAXA), LETREIRO_CERTO] },
+      validador: { tipo: "todos", validadores: [{ tipo: "semErro" }, casosDe("taxa", CASOS_TAXA), TELA_CERTA] },
       ajudas: {
         pergunta: "Qual comparação vale para 4 e também para quem passa de 4?",
         dica: "O conserto bom passa no caso novo e nos casos antigos: grupos de 4 ou mais pagam a taxa.",

@@ -10,7 +10,7 @@
  */
 import type { ValorCena } from "./modelo";
 
-export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador", "relogio", "campainha", "sensorCarro", "geladeira", "alarme", "semaforo", "botao", "aspersor", "sensorUmidade", "sensorDia"] as const;
+export const TIPOS_DISPOSITIVO = ["lampada", "sensor", "interruptor", "portao", "letreiro", "forno", "ventilador", "relogio", "campainha", "sensorCarro", "geladeira", "alarme", "semaforo", "botao", "aspersor", "sensorUmidade", "sensorDia", "registradora", "telaApp"] as const;
 
 export type TipoDispositivo = (typeof TIPOS_DISPOSITIVO)[number];
 
@@ -59,6 +59,16 @@ export type FichaDispositivo = {
 
 /** Quantas letras cabem no letreiro. */
 export const LETRAS_DO_LETREIRO = 16;
+
+/** Quantas letras cabem no visor da registradora. */
+export const LETRAS_DO_VISOR = 12;
+
+/**
+ * A tela de aplicativo (o "dispositivo" de um software é a tela dele): um
+ * recado de até `letrasDoRecado` letras ou uma agenda de até `linhas`
+ * marcações, com o título curto do dia.
+ */
+export const TELA_APP = { letrasDoRecado: 24, linhas: 8, letrasDoTitulo: 14, letrasDoCliente: 12 } as const;
 
 /** O fim de todo "por dentro": a ponte com a trilha Automação. */
 export const FIM_POR_DENTRO = "Na trilha Automação você monta isso de verdade.";
@@ -216,6 +226,52 @@ export const CATALOGO_DISPOSITIVOS: Record<TipoDispositivo, FichaDispositivo> = 
       { peca: "display", texto: "Ela acende os pontinhos de luz (LEDs) do letreiro, uma coluna de cada vez, rápido demais para o olho ver." },
     ],
   },
+  registradora: {
+    tipo: "registradora",
+    nome: "Registradora",
+    classe: "Registradora",
+    sentido: "saida",
+    oQueFaz: "O caixa do mercado: o visor mostra para o cliente o total que o programa calcula.",
+    comandos: [
+      { nome: "mostrar", assinatura: "mostrar(texto)", explicacao: "Mostra o texto no visor (até 12 letras; o resto não cabe)." },
+      { nome: "apagar", assinatura: "apagar()", explicacao: "Apaga o visor." },
+    ],
+    propriedades: [{ nome: "texto", tipo: "texto", escreve: false, doMundo: false, explicacao: "O que o visor mostra agora (vazio quando apagado)." }],
+    exemplo: (nome) => `${nome}.mostrar("R$ " + 25);`,
+    inicial: { texto: "" },
+    porDentro: [
+      { peca: "codigo", texto: "O programa calcula o total e manda: mostrar(\"R$ 25\")." },
+      { peca: "placa", texto: "A plaquinha do caixa transforma cada número nos tracinhos que ele precisa acender." },
+      { peca: "display", texto: "O visor de sete segmentos, virado para o cliente, acende os tracinhos de cada número." },
+    ],
+  },
+  telaApp: {
+    tipo: "telaApp",
+    nome: "Tela do aplicativo",
+    classe: "TelaApp",
+    sentido: "saida",
+    oQueFaz: "A tela do programa no balcão: mostra um recado ou a agenda que o programa monta, com o horário repetido em vermelho.",
+    comandos: [
+      { nome: "mostrar", assinatura: "mostrar(texto)", explicacao: "Mostra um recado na tela (até 24 letras)." },
+      {
+        nome: "mostrarAgenda",
+        assinatura: "mostrarAgenda(lista, titulo)",
+        explicacao: "Mostra a agenda: uma linha por marcação ({ horario, cliente }), por ordem de horário; o título (o dia) é opcional.",
+      },
+      { nome: "apagar", assinatura: "apagar()", explicacao: "Apaga a tela." },
+    ],
+    propriedades: [
+      { nome: "texto", tipo: "texto", escreve: false, doMundo: true, explicacao: "O que a tela mostra agora, em texto (a agenda vira \"Terça: 9h Ana, 10h Bia\")." },
+      { nome: "conflitos", tipo: "número", escreve: false, doMundo: true, explicacao: "Quantos horários aparecem mais de uma vez na agenda mostrada (0 sem agenda)." },
+    ],
+    exemplo: (nome) => `${nome}.mostrarAgenda([{ horario: 9, cliente: "Ana" }], "Segunda");\nconsole.log(${nome}.conflitos);`,
+    inicial: { conteudo: "" },
+    porDentro: [
+      { peca: "codigo", texto: "O programa monta a lista de marcações e manda: mostrarAgenda(agenda)." },
+      { peca: "placa", texto: "O sistema do tablet põe a lista em ordem de horário e confere se algum horário se repete." },
+      { peca: "display", texto: "A tela desenha uma linha por marcação e pinta de vermelho as do horário repetido." },
+    ],
+  },
   forno: {
     tipo: "forno",
     nome: "Forno",
@@ -315,6 +371,8 @@ export const ACOES_DO_TIPO: Record<TipoDispositivo, readonly string[]> = {
   interruptor: [],
   portao: ["abrir", "fechar"],
   letreiro: ["mostrar", "apagar"],
+  registradora: ["mostrar", "apagar"],
+  telaApp: ["mostrar", "mostrarAgenda", "apagar"],
   forno: ["ligar", "desligar", "assar"],
   ventilador: ["velocidade", "desligar"],
   relogio: [],

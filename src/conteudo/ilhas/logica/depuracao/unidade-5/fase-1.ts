@@ -28,30 +28,33 @@ const CODIGO_DESCONTO = [
 const CODIGO_FRETE = ["function frete(peso) {", "  if (peso > 10) {", "    return 0;", "  }", "  return 15;", "}"].join("\n");
 const PEDIDOS = [
   "const segunda = totalComDesconto(5, 10);",
-  'letreiro.mostrar("R$ " + segunda);',
+  'caixa.mostrar("R$ " + segunda);',
   "esperar(1000);",
   "const terca = totalComDesconto(3, 10);",
-  'letreiro.mostrar("R$ " + terca);',
+  'caixa.mostrar("R$ " + terca);',
   "esperar(1000);",
 ].join("\n");
 
-/** O letreiro do caixa do Mercadinho Estrela: mostra o total de cada pedido. */
+/**
+ * O caixa do Mercadinho Estrela: o balcão com a esteira e a cesta de compras
+ * e a registradora, cujo visor mostra o total de cada pedido.
+ */
 const CENA_CAIXA: DadosCena = {
   id: "mercadinho-caixa",
   titulo: "O caixa do Mercadinho Estrela",
-  ambiente: "vitrine",
+  ambiente: "mercadinho",
   periodo: "dia",
   duracaoMs: 4_000,
   cenario: [
-    { peca: "parede", x: 0, y: 0, largura: 320, altura: 156, variante: "tijolos" },
-    { peca: "parede", x: 22, y: 54, largura: 176, altura: 88 },
-    { peca: "vitrine", x: 22, y: 54, largura: 176, altura: 88 },
-    { peca: "toldo", x: 12, y: 32, largura: 196, altura: 24 },
-    { peca: "porta", x: 228, y: 70, largura: 46, altura: 82, variante: "vidro" },
-    { peca: "planta", x: 284, y: 112, largura: 24, altura: 42 },
-    { peca: "piso", x: 0, y: 152, largura: 320, altura: 48, variante: "calcada" },
+    { peca: "parede", x: 0, y: 0, largura: 320, altura: 152 },
+    { peca: "prateleira", x: 12, y: 28, largura: 80, altura: 30, variante: "potes" },
+    { peca: "prateleira", x: 12, y: 70, largura: 80, altura: 30, variante: "paes" },
+    { peca: "porta", x: 272, y: 70, largura: 40, altura: 82, variante: "vidro" },
+    { peca: "piso", x: 0, y: 150, largura: 320, altura: 50 },
+    { peca: "balcao", x: 104, y: 112, largura: 152, altura: 40, variante: "mercadinho" },
+    { peca: "cesta", x: 114, y: 88, largura: 36, altura: 24 },
   ],
-  dispositivos: [{ id: "letreiro", tipo: "letreiro", x: 54, y: 4, nome: "Letreiro do caixa" }],
+  dispositivos: [{ id: "caixa", tipo: "registradora", x: 178, y: 62, nome: "Visor do caixa" }],
   linhaDoTempo: [],
 };
 const CODIGO_INICIAL = [CODIGO_DESCONTO, CODIGO_FRETE, PEDIDOS].join("\n");
@@ -59,7 +62,8 @@ const CODIGO_INICIAL = [CODIGO_DESCONTO, CODIGO_FRETE, PEDIDOS].join("\n");
 const DESCONTO_CERTO = CODIGO_DESCONTO.replace("quantidade > 3", "quantidade >= 3");
 const FRETE_CERTO = CODIGO_FRETE.replace("peso > 10", "peso >= 10");
 const FRETES = ["const leve = frete(12);", "const borda = frete(10);"].join("\n");
-const LETREIRO_CERTO: Validador = { tipo: "estadoNaCena", dispositivo: "letreiro", propriedade: "texto", valor: "R$ 25", noTempo: 1_500 };
+/** O visor do caixa mostra o total com desconto do pedido de 3 itens. */
+const VISOR_CERTO: Validador = { tipo: "estadoNaCena", dispositivo: "caixa", propriedade: "texto", valor: "R$ 25", noTempo: 1_500 };
 
 const CASOS_DESCONTO: [number[], number][] = [
   [[2, 10], 20],
@@ -93,6 +97,7 @@ export const FASE_DEPURACAO_U5_F1: FasePratica = {
   introducao: [
     curioso("Chamado de verdade: o Mercadinho Estrela diz que o desconto de R$ 5 \"às vezes some\". Defeito vago assim pede um primeiro passo: reproduzir."),
     curioso("Reproduzir é achar um pedido que funciona e um que falha. O que muda entre os dois é a pista. Só depois a gente procura a causa."),
+    curioso("O visor da registradora mostra para o cliente o total que o programa calcula. Toque nela para abrir a ficha."),
   ],
   conclusao: [curioso("Você reproduziu o defeito, separou o sintoma da causa raiz e consertou sem quebrar o resto. É assim que se atende um chamado.")],
   falaFinal: curioso("Agora o chamado grande: um cliente de verdade, um defeito vago e um conserto que não pode quebrar nada."),
@@ -168,7 +173,7 @@ export const FASE_DEPURACAO_U5_F1: FasePratica = {
       tipo: "acao",
       modo: "guiado",
       enunciado: enunciado("Conserte a causa, não o sintoma: pedidos de 3 itens ou mais ganham R$ 5. Teste 2, 3 e 4 itens."),
-      validador: { tipo: "todos", validadores: [{ tipo: "semErro" }, casosDe("totalComDesconto", CASOS_DESCONTO), LETREIRO_CERTO] },
+      validador: { tipo: "todos", validadores: [{ tipo: "semErro" }, casosDe("totalComDesconto", CASOS_DESCONTO), VISOR_CERTO] },
       ajudas: {
         pergunta: "Qual comparação diz \"3 ou mais\"?",
         dica: "Trocar o resultado só do pedido de 3 itens conserta o sintoma; o conserto da causa muda a condição.",

@@ -15,6 +15,7 @@
  */
 import { aplicarEntradas, resolverAtores, type AtorCena, type RegraAtor, type EntradaCena } from "./acontecimentos";
 import { CATALOGO_DISPOSITIVOS, type TipoDispositivo } from "./catalogo";
+import { conflitosDaTela, lerConteudoDaTela, textoDaTela } from "./telaApp";
 
 /** Um valor de dispositivo: ligada, aberto, texto do letreiro, velocidade... */
 export type ValorCena = boolean | number | string;
@@ -35,6 +36,9 @@ export const PECAS_CENARIO = [
   "tapete",
   "toldo",
   "vitrine",
+  "cesta",
+  "espelho",
+  "cadeira",
 ] as const;
 
 export type TipoPeca = (typeof PECAS_CENARIO)[number];
@@ -325,6 +329,12 @@ export function estadoBaseNoTempo(rastro: RastroCena, tempoMs: number, opcoes: O
   for (const { id, tipo } of rastro.dispositivos) {
     if (tipo === "sensor") estado[id].temGente = pessoasPresentes(rastro.linhaDoTempo, tempoMs, antes) > 0;
     if (tipo === "interruptor") estado[id].ligado = (rastro.inicial[id]?.ligado === true) !== (apertosAte(rastro.linhaDoTempo, id, tempoMs, antes) % 2 === 1);
+    if (tipo === "telaApp") {
+      // O texto e os conflitos saem do que a tela mostra (o código só lê).
+      const conteudo = lerConteudoDaTela(estado[id].conteudo);
+      estado[id].texto = textoDaTela(conteudo);
+      estado[id].conflitos = conflitosDaTela(conteudo);
+    }
     if (tipo === "relogio") {
       const instante = antes ? Math.max(0, tempoMs - 1e-6) : tempoMs;
       estado[id].hora = horaNoTempo(Number(rastro.inicial[id]?.hora ?? 6), instante);

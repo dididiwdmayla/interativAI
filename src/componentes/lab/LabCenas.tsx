@@ -11,6 +11,8 @@ import type { ReactNode } from "react";
 import { CenaSvg } from "@/componentes/cena/CenaSvg";
 import { PecaDoCenario, TAMANHO_PADRAO } from "@/componentes/cena/kit/PecasCenario";
 import { CENA_QUARTO, CENA_VITRINE } from "@/conteudo/laboratorio/cenasDeReferencia";
+import { CENA_SALAO } from "@/conteudo/ilhas/logica/depuracao/unidade-6/cena";
+import { FASE_DEPURACAO_U5_F1 } from "@/conteudo/ilhas/logica/depuracao/unidade-5/fase-1";
 import { CATALOGO_DISPOSITIVOS } from "@/motor/cena/catalogo";
 import { type DadosCena, type DispositivoCena, type MudancaCena, PECAS_CENARIO, type RastroCena, rastroInicial, type ValorCena } from "@/motor/cena/modelo";
 import { TEMAS } from "@/tema/temas";
@@ -59,12 +61,47 @@ const AMOSTRAS: Amostra[] = [
   amostra("Relógio às 9h30", { id: "relogio", tipo: "relogio", x: 160, y: 75, escala: 3 }, [], 7000),
   amostra("Campainha quieta", { id: "campainha", tipo: "campainha", x: 160, y: 75, escala: 2.6 }, [], 100),
   amostra("Campainha tocando", { id: "campainha", tipo: "campainha", x: 160, y: 75, escala: 2.6 }, [["toques", 1, "tocar"]], 160),
+  amostra("Registradora apagada", { id: "caixa", tipo: "registradora", x: 90, y: 50, escala: 2 }, [], 100, { periodo: "dia" }),
+  amostra("Registradora com o total", { id: "caixa", tipo: "registradora", x: 90, y: 50, escala: 2 }, [["texto", "R$ 25", "mostrar"]], 100, { periodo: "dia" }),
+  amostra("Tela do aplicativo apagada", { id: "tela", tipo: "telaApp", x: 85, y: 22, escala: 1.5 }, [], 100, { periodo: "dia" }),
+  amostra("Tela com um recado", { id: "tela", tipo: "telaApp", x: 85, y: 22, escala: 1.5 }, [["conteudo", JSON.stringify({ recado: "Taxa R$ 10" }), "mostrar"]], 100, { periodo: "dia" }),
+  amostra(
+    "Tela com a agenda (horário repetido)",
+    { id: "tela", tipo: "telaApp", x: 85, y: 22, escala: 1.5 },
+    [["conteudo", JSON.stringify({ titulo: "Terça", linhas: [[9, "Ana"], [10, "Bia"], [10, "Dani"]], mais: 0 }), "mostrarAgenda"]],
+    100,
+    { periodo: "dia" },
+  ),
+];
+
+/** As peças com variantes que mudam o desenho (além da peça padrão). */
+const VARIANTES: { peca: (typeof PECAS_CENARIO)[number]; variante: string }[] = [
+  { peca: "balcao", variante: "padaria" },
+  { peca: "balcao", variante: "mercadinho" },
+  { peca: "balcao", variante: "salao" },
 ];
 
 /** As cenas de referência num momento bom: o quarto aceso e a vitrine acesa com a pessoa na frente. */
 const REFERENCIAS: Amostra[] = [
   ...AMOSTRAS_CENAS_NOVAS,
   { rotulo: CENA_QUARTO.titulo, dados: CENA_QUARTO, rastro: { ...rastroInicial(CENA_QUARTO), mudancas: [{ tempoMs: 0, dispositivo: "lampada", propriedade: "ligada", valor: true, acao: "ligar", execucao: 1, passo: null }, { tempoMs: 0, dispositivo: "ventilador", propriedade: "velocidade", valor: 2, acao: "velocidade", execucao: 1, passo: null }], fimCodigoMs: 0, relogioMs: 6000 }, tempoMs: 400 },
+  {
+    rotulo: "O caixa do Mercadinho Estrela",
+    dados: FASE_DEPURACAO_U5_F1.cena!,
+    rastro: { ...rastroInicial(FASE_DEPURACAO_U5_F1.cena!), mudancas: [{ tempoMs: 0, dispositivo: "caixa", propriedade: "texto", valor: "R$ 25", acao: "mostrar", execucao: 1, passo: null }], fimCodigoMs: 0, relogioMs: 4000 },
+    tempoMs: 400,
+  },
+  {
+    rotulo: CENA_SALAO.titulo,
+    dados: CENA_SALAO,
+    rastro: {
+      ...rastroInicial(CENA_SALAO),
+      mudancas: [{ tempoMs: 0, dispositivo: "tela", propriedade: "conteudo", valor: JSON.stringify({ titulo: "Terça", linhas: [[9, "Ana"], [10, "Bia"], [10, "Dani"]], mais: 0 }), acao: "mostrarAgenda", execucao: 1, passo: null }],
+      fimCodigoMs: 0,
+      relogioMs: 4000,
+    },
+    tempoMs: 400,
+  },
   { rotulo: CENA_VITRINE.titulo, dados: CENA_VITRINE, rastro: { ...rastroInicial(CENA_VITRINE), mudancas: [{ tempoMs: 3000, dispositivo: "luz", propriedade: "ligada", valor: true, acao: "ligar", execucao: 1, passo: null }], fimCodigoMs: 10_000, relogioMs: 10_000 }, tempoMs: 4500 },
 ];
 
@@ -97,13 +134,13 @@ export function LabCenas() {
             </div>
             <h3 className="mb-2 font-black">Peças do cenário</h3>
             <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-              {PECAS_CENARIO.map((peca) => {
+              {[...PECAS_CENARIO.map((peca) => ({ peca, variante: peca === "parede" ? "listras" : undefined })), ...VARIANTES].map(({ peca, variante }) => {
                 const [largura, altura] = TAMANHO_PADRAO[peca];
                 const folga = 10;
                 return (
-                  <Quadro key={peca} rotulo={peca}>
+                  <Quadro key={`${peca}-${variante ?? ""}`} rotulo={variante && peca !== "parede" ? `${peca} (${variante})` : peca}>
                     <svg viewBox={`${-folga} ${-folga} ${largura + folga * 2} ${altura + folga * 2}`} className="h-full w-full" aria-hidden="true">
-                      <PecaDoCenario peca={{ peca, x: 0, y: 0, variante: peca === "parede" ? "listras" : undefined }} periodo="noite" id={`kit-${tema.id}`} />
+                      <PecaDoCenario peca={{ peca, x: 0, y: 0, variante }} periodo="noite" id={`kit-${tema.id}`} />
                     </svg>
                   </Quadro>
                 );

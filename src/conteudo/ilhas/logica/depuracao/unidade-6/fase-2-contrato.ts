@@ -1,8 +1,9 @@
 /*
  * Depuração, U6, fase 2: o CHAMADO 2, no formato contrato (guia, seção 31).
  * O aplicativo de agenda do Salão Girassol marca duas clientes no mesmo
- * horário "de vez em quando". É um software com defeito, sem cena física:
- * o programa é o próprio palco, com console e casos de teste. O aluno
+ * horário "de vez em quando". É um software com defeito: a cena é a tela do
+ * aplicativo no balcão (a agenda de terça, com o horário repetido em
+ * vermelho até o conserto), com palco, console e casos de teste. O aluno
  * reproduz, investiga com o depurador, diz a causa antes de consertar
  * (cartões com distrações), conserta sem quebrar o resto e entrega o
  * relatório do conserto.
@@ -20,10 +21,12 @@
 import type { FaseDesafio, Validador } from "@/conteudo/tipos";
 import { linhasDoPlano } from "@/motor/plano/comentarios";
 import { casosDe, FERRAMENTAS_INVESTIGACAO, SABE_DEPURACAO, SITE_DE_CONSOLE, soltarPonto } from "../chamados";
+import { CENA_SALAO } from "./cena";
 
 const CHAMADAS = [
   'const segunda = agendar([{ horario: 9, cliente: "Ana" }, { horario: 10, cliente: "Bia" }], { horario: 9, cliente: "Caio" });',
   'const terca = agendar([{ horario: 9, cliente: "Ana" }, { horario: 10, cliente: "Bia" }], { horario: 10, cliente: "Dani" });',
+  'tela.mostrarAgenda(terca, "Terça");',
 ].join("\n");
 
 /** O código que o sobrinho deixou, com o defeito. */
@@ -147,24 +150,29 @@ export const FASE_DEPURACAO_U6_F2: FaseDesafio = {
   conceitos: ["teste-de-regressao"],
   revisa: [...SABE_DEPURACAO, "reproduzir-o-defeito", "causa-raiz", "teste-de-regressao", "for-js", "casos-de-borda", "plano-comentado"],
   prerequisitos: [...SABE_DEPURACAO, "reproduzir-o-defeito", "causa-raiz", "teste-de-regressao"],
-  areas: ["plano", "snippet", "palco", "testes"],
+  areas: ["cena", "plano", "snippet", "palco", "testes"],
+  // A tela do aplicativo no balcão: a agenda de terça, com o horário marcado em dobro em vermelho até o conserto.
+  cena: CENA_SALAO,
   plano: PLANO_RELATORIO,
   testes: {
     funcao: "agendar",
     parametros: ["agenda", "pedido"],
     inicial: [{ entrada: '[{ horario: 9, cliente: "Ana" }], { horario: 10, cliente: "Bia" }', esperado: '[{ horario: 9, cliente: "Ana" }, { horario: 10, cliente: "Bia" }]' }],
   },
-  usaFerramentas: [...FERRAMENTAS_INVESTIGACAO, "quadro-de-passos", "plano-no-codigo", "casos-de-teste"],
+  usaFerramentas: [...FERRAMENTAS_INVESTIGACAO, "cena", "ficha-dispositivo", "velocidade-simulacao", "quadro-de-passos", "plano-no-codigo", "casos-de-teste"],
   siteAlvo: SITE_DE_CONSOLE,
   programa: { snippet: { nome: "agenda.js", codigoInicial: CODIGO_COM_DEFEITO } },
   introducao: [
     { texto: "Chegou chamado! Dona Zélia, do Salão Girassol, tem um aplicativo de agenda que às vezes marca duas clientes no mesmo horário.", expressao: "comemorando" },
     { texto: "Eu sou o colega da mesa ao lado: pergunto e lembro do processo. Reproduzir, dizer a causa, consertar sem quebrar o resto e entregar o relatório.", expressao: "curioso" },
+    { texto: "A tela do balcão mostra a agenda que o programa monta. Rode o código e olhe a terça: tem horário em vermelho.", expressao: "apontando" },
   ],
   contrato: {
     cliente: "dona-zelia",
     projeto: "Conserto da agenda do salão",
     fimDeIlha: false,
+    // O aplicativo sai do jogo: a agenda (com os horários repetidos marcados) aparece no console.
+    levarProMundo: { arquivo: "agenda-do-salao.js" },
     briefing: [
       { texto: "Oi, querida! Sou a Zélia, do Salão Girassol. Meu sobrinho fez um aplicativo de agenda e eu adorava, até ele começar a me dar dor de cabeça.", expressao: "feliz" },
       { texto: "De vez em quando duas clientes aparecem no mesmo horário! Aconteceu na terça, às 10. Mas na segunda, às 9, ele recusou direitinho. Não entendo!", expressao: "preocupado" },
@@ -324,6 +332,7 @@ export const FASE_DEPURACAO_U6_F2: FaseDesafio = {
   conclusao: [
     { texto: "Chamado entregue! Você reproduziu, disse a causa antes de mexer, consertou sem quebrar o resto e ainda cobriu o expediente.", expressao: "comemorando" },
     { texto: "O relatório do conserto fica nos comentários do código: quem pegar o aplicativo depois sabe o que era, como foi achado e como foi testado.", expressao: "apontando" },
+    { texto: "E o aplicativo pode sair do jogo: o Levar pro mundo baixa a agenda num arquivo .js, que roda no Console de qualquer navegador.", expressao: "comemorando" },
   ],
   missaoDeCampo:
     "No Chrome, abra DevTools > Sources > Snippets, cole uma função sua, marque um ponto de parada dentro de um laço e use Watch e Retomar para ver o que muda de uma volta para a outra.",
