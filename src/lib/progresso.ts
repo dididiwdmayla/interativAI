@@ -136,6 +136,11 @@ export type Progresso = {
    * árvore da família (depois da sala 2). null enquanto o lugar está vazio.
    */
   proximaGeracao: RetratoDoAluno | null;
+  /**
+   * Museu das Origens: o aluno já viu a insígnia da história no retrato (as
+   * seis salas concluídas). Só para a revelação tocar uma vez.
+   */
+  insigniaDoMuseu: boolean;
 };
 
 /** O retrato do aluno na árvore da família: as peças do kit e a assinatura. */
@@ -203,6 +208,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   ilhasComemoradas: [],
   revisao: REVISAO_PADRAO,
   proximaGeracao: null,
+  insigniaDoMuseu: false,
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -486,6 +492,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     ilhasComemoradas: [...new Set(listaDeTextos(bruto.ilhasComemoradas))],
     revisao: lerEstadoRevisao(bruto.revisao),
     proximaGeracao: lerRetratoDoAluno(bruto.proximaGeracao),
+    insigniaDoMuseu: bruto.insigniaDoMuseu === true,
   };
 }
 
