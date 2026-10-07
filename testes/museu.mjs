@@ -19,11 +19,46 @@ const progresso = {
   versao: 2, fasesConcluidas: [], estrelasPorFase: {}, fasesEmAndamento: {}, faseAtual: null, tema: "doce", temasDesbloqueados: ["doce", "fliperama"],
   som: false, missoesDeCampo: {}, apresentacoesVistas: [], metasVistas: [], unidadesComemoradas: [], posicaoNoMapa: {}, mapaDesbloqueado: false, proporcaoPrevia: 0.4,
 };
-const { navegador, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/ilha/origens", esperar: "[data-trilho-museu]" });
+const { navegador, contexto, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/ilha/origens", esperar: "[data-trilho-museu]" });
+const cdpToque = toque ? await contexto.newCDPSession(pagina) : null;
+if (cdpToque) await cdpToque.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 2 });
 const pronto = () => esperarPronto(pagina, 30000);
 async function tocar(el) {
   await el.scrollIntoViewIfNeeded();
   await (toque ? el.tap() : el.click());
+  await pronto();
+}
+/**
+ * Uma peça da bancada de portões, no toque: como em circuito.mjs, o jogador amplia (150%) e arrasta o
+ * enquadramento com dois dedos até a peça, e toca nela (na posição dada, ou no meio).
+ */
+async function tocarNaBancada(estacao, el, posicao) {
+  if (!toque) return tocar(el);
+  await fecharBalao(pagina);
+  await el.scrollIntoViewIfNeeded();
+  const area = estacao.getByRole("application", { name: "Bancada do circuito" });
+  while (parseInt(await estacao.locator("[data-zoom-circuito]").innerText()) < 150) {
+    await estacao.getByRole("button", { name: "Aumentar zoom do circuito" }).tap();
+    await pronto();
+  }
+  for (let i = 0; i < 20; i++) {
+    const a = await area.boundingBox();
+    const caixa = await el.boundingBox();
+    const x = caixa.x + (posicao?.x ?? 0.5) * caixa.width;
+    const y = caixa.y + (posicao?.y ?? 0.5) * caixa.height;
+    if (x > a.x + 25 && x < a.x + a.width - 25 && y > a.y + 25 && y < a.y + a.height - 25) {
+      await pagina.touchscreen.tap(x, y);
+      break;
+    }
+    const mx = a.x + a.width / 2, my = a.y + a.height / 2;
+    const dx = Math.max(-a.width / 4, Math.min(a.width / 4, mx - x));
+    const dy = Math.max(-a.height / 4, Math.min(a.height / 4, my - y));
+    const dedos = [{ x: mx - 20, y: my, id: 1 }, { x: mx + 20, y: my, id: 2 }];
+    await cdpToque.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: dedos });
+    await cdpToque.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: dedos.map((p) => ({ ...p, x: p.x + dx, y: p.y + dy })) });
+    await cdpToque.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await pronto();
+  }
   await pronto();
 }
 
@@ -116,19 +151,16 @@ async function acao(a) {
       await tocar(estacao.locator(`[data-tomada-saida="${m.de}"]`));
       await tocar(estacao.locator(`[data-tomada-entrada="${m.para}:${m.porta ?? 0}"]`));
     } else if (m.tipo === "fio") {
-      await tocar(estacao.locator(`[data-porta-saida="${m.de}"]`));
-      if (toque) {
-        const corpo = estacao.locator(`[data-corpo-peca="${m.para}"]`);
-        const caixa = await corpo.boundingBox();
-        await corpo.tap({ position: { x: caixa.width * 0.35, y: (m.porta ?? 0) === 0 ? caixa.height * 0.25 : caixa.height * 0.75 } });
-        await pronto();
-      } else await tocar(estacao.locator(`[data-porta-entrada="${m.para}:${m.porta ?? 0}"]`));
+      await tocarNaBancada(estacao, estacao.locator(`[data-porta-saida="${m.de}"]`));
+      // No toque, o dedo vai perto da porta, sobre o corpo: quem recebe é a área ampliada da porta.
+      if (toque) await tocarNaBancada(estacao, estacao.locator(`[data-corpo-peca="${m.para}"]`), { x: 0.35, y: (m.porta ?? 0) === 0 ? 0.25 : 0.75 });
+      else await tocar(estacao.locator(`[data-porta-entrada="${m.para}:${m.porta ?? 0}"]`));
     } else if (m.tipo === "chave" && cabos) {
       const chave = estacao.locator(`[data-chave="${m.entrada}"]`);
       if (m.ligada === undefined || ((await chave.getAttribute("data-ligada")) === "sim") !== m.ligada) await tocar(chave);
     } else if (m.tipo === "chave") {
       const peca = estacao.locator(`[data-peca="${m.entrada}"]`);
-      if (m.ligada === undefined || ((await peca.getAttribute("data-acesa")) === "sim") !== m.ligada) await tocar(estacao.locator(`[data-corpo-peca="${m.entrada}"]`));
+      if (m.ligada === undefined || ((await peca.getAttribute("data-acesa")) === "sim") !== m.ligada) await tocarNaBancada(estacao, estacao.locator(`[data-corpo-peca="${m.entrada}"]`));
     } else throw new Error(`Mudança de circuito sem UI: ${m.tipo}`);
   } else if (a.tipo === "comandoNaEstacao") {
     const [verbo, resto] = a.comando.includes(":") ? [a.comando.slice(0, a.comando.indexOf(":")), a.comando.slice(a.comando.indexOf(":") + 1)] : [a.comando, ""];
