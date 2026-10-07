@@ -31,7 +31,15 @@ export function EstacaoLigar({ estacao, estado, mexer, toque, destaque }: PropsE
         key={id}
         type="button"
         aria-pressed={ativo}
-        onClick={() => {
+        onClick={(evento) => {
+          evento.stopPropagation();
+          // Com outro cartão na mão, tocar num cartão já colocado é tocar no alvo dele.
+          const alvoDele = estado.ligacoes[id];
+          if (noAlvo && escolhido && escolhido !== id && alvoDele) {
+            mexer({ tipo: "ligarCartao", estacao: estacao.id, cartao: escolhido, alvo: alvoDele });
+            setEscolhido(null);
+            return;
+          }
           // Escolher um cartão já é usar a mesa (o "Experimente" da apresentação termina aqui).
           sinalizarUso("cartoes-de-ligar");
           setEscolhido(ativo ? null : id);
@@ -85,7 +93,7 @@ export function EstacaoLigar({ estacao, estado, mexer, toque, destaque }: PropsE
             >
               <p className="text-sm font-black text-texto">{alvo.nome}</p>
               {alvo.descricao && <p className="text-[11px] text-texto-suave">{alvo.descricao}</p>}
-              <div className="flex flex-wrap gap-1" onClick={(evento) => evento.stopPropagation()}>
+              <div className="flex flex-wrap gap-1">
                 <AnimatePresence initial={false}>{aqui.map((id) => cartaoBotao(id, true))}</AnimatePresence>
               </div>
             </div>

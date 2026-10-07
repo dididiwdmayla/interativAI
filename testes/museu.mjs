@@ -144,7 +144,10 @@ async function acao(a) {
 async function conversa(nome) {
   if (toque) await abrirBalao(pagina);
   const botao = pagina.getByRole("button", { name: nome }).first();
-  await botao.waitFor({ timeout: 15000 });
+  await botao.waitFor({ timeout: 15000 }).catch(async (erro) => {
+    await pagina.screenshot({ path: `testes-falha-museu-${modo}.png` });
+    throw erro;
+  });
   await tocar(botao);
 }
 async function introducao() {

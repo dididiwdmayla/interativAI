@@ -29,6 +29,34 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 38, Origens parte 2: as salas 3 a 6 (o museu completo).**
+  Detalhe em `docs/PROGRESSO.md`.
+  - **Executor por linguagem** (`src/motor/linguagens/`): JavaScript no
+    executor de sempre, Python de verdade no Pyodide 314.0.7 (servido pelo
+    próprio jogo em `public/pyodide/<versão>/`, copiado do npm antes do dev
+    e do build, com cache imutável; Web Worker próprio, carregado só quando
+    alguém roda Python, com barra de carga; sem rede e sem o módulo `js`
+    depois de acordar), e C, Java, COBOL e BASIC com a saída declarada,
+    marcada "simulado". Saída e erros no formato do executor de
+    JavaScript; os validadores de saída valem para todas. Base da futura
+    Ilha Python.
+  - **Estações novas:** comparador de linguagens (partes que acendem
+    juntas, Rodar, linguagem editável e o coral), cartões de ligar e de
+    ordem, o circuito do museu (o painel de cabos do gigante e a bancada de
+    portões, com realimentação) e nove simulações por comando e marco
+    (compilar ou interpretar, memória, processador de brinquedo, o gerente
+    do sistema, árvore de pastas, o caminho de um clique, o mapa dos cabos
+    submarinos, a prévia da aba Rede e a cidade do código). 13 ferramentas
+    com card, 6 sons novos, checagens da fábrica e unitários.
+  - **Conteúdo:** sala 3 (Por que existem tantas linguagens, 5 fases),
+    sala 4 (Por baixo do capô, 7), sala 5 (Front, back e o caminho de um
+    clique, 5) e sala 6 (Onde a programação vive, 2), com os antepassados
+    recebendo o aluno; 21 conceitos com `termoIngles` e 42 itens de
+    revisão. Com as seis salas, o retrato na árvore da família ganha a
+    insígnia da história.
+  - Guia, seções 32.9 a 32.11; jornada `testes/museu.mjs` com as seis
+    salas, nos três layouts.
+
 - **Rodada 37, o mapa e as ilhas por dentro, e os dois chamados.** Detalhe
   em `docs/PROGRESSO.md`; capturas em `docs/capturas/rodada-37/`.
   - **Etapa 1, o mundo no celular:** a ilha que aparecia sem arte e sem
@@ -683,11 +711,27 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 37 (o mapa, as ilhas e os chamados): aguardando a revisão do pull
-  request, jogando no Android em pé o mundo (rolar de ponta a ponta e
-  voltar), o interior das ilhas e os dois chamados.
+- Rodada 38 (Origens, parte 2): aguardando a revisão do pull request,
+  jogando as salas 3 a 6 no Android em pé (o Python baixando pela rede do
+  celular, o coral, os cabos do gigante e o mapa dos cabos).
 
 ### Pendências
+
+- **Rodada 38, para depois:**
+  - O Python baixa uns 13 MB na primeira vez (o núcleo do Pyodide). Vale
+    medir num celular de verdade, com 4G, e decidir se a sala avisa antes.
+  - Um programa Python que trava só para no tempo limite (5 s), derrubando
+    o worker: o próximo Rodar acorda outro (do cache). Parar no meio pede
+    isolamento de origem cruzada (SharedArrayBuffer), que o jogo não tem.
+  - A saída de COBOL e BASIC foi conferida pela gramática, não por um
+    compilador (não havia GnuCOBOL nem BASIC no ambiente); C e Java foram
+    compilados e rodados.
+  - O /lab/fases acorda o Python na própria página para as checagens (o
+    Rodar checagens demora uns segundos a mais na primeira vez).
+  - A Revisão do dia continua sem a área exposicao: os 42 itens novos são
+    previsões sobre vitrines.
+  - O lugar da próxima geração continua abrindo com a sala 2; a insígnia
+    da história vem com as seis.
 
 - **Rodada 37, para depois:**
   - O sumiço das ilhas foi reproduzido pela medida de repintura do Chrome
@@ -912,13 +956,13 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Opus: Origens, parte 2 (as salas 3 a 5: o comparador de linguagens
-   executável, por baixo do capô com os portões e o caminho de um clique
-   com o diagrama de rede; guia, seções 32.7 e 32.8).
-2. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
+1. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
    e as missões de campo que leem documentação original (guia, seção 1).
-3. Depois: motores das outras ilhas (Páginas vivas, com objetos e o tempo
-   assíncrono; Rede e Servidor; Python no navegador; IA ao vivo; Ofício),
+2. Opus: Ilha Páginas vivas, parte A (JavaScript rodando no site-alvo,
+   eventos, o tempo assíncrono no executor, a aba Aplicação e a base de
+   orientação a objetos).
+3. Depois: motores das outras ilhas (Rede e Servidor; Python no navegador,
+   a partir do executor por linguagem da rodada 38; IA ao vivo; Ofício),
    intercalados com conteúdo, e a trilha Automação industrial a partir do
    protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no
    `PROJETO.md`).

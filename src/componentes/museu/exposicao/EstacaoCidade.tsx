@@ -145,7 +145,6 @@ export function EstacaoCidade({ estacao, estado, mexer, toque, destaque }: Props
                     mexer({ tipo: "comandoNaEstacao", estacao: estacao.id, comando: `abrir:${lugar.id}` });
                   }
                 }}
-                data-comando={`abrir:${lugar.id}`}
                 data-lugar-cidade={lugar.id}
                 data-visto={visto ? "sim" : "nao"}
               >
@@ -163,6 +162,8 @@ export function EstacaoCidade({ estacao, estado, mexer, toque, destaque }: Props
                     <motion.circle cx={x + 20} cy={y - 32} r="4" fill="var(--cor-destaque)" animate={{ scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
                   )
                 )}
+                {/* A área de toque, por cima de tudo e parada (a bolinha que pulsa e o carro andando não mudam ela). */}
+                <rect x={x - 32} y={y - 34} width="64" height="72" fill="transparent" data-comando={`abrir:${lugar.id}`} />
               </g>
             );
           })}

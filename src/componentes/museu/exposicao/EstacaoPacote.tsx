@@ -69,7 +69,7 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
             const y = Y(ilha.y);
             const r = ilha.raio * 1.6;
             return (
-              <g key={ilha.nome} aria-hidden="true">
+              <g key={ilha.nome} aria-hidden="true" pointerEvents="none">
                 <ellipse cx={x} cy={y + 1.5} rx={r + 2} ry={r * 0.62 + 2} fill="var(--cor-espuma)" opacity="0.6" />
                 <ellipse cx={x} cy={y} rx={r + 1} ry={r * 0.62 + 1} fill="var(--cor-areia)" />
                 <ellipse cx={x} cy={y - 0.8} rx={r} ry={r * 0.55} fill="var(--cor-grama)" />
@@ -88,7 +88,7 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
             const caminho = cabo.submarino ? `M${x1} ${y1} Q${(x1 + x2) / 2} ${Math.min(116, Math.max(y1, y2) + 28)} ${x2} ${y2}` : `M${x1} ${y1} L${x2} ${y2}`;
             const usado = noCaminho(cabo.de, cabo.para);
             return (
-              <g key={`${cabo.de}-${cabo.para}`} data-cabo-mapa={`${cabo.de}-${cabo.para}`} data-submarino={cabo.submarino ? "sim" : "nao"}>
+              <g key={`${cabo.de}-${cabo.para}`} pointerEvents="none" data-cabo-mapa={`${cabo.de}-${cabo.para}`} data-submarino={cabo.submarino ? "sim" : "nao"}>
                 <path d={caminho} fill="none" stroke={cabo.partido ? "var(--cor-erro)" : usado ? "var(--cor-destaque)" : cabo.submarino ? "var(--cor-ante-contorno)" : "var(--cor-ante-madeira-sombra)"} strokeWidth={usado ? 1.6 : 1} strokeDasharray={cabo.partido ? "3 3" : cabo.submarino ? "1.5 1.2" : undefined} />
                 {cabo.partido && (
                   <text x={(x1 + x2) / 2} y={cabo.submarino ? Math.min(110, Math.max(y1, y2) + 14) : (y1 + y2) / 2} textAnchor="middle" fontSize="5" fontWeight="900" fill="var(--cor-erro)">
@@ -98,13 +98,33 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
               </g>
             );
           })}
-          {/* Os pontos (roteadores, a casa, o servidor). */}
+          {/* Os pontos (roteadores, a casa, o servidor): só o desenho. */}
+          {estacao.nos.map((no) => {
+            const pode = proximos.includes(no.id);
+            return (
+              <g key={no.id} pointerEvents="none" data-ponto-mapa={no.id} data-pode={pode ? "sim" : "nao"}>
+                {pode && !reduzir && (
+                  <motion.circle cx={X(no.x)} cy={Y(no.y)} r="6" fill="none" stroke="var(--cor-destaque)" strokeWidth="1" animate={{ r: [5, 8, 5], opacity: [0.9, 0.2, 0.9] }} transition={{ duration: 1.4, repeat: Infinity }} />
+                )}
+                {(pode && reduzir) || destaque?.peca === no.id ? <circle cx={X(no.x)} cy={Y(no.y)} r="6.5" fill="none" stroke="var(--cor-destaque)" strokeWidth="1.2" /> : null}
+                <FiguraNo no={no} />
+                <text x={X(no.x)} y={Y(no.y) - 6} textAnchor="middle" fontSize="3.6" fontWeight="800" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.5" paintOrder="stroke">
+                  {no.nome}
+                </text>
+              </g>
+            );
+          })}
+          {/* As áreas de toque, numa camada por cima de todos os desenhos (maiores que o ponto). */}
           {estacao.nos.map((no) => {
             const pode = proximos.includes(no.id);
             const atual = aqui?.id === no.id;
             return (
-              <g
-                key={no.id}
+              <circle
+                key={`toque-${no.id}`}
+                cx={X(no.x)}
+                cy={Y(no.y)}
+                r={toque ? 8 : 6}
+                fill="transparent"
                 role="button"
                 tabIndex={pode ? 0 : -1}
                 aria-disabled={!pode}
@@ -118,20 +138,7 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
                   }
                 }}
                 data-comando={`pular:${no.id}`}
-                data-ponto-mapa={no.id}
-                data-pode={pode ? "sim" : "nao"}
-              >
-                {/* A área de toque maior que o desenho. */}
-                <circle cx={X(no.x)} cy={Y(no.y)} r={toque ? 8 : 6} fill="transparent" />
-                {pode && !reduzir && (
-                  <motion.circle cx={X(no.x)} cy={Y(no.y)} r="6" fill="none" stroke="var(--cor-destaque)" strokeWidth="1" animate={{ r: [5, 8, 5], opacity: [0.9, 0.2, 0.9] }} transition={{ duration: 1.4, repeat: Infinity }} />
-                )}
-                {(pode && reduzir) || destaque?.peca === no.id ? <circle cx={X(no.x)} cy={Y(no.y)} r="6.5" fill="none" stroke="var(--cor-destaque)" strokeWidth="1.2" /> : null}
-                <FiguraNo no={no} />
-                <text x={X(no.x)} y={Y(no.y) - 6} textAnchor="middle" fontSize="3.6" fontWeight="800" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.5" paintOrder="stroke">
-                  {no.nome}
-                </text>
-              </g>
+              />
             );
           })}
           {/* O pacote. */}

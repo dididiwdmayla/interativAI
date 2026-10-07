@@ -32,6 +32,18 @@ const ARQUIVOS_GRANDES: readonly { nome: string; aproximado: number }[] = [
 
 const PROIBIDOS_DEPOIS = ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport", "importScripts", "Worker", "SharedWorker", "indexedDB", "caches", "BroadcastChannel"];
 
+/**
+ * Tira um nome do global do worker. Muitos moram no protótipo (WorkerGlobalScope), onde o delete
+ * não alcança: uma propriedade própria valendo undefined esconde o do protótipo.
+ */
+function apagar(nome: string): void {
+  try {
+    Object.defineProperty(globalThis, nome, { value: undefined, configurable: true, writable: false });
+  } catch {
+    // Propriedade que não sai: fica sem uso.
+  }
+}
+
 let python: PythonCarregado | null = null;
 let carregando: Promise<void> | null = null;
 
@@ -59,18 +71,15 @@ async function carregar(endereco: string): Promise<void> {
   const base = new URL(endereco, escopo.location.origin).href;
   await baixarContando(base);
   avisar({ etapa: "acordando" });
+  // O bundler pode entregar este worker como clássico (com importScripts), e o Pyodide recusa worker
+  // clássico. O código do worker já está carregado: sem importScripts, ele roda como worker de módulo.
+  apagar("importScripts");
   const modulo = (await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ `${base}pyodide.mjs`)) as {
     loadPyodide(opcoes: { indexURL: string; packages?: string[] }): Promise<PythonCarregado>;
   };
   const carregado = await modulo.loadPyodide({ indexURL: base });
   prepararPython(carregado);
-  for (const nome of PROIBIDOS_DEPOIS) {
-    try {
-      delete escopo[nome];
-    } catch {
-      // Propriedade que não sai: fica sem uso.
-    }
-  }
+  for (const nome of PROIBIDOS_DEPOIS) apagar(nome);
   python = carregado;
   avisar({ etapa: "pronto" });
 }
