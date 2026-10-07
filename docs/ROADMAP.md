@@ -728,6 +728,13 @@ núcleo comum.
     compilados e rodados.
   - O /lab/fases acorda o Python na própria página para as checagens (o
     Rodar checagens demora uns segundos a mais na primeira vez).
+  - Bancada de portões no celular em pé, a 100%: as áreas de toque (44 px)
+    das portas de portões vizinhos se cobrem, e o aluno precisa ampliar
+    (como na bancada da Lógica). Vale abrir a bancada do museu já
+    ampliada no toque, ou espaçar mais os portões novos.
+  - O cartão compacto da apresentação (o "No F12 de verdade" recolhido)
+    só aparece quando o cartão inteiro não cabe ao lado do alvo; conferir
+    num celular deitado de verdade se a leitura do F12 não se perde.
   - A Revisão do dia continua sem a área exposicao: os 42 itens novos são
     previsões sobre vitrines.
   - O lugar da próxima geração continua abrindo com a sala 2; a insígnia

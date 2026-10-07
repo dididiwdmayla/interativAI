@@ -272,7 +272,10 @@ conferir(true, `${modo}: voltando ao museu, o aluno continua na árvore`);
 // ---------------------------------------------------------------- a insígnia da história (as seis salas)
 await pagina.locator('[data-arvore][data-museu-completo="sim"] [data-insignia-museu]').waitFor({ timeout: 15000 });
 conferir((await pagina.locator("[data-placa-insignia]").textContent()).includes("história"), `${modo}: com as seis salas, o retrato ganha a insígnia da história`);
-const viu = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2") ?? "{}").insigniaDoMuseu);
+// A medalha aparece na hora; a revelação (e o registro no progresso) vem um pouco depois.
+const viu = await pagina
+  .waitForFunction(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2") ?? "{}").insigniaDoMuseu === true, null, { timeout: 20000 })
+  .then(() => true, () => false);
 conferir(viu === true, `${modo}: a revelação da insígnia fica guardada (toca uma vez só)`);
 
 conferir(errosRelevantes(erros).length === 0, `${modo}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);

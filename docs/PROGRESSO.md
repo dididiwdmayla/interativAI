@@ -93,6 +93,24 @@ principal depois do merge da rodada 37.
   cai girando, o brilho passa uma vez, o som da insígnia e o recado do
   computadorzinho) toca uma vez só: `insigniaDoMuseu` no progresso.
 
+### Etapa 5 — Correções achadas nas jornadas (commits próprios)
+
+- **Cidade:** o papel de botão saiu do grupo de cada lugar (que inclui a
+  bolinha pulsando e o carro andando) e foi para a área de toque, parada.
+- **Mapa dos cabos:** o pulso dos próximos pontos anima a escala, não o
+  raio (o raio animado sujava o console com `r: undefined`).
+- **Apresentação das ferramentas (motor, vale para todas):** no
+  "Experimente", se o cartão inteiro não cabe ao lado do alvo (paisagem
+  baixa), ele fica compacto: o "No F12 de verdade" recolhe num item que
+  abre ao toque. Sem lugar nem assim, o cartão vai para o canto que menos
+  cobre o alvo, em vez do meio. Antes, em paisagem, o cartão cobria o
+  botão de Compilar e o de Rodar uma linha: o aluno só podia pular.
+- **`testes/museu.mjs`:** no toque, a bancada de portões é ampliada (150%)
+  e arrastada com dois dedos até a peça antes de tocar, como em
+  `circuito.mjs` (a 100%, no celular em pé, as áreas de 44 px das portas
+  de portões vizinhos se cobrem: é o mesmo comportamento da bancada da
+  Lógica).
+
 ### Decisões tomadas sem regra clara
 
 - A ordem das salas segue o mapa curricular (a parte 1 tinha trocado 4 e
@@ -113,4 +131,20 @@ principal depois do merge da rodada 37.
 
 ### Validação
 
-(preenchida no fim da rodada)
+- `npm run testar:conteudo`: 51 arquivos, 23.181 testes verdes (com o
+  Python de verdade, pelo Pyodide no Node).
+- `npm run lint` e `npm run build` verdes.
+- `testes/museu.mjs` (as seis salas jogadas pela interface, o coral, os
+  cabos, os portões, o pacote, a cidade e a insígnia) verde nos três
+  layouts, no servidor de desenvolvimento e no de produção.
+- Bateria completa (`PARALELO=4`, servidor de produção): 205 execuções,
+  200 verdes e 5 falhas.
+  - `museu.mjs` nos três layouts: a checagem de que a insígnia fica
+    guardada lia o progresso logo que a medalha aparecia, e a revelação
+    grava cerca de 1 s depois. O teste passou a esperar o registro; os
+    três, rodados de novo: verdes.
+  - `algoritmos.mjs paisagem 3`: tempo esgotado com quatro navegadores ao
+    mesmo tempo (a pendência "Testes sob carga"). Rodado de novo: verde.
+  - `unidades.mjs retrato`: o duplo toque da U4F1
+    (`editarValorAtributo`, linha 167), a pendência já registrada na
+    rodada 36.
