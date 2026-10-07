@@ -2,13 +2,21 @@
  * Testes de todo o conteúdo: cada regra de src/conteudo/checagens.ts vira
  * um teste por fase. A mensagem de falha diz a fase, a regra e o motivo.
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { REGRAS_DE_FASE, REGRAS_GERAIS } from "@/conteudo/checagens";
 import { FASES, UNIDADES } from "@/conteudo";
 import { ITENS_REVISAO } from "@/conteudo/revisao";
 import { faseDoItem } from "@/conteudo/revisao/faseDoItem";
 import { semProblemas } from "./ajuda";
 import { cenasRepetidas } from "@/motor/cena/ritmo";
+import { carregarPythonNode } from "@/motor/linguagens/python/node";
+import { definirPythonSincrono } from "@/motor/linguagens/sincrono";
+
+// O comparador do museu (sala 3) roda Python de verdade: as simulações usam o Pyodide do Node.
+beforeAll(async () => {
+  definirPythonSincrono(await carregarPythonNode());
+}, 60_000);
+afterAll(() => definirPythonSincrono(null));
 
 const contexto = { unidades: UNIDADES, fases: FASES };
 

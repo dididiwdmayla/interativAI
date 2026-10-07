@@ -20,11 +20,20 @@
  *   `plaquinhas`, as frases do "o que mudou" ficam soltas para o aluno
  *   pendurar no cartão certo.
  *
+ * - Salas 3 a 6 (rodada 38): "comparador", "ligar", "ordem", "circuito" e
+ *   as simulações (traducao, memoria, processador, sistema, arquivos,
+ *   clique, pacote, aba-rede, cidade), cada uma no seu arquivo.
+ *
  * Puro (sem React): a tela, a simulação dos testes, os validadores e as
  * checagens usam as mesmas funções. As mudanças devolvem um estado novo
  * (ou null quando a mudança não existe: estação, linha ou cartão errado).
  */
 import type { Acao } from "@/conteudo/tipos";
+import * as cartoes from "./cartoes";
+import * as circuitoMuseu from "./circuitoMuseu";
+import * as comparador from "./comparador";
+import { ehObjeto } from "./comum";
+import { ehTipoSimulacao, type EstacaoSimulacao, estadoDaSimulacaoCabe, type EstadoSimulacao, modeloDa, SIMULACOES, type TipoSimulacao } from "./simulacoes";
 
 /** Os antepassados do computadorzinho, na ordem do corredor (das épocas). */
 export const IDS_ANTEPASSADOS = ["tecela", "engrenagens", "valvulas", "terminal", "pc", "internet", "celular", "computadorzinho"] as const;
@@ -133,7 +142,29 @@ export type EstacaoLinhaDoTempo = {
   plaquinhas?: boolean;
 };
 
-export type Estacao = EstacaoTear | EstacaoBits | EstacaoCamadas | EstacaoCor | EstacaoLinhaDoTempo;
+/*
+ * As estações das salas 3 a 6 (rodada 38): o comparador de linguagens
+ * (comparador.ts), os cartões de ligar e de ordem (cartoes.ts), o circuito
+ * do gigante e dos portões (circuitoMuseu.ts) e as simulações por comando
+ * e marco (simulacoes/).
+ */
+export type EstacaoComparador = comparador.EstacaoComparador;
+export type EstacaoLigar = cartoes.EstacaoLigar;
+export type EstacaoOrdem = cartoes.EstacaoOrdem;
+export type EstacaoCircuito = circuitoMuseu.EstacaoCircuito;
+export type { EstacaoSimulacao, EstadoSimulacao, TipoSimulacao };
+
+export type Estacao =
+  | EstacaoTear
+  | EstacaoBits
+  | EstacaoCamadas
+  | EstacaoCor
+  | EstacaoLinhaDoTempo
+  | EstacaoComparador
+  | EstacaoLigar
+  | EstacaoOrdem
+  | EstacaoCircuito
+  | EstacaoSimulacao;
 
 export type TipoEstacao = Estacao["tipo"];
 
@@ -166,7 +197,22 @@ export type EstadoCamadas = { tipo: "camadas"; abertas: number; escolhida: strin
 export type EstadoCor = { tipo: "cor"; hex: string };
 export type EstadoLinhaDoTempo = { tipo: "linha-do-tempo"; linha: string[]; plaquinhas: Record<string, string> };
 
-export type EstadoEstacao = EstadoTear | EstadoBits | EstadoCamadas | EstadoCor | EstadoLinhaDoTempo;
+export type EstadoComparador = comparador.EstadoComparador;
+export type EstadoLigar = cartoes.EstadoLigar;
+export type EstadoOrdem = cartoes.EstadoOrdem;
+export type EstadoCircuito = circuitoMuseu.EstadoCircuito;
+
+export type EstadoEstacao =
+  | EstadoTear
+  | EstadoBits
+  | EstadoCamadas
+  | EstadoCor
+  | EstadoLinhaDoTempo
+  | EstadoComparador
+  | EstadoLigar
+  | EstadoOrdem
+  | EstadoCircuito
+  | EstadoSimulacao;
 
 /** O estado de cada estação (pelo id) e a estação aberta agora. */
 export type EstadoExposicao = { estacoes: Record<string, EstadoEstacao>; aberta: string };
@@ -192,6 +238,16 @@ export function estadoInicialDaEstacao(estacao: Estacao): EstadoEstacao {
       return { tipo: "cor", hex: normalizarHex(estacao.inicial) ?? "#000000" };
     case "linha-do-tempo":
       return { tipo: "linha-do-tempo", linha: [...(estacao.fixos ?? [])], plaquinhas: {} };
+    case "comparador":
+      return comparador.estadoInicialComparador();
+    case "ligar":
+      return cartoes.estadoInicialLigar();
+    case "ordem":
+      return cartoes.estadoInicialOrdem();
+    case "circuito":
+      return circuitoMuseu.estadoInicialCircuito(estacao);
+    default:
+      return modeloDa(estacao).inicial(estacao);
   }
 }
 
@@ -246,6 +302,37 @@ function estadoCabe(estacao: Estacao, estado: EstadoEstacao): boolean {
       const ids = new Set((estacao as EstacaoLinhaDoTempo).eventos.map((evento) => evento.id));
       return estado.linha.every((id) => ids.has(id)) && Object.entries(estado.plaquinhas).every(([cartao, plaquinha]) => ids.has(cartao) && ids.has(plaquinha));
     }
+    case "comparador":
+      return comparador.comparadorCabe(estacao as EstacaoComparador, estado);
+    case "ligar":
+      return cartoes.ligarCabe(estacao as EstacaoLigar, estado);
+    case "ordem":
+      return cartoes.ordemCabe(estacao as EstacaoOrdem, estado);
+    case "circuito":
+      return circuitoMuseu.circuitoCabe(estacao as EstacaoCircuito, estado);
+    default:
+      return estadoDaSimulacaoCabe(estacao as EstacaoSimulacao, estado);
+  }
+}
+
+/**
+ * Lê o estado salvo de uma estação das salas 3 a 6 (só a forma: a fase
+ * confere contra os dados ao abrir). As das salas 1 e 2 são lidas em
+ * src/lib/progresso.ts.
+ */
+export function lerEstadoDeEstacaoNova(valor: unknown): EstadoEstacao | null {
+  if (!ehObjeto(valor) || typeof valor.tipo !== "string") return null;
+  switch (valor.tipo) {
+    case "comparador":
+      return comparador.lerEstadoComparador(valor);
+    case "ligar":
+      return cartoes.lerEstadoLigar(valor);
+    case "ordem":
+      return cartoes.lerEstadoOrdem(valor);
+    case "circuito":
+      return circuitoMuseu.lerEstadoCircuito(valor);
+    default:
+      return ehTipoSimulacao(valor.tipo) ? SIMULACOES[valor.tipo].ler(valor) : null;
   }
 }
 
@@ -517,7 +604,26 @@ export function resumoDaEstacao(estacao: Estacao, estado: EstadoEstacao | null):
       return `${estacao.titulo}: ${estado.hex}`;
     case "linha-do-tempo":
       return `${estacao.titulo}: ${estado.linha.length ? estado.linha.join(" > ") : "linha vazia"}`;
+    case "comparador":
+      return `${estacao.titulo}: ${estado.rodadas.length ? `rodou ${estado.rodadas.join(", ")}` : "nada rodou"}${estado.acesa ? `, parte ${estado.acesa.parte} acesa` : ""}`;
+    case "ligar":
+      return `${estacao.titulo}: ${Object.keys(estado.ligacoes).length} cartão(ões) ligado(s)`;
+    case "ordem":
+      return `${estacao.titulo}: ${estado.fila.length ? estado.fila.join(" > ") : "fila vazia"}`;
+    case "circuito":
+      return `${estacao.titulo}: ${estado.circuito.pecas.length} peças, ${estado.circuito.fios.length} fio(s)`;
+    default:
+      return estacao.tipo === estado.tipo ? modeloDa(estacao as EstacaoSimulacao).resumo(estacao as EstacaoSimulacao, estado) : `${estacao.titulo}: sem estado`;
   }
+}
+
+/** Os marcos de agora de uma estação de simulação (o validador marcoNaEstacao). */
+export function marcosDaEstacao(estacao: EstacaoSimulacao, estado: EstadoSimulacao): string[] {
+  return modeloDa(estacao).marcos(estacao, estado);
+}
+
+export function ehEstacaoSimulacao(estacao: Estacao): estacao is EstacaoSimulacao {
+  return ehTipoSimulacao(estacao.tipo);
 }
 
 /* ------------------------------------------------------------------ ações */
@@ -533,6 +639,15 @@ export const TIPOS_ACAO_EXPOSICAO = [
   "porNaLinha",
   "tirarDaLinha",
   "pendurarPlaquinha",
+  "rodarLinguagem",
+  "cantarCoral",
+  "tocarParte",
+  "escreverNaLinguagem",
+  "ligarCartao",
+  "porNaOrdem",
+  "tirarDaOrdem",
+  "mexerNoCircuito",
+  "comandoNaEstacao",
 ] as const;
 
 export type AcaoExposicao = Extract<Acao, { tipo: (typeof TIPOS_ACAO_EXPOSICAO)[number] }>;
@@ -541,7 +656,7 @@ export function ehAcaoExposicao(acao: Acao): acao is AcaoExposicao {
   return (TIPOS_ACAO_EXPOSICAO as readonly string[]).includes(acao.tipo);
 }
 
-/** O tipo de estação que cada ação pede (abrirEstacao serve para qualquer uma). */
+/** O tipo de estação que cada ação pede (abrirEstacao serve para qualquer uma; comandoNaEstacao, para qualquer simulação). */
 export const ESTACAO_DA_ACAO: Record<AcaoExposicao["tipo"], TipoEstacao | null> = {
   abrirEstacao: null,
   furarCartao: "tear",
@@ -552,7 +667,50 @@ export const ESTACAO_DA_ACAO: Record<AcaoExposicao["tipo"], TipoEstacao | null> 
   porNaLinha: "linha-do-tempo",
   tirarDaLinha: "linha-do-tempo",
   pendurarPlaquinha: "linha-do-tempo",
+  rodarLinguagem: "comparador",
+  cantarCoral: "comparador",
+  tocarParte: "comparador",
+  escreverNaLinguagem: "comparador",
+  ligarCartao: "ligar",
+  porNaOrdem: "ordem",
+  tirarDaOrdem: "ordem",
+  mexerNoCircuito: "circuito",
+  comandoNaEstacao: null,
 };
+
+/** A estação do tipo pedido com o estado dela (null se não existe ou é de outro tipo). */
+function parDo<T extends TipoEstacao>(
+  dados: DadosExposicao,
+  estado: EstadoExposicao,
+  id: string,
+  tipo: T,
+): { estacao: Extract<Estacao, { tipo: T }>; atual: Extract<EstadoEstacao, { tipo: T }> } | null {
+  const estacao = estacaoDo(dados, id);
+  const atual = estado.estacoes[id];
+  if (!estacao || estacao.tipo !== tipo || !atual || atual.tipo !== tipo) return null;
+  return { estacao: estacao as Extract<Estacao, { tipo: T }>, atual: atual as Extract<EstadoEstacao, { tipo: T }> };
+}
+
+function mudar<T extends TipoEstacao>(
+  dados: DadosExposicao,
+  estado: EstadoExposicao,
+  id: string,
+  tipo: T,
+  mudanca: (estacao: Extract<Estacao, { tipo: T }>, atual: Extract<EstadoEstacao, { tipo: T }>) => EstadoEstacao | null,
+): EstadoExposicao | null {
+  const par = parDo(dados, estado, id, tipo);
+  const novo = par ? mudanca(par.estacao, par.atual) : null;
+  return novo ? comEstacao(estado, id, novo) : null;
+}
+
+/** Um comando numa estação de simulação. */
+export function comandoNaEstacao(dados: DadosExposicao, estado: EstadoExposicao, id: string, comando: string): EstadoExposicao | null {
+  const estacao = estacaoDo(dados, id);
+  const atual = estado.estacoes[id];
+  if (!estacao || !ehEstacaoSimulacao(estacao) || !atual || atual.tipo !== estacao.tipo) return null;
+  const novo = modeloDa(estacao).comando(estacao, atual as EstadoSimulacao, comando);
+  return novo ? comEstacao(estado, id, novo) : null;
+}
 
 /**
  * Aplica uma ação da exposição: o estado novo (que também abre a estação
@@ -587,6 +745,33 @@ export function aplicarAcaoExposicao(dados: DadosExposicao, estado: EstadoExposi
       break;
     case "pendurarPlaquinha":
       novo = pendurarPlaquinha(dados, estado, acao.estacao, acao.evento, acao.plaquinha);
+      break;
+    case "rodarLinguagem":
+      novo = mudar(dados, estado, acao.estacao, "comparador", (e, a) => comparador.rodarNoComparador(e, a, acao.linguagem));
+      break;
+    case "cantarCoral":
+      novo = mudar(dados, estado, acao.estacao, "comparador", (e, a) => comparador.cantarCoral(e, a));
+      break;
+    case "tocarParte":
+      novo = mudar(dados, estado, acao.estacao, "comparador", (e, a) => comparador.tocarParte(e, a, acao.parte, acao.linguagem));
+      break;
+    case "escreverNaLinguagem":
+      novo = mudar(dados, estado, acao.estacao, "comparador", (e, a) => comparador.escreverNoComparador(e, a, acao.linguagem, acao.codigo));
+      break;
+    case "ligarCartao":
+      novo = mudar(dados, estado, acao.estacao, "ligar", (e, a) => cartoes.ligarCartao(e, a, acao.cartao, acao.alvo));
+      break;
+    case "porNaOrdem":
+      novo = mudar(dados, estado, acao.estacao, "ordem", (e, a) => cartoes.porNaOrdem(e, a, acao.item, acao.posicao));
+      break;
+    case "tirarDaOrdem":
+      novo = mudar(dados, estado, acao.estacao, "ordem", (e, a) => cartoes.tirarDaOrdem(e, a, acao.item));
+      break;
+    case "mexerNoCircuito":
+      novo = mudar(dados, estado, acao.estacao, "circuito", (e, a) => circuitoMuseu.mexerNoCircuito(e, a, acao.mudanca));
+      break;
+    case "comandoNaEstacao":
+      novo = comandoNaEstacao(dados, estado, acao.estacao, acao.comando);
       break;
   }
   return novo ? { ...novo, aberta: acao.estacao } : null;

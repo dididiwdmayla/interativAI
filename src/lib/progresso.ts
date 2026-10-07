@@ -1,7 +1,7 @@
 import { type Acessorio, ACESSORIOS, type AparenciaCliente, CABELOS, CORES_CABELO, CORES_ROUPA, PELES, ROUPAS } from "@/motor/contrato/clientes";
 import type { Circuito, Fio, Peca } from "@/motor/circuito/modelo";
 import type { EstadoOrdenar } from "@/motor/ordenar/modelo";
-import type { EstadoEstacao, EstadoExposicao } from "@/motor/exposicao/modelo";
+import { type EstadoEstacao, type EstadoExposicao, lerEstadoDeEstacaoNova } from "@/motor/exposicao/modelo";
 import type { EscolhaRequisitos, EstadoContrato, EtapaContrato } from "@/motor/contrato/modelo";
 import { type EstadoCasos, MAXIMO_CASOS, MAXIMO_TEXTO_CASO, type ResultadoCaso } from "@/motor/casos/modelo";
 import { ehIdFerramenta, type IdFerramenta } from "@/ferramentas/ids";
@@ -136,6 +136,11 @@ export type Progresso = {
    * árvore da família (depois da sala 2). null enquanto o lugar está vazio.
    */
   proximaGeracao: RetratoDoAluno | null;
+  /**
+   * Museu das Origens: o aluno já viu a insígnia da história no retrato (as
+   * seis salas concluídas). Só para a revelação tocar uma vez.
+   */
+  insigniaDoMuseu: boolean;
 };
 
 /** O retrato do aluno na árvore da família: as peças do kit e a assinatura. */
@@ -203,6 +208,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   ilhasComemoradas: [],
   revisao: REVISAO_PADRAO,
   proximaGeracao: null,
+  insigniaDoMuseu: false,
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -306,7 +312,8 @@ function lerEstacaoSalva(valor: unknown): EstadoEstacao | null {
       return { tipo: "linha-do-tempo", linha: [...new Set(listaDeTextos(valor.linha))].slice(0, 10), plaquinhas };
     }
     default:
-      return null;
+      // As estações das salas 3 a 6: cada modelo lê a sua forma.
+      return lerEstadoDeEstacaoNova(valor);
   }
 }
 
@@ -485,6 +492,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     ilhasComemoradas: [...new Set(listaDeTextos(bruto.ilhasComemoradas))],
     revisao: lerEstadoRevisao(bruto.revisao),
     proximaGeracao: lerRetratoDoAluno(bruto.proximaGeracao),
+    insigniaDoMuseu: bruto.insigniaDoMuseu === true,
   };
 }
 

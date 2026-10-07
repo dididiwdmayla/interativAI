@@ -77,7 +77,8 @@ do computadorzinho, que acorda quando o aluno chega perto, e cada sala é
 uma unidade com exposições interativas (área `exposicao` da tela composta,
 guia, seção 32) e um pequeno desafio no fim. No fim do corredor, depois do
 computadorzinho, fica o lugar da próxima geração: quem termina a sala 2
-entra na árvore da família.
+entra na árvore da família, e quem termina as seis ganha a insígnia da
+história no retrato.
 
 Salas, na ordem do corredor (as salas 4 e 6 trocaram de lugar na rodada
 36, antes de ter conteúdo, para o corredor seguir as épocas e as salas 3 a
@@ -93,26 +94,33 @@ Salas, na ordem do corredor (as salas 4 e 6 trocaram de lugar na rodada
    a sonhadora de engrenagens): dos cartões perfurados à IA, pondo
    acontecimentos e máquinas na ordem e descobrindo o que cada um mudou.
    Fatos conferidos; sem datas inventadas (na dúvida, a década).
-3. **Por que existem tantas linguagens** (`origens-museu-u3`, anfitrião: o
-   terminal verde): o mesmo programa em várias linguagens, lado a lado,
-   rodando. **Requer motor:** comparador de linguagens executável.
-4. **Por baixo do capô** (`origens-museu-u4`, anfitrião: o computador
-   pessoal bege, com o gigante de válvulas de visita): memória,
-   processador, sistema operacional e arquivos, e os **quebra-cabeças
-   maiores com portões lógicos** (ideia aprovada na rodada 12): somar dois
-   números só com portões E, OU e NÃO e montar uma memória simples com
-   realimentação (a saída voltando para a entrada, o mesmo princípio do
-   selo da contatora dos comandos elétricos). O tipo de fase
-   `circuito-logico` ficou pronto na rodada 17, já com realimentação; o
-   binário e o hexadecimal foram para a sala 1. **Requer motor:** a
-   exposição "o computador aberto" (peças que se tocam e se explicam).
-5. **Front, back e o caminho de um clique** (`origens-museu-u5`,
-   anfitriã: a internet): visão geral, dos cabos e servidores aos pacotes.
-   **Requer motor:** diagrama de rede.
-6. **Onde a programação vive** (`origens-museu-u6`, anfitrião: o
-   celular): o dia a dia e as carreiras (ponte para a zona Carreira do
-   Ofício). **Requer motor:** a exposição "o dia de alguém" (apps e
-   aparelhos que se abrem para mostrar o código de dentro).
+3. **Por que existem tantas linguagens** (`origens-museu-u3`, pronta na
+   rodada 38, anfitrião: o terminal verde): a conta da padaria em seis
+   linguagens no comparador (JavaScript e Python rodando de verdade, C,
+   Java, COBOL e BASIC simulados) e o coral dos antepassados; cada
+   linguagem no seu serviço; o mesmo laço em quatro linguagens (o Python
+   editado e rodado); compilar ou interpretar e a escada do baixo ao alto
+   nível; desafio do frete.
+4. **Por baixo do capô** (`origens-museu-u4`, pronta na rodada 38,
+   anfitrião: o computador pessoal bege, com o gigante de válvulas de
+   visita): caixas com endereço (memória), o processador de brinquedo no
+   ciclo buscar, entender, executar, o gerente (sistema operacional),
+   arquivos e pastas como árvore (ponte com Estruturas de dados), os cabos
+   do gigante (o meio somador plugado à mão) e os portões por dentro (o
+   somador só com E, OU e NÃO, e a memória com realimentação, o selo da
+   contatora); desafio do computador inteiro.
+5. **Front, back e o caminho de um clique** (`origens-museu-u5`, pronta na
+   rodada 38, anfitriã: a internet): o caminho de um clique com o DNS, os
+   roteadores e o servidor, e os cenários de quebra (DNS fora, servidor
+   lento); a ordem das etapas e front ou back; um pacote pelo oceano do
+   próprio mapa, pelos cabos submarinos entre as ilhas; a prévia da aba
+   Rede (porta da Ilha Rede e Servidor); desafio do site que não abria.
+6. **Onde a programação vive** (`origens-museu-u6`, pronta na rodada 38,
+   anfitrião: o celular): a cidade com código em todo lugar (semáforo,
+   caixa eletrônico, app do banco, padaria, carro, ponto de ônibus) e quem
+   programa cada um, com a ponte para a tela de Profissões; desafio de quem
+   programa o quê. Com as seis salas, o retrato do aluno na árvore ganha a
+   insígnia da história.
 
 O gigante de válvulas (anos 1940) não tem sala própria: aparece de visita
 nas salas 1 e 4 e guarda o corredor entre as engrenagens e o terminal.

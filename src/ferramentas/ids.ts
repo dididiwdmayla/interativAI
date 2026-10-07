@@ -78,6 +78,20 @@ export const IDS_FERRAMENTAS = [
   "camadas-da-maquina",
   "mesa-de-cores",
   "linha-do-tempo-museu",
+  // Salas 3 a 6 do museu (rodada 38)
+  "comparador-de-linguagens",
+  "cartoes-de-ligar",
+  "ordem-dos-cartoes",
+  "compilar-interpretar",
+  "caixas-da-memoria",
+  "processador-de-brinquedo",
+  "gerente-do-sistema",
+  "arvore-de-pastas",
+  "painel-de-cabos",
+  "caminho-do-clique",
+  "mapa-dos-cabos",
+  "aba-rede-previa",
+  "cidade-do-codigo",
 ] as const;
 
 export type IdFerramenta = (typeof IDS_FERRAMENTAS)[number];

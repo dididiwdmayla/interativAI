@@ -9,11 +9,18 @@
  */
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { it } from "vitest";
+import { beforeAll, it } from "vitest";
 import { FASES, UNIDADES } from "@/conteudo";
 import { checarTudo } from "@/conteudo/checagens";
 import { conferirPublicados, montarPublicados, PUBLICADOS } from "@/conteudo/publicados";
 import { ITENS_REVISAO } from "@/conteudo/revisao";
+import { carregarPythonNode } from "@/motor/linguagens/python/node";
+import { definirPythonSincrono } from "@/motor/linguagens/sincrono";
+
+// O comparador do museu roda Python de verdade: as checagens simulam com o Pyodide do Node.
+beforeAll(async () => {
+  definirPythonSincrono(await carregarPythonNode());
+}, 60_000);
 
 // O npm roda os scripts na raiz do projeto (no jsdom, import.meta.url não é file:).
 const ARQUIVO = resolve(process.cwd(), "src/conteudo/publicados.json");

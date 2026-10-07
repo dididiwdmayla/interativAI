@@ -113,6 +113,20 @@ export function ferramentaDaAcao(acao: Acao): IdFerramenta | null {
     case "tirarDaLinha":
     case "pendurarPlaquinha":
       return "linha-do-tempo-museu";
+    case "rodarLinguagem":
+    case "cantarCoral":
+    case "tocarParte":
+    case "escreverNaLinguagem":
+      return "comparador-de-linguagens";
+    case "ligarCartao":
+      return "cartoes-de-ligar";
+    case "porNaOrdem":
+    case "tirarDaOrdem":
+      return "ordem-dos-cartoes";
+    case "mexerNoCircuito":
+      return "painel-de-cabos";
+    // A ferramenta de um comando depende do tipo da estação (FERRAMENTA_DA_ESTACAO).
+    case "comandoNaEstacao":
     case "abrirEstacao":
       return null;
   }

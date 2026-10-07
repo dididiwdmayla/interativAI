@@ -23,7 +23,7 @@ import { BotaoVoltarAoMundo } from "@/componentes/mapa/ilha/TelaIlha";
 import { Mascote } from "@/componentes/mascote/Mascote";
 import { ilhaDoId } from "@/curriculo";
 import { atualizarProgresso, useProgresso, useProgressoCarregado } from "@/lib/armazemProgresso";
-import { epocasDoCorredor, proximaGeracaoAberta } from "@/lib/museu";
+import { epocasDoCorredor, museuCompleto, proximaGeracaoAberta } from "@/lib/museu";
 import type { RetratoDoAluno } from "@/lib/progresso";
 import { useMontado } from "@/lib/useMontado";
 import { FICHAS_ANTEPASSADOS } from "@/motor/exposicao/antepassados";
@@ -184,6 +184,23 @@ export function CorredorMuseu({ ilhaId }: Props) {
     return () => clearTimeout(espera);
   }, [aberta, carregado, irParaArvore, retrato]);
 
+  /* ---------------------------------------------------------------- a insígnia da história */
+  // As seis salas concluídas: o retrato ganha a medalha (a revelação toca uma vez só, guardada no progresso).
+  const completo = museuCompleto(progresso);
+  const jaViuInsignia = progresso.insigniaDoMuseu;
+  const [revelandoInsignia, setRevelandoInsignia] = useState(false);
+  useEffect(() => {
+    if (!carregado || !completo || !retrato || jaViuInsignia) return;
+    const espera = setTimeout(() => {
+      setRevelandoInsignia(true);
+      atualizarProgresso((atual) => ({ ...atual, insigniaDoMuseu: true }));
+      tocarEfeito("insignia");
+      setGuia("Olha o seu retrato! A medalha da história: você conhece a família inteira, do tear até mim.");
+      irParaArvore();
+    }, festa ? 9000 : 900);
+    return () => clearTimeout(espera);
+  }, [carregado, completo, festa, irParaArvore, jaViuInsignia, retrato]);
+
   const entrarParaFamilia = (novo: Omit<RetratoDoAluno, "desde">) => {
     const primeiraVez = !retrato;
     atualizarProgresso((atual) => ({ ...atual, proximaGeracao: { ...novo, desde: atual.proximaGeracao?.desde ?? Date.now() } }));
@@ -259,6 +276,8 @@ export function CorredorMuseu({ ilhaId }: Props) {
                   festa={festa}
                   animar={animar}
                   aoOcupar={() => setCriando(true)}
+                  completo={completo}
+                  revelarInsignia={revelandoInsignia}
                   aoTerminarFesta={() => setGuia("Cada um da família deixou alguma coisa para o próximo. Agora você também programa. A próxima invenção pode ser sua.")}
                 />
               </div>

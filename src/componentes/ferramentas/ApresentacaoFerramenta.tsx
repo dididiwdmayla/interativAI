@@ -85,13 +85,13 @@ function uniao(caixas: readonly Caixa[]): Caixa | null {
 /** Fração da altura da tela acima da qual as áreas extras não entram na conta do cartão. */
 const LIMITE_AREA_LIVRE = 0.75;
 
-/** Lugar do cartão do mascote: ao lado do alvo, sem cobri-lo, se couber. */
-function posicionarCartao(alvo: Caixa | null, largura: number, altura: number): { x: number; y: number } {
+/** Lugar do cartão do mascote: ao lado do alvo, sem cobri-lo, se couber (cabe diz se coube). */
+function posicionarCartao(alvo: Caixa | null, largura: number, altura: number): { x: number; y: number; cabe: boolean } {
   const telaL = window.innerWidth;
   const telaA = window.innerHeight;
   const limitarX = (x: number) => Math.min(Math.max(MARGEM, x), telaL - largura - MARGEM);
   const limitarY = (y: number) => Math.min(Math.max(MARGEM, y), telaA - altura - MARGEM);
-  if (!alvo) return { x: limitarX((telaL - largura) / 2), y: limitarY((telaA - altura) / 2) };
+  if (!alvo) return { x: limitarX((telaL - largura) / 2), y: limitarY((telaA - altura) / 2), cabe: true };
 
   const lados = {
     direita: { x: alvo.x + alvo.largura + MARGEM, y: limitarY(alvo.y), cabe: alvo.x + alvo.largura + MARGEM + largura <= telaL - MARGEM },
@@ -104,11 +104,19 @@ function posicionarCartao(alvo: Caixa | null, largura: number, altura: number): 
     ? (["abaixo", "acima", "direita", "esquerda"] as const)
     : (["direita", "esquerda", "abaixo", "acima"] as const);
   for (const lado of ordem) {
-    if (lados[lado].cabe) return { x: lados[lado].x, y: lados[lado].y };
+    if (lados[lado].cabe) return { x: lados[lado].x, y: lados[lado].y, cabe: true };
   }
-  // Alvo grande demais: o cartão vai para a borda mais longe do centro dele.
+  // Não coube de nenhum lado: o cartão vai para a borda mais longe do centro do alvo, no canto
+  // (ou no meio) que cobre menos dele. Em empate, fica no meio.
   const centro = alvo.y + alvo.altura / 2;
-  return { x: limitarX((telaL - largura) / 2), y: centro > telaA / 2 ? MARGEM : telaA - altura - MARGEM };
+  const y = centro > telaA / 2 ? MARGEM : telaA - altura - MARGEM;
+  const cobre = (x: number) =>
+    Math.max(0, Math.min(x + largura, alvo.x + alvo.largura) - Math.max(x, alvo.x)) *
+    Math.max(0, Math.min(y + altura, alvo.y + alvo.altura) - Math.max(y, alvo.y));
+  const x = [limitarX((telaL - largura) / 2), limitarX(MARGEM), limitarX(telaL - largura - MARGEM)].reduce((melhor, candidato) =>
+    cobre(candidato) < cobre(melhor) ? candidato : melhor,
+  );
+  return { x, y, cabe: false };
 }
 
 /**
@@ -276,6 +284,11 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
   const areaDoCartao =
     areaLivre && areaLivre.altura <= window.innerHeight * LIMITE_AREA_LIVRE ? areaLivre : caixa;
   const posicao = posicionarCartao(areaDoCartao, tamanhoCartao.largura, tamanhoCartao.altura);
+  // No "Experimente", se o cartão inteiro não cabe ao lado do alvo (tela deitada e baixa), ele
+  // fica compacto: o "No F12 de verdade" recolhe e o cartão para de cobrir o que é para tocar.
+  // Uma vez compacto, fica (sem ir e voltar a cada medida).
+  const [compacto, setCompacto] = useState(false);
+  if (experimentando && !comemorando && caixa && !posicao.cabe && !compacto) setCompacto(true);
   // Desliga o hit-test antes do primeiro paint de uma posição nova. A
   // transição CSS pode começar depois do touchstart; esperar transitionrun
   // deixaria um quadro em que o cartão ainda engole o click do alvo.
@@ -402,9 +415,16 @@ export function ApresentacaoFerramenta({ ferramenta, toque, aoPreparar, aoConclu
                     <p className="text-[15px] font-bold leading-snug">
                       <span className="text-primaria">Experimente:</span> {ferramenta.experimente[modo]}
                     </p>
-                    <p className="rounded-xl bg-painel px-3 py-2 text-sm leading-snug">
-                      <span className="font-black">No F12 de verdade:</span> {ferramenta.noF12DeVerdade}
-                    </p>
+                    {compacto ? (
+                      <details className="rounded-xl bg-painel px-3 py-1.5 text-sm leading-snug" data-f12-recolhido>
+                        <summary className="cursor-pointer font-black">No F12 de verdade</summary>
+                        {ferramenta.noF12DeVerdade}
+                      </details>
+                    ) : (
+                      <p className="rounded-xl bg-painel px-3 py-2 text-sm leading-snug">
+                        <span className="font-black">No F12 de verdade:</span> {ferramenta.noF12DeVerdade}
+                      </p>
+                    )}
                   </>
                 ) : (
                   <p className="text-[15px] font-bold leading-snug">{falas[passo]}</p>

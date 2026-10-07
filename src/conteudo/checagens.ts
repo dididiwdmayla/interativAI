@@ -16,7 +16,10 @@ import { CONTROLES_DEPURADOR, faseComDepurador, FERRAMENTAS_DO_DEPURADOR } from 
 import { destinosDo, umaOrdemValida } from "@/motor/ordenar/modelo";
 import { AREAS_TRABALHO, casosDaFase, cenaDaFase, exposicaoDaFase, faseComposta, quadroDaFase, temArea } from "@/motor/composicao";
 import { conferirDadosExposicao, FERRAMENTA_DA_ESTACAO } from "@/motor/exposicao/conferir";
-import { ehAcaoExposicao, ESTACAO_DA_ACAO, estacaoDo, normalizarHex, type TipoEstacao } from "@/motor/exposicao/modelo";
+import { ehAcaoExposicao, ehEstacaoSimulacao, ESTACAO_DA_ACAO, estacaoDo, normalizarHex, type TipoEstacao } from "@/motor/exposicao/modelo";
+import { linhasDeAgora, programaDa } from "@/motor/exposicao/comparador";
+import { modeloDa } from "@/motor/exposicao/simulacoes";
+import { nomeDa } from "@/motor/circuito/modelo";
 import { conferirCena, conferirValidadorDeCena } from "@/motor/cena/conferir";
 import { VALIDADORES_DE_CENA } from "@/motor/cena/validar";
 import { cenasRepetidasEntreUnidades, unidadesSemCena } from "@/motor/cena/ritmo";
@@ -244,6 +247,12 @@ const VALIDADORES_DE_EXPOSICAO: Partial<Record<Validador["tipo"], TipoEstacao>> 
   corHex: "cor",
   linhaEmOrdem: "linha-do-tempo",
   plaquinhasCertas: "linha-do-tempo",
+  linguagensRodadas: "comparador",
+  parteVista: "comparador",
+  cartoesLigados: "ligar",
+  ordemCerta: "ordem",
+  circuitoNaEstacao: "circuito",
+  circuitoLembra: "circuito",
 };
 
 /**
@@ -281,7 +290,14 @@ function conferirExposicaoDaFase(fase: Fase): string[] {
   for (const { onde, validador } of validadoresDe(fase)) {
     for (const item of achatarValidador(validador)) {
       const tipo = VALIDADORES_DE_EXPOSICAO[item.tipo];
-      if (!tipo || !("estacao" in item)) continue;
+      if (!tipo || !("estacao" in item)) {
+        if (item.tipo === "marcoNaEstacao") {
+          const estacao = estacaoDoTipo(`${onde} (marcoNaEstacao)`, item.estacao, null);
+          if (estacao && !ehEstacaoSimulacao(estacao)) problemas.push(`${onde}: marcoNaEstacao só vale numa simulação (a estação "${item.estacao}" é ${estacao.tipo})`);
+          else if (estacao && ehEstacaoSimulacao(estacao) && !modeloDa(estacao).marcoPossivel(estacao, item.marco)) problemas.push(`${onde}: o marco "${item.marco}" não existe em ${estacao.tipo} "${estacao.id}"`);
+        }
+        continue;
+      }
       const estacao = estacaoDoTipo(`${onde} (${item.tipo})`, item.estacao, tipo);
       if (!estacao) continue;
       if (item.tipo === "bitsValem" && estacao.tipo === "bits" && (!Number.isInteger(item.valor) || item.valor < 0 || item.valor >= 2 ** estacao.quantos)) {
@@ -306,6 +322,28 @@ function conferirExposicaoDaFase(fase: Fase): string[] {
       if (item.tipo === "tecidoIgual" && estacao.tipo === "tear") {
         for (const linha of item.linhas ?? []) if (!Number.isInteger(linha) || linha < 0 || linha >= estacao.modelo.length) problemas.push(`${onde}: tecidoIgual cita o cartão ${linha}, fora do tear`);
       }
+      if (item.tipo === "linguagensRodadas" && estacao.tipo === "comparador") {
+        for (const linguagem of item.linguagens ?? []) if (!programaDa(estacao, linguagem)) problemas.push(`${onde}: linguagensRodadas cita ${linguagem}, que não está no comparador`);
+      }
+      if (item.tipo === "parteVista" && estacao.tipo === "comparador") {
+        if (!estacao.partes.some((p) => p.id === item.parte)) problemas.push(`${onde}: parteVista cita a parte "${item.parte}", que não existe`);
+        for (const linguagem of item.linguagens ?? []) if (!programaDa(estacao, linguagem)) problemas.push(`${onde}: parteVista cita ${linguagem}, que não está no comparador`);
+      }
+      if (item.tipo === "cartoesLigados" && estacao.tipo === "ligar") {
+        for (const id of item.cartoes ?? []) if (!estacao.cartoes.some((c) => c.id === id)) problemas.push(`${onde}: cartoesLigados cita o cartão "${id}", que não existe`);
+      }
+      if (item.tipo === "ordemCerta" && estacao.tipo === "ordem") {
+        for (const id of item.itens ?? []) if (!estacao.itens.some((i) => i.id === id)) problemas.push(`${onde}: ordemCerta cita o item "${id}", que não existe`);
+      }
+      if ((item.tipo === "circuitoNaEstacao" || item.tipo === "circuitoLembra") && estacao.tipo === "circuito") {
+        const nomes = new Set(estacao.inicial.pecas.map(nomeDa));
+        const citados =
+          item.tipo === "circuitoLembra"
+            ? [item.saida, item.liga, item.desliga]
+            : [...(item.esperado ?? []).flatMap((l) => [...Object.keys(l.entradas), ...(typeof l.saida === "boolean" ? [] : Object.keys(l.saida))]), ...Object.keys(item.agora?.entradas ?? {}), ...Object.keys(item.agora?.saidas ?? {})];
+        for (const nome of new Set(citados)) if (!nomes.has(nome)) problemas.push(`${onde}: ${item.tipo} cita "${nome}", que não é chave nem saída do circuito`);
+        if (item.tipo === "circuitoNaEstacao" && !item.esperado && !item.agora) problemas.push(`${onde}: circuitoNaEstacao pede esperado ou agora`);
+      }
     }
   }
   for (const { onde, acoes } of [...acoesDoJogador(fase), ...acoesRoteirizadas(fase)]) {
@@ -324,6 +362,28 @@ function conferirExposicaoDaFase(fase: Fase): string[] {
         for (const id of ids) if (!estacao.eventos.some((e) => e.id === id)) problemas.push(`${onde}: ${acao.tipo} cita o cartão "${id}", que não existe`);
         if (acao.tipo !== "pendurarPlaquinha" && estacao.fixos?.includes(acao.evento)) problemas.push(`${onde}: ${acao.tipo} mexe no cartão fixo "${acao.evento}"`);
         if (acao.tipo === "pendurarPlaquinha" && !estacao.plaquinhas) problemas.push(`${onde}: pendurarPlaquinha pede plaquinhas: true na estação`);
+      }
+      if ((acao.tipo === "rodarLinguagem" || acao.tipo === "tocarParte" || acao.tipo === "escreverNaLinguagem") && estacao.tipo === "comparador") {
+        if (!programaDa(estacao, acao.linguagem)) problemas.push(`${onde}: ${acao.tipo} cita ${acao.linguagem}, que não está no comparador`);
+        if (acao.tipo === "escreverNaLinguagem" && estacao.editavel !== acao.linguagem) problemas.push(`${onde}: escreverNaLinguagem em ${acao.linguagem}, que não é a linguagem editável`);
+        if (acao.tipo === "tocarParte" && acao.parte !== null && !linhasDeAgora(estacao, { tipo: "comparador", rodadas: [], acesa: null, codigos: {}, coral: false }, acao.linguagem).some((l) => l.parte === acao.parte)) {
+          problemas.push(`${onde}: tocarParte "${acao.parte}" em ${acao.linguagem}, que não tem linha dessa parte`);
+        }
+      }
+      if (acao.tipo === "cantarCoral" && estacao.tipo === "comparador" && !estacao.coral) problemas.push(`${onde}: cantarCoral pede coral: true no comparador`);
+      if (acao.tipo === "ligarCartao" && estacao.tipo === "ligar") {
+        if (!estacao.cartoes.some((c) => c.id === acao.cartao)) problemas.push(`${onde}: ligarCartao cita o cartão "${acao.cartao}", que não existe`);
+        if (acao.alvo !== null && !estacao.alvos.some((a) => a.id === acao.alvo)) problemas.push(`${onde}: ligarCartao cita o alvo "${acao.alvo}", que não existe`);
+      }
+      if ((acao.tipo === "porNaOrdem" || acao.tipo === "tirarDaOrdem") && estacao.tipo === "ordem" && !estacao.itens.some((i) => i.id === acao.item)) problemas.push(`${onde}: ${acao.tipo} cita o item "${acao.item}", que não existe`);
+      if (acao.tipo === "mexerNoCircuito" && estacao.tipo === "circuito") {
+        const m = acao.mudanca;
+        if (m.tipo === "portao" && (estacao.aparencia === "cabos" || !estacao.paleta.includes(m.portao))) problemas.push(`${onde}: mexerNoCircuito põe um portão ${m.portao}, que não está na paleta`);
+        if (m.tipo === "chave" && !estacao.inicial.pecas.some((p) => p.id === m.entrada && p.tipo === "entrada")) problemas.push(`${onde}: mexerNoCircuito liga a chave "${m.entrada}", que não existe`);
+      }
+      if (acao.tipo === "comandoNaEstacao") {
+        if (!ehEstacaoSimulacao(estacao)) problemas.push(`${onde}: comandoNaEstacao só vale numa simulação (a estação "${acao.estacao}" é ${estacao.tipo})`);
+        else if (!modeloDa(estacao).comandoPossivel(estacao, acao.comando)) problemas.push(`${onde}: o comando "${acao.comando}" não existe em ${estacao.tipo} "${estacao.id}"`);
       }
     }
   }
@@ -1061,9 +1121,12 @@ const REGRAS_DE_DADOS: readonly RegraFase[] = [
       const problemas: string[] = [];
       const programa = fase.programa;
       const deCodigo = new Set(["valorVariavel", "respostaDoConsole", "saida", "semErro", "erroDoTipo", "usouSintaxe", "funcaoPassa"]);
+      // O comparador do museu roda JavaScript e Python de verdade: a saída e o erro valem nele (os validadores de saída).
+      const deSaida = new Set(["saida", "semErro", "erroDoTipo"]);
+      const comComparador = exposicaoDaFase(fase)?.estacoes.some((estacao) => estacao.tipo === "comparador") ?? false;
       for (const { onde, validador } of validadoresDe(fase)) {
         for (const item of achatarValidador(validador)) {
-          if (deCodigo.has(item.tipo) && !programa) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa (campo programa)`);
+          if (deCodigo.has(item.tipo) && !programa && !(comComparador && deSaida.has(item.tipo))) problemas.push(`${onde}: o validador ${item.tipo} só vale numa fase de programa (campo programa) ou com o comparador do museu (saida, semErro e erroDoTipo)`);
           if (programa && "seletor" in item) problemas.push(`${onde}: fase de programa não tem página; o validador ${item.tipo} olha a página`);
           if (item.tipo === "saida" && item.contem === undefined && item.igual === undefined) problemas.push(`${onde}: saida sem contem nem igual`);
           if (item.tipo === "funcaoPassa") {

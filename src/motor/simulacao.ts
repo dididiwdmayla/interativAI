@@ -43,6 +43,8 @@ import * as bancada from "./circuito/modelo";
 import { circuitoDaFase } from "./tiposDeFase";
 import { casosDaFase, cenaDaFase, exposicaoDaFase, quadroDaFase, temArea } from "./composicao";
 import * as museu from "./exposicao/modelo";
+import { codigoDaLinguagem, programaDa } from "./exposicao/comparador";
+import { executarNaLinguagemSincrono, resumoDaLinguagem } from "./linguagens/sincrono";
 import { cenariosDaFase } from "./cena/validar";
 import { type DadosCena, type RastroCena, rastroInicial } from "./cena/modelo";
 import * as casosDoAluno from "./casos/modelo";
@@ -421,6 +423,19 @@ export function criarSimulacao(fase: Fase) {
               const novo = museu.aplicarAcaoExposicao(dadosExposicao, exposicao, acao);
               if (!novo) return false;
               exposicao = novo;
+              // Comparador: como na tela, rodar gera executouCodigo com a saída (JavaScript e Python de verdade; as simuladas, a declarada).
+              if (acao.tipo === "rodarLinguagem" || acao.tipo === "cantarCoral") {
+                const estacao = museu.estacaoDo(dadosExposicao, acao.estacao);
+                const estado = novo.estacoes[acao.estacao];
+                if (estacao?.tipo === "comparador" && estado?.tipo === "comparador") {
+                  const linguagens = acao.tipo === "rodarLinguagem" ? [acao.linguagem] : estacao.programas.map((p) => p.linguagem);
+                  for (const linguagem of linguagens) {
+                    const programa = programaDa(estacao, linguagem);
+                    const resultado = executarNaLinguagemSincrono(linguagem, codigoDaLinguagem(estacao, estado, linguagem), programa?.saida ?? []);
+                    eventos.push({ tipo: "executouCodigo", execucao: resumoDaLinguagem(resultado) });
+                  }
+                }
+              }
               if (acao.tipo !== "abrirEstacao") eventos.push({ tipo: "mexeuNaExposicao", estacao: acao.estacao, acao: acao.tipo });
               return true;
             },

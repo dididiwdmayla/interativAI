@@ -62,6 +62,19 @@ export function epocasDoCorredor(progresso: Progresso, unidades: readonly Unidad
   });
 }
 
+/**
+ * O museu inteiro: todas as salas do corredor têm conteúdo e estão
+ * concluídas. O retrato do aluno na árvore ganha a insígnia da história.
+ */
+export function museuCompleto(progresso: Progresso, unidades: readonly Unidade[] = UNIDADES, curriculo: readonly IlhaCurriculo[] = CURRICULO): boolean {
+  const salas = ilhaDasOrigens(curriculo)?.zonas.flatMap((zona) => zona.unidades) ?? [];
+  if (!salas.length) return false;
+  return salas.every((item) => {
+    const sala = unidades.find((unidade) => unidade.id === item.id);
+    return sala !== undefined && unidadeConcluida(sala, progresso);
+  });
+}
+
 /** O lugar da próxima geração abriu: a sala 2 está concluída. */
 export function proximaGeracaoAberta(progresso: Progresso, unidades: readonly Unidade[] = UNIDADES): boolean {
   if (progresso.mapaDesbloqueado) return true;

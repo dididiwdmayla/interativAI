@@ -16,6 +16,7 @@ import { Botao } from "@/componentes/ui/Botao";
 import { FICHAS_ANTEPASSADOS, ORDEM_DO_CORREDOR, textoDeTerminal } from "@/motor/exposicao/antepassados";
 import type { IdAntepassado } from "@/motor/exposicao/modelo";
 import type { RetratoDoAluno } from "@/lib/progresso";
+import { InsigniaDaHistoria } from "./InsigniaDaHistoria";
 
 /** Quanto tempo cada parente leva para dar as boas-vindas, um depois do outro. */
 const MS_POR_BOAS_VINDAS = 950;
@@ -64,9 +65,13 @@ type Props = {
   aoOcupar: () => void;
   /** A família inteira já deu as boas-vindas (o fim da festa). */
   aoTerminarFesta?: () => void;
+  /** As seis salas do museu concluídas: o retrato ganha a insígnia da história. */
+  completo?: boolean;
+  /** A insígnia acabou de ser ganha: chega com animação. */
+  revelarInsignia?: boolean;
 };
 
-export function ArvoreDaFamilia({ aberta, retrato, festa, animar, aoOcupar, aoTerminarFesta }: Props) {
+export function ArvoreDaFamilia({ aberta, retrato, festa, animar, aoOcupar, aoTerminarFesta, completo = false, revelarInsignia = false }: Props) {
   // Da raiz para o alto: a tecelã embaixo, o computadorzinho em cima (a tela mostra de cima para baixo).
   const geracoes = [...ORDEM_DO_CORREDOR].reverse();
   const [falaram, setFalaram] = useState(festa ? 0 : geracoes.length);
@@ -97,7 +102,7 @@ export function ArvoreDaFamilia({ aberta, retrato, festa, animar, aoOcupar, aoTe
   const estado = retrato ? "ocupada" : aberta ? "aberta" : "vazia";
 
   return (
-    <section className="relative flex w-full flex-col items-center" aria-label="A árvore da família" data-arvore data-proxima-geracao={estado}>
+    <section className="relative flex w-full flex-col items-center" aria-label="A árvore da família" data-arvore data-proxima-geracao={estado} data-museu-completo={completo ? "sim" : "nao"}>
       {festa && (
         <svg className="pointer-events-none absolute inset-0 z-20 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {CONFETES.map((confete, i) => (
@@ -124,33 +129,52 @@ export function ArvoreDaFamilia({ aberta, retrato, festa, animar, aoOcupar, aoTe
           animate={estado === "vazia" ? { opacity: 0.15 } : animar && estado === "aberta" ? { opacity: [0.4, 0.95, 0.4] } : { opacity: 0.9 }}
           transition={estado === "aberta" && animar ? { duration: 2.2, repeat: Infinity } : { duration: 0.6 }}
         />
-        <div
-          className={`relative grid h-32 w-32 place-items-center overflow-hidden rounded-full border-4 ${retrato ? "border-[var(--cor-ante-latao)] bg-[var(--cor-museu-placa)]" : "border-dashed border-[var(--cor-museu-placa-borda)] bg-[var(--cor-museu-parede-sombra)]"}`}
-        >
-          <AnimatePresence mode="wait">
-            {retrato ? (
-              <motion.div
-                key="retrato"
-                initial={festa && animar ? { scale: 0.2, opacity: 0, y: 30 } : false}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 160, damping: 12, delay: festa ? 0.4 : 0 }}
-                className="translate-y-3"
-              >
-                <RetratoCliente aparencia={retrato.aparencia} nome={retrato.nome || "Você"} expressao={festa ? "empolgado" : "feliz"} tamanho={104} />
-              </motion.div>
-            ) : (
-              <motion.span key="vazio" className="text-4xl font-black text-[var(--cor-museu-placa-borda)]" aria-hidden="true">
-                ?
-              </motion.span>
-            )}
-          </AnimatePresence>
+        <div className="relative">
+          {/* Com o museu completo, o retrato ganha um anel de oito contas: a família inteira em volta dele. */}
+          {retrato && completo && (
+            <svg viewBox="0 0 100 100" className="pointer-events-none absolute -inset-2.5 h-[calc(100%+1.25rem)] w-[calc(100%+1.25rem)]" aria-hidden="true" data-anel-da-familia>
+              {ORDEM_DO_CORREDOR.map((id, i) => {
+                const angulo = -Math.PI / 2 + (Math.PI * 2 * i) / ORDEM_DO_CORREDOR.length;
+                return <circle key={id} cx={50 + Math.cos(angulo) * 47} cy={50 + Math.sin(angulo) * 47} r="2.4" fill={i % 2 ? "var(--cor-ante-fio-a)" : "var(--cor-ante-latao)"} stroke="var(--cor-ante-latao-sombra)" strokeWidth="0.6" />;
+              })}
+            </svg>
+          )}
+          <div
+            className={`relative grid h-32 w-32 place-items-center overflow-hidden rounded-full border-4 ${retrato ? "border-[var(--cor-ante-latao)] bg-[var(--cor-museu-placa)]" : "border-dashed border-[var(--cor-museu-placa-borda)] bg-[var(--cor-museu-parede-sombra)]"}`}
+          >
+            <AnimatePresence mode="wait">
+              {retrato ? (
+                <motion.div
+                  key="retrato"
+                  initial={festa && animar ? { scale: 0.2, opacity: 0, y: 30 } : false}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 160, damping: 12, delay: festa ? 0.4 : 0 }}
+                  className="translate-y-3"
+                >
+                  <RetratoCliente aparencia={retrato.aparencia} nome={retrato.nome || "Você"} expressao={festa ? "empolgado" : "feliz"} tamanho={104} />
+                </motion.div>
+              ) : (
+                <motion.span key="vazio" className="text-4xl font-black text-[var(--cor-museu-placa-borda)]" aria-hidden="true">
+                  ?
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+          {retrato && completo && <InsigniaDaHistoria revelar={revelarInsignia && animar} />}
         </div>
         <div className="relative mt-2 rounded-xl border-2 border-[var(--cor-museu-placa-borda)] bg-[var(--cor-museu-placa)] px-3 py-1.5 text-center" data-placa-proxima-geracao>
           <p className="text-[11px] font-black uppercase tracking-wide text-texto-suave">A próxima geração</p>
           {retrato ? (
-            <p className="text-sm font-black text-texto">
-              {retrato.nome || "Você"} <span className="font-bold text-texto-suave">· também programa</span>
-            </p>
+            <>
+              <p className="text-sm font-black text-texto">
+                {retrato.nome || "Você"} <span className="font-bold text-texto-suave">· também programa</span>
+              </p>
+              {completo && (
+                <p className="text-[11px] font-bold text-texto-suave" data-placa-insignia>
+                  e conhece a história da família inteira
+                </p>
+              )}
+            </>
           ) : (
             <p className="text-xs font-bold text-texto-suave">{aberta ? "Este lugar está esperando por você." : "Termine a sala 2 para descobrir quem fica aqui."}</p>
           )}

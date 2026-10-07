@@ -2488,6 +2488,11 @@ precisa estar em `usaFerramentas` e ser apresentada na primeira vez):
 | `camadas` | o mesmo programa em 2 a 4 camadas; cada linha diz `de` quais linhas da camada de cima ela veio | `camadas-da-maquina` |
 | `cor` | `#rrggbb` com setinhas por dígito, o CSS que usa a cor (`css`) e uma `amostra` | `mesa-de-cores` |
 | `linha-do-tempo` | `eventos` JÁ NA ORDEM CERTA (a tela embaralha), `fixos` (âncoras), `plaquinhas` (o "o que mudou" solto) | `linha-do-tempo-museu` |
+| `comparador` | o mesmo programa em 2 a 6 linguagens, `partes` (cada linha diz a sua parte), `editavel` (javascript ou python), `coral` (seção 32.9) | `comparador-de-linguagens` |
+| `ligar` | `cartoes` com o `alvo` certo e `revela`, `alvos`, `pergunta` | `cartoes-de-ligar` |
+| `ordem` | `itens` JÁ NA ORDEM CERTA (a tela embaralha), `aparencia` escada (de baixo para cima) ou etapas, `pontas` | `ordem-dos-cartoes` |
+| `circuito` | o modelo do circuito lógico: `aparencia` cabos (o painel do gigante, só plugar) ou portoes (a bancada com `paleta`) (seção 32.11) | `painel-de-cabos` |
+| simulações | `traducao`, `memoria`, `processador`, `sistema`, `arquivos`, `clique`, `pacote`, `aba-rede`, `cidade`: comandos e marcos (seção 32.10) | uma por tipo |
 
 Na linha do tempo: cada cartão no lugar certo (em relação aos outros da
 linha) mostra a época e o que mudou; com `plaquinhas`, mostra só a época
@@ -2514,8 +2519,25 @@ linha 2, coluna 0; `"1"` a lâmpada 1; o id de uma linha ou de um cartão;
 `"descer"`; `"r"`, `"g"` ou `"b"`). O objetivo novo abre sozinho a
 estação que o validador dele olha.
 
+Salas 3 a 6 (rodada 38). Validadores: `linguagensRodadas`, `parteVista`
+(com `linguagens`: tocada numa delas), `cartoesLigados`, `ordemCerta`,
+`circuitoNaEstacao` (`esperado`, a tabela só das saídas citadas, e/ou
+`agora`, as chaves e as lâmpadas de agora), `circuitoLembra` (a memória com
+realimentação) e `marcoNaEstacao` (as simulações). No comparador, os
+validadores de saída (`saida`, `semErro`, `erroDoTipo`) também valem: rodar
+gera `executouCodigo`. Ações: `rodarLinguagem`, `cantarCoral`, `tocarParte`,
+`escreverNaLinguagem`, `ligarCartao` (`alvo` null devolve à mesa),
+`porNaOrdem`, `tirarDaOrdem`, `mexerNoCircuito` (`mudanca`: portao, fio,
+soltar, chave, apagar, mover) e `comandoNaEstacao`. Peças do degrau 3:
+`"rodar:python"`, `"javascript:desconto"` (linguagem:parte), `"coral"`,
+`"editar"` no comparador; o id do cartão, do alvo ou do item; o id da peça
+do circuito; o comando (`"passo"`, `"compilar"`, `"avancar"`) ou o id do
+lugar, do programa, da pasta, do ponto do mapa ou da requisição nas
+simulações.
+
 A Revisão do dia não aceita a área exposicao: os itens dos conceitos do
-museu são previsões sobre uma vitrine pequena (`src/conteudo/revisao/origens.ts`).
+museu são previsões sobre uma vitrine pequena (`src/conteudo/revisao/origens.ts`
+e `origens-salas-3-a-6.ts`).
 
 ### 32.4 O anfitrião e as falas
 
@@ -2555,6 +2577,12 @@ próxima geração: ele abre quando a sala 2 (`SALA_DA_PROXIMA_GERACAO`)
 termina; o aluno monta o retrato com o kit de clientes e entra para a
 família (`proximaGeracao` no progresso).
 
+Com as seis salas concluídas, o retrato do aluno na árvore ganha a
+insígnia da história (`museuCompleto` em `src/lib/museu.ts`): a medalha de
+latão com a arvorezinha da família, o anel de oito contas e a linha "e
+conhece a história da família inteira" na placa. A revelação toca uma vez
+(`insigniaDoMuseu` no progresso).
+
 ### 32.7 Como criar uma sala nova (sem quebrar o padrão)
 
 1. Leia a sala no `MAPA-CURRICULAR.md` (Ilha 0) e tire o `requerMotor` da
@@ -2586,6 +2614,92 @@ checagem `exposicao-do-museu`, a leitura do progresso salvo
 (`src/lib/progresso.ts`), a ferramenta em `src/ferramentas` (com ícone e
 `FERRAMENTA_DA_ESTACAO`), a tela em `src/componentes/museu/exposicao/`
 (com a peça de mexer em `NucleoDaEstacao`, o alvo das apresentações) e a
-miniatura da meta (`MiniComposicao`). As salas 3 a 5 pedem três estações
-novas: o comparador de linguagens executável, o computador aberto com os
-portões e o diagrama de rede.
+miniatura da meta (`MiniComposicao`). Uma simulação nova é mais simples:
+um arquivo em `src/motor/exposicao/simulacoes/` com o `ModeloSimulacao`
+(inicial, comando, marcos, marcoPossivel, comandoPossivel, conferir, ler,
+cabe, resumo), o registro em `simulacoes/index.ts`, a ferramenta e a tela;
+a ação (`comandoNaEstacao`), o validador (`marcoNaEstacao`), as checagens e
+o progresso já servem.
+
+### 32.9 O comparador e o executor por linguagem
+
+O comparador mostra o mesmo programa em várias linguagens, lado a lado
+(`src/motor/exposicao/comparador.ts`; os programas das salas em
+`unidade-3/programas.ts`). Cada linha diz a sua `parte` ("precos",
+"desconto", "mostrar"); tocar numa acende a mesma parte em todas. Uma parte
+precisa aparecer em pelo menos dois programas (a "moldura" do C, do Java e
+do COBOL, por exemplo). Linha até 52 caracteres (cabe no celular).
+
+- **Rodar:** JavaScript e Python rodam de verdade; C, Java, COBOL e BASIC
+  mostram a `saida` declarada, com a etiqueta "simulado". A `saida` das
+  simuladas é conferida fora do jogo (C e Java compilados e rodados; COBOL
+  e BASIC pela gramática da época, sem palavra reservada escondida nos
+  nomes) e a das que rodam é conferida pelos testes
+  (`testes/conteudo/linguagens.test.ts` e as checagens, com o Pyodide do
+  Node). Escreva a saída igual em todas, quando a época deixar (o BASIC e o
+  COBOL saem em maiúsculas).
+- **Editável:** `editavel: "python"` (ou javascript) abre um editor simples
+  naquela linguagem. As partes continuam enquanto o número de linhas não
+  muda. O objetivo valida o resultado com `saida`, nunca o texto.
+- **O coral:** `coral: true` põe o botão; cada antepassado canta a versão
+  da sua época (a tecelã o COBOL, o PC bege o BASIC, o terminal o C, a
+  internet o Java, o computadorzinho JavaScript e Python, rodando de
+  verdade). A ordem é a dos `programas`.
+
+O **executor por linguagem** (`src/motor/linguagens/`) é a base da futura
+Ilha Python: a mesma pergunta (rodar este código nesta linguagem) e a mesma
+resposta (`ResultadoLinguagem`: as linhas no formato do Console e o erro no
+formato do executor de JavaScript, com nome, mensagem e linha;
+`explicarErroPython` dá a explicação de leigo). `resumoDaLinguagem` vira o
+evento `executouCodigo`, e os validadores de saída funcionam igual.
+
+- **Python:** Pyodide 314.0.7 (CPython 3.14 em WebAssembly), do npm,
+  copiado para `public/pyodide/<versão>/` antes do dev e do build
+  (`scripts/copiar-pyodide.mjs`, pasta fora do git) e servido pelo próprio
+  jogo, com cache imutável (`next.config.ts`). Roda num Web Worker próprio
+  (`python/sessao.ts`), carregado só quando alguém roda Python, com a barra
+  de "baixando" (uns 13 MB, só na primeira vez) e "acordando". Depois de
+  acordar, o worker perde a rede e o Python perde o módulo `js`; cada
+  execução começa com a memória vazia; `input()` dá erro; passou de 5 s, o
+  worker é encerrado e outro acorda no próximo Rodar.
+- **Simulação e testes:** `executarNaLinguagemSincrono` roda JavaScript no
+  núcleo de sempre e Python no Pyodide registrado (`definirPythonSincrono`:
+  o do Node nos testes e no `publicar:conteudo`, o da própria página no
+  `/lab`). Sem Python registrado, vale a saída declarada.
+
+### 32.10 As simulações (comando e marco)
+
+As estações de simulação recebem comandos de texto curto e respondem com
+marcos (o que já aconteceu ou vale agora). Os comandos e os marcos de cada
+tipo (a fábrica reprova um que não existe):
+
+| Tipo | Comandos | Marcos |
+| --- | --- | --- |
+| `traducao` | compilar, interpretar, repetir | compilou, interpretou, repetiu |
+| `memoria` | passo, escolher:N, guardar:N=V (V da `bandeja`), reiniciar | linha:K, fim, escolhida:N, caixa:N=V |
+| `processador` | passo, ciclo, rodar, reiniciar | buscou, entendeu, executou, ciclo:K, acumulador=V, caixa:N=V, fim |
+| `sistema` | vez:programa, automatico, reiniciar | vez:programa, terminou:programa, engasgou, todos-terminaram, terminou-sem-engasgo, automatico |
+| `arquivos` | abrir:pasta, escolher:id, mover:arquivo>pasta, ver-arvore | aberta:pasta, escolhido:id, em:arquivo>pasta, viu-arvore |
+| `clique` | clicar, avancar, cenario:normal/dns-fora/servidor-lento | clicou, etapa:id, pagina-montada, viu:cenario |
+| `pacote` | pular:ponto, voltar, recomecar | chegou:ponto, entregue, atravessou-oceano |
+| `aba-rede` | gravar, escolher:id, ordenar:chegada/tempo | gravou, escolhida:id, ordenou |
+| `cidade` | abrir:lugar, fechar | aberto:lugar, todos-abertos |
+
+Cuidados: um marco que já vale no começo do objetivo reprova (as caixas de
+dado do processador já têm valor: peça a caixa que muda); no desafio, as
+partes de estado precisam valer juntas no fim (prefira marcos que ficam,
+como `viu:` e `entregue`). O processador é a máquina de brinquedo da sala
+1 (PEGA 0001, SOMA 0010, GUARDA 0011, PARA 0000, endereço em 4 bits), com
+as ordens primeiro e os dados depois. O sistema confere que o automático
+termina sem engasgo. O pacote desenha as `ilhas` do jogo no oceano; um
+cabo `submarino` desce até o fundo do mar e um `partido` não deixa passar.
+
+### 32.11 O circuito no museu
+
+O mesmo modelo do circuito lógico da Ilha Lógica, numa estação: na
+aparência `cabos` (o painel do gigante de válvulas, anos 1940), todas as
+peças vêm fixas e o aluno só pluga (as caixas de válvulas precisam de
+`legendas`); na `portoes`, a bancada de sempre com a `paleta`. A
+realimentação guarda estado (`anteriores`): é a memória e o selo da
+contatora (a ponte com a trilha Automação). `circuitoLembra` liga e solta
+o `liga` (a saída precisa ficar acesa) e depois o `desliga`.

@@ -9,7 +9,7 @@ import { IconeCerto } from "@/componentes/icones/IconeCerto";
 import { acharBlocoDoPlano } from "@/motor/plano/comentarios";
 import type { RetratoComposicao } from "@/motor/simulacao";
 import { CenaSvg } from "@/componentes/cena/CenaSvg";
-import { canaisDaCor, valorDosBits } from "@/motor/exposicao/modelo";
+import { canaisDaCor, resumoDaEstacao, valorDosBits } from "@/motor/exposicao/modelo";
 
 /** O código da miniatura: o bloco do plano vira uma linha só (o plano já aparece em cima), para a função caber. */
 function codigoResumido(codigo: string): string {
@@ -69,6 +69,8 @@ export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposica
                   ) : (
                     <p className="text-texto-suave">Linha vazia: os cartões estão na caixa.</p>
                   ))}
+                {/* As estações das salas 3 a 6: a frase do estado (o mesmo resumo do tutor). */}
+                {!["tear", "bits", "cor", "camadas", "linha-do-tempo"].includes(estado.tipo) && <p className="font-bold text-texto">{resumoDaEstacao(estacao, estado).replace(`${estacao.titulo}: `, "")}</p>}
               </section>
             );
           })}
