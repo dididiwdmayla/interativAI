@@ -22,12 +22,12 @@ export const ILHAS_DO_MAPA: IlhaDoMapa[] = [
 
 export const PONTOS_DO_MAPA: NoDoMapa[] = [
   { id: "casa", nome: "Sua casa", figura: "casa", x: 7, y: 26 },
-  { id: "bairro", nome: "Roteador do bairro", figura: "roteador", x: 15, y: 36 },
-  { id: "costa-origens", nome: "Estação de cabo", figura: "estacao-cabo", x: 22, y: 44 },
-  { id: "sites", nome: "Roteador da Sites", figura: "roteador", x: 38, y: 70 },
-  { id: "logica", nome: "Roteador da Lógica", figura: "roteador", x: 54, y: 28 },
-  { id: "costa-rede", nome: "Estação de cabo", figura: "estacao-cabo", x: 78, y: 58 },
-  { id: "servidor", nome: "Servidor da padaria", figura: "servidor", x: 92, y: 66 },
+  { id: "bairro", nome: "Bairro", figura: "roteador", x: 15, y: 36 },
+  { id: "costa-origens", nome: "Cabo das Origens", figura: "estacao-cabo", x: 22, y: 44 },
+  { id: "sites", nome: "Roteador Sites", figura: "roteador", x: 38, y: 70 },
+  { id: "logica", nome: "Roteador Lógica", figura: "roteador", x: 54, y: 28 },
+  { id: "costa-rede", nome: "Cabo da Rede", figura: "estacao-cabo", x: 78, y: 58 },
+  { id: "servidor", nome: "Servidor", figura: "servidor", x: 92, y: 66 },
 ];
 
 export function cabosDoMapa(partidos: readonly string[] = []): CaboDoMapa[] {

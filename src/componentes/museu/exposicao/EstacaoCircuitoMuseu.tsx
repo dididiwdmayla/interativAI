@@ -41,6 +41,18 @@ function tomadaDeEntrada(peca: Peca, porta: number) {
   return { x: peca.x, y: peca.y + (porta === 0 ? 22 : CAIXA.altura - 22) };
 }
 
+/** Parte a legenda em duas linhas de tamanho parecido (nas palavras). */
+function duasLinhas(texto: string): string[] {
+  const palavras = texto.split(" ");
+  if (palavras.length < 2) return [texto];
+  let melhor = 1;
+  for (let i = 1; i < palavras.length; i += 1) {
+    const diferenca = (n: number) => Math.abs(palavras.slice(0, n).join(" ").length - palavras.slice(n).join(" ").length);
+    if (diferenca(i) < diferenca(melhor)) melhor = i;
+  }
+  return [palavras.slice(0, melhor).join(" "), palavras.slice(melhor).join(" ")];
+}
+
 const CORES_DOS_CABOS = ["var(--cor-ante-cabo-a)", "var(--cor-ante-cabo-b)", "var(--cor-ante-cabo-c)"];
 
 type PropsPainel = {
@@ -169,8 +181,13 @@ function PainelDeCabos({ estacao, circuito, valores, fios, toque, destaque, aoLi
                   />
                 </g>
               ))}
-              <text x={peca.x + CAIXA.largura / 2} y={peca.y + 58} textAnchor="middle" fontSize="11.5" fontWeight="800" fill="var(--cor-ante-branco)">
-                {legenda}
+              {/* A legenda em duas linhas, para caber na caixa até no celular. */}
+              <text x={peca.x + CAIXA.largura / 2} y={peca.y + 53} textAnchor="middle" fontSize="10" fontWeight="800" fill="var(--cor-ante-branco)">
+                {duasLinhas(legenda).map((linha, i) => (
+                  <tspan key={i} x={peca.x + CAIXA.largura / 2} dy={i === 0 ? 0 : 12}>
+                    {linha}
+                  </tspan>
+                ))}
               </text>
             </g>
           );

@@ -73,7 +73,7 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
                 <ellipse cx={x} cy={y + 1.5} rx={r + 2} ry={r * 0.62 + 2} fill="var(--cor-espuma)" opacity="0.6" />
                 <ellipse cx={x} cy={y} rx={r + 1} ry={r * 0.62 + 1} fill="var(--cor-areia)" />
                 <ellipse cx={x} cy={y - 0.8} rx={r} ry={r * 0.55} fill="var(--cor-grama)" />
-                <text x={x} y={y + r * 0.62 + 6.5} textAnchor="middle" fontSize="4.2" fontWeight="900" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.6" paintOrder="stroke">
+                <text x={x} y={y + r * 0.62 + 6.5} textAnchor="middle" fontSize="5" fontWeight="900" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.6" paintOrder="stroke">
                   {ilha.nome}
                 </text>
               </g>
@@ -104,11 +104,11 @@ export function EstacaoPacote({ estacao, estado, mexer, toque, destaque }: Props
             return (
               <g key={no.id} pointerEvents="none" data-ponto-mapa={no.id} data-pode={pode ? "sim" : "nao"}>
                 {pode && !reduzir && (
-                  <motion.circle cx={X(no.x)} cy={Y(no.y)} r="6" fill="none" stroke="var(--cor-destaque)" strokeWidth="1" animate={{ r: [5, 8, 5], opacity: [0.9, 0.2, 0.9] }} transition={{ duration: 1.4, repeat: Infinity }} />
+                  <motion.circle cx={X(no.x)} cy={Y(no.y)} r="6" fill="none" stroke="var(--cor-destaque)" strokeWidth="1" animate={{ scale: [0.85, 1.35, 0.85], opacity: [0.9, 0.2, 0.9] }} transition={{ duration: 1.4, repeat: Infinity }} />
                 )}
                 {(pode && reduzir) || destaque?.peca === no.id ? <circle cx={X(no.x)} cy={Y(no.y)} r="6.5" fill="none" stroke="var(--cor-destaque)" strokeWidth="1.2" /> : null}
                 <FiguraNo no={no} />
-                <text x={X(no.x)} y={Y(no.y) - 6} textAnchor="middle" fontSize="3.6" fontWeight="800" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.5" paintOrder="stroke">
+                <text x={X(no.x)} y={Y(no.y) - 6.5} textAnchor="middle" fontSize="4.6" fontWeight="800" fill="var(--cor-ante-branco)" stroke="var(--cor-ante-contorno)" strokeWidth="0.5" paintOrder="stroke">
                   {no.nome}
                 </text>
               </g>

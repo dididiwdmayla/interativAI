@@ -132,22 +132,7 @@ export function EstacaoCidade({ estacao, estado, mexer, toque, destaque }: Props
             const ativo = estado.aberto === lugar.id;
             const { x, y } = LUGAR[lugar.figura];
             return (
-              <g
-                key={lugar.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`${lugar.nome}${visto ? " (já aberto)" : ""}`}
-                className="cursor-pointer"
-                onClick={() => mexer({ tipo: "comandoNaEstacao", estacao: estacao.id, comando: `abrir:${lugar.id}` })}
-                onKeyDown={(evento) => {
-                  if (evento.key === "Enter" || evento.key === " ") {
-                    evento.preventDefault();
-                    mexer({ tipo: "comandoNaEstacao", estacao: estacao.id, comando: `abrir:${lugar.id}` });
-                  }
-                }}
-                data-lugar-cidade={lugar.id}
-                data-visto={visto ? "sim" : "nao"}
-              >
+              <g key={lugar.id} data-lugar-cidade={lugar.id} data-visto={visto ? "sim" : "nao"}>
                 {(ativo || destaque?.peca === lugar.id) && <circle cx={x} cy={y} r="34" fill="var(--cor-destaque)" opacity="0.25" />}
                 <Figura figura={lugar.figura} acesa={ativo} />
                 {visto ? (
@@ -162,8 +147,26 @@ export function EstacaoCidade({ estacao, estado, mexer, toque, destaque }: Props
                     <motion.circle cx={x + 20} cy={y - 32} r="4" fill="var(--cor-destaque)" animate={{ scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
                   )
                 )}
-                {/* A área de toque, por cima de tudo e parada (a bolinha que pulsa e o carro andando não mudam ela). */}
-                <rect x={x - 32} y={y - 34} width="64" height="72" fill="transparent" data-comando={`abrir:${lugar.id}`} />
+                {/* A área de toque é o botão: por cima de tudo e parada (a bolinha que pulsa e o carro andando ficam fora dela). */}
+                <rect
+                  x={x - 32}
+                  y={y - 34}
+                  width="64"
+                  height="72"
+                  fill="transparent"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${lugar.nome}${visto ? " (já aberto)" : ""}`}
+                  className="cursor-pointer outline-none focus-visible:stroke-[var(--cor-destaque)] focus-visible:[stroke-width:3]"
+                  onClick={() => mexer({ tipo: "comandoNaEstacao", estacao: estacao.id, comando: `abrir:${lugar.id}` })}
+                  onKeyDown={(evento) => {
+                    if (evento.key === "Enter" || evento.key === " ") {
+                      evento.preventDefault();
+                      mexer({ tipo: "comandoNaEstacao", estacao: estacao.id, comando: `abrir:${lugar.id}` });
+                    }
+                  }}
+                  data-comando={`abrir:${lugar.id}`}
+                />
               </g>
             );
           })}
