@@ -8,6 +8,18 @@ Status consolidado: `docs/ROADMAP.md`.
 Branch `codex/faxina-tecnica-pendencias`, base `3d3685e`, depois dos merges
 #40 e #41 do mundo vivo e da fila de falas. IDs e ordem publicados preservados.
 
+### Item 1 — Duplo toque da U4F1
+
+Reproduzido no jogo de produção e na jornada: o primeiro toque em `#membros`
+rola a linha 32 px em 50 ms; o segundo, na mesma posição, cai no texto
+Integrantes. Defeito do jogo: a rolagem imediata da linha ainda movia o alvo.
+Toda rolagem da seleção agora espera os 400 ms já existentes (a janela do
+ duplo toque é 350 ms). Regressão `duplo-toque-u4.mjs` toca sem seleção prévia
+nem recalcular coordenadas. Em retrato passou depois e falhou antes.
+A jornada completa também precisava evitar fechar o balão pelo véu do
+Experimente quando a Árvore já estava aberta; ajuste do teste, com a causa
+registrada, para chegar à U4. Jornadas dos três layouts no fechamento.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano

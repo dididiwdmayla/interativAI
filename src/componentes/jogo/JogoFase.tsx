@@ -2955,6 +2955,7 @@ export function JogoFase({
           fecharDepoisDe={
             layout === "paisagem" &&
             emObjetivo &&
+            !ferramentaEmCena &&
             !filaPedeJogador(estado) &&
             !estado.confirmandoSolucao &&
             !previsaoPendente &&

@@ -8,6 +8,12 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["tutor-apresentacao.mjs", "desktop"],
+  ["tutor-apresentacao.mjs", "retrato"],
+  ["tutor-apresentacao.mjs", "paisagem"],
+  ["duplo-toque-u4.mjs", "desktop"],
+  ["duplo-toque-u4.mjs", "retrato"],
+  ["duplo-toque-u4.mjs", "paisagem"],
   ["falas.mjs", "desktop"],
   ["falas.mjs", "retrato"],
   ["falas.mjs", "paisagem"],
