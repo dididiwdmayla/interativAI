@@ -83,7 +83,7 @@ export function NevoaIlha(no: NoMapa) {
   const area = { left: (no.x - 150) * no.escala, top: (no.y - 90) * no.escala, width: 300 * no.escala, height: 160 * no.escala };
   const caixaDoDesenho = "-150 -90 300 160";
   return (
-    <div aria-hidden="true" className="no-escuro pointer-events-none absolute" style={area} data-nevoa>
+    <div aria-hidden="true" className="camada-propria no-escuro pointer-events-none absolute" style={area} data-nevoa>
       <svg
         viewBox={caixaDoDesenho}
         width="100%"

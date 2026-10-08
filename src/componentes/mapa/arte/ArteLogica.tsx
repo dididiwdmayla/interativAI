@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
 /** Caminho de uma engrenagem com `dentes` dentes, centro em (0, 0). */
 function engrenagem(raio: number, dentes: number): string {
@@ -22,17 +20,14 @@ function engrenagem(raio: number, dentes: number): string {
 
 type Props = { x: number; y: number; raio: number; dentes: number; cor: string; sentido: 1 | -1 };
 
+/** Uma engrenagem girando (CSS, pelo compositor; globals.css). */
 function Engrenagem({ x, y, raio, dentes, cor, sentido }: Props) {
-  const animar = useAnimarMapa();
   return (
     <g transform={`translate(${x} ${y})`}>
-      <motion.g
-        animate={animar ? { rotate: 360 * sentido } : { rotate: 0 }}
-        transition={animar ? { duration: 14, repeat: Infinity, ease: "linear" } : undefined}
-      >
+      <g className={sentido === 1 ? "ilha-gira" : "ilha-gira ilha-gira-volta"}>
         <path d={engrenagem(raio, dentes)} fill={cor} stroke="var(--cor-texto)" strokeOpacity="0.25" strokeWidth="2" />
         <circle r={raio * 0.35} fill="var(--cor-superficie)" />
-      </motion.g>
+      </g>
     </g>
   );
 }

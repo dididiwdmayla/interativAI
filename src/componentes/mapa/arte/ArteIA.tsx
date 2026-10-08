@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
 /** Os nós da constelação (a "rede" de um modelo), em cima da ilha. */
 const NOS = [
@@ -29,19 +28,18 @@ const LIGACOES: readonly (readonly [number, number])[] = [
 /** Topo do farol, de onde sai o sinal. */
 const LUZ = { x: 53, y: -58 };
 
-/** IA: nós ligados como uma constelação e um farolzinho mandando sinal. */
+/** IA: nós ligados como uma constelação e um farolzinho mandando sinal (CSS, pelo compositor; globals.css). */
 export function ArteIA() {
-  const animar = useAnimarMapa();
   const arco = (raio: number, lado: 1 | -1, atraso: number) => (
-    <motion.path
+    <path
       key={`${lado}-${raio}`}
       d={`M${lado * raio * 0.5} ${-raio * 0.866}A${raio} ${raio} 0 0 ${lado === 1 ? 1 : 0} ${lado * raio * 0.5} ${raio * 0.866}`}
       fill="none"
       stroke="var(--cor-destaque)"
       strokeWidth="3"
       strokeLinecap="round"
-      animate={animar ? { opacity: [0, 1, 0] } : { opacity: 0.8 }}
-      transition={animar ? { duration: 2, repeat: Infinity, delay: atraso } : undefined}
+      className="ilha-sinal"
+      style={{ "--duracao": "2s", "--atraso": `${atraso - 2}s` } as CSSProperties}
     />
   );
   return (
@@ -69,13 +67,13 @@ export function ArteIA() {
       ))}
       {NOS.map((no, indice) => (
         <g key={indice} transform={`translate(${no.x} ${no.y})`}>
-          <motion.circle
+          <circle
             r={indice === 3 ? 8 : 6}
             fill={indice % 2 === 0 ? "var(--cor-secundaria)" : "var(--cor-primaria)"}
             stroke="var(--cor-superficie)"
             strokeWidth="2"
-            animate={animar ? { scale: [1, 1.25, 1] } : undefined}
-            transition={animar ? { duration: 2.4, repeat: Infinity, delay: indice * 0.35 } : undefined}
+            className="ilha-no-pulsa"
+            style={{ "--atraso": `${indice * 0.35 - 2.4}s` } as CSSProperties}
           />
         </g>
       ))}

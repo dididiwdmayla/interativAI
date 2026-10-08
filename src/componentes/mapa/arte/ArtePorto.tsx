@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useAnimarMapa } from "./useAnimarMapa";
 
 /**
  * O Porto da revisão: um pier de madeira sobre o mar, um barco atracado
@@ -9,7 +7,6 @@ import { useAnimarMapa } from "./useAnimarMapa";
  * bandeirola. Desenhado em volta de (0, 0), só com tokens.
  */
 export function ArtePorto({ comItens }: { comItens: boolean }) {
-  const animar = useAnimarMapa();
   return (
     <g>
       {/* Faixa de areia onde o pier nasce */}
@@ -30,23 +27,15 @@ export function ArtePorto({ comItens }: { comItens: boolean }) {
       <rect x="-58" y="-16" width="9" height="9" rx="1.5" fill="var(--cor-destaque)" opacity={comItens ? 1 : 0.35} />
       {/* Mastro com bandeirola */}
       <path d="M-4 16V-52" stroke="var(--cor-madeira)" strokeWidth="3" strokeLinecap="round" />
-      <motion.path
-        d="M-3 -52l24 7-24 7z"
-        fill="var(--cor-secundaria)"
-        style={{ transformOrigin: "-3px -45px" }}
-        animate={animar ? { scaleX: [1, 0.8, 1] } : undefined}
-        transition={animar ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" } : undefined}
-      />
+      {/* A bandeirola tremulando e o barco balançando: CSS, pelo compositor (globals.css). */}
+      <path d="M-3 -52l24 7-24 7z" fill="var(--cor-secundaria)" className="bandeira-tremula" />
       {/* Barco atracado, balançando */}
-      <motion.g
-        animate={animar ? { rotate: [-3, 3, -3], y: [0, -2, 0] } : undefined}
-        transition={animar ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : undefined}
-      >
+      <g className="barco-atracado">
         <path d="M58 40h46l-8 12H66z" fill="var(--cor-madeira)" stroke="var(--cor-borda)" strokeWidth="2" strokeLinejoin="round" />
         <path d="M80 39V6" stroke="var(--cor-madeira)" strokeWidth="2.5" />
         <path d="M82 8l18 28H82z" fill="var(--cor-superficie)" stroke="var(--cor-borda)" strokeWidth="1.5" />
         <path d="M78 12L64 36h14z" fill="var(--cor-primaria)" />
-      </motion.g>
+      </g>
       {/* Corda amarrando o barco no pier */}
       <path d="M70 22q6 10 0 20" fill="none" stroke="var(--cor-areia-sombra)" strokeWidth="2" />
     </g>
