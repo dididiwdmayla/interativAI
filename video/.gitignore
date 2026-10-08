@@ -1,0 +1,11 @@
+node_modules/
+out/
+captura/
+public/takes/
+public/vozes/
+public/musica/
+public/efeitos/
+.cache/
+*.tsbuildinfo
+public/capa/
+!public/.gitkeep

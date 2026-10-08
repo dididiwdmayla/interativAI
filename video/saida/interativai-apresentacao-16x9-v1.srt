@@ -1,0 +1,67 @@
+1
+00:00:03,350 --> 00:00:06,100
+Oi. Quer ver um truque?
+
+2
+00:00:06,500 --> 00:00:08,200
+Aperta F12.
+
+3
+00:00:14,400 --> 00:00:17,500
+Pronto. Esse site agora é seu.
+
+4
+00:00:18,200 --> 00:00:21,650
+Isso funciona em qualquer site. De verdade.
+
+5
+00:00:27,367 --> 00:00:30,817
+Cada ilha é um pedaço do ofício.
+
+6
+00:00:33,155 --> 00:00:36,255
+Estuda de madrugada? O mundo também.
+
+7
+00:00:42,033 --> 00:00:45,833
+Aqui você não decora. Você mexe e vê.
+
+8
+00:00:55,018 --> 00:00:58,468
+Seu código acende a vitrine da padaria.
+
+9
+00:00:59,703 --> 00:01:02,803
+Cliente de mentirinha. Problema de verdade.
+
+10
+00:01:02,812 --> 00:01:06,262
+Errou? Ótimo. A gente pausa e investiga.
+
+11
+00:01:07,500 --> 00:01:10,250
+Essa é a minha família.
+
+12
+00:01:13,200 --> 00:01:17,000
+E sim: Python rodando de verdade, no navegador.
+
+13
+00:01:18,050 --> 00:01:21,850
+Travou? Eu pergunto antes de entregar a resposta.
+
+14
+00:01:23,744 --> 00:01:27,194
+Tem um tema secreto escondido. Boa sorte.
+
+15
+00:01:27,500 --> 00:01:30,950
+Ainda estou construindo o resto do mundo.
+
+16
+00:01:31,100 --> 00:01:35,950
+Inclusive a ilha onde você aprende a revisar código de IA.
+
+17
+00:01:41,205 --> 00:01:42,905
+Sua vez.
