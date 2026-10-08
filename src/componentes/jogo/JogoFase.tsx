@@ -113,7 +113,8 @@ import { useToque } from "@/lib/useConsultaMidia";
 import type { Aba } from "@/motor/abas";
 import { criarBarramento } from "@/motor/barramento";
 import type { EventoFase } from "@/motor/eventos";
-import { enunciadoDe, FALA_CONTRATO, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo } from "@/motor/estadoMotor";
+import { filaPedeJogador } from "@/motor/filaDeFalas";
+import { enunciadoDe, FALA_CONTRATO, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo, ofereceContinuar } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
 import { avaliarDetalhado } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
@@ -764,7 +765,7 @@ export function JogoFase({
   // "Salvar como Meu tema" (E5): lê as cores da maquete, confere o contraste e guarda.
   const [avisoContraste, setAvisoContraste] = useState<ResultadoPar[] | null>(null);
   /** Quem fala sobre o tema salvo (ligado ao motor mais abaixo, só quando não atrapalha). */
-  const falarDoTema = useRef<(fala: Fala) => void>(() => {});
+  const falarDoTema = useRef<(fala: Fala, opcoes?: { aguarda?: boolean }) => void>(() => {});
   /** O computadorzinho explicando algo do painel (o Lighthouse), só quando não atrapalha. */
   const falarLivre = useRef<(fala: Fala) => void>(() => {});
 
@@ -799,7 +800,9 @@ export function JogoFase({
       salvarMeuTema(meuTema);
       tocarEfeito("desbloqueio");
       barramento.emitir({ tipo: "temaSalvo", paresRuins: ruins.length });
-      falarDoTema.current(ruins.length > 0 ? FALA_TEMA_SALVO_COM_AVISO : FALA_TEMA_SALVO);
+      // O aviso de contraste é importante: espera o jogador.
+      if (ruins.length > 0) falarDoTema.current(FALA_TEMA_SALVO_COM_AVISO, { aguarda: true });
+      else falarDoTema.current(FALA_TEMA_SALVO);
       return true;
     },
     [barramento, coresDaMaquete, coresDaMaqueteAgora, siteDoJogo],
@@ -1260,7 +1263,7 @@ export function JogoFase({
     if (!simulandoAcentos || explicouAcentos.current) return;
     if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
     explicouAcentos.current = true;
-    falar(FALA_ACENTOS);
+    falar(FALA_ACENTOS, { automatica: true, aguarda: true });
   }, [simulandoAcentos, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   // Na primeira vez que o celular simula os 980 px, o computadorzinho explica (quando não atrapalha).
   const explicouViewport = useRef(false);
@@ -1268,7 +1271,7 @@ export function JogoFase({
     if (!simulandoViewport || explicouViewport.current) return;
     if (estado.etapa !== "objetivos" || estado.pausa !== null || previsaoPendente || estado.roteiro !== null) return;
     explicouViewport.current = true;
-    falar(FALA_VIEWPORT);
+    falar(FALA_VIEWPORT, { automatica: true, aguarda: true });
   }, [simulandoViewport, estado.etapa, estado.pausa, estado.roteiro, previsaoPendente, falar]);
   const desafio = fase.tipo === "desafio" ? fase : null;
   const projeto = fase.tipo === "projeto-ponte" ? fase : null;
@@ -1308,6 +1311,8 @@ export function JogoFase({
       revisaoDoDia ||
       caixa.aberta ||
       estado.roteiro !== null ||
+      // Só com a fila de falas vazia: a apresentação não cobre um recado que espera o jogador.
+      filaPedeJogador(estado) ||
       previsaoPendente ||
       (estado.etapa === "concluida" && estado.conclusaoAberta),
   });
@@ -1319,7 +1324,8 @@ export function JogoFase({
     ? falaDoAnfitriao(
         exposicao.dados,
         temObjetivos(fase)
-          ? { tipo: "objetivos", ids: fase.objetivos.map((item) => item.id), atual: estado.concluidos }
+          ? // O objetivo ativo (não os concluídos): a fala do próximo passo só entra quando ele começa, depois da conclusão.
+            { tipo: "objetivos", ids: fase.objetivos.map((item) => item.id), atual: estado.objetivoAtual }
           : { tipo: "partes", ids: fase.tipo === "desafio" ? fase.partes.map((parte) => parte.id) : [], feitas: estado.partesFeitas },
         estado.etapa === "concluida",
       )
@@ -1801,6 +1807,7 @@ export function JogoFase({
   useEffect(() => {
     atalhoEnter.current = () => {
       if (estado.etapa === "introducao" || estado.etapa === "meta") comClique(motor.avancarFala)();
+      else if (ofereceContinuar(estado)) comClique(motor.continuarFala)();
       else if (estado.pausa !== null) comClique(motor.seguir)();
     };
   });
@@ -1856,6 +1863,7 @@ export function JogoFase({
           )
         }
         aoAvancar={comClique(motor.avancarFala)}
+        aoContinuarFala={comClique(motor.continuarFala)}
         aoSeguir={comClique(motor.seguir)}
         aoAjudar={() => {
           sinalizarUso("me-ajuda");
@@ -2480,6 +2488,7 @@ export function JogoFase({
       data-apresentacao-estado={ferramentaEmCena ? "ativa" : "inativa"}
       data-pronto={pronta ? "sim" : "nao"}
       data-roteiro={estado.roteiro ?? "nenhum"}
+      data-fila-falas={ofereceContinuar(estado) ? "pede" : "livre"}
       style={movel && viewport.altura ? { height: `calc(${viewport.altura}px - var(--tela-cheia-inset, 0px))` } : undefined}
     >
       {movel ? (
@@ -2939,6 +2948,7 @@ export function JogoFase({
           fecharDepoisDe={
             layout === "paisagem" &&
             emObjetivo &&
+            !filaPedeJogador(estado) &&
             !estado.confirmandoSolucao &&
             !previsaoPendente &&
             !estado.listaRever &&
@@ -3041,7 +3051,7 @@ export function JogoFase({
           />
           <ConversaCliente
             key={`mudanca-${estadoContrato.mudou ? "sim" : "nao"}`}
-            aberta={estado.pausa === "mudancaDoCliente"}
+            aberta={estado.pausa === "mudancaDoCliente" && estado.filaFalas.length === 0}
             titulo="Mensagem do cliente"
             etiqueta="Mensagem nova"
             cliente={contrato.contrato.cliente}

@@ -2,6 +2,7 @@ import { temObjetivos } from "@/motor/tiposDeFase";
 import type { Fase, FaseComObjetivos, Objetivo } from "@/conteudo/tipos";
 import type { EstadoFaseSalvo } from "@/lib/progresso";
 import { ehContrato, escolhaCerta, estadoInicialContrato, type EstadoContrato } from "./contrato/modelo";
+import type { EstadoDaFala } from "./filaDeFalas";
 import { itensDoChecklist } from "./validadores";
 import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "./tipos";
 
@@ -30,7 +31,8 @@ export type PausaMotor = "objetivoConcluido" | "solucao" | "desafioConcluido" | 
  */
 export type ModoJogo = "jogo" | "revisao" | "lab" | "revisao-dia";
 
-export type EstadoMotor = {
+/** A fala na tela, se ela espera o jogador e a fila (src/motor/filaDeFalas.ts). */
+export type EstadoMotor = EstadoDaFala & {
   etapa: EtapaFase;
   /** Índice da fala na introdução ou na conclusão. */
   indiceFala: number;
@@ -42,7 +44,6 @@ export type EstadoMotor = {
   estrelas: number;
   pausa: PausaMotor;
   confirmandoSolucao: boolean;
-  fala: Fala;
   conclusaoAberta: boolean;
   /** Sobe a cada acerto; dispara som e animação. */
   acertos: number;
@@ -65,6 +66,15 @@ export type EstadoMotor = {
   /** (Contrato) A etapa, a lista de requisitos, a mudança de pedido e o tempo. null nas outras fases. */
   contrato: EstadoContrato | null;
 };
+
+/**
+ * O balão oferece Continuar (e o Enter continua a fila): há recados na fila,
+ * ou a fala de agora espera o jogador fora de uma pausa (a pausa tem o botão
+ * dela). Durante um momento roteirizado, nada.
+ */
+export function ofereceContinuar(estado: Pick<EstadoMotor, "filaFalas" | "falaAguarda" | "pausa" | "roteiro">): boolean {
+  return estado.roteiro === null && (estado.filaFalas.length > 0 || (estado.falaAguarda && estado.pausa === null));
+}
 
 function limitar(valor: number, minimo: number, maximo: number): number {
   return Math.min(maximo, Math.max(minimo, Math.round(valor)));
@@ -148,6 +158,8 @@ export function criarEstadoInicial(
     pausa: null,
     confirmandoSolucao: false,
     fala: fase.introducao[0],
+    falaAguarda: false,
+    filaFalas: [],
     conclusaoAberta: false,
     acertos: 0,
     previsao: null,

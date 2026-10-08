@@ -28,6 +28,7 @@ import {
 } from "@/motor/estadoMotor";
 import type { EventoFase } from "@/motor/eventos";
 import { executarAcoes, type PainelDasAcoes } from "@/motor/executarAcao";
+import { avancarFila, enfileirarFala, enfileirarFalas, falaDaPausa, trocarFala } from "@/motor/filaDeFalas";
 import { documentoSoltoDaFase } from "@/motor/simulacao";
 import { type DegrauAjuda, ESTRELAS_INICIAIS, ESTRELAS_MINIMAS, type Fala } from "@/motor/tipos";
 import { diaLocal, registrarFaseConcluida } from "@/lib/revisao";
@@ -183,11 +184,7 @@ export function useMotorFase({
       setEstado((anterior) =>
         anterior.objetivoAtual !== estado.objetivoAtual || anterior.previsao !== null
           ? anterior
-          : {
-              ...anterior,
-              previsao: opcao,
-              fala: { texto: enunciadoDe(atual, toque), expressao: acertou ? "comemorando" : "pensativo" },
-            },
+          : trocarFala<EstadoMotor>({ ...anterior, previsao: opcao }, { texto: enunciadoDe(atual, toque), expressao: acertou ? "comemorando" : "pensativo" }),
       );
       barramento.emitir({ tipo: "respondeuPrevisao", opcao, acertou });
     },
@@ -312,14 +309,18 @@ export function useMotorFase({
   /* Roteiros e ativação de objetivos                                 */
   /* ---------------------------------------------------------------- */
 
-  /** Roda um momento roteirizado: animação, ações pelo painel e a fala. */
+  /**
+   * Roda um momento roteirizado: animação, ações pelo painel e a fala. O que
+   * o roteiro conta espera o jogador (Continuar); depois vem `seguinte` (o
+   * enunciado do objetivo) ou, sem ele, a fala que estava na tela.
+   */
   const rodarEvento = useCallback(
-    (evento: EventoRoteirizado, depois: () => void) => {
+    (evento: EventoRoteirizado, depois: () => void, seguinte?: Fala) => {
       const esbarrao = evento.animacao === "esbarrao";
+      const volta = seguinte ?? estadoAtual.current.fala;
       setEstado((atual) => ({
-        ...atual,
+        ...(esbarrao ? trocarFala<EstadoMotor>(atual, FALA_TROPECO) : atual),
         roteiro: esbarrao ? "esbarrao" : "roteiro",
-        fala: esbarrao ? FALA_TROPECO : atual.fala,
       }));
       agendar(
         () => {
@@ -333,7 +334,12 @@ export function useMotorFase({
           }
           // O que o computadorzinho fez não conta como ação do jogador.
           eventosObjetivo.current = [];
-          setEstado((atual) => ({ ...atual, roteiro: null, fala: evento.fala ?? atual.fala }));
+          setEstado((atual) => {
+            const pronto = { ...atual, roteiro: null };
+            if (!evento.fala) return esbarrao || seguinte ? trocarFala<EstadoMotor>(pronto, volta) : pronto;
+            const contado = trocarFala<EstadoMotor>(pronto, evento.fala, true);
+            return volta.texto === evento.fala.texto ? contado : { ...contado, filaFalas: [{ fala: volta, aguarda: false }, ...contado.filaFalas] };
+          });
           depois();
         },
         esbarrao ? ESPERA_ESBARRAO_MS : ESPERA_ROTEIRO_MS,
@@ -357,26 +363,32 @@ export function useMotorFase({
 
   /**
    * Liga um objetivo da prática: fala, previsão zerada e o momento
-   * roteirizado dele. `falaMantida` segura a fala de um roteiro anterior.
+   * roteirizado dele. Com roteiro, o enunciado vem depois do que o roteiro
+   * conta. `doJogador`: veio do Próximo objetivo (a fala de antes foi lida).
    */
   const ativarObjetivo = useCallback(
-    (indice: number, falaMantida?: Fala) => {
+    (indice: number, doJogador = false) => {
       if (!pratica) return;
       const alvo = pratica.objetivos[indice];
+      const enunciado = falaDoObjetivo(pratica, indice, toque);
       eventosObjetivo.current = [];
-      setEstado((atual) => ({
-        ...atual,
-        etapa: "objetivos",
-        objetivoAtual: indice,
-        pausa: null,
-        degrau: 0,
-        confirmandoSolucao: false,
-        previsao: null,
-        fala: falaMantida ?? falaDoObjetivo(pratica, indice, toque),
-        htmlInicioObjetivo: alvo.eventoAoComecar ? htmlAtual : null,
-        cssInicioObjetivo: alvo.eventoAoComecar ? cssAtual : null,
-      }));
-      if (alvo.eventoAoComecar) rodarEvento(alvo.eventoAoComecar, () => {});
+      setEstado((atual) => {
+        const ligado: EstadoMotor = {
+          ...atual,
+          etapa: "objetivos",
+          objetivoAtual: indice,
+          pausa: null,
+          degrau: 0,
+          confirmandoSolucao: false,
+          previsao: null,
+          falaAguarda: doJogador ? false : atual.falaAguarda,
+          htmlInicioObjetivo: alvo.eventoAoComecar ? htmlAtual : null,
+          cssInicioObjetivo: alvo.eventoAoComecar ? cssAtual : null,
+        };
+        if (alvo.eventoAoComecar) return ligado;
+        return ligado.falaAguarda ? enfileirarFala<EstadoMotor>(ligado, enunciado) : trocarFala<EstadoMotor>(ligado, enunciado);
+      });
+      if (alvo.eventoAoComecar) rodarEvento(alvo.eventoAoComecar, () => {}, enunciado);
     },
     [cssAtual, htmlAtual, pratica, rodarEvento, toque],
   );
@@ -415,15 +427,18 @@ export function useMotorFase({
       const concluido = pratica.objetivos[indice];
       setEstado((atual) => {
         if (atual.etapa !== "objetivos" || atual.objetivoAtual !== indice || atual.pausa !== null) return atual;
-        return {
-          ...atual,
-          concluidos: indice + 1,
-          pausa: "objetivoConcluido",
-          confirmandoSolucao: false,
-          fala: concluido.falaAoConcluir,
-          acertos: atual.acertos + 1,
-          comemoracoesSozinho: atual.comemoracoesSozinho + (concluido.modo === "sozinho" ? 1 : 0),
-        };
+        // A fala de conclusão é importante: toma a cena e fica até o jogador seguir.
+        return falaDaPausa<EstadoMotor>(
+          {
+            ...atual,
+            concluidos: indice + 1,
+            pausa: "objetivoConcluido",
+            confirmandoSolucao: false,
+            acertos: atual.acertos + 1,
+            comemoracoesSozinho: atual.comemoracoesSozinho + (concluido.modo === "sozinho" ? 1 : 0),
+          },
+          concluido.falaAoConcluir,
+        );
       });
       limparAjudasVisuais();
     },
@@ -444,44 +459,54 @@ export function useMotorFase({
         const jaMudou = atual.contrato?.mudou ?? false;
         const itens = itensDoChecklist(comChecklist, jaMudou) ?? [];
         const partesFeitas = recalcularPartesFeitas(comChecklist, atual.partesFeitas, contexto, jaMudou);
+        const novas = partesFeitas.filter((id) => !atual.partesFeitas.includes(id));
+        const noProjeto = comChecklist.tipo === "projeto-ponte";
+        const noContrato = atual.contrato !== null;
+        // As partes que ficaram prontas juntas saem numa fala só (uma não atropela a outra).
+        const falaDasNovas = (ids: readonly string[]): Fala => {
+          const descricoes = ids.map((id) => itens.find((item) => item.id === id)?.descricao ?? "");
+          const nome = noProjeto || noContrato ? (ids.length > 1 ? "Requisitos cumpridos" : "Requisito cumprido") : ids.length > 1 ? "Partes feitas" : "Parte feita";
+          return { texto: `Isso! ${nome}: ${descricoes.join("; ")}`, expressao: "comemorando" };
+        };
         // (Contrato) A mensagem do cliente chega quando as partes de depoisDe ficam prontas: o checklist muda.
         if (contrato && atual.contrato && !jaMudou && mudancaPronta(contrato.contrato, partesFeitas)) {
           const depois = recalcularPartesFeitas(comChecklist, partesFeitas, contexto, true);
-          return {
-            ...atual,
-            partesFeitas: depois,
-            concluidos: depois.length,
-            acertos: atual.acertos + 1,
-            listaRever: false,
-            contrato: { ...atual.contrato, mudou: true },
-            pausa: "mudancaDoCliente",
-            fala: { texto: `Ih, chegou mensagem de ${clienteDe(contrato.contrato.cliente).nome}. Cliente de verdade muda de ideia no meio do caminho!`, expressao: "curioso" },
-          };
+          const mensagem: Fala = { texto: `Ih, chegou mensagem de ${clienteDe(contrato.contrato.cliente).nome}. Cliente de verdade muda de ideia no meio do caminho!`, expressao: "curioso" };
+          return enfileirarFalas<EstadoMotor>(
+            {
+              ...atual,
+              partesFeitas: depois,
+              concluidos: depois.length,
+              acertos: atual.acertos + 1,
+              listaRever: false,
+              contrato: { ...atual.contrato, mudou: true },
+              pausa: "mudancaDoCliente",
+            },
+            // A parte que trouxe a mensagem é comemorada antes: a mensagem (e a conversa com o cliente) vem no Continuar.
+            [...(novas.length > 0 ? [{ fala: falaDasNovas(novas), aguarda: true }] : []), { fala: mensagem, aguarda: true }],
+          );
         }
-        const novas = partesFeitas.filter((id) => !atual.partesFeitas.includes(id));
         const mesmas = partesFeitas.length === atual.partesFeitas.length && novas.length === 0;
         if (mesmas) return atual;
         const todas = partesFeitas.length >= itens.length;
-        const parte = itens.find((item) => item.id === novas[novas.length - 1]);
-        const noProjeto = comChecklist.tipo === "projeto-ponte";
-        const noContrato = atual.contrato !== null;
-        return {
+        const atualizado: EstadoMotor = {
           ...atual,
           partesFeitas,
           concluidos: partesFeitas.length,
           acertos: novas.length > 0 ? atual.acertos + 1 : atual.acertos,
           listaRever: novas.length > 0 ? false : atual.listaRever,
           pausa: todas ? "desafioConcluido" : null,
-          fala: todas
-            ? noContrato
-              ? { texto: "Todos os requisitos atendidos, inclusive o pedido novo! Bora montar o relatório e entregar?", expressao: "comemorando" }
-              : noProjeto
-              ? { texto: "Todos os requisitos! O site é seu, feito do zero, sem passo a passo. Que orgulho!", expressao: "comemorando" }
-              : { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" }
-            : novas.length > 0
-              ? { texto: `Isso! ${noProjeto || noContrato ? "Requisito cumprido" : "Parte feita"}: ${parte?.descricao ?? ""}`, expressao: "comemorando" }
-              : atual.fala,
         };
+        if (todas) {
+          const final: Fala = noContrato
+            ? { texto: "Todos os requisitos atendidos, inclusive o pedido novo! Bora montar o relatório e entregar?", expressao: "comemorando" }
+            : noProjeto
+              ? { texto: "Todos os requisitos! O site é seu, feito do zero, sem passo a passo. Que orgulho!", expressao: "comemorando" }
+              : { texto: "Desafio completo! Todas as partes marcadas, sem passo a passo. Que orgulho!", expressao: "comemorando" };
+          // A fala final resume as partes: toma a cena e leva a fila junto.
+          return falaDaPausa<EstadoMotor>(atualizado, final);
+        }
+        return novas.length > 0 ? enfileirarFala<EstadoMotor>(atualizado, falaDasNovas(novas)) : atualizado;
       });
     },
     [comChecklist, contrato],
@@ -543,41 +568,44 @@ export function useMotorFase({
 
   const entrarNosObjetivos = () => {
     eventosObjetivo.current = [];
-    setEstado({ ...estado, etapa: "objetivos", indiceFala: 0, fala: falaDeInicio(fase, toque) });
+    setEstado(trocarFala<EstadoMotor>({ ...estado, etapa: "objetivos", indiceFala: 0 }, falaDeInicio(fase, toque)));
     const iniciais = fase.eventosIniciais ?? [];
+    // Sem roteiro inicial, o primeiro objetivo entra na hora; com roteiro, o enunciado espera o que ele conta.
     rodarEventos(iniciais, () => {
-      if (pratica) ativarObjetivo(0, iniciais[iniciais.length - 1]?.fala);
+      if (pratica) ativarObjetivo(0, iniciais.length === 0);
     });
   };
 
   /** Avança a meta, as falas da introdução e as da conclusão. */
   const avancarFala = () => {
     if (estado.etapa === "meta") {
-      setEstado({ ...estado, etapa: "introducao", indiceFala: 0, fala: fase.introducao[0] });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, etapa: "introducao", indiceFala: 0 }, fase.introducao[0]));
       return;
     }
     if (estado.etapa === "introducao") {
       const proxima = estado.indiceFala + 1;
-      if (proxima < fase.introducao.length) setEstado({ ...estado, indiceFala: proxima, fala: fase.introducao[proxima] });
+      if (proxima < fase.introducao.length) setEstado(trocarFala<EstadoMotor>({ ...estado, indiceFala: proxima }, fase.introducao[proxima]));
       else entrarNosObjetivos();
       return;
     }
     if (estado.etapa === "concluida" && estado.conclusaoAberta) {
       const proxima = Math.min(estado.indiceFala + 1, fase.conclusao.length);
-      setEstado({
-        ...estado,
-        indiceFala: proxima,
-        fala: proxima < fase.conclusao.length ? fase.conclusao[proxima] : falaFinalDe(fase),
-      });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, indiceFala: proxima }, proxima < fase.conclusao.length ? fase.conclusao[proxima] : falaFinalDe(fase)));
     }
   };
 
+  /** Continuar a fila de falas: a próxima entra (ou a importante de agora deixa de esperar). */
+  const continuarFala = useCallback(() => {
+    setEstado((atual) => avancarFila(atual));
+  }, []);
+
   /** Sai da pausa: ativa o próximo objetivo ou conclui a fase. */
   const seguir = () => {
-    if (estado.pausa === null) return;
+    // Com falas na fila, o botão da pausa ainda não aparece: primeiro a fila.
+    if (estado.pausa === null || estado.filaFalas.length > 0) return;
     if (estado.pausa === "mudancaDoCliente") {
       // O pedido mudou: o trabalho continua (os eventos do objetivo continuam valendo).
-      setEstado({ ...estado, pausa: null, fala: { texto: "O checklist já mudou. Mexer em código que já funciona é normal: confere que o resto continua passando.", expressao: "pensativo" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, pausa: null }, { texto: "O checklist já mudou. Mexer em código que já funciona é normal: confere que o resto continua passando.", expressao: "pensativo" }));
       return;
     }
     eventosObjetivo.current = [];
@@ -585,23 +613,19 @@ export function useMotorFase({
       // Contrato: antes da conclusão, a entrega (o relatório, a reação do cliente e o Levar pro mundo).
       const comTempoFinal = comTempo(estado.contrato);
       inicioTrabalho.current = null;
-      setEstado({ ...estado, pausa: null, contrato: { ...comTempoFinal, etapa: "entrega" }, fala: { texto: "O relatório saiu sozinho do checklist e dos testes. Confere e entrega!", expressao: "apontando" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, pausa: null, contrato: { ...comTempoFinal, etapa: "entrega" } }, { texto: "O relatório saiu sozinho do checklist e dos testes. Confere e entrega!", expressao: "apontando" }));
       return;
     }
     if (estado.pausa === "desafioConcluido" || estado.concluidos >= total) {
-      setEstado({
-        ...estado,
-        etapa: "concluida",
-        objetivoAtual: total,
-        pausa: null,
-        degrau: 0,
-        indiceFala: 0,
-        conclusaoAberta: true,
-        fala: fase.conclusao[0],
-      });
+      setEstado(
+        trocarFala<EstadoMotor>(
+          { ...estado, etapa: "concluida", objetivoAtual: total, pausa: null, degrau: 0, indiceFala: 0, conclusaoAberta: true },
+          fase.conclusao[0],
+        ),
+      );
       return;
     }
-    ativarObjetivo(estado.concluidos);
+    ativarObjetivo(estado.concluidos, true);
   };
 
   /* ---------------------------------------------------------------- */
@@ -649,7 +673,7 @@ export function useMotorFase({
       if (pendentes.length === 0) return;
       const vez = pendentes[estado.degrau % pendentes.length];
       const pergunta = contrato.partes.find((parte) => parte.id === vez.id)?.pergunta ?? "O que o cliente pediu que ainda falta? Relê o documento dele.";
-      setEstado({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda, listaRever: false, fala: { texto: pergunta, expressao: "curioso" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda, listaRever: false }, { texto: pergunta, expressao: "curioso" }));
       return;
     }
     if (desafio) {
@@ -661,7 +685,7 @@ export function useMotorFase({
       const pendentes = projeto.requisitos.filter((item) => !estado.partesFeitas.includes(item.id));
       if (pendentes.length === 0) return;
       const vez = estado.degrau % pendentes.length;
-      setEstado({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda, fala: { texto: pendentes[vez].pergunta, expressao: "curioso" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, degrau: ((estado.degrau + 1) % 4) as DegrauAjuda }, { texto: pendentes[vez].pergunta, expressao: "curioso" }));
       return;
     }
     if (!objetivo || previsaoPendente) return;
@@ -669,37 +693,34 @@ export function useMotorFase({
     if (proximo === estado.degrau) return;
     const { ajudas } = objetivo;
     if (proximo === 1) {
-      setEstado({ ...estado, degrau: 1, fala: { texto: ajudas.pergunta, expressao: "curioso" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, degrau: 1 }, { texto: ajudas.pergunta, expressao: "curioso" }));
     } else if (proximo === 2) {
-      setEstado({ ...estado, degrau: 2, fala: { texto: ajudas.dica, expressao: "pensativo" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, degrau: 2 }, { texto: ajudas.dica, expressao: "pensativo" }));
     } else if (objetivo.modo === "guiado" && proximo === 3) {
       aplicarLinha(objetivo.ajudas.linha);
-      setEstado({ ...estado, degrau: 3, fala: { texto: objetivo.ajudas.linha.fala, expressao: "apontando" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, degrau: 3 }, { texto: objetivo.ajudas.linha.fala, expressao: "apontando" }));
     } else if (objetivo.modo === "guiado") {
       const gratis = modo !== "jogo" || estado.estrelas <= ESTRELAS_MINIMAS;
-      setEstado({
-        ...estado,
-        confirmandoSolucao: true,
-        fala: {
-          texto:
-            modo === "revisao"
-              ? "Na revisão a solução é de graça. Quer ver?"
-              : gratis
-                ? "Você já está com a estrela mínima, então essa sai de graça. Quer ver a solução?"
-                : "Isso custa 1 estrela. Quer ver a solução?",
-          expressao: "pensativo",
-        },
-      });
+      setEstado(
+        trocarFala<EstadoMotor>(
+          { ...estado, confirmandoSolucao: true },
+          {
+            texto:
+              modo === "revisao"
+                ? "Na revisão a solução é de graça. Quer ver?"
+                : gratis
+                  ? "Você já está com a estrela mínima, então essa sai de graça. Quer ver a solução?"
+                  : "Isso custa 1 estrela. Quer ver a solução?",
+            expressao: "pensativo",
+          },
+        ),
+      );
     }
   };
 
   const cancelarSolucao = () => {
     if (!objetivo) return;
-    setEstado({
-      ...estado,
-      confirmandoSolucao: false,
-      fala: { texto: "Boa! Tenta mais um pouquinho, você consegue.", expressao: "feliz" },
-    });
+    setEstado(trocarFala<EstadoMotor>({ ...estado, confirmandoSolucao: false }, { texto: "Boa! Tenta mais um pouquinho, você consegue.", expressao: "feliz" }));
   };
 
   /** Degrau 4: aplica a solução pelas funções da interface, explica e cobra 1 estrela. */
@@ -714,15 +735,19 @@ export function useMotorFase({
       aplicando.current = false;
     }
     limparAjudasVisuais();
-    setEstado({
-      ...estado,
-      degrau: 4,
-      confirmandoSolucao: false,
-      concluidos: estado.objetivoAtual + 1,
-      pausa: "solucao",
-      estrelas: modo === "jogo" ? Math.max(ESTRELAS_MINIMAS, estado.estrelas - 1) : estado.estrelas,
-      fala: { texto: objetivo.ajudas.solucao.fala, expressao: "apontando" },
-    });
+    setEstado(
+      falaDaPausa<EstadoMotor>(
+        {
+          ...estado,
+          degrau: 4,
+          confirmandoSolucao: false,
+          concluidos: estado.objetivoAtual + 1,
+          pausa: "solucao",
+          estrelas: modo === "jogo" ? Math.max(ESTRELAS_MINIMAS, estado.estrelas - 1) : estado.estrelas,
+        },
+        { texto: objetivo.ajudas.solucao.fala, expressao: "apontando" },
+      ),
+    );
   };
 
   /**
@@ -749,7 +774,7 @@ export function useMotorFase({
   /** Do briefing (o cliente falando e o documento) para a lista de requisitos. */
   const irParaRequisitos = () => {
     if (!estado.contrato || estado.contrato.etapa !== "briefing") return;
-    setEstado({ ...estado, contrato: { ...estado.contrato, etapa: "requisitos" }, fala: { texto: contrato?.contrato.requisitos.pergunta ?? "O que o cliente pediu de verdade? Escolhe os cartões e completa as lacunas.", expressao: "curioso" } });
+    setEstado(trocarFala<EstadoMotor>({ ...estado, contrato: { ...estado.contrato, etapa: "requisitos" } }, { texto: contrato?.contrato.requisitos.pergunta ?? "O que o cliente pediu de verdade? Escolhe os cartões e completa as lacunas.", expressao: "curioso" }));
   };
 
   /** Confere a lista de requisitos: certa, começa o trabalho; errada, o colega diz o que falta (sem dizer qual, nas primeiras vezes). */
@@ -759,9 +784,9 @@ export function useMotorFase({
     barramento.emitir({ tipo: "conferiuRequisitos", certo: conferencia.certo });
     if (conferencia.certo) {
       eventosObjetivo.current = [];
-      setEstado({ ...estado, contrato: { ...estado.contrato, etapa: "trabalho", escolha }, fala: { texto: falaDaConferencia(conferencia), expressao: "comemorando" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, contrato: { ...estado.contrato, etapa: "trabalho", escolha } }, { texto: falaDaConferencia(conferencia), expressao: "comemorando" }));
     } else {
-      setEstado({ ...estado, contrato: { ...estado.contrato, escolha, tentativas: estado.contrato.tentativas + 1 }, fala: { texto: falaDaConferencia(conferencia), expressao: "pensativo" } });
+      setEstado(trocarFala<EstadoMotor>({ ...estado, contrato: { ...estado.contrato, escolha, tentativas: estado.contrato.tentativas + 1 } }, { texto: falaDaConferencia(conferencia), expressao: "pensativo" }));
     }
     return conferencia;
   };
@@ -769,17 +794,12 @@ export function useMotorFase({
   /** Entregou: a fase conclui (a conclusão e o Levar pro mundo vêm depois). */
   const entregar = () => {
     if (!estado.contrato || estado.contrato.etapa !== "entrega") return;
-    setEstado({
-      ...estado,
-      etapa: "concluida",
-      objetivoAtual: total,
-      pausa: null,
-      degrau: 0,
-      indiceFala: 0,
-      conclusaoAberta: true,
-      fala: fase.conclusao[0],
-      contrato: { ...estado.contrato, entregue: true },
-    });
+    setEstado(
+      trocarFala<EstadoMotor>(
+        { ...estado, etapa: "concluida", objetivoAtual: total, pausa: null, degrau: 0, indiceFala: 0, conclusaoAberta: true, contrato: { ...estado.contrato, entregue: true } },
+        fase.conclusao[0],
+      ),
+    );
   };
 
   /** Lab: aplica a solução de teste do objetivo (ou da próxima parte) pelas funções da interface. */
@@ -797,14 +817,18 @@ export function useMotorFase({
     }
   };
 
-  /** Fala vinda de fora do roteiro (tutor, easter egg). */
-  const falar = useCallback((fala: Fala) => {
-    setEstado((atual) => ({ ...atual, fala }));
+  /**
+   * Fala vinda de fora do roteiro. Padrão: o jogador pediu (o tutor, um link
+   * que ele tocou, o easter egg) e ela entra na hora. `automatica`: veio
+   * sozinha (um aviso) e espera a vez; `aguarda`: espera o jogador.
+   */
+  const falar = useCallback((fala: Fala, opcoes: { automatica?: boolean; aguarda?: boolean } = {}) => {
+    setEstado((atual) => (opcoes.automatica ? enfileirarFala(atual, fala, opcoes.aguarda) : trocarFala(atual, fala, opcoes.aguarda)));
   }, []);
 
   const abrirConclusao = () => setEstado({ ...estado, conclusaoAberta: true });
   const fecharConclusao = () =>
-    setEstado({ ...estado, conclusaoAberta: false, indiceFala: fase.conclusao.length, fala: falaFinalDe(fase) });
+    setEstado(trocarFala<EstadoMotor>({ ...estado, conclusaoAberta: false, indiceFala: fase.conclusao.length }, falaFinalDe(fase)));
 
   return {
     estado,
@@ -817,6 +841,7 @@ export function useMotorFase({
     verificar,
     aoDocumentoPronto,
     avancarFala,
+    continuarFala,
     seguir,
     ajudar,
     cancelarSolucao,

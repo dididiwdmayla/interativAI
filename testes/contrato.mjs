@@ -6,7 +6,7 @@
 // código do antes caindo na parte nova, o do depois passando em tudo, a
 // entrega com o relatório e a reação do cliente, até a conclusão.
 // Uso: node testes/contrato.mjs [desktop|retrato|paisagem]
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, continuarFalas, errosRelevantes, esperarPronto, fecharBalao } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -145,6 +145,9 @@ await esperarPronto(pagina);
 // O código do antes: o pisca-pisca pronto faz a mensagem do cliente chegar.
 await escrever(ANTES);
 await executar();
+// A fila de falas: o requisito que trouxe a mensagem é comemorado antes, e a mensagem vem no Continuar.
+await pagina.waitForFunction(() => document.querySelector("[data-jogo-fase]")?.getAttribute("data-fila-falas") === "pede" || document.querySelector("[data-conversa-cliente]"), null, { timeout: 15000 });
+await continuarFalas(pagina);
 await pagina.locator("[data-conversa-cliente]").waitFor({ timeout: 15000 });
 await modalAssentado();
 conferir(((await pagina.locator("[data-conversa-cliente]").textContent()) ?? "").includes("Mensagem nova"), `${MODO}: a mensagem de mudança do cliente aparece`);

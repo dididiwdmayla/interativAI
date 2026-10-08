@@ -5,7 +5,7 @@
 // testes/chamados-jornadas.json (o teste de conteúdo confere que ele acompanha o TS).
 // Uso: node testes/chamados.mjs [desktop|retrato|paisagem] [5|6]
 import { readFileSync } from 'node:fs';
-import { abrir, abrirBalao, fecharBalao, esperarPronto, conferir, errosRelevantes, opcaoDaPrevisao } from './util.mjs';
+import { abrir, abrirBalao, continuarFalas, fecharBalao, esperarPronto, conferir, errosRelevantes, opcaoDaPrevisao } from './util.mjs';
 import { PUBLICADAS, obrigatoriasProntasDaIlha } from './curriculo.mjs';
 const modo = process.argv[2] ?? 'desktop', n = process.argv[3] ?? '5';
 const UNIDADE = `logica-depuracao-u${n}`;
@@ -188,6 +188,8 @@ for (const parte of JORNADA.contrato.partes) {
  observados = new Map();
  await acoes(parte.solucaoDeTeste);
  conferirObservados(parte.id, parte.validador);
+ // A fila de falas: o conserto que trouxe a mensagem do cliente é comemorado antes dela.
+ if (!mudou) await continuarFalas(pagina);
  if (!mudou && await pagina.locator('[data-conversa-cliente]').isVisible().catch(() => false)) {
   mudou = true;
   conferir(JORNADA.contrato.depoisDe.every(id => JORNADA.contrato.partes.findIndex(p => p.id === id) <= JORNADA.contrato.partes.indexOf(parte)), `${modo} U${n}: a mensagem de mudança chega depois do conserto pronto`);

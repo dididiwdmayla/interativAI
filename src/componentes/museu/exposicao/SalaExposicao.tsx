@@ -31,6 +31,7 @@ import { EstacaoPacote } from "./EstacaoPacote";
 import { EstacaoProcessador } from "./EstacaoProcessador";
 import { EstacaoSistema } from "./EstacaoSistema";
 import { EstacaoTraducao } from "./EstacaoTraducao";
+import { useFilaDoAnfitriao } from "../useFilaDoAnfitriao";
 
 type Props = {
   dados: DadosExposicao;
@@ -90,6 +91,7 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
   const deitado = layout === "paisagem";
   const aberta = dados.estacoes.find((estacao) => estacao.id === estado.aberta) ?? dados.estacoes[0];
   const estadoAberta = aberta ? estado.estacoes[aberta.id] : null;
+  const anfitriao = useFilaDoAnfitriao(fala);
   return (
     <div
       className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-[var(--cor-museu-rodape)] bg-[var(--cor-museu-parede)] shadow-[0_8px_0_var(--cor-sombra)]"
@@ -115,9 +117,10 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
             </div>
           )}
           <FalaAntepassado
-            key={fala}
+            key={anfitriao.mostrada}
             id={dados.anfitriao}
-            texto={fala}
+            texto={anfitriao.mostrada}
+            aoCompletar={anfitriao.aoCompletar}
             expressao={concluida ? "orgulhoso" : "feliz"}
             tamanho={estreita ? 64 : deitado ? 72 : 132}
             arranjo={estreita ? "lado" : "pilha"}

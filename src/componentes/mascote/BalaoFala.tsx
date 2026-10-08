@@ -70,6 +70,7 @@ export function BalaoFala({ fala, pergunta, children, rabo = "esquerda", voz = t
               if (troca.current?.texto === fala.texto) troca.current.encerrar();
             }}
             className="text-[15px] font-bold leading-snug text-texto"
+            data-fala-mascote
           >
             {fala.texto}
           </motion.p>

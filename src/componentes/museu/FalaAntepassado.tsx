@@ -19,7 +19,7 @@
  * só visual). Tocar no balão completa a fala.
  */
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { tocarEfeito } from "@/audio/motor";
 import type { IdEfeito } from "@/audio/efeitos";
 import { FICHAS_ANTEPASSADOS, frasesDoTexto, type JeitoDeFalar, textoDeTerminal } from "@/motor/exposicao/antepassados";
@@ -61,6 +61,8 @@ type Props = {
   arranjo?: "lado" | "pilha";
   /** Sem som (a fala que se repete, a miniatura). */
   mudo?: boolean;
+  /** A fala terminou de aparecer (ou o jogador tocou para completar). */
+  aoCompletar?: () => void;
   className?: string;
 };
 
@@ -89,7 +91,7 @@ function Lancadeira() {
   );
 }
 
-export function FalaAntepassado({ id, texto, expressao = "feliz", tamanho = 96, arranjo = "lado", mudo = false, className = "" }: Props) {
+export function FalaAntepassado({ id, texto, expressao = "feliz", tamanho = 96, arranjo = "lado", mudo = false, aoCompletar, className = "" }: Props) {
   const ficha = FICHAS_ANTEPASSADOS[id];
   const jeito = ficha.jeito;
   const visivel = jeito === "terminal" ? textoDeTerminal(texto) : texto;
@@ -107,6 +109,13 @@ export function FalaAntepassado({ id, texto, expressao = "feliz", tamanho = 96, 
   );
   const fala = useFalaNoTempo(visivel, MODO[jeito], aoAvancar);
   const falando = !fala.completo;
+  const aoCompletarAtual = useRef(aoCompletar);
+  useEffect(() => {
+    aoCompletarAtual.current = aoCompletar;
+  }, [aoCompletar]);
+  useEffect(() => {
+    if (fala.completo) aoCompletarAtual.current?.();
+  }, [fala.completo]);
 
   const desenho = (
     <Antepassado id={id} expressao={expressao} falando={falando} letraAtual={fala.letraAtual} passos={fala.passos} tamanho={tamanho} className="h-auto shrink-0" />
