@@ -704,14 +704,11 @@ resposta da última expressão, as saídas do console e o erro.
     linhas que cabe na altura da tela com a mesma margem em cima e
     embaixo: fundo em pé, achatado deitado; numa tela mais larga que o
     mundo, o mar sobra igual dos dois lados.
-  - Desempenho (rodada 37): o que se mexe sozinho mexe só transform e
-    opacity, pelo compositor (as ondas, o brilho, o anel, a névoa e o
-    barquinho são camadas de HTML com animação CSS); a arte de cada ilha
-    tem camada própria e as animações dela param fora da tela
-    (`GrupoAnimadoNaTela`; a visibilidade nunca depende disso). Antes, as
-    ondas dentro do SVG faziam o Chrome repintar o mapa inteiro a cada
-    quadro, e no celular uma ilha aparecia sem arte e sem nome até sair da
-    tela e voltar. `testes/mundo.mjs` confere os pixels e a repintura.
+  - Desempenho (rodada 37): antes, as ondas dentro do SVG faziam o Chrome
+    repintar o mapa inteiro a cada quadro, e no celular uma ilha aparecia
+    sem arte e sem nome até sair da tela e voltar. `testes/mundo.mjs`
+    confere os pixels e a repintura. As regras de hoje estão em
+    "Desempenho do mundo" (rodada 40), abaixo.
   - O mundo vivo (rodada 39, `componentes/mapa/mundo/`): o mar fundo longe
     das ilhas e raso perto (desenho parado), reflexos piscando e espuma nas
     praias; peixes saltando de vez em quando, a baleia rara (sorteada de
@@ -728,15 +725,46 @@ resposta da última expressão, as saídas do console e o erro.
     têm operários-computadorzinhos de capacete (de noite, cochilam). O
     computadorzinho acena para quem volta depois de 20 minutos fora (a hora
     fica em `ilha-sites:mundo:ultima-visita`, chave só cosmética).
-  - Desempenho do mundo vivo: o que anda sozinho anima transform e opacity
-    pelo compositor; o que fica parado num lugar pausa fora da tela
-    (`useNaTela`, `data-pausado`); quem atravessa o mundo (nuvens, gaivotas,
-    o barquinho) fica dentro de um recorte do tamanho do desenho (o
-    transform de quem anda contava na área de rolagem e esticava o mapa); a
-    vida de dentro de uma ilha só anda com metade dela na tela, e os
-    operários andam em passos (girar ou espelhar uma peça dentro do SVG
-    repinta a camada a cada quadro). Com menos movimento (acompanhado ao
-    vivo, `useMenosMovimento`), tudo fica parado.
+  - Desempenho do mundo (rodada 40; regras para qualquer coisa nova no mundo):
+    - Uma camada só do tamanho do mundo: o mar de baixo (fundo e raso, as
+      ondinhas paradas, a rota e a hora na água), pintado uma vez. Todo o
+      resto é camada pequena (`camada-ilha`, `camada-propria`: a arte de cada
+      ilha, cada nome, as luzes, a névoa, o computadorzinho). Camadas do
+      tamanho do mundo (as ondas que deslizavam, grupos inteiros) disputavam
+      a memória de vídeo do celular, e o que ficava sem memória (os nomes, a
+      arte das ilhas) não era pintado: era o sumiço.
+    - Só CSS de transform e opacity, que o compositor anda sozinho; nada de
+      Framer nem estado do React por quadro. Animar um elemento de dentro de
+      um SVG custa um layout por quadro: quando der, anime o `<svg>` de fora
+      ou uma caixa de HTML (o respiro do computadorzinho fica no `<svg>`).
+    - Toda classe animada do mundo entra nas duas listas do `globals.css`
+      (a do `data-pausado` e a do `data-parada`/`data-rolando`): com as
+      listas, ligar uma marca recalcula só quem anima. Uma classe fora delas
+      aparece no `desempenho-mundo.mjs` (animações rodando no meio de um
+      arrasto).
+    - As marcas (`mundo/useNaTela.ts`, atributos, sem estado do React): fora
+      da tela, com folga, `data-pausado` tira a animação (e a camada); a
+      vida de uma ilha com menos da metade na tela para onde está
+      (`data-parada`); enquanto a pessoa rola, `data-rolando` pausa tudo
+      (cada animação, mesmo no compositor, custa um recálculo por quadro, e
+      rolando há um quadro por vsync), e as marcas de quem entra ou sai da
+      tela esperam a rolagem parar (600 ms depois do último movimento).
+    - Quem atravessa o mundo (nuvens, gaivotas, o barquinho) fica dentro de
+      um recorte do tamanho do desenho (o transform de quem anda esticava a
+      área de rolagem). Com menos movimento (`useMenosMovimento`), tudo para.
+    - Modo leve (`mundo/useModoAnimacoes.ts`): sem peixes, baleia nem
+      gaivotas, metade dos reflexos e das estrelas piscando, um anel de
+      espuma e no máximo duas nuvens. O menu tem "Animações: Completas |
+      Leves" (`progresso.animacoes`: `auto`, `completas` ou `leves`; no
+      desktop, no painel do som). No automático, liga sozinho com pouca
+      memória ou poucos núcleos (`navigator.deviceMemory` ≤ 2,
+      `hardwareConcurrency` ≤ 2) ou com a rolagem travando nos primeiros
+      segundos (abaixo de 45 quadros por segundo, ou mais de um quarto dos
+      quadros acima de 25 ms, em 90 quadros depois de descartar 30); o leve
+      automático fica guardado em `ilha-sites:mundo:animacoes-automaticas`.
+    - `testes/desempenho-mundo.mjs` mede como um celular (processador
+      limitado, toques de verdade, de dia e de noite) e confere as ilhas que
+      não somem com pouca memória de vídeo; roda sozinho no fim da bateria.
 - Ilha (`TelaIlha`, `/ilha/[id]`): zonas como regiões ao longo de um
   caminho sinuoso (horizontal no desktop e deitado, vertical em pé). O
   desenho (`ilha/desenhoIlha.ts`, puro e testado, em px de tela) dá o

@@ -29,6 +29,26 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 40: o mundo fluido no celular e os nomes das ilhas que não somem.**
+  Detalhe em `docs/PROGRESSO.md`.
+  - **Medida de celular** (`testes/desempenho-mundo.mjs`): processador
+    limitado (4x, 6x e 12x), toques de verdade com embalo, de dia e de noite.
+    Antes: 29 quadros por segundo em 4x e 19,5 em 6x, com centenas de
+    travadas; depois: 58 em 4x e 56 em 6x, com as animações completas.
+  - **Causas e correções:** a vida das ilhas e o respiro do computadorzinho
+    em CSS (sem Framer por quadro); tudo pausa enquanto se rola, e as marcas
+    de fora da tela esperam a rolagem parar; marcas por atributo, sem estado
+    do React; as regras de pausa com a lista das classes animadas; uma camada
+    só do tamanho do mundo (o mar, com as ondas paradas).
+  - **Modo leve:** liga sozinho num aparelho fraco (memória, núcleos ou a
+    rolagem travando nos primeiros segundos) e fica no menu ("Animações:
+    Completas | Leves", salvo no progresso).
+  - **Nomes e arte sumindo:** reproduzido com a memória de vídeo de um
+    celular de entrada (as camadas do tamanho do mundo não cabiam com as
+    ilhas e os nomes); corrigido na causa e conferido a cada parada de uma
+    rolagem rápida (versão antiga: 17 de 35 ilhas sem nome ou arte; nova:
+    nenhuma). Os testes de desempenho rodam sozinhos no fim da bateria.
+
 - **Rodada 39: mundo completo e vivo, fila de falas e ajustes nas Origens.**
   Detalhe em `docs/PROGRESSO.md`.
   - **Fila de falas** (`src/motor/filaDeFalas.ts`): a fala importante
@@ -742,19 +762,33 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 39 (mundo vivo e fila de falas): aguardando a revisão do pull
-  request, jogando no Android em pé e deitado (o mundo de dia e de noite, a
-  fila de falas ao concluir objetivos e no contrato, a mesa de cores).
+- Rodada 40 (mundo fluido): aguardando a revisão do pull request, rolando o
+  mundo num Android de verdade, de dia e de noite, rápido, ida e volta (sem
+  travar e sem ilha sem nome), e trocando as animações no menu.
 
 ### Pendências
 
+- **Rodada 40, para depois:**
+  - As medidas são de um Chromium sem tela, com o processador e a memória
+    de vídeo limitados por emulação; o compositor e a GPU de um celular de
+    verdade não foram limitados. Falta a confirmação no Android.
+  - As ondinhas do mundo pararam de deslizar (eram duas camadas do tamanho
+    do mundo; a vida do mar ficou com reflexos, espuma, peixes e o
+    barquinho). Na tela da ilha, continuam deslizando.
+  - Enquanto se rola, todo o mundo pausa (e volta 600 ms depois); pausar e
+    voltar custa um recálculo de cada animação na tela (até ~90 ms em 6x,
+    num momento em que nada se mexe).
+  - A área de rolagem do mundo é uns 15 px mais larga que o desenho: no fim
+    do mundo aparece uma faixa do azul de fundo, que de noite destoa.
+  - Com 32 MB de memória de vídeo (celular bem de entrada, tela de 3x), a
+    versão nova ainda perde 3 de 15 nomes (a antiga, 17 de 33); abaixo disso,
+    só o modo leve com menos camadas ajudaria.
+  - Cada classe animada nova do mundo precisa entrar nas duas listas do
+    `globals.css` (o `desempenho-mundo.mjs` acusa uma esquecida).
+
 - **Rodada 39, para depois:**
-  - O mundo vivo foi medido num Chromium sem GPU (repintura parada abaixo
-    do teto); vale olhar num Android mais fraco, rolando o mundo de noite
-    (estrelas, farol e LEDs) e de dia (nuvens, peixes e o barquinho).
   - Deitado, cabem quatro ou cinco ilhas inteiras e todas animam por
-    dentro (a regra é metade da ilha na tela); de noite, o "z" dos operários
-    cochilando ainda é animação do Framer (4,2 telas/s deitado).
+    dentro (a regra é metade da ilha na tela).
   - O mundo segue o relógio do aparelho: quem joga de noite vê o mundo
     escuro. Se incomodar, um ajuste de "sempre de dia" nos Ajustes.
   - "Parte feita" do desafio não espera o Continuar; a fala final do
@@ -1017,7 +1051,7 @@ núcleo comum.
 ### Próximo (em ordem)
 
 1. Faxina técnica das pendências (as desta seção, das mais antigas às da
-   rodada 39).
+   rodada 40).
 2. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
    e as missões de campo que leem documentação original (guia, seção 1).
 3. Planejar o início do jogo (o porto de chegada) e o login.
