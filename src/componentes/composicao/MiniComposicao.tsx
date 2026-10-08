@@ -16,7 +16,7 @@ function codigoResumido(codigo: string): string {
   const bloco = acharBlocoDoPlano(codigo);
   if (!bloco) return codigo;
   const linhas = codigo.slice(bloco.de, bloco.ate).split("\n");
-  return `${codigo.slice(0, bloco.de)}${linhas[0]} (${linhas.length - 1} passos em comentário)${codigo.slice(bloco.ate)}`;
+  return `${codigo.slice(0, bloco.de)}${linhas[1]} (${linhas.length - 3} passos em comentário)${codigo.slice(bloco.ate)}`;
 }
 
 /** Linhas do código mostradas (o resto vira "..."). */

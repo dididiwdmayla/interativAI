@@ -108,22 +108,36 @@ describe("o plano no código: comentários", () => {
   };
   const certo = estado(["vazia", "zerar", "somar", "dividir", "devolver"]);
 
+  it("não reescreve bloco legado ou marcador incompleto, pois não há fim seguro", () => {
+    for (const codigo of ["// Plano: velho\n// 1. meu comentário", "// <interativai:plano>\n// 1. meu comentário"]) {
+      expect(codigoComPlano(codigo, dados, certo, false)).toBe(codigo);
+      expect(codigoComPlano(codigo, dados, certo, true)).toContain(codigo);
+    }
+  });
+
+  it("preserva comentário numerado fora do plano ao mudar a ordem", () => {
+    const codigo = codigoComPlano("", dados, certo, true).trimEnd() + "\n// 99. anotação minha\n";
+    expect(codigoComPlano(codigo, dados, estado(["zerar", "vazia"]), false)).toContain("// 99. anotação minha");
+  });
+
   it("leva o plano pro topo do código, na ordem do aluno, sem apagar o que já existe", () => {
     const codigo = "function media(notas) {\n  return 0;\n}";
     const novo = codigoComPlano(codigo, dados, certo, true);
     expect(novo).toBe(
       [
+        "// <interativai:plano>",
         "// Plano: Calcular a média das notas",
         "// 1. Se não tiver nenhuma nota, devolver 0",
         "// 2. Começar a soma em zero",
         "// 3. Somar cada nota na soma",
         "// 4. Dividir a soma pela quantidade de notas",
         "// 5. Devolver a média",
+        "// </interativai:plano>",
         "",
         codigo,
       ].join("\n"),
     );
-    expect(codigoComPlano("", dados, certo, true).endsWith("// 5. Devolver a média\n")).toBe(true);
+    expect(codigoComPlano("", dados, certo, true).endsWith("// 5. Devolver a média\n// </interativai:plano>\n")).toBe(true);
   });
 
   it("mexer no plano reescreve só o bloco: o código do aluno fica", () => {
@@ -135,8 +149,8 @@ describe("o plano no código: comentários", () => {
     // Sem o bloco (o aluno apagou), mexer no plano não põe o bloco de volta sozinho.
     expect(codigoComPlano(codigoDoAluno, dados, certo, false)).toBe(codigoDoAluno);
     // Bloco recuado (dentro da função): o recuo continua.
-    const recuado = "function media(notas) {\n  // Plano: x\n  // 1. Devolver a média\n  return 0;\n}";
-    expect(codigoComPlano(recuado, dados, estado(["devolver"]), false)).toBe("function media(notas) {\n  // Plano: Calcular a média das notas\n  // 1. Devolver a média\n  return 0;\n}");
+    const recuado = "function media(notas) {\n  // <interativai:plano>\n  // Plano: x\n  // 1. Devolver a média\n  // </interativai:plano>\n  return 0;\n}";
+    expect(codigoComPlano(recuado, dados, estado(["devolver"]), false)).toBe("function media(notas) {\n  // <interativai:plano>\n  // Plano: Calcular a média das notas\n  // 1. Devolver a média\n  // </interativai:plano>\n  return 0;\n}");
   });
 
   it("lê os comentários de volta como plano, mesmo espalhados pelo código", () => {
@@ -189,7 +203,7 @@ describe("o plano no código: comentários", () => {
     let plano = estadoInicialOrdenar(festa);
     for (const [id, grupo] of [["lista", "convidar"], ["mandar", "convidar"], ["bolo", "preparar"]]) plano = porPasso(festa, plano, id, grupo) as EstadoOrdenar;
     const codigo = codigoComPlano("", festa, plano, true);
-    expect(codigo).toBe("// Plano: Festa\n// 1. Convidar\n//   1.1 Fazer a lista\n//   1.2 Mandar a mensagem\n// 2. Preparar\n//   2.1 Fazer o bolo\n");
+    expect(codigo).toBe("// <interativai:plano>\n// Plano: Festa\n// 1. Convidar\n//   1.1 Fazer a lista\n//   1.2 Mandar a mensagem\n// 2. Preparar\n//   2.1 Fazer o bolo\n// </interativai:plano>\n");
     expect(planoDosComentarios(festa, codigo).estado.listas).toEqual({ convidar: ["lista", "mandar"], preparar: ["bolo"] });
     // O bolo no passo grande errado: o plano dos comentários não vale.
     const errado = codigo.replace("//   1.2 Mandar a mensagem\n", "//   1.2 Mandar a mensagem\n//   1.3 Fazer o bolo\n").replace("//   2.1 Fazer o bolo\n", "");
@@ -257,7 +271,7 @@ describe("o desafio composto", () => {
     const { antes, depois } = composicaoDoDesafio(FASE_DEMO_DESAFIO_RESOLVER);
     expect(antes).toEqual({ cena: null, plano: [], codigo: "", casos: [], memoria: null, exposicao: null });
     expect(depois.plano).toEqual(["Começar a contagem em zero", "Olhar cada nota da lista", "Se a nota for 6 ou mais, contar mais um", "Devolver a contagem"]);
-    expect(depois.codigo?.startsWith("// Plano: Contar quantos passaram\n// 1. Começar a contagem em zero")).toBe(true);
+    expect(depois.codigo?.startsWith("// <interativai:plano>\n// Plano: Contar quantos passaram\n// 1. Começar a contagem em zero")).toBe(true);
     expect(depois.casos?.map((caso) => [caso.chamada, caso.esperado, caso.passou])).toEqual([
       ["aprovados([7, 4, 9])", "2", true],
       ["aprovados([6])", "1", true],

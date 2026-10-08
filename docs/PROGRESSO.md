@@ -3,6 +3,21 @@
 Rodada anterior: `docs/arquivo/PROGRESSO-rodada-39.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
+## Rodada 41: faxina técnica das pendências
+
+Branch `codex/faxina-tecnica-pendencias`, base `3d3685e`, depois dos merges
+#40 e #41 do mundo vivo e da fila de falas. IDs e ordem publicados preservados.
+
+### Item 7 — O plano não apaga comentários do aluno
+
+Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
+sumia ao reordenar; regressão falhou antes e passou depois. Causa: o bloco
+terminava na última linha numerada, sem marcador de fim. Agora os marcadores
+`// <interativai:plano>` e `// </interativai:plano>` delimitam a substituição.
+Blocos legados/incompletos ficam intactos; inserir novamente preserva tudo.
+Só a bancada não publicada ganhou exemplos delimitados. 19 unitários verdes;
+jornadas compostas e unidades afetadas conferidas no fechamento.
+
 ## Rodada 40: o mundo fluido no celular e os nomes das ilhas que não somem
 
 Branch `claude/mundo-completo-falas-b43oz0`, recomeçada da principal depois
