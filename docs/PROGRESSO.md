@@ -20,6 +20,14 @@ A jornada completa também precisava evitar fechar o balão pelo véu do
 Experimente quando a Árvore já estava aberta; ajuste do teste, com a causa
 registrada, para chegar à U4. Jornadas dos três layouts no fechamento.
 
+### Item 9 — `textoContem`
+
+Regressão falhou antes: o motor não reconhecia o novo tipo. Agora confere
+um trecho não vazio em pelo menos um elemento, com espaços normalizados,
+caixa e acentos exatos. Testes cobrem trecho ausente, seletor vazio, diferenças
+de caixa/acento e composição com `todos`. Guia documentado; nenhuma fase
+publicada foi alterada. 24 testes do núcleo verdes.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano

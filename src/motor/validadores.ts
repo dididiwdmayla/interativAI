@@ -160,6 +160,8 @@ export function descreverValidador(validador: Validador): string {
       return `não existe ${validador.seletor}`;
     case "contagem":
       return `quantidade de ${validador.seletor}${validador.comTexto ? " (com texto)" : ""} ${validador.op} ${validador.valor}`;
+    case "textoContem":
+      return `texto de ${validador.seletor} contém "${validador.valor}"`;
     case "textoIgual":
       return `texto de ${validador.seletor} igual a "${validador.valor}"`;
     case "textoDiferenteDoInicial":
@@ -342,6 +344,11 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       if (validador.comTexto) elementos = elementos.filter((elemento) => normalizarTexto(textoVerdadeiro(elemento)).length > 0);
       const quantidade = elementos.length;
       return { passou: comparar(quantidade, validador.op, validador.valor), descricao, detalhe: `achou ${quantidade}` };
+    }
+    case "textoContem": {
+      const textos = textosDe(consultar(documento, validador.seletor));
+      const alvo = normalizarTexto(validador.valor);
+      return { passou: alvo.length > 0 && textos.some((texto) => texto.includes(alvo)), descricao, detalhe: `textos: ${lista(textos)}` };
     }
     case "textoIgual": {
       const textos = textosDe(consultar(documento, validador.seletor));
