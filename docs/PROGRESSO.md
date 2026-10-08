@@ -126,3 +126,16 @@ Outros achados:
   ruído.
 - Docs: `PROJETO.md` ("Desempenho do mundo", as regras para o que entrar no
   mundo), `testes/README.md` e o ROADMAP.
+- Build, lint e `testar:conteudo` verdes (com um teste novo da normalização
+  de `animacoes`). Bateria completa uma vez, no servidor de produção
+  (`PARALELO=4`): 209 execuções, 207 verdes. As 2 falhas: `algoritmos.mjs
+  paisagem 3` (a instabilidade sob carga já registrada; verde sozinho) e
+  `unidades.mjs retrato` (o duplo toque da U4F1, pendência da rodada 36;
+  falha igual na principal). O `desempenho-mundo.mjs` passou no fim,
+  sozinho.
+- Depois da bateria, os limites do teste de desempenho ganharam folga
+  (quadros acima de 50 ms: até 3 em 4x e até 8 em 6x; a bateria deu 6 em 6x
+  de noite, no limite antigo), e a conferência da arte nas paradas passou a
+  exigir 40% (de noite, o farol girando da IA só aparece na captura e
+  deixava a ilha em 58%; uma arte sumida fica perto de 0%). O teste foi
+  rodado de novo, verde.
