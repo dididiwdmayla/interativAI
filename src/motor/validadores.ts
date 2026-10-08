@@ -1,3 +1,4 @@
+import type { DiferencaTexto } from "./contrato/diferencaTexto";
 /*
  * Interpretador dos validadores declarativos (src/conteudo/tipos.ts).
  * Funciona com o documento vivo do iframe, com um Document solto
@@ -100,6 +101,7 @@ export type ResultadoValidador = {
   /** O que foi encontrado, quando ajuda a entender uma falha. */
   detalhe?: string;
   filhos?: ResultadoValidador[];
+  diferencaTexto?: DiferencaTexto;
 };
 
 /** Espaços nas pontas fora e espaços repetidos virando um só. */
@@ -792,8 +794,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       };
     }
     case "estadoNaCena": {
-      const { passou, detalhe } = conferirEstado(validador, contexto.programa?.cena);
-      return { passou, descricao, detalhe };
+      return { ...conferirEstado(validador, contexto.programa?.cena), descricao };
     }
     case "sequenciaNaCena": {
       const { passou, detalhe } = conferirSequencia(validador, contexto.programa?.cena);

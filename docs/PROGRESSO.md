@@ -77,6 +77,14 @@ Regressão inclui Home repetido em zero. Três layouts com navegadores em
 paralelo; nenhum timeout aumentado. O import pesado das checagens já estava
 fora dos testes de Estruturas; não era necessário replicar esse ajuste aqui.
 
+### Item 6 — Texto exato no contrato
+
+Antes, `estadoNaCena` só mostrava o valor recebido. Agora as falhas de texto
+trazem esperado/recebido e a faixa diferente, sem normalizar espaços, caixa
+ou acento. No checklist do contrato a faixa é marcada e espaços viram `␠`;
+uma remoção aparece como "ausente". O /lab também recebe a comparação no
+detalhe do validador. Unitários cobrem `CLIENTES: 4` sem espaço, caixa e CAFÉ.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
