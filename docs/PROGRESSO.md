@@ -36,6 +36,14 @@ pausa em `document.hidden`, salva ao ocultar e retoma ao voltar/interagir.
 Escuta toque/clique, teclado, escrita e rolagem. Não depende de ticks para
 parar no limite e não soma duas vezes ao entregar. Duas regressões verdes.
 
+### Item 10 — Meta compacta em retrato
+
+Reprodução medida: a meta da padaria ocupava 715,75 px dos 844 px. A
+miniatura reservava 288 px mesmo quando só tinha uma cena de 112 px,
+deixando espaço vazio. Só as miniaturas com cena única usam altura natural;
+a cena, as legendas e a fonte mantêm o tamanho. Regressão exige até 610 px,
+antes/depois e botão visíveis; demais composições mantêm a altura.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
