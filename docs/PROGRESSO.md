@@ -54,6 +54,16 @@ saíam; ficaram incluídas na prova de cobertura. Registro de fábricas é
 `Record<TipoDispositivo, string>` (um novo tipo sem exportação quebra o build)
 e a prova por catálogo verifica execução e console. 20 provas verdes.
 
+### Item 3 — Portões sem alvos sobrepostos
+
+Antes, os retângulos ampliados cobriam os vizinhos. A jornada sem ampliar
+falhou ao conectar o NÃO no retrato. Depois passou na escala inicial.
+Os alvos são recortados por células de proximidade (Voronoi), incluindo
+corpos e portas: nenhum interior de área cobre outro alvo; o desenho é
+preservado e não intercepta o toque fora do recorte. O unitário confere
+cada vértice contra todos os vizinhos; circuito e museu usam a mesma bancada.
+Jornadas agora não ampliam automaticamente; testes de zoom continuam à parte.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano

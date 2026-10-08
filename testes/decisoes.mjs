@@ -110,13 +110,12 @@ const cdpToque = toque ? await contexto.newCDPSession(pagina) : null;
 if (cdpToque) await cdpToque.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 2 });
 const peca = (id) => pagina.locator(`[data-peca="${id}"]`);
 const acesa = async (id) => (await peca(id).getAttribute("data-acesa")) === "sim";
-/** No toque, amplia a bancada e arrasta com dois dedos até a peça caber, como um jogador faria. */
+/** No toque, mantém a escala inicial e arrasta com dois dedos até a peça caber. */
 async function tocarCirc(localizador, opcoes = {}) {
   if (movel) await fecharBalao(pagina);
   await localizador.scrollIntoViewIfNeeded();
   if (toque && (await localizador.evaluate((el) => el instanceof SVGElement))) {
     const area = pagina.getByRole("application", { name: "Bancada do circuito" });
-    while (parseInt(await pagina.locator("[data-zoom-circuito]").innerText()) < 150) await pagina.getByRole("button", { name: "Aumentar zoom do circuito" }).tap();
     for (let i = 0; i < 20; i++) {
       const a = await area.boundingBox();
       const caixa = await localizador.boundingBox();
