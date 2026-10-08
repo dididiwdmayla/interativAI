@@ -386,3 +386,72 @@ describe("o desenho de cada ilha por dentro (src/componentes/mapa/ilha/desenhoIl
     }
   }
 });
+
+describe("o mundo vivo (src/componentes/mapa/mundo/)", () => {
+  const web = TRILHAS.find((trilha) => trilha.id === "web");
+  const ilhasWeb = web ? ilhasDaTrilha(web) : [];
+
+  it("o período do dia segue a hora do aparelho (e o ?hora= do endereço)", async () => {
+    const { horaDoEndereco, periodoDaHora } = await import("@/componentes/mapa/mundo/periodo");
+    expect([0, 5, 6, 7, 8, 12, 16, 17, 18, 19, 23].map(periodoDaHora)).toEqual([
+      "noite", "noite", "amanhecer", "amanhecer", "dia", "dia", "dia", "entardecer", "entardecer", "noite", "noite",
+    ]);
+    expect(horaDoEndereco("?hora=22")).toBe(22);
+    expect(horaDoEndereco("?hora=24")).toBeNull();
+    expect(horaDoEndereco("?hora=abc")).toBeNull();
+    expect(horaDoEndereco("")).toBeNull();
+  });
+
+  for (const tela of [
+    { nome: "em pé", largura: 390, altura: 740 },
+    { nome: "deitado", largura: 844, altura: 306 },
+    { nome: "computador", largura: 1440, altura: 796 },
+  ]) {
+    it(`${tela.nome}: os lugares de mar aberto ficam longe das ilhas, dos nomes e do Porto, e a vida do mar tem onde morar`, async () => {
+      const { espalhados, lugaresDoMar } = await import("@/componentes/mapa/mundo/lugaresDoMar");
+      const desenho = desenhoDoMundo(ilhasWeb, tela.largura, tela.altura);
+      const ilhas = ilhasWeb.map((item) => desenho.posicao(item));
+      const lugares = lugaresDoMar(desenho.largura, desenho.altura, ilhas, desenho.porto);
+      expect(lugares.length).toBeGreaterThan(12);
+      for (const lugar of lugares) {
+        for (const ilhaNoMapa of ilhas) {
+          // A arte (118 para cada lado, de 86 acima a 76 abaixo) e a etiqueta (140 x 44 px, 70 abaixo do centro) ficam de fora.
+          const dx = Math.abs(lugar.x - ilhaNoMapa.x);
+          const dy = lugar.y - ilhaNoMapa.y;
+          const naArte = dx < 118 && dy > -86 && dy < 76;
+          const naEtiqueta = dx < 70 / desenho.escala && dy > 70 && dy < 70 + 44 / desenho.escala;
+          expect(naArte || naEtiqueta, `${JSON.stringify(lugar)} em cima de ${JSON.stringify(ilhaNoMapa)}`).toBe(false);
+        }
+        expect(lugar.x).toBeGreaterThan(0);
+        expect(lugar.x).toBeLessThan(desenho.largura);
+        expect(lugar.y).toBeGreaterThan(0);
+        expect(lugar.y).toBeLessThan(desenho.altura);
+      }
+      const peixes = espalhados(lugares, 3, 7);
+      expect(peixes).toHaveLength(3);
+      expect(espalhados(lugares, 3, 7)).toEqual(peixes);
+      expect(new Set(peixes.map((p) => `${p.x},${p.y}`)).size).toBe(3);
+    });
+  }
+
+  it("o barquinho faz a rota inteira, ilha por ilha, e volta virado, sem passar por cima das ilhas", async () => {
+    const { viagemDoBarco } = await import("@/componentes/mapa/mundo/lugaresDoMar");
+    const desenho = desenhoDoMundo(ilhasWeb, 1440, 796);
+    const rota = ilhasWeb.filter((item) => !item.opcional).map((item) => desenho.posicao(item));
+    const quadros = viagemDoBarco(rota);
+    expect(quadros.length).toBeGreaterThan(rota.length * 2);
+    expect(quadros[0].offset).toBe(0);
+    expect(quadros[quadros.length - 1].offset).toBe(1);
+    quadros.forEach((quadro, indice) => {
+      if (indice > 0) expect(quadro.offset).toBeGreaterThanOrEqual(quadros[indice - 1].offset);
+      expect(Math.abs(quadro.angulo)).toBeLessThanOrEqual(22);
+      for (const ilhaNoMapa of rota) expect(Math.hypot(quadro.x - ilhaNoMapa.x, quadro.y - 24 - ilhaNoMapa.y)).toBeGreaterThan(100);
+    });
+    const ida = quadros.filter((quadro) => !quadro.virado);
+    const volta = quadros.filter((quadro) => quadro.virado);
+    // Vai da primeira até perto da última, e volta.
+    expect(ida[0].x).toBeLessThan(rota[1].x);
+    expect(ida[ida.length - 1].x).toBeGreaterThan(rota[rota.length - 2].x);
+    expect(volta[volta.length - 1].x).toBeLessThan(rota[1].x);
+  });
+});

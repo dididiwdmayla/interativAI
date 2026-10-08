@@ -76,6 +76,23 @@
   --cor-pedra-sombra: #d9c9e6;
   --cor-terminal-fundo: #1d3328;
   --cor-terminal-texto: #7dffb0;
+  /* O mundo vivo (rodada 39): o mar fundo, o céu na água, a vida no mar e as luzes da noite */
+  --cor-mar-profundo: #a1d6ef;
+  --cor-reflexo: #ffffff;
+  --cor-noite: #1b2266a6;
+  --cor-entardecer: #ffa25c47;
+  --cor-amanhecer: #ffb3d42e;
+  --cor-estrela: #fffbe0;
+  --cor-janela-acesa: #ffd95e;
+  --cor-farol-luz: #fff2a8;
+  --cor-nuvem: #ffffff;
+  --cor-nuvem-sombra: #2f5d7a;
+  --cor-gaivota: #4a5d7a;
+  --cor-peixe: #ff7a59;
+  --cor-baleia: #4d6ea8;
+  --cor-baleia-barriga: #d9e6f5;
+  --cor-garrafa: #8fe0c8;
+  --cor-fumaca: #ece4f4;
 
   /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
   --cor-espuma: #ffffff;
@@ -295,6 +312,23 @@
   --cor-pedra-sombra: #211c4c;
   --cor-terminal-fundo: #05040f;
   --cor-terminal-texto: #38f28b;
+  /* O mundo vivo (rodada 39) */
+  --cor-mar-profundo: #0c0a2e;
+  --cor-reflexo: #22e4f0;
+  --cor-noite: #02010ab3;
+  --cor-entardecer: #ff3ea533;
+  --cor-amanhecer: #8a6bff2e;
+  --cor-estrela: #f4f0ff;
+  --cor-janela-acesa: #ffe14d;
+  --cor-farol-luz: #fff36b;
+  --cor-nuvem: #2c2873;
+  --cor-nuvem-sombra: #04031a;
+  --cor-gaivota: #e9e4ff;
+  --cor-peixe: #ff3ea5;
+  --cor-baleia: #4040b0;
+  --cor-baleia-barriga: #9a9ae8;
+  --cor-garrafa: #22e4f0;
+  --cor-fumaca: #4a4390;
 
   /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
   --cor-espuma: #7ff3ff;
@@ -512,6 +546,23 @@
   --cor-pedra-sombra: #0a2a1f;
   --cor-terminal-fundo: #010a06;
   --cor-terminal-texto: #3dff8f;
+  /* O mundo vivo (rodada 39) */
+  --cor-mar-profundo: #03201b;
+  --cor-reflexo: #3dff8f;
+  --cor-noite: #000805b3;
+  --cor-entardecer: #c8ff3d24;
+  --cor-amanhecer: #3dffcf24;
+  --cor-estrela: #c4ffdc;
+  --cor-janela-acesa: #c8ff3d;
+  --cor-farol-luz: #e0ff9e;
+  --cor-nuvem: #11493a;
+  --cor-nuvem-sombra: #000a06;
+  --cor-gaivota: #c4ffdc;
+  --cor-peixe: #3dff8f;
+  --cor-baleia: #17795c;
+  --cor-baleia-barriga: #66e0b0;
+  --cor-garrafa: #3dff8f;
+  --cor-fumaca: #2a6b55;
 
   /* Interior das ilhas (rodada 37): a borda, o relevo, as zonas e o caminho */
   --cor-espuma: #3dff8f;

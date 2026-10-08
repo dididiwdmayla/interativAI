@@ -4,6 +4,10 @@
 // desenhada e o nome legível. Também confere a causa do sumiço visto num
 // Android: nada animado pode obrigar o Chrome a repintar o mapa inteiro a cada
 // quadro (as ondas e os brilhos andam pelo compositor; fora da tela, parado).
+// O mundo vivo (rodada 39): de dia (?hora=12, para os pixels não dependerem do
+// relógio) e de noite (?hora=22: estrelas, janelas acesas, o farol girando e os
+// nomes legíveis), a garrafa com a curiosidade, a baleia (?baleia), o aceno de
+// quem chega e o barquinho andando pela rota; com menos movimento, tudo parado.
 // Uso: node testes/mundo.mjs [desktop|retrato|paisagem]
 import { readFileSync } from "node:fs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS } from "./curriculo.mjs";
@@ -44,11 +48,18 @@ const progresso = {
   revisao: { conceitos: { tag: { nivel: 2, proxima: hoje, vezes: 1, ultima: null } }, sequencia: { atual: 0, melhor: 0, ultimoDia: null } },
 };
 
-const { navegador, contexto, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/", esperar: "[data-mapa=mundo]" });
+const { navegador, contexto, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/?hora=12", esperar: "[data-mapa=mundo]" });
 const area = pagina.getByRole("region", { name: /Mapa do mundo/ });
 await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
 await pagina.evaluate(() => document.fonts.ready);
 await doisQuadros(pagina);
+conferir((await pagina.locator("[data-mundo-desenho]").getAttribute("data-periodo")) === "dia", `${MODO}: ?hora=12 deixa o mundo de dia`);
+
+// ------------------------------------------------ o computadorzinho acena para quem chega (e o recado some)
+conferir((await pagina.locator('[data-acenando="sim"]').count()) === 1, `${MODO}: quem chega ao mundo pela primeira vez ganha um aceno`);
+conferir(((await pagina.locator("[data-oi-do-computadorzinho]").textContent()) ?? "").startsWith("Oi!"), `${MODO}: e um oi do computadorzinho`);
+await pagina.locator('[data-acenando="nao"]').waitFor({ timeout: 8000 });
+conferir((await pagina.locator("[data-oi-do-computadorzinho]").count()) === 0, `${MODO}: o aceno dura uns segundos e o oi some`);
 
 // ------------------------------------------------ cabe na altura, centralizado
 const medidas = await area.evaluate((el) => {
@@ -265,6 +276,106 @@ for (const ilhaId of ["sites", "logica"]) {
   if (process.env.MEDIR) console.log(`${MODO}: ${ilhaId}: maior ${((maiorIlha / telaIlha) * 100).toFixed(0)}%, ${(porSegundoIlha / telaIlha).toFixed(1)} telas/s`);
   conferir(maiorIlha <= telaIlha * 0.3 && porSegundoIlha <= telaIlha * 8, `${MODO}: ${ilhaId}: parado, a ilha repinta pouco (maior ${((maiorIlha / telaIlha) * 100).toFixed(0)}%, ${(porSegundoIlha / telaIlha).toFixed(1)} telas/s)`);
 }
+
+// ------------------------------------------------ o mundo vivo: o barquinho, a garrafa, a baleia e a noite
+await pagina.goto(`${URL_JOGO}/?hora=12&baleia`);
+await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
+const mundo = pagina.getByRole("region", { name: /Mapa do mundo/ });
+// O barquinho faz a rota: em dois instantes, ele está em lugares diferentes.
+const ondeEstaOBarco = () => pagina.locator("[data-barquinho]").evaluate((el) => getComputedStyle(el).transform);
+const barcoAntes = await ondeEstaOBarco();
+await pagina.waitForTimeout(700);
+conferir((await ondeEstaOBarco()) !== barcoAntes, `${MODO}: o barquinho anda pela rota`);
+// A baleia (rara; ?baleia chama ela logo): sobe num lugar que está na tela, mergulha e some.
+await pagina.locator("[data-baleia]").waitFor({ timeout: 6000 });
+const baleiaNaTela = await pagina.locator("[data-baleia]").evaluate((el) => {
+  const caixa = el.getBoundingClientRect();
+  const tela = document.querySelector("[data-area-arrastavel]").getBoundingClientRect();
+  return caixa.left >= tela.left - 10 && caixa.right <= tela.right + 10 && caixa.top >= tela.top - 10 && caixa.bottom <= tela.bottom + 10;
+});
+conferir(baleiaNaTela, `${MODO}: a baleia aparece onde a pessoa está olhando`);
+await pagina.locator("[data-baleia]").waitFor({ state: "detached", timeout: 14000 });
+conferir(true, `${MODO}: a baleia mergulha e some`);
+// A garrafa com mensagem: escondida no fim do mundo; abre uma curiosidade e troca por outra.
+const garrafa = pagina.locator("[data-garrafa]");
+await garrafa.evaluate((el) => {
+  const area = document.querySelector("[data-area-arrastavel]");
+  const caixa = el.getBoundingClientRect();
+  const tela = area.getBoundingClientRect();
+  area.scrollTo({ left: area.scrollLeft + caixa.left + caixa.width / 2 - tela.left - tela.width / 2, top: area.scrollTop + caixa.top + caixa.height / 2 - tela.top - tela.height / 2 });
+});
+await doisQuadros(pagina);
+const caixaGarrafa = await garrafa.boundingBox();
+conferir(caixaGarrafa.width >= 43 && caixaGarrafa.height >= 43, `${MODO}: a garrafa tem área de toque de 44 px (${caixaGarrafa.width.toFixed(0)} px)`);
+if (toque) await garrafa.tap();
+else await garrafa.click();
+const mensagem = pagina.locator("[data-curiosidade]");
+await mensagem.waitFor({ timeout: 5000 });
+const primeira = (await mensagem.textContent()) ?? "";
+conferir(/^Anos \d{4}/.test(primeira), `${MODO}: a garrafa traz uma curiosidade da história da computação, com a década ("${primeira.slice(0, 40)}...")`);
+await pagina.getByRole("button", { name: "Outra mensagem" }).click();
+conferir(((await mensagem.textContent()) ?? "") !== primeira, `${MODO}: Outra mensagem troca a curiosidade`);
+await pagina.getByRole("button", { name: "Devolver ao mar" }).click();
+await mensagem.waitFor({ state: "detached", timeout: 5000 });
+
+// De noite: o mar escurece, aparecem as estrelas, as janelas acendem e o farol da IA gira; os nomes continuam legíveis.
+await pagina.goto(`${URL_JOGO}/?hora=22`);
+await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
+await doisQuadros(pagina);
+conferir((await pagina.locator("[data-mundo-desenho]").getAttribute("data-periodo")) === "noite", `${MODO}: ?hora=22 deixa o mundo de noite`);
+conferir((await pagina.locator("[data-estrelas] circle").count()) > 10 && (await pagina.locator("[data-estrela-pisca]").count()) > 0, `${MODO}: de noite, estrelas no mar (umas piscando)`);
+conferir((await pagina.locator("[data-luzes-ilha]").count()) >= 6, `${MODO}: de noite, as janelas e os postes das ilhas acendem`);
+conferir((await pagina.locator("[data-farol]").count()) === 1, `${MODO}: de noite, o farol da ilha IA gira a luz`);
+conferir((await pagina.locator("[data-gaivota]").count()) === 0, `${MODO}: de noite, as gaivotas dormem`);
+const nomeDeNoite = await mundo.evaluate((el) => {
+  const nome = el.querySelector('[data-nome-ilha="sites"]');
+  const caixa = el.getBoundingClientRect();
+  const n = nome.getBoundingClientRect();
+  el.scrollTo({ left: el.scrollLeft + n.left + n.width / 2 - caixa.left - caixa.width / 2, top: 0 });
+  return { fundo: getComputedStyle(nome).backgroundColor, letra: getComputedStyle(nome).color };
+});
+await doisQuadros(pagina);
+{
+  const n = await pagina.locator('[data-nome-ilha="sites"]').boundingBox();
+  const png = lerPng(await pagina.screenshot({ clip: n }));
+  const fundo = corEmRgb(nomeDeNoite.fundo);
+  const letra = corEmRgb(nomeDeNoite.letra);
+  let deFundo = 0;
+  let deLetra = 0;
+  for (let y = 0; y < png.altura; y++) {
+    for (let xx = 0; xx < png.largura; xx++) {
+      const cor = png.pixel(xx, y);
+      if (perto(cor, fundo, 30)) deFundo++;
+      else if (perto(cor, letra, 90)) deLetra++;
+    }
+  }
+  const total = png.largura * png.altura;
+  conferir(deFundo / total > 0.35 && deLetra / total > 0.03, `${MODO}: de noite, o nome das ilhas continua legível`);
+}
+// De noite também, parado, o Chrome repinta pouco (o farol e as estrelas andam pelo compositor).
+await pagina.waitForTimeout(1200);
+const cdpNoite = await contexto.newCDPSession(pagina);
+const pinturasNoite = [];
+cdpNoite.on("LayerTree.layerPainted", ({ clip }) => pinturasNoite.push(clip.width * clip.height));
+await cdpNoite.send("LayerTree.enable");
+await pagina.waitForTimeout(500);
+pinturasNoite.length = 0;
+await pagina.waitForTimeout(2000);
+await cdpNoite.send("LayerTree.disable");
+const porSegundoNoite = pinturasNoite.reduce((soma, a) => soma + a, 0) / 2;
+if (process.env.MEDIR) console.log(`${MODO}: de noite, ${(porSegundoNoite / tela).toFixed(1)} telas/s`);
+conferir(porSegundoNoite <= tela * 8, `${MODO}: de noite, parado, o Chrome repinta menos de 8 telas de mapa por segundo (${(porSegundoNoite / tela).toFixed(1)})`);
+
+// Com menos movimento, o mundo vivo fica parado: nenhum peixe salta e o barquinho não anda.
+// (Liga depois de carregar: carregando já com menos movimento, o Framer avisa no console do modo dev.)
+await pagina.goto(`${URL_JOGO}/?hora=12`);
+await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
+await pagina.emulateMedia({ reducedMotion: "reduce" });
+await pagina.waitForTimeout(600);
+conferir((await pagina.locator("[data-peixe]").count()) === 0 && (await pagina.locator("[data-gaivota]").count()) === 0, `${MODO}: com menos movimento, sem peixes saltando nem gaivotas`);
+const paradoAntes = await ondeEstaOBarco();
+await pagina.waitForTimeout(700);
+conferir((await ondeEstaOBarco()) === paradoAntes, `${MODO}: com menos movimento, o barquinho fica parado`);
 
 conferir(errosRelevantes(erros).length === 0, `${MODO}: console limpo ${JSON.stringify(errosRelevantes(erros))}`);
 await navegador.close();

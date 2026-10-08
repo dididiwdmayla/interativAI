@@ -25,3 +25,10 @@ export const CONSULTA_TOQUE = "(pointer: coarse)";
 export function useToque(): boolean {
   return useConsultaMidia(CONSULTA_TOQUE);
 }
+
+export const CONSULTA_MENOS_MOVIMENTO = "(prefers-reduced-motion: reduce)";
+
+/** A pessoa pediu menos movimento (acompanha a troca ao vivo, sem recarregar). */
+export function useMenosMovimento(): boolean {
+  return useConsultaMidia(CONSULTA_MENOS_MOVIMENTO);
+}
