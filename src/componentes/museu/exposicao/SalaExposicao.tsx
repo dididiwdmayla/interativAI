@@ -31,6 +31,7 @@ import { EstacaoPacote } from "./EstacaoPacote";
 import { EstacaoProcessador } from "./EstacaoProcessador";
 import { EstacaoSistema } from "./EstacaoSistema";
 import { EstacaoTraducao } from "./EstacaoTraducao";
+import { useFilaDoAnfitriao } from "../useFilaDoAnfitriao";
 
 type Props = {
   dados: DadosExposicao;
@@ -49,12 +50,15 @@ type Props = {
   aoAbrirCard?: (id: IdFerramenta) => void;
   /** O comparador: as saídas desta visita, a carga do Python e o coral. */
   extras?: ExtrasComparador;
+  /** A cor pedida em cada mesa de cores (do objetivo ativo ou das partes do desafio). */
+  alvosDeCor?: Readonly<Record<string, string>>;
 };
 
 function ConteudoDaEstacao({
   estacao,
   estado,
   extras,
+  alvoDeCor,
   ...resto
 }: {
   estacao: Estacao;
@@ -63,11 +67,12 @@ function ConteudoDaEstacao({
   toque: boolean;
   destaque: { peca?: string } | null;
   extras?: ExtrasComparador;
+  alvoDeCor?: string;
 }) {
   if (estacao.tipo === "tear" && estado.tipo === "tear") return <EstacaoTear estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "bits" && estado.tipo === "bits") return <EstacaoBits estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "camadas" && estado.tipo === "camadas") return <EstacaoCamadas estacao={estacao} estado={estado} {...resto} />;
-  if (estacao.tipo === "cor" && estado.tipo === "cor") return <EstacaoCor estacao={estacao} estado={estado} {...resto} />;
+  if (estacao.tipo === "cor" && estado.tipo === "cor") return <EstacaoCor estacao={estacao} estado={estado} alvo={alvoDeCor} {...resto} />;
   if (estacao.tipo === "linha-do-tempo" && estado.tipo === "linha-do-tempo") return <EstacaoLinhaDoTempo estacao={estacao} estado={estado} {...resto} />;
   if (estacao.tipo === "comparador" && estado.tipo === "comparador") return <EstacaoComparador estacao={estacao} estado={estado} extras={extras} {...resto} />;
   if (estacao.tipo === "ligar" && estado.tipo === "ligar") return <EstacaoLigar estacao={estacao} estado={estado} {...resto} />;
@@ -85,11 +90,12 @@ function ConteudoDaEstacao({
   return null;
 }
 
-export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, concluida, feitas = [], layout, aoAbrirCard, extras }: Props) {
+export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, concluida, feitas = [], layout, aoAbrirCard, extras, alvosDeCor }: Props) {
   const estreita = layout === "retrato";
   const deitado = layout === "paisagem";
   const aberta = dados.estacoes.find((estacao) => estacao.id === estado.aberta) ?? dados.estacoes[0];
   const estadoAberta = aberta ? estado.estacoes[aberta.id] : null;
+  const anfitriao = useFilaDoAnfitriao(fala);
   return (
     <div
       className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-2 border-[var(--cor-museu-rodape)] bg-[var(--cor-museu-parede)] shadow-[0_8px_0_var(--cor-sombra)]"
@@ -115,9 +121,10 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
             </div>
           )}
           <FalaAntepassado
-            key={fala}
+            key={anfitriao.mostrada}
             id={dados.anfitriao}
-            texto={fala}
+            texto={anfitriao.mostrada}
+            aoCompletar={anfitriao.aoCompletar}
             expressao={concluida ? "orgulhoso" : "feliz"}
             tamanho={estreita ? 64 : deitado ? 72 : 132}
             arranjo={estreita ? "lado" : "pilha"}
@@ -165,6 +172,7 @@ export function SalaExposicao({ dados, estado, mexer, toque, destaque, fala, con
                   toque={toque}
                   destaque={destaque?.estacao === aberta.id ? { peca: destaque.peca } : null}
                   extras={extras}
+                  alvoDeCor={alvosDeCor?.[aberta.id]}
                 />
               </div>
             </AlvoFerramenta>

@@ -348,6 +348,18 @@ export const RECEITAS: Readonly<Record<IdEfeito, Receita>> = {
       s.tom({ frequencia, inicio: 0.18 + indice * 0.1, duracao: 0.18, ganho: V * 0.6, forma: "triangle" }),
     );
   },
+  // A baleia rara do mundo: o jato de água (um sopro de ruído subindo) e um canto grave que sobe e desce.
+  baleia: (s) => {
+    s.ruido({ inicio: 0, duracao: 0.45, ganho: V * 0.3, frequencia: 1800, q: 0.8 });
+    s.tom({ frequencia: 180, frequenciaFinal: 320, inicio: 0.3, duracao: 0.7, ganho: V * 0.22, forma: "sine", ataque: 0.12 });
+    s.tom({ frequencia: 320, frequenciaFinal: 210, inicio: 1, duracao: 0.8, ganho: V * 0.18, forma: "sine", ataque: 0.1 });
+  },
+  // A garrafa: o vidro batendo (dois tinidos) e a rolha saindo.
+  garrafa: (s) => {
+    s.tom({ frequencia: 2093, inicio: 0, duracao: 0.18, ganho: V * 0.22, forma: "sine", ataque: 0.003 });
+    s.tom({ frequencia: 2637, inicio: 0.09, duracao: 0.22, ganho: V * 0.18, forma: "sine", ataque: 0.003 });
+    s.tom({ frequencia: 420, frequenciaFinal: 900, inicio: 0.32, duracao: 0.06, ganho: V * 0.35, forma: "triangle", ataque: 0.002 });
+  },
   // Barquinho partindo: onda do mar e dois tons de apito subindo.
   "viagem-ilha": (s) => {
     s.ruido({ inicio: 0, duracao: 0.6, ganho: V * 0.25, frequencia: 400, frequenciaFinal: 1200, q: 0.8, ataque: 0.2 });

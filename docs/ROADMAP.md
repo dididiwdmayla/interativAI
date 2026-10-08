@@ -29,6 +29,37 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 39: mundo completo e vivo, fila de falas e ajustes nas Origens.**
+  Detalhe em `docs/PROGRESSO.md`.
+  - **Fila de falas** (`src/motor/filaDeFalas.ts`): a fala importante
+    (conclusão de objetivo, solução, fim do desafio, o que um roteiro conta,
+    mudança de pedido, avisos) espera o Continuar ou o Enter; a automática
+    espera a vez; a pedida pelo jogador entra na hora. Balão com "mais N
+    recados", apresentações só com a fila vazia, balão deitado sem fechar
+    com fala esperando, partes simultâneas numa fala só, o requisito que
+    traz a mensagem do cliente comemorado antes dela, o anfitrião do museu
+    seguindo o objetivo ativo e terminando a fala antes da próxima.
+    `testes/falas.mjs` nos três layouts.
+  - **Origens:** o museu acaba onde acaba (a parede com profundidade
+    esticava a rolagem); a mesa de cores mostra o vermelho, o verde e o
+    azul sozinhos (amostra, dígitos, valor, controle e a régua até o alvo)
+    e a cor combinada ao lado do alvo.
+  - **Mundo completo:** todas as ilhas do currículo, na ordem dele (o
+    zigue-zague sai só da trilha), e arte própria para as ilhas das trilhas
+    Jogos e Automação (só aparecem na trilha delas).
+  - **Mundo vivo:** mar com profundidade, reflexos e espuma; peixes, a
+    baleia rara e a garrafa com curiosidades; o barquinho fazendo a rota;
+    nuvens com sombra e gaivotas; dia e noite pelo relógio (estrelas,
+    janelas acesas, o farol da IA girando); guindaste, pulsos nos cabos,
+    fumaça e operários de capacete; o aceno do computadorzinho. Só tokens,
+    nos três temas, com repintura parada abaixo do teto em todos os layouts.
+  - 23.198 testes unitários, lint e build verdes; bateria completa no
+    servidor de produção: 208 execuções, 201 verdes; as 7 falhas foram
+    jornadas sem o Continuar da fila (ajustadas, e a bateria achou o cartão
+    da previsão escondido atrás de um aviso, corrigido), a instabilidade sob
+    carga do `algoritmos.mjs paisagem 3` e a pendência antiga do
+    `unidades.mjs retrato` (U4F1). Capturas em `docs/capturas/rodada-39/`.
+
 - **Rodada 38, Origens parte 2: as salas 3 a 6 (o museu completo).**
   Detalhe em `docs/PROGRESSO.md`.
   - **Executor por linguagem** (`src/motor/linguagens/`): JavaScript no
@@ -711,11 +742,33 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 38 (Origens, parte 2): aguardando a revisão do pull request,
-  jogando as salas 3 a 6 no Android em pé (o Python baixando pela rede do
-  celular, o coral, os cabos do gigante e o mapa dos cabos).
+- Rodada 39 (mundo vivo e fila de falas): aguardando a revisão do pull
+  request, jogando no Android em pé e deitado (o mundo de dia e de noite, a
+  fila de falas ao concluir objetivos e no contrato, a mesa de cores).
 
 ### Pendências
+
+- **Rodada 39, para depois:**
+  - O mundo vivo foi medido num Chromium sem GPU (repintura parada abaixo
+    do teto); vale olhar num Android mais fraco, rolando o mundo de noite
+    (estrelas, farol e LEDs) e de dia (nuvens, peixes e o barquinho).
+  - Deitado, cabem quatro ou cinco ilhas inteiras e todas animam por
+    dentro (a regra é metade da ilha na tela); de noite, o "z" dos operários
+    cochilando ainda é animação do Framer (4,2 telas/s deitado).
+  - O mundo segue o relógio do aparelho: quem joga de noite vê o mundo
+    escuro. Se incomodar, um ajuste de "sempre de dia" nos Ajustes.
+  - "Parte feita" do desafio não espera o Continuar; a fala final do
+    desafio resume e leva a fila. Se o Will quiser a parte esperando, é uma
+    troca de uma linha no motor (`aguarda: true`), mas as jornadas que fazem
+    várias partes seguidas passam a tocar Continuar.
+  - A fala pedida (tutor, link) troca uma importante que estava na tela;
+    a pausa (Próximo objetivo) continua valendo.
+  - O aceno guarda a hora numa chave própria do localStorage
+    (`ilha-sites:mundo:ultima-visita`), fora do progresso e da migração.
+  - A garrafa tem 8 curiosidades (`curiosidades.ts`); o "eu vi!" da baleia
+    não conta em lugar nenhum (uma insígnia escondida seria opção).
+  - `?hora=` e `?baleia` ficam abertos no endereço (para conferir e para os
+    testes).
 
 - **Rodada 38, para depois:**
   - O Python baixa uns 13 MB na primeira vez (o núcleo do Pyodide). Vale
@@ -963,12 +1016,15 @@ núcleo comum.
 
 ### Próximo (em ordem)
 
-1. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
+1. Faxina técnica das pendências (as desta seção, das mais antigas às da
+   rodada 39).
+2. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
    e as missões de campo que leem documentação original (guia, seção 1).
-2. Opus: Ilha Páginas vivas, parte A (JavaScript rodando no site-alvo,
+3. Planejar o início do jogo (o porto de chegada) e o login.
+4. Opus: Ilha Páginas vivas, parte A (JavaScript rodando no site-alvo,
    eventos, o tempo assíncrono no executor, a aba Aplicação e a base de
    orientação a objetos).
-3. Depois: motores das outras ilhas (Rede e Servidor; Python no navegador,
+5. Depois: motores das outras ilhas (Rede e Servidor; Python no navegador,
    a partir do executor por linguagem da rodada 38; IA ao vivo; Ofício),
    intercalados com conteúdo, e a trilha Automação industrial a partir do
    protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no

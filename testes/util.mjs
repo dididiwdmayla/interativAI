@@ -197,6 +197,21 @@ export async function abrirBalao(pagina) {
   await esperarPronto(pagina);
 }
 
+/**
+ * A fila de falas do computadorzinho: enquanto uma fala importante espera o
+ * jogador (ou há recados na fila), toca em Continuar no balão (no celular,
+ * abre o balão antes). Volta quando a fila está livre.
+ */
+export async function continuarFalas(pagina, vezes = 8) {
+  for (let i = 0; i < vezes; i++) {
+    await esperarPronto(pagina);
+    const fila = await pagina.locator("[data-jogo-fase]").getAttribute("data-fila-falas").catch(() => null);
+    if (fila !== "pede") return;
+    if ((await estadoDoBalao(pagina)) !== null) await abrirBalao(pagina);
+    await tocarOuClicar(pagina, pagina.locator("[data-continuar-fala]").first());
+  }
+}
+
 /** No celular, fecha o balão da conversa e espera a animação de saída acabar. */
 export async function fecharBalao(pagina) {
   await esperarPronto(pagina);

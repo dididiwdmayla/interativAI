@@ -70,6 +70,9 @@ export const IDS_EFEITOS = [
   "ciclo-processador",
   "pacote-pulo",
   "pacote-oceano",
+  // O mundo vivo (rodada 39): a baleia rara e a garrafa com mensagem.
+  "baleia",
+  "garrafa",
 ] as const;
 
 export type IdEfeito = (typeof IDS_EFEITOS)[number];

@@ -2,13 +2,14 @@
 
 import type { ReactNode } from "react";
 import { AlvoFerramenta } from "@/componentes/ferramentas/AlvoFerramenta";
+import { IconeChevron } from "@/componentes/icones/IconeChevron";
 import { BotaoAjuda } from "@/componentes/mascote/BotaoAjuda";
 import { BotaoRever } from "@/componentes/mascote/BotaoRever";
 import { CartaoPrevisao } from "@/componentes/mascote/CartaoPrevisao";
 import { Botao } from "@/componentes/ui/Botao";
 import type { Previsao } from "@/conteudo/tipos";
 import type { IdFerramenta } from "@/ferramentas/ids";
-import type { EstadoMotor } from "@/motor/estadoMotor";
+import { type EstadoMotor, ofereceContinuar } from "@/motor/estadoMotor";
 import type { DegrauAjuda } from "@/motor/tipos";
 
 type Props = {
@@ -33,6 +34,8 @@ type Props = {
   /** Lista do "Rever", montada por quem chama. */
   listaRever: ReactNode;
   aoAvancar: () => void;
+  /** A fila de falas: a próxima entra (ou a importante de agora deixa de esperar). */
+  aoContinuarFala: () => void;
   aoSeguir: () => void;
   aoAjudar: () => void;
   aoCancelarSolucao: () => void;
@@ -57,6 +60,7 @@ export function AcoesConversa({
   rotuloPausa,
   listaRever,
   aoAvancar,
+  aoContinuarFala,
   aoSeguir,
   aoAjudar,
   aoCancelarSolucao,
@@ -83,6 +87,27 @@ export function AcoesConversa({
         </span>
         <Botao onClick={aoAvancar} className="ml-auto">
           {ultima ? "Vamos lá!" : "Continuar"}
+        </Botao>
+      </>
+    );
+  }
+  // A fala importante espera o jogador; com fila, o botão da pausa só vem depois dela.
+  if (ofereceContinuar(estado)) {
+    const faltam = estado.filaFalas.length;
+    return (
+      <>
+        {/* Um aviso que chegou depois do palpite não esconde a resposta da previsão. */}
+        {emObjetivo && previsao && estado.previsao !== null && (
+          <CartaoPrevisao previsao={previsao} resposta={estado.previsao} aoResponder={aoResponderPrevisao} />
+        )}
+        {faltam > 0 && (
+          <span className="text-xs font-bold text-texto-suave" data-falas-na-fila={faltam}>
+            {faltam === 1 ? "mais 1 recado" : `mais ${faltam} recados`}
+          </span>
+        )}
+        <Botao onClick={aoContinuarFala} className="ml-auto" data-continuar-fala aria-keyshortcuts="Enter">
+          Continuar
+          <IconeChevron tamanho={12} className="animate-pulse motion-reduce:animate-none" />
         </Botao>
       </>
     );

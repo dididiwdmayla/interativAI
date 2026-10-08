@@ -7,7 +7,7 @@
 // 980 px (aviso "simulação") e desfazer volta. No celular, a barra cabe numa
 // linha.
 // Uso: node testes/dispositivo.mjs [desktop|retrato|paisagem]
-import { abrir, conferir, errosRelevantes, esperarPronto, fecharBalao, selecionarNo } from "./util.mjs";
+import { abrir, conferir, continuarFalas, errosRelevantes, esperarPronto, fecharBalao, selecionarNo } from "./util.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
 const TAMANHOS = {
@@ -156,8 +156,11 @@ function ajudantes(pagina) {
   await esperarPronto(pagina);
   conferir((await larguraDaPagina()) === 980 && (await aparelho.getAttribute("data-largura-layout")) === "980", `${MODO}: sem meta viewport, o celular desenha a página em 980 px`);
   conferir(await pagina.locator("[data-aviso-viewport]").isVisible(), `${MODO}: com o aviso de simulação na prévia`);
+  // A fila de falas: a bancada abre sem meta charset, e o aviso dos acentos (importante) chega antes; o dos 980 px vem no Continuar.
+  await continuarFalas(pagina);
   const fala = await pagina.evaluate(() => document.body.innerText.includes("980 px e encolhe tudo"));
   conferir(fala, `${MODO}: e o computadorzinho explica`);
+  if (toque) await fecharBalao(pagina);
   await tocar(pagina.getByRole("button", { name: "Desfazer" }).first());
   await pagina.waitForFunction(() => document.querySelector("section[data-previa] iframe")?.contentWindow?.innerWidth === 390);
   conferir((await pagina.locator("[data-aviso-viewport]").count()) === 0, `${MODO}: desfazer devolve o meta viewport e a largura do aparelho`);

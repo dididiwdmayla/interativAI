@@ -5,6 +5,9 @@
 import { spawn } from "node:child_process";
 
 const TESTES = [
+  ["falas.mjs", "desktop"],
+  ["falas.mjs", "retrato"],
+  ["falas.mjs", "paisagem"],
   ["museu.mjs", "desktop"],
   ["museu.mjs", "retrato"],
   ["museu.mjs", "paisagem"],

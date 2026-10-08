@@ -21,9 +21,16 @@ export function useAnimarMapa(): boolean {
 }
 
 /**
+ * Quanto da ilha precisa estar na tela para a vida de dentro dela (as
+ * engrenagens, o guindaste, os operários) andar. Limita quantas coisas se
+ * mexem ao mesmo tempo: no celular em pé, quase sempre uma ilha por vez.
+ */
+const PARTE_NA_TELA = 0.5;
+
+/**
  * Um grupo do SVG do mapa que só anima o que tem dentro enquanto aparece
- * (com uma folga em volta, para já estar andando quando entra). A
- * visibilidade nunca depende disto: só o movimento.
+ * (pelo menos metade dele na tela). A visibilidade nunca depende disto:
+ * só o movimento.
  */
 export function GrupoAnimadoNaTela({ children, ...props }: { children: ReactNode } & SVGProps<SVGGElement>) {
   const grupo = useRef<SVGGElement>(null);
@@ -31,9 +38,12 @@ export function GrupoAnimadoNaTela({ children, ...props }: { children: ReactNode
   useEffect(() => {
     const elemento = grupo.current;
     if (!elemento || typeof IntersectionObserver === "undefined") return;
-    // A raiz é a área que rola (a folga vale dentro dela); fora de uma, a tela.
+    // A raiz é a área que rola; fora de uma, a tela.
     const raiz = elemento.closest("[data-area-arrastavel]");
-    const observador = new IntersectionObserver(([entrada]) => setNaTela(entrada.isIntersecting), { root: raiz, rootMargin: "120px" });
+    const observador = new IntersectionObserver(([entrada]) => setNaTela(entrada.isIntersecting && entrada.intersectionRatio >= PARTE_NA_TELA), {
+      root: raiz,
+      threshold: [0, PARTE_NA_TELA],
+    });
     observador.observe(elemento);
     return () => observador.disconnect();
   }, []);

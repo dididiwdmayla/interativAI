@@ -164,6 +164,29 @@ isso sem virar aula de inglês:
 - os conceitos antigos ainda não têm o termo: preencher fica para uma
   tarefa de conteúdo (ROADMAP).
 
+**A fila de falas (rodada 39).** Uma fala nunca some antes de dar tempo de
+ler (`src/motor/filaDeFalas.ts`). O motor separa três jeitos de uma fala
+chegar:
+
+- **importante:** espera o jogador. A conclusão de um objetivo e a solução
+  (o botão da pausa: "Próximo objetivo"), a fala final do desafio, o que um
+  momento roteirizado conta, a mudança de pedido do contrato e os avisos
+  (os acentos quebrados, os 980 px do celular, o contraste do Meu tema). Com
+  outra fala esperando atrás, o balão mostra **Continuar** (e o Enter
+  continua), com "mais N recados";
+- **automática:** espera a vez. Se a fala de agora é importante (ou há
+  fila), ela entra no fim; se é comum (o enunciado, uma resposta), entra na
+  hora. "Parte feita" do desafio é automática; partes que ficam prontas
+  juntas saem numa fala só ("Partes feitas: A; B");
+- **pedida:** o jogador pediu (Me ajuda, o tutor, um link que ele tocou):
+  entra na hora, e a fila continua.
+
+As apresentações de ferramenta só começam com a fila vazia, e deitado o
+balão não fecha sozinho com uma fala esperando. Para o conteúdo, nada
+muda: escreva as falas como sempre. Só lembre que a fala de um momento
+roteirizado agora fica na tela até o Continuar, e o enunciado do objetivo
+vem logo depois dela (3.7).
+
 **Falas não têm versão de toque.** Só os enunciados têm `mouse` e
 `toque`. Por isso, nas falas (ajudas, conclusões), escreva de um jeito
 neutro: "Use Esconder nele", "Duplique ele", e não "clique com o botão
@@ -448,6 +471,12 @@ engano, bagunçar uma lista). Se o jogador recarregar no meio, a página
 volta para antes do momento e ele roda de novo. Prefira `eventoAoComecar`
 do objetivo que resolve o problema: assim a fala do momento fica na tela
 enquanto ele trabalha.
+
+A fala do momento é importante (a fila de falas, seção 1): fica no balão
+com o Continuar, e o enunciado do objetivo entra depois dela; a
+apresentação do objetivo (`apresentar`) espera esse Continuar. Por isso
+ela pode contar o problema sem repetir o enunciado ("Ops! Tropecei e
+apaguei o rodapé"), e o enunciado diz o que fazer.
 
 ### 3.8 Desafio
 
@@ -2298,6 +2327,10 @@ O contrato abre com o cliente, não com a tela de meta; a meta da unidade
 - Realista: o cliente usou o que você fez e descobriu algo (a conta de luz
   assustou). Ela chega depois de partes prontas (`depoisDe`), de
   preferência das que ela mexe.
+- Na tela (rodada 39): o requisito que trouxe a mensagem é comemorado
+  primeiro ("Isso! Requisito cumprido: ..."), e a mensagem do cliente abre
+  no Continuar. As jornadas de navegador passam por esse Continuar
+  (`continuarFalas`, em `testes/util.mjs`) antes de esperar a conversa.
 - Ela exige **ajuste real** no código pronto: a checagem roda a solução do
   antes e acusa a parte nova que já passasse com ela. Trocar um requisito
   antigo (`substitui`) é o caso mais comum; acrescentar um novo também vale.
@@ -2486,7 +2519,7 @@ precisa estar em `usaFerramentas` e ser apresentada na primeira vez):
 | `tear` | cartões que tecem um desenho: `modelo` (uma linha por cartão, `#` furo, `.` sem furo), `inicial`, `mostrarBinario` | `tear-de-cartoes` |
 | `bits` | lâmpadas ou válvulas (`aparencia`), `quantos` 4 ou 8, `pesos`, `letra` (só com 8: a tabela ASCII) | `lampadas-de-bits` |
 | `camadas` | o mesmo programa em 2 a 4 camadas; cada linha diz `de` quais linhas da camada de cima ela veio | `camadas-da-maquina` |
-| `cor` | `#rrggbb` com setinhas por dígito, o CSS que usa a cor (`css`) e uma `amostra` | `mesa-de-cores` |
+| `cor` | `#rrggbb` com os três canais separados (o vermelho, o verde e o azul sozinhos, cada um com a amostra, os dois dígitos com setinhas, o valor e um controle deslizante), a cor combinada embaixo, o CSS que usa a cor (`css`) e uma `amostra`. O alvo de cada canal sai do `corHex` com `valor` do objetivo ativo ou das partes do desafio (senão, da `amostra`): cada canal diz se está no alvo, se falta subir ou se passou | `mesa-de-cores` |
 | `linha-do-tempo` | `eventos` JÁ NA ORDEM CERTA (a tela embaralha), `fixos` (âncoras), `plaquinhas` (o "o que mudou" solto) | `linha-do-tempo-museu` |
 | `comparador` | o mesmo programa em 2 a 6 linguagens, `partes` (cada linha diz a sua parte), `editavel` (javascript ou python), `coral` (seção 32.9) | `comparador-de-linguagens` |
 | `ligar` | `cartoes` com o `alvo` certo e `revela`, `alvos`, `pergunta` | `cartoes-de-ligar` |
@@ -2548,6 +2581,12 @@ caracteres, no **jeito de falar do anfitrião** (a tecelã é avó paciente, o
 gigante fala ALTO, o terminal é seco e rabugento, o PC bege é animado, a
 internet é tagarela, o celular é curto). A fala do anfitrião conversa com o
 computadorzinho, não repete o enunciado.
+
+Na prática, a fala do passo seguinte só entra quando ele começa (depois do
+"Próximo objetivo"), e não na pausa da conclusão do anterior. E o anfitrião
+tem a fila dele (`useFilaDoAnfitriao`): a fala nova espera a de agora
+terminar de aparecer (no jeito da época) e ficar um tempinho na tela; no
+desafio, duas partes feitas seguidas não cortam a fala no meio.
 
 ### 32.5 Os antepassados
 

@@ -712,6 +712,31 @@ resposta da última expressão, as saídas do console e o erro.
     ondas dentro do SVG faziam o Chrome repintar o mapa inteiro a cada
     quadro, e no celular uma ilha aparecia sem arte e sem nome até sair da
     tela e voltar. `testes/mundo.mjs` confere os pixels e a repintura.
+  - O mundo vivo (rodada 39, `componentes/mapa/mundo/`): o mar fundo longe
+    das ilhas e raso perto (desenho parado), reflexos piscando e espuma nas
+    praias; peixes saltando de vez em quando, a baleia rara (sorteada de
+    tempos em tempos, num lugar que está na tela; `?baleia` chama ela) e a
+    garrafa com mensagem escondida no fim do mundo (curiosidades da história
+    da computação, `curiosidades.ts`, com a década); o barquinho fazendo a
+    rota inteira, ida e volta (Web Animations só de transform, quadros em
+    `lugaresDoMar.ts`); nuvens com sombra e gaivotas; o dia e a noite pelo
+    relógio do aparelho (`?hora=22` para conferir): de noite, o mar escuro
+    com estrelas e lua, as ilhas mais escuras (filtro na camada), as janelas
+    e os postes acesos, os LEDs da Rede e o farol da IA girando a luz.
+    Cada ilha tem vida própria (o guindaste na Sites, os pulsos nos cabos da
+    Rede, a fumaça na Ofício, o bloco encaixando na Frameworks) e as em obra
+    têm operários-computadorzinhos de capacete (de noite, cochilam). O
+    computadorzinho acena para quem volta depois de 20 minutos fora (a hora
+    fica em `ilha-sites:mundo:ultima-visita`, chave só cosmética).
+  - Desempenho do mundo vivo: o que anda sozinho anima transform e opacity
+    pelo compositor; o que fica parado num lugar pausa fora da tela
+    (`useNaTela`, `data-pausado`); quem atravessa o mundo (nuvens, gaivotas,
+    o barquinho) fica dentro de um recorte do tamanho do desenho (o
+    transform de quem anda contava na área de rolagem e esticava o mapa); a
+    vida de dentro de uma ilha só anda com metade dela na tela, e os
+    operários andam em passos (girar ou espelhar uma peça dentro do SVG
+    repinta a camada a cada quadro). Com menos movimento (acompanhado ao
+    vivo, `useMenosMovimento`), tudo fica parado.
 - Ilha (`TelaIlha`, `/ilha/[id]`): zonas como regiões ao longo de um
   caminho sinuoso (horizontal no desktop e deitado, vertical em pé). O
   desenho (`ilha/desenhoIlha.ts`, puro e testado, em px de tela) dá o
@@ -976,8 +1001,9 @@ camada de trilhas e a fábrica estiverem estáveis.
   dentro do iframe). "Pular" sempre visível. Vistas e puladas ficam em
   `apresentacoesVistas`.
 - A fila espera enquanto um momento roteirizado roda, enquanto um card de
-  previsão não foi respondido e na revisão/lab (no lab não há
-  apresentações). No "Experimente", o cartão do mascote também evita as
+  previsão não foi respondido, enquanto uma fala importante do
+  computadorzinho espera o Continuar (a fila de falas, em Mascote) e na
+  revisão/lab (no lab não há apresentações). No "Experimente", o cartão do mascote também evita as
   áreas liberadas (a árvore da trilha, a tela do inspecionar), se couber.
 - Caixa de Ferramentas: gaveta (desktop) ou folha arrastável (celular), card
   por ferramenta, silhueta com carinha dormindo para as ainda não vistas,
@@ -1014,6 +1040,14 @@ camada de trilhas e a fábrica estiverem estáveis.
 
 ### Mascote
 
+- Fila de falas (rodada 39, `src/motor/filaDeFalas.ts`, no estado do motor
+  com `falaAguarda` e `filaFalas`): a fala importante (conclusão, solução,
+  fim do desafio, o que um roteiro conta, mudança de pedido, avisos) espera
+  o jogador; a automática espera a vez; a pedida entra na hora. Com recado
+  esperando, o balão mostra Continuar (e o Enter continua); o botão da
+  pausa só aparece com a fila vazia, e a conversa do cliente (mudança de
+  pedido) também. `ofereceContinuar` (estadoMotor) é a regra única do
+  balão, do Enter e do `data-fila-falas` que os testes leem.
 - Computadorzinho: monitor retrô em SVG puro, rosto estilo `:)`.
 - Expressões: feliz, curioso, pensativo, apontando, comemorando, preocupado,
   dormindo. Piscar aleatório, respiração, transição suave, respeita

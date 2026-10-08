@@ -7,7 +7,7 @@
 // Uso: node testes/contrato-logica.mjs [desktop|retrato|paisagem]
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { abrir, abrirBalao, conferir, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
+import { abrir, abrirBalao, conferir, continuarFalas, errosRelevantes, esperarPronto, fecharBalao, opcaoDaPrevisao } from "./util.mjs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS } from "./curriculo.mjs";
 
 const MODO = process.argv[2] ?? "desktop";
@@ -214,6 +214,8 @@ conferir((await objetivoAtual()) === "contrato-trabalho", `${MODO}: a lista cert
 let mudou = false;
 for (const parte of JORNADA.contrato.partes) {
   await acoes(parte.solucaoDeTeste);
+  // A fila de falas: o requisito que trouxe a mensagem do cliente é comemorado antes dela.
+  if (!mudou) await continuarFalas(pagina);
   if (!mudou && (await pagina.locator("[data-conversa-cliente]").isVisible().catch(() => false))) {
     mudou = true;
     conferir(JORNADA.contrato.depoisDe.every((id) => JORNADA.contrato.partes.findIndex((p) => p.id === id) <= JORNADA.contrato.partes.indexOf(parte)), `${MODO}: a mensagem de mudança chega depois da luz e do letreiro prontos`);

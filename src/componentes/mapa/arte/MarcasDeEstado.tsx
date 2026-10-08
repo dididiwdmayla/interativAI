@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
-import { useAnimarMapa } from "./useAnimarMapa";
+import { OperarioBloco, OperarioMartelo } from "./Operarios";
 
 type NoMapa = {
   /** O centro da ilha, em unidades do desenho do mundo. */
@@ -39,28 +38,11 @@ export function BrilhoIlha({ completa = false, ...no }: NoMapa & { completa?: bo
   );
 }
 
-/** Computadorzinho de brinquedo, dormindo (em SVG, para morar dentro do mapa). */
-export function ComputadorzinhoDormindo({ x, y, escala = 1 }: { x: number; y: number; escala?: number }) {
-  const animar = useAnimarMapa();
-  return (
-    <g transform={`translate(${x} ${y}) scale(${escala})`}>
-      <rect x="-9" y="10" width="18" height="4" rx="2" fill="var(--cor-mascote-base)" />
-      <rect x="-16" y="-12" width="32" height="24" rx="8" fill="var(--cor-mascote-moldura)" />
-      <rect x="-12" y="-8" width="24" height="16" rx="5" fill="var(--cor-mascote-tela)" />
-      <path d="M-8-1q2.5 2 5 0M3-1q2.5 2 5 0M-2 4h4" fill="none" stroke="var(--cor-mascote-rosto)" strokeWidth="1.6" strokeLinecap="round" />
-      <motion.g
-        animate={animar ? { opacity: [0, 1, 0], y: [4, -4, -8] } : { opacity: 1 }}
-        transition={animar ? { duration: 2.4, repeat: Infinity } : undefined}
-      >
-        <text x="16" y="-14" fontSize="10" fontWeight="900" fill="var(--cor-texto-suave)">
-          z
-        </text>
-      </motion.g>
-    </g>
-  );
-}
-
-/** Andaimes por cima da ilha e o computadorzinho dormindo: em construção. */
+/**
+ * Andaimes por cima da ilha e dois operários-computadorzinhos de capacete:
+ * um martela no alto, o outro carrega blocos (de noite, cochilam). Em
+ * construção.
+ */
 export function AndaimesIlha() {
   const traco = { stroke: "var(--cor-madeira)", strokeWidth: 4, strokeLinecap: "round" as const };
   return (
@@ -74,7 +56,9 @@ export function AndaimesIlha() {
         <line x1="-70" y1="-66" x2="-20" y2="-20" {...traco} strokeWidth={2.5} />
         <line x1="-20" y1="-66" x2="30" y2="-20" {...traco} strokeWidth={2.5} />
       </g>
-      <ComputadorzinhoDormindo x={66} y={10} escala={1.2} />
+      {/* No meio do andaime (a tábua do meio), longe do topo da arte. */}
+      <OperarioMartelo x={-45} y={-35} escala={1.05} />
+      <OperarioBloco x={52} y={10} escala={1.15} />
     </g>
   );
 }
@@ -99,7 +83,7 @@ export function NevoaIlha(no: NoMapa) {
   const area = { left: (no.x - 150) * no.escala, top: (no.y - 90) * no.escala, width: 300 * no.escala, height: 160 * no.escala };
   const caixaDoDesenho = "-150 -90 300 160";
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute" style={area} data-nevoa>
+    <div aria-hidden="true" className="no-escuro pointer-events-none absolute" style={area} data-nevoa>
       <svg
         viewBox={caixaDoDesenho}
         width="100%"

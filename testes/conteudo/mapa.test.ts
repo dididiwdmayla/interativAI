@@ -5,7 +5,8 @@
 import { describe, expect, it } from "vitest";
 import { UNIDADES } from "@/conteudo";
 import type { Unidade } from "@/conteudo/tipos";
-import { CURRICULO, ilhaDoId, ilhasDaTrilha, localNoCurriculo, TRILHAS } from "@/curriculo";
+import { CURRICULO, ilhaDoId, ilhasDaTrilha, localNoCurriculo, TODAS_AS_ILHAS, TRILHAS } from "@/curriculo";
+import { ARTE_DAS_ILHAS } from "@/componentes/mapa/arte";
 import { desenhoDoMundo } from "@/componentes/mapa/desenhoMundo";
 import { dentroDoArredondado, encolher } from "@/componentes/mapa/geometria";
 import { type Caixa, caixaDaPlaca, caixaDoMascote, caixaDoNome, desenharIlha } from "@/componentes/mapa/ilha/desenhoIlha";
@@ -250,6 +251,28 @@ describe("zona opcional", () => {
   });
 });
 
+describe("o mundo completo: toda ilha, com arte, na ordem do currículo", () => {
+  it("a trilha Web passa por todas as ilhas do currículo, na ordem dele", () => {
+    expect(TRILHAS.find((trilha) => trilha.id === "web")?.ilhas).toEqual(CURRICULO.map((item) => item.id));
+  });
+  it("toda ilha (do currículo e das trilhas em construção) tem arte própria no mundo", () => {
+    for (const item of TODAS_AS_ILHAS) expect(ARTE_DAS_ILHAS[item.id], item.id).toBeDefined();
+  });
+  for (const trilha of TRILHAS) {
+    it(`trilha ${trilha.id}: a rota segue a ordem da trilha, em zigue-zague, e a opcional fica no fim`, () => {
+      const ilhas = ilhasDaTrilha(trilha);
+      const desenho = desenhoDoMundo(ilhas, 1440, 796);
+      const rota = ilhas.filter((item) => !item.opcional).map((item) => desenho.posicao(item));
+      rota.forEach((ponto, indice) => {
+        if (indice === 0) return;
+        expect(ponto.x).toBeGreaterThan(rota[indice - 1].x);
+        expect(ponto.y).not.toBeCloseTo(rota[indice - 1].y);
+      });
+      for (const opcional of ilhas.filter((item) => item.opcional)) expect(desenho.posicao(opcional).x).toBeGreaterThan(rota[rota.length - 1].x);
+    });
+  }
+});
+
 describe("o desenho do mundo (src/componentes/mapa/desenhoMundo.ts)", () => {
   // As telas do jogo: em pé (390 x 844 menos as barras), deitado, o computador pequeno e o grande.
   const TELAS = [
@@ -263,7 +286,7 @@ describe("o desenho do mundo (src/componentes/mapa/desenhoMundo.ts)", () => {
     const ilhas = ilhasDaTrilha(trilha);
     for (const tela of TELAS) {
       it(`trilha ${trilha.id}, ${tela.nome}: cabe na altura com a mesma margem em cima e embaixo`, () => {
-        const desenho = desenhoDoMundo(trilha, ilhas, tela.largura, tela.altura);
+        const desenho = desenhoDoMundo(ilhas, tela.largura, tela.altura);
         const ys = ilhas.map((ilha) => desenho.posicao(ilha).y);
         // Em cima: a arte (até 86 acima do centro; o pier do Porto, 52); embaixo: a etiqueta (70 abaixo e mais 44 px).
         const topo = Math.min(Math.min(...ys) - 86, desenho.porto.y - 52) * desenho.escala;
@@ -278,7 +301,7 @@ describe("o desenho do mundo (src/componentes/mapa/desenhoMundo.ts)", () => {
         expect(Math.max(...xs) + 118).toBeLessThanOrEqual(desenho.largura);
       });
       it(`trilha ${trilha.id}, ${tela.nome}: as ilhas não se encostam (nem as etiquetas nas artes)`, () => {
-        const desenho = desenhoDoMundo(trilha, ilhas, tela.largura, tela.altura);
+        const desenho = desenhoDoMundo(ilhas, tela.largura, tela.altura);
         const etiquetaPx = { largura: 140, altura: 44 };
         const caixas = ilhas.flatMap((ilha) => {
           const { x, y } = desenho.posicao(ilha);
@@ -362,4 +385,73 @@ describe("o desenho de cada ilha por dentro (src/componentes/mapa/ilha/desenhoIl
       });
     }
   }
+});
+
+describe("o mundo vivo (src/componentes/mapa/mundo/)", () => {
+  const web = TRILHAS.find((trilha) => trilha.id === "web");
+  const ilhasWeb = web ? ilhasDaTrilha(web) : [];
+
+  it("o período do dia segue a hora do aparelho (e o ?hora= do endereço)", async () => {
+    const { horaDoEndereco, periodoDaHora } = await import("@/componentes/mapa/mundo/periodo");
+    expect([0, 5, 6, 7, 8, 12, 16, 17, 18, 19, 23].map(periodoDaHora)).toEqual([
+      "noite", "noite", "amanhecer", "amanhecer", "dia", "dia", "dia", "entardecer", "entardecer", "noite", "noite",
+    ]);
+    expect(horaDoEndereco("?hora=22")).toBe(22);
+    expect(horaDoEndereco("?hora=24")).toBeNull();
+    expect(horaDoEndereco("?hora=abc")).toBeNull();
+    expect(horaDoEndereco("")).toBeNull();
+  });
+
+  for (const tela of [
+    { nome: "em pé", largura: 390, altura: 740 },
+    { nome: "deitado", largura: 844, altura: 306 },
+    { nome: "computador", largura: 1440, altura: 796 },
+  ]) {
+    it(`${tela.nome}: os lugares de mar aberto ficam longe das ilhas, dos nomes e do Porto, e a vida do mar tem onde morar`, async () => {
+      const { espalhados, lugaresDoMar } = await import("@/componentes/mapa/mundo/lugaresDoMar");
+      const desenho = desenhoDoMundo(ilhasWeb, tela.largura, tela.altura);
+      const ilhas = ilhasWeb.map((item) => desenho.posicao(item));
+      const lugares = lugaresDoMar(desenho.largura, desenho.altura, ilhas, desenho.porto);
+      expect(lugares.length).toBeGreaterThan(12);
+      for (const lugar of lugares) {
+        for (const ilhaNoMapa of ilhas) {
+          // A arte (118 para cada lado, de 86 acima a 76 abaixo) e a etiqueta (140 x 44 px, 70 abaixo do centro) ficam de fora.
+          const dx = Math.abs(lugar.x - ilhaNoMapa.x);
+          const dy = lugar.y - ilhaNoMapa.y;
+          const naArte = dx < 118 && dy > -86 && dy < 76;
+          const naEtiqueta = dx < 70 / desenho.escala && dy > 70 && dy < 70 + 44 / desenho.escala;
+          expect(naArte || naEtiqueta, `${JSON.stringify(lugar)} em cima de ${JSON.stringify(ilhaNoMapa)}`).toBe(false);
+        }
+        expect(lugar.x).toBeGreaterThan(0);
+        expect(lugar.x).toBeLessThan(desenho.largura);
+        expect(lugar.y).toBeGreaterThan(0);
+        expect(lugar.y).toBeLessThan(desenho.altura);
+      }
+      const peixes = espalhados(lugares, 3, 7);
+      expect(peixes).toHaveLength(3);
+      expect(espalhados(lugares, 3, 7)).toEqual(peixes);
+      expect(new Set(peixes.map((p) => `${p.x},${p.y}`)).size).toBe(3);
+    });
+  }
+
+  it("o barquinho faz a rota inteira, ilha por ilha, e volta virado, sem passar por cima das ilhas", async () => {
+    const { viagemDoBarco } = await import("@/componentes/mapa/mundo/lugaresDoMar");
+    const desenho = desenhoDoMundo(ilhasWeb, 1440, 796);
+    const rota = ilhasWeb.filter((item) => !item.opcional).map((item) => desenho.posicao(item));
+    const quadros = viagemDoBarco(rota);
+    expect(quadros.length).toBeGreaterThan(rota.length * 2);
+    expect(quadros[0].offset).toBe(0);
+    expect(quadros[quadros.length - 1].offset).toBe(1);
+    quadros.forEach((quadro, indice) => {
+      if (indice > 0) expect(quadro.offset).toBeGreaterThanOrEqual(quadros[indice - 1].offset);
+      expect(Math.abs(quadro.angulo)).toBeLessThanOrEqual(22);
+      for (const ilhaNoMapa of rota) expect(Math.hypot(quadro.x - ilhaNoMapa.x, quadro.y - 24 - ilhaNoMapa.y)).toBeGreaterThan(100);
+    });
+    const ida = quadros.filter((quadro) => !quadro.virado);
+    const volta = quadros.filter((quadro) => quadro.virado);
+    // Vai da primeira até perto da última, e volta.
+    expect(ida[0].x).toBeLessThan(rota[1].x);
+    expect(ida[ida.length - 1].x).toBeGreaterThan(rota[rota.length - 2].x);
+    expect(volta[volta.length - 1].x).toBeLessThan(rota[1].x);
+  });
 });
