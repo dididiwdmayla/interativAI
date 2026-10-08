@@ -1303,11 +1303,11 @@ export const FERRAMENTAS: Record<IdFerramenta, Ferramenta> = {
     nome: "Mesa de cores",
     Icone: IconeMesaCores,
     alvo: seletorFerramenta("mesa-de-cores"),
-    oQueFaz: "Monta uma cor em hexadecimal: dois dígitos de vermelho, dois de verde e dois de azul, de 00 (nada) a ff (tudo).",
+    oQueFaz: "Monta uma cor em hexadecimal: o vermelho, o verde e o azul aparecem sozinhos, cada um com dois dígitos, de 00 (nada) a ff (tudo). Juntos, dão a cor.",
     praQueServe: "É o mesmo #ff8800 do CSS. Cada par de dígitos é um número de 0 a 255 contando de 16 em 16, com letras de a a f depois do 9.",
     comoUsarAqui: {
-      mouse: "Clique nas setinhas de cada dígito para subir ou descer. A cor e o CSS mudam na hora.",
-      toque: "Toque nas setinhas de cada dígito para subir ou descer. A cor e o CSS mudam na hora.",
+      mouse: "Clique nas setinhas de cada dígito (ou arraste o controle do canal). Com uma cor pedida, cada canal diz se está no alvo, se falta subir ou se passou.",
+      toque: "Toque nas setinhas de cada dígito (ou arraste o controle do canal). Com uma cor pedida, cada canal diz se está no alvo, se falta subir ou se passou.",
     },
     noF12DeVerdade:
       "no painel Estilos da aba Elementos, ao lado de cada cor há um quadradinho: clicar nele abre o seletor de cores, e Shift + clique troca o jeito de escrever (hexadecimal, rgb, hsl).",

@@ -54,6 +54,7 @@ import { useDepurador } from "./useDepurador";
 import { useEstruturas } from "./useEstruturas";
 import { useExposicao } from "./useExposicao";
 import { SalaExposicao } from "@/componentes/museu/exposicao/SalaExposicao";
+import { alvosDeCor } from "@/motor/exposicao/alvoDaCor";
 import { falaDoAnfitriao, resumoDaEstacao } from "@/motor/exposicao/modelo";
 import { useOrdenar } from "./useOrdenar";
 import { useCasos } from "./useCasos";
@@ -1336,6 +1337,11 @@ export function JogoFase({
   useEffect(() => {
     if (estacaoDoObjetivo) abrirEstacao(estacaoDoObjetivo);
   }, [abrirEstacao, estacaoDoObjetivo]);
+  // Mesa de cores: a cor pedida (o objetivo ativo ou as partes do desafio), para cada canal mostrar o quanto falta.
+  const alvosDaMesa = useMemo(
+    () => (!exposicao.dados ? {} : objetivo ? alvosDeCor([objetivo.validador]) : fase.tipo === "desafio" ? alvosDeCor(fase.partes.map((parte) => parte.validador)) : {}),
+    [exposicao.dados, fase, objetivo],
+  );
   const estacoesFeitas =
     fase.tipo === "desafio" ? fase.partes.flatMap((parte) => (estado.partesFeitas.includes(parte.id) && "estacao" in parte.validador ? [parte.validador.estacao] : [])) : [];
 
@@ -2653,6 +2659,7 @@ export function JogoFase({
                   layout={layout}
                   aoAbrirCard={abrirCard}
                   extras={exposicao.extras}
+                  alvosDeCor={alvosDaMesa}
                 />
               ) : null,
             testes: casos.ativo ? (

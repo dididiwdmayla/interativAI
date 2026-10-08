@@ -23,7 +23,7 @@ export const FASE_ORIGENS_U1_F4: Fase = {
       abrir: "Oiê! Aqui em casa eu guardava tudo em bytes: oito lâmpadas juntinhas! Cada número de 0 a 255 pode ser uma letra.",
       porEtapa: {
         "letra-a": "Acende o 65 pra mim? 64 + 1! Olha a letra que aparece!",
-        vermelho: "Agora a minha mesa de cores! Dois dígitos de vermelho, dois de verde e dois de azul.",
+        vermelho: "Agora a minha mesa de cores! Cada canal sozinho: dois dígitos de vermelho, dois de verde e dois de azul.",
         laranja: "Sozinho agora: o laranja do botão. Muito vermelho, metade de verde, nada de azul. Bip!",
       },
       concluir: "PRONTO! Letra, número e cor: tudo byte. Bip bip!",
@@ -108,7 +108,7 @@ export const FASE_ORIGENS_U1_F4: Fase = {
       validador: { tipo: "corHex", estacao: "mesa", valor: "#ff8800" },
       ajudas: {
         pergunta: "Qual par de dígitos é o verde? E quanto é metade de ff?",
-        dica: "Os pares são vermelho, verde e azul, nessa ordem. 88 fica no meio do caminho entre 00 e ff.",
+        dica: "Olhe canal por canal: a mesa diz qual está no alvo e qual falta subir. 88 fica no meio do caminho entre 00 e ff.",
       },
       falaAoConcluir: { texto: "#ff8800! É assim que se escreve laranja no CSS. Você vai ver muito disso na Ilha Sites.", expressao: "comemorando" },
       solucaoDeTeste: [{ tipo: "definirCor", estacao: "mesa", valor: "#FF8800" }],

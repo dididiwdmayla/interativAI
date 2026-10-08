@@ -335,3 +335,25 @@ describe("a exposição com as estações novas", () => {
     expect(estadoValidoExposicao(dados, lido)).toEqual(estado);
   });
 });
+
+describe("mesa de cores: o alvo canal por canal", () => {
+  it("tira o alvo do validador (inclusive dentro de todos) e ignora o de faixa", async () => {
+    const { alvosDeCor } = await import("@/motor/exposicao/alvoDaCor");
+    expect(
+      alvosDeCor([
+        { tipo: "corHex", estacao: "mesa", valor: "#FF8800" },
+        { tipo: "todos", validadores: [{ tipo: "corHex", estacao: "outra", valor: "#ff0" }] },
+        { tipo: "corHex", estacao: "faixa", canais: { r: [200, 255] } },
+      ]),
+    ).toEqual({ mesa: "#ff8800", outra: "#ffff00" });
+  });
+
+  it("diz qual canal está no alvo, abaixo ou acima", async () => {
+    const { canaisNoAlvo } = await import("@/motor/exposicao/alvoDaCor");
+    const canais = canaisNoAlvo("#ff9900", "#ff8800");
+    expect(canais.r).toEqual({ valor: 255, alvo: 255, situacao: "certo" });
+    expect(canais.g.situacao).toBe("acima");
+    expect(canais.b.situacao).toBe("certo");
+    expect(canaisNoAlvo("#000000", "#ffff00").g.situacao).toBe("abaixo");
+  });
+});

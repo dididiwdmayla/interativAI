@@ -229,10 +229,15 @@ export function CorredorMuseu({ ilhaId }: Props) {
           data-trilho-museu
         >
           <div className={`relative flex ${vertical ? "w-full flex-col pb-28" : "h-full w-max flex-row pr-[20vw]"}`}>
-            {/* A parede do fundo: arcos que andam mais devagar (a profundidade) */}
+            {/*
+              A parede do fundo: arcos que andam mais devagar (a profundidade).
+              O recorte (overflow-hidden) segura a camada que anda: sem ele, o
+              transform dela aumentava a área de rolagem a cada rolada, e o
+              corredor seguia muito além da árvore (a parede e o chão bege sem fim).
+            */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" data-parede-museu>
             <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
+              className="absolute inset-0"
               style={{
                 x: fundoX,
                 y: fundoY,
@@ -242,6 +247,7 @@ export function CorredorMuseu({ ilhaId }: Props) {
                 backgroundRepeat: "repeat-x, no-repeat",
               }}
             />
+            </div>
             {/* O chão: as tábuas em perspectiva */}
             <div
               aria-hidden="true"
