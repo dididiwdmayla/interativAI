@@ -1,12 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
-/** Origens: museu com colunas, um cartão perfurado e um terminal antigo. */
+/** Origens: museu com colunas, um cartão perfurado e um terminal antigo (o cursor pisca por CSS; globals.css). */
 export function ArteOrigens() {
-  const animar = useAnimarMapa();
   return (
     <g>
       <ChaoIlha />
@@ -32,12 +29,7 @@ export function ArteOrigens() {
         <rect x="-4" y="-34" width="40" height="32" rx="5" fill="var(--cor-pedra-sombra)" />
         <rect x="1" y="-30" width="30" height="22" rx="3" fill="var(--cor-terminal-fundo)" />
         <path d="M5-24h12M5-19h18M5-14h8" stroke="var(--cor-terminal-texto)" strokeWidth="2" strokeLinecap="round" />
-        <motion.g
-          animate={animar ? { opacity: [1, 0, 1] } : { opacity: 1 }}
-          transition={animar ? { duration: 1.1, repeat: Infinity } : undefined}
-        >
-          <rect x="15" y="-16" width="5" height="4" fill="var(--cor-terminal-texto)" />
-        </motion.g>
+        <rect x="15" y="-16" width="5" height="4" fill="var(--cor-terminal-texto)" className="cursor-pisca" />
         <rect x="6" y="-2" width="20" height="4" rx="1" fill="var(--cor-pedra-sombra)" />
       </g>
     </g>

@@ -78,7 +78,7 @@ function CamadaDeLuz({ centro, escala, children, id }: { centro: Ponto; escala: 
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute"
+      className="camada-propria pointer-events-none absolute"
       style={{ left: (centro.x + CAIXA.x) * escala, top: (centro.y + CAIXA.y) * escala, width: CAIXA.largura * escala, height: CAIXA.altura * escala }}
       data-luzes-ilha={id}
     >

@@ -141,7 +141,15 @@ export type Progresso = {
    * seis salas concluídas). Só para a revelação tocar uma vez.
    */
   insigniaDoMuseu: boolean;
+  /**
+   * Animações do mundo (menu): "completas", "leves" (menos coisas se mexendo,
+   * para aparelho mais fraco) ou "auto" (o jogo decide pelo aparelho).
+   */
+  animacoes: PreferenciaAnimacoes;
 };
+
+export const PREFERENCIAS_ANIMACOES = ["auto", "completas", "leves"] as const;
+export type PreferenciaAnimacoes = (typeof PREFERENCIAS_ANIMACOES)[number];
 
 /** O retrato do aluno na árvore da família: as peças do kit e a assinatura. */
 export type RetratoDoAluno = {
@@ -209,6 +217,7 @@ export const PROGRESSO_PADRAO: Progresso = {
   revisao: REVISAO_PADRAO,
   proximaGeracao: null,
   insigniaDoMuseu: false,
+  animacoes: "auto",
 };
 
 export const ESTADO_FASE_PADRAO: EstadoFaseSalvo = {
@@ -493,6 +502,7 @@ export function normalizarProgresso(bruto: unknown): Progresso {
     revisao: lerEstadoRevisao(bruto.revisao),
     proximaGeracao: lerRetratoDoAluno(bruto.proximaGeracao),
     insigniaDoMuseu: bruto.insigniaDoMuseu === true,
+    animacoes: PREFERENCIAS_ANIMACOES.find((valor) => valor === bruto.animacoes) ?? PROGRESSO_PADRAO.animacoes,
   };
 }
 

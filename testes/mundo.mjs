@@ -8,6 +8,9 @@
 // relógio) e de noite (?hora=22: estrelas, janelas acesas, o farol girando e os
 // nomes legíveis), a garrafa com a curiosidade, a baleia (?baleia), o aceno de
 // quem chega e o barquinho andando pela rota; com menos movimento, tudo parado.
+// As animações do menu (rodada 40): completas | leves, salvas no progresso.
+// O desempenho com o processador limitado e as ilhas que não somem rolando
+// rápido com pouca memória de vídeo ficam no desempenho-mundo.mjs (roda sozinho).
 // Uso: node testes/mundo.mjs [desktop|retrato|paisagem]
 import { readFileSync } from "node:fs";
 import { obrigatoriasProntasDaIlha, PUBLICADAS } from "./curriculo.mjs";
@@ -46,6 +49,8 @@ const progresso = {
   mapaDesbloqueado: false,
   proporcaoPrevia: 0.4,
   revisao: { conceitos: { tag: { nivel: 2, proxima: hoje, vezes: 1, ultima: null } }, sequencia: { atual: 0, melhor: 0, ultimoDia: null } },
+  // As animações completas (no automático, um aparelho ocupado podia ligar o modo leve e tirar os peixes e as gaivotas).
+  animacoes: "completas",
 };
 
 const { navegador, contexto, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/?hora=12", esperar: "[data-mapa=mundo]" });
@@ -365,6 +370,37 @@ await cdpNoite.send("LayerTree.disable");
 const porSegundoNoite = pinturasNoite.reduce((soma, a) => soma + a, 0) / 2;
 if (process.env.MEDIR) console.log(`${MODO}: de noite, ${(porSegundoNoite / tela).toFixed(1)} telas/s`);
 conferir(porSegundoNoite <= tela * 8, `${MODO}: de noite, parado, o Chrome repinta menos de 8 telas de mapa por segundo (${(porSegundoNoite / tela).toFixed(1)})`);
+
+// ------------------------------------------------ as animações do menu: completas | leves (rodada 40)
+await pagina.goto(`${URL_JOGO}/?hora=12`);
+await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
+const modoDoMundo = () => pagina.locator("[data-mapa=mundo]").getAttribute("data-animacoes");
+const abrirAjusteDasAnimacoes = async () => {
+  // No desktop, no painel do som; no celular, no menu.
+  await pagina.getByRole("button", { name: MODO === "desktop" ? "Ajustes de som" : "Mais opções" }).click();
+  await pagina.locator("[data-ajuste-animacoes]").waitFor();
+};
+conferir((await modoDoMundo()) === "completas", `${MODO}: as animações começam completas`);
+const ilhasAntes = await pagina.locator("[data-ilha-arte]").count();
+await abrirAjusteDasAnimacoes();
+await pagina.locator('[data-animacoes-opcao="leves"]').click();
+await pagina.waitForFunction(() => document.querySelector("[data-mapa=mundo]")?.getAttribute("data-animacoes") === "leves");
+conferir(
+  (await pagina.locator("[data-peixe]").count()) === 0 && (await pagina.locator("[data-gaivota]").count()) === 0 && (await pagina.locator("[data-nuvem]").count()) <= 2,
+  `${MODO}: no modo leve, menos coisas se mexem (sem peixes nem gaivotas, no máximo duas nuvens)`,
+);
+conferir(
+  (await pagina.locator("[data-ilha-arte]").count()) === ilhasAntes && (await pagina.locator("[data-barquinho]").count()) === 1,
+  `${MODO}: no modo leve, o mundo continua inteiro (as ilhas e o barquinho)`,
+);
+await pagina.reload();
+await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
+const salvo = await pagina.evaluate(() => JSON.parse(localStorage.getItem("ilha-sites:progresso:v2") ?? "{}").animacoes);
+conferir((await modoDoMundo()) === "leves" && salvo === "leves", `${MODO}: a escolha fica salva no progresso (${salvo})`);
+await abrirAjusteDasAnimacoes();
+await pagina.locator('[data-animacoes-opcao="completas"]').click();
+await pagina.waitForFunction(() => document.querySelector("[data-mapa=mundo]")?.getAttribute("data-animacoes") === "completas");
+conferir((await pagina.locator("[data-peixe]").count()) > 0, `${MODO}: de volta às completas, os peixes voltam`);
 
 // Com menos movimento, o mundo vivo fica parado: nenhum peixe salta e o barquinho não anda.
 // (Liga depois de carregar: carregando já com menos movimento, o Framer avisa no console do modo dev.)

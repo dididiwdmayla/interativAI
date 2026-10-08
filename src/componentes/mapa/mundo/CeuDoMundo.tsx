@@ -8,18 +8,20 @@
  *
  * Desempenho: cada nuvem e cada gaivota é uma camada só, que anda por
  * transform pelo compositor (sem repintar o mapa); quantas nuvens depende
- * do tamanho do mundo, com teto. Com menos movimento, as nuvens ficam
- * paradas e as gaivotas não aparecem.
+ * do tamanho do mundo, com teto. No modo leve, no máximo duas nuvens e
+ * nenhuma gaivota. Com menos movimento, as nuvens ficam paradas e as
+ * gaivotas não aparecem.
  */
 import { useMenosMovimento } from "@/lib/useConsultaMidia";
 import type { CSSProperties } from "react";
 import { sorteioFixo } from "../geometria";
 import type { Periodo } from "./periodo";
 
-type Props = { largura: number; altura: number; escala: number; periodo: Periodo };
+type Props = { largura: number; altura: number; escala: number; periodo: Periodo; leve?: boolean };
 
-/** Teto de nuvens no céu (o celular agradece). */
+/** Teto de nuvens no céu (o celular agradece); no modo leve, menos. */
 const MAXIMO_DE_NUVENS = 3;
+const MAXIMO_DE_NUVENS_LEVE = 2;
 
 function Nuvem({ variante }: { variante: number }) {
   const formas = [
@@ -48,9 +50,9 @@ function Gaivota() {
   );
 }
 
-export function CeuDoMundo({ largura, altura, escala, periodo }: Props) {
+export function CeuDoMundo({ largura, altura, escala, periodo, leve = false }: Props) {
   const reduzir = useMenosMovimento();
-  const quantas = Math.min(MAXIMO_DE_NUVENS, Math.max(1, Math.round(largura / 900)));
+  const quantas = Math.min(leve ? MAXIMO_DE_NUVENS_LEVE : MAXIMO_DE_NUVENS, Math.max(1, Math.round(largura / 900)));
   const viagem = (largura + 400) * escala;
   const nuvens = Array.from({ length: quantas }, (_, indice) => ({
     // Cada nuvem numa faixa de altura e num ponto da viagem.
@@ -84,6 +86,7 @@ export function CeuDoMundo({ largura, altura, escala, periodo }: Props) {
         </div>
       ))}
       {!reduzir &&
+        !leve &&
         periodo !== "noite" &&
         [0, 1].map((indice) => (
           <div

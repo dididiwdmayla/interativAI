@@ -1,6 +1,9 @@
 // Roda os testes de navegador que não dependem de configuração do tutor.
 // Precisa do jogo no ar (npm run dev ou npm start) em URL_JOGO (padrão :3000).
 // PARALELO=n roda n arquivos ao mesmo tempo (padrão 1, um atrás do outro).
+// Os que medem desempenho (SOZINHOS) rodam no fim, um de cada vez e sem
+// ninguém em paralelo: com outros testes disputando o processador, a medida
+// vira ruído.
 // FILTRO=regex roda só os testes cuja linha ("arquivo argumentos") casa com ela.
 import { spawn } from "node:child_process";
 
@@ -219,6 +222,9 @@ const TESTES = [
   ["audio.mjs"],
 ];
 
+/** Medem desempenho: rodam no fim, sozinhos. */
+const SOZINHOS = [["desempenho-mundo.mjs"]];
+
 const PARALELO = Math.max(1, Number(process.env.PARALELO ?? 1));
 
 /** Roda um arquivo; em paralelo, a saída de cada um sai inteira no fim, sem misturar. */
@@ -250,5 +256,8 @@ await Promise.all(
     }
   }),
 );
+for (const teste of SOZINHOS.filter((item) => !FILTRO || FILTRO.test(item.join(" ")))) {
+  if (!(await rodar(teste))) falhas.push(teste.join(" "));
+}
 console.log(falhas.length === 0 ? "\nTudo certo." : `\n${falhas.length} teste(s) falharam: ${falhas.join("; ")}`);
 process.exit(falhas.length === 0 ? 0 : 1);

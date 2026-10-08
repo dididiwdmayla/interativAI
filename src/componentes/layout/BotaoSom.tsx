@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { tocarEfeito } from "@/audio/motor";
 import { IconeSom } from "@/componentes/icones/IconeSom";
 import { Dica } from "@/componentes/ui/Dica";
@@ -10,9 +10,10 @@ import { AjustesSom } from "./AjustesSom";
 /**
  * Botão de som da barra (desktop): abre os ajustes de som num painel
  * pequeno logo abaixo. Fecha com Esc, com clique fora ou no próprio botão.
- * No celular os ajustes moram direto no menu (AjustesSom).
+ * No celular os ajustes moram direto no menu (AjustesSom). `extra` vem logo
+ * depois no mesmo painel (no mundo, as animações).
  */
-export function BotaoSom() {
+export function BotaoSom({ extra }: { extra?: ReactNode }) {
   const { som } = useProgresso();
   const [aberto, setAberto] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
@@ -68,7 +69,12 @@ export function BotaoSom() {
         hidden={!aberto}
         className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border-2 border-borda bg-superficie p-3 text-texto shadow-[0_6px_0_var(--cor-sombra)]"
       >
-        {aberto && <AjustesSom />}
+        {aberto && (
+          <div className="flex flex-col gap-3">
+            <AjustesSom />
+            {extra && <div className="border-t-2 border-borda pt-3">{extra}</div>}
+          </div>
+        )}
       </div>
     </div>
   );

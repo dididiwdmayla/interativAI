@@ -4,11 +4,9 @@
  * Os operários das ilhas em construção: computadorzinhos de capacete. Um
  * martela no alto do andaime, o outro carrega um bloco pra lá e pra cá. De
  * noite, os dois cochilam (de capacete e tudo). Só tokens; o que se mexe é
- * pequeno e para fora da tela (useAnimarMapa).
+ * pequeno, só CSS (o compositor anda sozinho; globals.css) e para fora da tela.
  */
-import { motion } from "framer-motion";
 import { useNoiteNoMapa } from "./noiteNoMapa";
-import { useAnimarMapa } from "./useAnimarMapa";
 
 /** O corpo do computadorzinho com capacete; `dormindo` fecha os olhos. */
 function Corpo({ dormindo }: { dormindo: boolean }) {
@@ -34,19 +32,17 @@ function Corpo({ dormindo }: { dormindo: boolean }) {
 }
 
 function Zzz({ x, y }: { x: number; y: number }) {
-  const animar = useAnimarMapa();
   return (
-    <motion.g animate={animar ? { opacity: [0, 1, 0], y: [4, -4, -8] } : { opacity: 1 }} transition={animar ? { duration: 2.4, repeat: Infinity } : undefined}>
+    <g className="operario-zzz">
       <text x={x} y={y} fontSize="10" fontWeight="900" fill="var(--cor-texto-suave)">
         z
       </text>
-    </motion.g>
+    </g>
   );
 }
 
 /** O operário do martelo, no andaime. */
 export function OperarioMartelo({ x, y, escala = 1 }: { x: number; y: number; escala?: number }) {
-  const animar = useAnimarMapa();
   const noite = useNoiteNoMapa();
   return (
     <g transform={`translate(${x} ${y}) scale(${escala})`} data-operario="martelo">
@@ -56,7 +52,7 @@ export function OperarioMartelo({ x, y, escala = 1 }: { x: number; y: number; es
       ) : (
         <g transform="translate(16 2)">
           {/* O martelo gira em volta da mão, em passos (poucas repinturas por segundo; globals.css). */}
-          <g className={animar ? "operario-martelo" : undefined}>
+          <g className="operario-martelo">
             <path d="M0 0l12-6" stroke="var(--cor-madeira)" strokeWidth="2.6" strokeLinecap="round" />
             <rect x="9" y="-12" width="9" height="6" rx="1.5" transform="rotate(-27 13 -9)" fill="var(--cor-texto-suave)" />
           </g>
@@ -68,11 +64,10 @@ export function OperarioMartelo({ x, y, escala = 1 }: { x: number; y: number; es
 
 /** O operário que carrega um bloco, andando pra lá e pra cá no chão da ilha (em passos, como um robozinho). */
 export function OperarioBloco({ x, y, escala = 1 }: { x: number; y: number; escala?: number }) {
-  const animar = useAnimarMapa();
   const noite = useNoiteNoMapa();
   return (
     <g transform={`translate(${x} ${y}) scale(${escala})`} data-operario="bloco">
-      <g className={animar && !noite ? "operario-anda" : undefined}>
+      <g className={noite ? undefined : "operario-anda"}>
         <Corpo dormindo={noite} />
         {!noite && <rect x="-8" y="-27" width="16" height="11" rx="2" fill="var(--cor-primaria)" stroke="var(--cor-madeira)" strokeWidth="1.2" />}
       </g>

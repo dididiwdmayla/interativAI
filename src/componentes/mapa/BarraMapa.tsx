@@ -9,6 +9,7 @@ import { BotaoFerramentas } from "@/componentes/ferramentas/BotaoFerramentas";
 import { CaixaFerramentas } from "@/componentes/ferramentas/CaixaFerramentas";
 import { IconeEstrela } from "@/componentes/icones/IconeEstrela";
 import { useLayoutJogo } from "@/componentes/jogo/movel/useLayoutJogo";
+import { AjusteAnimacoes } from "@/componentes/layout/AjusteAnimacoes";
 import { AjustesSom } from "@/componentes/layout/AjustesSom";
 import { BotaoSom } from "@/componentes/layout/BotaoSom";
 import { MenuMovel } from "@/componentes/layout/MenuMovel";
@@ -29,6 +30,8 @@ type Props = {
   voltar?: ReactNode;
   /** Mostra a barra de temas (lentes) embaixo: no mundo e na ilha. */
   lentes?: boolean;
+  /** No mundo: o modo das animações que está valendo, e o ajuste delas no menu (no desktop, no painel do som). */
+  animacoes?: "completas" | "leves";
 };
 
 /** Total de estrelas do jogo, com a estrela desenhada. */
@@ -53,7 +56,7 @@ function TotalEstrelas({ compacto }: { compacto: boolean }) {
  * Ferramentas (a Caixa, só para ler os cards), tema e som. No celular,
  * Ferramentas, tema e som moram no menu.
  */
-export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
+export function BarraMapa({ caminho, voltar, lentes = false, animacoes }: Props) {
   const layout = useLayoutJogo();
   const toque = useToque();
   const progresso = useProgresso();
@@ -88,13 +91,18 @@ export function BarraMapa({ caminho, voltar, lentes = false }: Props) {
             <div data-manter-menu className="border-t-2 border-borda pt-2">
               <AjustesSom />
             </div>
+            {animacoes && (
+              <div data-manter-menu className="border-t-2 border-borda pt-2">
+                <AjusteAnimacoes atual={animacoes} />
+              </div>
+            )}
           </MenuMovel>
         ) : (
           <>
             <LinksExplorar />
             <BotaoFerramentas aoAbrir={() => setCaixaAberta(true)} />
             <SeletorTema />
-            <BotaoSom />
+            <BotaoSom extra={animacoes && <AjusteAnimacoes atual={animacoes} />} />
             <BotaoTelaCheia />
           </>
         )}

@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
 /** Os cabos submarinos (Bézier de 4 pontos), do chão da ilha até sumirem na água. */
 const CABOS = [
@@ -23,35 +22,29 @@ function pontosDoCabo([p1, c1, c2, p2]: (typeof CABOS)[number], quantos = 7): { 
   return { x, y };
 }
 
-/** Um pulso de luz correndo pelo cabo, da ilha para o mar (o pacote saindo para o mundo). */
+/**
+ * Um pulso de luz correndo pelo cabo, da ilha para o mar (o pacote saindo
+ * para o mundo): CSS, pelo compositor, passando pelos pontos do cabo
+ * (`--x0`...`--y6`; globals.css). Com menos movimento, não aparece.
+ */
 function Pulso({ cabo, atraso }: { cabo: (typeof CABOS)[number]; atraso: number }) {
-  const animar = useAnimarMapa();
-  if (!animar) return null;
   const { x, y } = pontosDoCabo(cabo);
-  return (
-    <motion.circle
-      r="3.4"
-      fill="var(--cor-destaque)"
-      initial={false}
-      animate={{ cx: x, cy: y, opacity: [0, 1, 1, 1, 1, 1, 0] }}
-      transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2, ease: "linear", delay: atraso }}
-    />
-  );
+  const pontos = Object.fromEntries(x.flatMap((_, i) => [[`--x${i}`, `${x[i].toFixed(1)}px`], [`--y${i}`, `${y[i].toFixed(1)}px`]]));
+  return <circle r="3.4" fill="var(--cor-destaque)" className="cabo-pulso" style={{ ...pontos, "--atraso": `${atraso - 3}s` } as CSSProperties} />;
 }
 
 /** Rede e Servidor: antenas com sinal e cabos que descem pro mar, com pulsos de luz correndo por eles. */
 export function ArteRede() {
-  const animar = useAnimarMapa();
   const onda = (raio: number, atraso: number) => (
-    <motion.path
+    <path
       key={raio}
       d={`M${-raio} ${-raio * 0.2}A${raio} ${raio} 0 0 1 ${raio} ${-raio * 0.2}`}
       fill="none"
       stroke="var(--cor-secundaria)"
       strokeWidth="3"
       strokeLinecap="round"
-      animate={animar ? { opacity: [0, 1, 0] } : { opacity: 0.8 }}
-      transition={animar ? { duration: 1.8, repeat: Infinity, delay: atraso } : undefined}
+      className="ilha-sinal"
+      style={{ "--duracao": "1.8s", "--atraso": `${atraso - 1.8}s` } as CSSProperties}
     />
   );
   return (

@@ -27,9 +27,10 @@ export const FASE_INICIAL = "sites-elementos-u1-f1";
  * Abre o jogo. Sem `rota`, vai direto para a fase atual do progresso (ou a
  * primeira), em /fase/<id>; o mundo é "/" e a ilha, /ilha/<id>.
  */
-export async function abrir({ largura = 1440, altura = 900, toque = false, escala = 1, progresso = null, rota, esperar = "iframe" } = {}) {
+export async function abrir({ largura = 1440, altura = 900, toque = false, escala = 1, progresso = null, rota, esperar = "iframe", argumentos = [] } = {}) {
   const destino = rota ?? `/fase/${progresso?.faseAtual ?? FASE_INICIAL}`;
-  const navegador = await chromium.launch();
+  // `argumentos`: opções do Chromium (ex.: a memória de um celular, no desempenho-mundo.mjs).
+  const navegador = await chromium.launch({ args: argumentos });
   const contexto = await navegador.newContext({
     viewport: { width: largura, height: altura },
     hasTouch: toque,
@@ -140,6 +141,25 @@ export async function doisQuadros(pagina) {
   await pagina
     .evaluate(() => new Promise((resolver) => requestAnimationFrame(() => requestAnimationFrame(() => resolver(null)))))
     .catch(() => {});
+}
+
+/**
+ * Um arrasto com o dedo, com eventos de toque de verdade pelo Chrome DevTools
+ * Protocol (o gesto sintético de rolagem por toque, Input.synthesizeScrollGesture
+ * com "touch", não rola nada no Chromium sem tela). Do ponto (x, y), anda `dx`
+ * px na horizontal em `passos` movimentos, um a cada `intervalo` ms, e solta.
+ * Cada toque leva o carimbo de tempo dele (sem isso, o Chrome não vê a
+ * velocidade): rápido assim, a rolagem continua no embalo, como no celular.
+ */
+export async function arrastarComODedo(cdp, { x, y, dx, passos = 12, intervalo = 16 }) {
+  let tempo = Date.now() / 1000;
+  const carimbo = () => (tempo += intervalo / 1000);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }], timestamp: carimbo() });
+  for (let passo = 1; passo <= passos; passo++) {
+    await new Promise((resolver) => setTimeout(resolver, intervalo));
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: Math.round(x + (dx * passo) / passos), y }], timestamp: carimbo() });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [], timestamp: carimbo() });
 }
 
 /** Espera a fase ficar pronta (fora de uma fase, só os dois quadros). */

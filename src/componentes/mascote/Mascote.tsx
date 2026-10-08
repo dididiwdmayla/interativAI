@@ -45,7 +45,9 @@ export function Mascote({ expressao = "feliz", direcao = "cima", tamanho = 120, 
       viewBox="0 0 140 130"
       width={tamanho}
       height={(tamanho * 130) / 140}
-      className={className}
+      // O respiro é CSS no próprio <svg> (globals.css): o compositor anda sozinho e,
+      // por ser a caixa de fora, o Chrome não refaz o layout do desenho a cada quadro.
+      className={`mascote-respira ${className ?? ""}`}
       role="img"
       aria-label={`Computadorzinho ${DESCRICAO[expressao]}`}
       overflow="visible"
@@ -60,11 +62,7 @@ export function Mascote({ expressao = "feliz", direcao = "cima", tamanho = 120, 
         }
         style={{ originX: 0.5, originY: 1 }}
       >
-        <motion.g
-          animate={animar ? { scale: [1, 1.02, 1] } : { scale: 1 }}
-          transition={animar ? { duration: 3.4, repeat: Infinity, ease: "easeInOut" } : undefined}
-          style={{ originX: 0.5, originY: 1 }}
-        >
+        <g>
           <CorpoMonitor />
           <AnimatePresence initial={false}>
             <motion.g
@@ -77,7 +75,7 @@ export function Mascote({ expressao = "feliz", direcao = "cima", tamanho = 120, 
               <RostoMascote expressao={expressao} piscando={piscando} direcao={direcao} />
             </motion.g>
           </AnimatePresence>
-        </motion.g>
+        </g>
       </motion.g>
       <AnimatePresence initial={false}>
         <motion.g

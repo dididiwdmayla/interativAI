@@ -1,12 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
-/** Python: um observatório de dados, com o gráfico de barras crescendo e uma planilha estendida no varal. */
+/** Python: um observatório de dados, com o gráfico de barras crescendo (CSS, pelo compositor) e uma planilha estendida no varal. */
 export function ArtePython() {
-  const animar = useAnimarMapa();
   const barras = [
     { x: 14, altura: 18, atraso: 0 },
     { x: 26, altura: 30, atraso: 0.2 },
@@ -26,15 +24,16 @@ export function ArtePython() {
       <rect x="6" y="-40" width="58" height="50" rx="4" fill="var(--cor-superficie)" stroke="var(--cor-madeira)" strokeWidth="3" />
       <path d="M12 2H58" stroke="var(--cor-texto-suave)" strokeWidth="1.5" />
       {barras.map(({ x, altura, atraso }) => (
-        <motion.rect
+        <rect
           key={x}
           x={x}
+          y={2 - altura}
           width="8"
+          height={altura}
           rx="1.5"
           fill={x === 50 ? "var(--cor-primaria)" : "var(--cor-secundaria)"}
-          initial={false}
-          animate={animar ? { height: [altura * 0.4, altura, altura * 0.4], y: [2 - altura * 0.4, 2 - altura, 2 - altura * 0.4] } : { height: altura, y: 2 - altura }}
-          transition={animar ? { duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: atraso } : undefined}
+          className="barra-cresce"
+          style={{ "--atraso": `${atraso - 3.2}s` } as CSSProperties}
         />
       ))}
       <path d="M18 10v14M52 10v14" stroke="var(--cor-madeira)" strokeWidth="3" strokeLinecap="round" />

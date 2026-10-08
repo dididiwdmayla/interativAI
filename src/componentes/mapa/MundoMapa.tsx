@@ -21,7 +21,6 @@ import { ARTE_DAS_ILHAS, ArteFutura } from "./arte";
 import { AndaimesIlha, BrilhoIlha, NevoaIlha } from "./arte/MarcasDeEstado";
 import { NoiteNoMapa } from "./arte/noiteNoMapa";
 import { Oceano } from "./arte/Oceano";
-import { GrupoAnimadoNaTela } from "./arte/useAnimarMapa";
 import { type ApiAreaArrastavel, AreaArrastavel } from "./AreaArrastavel";
 import { BarraMapa } from "./BarraMapa";
 import { desenhoDoMundo } from "./desenhoMundo";
@@ -32,7 +31,9 @@ import { CeuDoMundo } from "./mundo/CeuDoMundo";
 import { ComputadorzinhoDoMundo } from "./mundo/ComputadorzinhoDoMundo";
 import { espalhados, lugaresDoMar } from "./mundo/lugaresDoMar";
 import { FarolDaIA, LuzesDaIlha } from "./mundo/LuzesDasIlhas";
-import { CeuNaAgua, EspumaDasPraias, Profundidade, Reflexos } from "./mundo/MarDoMundo";
+import { CeuNaAgua, EspumaDasPraias, ESTRELAS_QUE_PISCAM, EstrelasPiscando, Profundidade, Reflexos } from "./mundo/MarDoMundo";
+import { useModoAnimacoes } from "./mundo/useModoAnimacoes";
+import { useMarcarIlhaNaTela, useMarcarNaTela, useMarcarRolando } from "./mundo/useNaTela";
 import { usePeriodoDoDia } from "./mundo/usePeriodoDoDia";
 import { Baleia, GarrafaComMensagem, Peixes } from "./mundo/VidaNoMar";
 
@@ -57,8 +58,10 @@ const CAIXA_DA_ARTE = { x: -160, y: -130, largura: 320, altura: 230 };
 
 /**
  * A arte de uma ilha numa camada própria do compositor, centrada no ponto
- * dela: a animação de uma ilha repinta só essa camada, e o resto do mapa
- * (o mar, a rota, as outras ilhas) fica pintado.
+ * dela. O que se mexe dentro dela é CSS (transform e opacity), que o
+ * compositor anda sem repintar nada; com menos da metade da ilha na tela,
+ * `data-parada` para tudo onde está, e longe da tela `data-pausado` tira as
+ * animações (e as camadas delas). Sem estado do React (useNaTela.ts).
  */
 function CamadaDaArte({
   x,
@@ -69,14 +72,19 @@ function CamadaDaArte({
   ...dados
 }: Ponto & { escala: number; apagada?: boolean; children: ReactNode } & Record<`data-${string}`, string | boolean>) {
   const { x: cx, y: cy, largura, altura } = CAIXA_DA_ARTE;
+  const camada = useMarcarNaTela<HTMLDivElement>();
+  const grupo = useMarcarIlhaNaTela<SVGGElement>();
   return (
     <div
+      ref={camada}
       aria-hidden="true"
       className="camada-ilha no-escuro pointer-events-none absolute"
       style={{ left: (x + cx) * escala, top: (y + cy) * escala, width: largura * escala, height: altura * escala, opacity: apagada ? 0.35 : 1 }}
     >
       <svg viewBox={`${cx} ${cy} ${largura} ${altura}`} width="100%" height="100%" className="block overflow-visible">
-        <GrupoAnimadoNaTela {...dados}>{children}</GrupoAnimadoNaTela>
+        <g ref={grupo} {...dados}>
+          {children}
+        </g>
       </svg>
     </div>
   );
@@ -159,6 +167,11 @@ function MundoCarregado() {
 
   // O dia e a noite pelo relógio do aparelho (ou ?hora= no endereço).
   const periodo = usePeriodoDoDia();
+  // Completas ou leves (o menu, ou sozinho num aparelho fraco): no leve, menos coisas se mexem.
+  const { modo: modoAnimacoes } = useModoAnimacoes(moldura);
+  const leve = modoAnimacoes === "leves";
+  // Rolando, as animações pausam (o processador fica todo para a rolagem; globals.css).
+  const desenhoRef = useMarcarRolando<HTMLDivElement>(moldura);
   const comLuzes = periodo === "noite" || periodo === "entardecer";
   const pontosDasIlhas = ilhasDoMundo.map((ilha) => posicaoDa(ilha));
   const chaveDoDesenho = `${LARGURA.toFixed(0)}-${ALTURA.toFixed(0)}-${escala.toFixed(3)}-${comPorto}-${ilhasDoMundo.map((ilha) => ilha.id).join()}`;
@@ -174,30 +187,36 @@ function MundoCarregado() {
   }, [chaveDoDesenho]);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="mundo" data-trilha={trilha.id}>
-      <BarraMapa caminho={["Mundo"]} lentes />
+    <div className="flex h-dvh flex-col overflow-hidden bg-mar" data-mapa="mundo" data-trilha={trilha.id} data-animacoes={modoAnimacoes}>
+      <BarraMapa caminho={["Mundo"]} lentes animacoes={modoAnimacoes} />
       <div ref={moldura} className="relative flex min-h-0 flex-1 flex-col">
         <AreaArrastavel ref={area} rotulo="Mapa do mundo. Arraste ou role para ver todas as ilhas.">
           <div
+            ref={desenhoRef}
             className="relative"
             style={{ width: LARGURA * escala, height: ALTURA * escala }}
             data-mundo-desenho
             data-escala={escala.toFixed(3)}
             data-periodo={periodo}
           >
-            {/* O mar: fundo longe das ilhas e raso perto delas (desenho parado), as ondinhas, os reflexos e a espuma nas praias. */}
+            {/*
+              A ordem da pintura e as camadas contam (rodada 40). Embaixo, o que nunca
+              muda (o mar fundo e raso, as ondinhas, a rota e a hora na água), pintado
+              uma vez numa camada só, a única do tamanho do mundo. Por cima, o mar vivo,
+              as ilhas, as luzes, a névoa, o céu (o que atravessa o mundo) e, no alto,
+              os nomes e o computadorzinho: cada pedaço numa camada pequena dele.
+              Camadas do tamanho do mundo disputavam a memória de vídeo do celular, e
+              o que ficava sem memória (os nomes, a arte das ilhas) sumia.
+            */}
             <Profundidade largura={LARGURA} altura={ALTURA} escala={escala} ilhas={comPorto ? [...pontosDasIlhas, POSICAO_PORTO] : pontosDasIlhas} />
-            <Oceano largura={LARGURA} altura={ALTURA} escala={escala} />
-            <Recorte>
-              {periodo !== "noite" && <Reflexos lugares={mar.reflexos} escala={escala} />}
-              <EspumaDasPraias ilhas={pontosDasIlhas} escala={escala} />
-            </Recorte>
+            <Oceano largura={LARGURA} altura={ALTURA} escala={escala} parado />
             <svg
               viewBox={`0 0 ${LARGURA} ${ALTURA}`}
               width={LARGURA * escala}
               height={ALTURA * escala}
-              className="absolute inset-0"
+              className="pointer-events-none absolute inset-0"
               aria-hidden="true"
+              data-rota
             >
               {/* A rota entre as ilhas, na ordem do currículo. */}
               <path d={caminhoSuave(pontosDaRota)} fill="none" stroke="var(--cor-mar-fundo)" strokeWidth="16" strokeLinecap="round" opacity="0.6" />
@@ -226,8 +245,23 @@ function MundoCarregado() {
               })}
             </svg>
             {/* A hora do dia na água: de noite, o mar escuro com as estrelas e a lua; no amanhecer e no entardecer, a água morna. */}
+            <CeuNaAgua periodo={periodo} largura={LARGURA} altura={ALTURA} escala={escala} lugares={mar.estrelas} />
+            {/*
+              O mar vivo: os reflexos (de dia), as estrelas que piscam (de noite), a
+              espuma nas praias, os peixes, a baleia rara e a garrafa. No modo leve,
+              metade dos reflexos e das estrelas piscando, um anel de espuma e nada
+              de peixes nem baleia.
+            */}
             <Recorte>
-              <CeuNaAgua periodo={periodo} largura={LARGURA} altura={ALTURA} escala={escala} lugares={mar.estrelas} />
+              {periodo === "noite" ? (
+                <EstrelasPiscando lugares={mar.estrelas} escala={escala} quantas={leve ? ESTRELAS_QUE_PISCAM / 2 : ESTRELAS_QUE_PISCAM} />
+              ) : (
+                <Reflexos lugares={leve ? mar.reflexos.slice(0, mar.reflexos.length / 2) : mar.reflexos} escala={escala} />
+              )}
+              <EspumaDasPraias ilhas={pontosDasIlhas} escala={escala} aneis={leve ? 1 : 2} />
+              {!leve && <Peixes lugares={mar.peixes} escala={escala} />}
+              {!leve && <Baleia lugares={mar.lugares} escala={escala} />}
+              {mar.garrafa && <GarrafaComMensagem lugar={mar.garrafa} escala={escala} />}
             </Recorte>
             {/* O brilho das ilhas abertas, embaixo do desenho (pulsa pelo compositor). */}
             {ilhasDoMundo.map((ilha) =>
@@ -237,12 +271,6 @@ function MundoCarregado() {
                 </div>
               ) : null,
             )}
-            {/* A vida no mar: os peixes saltando, a baleia rara e a garrafa escondida. */}
-            <Recorte>
-              <Peixes lugares={mar.peixes} escala={escala} />
-              <Baleia lugares={mar.lugares} escala={escala} />
-              {mar.garrafa && <GarrafaComMensagem lugar={mar.garrafa} escala={escala} />}
-            </Recorte>
             {/*
               A arte de cada ilha (e do Porto) numa camada própria: o que se mexe
               nela (engrenagens, sinais, a fumaça) repinta só a ilha, e nunca o
@@ -277,18 +305,17 @@ function MundoCarregado() {
                 )}
               </>
             )}
-            <Recorte>
-              <BarcoNaRota rota={pontosDaRota} parado={posicaoBarco} escala={escala} />
-            </Recorte>
             {/* A névoa das ilhas bloqueadas, em cima do desenho (desliza pelo compositor). */}
             {ilhasDoMundo.map((ilha) =>
               estadoDaIlha(ilha, fonte) === "bloqueada" ? <NevoaIlha key={ilha.id} {...posicaoDa(ilha)} escala={escala} /> : null,
             )}
-            {/* O céu: as nuvens com a sombra delas e as gaivotas (por cima das ilhas, por baixo dos nomes). */}
+            {/* O céu: o barquinho fazendo a rota, as nuvens com a sombra delas e as gaivotas (por cima das ilhas, por baixo dos nomes). */}
             <Recorte>
-              <CeuDoMundo largura={LARGURA} altura={ALTURA} escala={escala} periodo={periodo} />
+              <BarcoNaRota rota={pontosDaRota} parado={posicaoBarco} escala={escala} />
+              <CeuDoMundo largura={LARGURA} altura={ALTURA} escala={escala} periodo={periodo} leve={leve} />
             </Recorte>
 
+            {/* Os nomes das ilhas e do Porto (os links), por cima de tudo, cada um numa camada pequena. */}
             {ilhasDoMundo.map((ilha) => {
               const { x, y } = posicaoDa(ilha);
               const estado = estadoDaIlha(ilha, fonte);
@@ -360,7 +387,7 @@ function MundoCarregado() {
                     data-lente={naLente === null ? undefined : apagada ? "apagada" : "acesa"}
                     aria-label={`${rotulo}. Termine a ilha ${anterior?.nome ?? "anterior"} para abrir.`}
                     onClick={() => setAviso(`A ilha ${ilha.nome} abre quando você terminar a ilha ${anterior?.nome ?? "anterior"}.`)}
-                    className={`absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
+                    className={`camada-propria absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
                     style={estilo}
                   >
                     {etiqueta}
@@ -378,7 +405,7 @@ function MundoCarregado() {
                   data-completa={estado === "disponivel" && ilhaCompleta(ilha, fonte) ? "sim" : "nao"}
                   data-lente={naLente === null ? undefined : apagada ? "apagada" : "acesa"}
                   aria-label={rotulo}
-                  className={`absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
+                  className={`camada-propria absolute rounded-[40%] focus-visible:outline-offset-4 ${apagada ? "opacity-40" : ""}`}
                   style={estilo}
                 >
                   {etiqueta}
@@ -396,7 +423,7 @@ function MundoCarregado() {
                 aria-label={`Porto da revisão: ${
                   itensDeHoje === 0 ? "nada pra revisar hoje" : `${itensDeHoje} ${itensDeHoje === 1 ? "item vence" : "itens vencem"} hoje`
                 }`}
-                className="absolute rounded-[40%] focus-visible:outline-offset-4"
+                className="camada-propria absolute rounded-[40%] focus-visible:outline-offset-4"
                 style={{
                   left: (POSICAO_PORTO.x - 80) * escala,
                   top: (POSICAO_PORTO.y - 60) * escala,
@@ -419,9 +446,10 @@ function MundoCarregado() {
               </Link>
             )}
 
-            {/* O computadorzinho mora na ilha atual. */}
+
+            {/* O computadorzinho mora na ilha atual (numa camada dele). */}
             <motion.div
-              className="pointer-events-none absolute"
+              className="camada-propria pointer-events-none absolute"
               data-mascote-no-mapa={atual.id}
               initial={false}
               animate={{ left: (posicaoAtual.x + 52) * escala, top: (posicaoAtual.y - 104) * escala }}

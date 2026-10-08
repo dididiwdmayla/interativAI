@@ -1,26 +1,19 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { ChaoIlha } from "./ChaoIlha";
-import { useAnimarMapa } from "./useAnimarMapa";
 
-/** A fumaça da chaminé: três baforadas subindo, crescendo e sumindo, uma atrás da outra. */
+/**
+ * A fumaça da chaminé: três baforadas subindo, crescendo e sumindo, uma
+ * atrás da outra (CSS, pelo compositor; globals.css). Com menos movimento,
+ * fica uma baforada parada.
+ */
 function Fumaca() {
-  const animar = useAnimarMapa();
-  if (!animar) return <circle cx="12" cy="-84" r="5" fill="var(--cor-fumaca)" opacity="0.6" />;
   return (
     <>
+      <circle cx="12" cy="-84" r="5" fill="var(--cor-fumaca)" className="fumaca-parada" />
       {[0, 1, 2].map((indice) => (
-        <motion.circle
-          key={indice}
-          cx="12"
-          cy="-80"
-          r="5"
-          fill="var(--cor-fumaca)"
-          initial={false}
-          animate={{ y: [0, -30], x: [0, 6], opacity: [0, 0.75, 0], scale: [0.6, 1.5] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeOut", delay: indice }}
-        />
+        <circle key={indice} cx="12" cy="-80" r="5" fill="var(--cor-fumaca)" className="fumaca-sobe" style={{ "--atraso": `${indice - 3}s` } as CSSProperties} />
       ))}
     </>
   );

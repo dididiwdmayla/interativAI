@@ -153,3 +153,12 @@ describe("meta da unidade: uma vez só na entrada, sempre no desafio", () => {
     expect(lido.fasesEmAndamento.fontes.programa).toEqual({ entradas: [], snippet: "let a = 1;", pontos: [3, 8], observacoes: ["total", "a * 2"] });
   });
 });
+
+describe("animações do mundo (menu)", () => {
+  it("progresso antigo e valor desconhecido viram o automático; as escolhas ficam", () => {
+    expect(normalizarProgresso({ versao: 2 }).animacoes).toBe("auto");
+    expect(normalizarProgresso({ versao: 2, animacoes: "turbo" }).animacoes).toBe("auto");
+    expect(normalizarProgresso({ versao: 2, animacoes: "leves" }).animacoes).toBe("leves");
+    expect(normalizarProgresso({ versao: 2, animacoes: "completas" }).animacoes).toBe("completas");
+  });
+});
