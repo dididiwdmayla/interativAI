@@ -121,7 +121,7 @@ function MundoCarregado() {
     lente ? unidadesDaIlha(ilha).filter((item) => unidadeNaLente(item, lente)).length : null;
   const ilhasDoMundo = ilhasDaTrilha(trilha);
   // As ilhas cabem na altura, com a mesma margem em cima e embaixo; o resto rola de lado.
-  const desenho = desenhoDoMundo(trilha, ilhasDoMundo, larguraTela, alturaTela);
+  const desenho = desenhoDoMundo(ilhasDoMundo, larguraTela, alturaTela);
   const { largura: LARGURA, altura: ALTURA, escala, posicao: posicaoDa, porto: POSICAO_PORTO } = desenho;
   const atual = ilhaAtual(fonte);
   // Do mundo, o provável é ir para a ilha onde o computadorzinho está.

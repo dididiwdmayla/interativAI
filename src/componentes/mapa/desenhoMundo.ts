@@ -2,26 +2,8 @@
  * O desenho do mundo (a tela das ilhas) para o tamanho da tela: onde cada
  * ilha fica e a escala. Puro, testado em testes/conteudo/mapa.test.ts.
  */
-import type { Trilha } from "@/curriculo";
 import type { IlhaCurriculo } from "@/curriculo/tipos";
 import type { Ponto } from "./geometria";
-
-/**
- * Onde cada ilha fica no mundo da trilha Web, na ordem da rota: o x e a linha
- * do zigue-zague (0 em cima, 1 embaixo). Frameworks, a opcional, fica no fim,
- * ligada ao Ofício por uma rota mais clara.
- */
-const POSICOES_WEB: Record<string, { x: number; linha: 0 | 1 }> = {
-  origens: { x: 180, linha: 1 },
-  sites: { x: 430, linha: 0 },
-  logica: { x: 680, linha: 1 },
-  "paginas-vivas": { x: 930, linha: 0 },
-  "rede-servidor": { x: 1180, linha: 1 },
-  python: { x: 1430, linha: 0 },
-  ia: { x: 1680, linha: 1 },
-  oficio: { x: 1930, linha: 0 },
-  frameworks: { x: 2180, linha: 1 },
-};
 
 /**
  * O Porto da revisão: um ponto fixo no mar, em cima das Origens, no começo da
@@ -55,19 +37,18 @@ export type DesenhoMundo = {
 };
 
 /**
- * O desenho do mundo de uma trilha para a tela. As ilhas, com as etiquetas,
+ * O desenho do mundo (as ilhas de uma trilha, na ordem dela) para a tela. As ilhas, com as etiquetas,
  * cabem na altura com a mesma margem em cima e embaixo: em pé sobra altura e
  * o zigue-zague fica fundo; deitado, ele achata para as ilhas não encolherem
  * demais. A largura rola de lado; numa tela mais larga que o mundo, o mar
  * sobra igual dos dois lados.
  */
-export function desenhoDoMundo(trilha: Trilha, ilhas: readonly IlhaCurriculo[], larguraTela: number, alturaTela: number): DesenhoMundo {
+export function desenhoDoMundo(ilhas: readonly IlhaCurriculo[], larguraTela: number, alturaTela: number): DesenhoMundo {
   const rota = ilhas.filter((ilha) => !ilha.opcional);
   const opcionais = ilhas.filter((ilha) => ilha.opcional);
-  const web = trilha.id === "web";
-  // Outras trilhas: as ilhas em zigue-zague, na ordem da trilha, e as opcionais no fim.
+  // As ilhas em zigue-zague, na ordem da trilha (a do currículo), começando embaixo; as opcionais no fim,
+  // ligadas à última da rota por uma rota mais clara. Ilha nova no currículo entra no lugar dela sozinha.
   const lugar = (ilha: IlhaCurriculo): { x: number; linha: 0 | 1 } => {
-    if (web && POSICOES_WEB[ilha.id]) return POSICOES_WEB[ilha.id];
     const indice = ilha.opcional ? rota.length + opcionais.indexOf(ilha) : rota.indexOf(ilha);
     return { x: 180 + indice * PASSO_X, linha: indice % 2 === 0 ? 1 : 0 };
   };
