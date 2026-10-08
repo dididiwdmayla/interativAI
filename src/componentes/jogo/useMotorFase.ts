@@ -556,6 +556,7 @@ export function useMotorFase({
     atualizarChecklist,
   ]);
 
+  const [versaoSolucao, setVersaoSolucao] = useState(0);
   const verificarAtual = useRef(verificar);
   useEffect(() => {
     verificarAtual.current = verificar;
@@ -577,7 +578,7 @@ export function useMotorFase({
     if (estado.etapa !== "objetivos" || estado.pausa !== null || estado.roteiro !== null) return;
     const temporizador = agendarRastreado(() => verificarAtual.current(), ESPERA_VERIFICAR_MS);
     return () => temporizador.cancelar();
-  }, [estado.etapa, estado.objetivoAtual, estado.pausa, estado.roteiro, estado.previsao, etapaContrato]);
+  }, [estado.etapa, estado.objetivoAtual, estado.pausa, estado.roteiro, estado.previsao, etapaContrato, versaoSolucao]);
 
   /* ---------------------------------------------------------------- */
   /* Conversa                                                          */
@@ -828,6 +829,9 @@ export function useMotorFase({
     if (!acoes) return "Nada para aplicar.";
     try {
       executarAcoes(acoes, painelCompleto);
+      // O evento da ação pode chegar antes do React publicar o estado do
+      // plano/código. Conferir novamente depois do commit, com o contexto atual.
+      setVersaoSolucao((v) => v + 1);
       return null;
     } catch (erro) {
       return erro instanceof Error ? erro.message : String(erro);

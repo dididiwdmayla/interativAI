@@ -85,6 +85,15 @@ ou acento. No checklist do contrato a faixa é marcada e espaços viram `␠`;
 uma remoção aparece como "ausente". O /lab também recebe a comparação no
 detalhe do validador. Unitários cobrem `CLIENTES: 4` sem espaço, caixa e CAFÉ.
 
+### Item 8 — Aplicar solução no /lab
+
+Reproduzido no desafio publicado U6F3: aplicar a próxima ação sintética não
+recalculava o checklist (regressão parou antes). Causa: o evento chega antes
+do commit do React que atualiza o contexto. Cada aplicação agenda uma nova
+conferência após o commit, com o contexto atual. A prova aplica todas as
+partes pelo botão, esperando só a marcação; nenhum gesto intermediário.
+Passou no desktop após a correção; incluída na bateria nos três layouts.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
