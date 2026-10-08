@@ -1,150 +1,128 @@
 # Progresso
 
-Rodada anterior: `docs/arquivo/PROGRESSO-rodada-37.md`.
+Rodada anterior: `docs/arquivo/PROGRESSO-rodada-38.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
-## Rodada 38: Origens, parte 2 (as salas 3 a 6)
+## Rodada 39: mundo completo e vivo, fila de falas e ajustes nas Origens
 
-Branch `claude/origens-part2-languages-architecture-9rbsb0`, a partir da
-principal depois do merge da rodada 37.
+Branch `claude/mundo-completo-falas-b43oz0`, a partir da principal depois do
+merge da rodada 38.
 
-### Etapa 1 — O executor por linguagem (commit próprio)
+### Etapa 1 — A fila de falas do computadorzinho (commit próprio)
 
-- `src/motor/linguagens/`: a mesma pergunta (rodar este código nesta
-  linguagem) e a mesma resposta (`ResultadoLinguagem`: as linhas no formato
-  do Console e o erro no formato do executor de JavaScript). JavaScript
-  roda numa sessão nova do executor de sempre; Python no Pyodide; C, Java,
-  COBOL e BASIC devolvem a saída declarada (`simulado`).
-- **Pyodide:** a versão atual no npm é a 314.0.7 (a numeração nova segue o
-  Python: 314 é o CPython 3.14). Vem como dependência e
-  `scripts/copiar-pyodide.mjs` copia o núcleo (5 arquivos, uns 13 MB) para
-  `public/pyodide/314.0.7/` antes do dev e do build (fora do git). O
-  `next.config.ts` serve a pasta com cache imutável (versão nova, pasta
-  nova). Sem CDN de fora.
-- **No navegador:** um Web Worker próprio (`python/python.worker.ts` e
-  `python/sessao.ts`), criado no primeiro Rodar do Python e guardado para a
-  página inteira. A carga baixa os arquivos grandes contando os bytes (a
-  barra "baixando o Python") e depois acorda. Depois de acordar, o worker
-  perde a rede (fetch, XMLHttpRequest, WebSocket... escondidos por uma
-  propriedade própria, que alcança os do protótipo) e o Python perde o
-  módulo `js`. `input()` dá erro. Passou de 5 s, o worker é encerrado.
-  Cada execução começa com a memória vazia.
-- **No Node:** `python/node.ts` carrega o mesmo Pyodide do node_modules; o
-  núcleo (`python/nucleo.ts`) é o mesmo dos dois lados. Os erros saem do
-  traceback (nome, mensagem e a linha do programa) e `explicarErroPython`
-  dá a explicação de leigo (NameError, os dois-pontos, recuo, texto com
-  número, divisão por zero).
-- `testes/conteudo/linguagens.test.ts` (10 testes): o Python de verdade, os
-  erros, a memória vazia, o módulo js e o input bloqueados, e o resumo para
-  os validadores de saída.
+- **Levantamento** (onde uma fala trocava outra): na prática, o roteiro do
+  objetivo trocava o enunciado depois de 250 ms e a validação logo depois
+  de ativar podia trocar o enunciado pela conclusão; o tutor e os avisos
+  (acentos, 980 px, contraste do Meu tema) entravam por cima de qualquer
+  coisa. No desafio e no projeto, "Parte feita" era atropelada pela parte
+  seguinte e pela fala final. No contrato, o "Requisito cumprido" que
+  disparava a mudança de pedido sumia e a conversa do cliente abria na
+  hora. No museu, o anfitrião já pulava para a fala do próximo objetivo
+  durante a pausa da conclusão (seguia `concluidos`) e, no desafio, cortava
+  a fala no meio a cada parte. Deitado, o balão fechava sozinho com uma
+  fala que pedia leitura. As apresentações só esperavam a pausa. Cena e
+  revisão usam o mesmo motor da prática (mesmos casos).
+- **`src/motor/filaDeFalas.ts`** (puro, com unitários): a fala importante
+  espera o jogador (Continuar ou Enter); a automática espera a vez (entra
+  no fim da fila se a de agora é importante, senão na hora); a pedida pelo
+  jogador entra na hora e a fila continua; a pausa toma a cena e leva a
+  fila que saiu de moda. O estado do motor ganhou `falaAguarda` e
+  `filaFalas`; `ofereceContinuar` é a regra única do balão, do Enter e do
+  atributo `data-fila-falas`.
+- **No motor:** conclusão de objetivo, solução e fim do desafio tomam a
+  cena; o roteiro conta (importante) e o enunciado vem depois; partes que
+  ficam prontas juntas saem numa fala só; no contrato, o requisito que
+  trouxe a mensagem é comemorado antes e a conversa do cliente abre no
+  Continuar.
+- **No balão:** botão Continuar com "mais N recados"; as apresentações só
+  começam com a fila vazia; deitado, o balão não fecha sozinho com fala
+  esperando.
+- **Museu:** o anfitrião segue o objetivo ativo e tem a fila dele
+  (`useFilaDoAnfitriao`): a fala nova espera a de agora terminar de
+  aparecer e ficar 1,5 s.
+- `testes/falas.mjs` (três layouts, na bateria): a conclusão fica na tela
+  9 s sem trocar nem fechar, o Enter e o Próximo objetivo avançam; o
+  esbarrão espera o Continuar, a apresentação espera a fila e o enunciado
+  vem depois. `continuarFalas` em `testes/util.mjs`; `contrato.mjs`,
+  `contrato-logica.mjs` e `chamados.mjs` passam pelo Continuar antes da
+  conversa do cliente.
 
-### Etapa 2 — As estações das salas 3 a 6 (commit próprio)
+### Etapa 2 — Ajustes nas Origens (commit próprio)
 
-- **Comparador** (`exposicao/comparador.ts`): o mesmo programa em 2 a 6
-  linguagens; cada linha diz a sua parte e tocar acende a parte em todas;
-  Rodar (assíncrono na tela: a linguagem só conta como rodada quando a
-  saída chega, com o evento `executouCodigo`); linguagem editável; o coral.
-- **Cartões** (`exposicao/cartoes.ts`): ligar (cada cartão no alvo certo,
-  com a revelação) e ordem (escada de baixo para cima, ou etapas).
-- **Circuito do museu** (`exposicao/circuitoMuseu.ts`): o modelo da Ilha
-  Lógica numa estação, com a realimentação guardando estado; aparência de
-  painel de cabos (desenho próprio, com chaves de faca, caixas de válvulas
-  que acendem e cabos caídos) ou a bancada de portões.
-- **Simulações por comando e marco** (`exposicao/simulacoes/`): traducao,
-  memoria, processador, sistema, arquivos, clique, pacote, aba-rede e
-  cidade. Uma ação (`comandoNaEstacao`) e um validador (`marcoNaEstacao`)
-  servem a todas; cada tipo diz os comandos e os marcos que existem, e a
-  fábrica confere.
-- Validadores novos: `linguagensRodadas`, `parteVista`, `cartoesLigados`,
-  `ordemCerta`, `circuitoNaEstacao`, `circuitoLembra`, `marcoNaEstacao`; os
-  de saída valem com o comparador. 13 ferramentas com ícone e card, 6 sons
-  sintetizados (rodar, o acorde do coral, plugar cabo, o tique do
-  processador, o pulo e o mergulho do pacote), progresso salvo das
-  estações novas e unitários (`testes/conteudo/estacoesNovas.test.ts`).
+- **Rolagem quase infinita do museu:** a parede com profundidade anda por
+  transform, e o transform contava na área de rolagem a cada rolada (em pé,
+  4.752 px viravam 7.969; no computador, 5.272 viravam 8.381). A camada
+  ficou dentro de um recorte: o corredor acaba na árvore da família.
+- **Mesa de cores:** os três canais separados (o vermelho, o verde e o azul
+  sozinhos, cada um com a amostra, os dois dígitos com setinhas, o valor e
+  um controle deslizante) e, embaixo, a cor combinada ao lado do alvo. O
+  alvo sai do `corHex` com `valor` do objetivo ativo ou das partes do
+  desafio (senão, da amostra): cada canal tem a régua até o alvo e diz se
+  está no alvo, se falta subir ou se passou (`alvoDaCor.ts`, com
+  unitários). Card da ferramenta, a fala do anfitrião e a dica do laranja
+  atualizados, sem mudar ids nem ordem.
 
-### Etapa 3 — O conteúdo das quatro salas (commit próprio)
+### Etapa 3 — O mundo completo (commit próprio)
 
-- **Sala 3, Por que existem tantas linguagens** (terminal verde): a conta
-  da padaria em COBOL, BASIC, C, Java, JavaScript e Python, e o coral; cada
-  linguagem no seu serviço; o mesmo laço em quatro linguagens, com o Python
-  editado para cinco fornadas e rodado de verdade; compilar ou interpretar
-  e a escada; desafio do frete.
-- **Sala 4, Por baixo do capô** (PC bege; o gigante de visita): caixas com
-  endereço; o processador de brinquedo (a máquina da sala 1, rodando); o
-  gerente; arquivos e pastas como árvore; os cabos do gigante (o meio
-  somador plugado); os portões por dentro (o somador com E, OU e NÃO, e o
-  selo); desafio do computador inteiro.
-- **Sala 5, Front, back e o caminho de um clique** (internet): o clique
-  etapa por etapa e as quebras; a ordem das etapas e front ou back; o
-  pacote pelo oceano do mapa do jogo; a aba Rede; desafio do site do salão.
-- **Sala 6, Onde a programação vive** (celular): a cidade do código, com a
-  ponte para Profissões; desafio de quem programa o quê.
-- 21 conceitos com `termoIngles` e 42 itens de revisão. As quatro salas
-  saem do `requerMotor` e entram no `publicados.json`. O `testar:conteudo`,
-  o `publicar:conteudo` e o `/lab` simulam com Python de verdade.
+- Todas as ilhas do currículo já estavam no mundo, com arte e estado
+  (Origens, Sites, Lógica, Páginas vivas, Rede e Servidor, Python, IA,
+  Ofício e a opcional Frameworks). O zigue-zague passou a sair só da ordem
+  da trilha (a do currículo): a tabela fixa da trilha Web repetia a mesma
+  conta e uma ilha nova não entraria nela. Mesmas posições.
+- As ilhas das trilhas Jogos e Automação ganharam arte própria (a placa com
+  o símbolo: controle, paleta, bola, chip, botoeira, engrenagem e ladder) e
+  continuam aparecendo só na trilha delas.
+- Unitários: a trilha Web passa por todo o currículo, na ordem; toda ilha
+  tem arte; a rota anda para a direita em zigue-zague, com a opcional no
+  fim.
 
-### Etapa 4 — A insígnia da história (commit próprio)
+### Etapa 4 — Um mundo vivo (commit próprio)
 
-- Com as seis salas concluídas (`museuCompleto`), o retrato do aluno na
-  árvore ganha uma medalha de latão com a arvorezinha da família (um
-  pontinho por antepassado e o do aluno, mais claro, no alto), fitas nas
-  cores dos fios da tecelã, um anel de oito contas em volta e a linha "e
-  conhece a história da família inteira" na placa. A revelação (a medalha
-  cai girando, o brilho passa uma vez, o som da insígnia e o recado do
-  computadorzinho) toca uma vez só: `insigniaDoMuseu` no progresso.
-
-### Etapa 5 — Correções achadas nas jornadas (commits próprios)
-
-- **Cidade:** o papel de botão saiu do grupo de cada lugar (que inclui a
-  bolinha pulsando e o carro andando) e foi para a área de toque, parada.
-- **Mapa dos cabos:** o pulso dos próximos pontos anima a escala, não o
-  raio (o raio animado sujava o console com `r: undefined`).
-- **Apresentação das ferramentas (motor, vale para todas):** no
-  "Experimente", se o cartão inteiro não cabe ao lado do alvo (paisagem
-  baixa), ele fica compacto: o "No F12 de verdade" recolhe num item que
-  abre ao toque. Sem lugar nem assim, o cartão vai para o canto que menos
-  cobre o alvo, em vez do meio. Antes, em paisagem, o cartão cobria o
-  botão de Compilar e o de Rodar uma linha: o aluno só podia pular.
-- **`testes/museu.mjs`:** no toque, a bancada de portões é ampliada (150%)
-  e arrastada com dois dedos até a peça antes de tocar, como em
-  `circuito.mjs` (a 100%, no celular em pé, as áreas de 44 px das portas
-  de portões vizinhos se cobrem: é o mesmo comportamento da bancada da
-  Lógica).
+- `src/componentes/mapa/mundo/`: o mar fundo e raso, os reflexos, a espuma,
+  os peixes, a baleia rara, a garrafa com mensagem (8 curiosidades com a
+  década), o barquinho fazendo a rota ida e volta, nuvens com sombra,
+  gaivotas, dia e noite pelo relógio (estrelas, lua, janelas e postes
+  acesos, LEDs, o farol da IA girando), o aceno do computadorzinho para
+  quem volta depois de 20 minutos. Nas ilhas: guindaste na Sites, pulsos nos
+  cabos da Rede, fumaça na Ofício, bloco encaixando na Frameworks e
+  operários de capacete nas em obra (de noite, cochilam).
+- Tokens novos nos três temas (`--cor-mar-profundo`, `--cor-noite`,
+  `--cor-janela-acesa`, `--cor-farol-luz`, `--cor-nuvem`...); sons
+  sintetizados `baleia` e `garrafa`.
+- Desempenho: transform e opacity pelo compositor; pausa fora da tela
+  (`useNaTela`); recorte para quem atravessa o mundo (sem ele, a nuvem
+  esticava a área de rolagem, como no museu); a vida de dentro da ilha só
+  anda com metade dela na tela; os operários andam em passos. Repintura
+  parada, de dia: 1,9 telas/s no computador, 3,7 em pé, 4,3 deitado (era
+  4,2 deitado antes da rodada; o teto do teste é 8); de noite, 1,3, 0,4 e
+  4,2; com menos movimento, de 0 a 0,3.
+- `testes/mundo.mjs`: de dia fixo (`?hora=12`), o aceno, o barco andando,
+  a baleia (`?baleia`) na tela e sumindo, a garrafa (44 px, curiosidade,
+  Outra mensagem), a noite (`?hora=22`: estrelas, luzes, farol, nomes
+  legíveis, repintura) e menos movimento (sem peixes e gaivotas, barco
+  parado).
 
 ### Decisões tomadas sem regra clara
 
-- A ordem das salas segue o mapa curricular (a parte 1 tinha trocado 4 e
-  6); a sala 6 tem duas fases (a cidade e o desafio), por ser a menor.
-- No coral, o Java fica com a internet (anos 1990, a década do Java), já
-  que o prompt não diz quem canta o Java.
-- A saída igual em todas, quando a época deixa: "Total: 35"; o BASIC e o
-  COBOL saem em maiúsculas ("TOTAL: 35"). No COBOL, CONTA em vez de TOTAL
-  e, no BASIC, SOMA (TOTAL tem a palavra reservada TO).
-- A sala 4 virou sete fases (memória, processador, gerente, arquivos, os
-  cabos, os portões e o desafio), em vez de juntar estações por fase.
-- A memória com realimentação vem com os portões já ligados, faltando só o
-  fio que volta: o quebra-cabeça é a realimentação, não a fiação.
-- Uma ação e um validador genéricos (comando e marco) para as simulações,
-  em vez de um par por estação.
-- Os sistemas de arquivos, o gerente e a aba Rede são simulações
-  simplificadas, declaradas na placa.
+- "Parte feita" do desafio não espera o Continuar (é automática): espera a
+  vez só atrás de uma fala importante. A fala final do desafio resume as
+  partes e leva a fila junto. Antes da mensagem do cliente, o requisito é
+  importante (senão a conversa cobriria a fala).
+- A fala pedida pelo jogador (tutor, link, Me ajuda) entra na hora mesmo
+  com uma importante na tela: quem pergunta já leu.
+- Sem tempo mínimo com relógio para fala comum: uma fala que chegasse
+  atrasada abriria o balão sozinho no celular em pé no meio de um toque.
+- Os períodos: amanhecer 6h a 8h, dia 8h a 17h, entardecer 17h a 19h e
+  noite 19h a 6h. As luzes acendem no entardecer e de noite.
+- A garrafa fica no lugar de mar aberto mais distante do começo da rota.
+  A baleia: sorteio a cada 40 s com chance de 18% (uns 3,7 minutos em
+  média), num lugar que está na tela.
+- A hora da última visita ao mundo mora numa chave própria do
+  localStorage (cosmética), fora do progresso.
 
 ### Validação
 
-- `npm run testar:conteudo`: 51 arquivos, 23.181 testes verdes (com o
-  Python de verdade, pelo Pyodide no Node).
+- `npm run testar:conteudo`: 52 arquivos, 23.198 testes verdes.
 - `npm run lint` e `npm run build` verdes.
-- `testes/museu.mjs` (as seis salas jogadas pela interface, o coral, os
-  cabos, os portões, o pacote, a cidade e a insígnia) verde nos três
-  layouts, no servidor de desenvolvimento e no de produção.
-- Bateria completa (`PARALELO=4`, servidor de produção): 205 execuções,
-  200 verdes e 5 falhas.
-  - `museu.mjs` nos três layouts: a checagem de que a insígnia fica
-    guardada lia o progresso logo que a medalha aparecia, e a revelação
-    grava cerca de 1 s depois. O teste passou a esperar o registro; os
-    três, rodados de novo: verdes.
-  - `algoritmos.mjs paisagem 3`: tempo esgotado com quatro navegadores ao
-    mesmo tempo (a pendência "Testes sob carga"). Rodado de novo: verde.
-  - `unidades.mjs retrato`: o duplo toque da U4F1
-    (`editarValorAtributo`, linha 167), a pendência já registrada na
-    rodada 36.
+- Durante a rodada: `falas.mjs`, `museu.mjs`, `mundo.mjs` e `contrato.mjs`
+  nos três layouts; `contrato-logica.mjs` e `chamados.mjs 5` no computador.
