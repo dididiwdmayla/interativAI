@@ -64,6 +64,19 @@ preservado e não intercepta o toque fora do recorte. O unitário confere
 cada vértice contra todos os vizinhos; circuito e museu usam a mesma bancada.
 Jornadas agora não ampliam automaticamente; testes de zoom continuam à parte.
 
+### Item 2 — U3 dos Algoritmos sob carga
+
+Reproduzida a espera de 30 s na navegação Home/End da recursão (nos três
+layouts, intermitente). A jornada fazia foco e tecla global em chamadas
+separadas, permitindo que o palco/código trocasse o foco durante a execução
+pesada (mil fotos, com as molduras da recursão). As teclas agora vão direto
+ao localizador da barra, que faz o foco junto da ação; o teste espera a cena
+pausar antes de avançar. No jogo, Home/End explicitam a seleção também quando
+a barra já está no extremo, pois nesse caso o range nativo não emite change.
+Regressão inclui Home repetido em zero. Três layouts com navegadores em
+paralelo; nenhum timeout aumentado. O import pesado das checagens já estava
+fora dos testes de Estruturas; não era necessário replicar esse ajuste aqui.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano

@@ -45,6 +45,14 @@ export function LinhaDoTempo({ passos, indice, aoMudar, codigo, cortado, totalPa
           max={Math.max(0, total - 1)}
           value={Math.min(indice, Math.max(0, total - 1))}
           onChange={(evento) => aoMudar(Number(evento.target.value))}
+          onKeyDown={(evento) => {
+            // Home/End também escolhem (e pausam a cena) quando o range já
+            // está no extremo. Nesse caso o navegador não dispara change.
+            if (evento.key === "Home" || evento.key === "End") {
+              evento.preventDefault();
+              aoMudar(evento.key === "Home" ? 0 : Math.max(0, total - 1));
+            }
+          }}
           disabled={total <= 1}
           aria-label="Linha do tempo da execução"
           className="h-8 min-w-0 flex-1 accent-primaria pointer-coarse:h-11"
