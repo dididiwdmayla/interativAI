@@ -1,5 +1,6 @@
 "use client";
 
+import { TempoTrabalho } from "@/motor/contrato/tempoTrabalho";
 import { semPagina, temObjetivos } from "@/motor/tiposDeFase";
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DestaqueArvore } from "@/componentes/painel/arvore/tipos";
@@ -218,15 +219,15 @@ export function useMotorFase({
   /* ---------------------------------------------------------------- */
 
   /* (Contrato) O tempo de trabalho: conta enquanto a etapa é "trabalho" nesta visita. */
-  const inicioTrabalho = useRef<number | null>(null);
+  const relogioTrabalho = useRef<TempoTrabalho | null>(null);
   const trabalhando = estado.contrato?.etapa === "trabalho" && estado.etapa === "objetivos";
   useEffect(() => {
-    if (trabalhando && inicioTrabalho.current === null) inicioTrabalho.current = Date.now();
+    relogioTrabalho.current ??= new TempoTrabalho(Date.now());
+    relogioTrabalho.current.atualizar(Date.now(), { trabalhando, visivel: !document.hidden });
   }, [trabalhando]);
-  const comTempo = useCallback((atual: EstadoContrato): EstadoContrato => {
-    const desde = inicioTrabalho.current;
-    return desde === null ? atual : { ...atual, tempoMs: atual.tempoMs + Math.max(0, Date.now() - desde) };
-  }, []);
+  const comTempo = useCallback((atual: EstadoContrato): EstadoContrato => ({
+    ...atual, tempoMs: atual.tempoMs + (relogioTrabalho.current?.tempo(Date.now()) ?? 0),
+  }), []);
 
   // Revisão do dia: a fase concluída agora (não a que já abriu concluída) põe os conceitos na fila, uma vez.
   const concluidaAoAbrir = useRef(estado.etapa === "concluida");
@@ -294,11 +295,27 @@ export function useMotorFase({
     salvar(estado);
   }, [salvar, estado]);
 
-  // (Contrato) Durante o trabalho, salva de minuto em minuto: o tempo não se perde se a aba fechar.
   const estadoAtual = useRef(estado);
   useEffect(() => {
     estadoAtual.current = estado;
   }, [estado]);
+  useEffect(() => {
+    if (!trabalhando) return;
+    const interagir = () => relogioTrabalho.current?.atualizar(Date.now(), { interacao: true });
+    const visibilidade = () => {
+      relogioTrabalho.current?.atualizar(Date.now(), { visivel: !document.hidden });
+      salvar(estadoAtual.current);
+    };
+    const eventos = ["pointerdown", "keydown", "input", "wheel"] as const;
+    eventos.forEach((evento) => document.addEventListener(evento, interagir, { passive: true, capture: true }));
+    document.addEventListener("visibilitychange", visibilidade);
+    return () => {
+      eventos.forEach((evento) => document.removeEventListener(evento, interagir, true));
+      document.removeEventListener("visibilitychange", visibilidade);
+    };
+  }, [salvar, trabalhando]);
+
+  // (Contrato) Durante o trabalho, salva de minuto em minuto: o tempo não se perde se a aba fechar.
   useEffect(() => {
     if (!trabalhando || modo !== "jogo") return;
     const intervalo = setInterval(() => salvar(estadoAtual.current), 60_000);
@@ -612,7 +629,7 @@ export function useMotorFase({
     if (contrato && estado.contrato && (estado.pausa === "desafioConcluido" || estado.concluidos >= total)) {
       // Contrato: antes da conclusão, a entrega (o relatório, a reação do cliente e o Levar pro mundo).
       const comTempoFinal = comTempo(estado.contrato);
-      inicioTrabalho.current = null;
+      relogioTrabalho.current = null;
       setEstado(trocarFala<EstadoMotor>({ ...estado, pausa: null, contrato: { ...comTempoFinal, etapa: "entrega" } }, { texto: "O relatório saiu sozinho do checklist e dos testes. Confere e entrega!", expressao: "apontando" }));
       return;
     }

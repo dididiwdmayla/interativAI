@@ -28,6 +28,14 @@ caixa e acentos exatos. Testes cobrem trecho ausente, seletor vazio, diferenças
 de caixa/acento e composição com `todos`. Guia documentado; nenhuma fase
 publicada foi alterada. 24 testes do núcleo verdes.
 
+### Item 5 — Tempo de trabalho ativo
+
+Antes, `Date.now() - inicioTrabalho` somava toda a visita, inclusive oculta
+ou esquecida. O relógio puro limita o intervalo à última interação + 60 s,
+pausa em `document.hidden`, salva ao ocultar e retoma ao voltar/interagir.
+Escuta toque/clique, teclado, escrita e rolagem. Não depende de ticks para
+parar no limite e não soma duas vezes ao entregar. Duas regressões verdes.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
