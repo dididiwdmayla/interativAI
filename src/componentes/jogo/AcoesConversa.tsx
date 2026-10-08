@@ -96,6 +96,10 @@ export function AcoesConversa({
     const faltam = estado.filaFalas.length;
     return (
       <>
+        {/* Um aviso que chegou depois do palpite não esconde a resposta da previsão. */}
+        {emObjetivo && previsao && estado.previsao !== null && (
+          <CartaoPrevisao previsao={previsao} resposta={estado.previsao} aoResponder={aoResponderPrevisao} />
+        )}
         {faltam > 0 && (
           <span className="text-xs font-bold text-texto-suave" data-falas-na-fila={faltam}>
             {faltam === 1 ? "mais 1 recado" : `mais ${faltam} recados`}

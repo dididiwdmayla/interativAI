@@ -16,6 +16,7 @@ import {
   abrirBalao as abrirBalaoDaPagina,
   chaveDoSeletor,
   conferir,
+  continuarFalas,
   errosRelevantes,
   esperarPronto,
   fecharBalao as fecharBalaoDaPagina,
@@ -614,6 +615,10 @@ await pagina.waitForFunction(() => {
   return doc && !doc.querySelector("#rodape");
 }, null, { timeout: 5000 });
 conferir(true, "esbarrão: o rodapé some sozinho");
+// A fila de falas: o que o esbarrão conta espera o Continuar, e só depois a apresentação do Desfazer começa.
+await pagina.locator('[data-jogo-fase][data-fila-falas="pede"]').waitFor({ timeout: 5000 });
+conferir((await pagina.locator("[data-apresentacao]").count()) === 0, "esbarrão: a apresentação do Desfazer espera a fala do computadorzinho");
+await continuarFalas(pagina);
 await apresentacao("desfazer", () => tocar(pagina.getByRole("button", { name: /^Desfazer a última mudança/ })));
 conferir((await iframe.locator("#rodape").count()) === 1, "desfazer: o rodapé volta");
 await proximoObjetivo("U2F2 objetivo 3 (desfazer)");

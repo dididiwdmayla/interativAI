@@ -102,6 +102,19 @@ merge da rodada 38.
   legíveis, repintura) e menos movimento (sem peixes e gaivotas, barco
   parado).
 
+### Etapa 5 — Correções achadas na bateria (commit próprio)
+
+- **A resposta da previsão sumia atrás de um aviso:** na U6F2, o aviso dos
+  acentos (importante) entrava logo depois do palpite e o cartão com a
+  resposta e a explicação só voltava depois do Continuar. Agora, com uma
+  previsão respondida, o cartão fica no balão junto do Continuar.
+- **Jornadas que passam pelo Continuar:** `unidades.mjs` (a fala do esbarrão
+  da U2F2 espera o Continuar antes da apresentação do Desfazer) e
+  `dispositivo.mjs` (a bancada abre sem meta charset: o aviso dos acentos
+  chega antes, e o dos 980 px vem no Continuar).
+- Capturas do mundo em `docs/capturas/rodada-39/` (celular em pé e
+  computador, de dia e de noite; a mesa de cores e o Continuar).
+
 ### Decisões tomadas sem regra clara
 
 - "Parte feita" do desafio não espera o Continuar (é automática): espera a
@@ -126,3 +139,16 @@ merge da rodada 38.
 - `npm run lint` e `npm run build` verdes.
 - Durante a rodada: `falas.mjs`, `museu.mjs`, `mundo.mjs` e `contrato.mjs`
   nos três layouts; `contrato-logica.mjs` e `chamados.mjs 5` no computador.
+- Bateria completa (`PARALELO=4`, servidor de produção): 208 execuções, 201
+  verdes e 7 falhas.
+  - `dispositivo.mjs` nos três layouts e `unidades.mjs` nos três: as
+    jornadas não passavam pelo Continuar da fila de falas, e a U6F2 achou o
+    cartão da previsão escondido (Etapa 5). Rodados de novo, com o build
+    novo: `dispositivo.mjs` verde nos três; `unidades.mjs` verde no
+    computador e deitado.
+  - `unidades.mjs retrato`: continua parando no duplo toque da U4F1
+    (`editarValorAtributo`), a pendência registrada desde a rodada 36 (quebra
+    igual na principal).
+  - `algoritmos.mjs paisagem 3`: tempo esgotado com quatro navegadores ao
+    mesmo tempo (a pendência "Testes sob carga"). Sozinho: verde.
+  - `falas.mjs` no computador verde de novo, com o build novo.

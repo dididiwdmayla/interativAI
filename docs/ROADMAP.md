@@ -54,7 +54,11 @@ núcleo comum.
     fumaça e operários de capacete; o aceno do computadorzinho. Só tokens,
     nos três temas, com repintura parada abaixo do teto em todos os layouts.
   - 23.198 testes unitários, lint e build verdes; bateria completa no
-    servidor de produção (resultado no PROGRESSO).
+    servidor de produção: 208 execuções, 201 verdes; as 7 falhas foram
+    jornadas sem o Continuar da fila (ajustadas, e a bateria achou o cartão
+    da previsão escondido atrás de um aviso, corrigido), a instabilidade sob
+    carga do `algoritmos.mjs paisagem 3` e a pendência antiga do
+    `unidades.mjs retrato` (U4F1). Capturas em `docs/capturas/rodada-39/`.
 
 - **Rodada 38, Origens parte 2: as salas 3 a 6 (o museu completo).**
   Detalhe em `docs/PROGRESSO.md`.
