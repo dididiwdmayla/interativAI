@@ -44,6 +44,16 @@ deixando espaço vazio. Só as miniaturas com cena única usam altura natural;
 a cena, as legendas e a fonte mantêm o tamanho. Regressão exige até 610 px,
 antes/depois e botão visíveis; demais composições mantêm a altura.
 
+### Item 4 — Todos os aparelhos fora do jogo
+
+Regressão enumera `TIPOS_DISPOSITIVO` e roda exemplos, comandos e propriedades
+no Node: antes faltavam oito aparelhos, acontecimentos genéricos e o método
+`forno.assar`. Exportação agora cobre o catálogo completo, entradas constantes
+ou em rampa e reações de atores (com atraso/fim). Registradora e telaApp já
+saíam; ficaram incluídas na prova de cobertura. Registro de fábricas é
+`Record<TipoDispositivo, string>` (um novo tipo sem exportação quebra o build)
+e a prova por catálogo verifica execução e console. 20 provas verdes.
+
 ### Item 7 — O plano não apaga comentários do aluno
 
 Reprodução: comentário `// 99. anotação minha` imediatamente depois do plano
