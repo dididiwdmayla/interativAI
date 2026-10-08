@@ -29,6 +29,34 @@ núcleo comum.
 
 ### Feito
 
+- **Vídeo de apresentação v1 ("Fase 0: Conhecer o InterativAI").** O vídeo
+  de introdução, feito com o próprio jogo, num projeto separado (Remotion)
+  na pasta `video/`. Nada em `src/`, `public/`, `testes/` nem no
+  `package.json` da raiz foi alterado; a raiz só ganhou `video` no `exclude`
+  do `tsconfig.json` e `video/**` nos ignorados do ESLint.
+  - **Entregue em `video/saida/`:** `interativai-apresentacao-16x9-v1.mp4`
+    (1920 x 1080, 108,3 s, 31,3 MB, -14,6 LUFS), `interativai-apresentacao-9x16-v1.mp4`
+    (1080 x 1920, 49,4 s, 15,1 MB, -14,2 LUFS, montagem própria),
+    `capa-16x9-v1.png`, `capa-9x16-v1.png` e a legenda
+    `interativai-apresentacao-16x9-v1.srt`.
+  - **Como é:** o vídeo é uma fase do jogo. O computadorzinho narra com o
+    balão e a voz de modem (o gerador do jogo), a lista "Fase 0" marca cinco
+    de seis objetivos e o sexto ("Começar a sua jornada") fica para quem
+    assiste. Toda interface mostrada é gravação real de um build de
+    produção: 22 tomadas (18 de computador, 4 de celular), com o cursor
+    redesenhado pelo vídeo. A trilha são as músicas das ilhas.
+  - **Números do vídeo vêm do código** (`video/scripts/contar.mjs`): 249
+    fases publicadas em 67 unidades de 3 ilhas; o título diz "Mais de 240
+    fases para jogar hoje". As ilhas sem unidade publicada aparecem como
+    "chegando".
+  - **Revisão:** folhas de contato em `video/revisao/` (um quadro a cada
+    2 s de cada vídeo e 12 quadros de cada tomada) e o resumo em
+    `video/revisao/revisao.txt` (sem tela preta nem congelada, voz pelo menos
+    10,5 dB acima da música, sem emoji, sem cor fora dos tokens).
+  - **Para fazer uma v2:** `video/README.md` (regravar uma tomada, mudar uma
+    fala no `video/src/roteiro.ts`, renderizar e entregar com nome novo; a
+    v1 não é sobrescrita). O roteiro com os tempos está em `video/ROTEIRO.md`.
+
 - **Rodada 40: o mundo fluido no celular e os nomes das ilhas que não somem.**
   Detalhe em `docs/PROGRESSO.md`.
   - **Medida de celular** (`testes/desempenho-mundo.mjs`): processador
@@ -762,11 +790,32 @@ núcleo comum.
 
 ### Em andamento
 
+- Vídeo de apresentação v1: aguardando a revisão do pull request (assistir
+  os dois mp4 no celular e conferir as folhas de `video/revisao/`).
 - Rodada 40 (mundo fluido): aguardando a revisão do pull request, rolando o
   mundo num Android de verdade, de dia e de noite, rápido, ida e volta (sem
   travar e sem ilha sem nome), e trocando as animações no menu.
 
 ### Pendências
+
+- **Achados no jogo durante a gravação do vídeo (não corrigidos):**
+  - `npm run build` depende de baixar a Nunito e a JetBrains Mono do Google
+    Fonts: numa máquina sem esse acesso, o build falha. O vídeo contornou
+    com `video/scripts/build-do-jogo.mjs` (fontes dos pacotes locais, sem
+    mexer no jogo). Vale trocar por fontes locais no próprio jogo.
+  - Museu, sala 3, comparador de linguagens (`origens-museu-u3-f1`): a
+    1600 x 900 as seis linguagens não cabem na tela, a saída do Python
+    aparece abaixo da dobra e, ao rolar, o fundo da estação termina no meio
+    dos cartões.
+  - Contrato da padaria no celular em pé (412 x 732): depois de Executar,
+    com "Linhas do tempo" aberta, o desenho da cena encolhe para uns 80 px
+    de largura (130 antes) e o letreiro fica ilegível.
+  - Ilha Sites, L2 fase 2 (Flexbox): a etiqueta da seleção
+    ("div.cards 794 × 184") na prévia cobre o título "Destaques da semana".
+  - Tela de dentro da Ilha Sites a 1920 x 1080 num Chromium sem GPU: a
+    rolagem do mapa fica perto de 18 quadros por segundo e o ponteiro sobre
+    o mapa demora (um trajeto de 0,8 s levou uns 3 s). Não medido em
+    aparelho de verdade.
 
 - **Rodada 40, para depois:**
   - As medidas são de um Chromium sem tela, com o processador e a memória

@@ -1,0 +1,82 @@
+{
+  "mapa": {
+    "bpm": 100.943,
+    "batida": 0.5944,
+    "batidasNoLoop": 160,
+    "duracaoSegundos": 95.103125,
+    "gradeConfiavel": true,
+    "bpmMedido": 100.75,
+    "primeiraBatida": 0.116,
+    "primeiroTempoForte": 1.903
+  },
+  "origens": {
+    "bpm": 75,
+    "batida": 0.8,
+    "batidasNoLoop": 96,
+    "duracaoSegundos": 76.8,
+    "gradeConfiavel": true,
+    "bpmMedido": 75,
+    "primeiraBatida": 0.749,
+    "primeiroTempoForte": 0.749
+  },
+  "sites": {
+    "bpm": 107.004,
+    "batida": 0.5607,
+    "batidasNoLoop": 128,
+    "duracaoSegundos": 71.772875,
+    "gradeConfiavel": true,
+    "bpmMedido": 107,
+    "primeiraBatida": 0.226,
+    "primeiroTempoForte": 1.909
+  },
+  "logica": {
+    "bpm": 101.372,
+    "batida": 0.5919,
+    "batidasNoLoop": 128,
+    "duracaoSegundos": 75.760896,
+    "gradeConfiavel": true,
+    "bpmMedido": 101.25,
+    "primeiraBatida": 0.459,
+    "primeiroTempoForte": 2.236
+  },
+  "paginas-vivas": {
+    "bpm": 136.063,
+    "batida": 0.441,
+    "batidasNoLoop": 224,
+    "duracaoSegundos": 98.777687,
+    "gradeConfiavel": true,
+    "bpmMedido": 135.75,
+    "primeiraBatida": 0.226,
+    "primeiroTempoForte": 1.11
+  },
+  "rede-servidor": {
+    "bpm": 138.499,
+    "batida": 0.4332,
+    "batidasNoLoop": 138.54,
+    "duracaoSegundos": 60.017792,
+    "gradeConfiavel": false,
+    "bpmMedido": 138.5,
+    "primeiraBatida": 0.052,
+    "primeiroTempoForte": 0.485
+  },
+  "oficio": {
+    "bpm": 75.006,
+    "batida": 0.7999,
+    "batidasNoLoop": 96,
+    "duracaoSegundos": 76.794208,
+    "gradeConfiavel": true,
+    "bpmMedido": 75,
+    "primeiraBatida": 0.737,
+    "primeiroTempoForte": 2.337
+  },
+  "ia": {
+    "bpm": 104.33,
+    "batida": 0.5751,
+    "batidasNoLoop": 144,
+    "duracaoSegundos": 82.813979,
+    "gradeConfiavel": true,
+    "bpmMedido": 104.25,
+    "primeiraBatida": 0.163,
+    "primeiroTempoForte": 0.738
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "geradoPor": "video/scripts/contar.mjs, a partir de src/curriculo/curriculo.ts e src/conteudo/publicados.json",
+  "ilhasNoCurriculo": 9,
+  "ilhasComConteudo": 3,
+  "ilhasEmConstrucao": [
+    "Páginas vivas",
+    "Rede e Servidor",
+    "Python",
+    "IA",
+    "Ofício",
+    "Frameworks"
+  ],
+  "unidadesPublicadas": 67,
+  "fasesPublicadas": 249,
+  "unidadesNoCurriculo": 132,
+  "maisDeFases": 240,
+  "maisDeUnidades": 60,
+  "ilhas": [
+    {
+      "id": "origens",
+      "nome": "Origens",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 1,
+      "zonasComConteudo": 1,
+      "unidadesNoCurriculo": 6,
+      "unidadesPublicadas": 6,
+      "fasesPublicadas": 27,
+      "estado": "completa"
+    },
+    {
+      "id": "sites",
+      "nome": "Sites",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 6,
+      "zonasComConteudo": 6,
+      "unidadesNoCurriculo": 24,
+      "unidadesPublicadas": 24,
+      "fasesPublicadas": 88,
+      "estado": "completa"
+    },
+    {
+      "id": "logica",
+      "nome": "Lógica",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 10,
+      "zonasComConteudo": 10,
+      "unidadesNoCurriculo": 37,
+      "unidadesPublicadas": 37,
+      "fasesPublicadas": 134,
+      "estado": "completa"
+    },
+    {
+      "id": "paginas-vivas",
+      "nome": "Páginas vivas",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 7,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 11,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    },
+    {
+      "id": "rede-servidor",
+      "nome": "Rede e Servidor",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 8,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 13,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    },
+    {
+      "id": "python",
+      "nome": "Python",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 4,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 9,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    },
+    {
+      "id": "ia",
+      "nome": "IA",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 5,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 7,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    },
+    {
+      "id": "oficio",
+      "nome": "Ofício",
+      "opcional": false,
+      "trilhas": null,
+      "zonas": 15,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 23,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    },
+    {
+      "id": "frameworks",
+      "nome": "Frameworks",
+      "opcional": true,
+      "trilhas": null,
+      "zonas": 1,
+      "zonasComConteudo": 0,
+      "unidadesNoCurriculo": 2,
+      "unidadesPublicadas": 0,
+      "fasesPublicadas": 0,
+      "estado": "em construção"
+    }
+  ]
+}
