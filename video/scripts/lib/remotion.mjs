@@ -37,7 +37,7 @@ export async function composicao(id, props) {
   return renderer.selectComposition({ serveUrl: await empacotar(), id, inputProps: props, ...comum });
 }
 
-/** Só o áudio, em WAV (`so`: "musica", "voz" ou "efeitos" para uma parte só da trilha). */
+/** Só o áudio, em WAV (`so`: "musica", "voz" ou "efeitos" para uma parte só da trilha; nos curtos, "tudo" dá a trilha inteira sem renderizar a imagem). */
 export async function audio(id, saida, so) {
   const props = so ? { so } : undefined;
   const comp = await composicao(id, props);
