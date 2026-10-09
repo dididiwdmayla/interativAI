@@ -48,7 +48,7 @@ import { criarSimulacao, estadoFinalDoDesafio } from "@/motor/simulacao";
 import { propriedadeConhecida } from "@/motor/css/valores";
 import { nomeDeTagValido } from "@/motor/nucleoPainel";
 import { explicarResultado, itensDoChecklist, recalcularPartesFeitas, validadorTravado } from "@/motor/validadores";
-import { CONCEITOS, ehIdConceito, type IdConceito } from "./conceitos";
+import { CONCEITOS, ehIdConceito, type IdConceito, type Conceito } from "./conceitos";
 import { conferirPublicados, PUBLICADOS } from "./publicados";
 import type { Acao, Fase, FaseComObjetivos, FaseDesafio, FaseProjetoPonte, ItemRevisao, Objetivo, ParteDesafio, Unidade, Validador } from "./tipos";
 import { conferirContrato } from "@/motor/contrato/conferir";
@@ -481,7 +481,21 @@ function seletorValido(seletor: string): boolean {
 /* Regras gerais                                                      */
 /* ------------------------------------------------------------------ */
 
+/** Termo real ou exceção explícita: nenhuma entrada pode ficar esquecida. */
+export function conferirInglesDosConceitos(
+  conceitos: readonly Pick<Conceito, "id" | "termoIngles" | "semEquivalenteIngles">[] = CONCEITOS,
+): string[] {
+  return conceitos
+    .filter((conceito) => Boolean(conceito.termoIngles?.trim()) === (conceito.semEquivalenteIngles === true))
+    .map((conceito) => `conceito "${conceito.id}": preencha termoIngles ou marque semEquivalenteIngles: true, nunca ambos`);
+}
+
 export const REGRAS_GERAIS: readonly RegraGeral[] = [
+  {
+    id: "ingles-dos-conceitos",
+    nome: "todo conceito tem termo em inglês ou marca explícita de sem equivalente",
+    checar: () => conferirInglesDosConceitos(),
+  },
   {
     id: "ids-unicos",
     nome: "ids de unidades e fases são únicos e em kebab-case",

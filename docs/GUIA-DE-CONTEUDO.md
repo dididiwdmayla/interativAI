@@ -153,7 +153,10 @@ isso sem virar aula de inglês:
 
 - **todo conceito novo tem `termoIngles`** (`src/conteudo/conceitos.ts`):
   o nome como aparece na documentação ("bit", "breakpoint", "event
-  loop"). O glossário mostra os dois e a busca acha pelos dois;
+  loop"). Se for um conceito próprio do jogo sem equivalente técnico,
+  marque `semEquivalenteIngles: true` e deixe `termoIngles` ausente; não
+  invente tradução. A checagem exige uma das duas opções em todo o catálogo.
+  O glossário mostra os dois e a busca acha pelos dois;
 - na primeira vez que o termo aparece numa fala, diga os dois: "o ponto de
   parada (em inglês, breakpoint)". Depois, use o nome em português;
 - **de vez em quando, uma missão de campo pede ler um trecho curto da
@@ -161,8 +164,8 @@ isso sem virar aula de inglês:
   ("abra a página do `Array.prototype.push` na MDN em inglês e ache o que
   ele devolve: procure por Return value"). Uma por zona, mais ou menos;
   diga onde procurar, nunca peça para traduzir o texto inteiro;
-- os conceitos antigos ainda não têm o termo: preencher fica para uma
-  tarefa de conteúdo (ROADMAP).
+- conceitos antigos também têm o termo ou a exceção explícita; nomes, ids
+  e textos de fases publicadas permanecem congelados.
 
 **A fila de falas (rodada 39).** Uma fala nunca some antes de dar tempo de
 ler (`src/motor/filaDeFalas.ts`). O motor separa três jeitos de uma fala

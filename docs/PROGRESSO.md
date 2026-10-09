@@ -23,6 +23,15 @@ Validação: 23.230 testes, build e lint verdes. A instalação temporária do
 Playwright interferiu nas dependências locais durante o primeiro build;
 restauradas com `npm ci`, sem mudar manifesto ou lockfile, build repetido verde.
 
+### Etapa 2 — Glossário e checagem
+
+Exibição ao lado do nome e busca bilíngue já existiam e foram preservadas.
+Campo de busca agora explica os dois idiomas. Regra geral exige termo não
+vazio ou `semEquivalenteIngles: true`, rejeitando também os dois juntos.
+Regressões cobrem array → lista, breakpoint, step over, exceção explícita e
+campos faltantes; a jornada confere nome e termo inglês nos três layouts.
+Validação: 23.234 testes, build, lint e `explorar.mjs` nos três layouts verdes.
+
 ## Rodada 41: faxina técnica das pendências
 
 Branch `codex/faxina-tecnica-pendencias`, base `3d3685e`, depois dos merges

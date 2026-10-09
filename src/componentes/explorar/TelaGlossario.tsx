@@ -67,7 +67,7 @@ function GlossarioCarregado() {
                 type="search"
                 value={busca}
                 onChange={(evento) => setBusca(evento.target.value)}
-                placeholder="Buscar um termo, como margem ou link"
+                placeholder="Buscar em português ou inglês, como lista ou array"
                 aria-label="Buscar no glossário"
                 className="h-11 w-full rounded-full border-2 border-borda bg-superficie px-4 text-base font-bold text-texto outline-none placeholder:text-texto-suave focus:border-primaria"
               />
