@@ -3,6 +3,26 @@
 Rodada anterior: `docs/arquivo/PROGRESSO-rodada-39.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
+## Rodada 42: termos em inglês e glossário bilíngue
+
+Branch `codex/glossario-bilingue`, base `864d1f7`. IDs, resumos e fases
+publicadas preservados.
+
+### Etapa 1 — Catálogo
+
+252 conceitos antigos receberam `termoIngles`, com vocabulário técnico:
+array, breakpoint, scope, accumulator, type selector e call frame.
+Conceitos compostos usam os dois termos quando necessário (step into / step out).
+Único conceito sem equivalente: `salvar-como-meu-tema` (Salvar como Meu tema),
+recurso próprio do jogo, marcado com `semEquivalenteIngles: true`.
+Fontes: [MDN Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array),
+[seletores CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Selectors/Selectors_and_combinators),
+[Chrome DevTools](https://developer.chrome.com/docs/devtools/javascript/reference) e
+[Google Search Central](https://developers.google.com/search/docs/appearance/title-link).
+Validação: 23.230 testes, build e lint verdes. A instalação temporária do
+Playwright interferiu nas dependências locais durante o primeiro build;
+restauradas com `npm ci`, sem mudar manifesto ou lockfile, build repetido verde.
+
 ## Rodada 41: faxina técnica das pendências
 
 Branch `codex/faxina-tecnica-pendencias`, base `3d3685e`, depois dos merges
