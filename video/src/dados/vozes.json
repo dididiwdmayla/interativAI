@@ -2432,5 +2432,126 @@
     "tipo": "chiado"
    }
   ]
+ },
+ "curto-start": {
+  "fala": "curto-start",
+  "texto": "Aperta start.",
+  "expressao": "feliz",
+  "duracao": 0.54,
+  "eventos": [
+   {
+    "t": 0.02,
+    "d": 0.055,
+    "tipo": "tom"
+   },
+   {
+    "t": 0.02,
+    "d": 0.055,
+    "tipo": "tom"
+   },
+   {
+    "t": 0.08,
+    "d": 0.055,
+    "tipo": "varrido"
+   },
+   {
+    "t": 0.17,
+    "d": 0.04,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.25,
+    "d": 0.012,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.267,
+    "d": 0.05,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.344,
+    "d": 0.012,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.361,
+    "d": 0.04,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.467,
+    "d": 0.022,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.494,
+    "d": 0.046,
+    "tipo": "blip"
+   }
+  ]
+ },
+ "curto-jogador": {
+  "fala": "curto-jogador",
+  "texto": "1 jogador?",
+  "expressao": "curioso",
+  "duracao": 0.713,
+  "eventos": [
+   {
+    "t": 0.02,
+    "d": 0.13,
+    "tipo": "varrido"
+   },
+   {
+    "t": 0.17,
+    "d": 0.055,
+    "tipo": "tom"
+   },
+   {
+    "t": 0.17,
+    "d": 0.055,
+    "tipo": "tom"
+   },
+   {
+    "t": 0.23,
+    "d": 0.055,
+    "tipo": "varrido"
+   },
+   {
+    "t": 0.32,
+    "d": 0.052,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.458,
+    "d": 0.022,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.485,
+    "d": 0.052,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.55,
+    "d": 0.012,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.567,
+    "d": 0.06,
+    "tipo": "blip"
+   },
+   {
+    "t": 0.642,
+    "d": 0.012,
+    "tipo": "chiado"
+   },
+   {
+    "t": 0.659,
+    "d": 0.054,
+    "tipo": "blip"
+   }
+  ]
  }
 }
