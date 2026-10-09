@@ -13,6 +13,9 @@
     "renderizar": "node scripts/renderizar.mjs",
     "revisar": "node scripts/revisar.mjs",
     "finalizar": "node scripts/finalizar.mjs",
+    "curtos:renderizar": "node scripts/renderizar.mjs CurtoAprendiz CurtoChefao",
+    "curtos:revisar": "node scripts/revisar-curtos.mjs",
+    "curtos:finalizar": "node scripts/finalizar-curtos.mjs",
     "tipos": "tsc --noEmit"
   },
   "dependencies": {

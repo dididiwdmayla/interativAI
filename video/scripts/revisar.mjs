@@ -6,6 +6,8 @@
 //    em janelas com o astats do ffmpeg);
 // 4) as afirmações: os números do vídeo contra o numeros.json, e nenhum emoji nos textos.
 // Uso: node scripts/revisar.mjs [arquivo16x9.mp4] [arquivo9x16.mp4]   (padrão: os de saida/, senão os de out/)
+//      node scripts/revisar.mjs --curtos   revisa os dois curtos verticais (scripts/revisar-curtos.mjs: folhas a cada
+//      0,5 s, o primeiro segundo, a lista proibida por OCR, o laço da imagem e do som, o teste do polegar)
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -13,6 +15,12 @@ import { folha } from "./lib/folha.mjs";
 import { PASTA_VIDEO } from "./lib/jogo.mjs";
 import { audio } from "./lib/remotion.mjs";
 import { carregarRoteiro } from "./lib/roteiro.mjs";
+
+// Os curtos têm a revisão deles (com as checagens próprias de vídeo curto em laço).
+if (process.argv.includes("--curtos")) {
+  await import("./revisar-curtos.mjs");
+  process.exit(0);
+}
 
 const R = await carregarRoteiro();
 const REVISAO = path.join(PASTA_VIDEO, "revisao");
