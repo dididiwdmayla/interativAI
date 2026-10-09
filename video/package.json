@@ -1,0 +1,38 @@
+{
+  "name": "interativai-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vídeo de apresentação do InterativAI (Remotion). Projeto separado do jogo: nada daqui entra no build da raiz.",
+  "type": "module",
+  "scripts": {
+    "estudio": "remotion studio src/index.ts",
+    "contar": "node scripts/contar.mjs",
+    "gravar": "node scripts/gravar.mjs",
+    "vozes": "node scripts/vozes.mjs",
+    "rascunho": "node scripts/renderizar.mjs --rascunho",
+    "renderizar": "node scripts/renderizar.mjs",
+    "revisar": "node scripts/revisar.mjs",
+    "finalizar": "node scripts/finalizar.mjs",
+    "curtos:renderizar": "node scripts/renderizar.mjs CurtoAprendiz CurtoChefao",
+    "curtos:revisar": "node scripts/revisar-curtos.mjs",
+    "curtos:finalizar": "node scripts/finalizar-curtos.mjs",
+    "tipos": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/nunito": "5.3.0",
+    "@remotion/bundler": "4.0.534",
+    "@remotion/cli": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

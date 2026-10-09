@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // O Pyodide copiado do node_modules (scripts/copiar-pyodide.mjs): código de fora, não lintado.
     "public/pyodide/**",
+    // O vídeo de apresentação (Remotion): projeto separado, com o package.json e o tsconfig dele.
+    "video/**",
   ]),
 ]);
 

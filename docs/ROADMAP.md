@@ -29,6 +29,68 @@ núcleo comum.
 
 ### Feito
 
+- **Vídeos curtos v1 ("O aprendiz" e "O chefão").** Dois verticais de uns
+  15 s (1080 x 1920, em laço) para Reels, TikTok e Shorts, com a mesma ideia
+  ("Programe jogando.") contada de dois jeitos. São composições novas no
+  projeto `video/`; a apresentação v1 não mudou (os mesmos quadros, conferidos
+  antes e depois) e nada em `src/`, `public/`, `testes/` nem no
+  `package.json` da raiz foi alterado.
+  - **Entregue em `video/saida/`:** `interativai-curto-aprendiz-9x16-v1.mp4`
+    (15,70 s, 8,8 MB, -14,1 LUFS), `interativai-curto-chefao-9x16-v1.mp4`
+    (15,87 s, 10,3 MB, -14,1 LUFS) e as capas `capa-curto-aprendiz-v1.png` e
+    `capa-curto-chefao-v1.png` (o quadro 0 de cada um).
+  - **"O aprendiz" (Doce):** um aprendiz montado com o kit de clientes do
+    jogo reage numa câmera de streamer enquanto a partida passa por quatro
+    fases reais (mexer num site, trocar uma cor, acender a vitrine da padaria,
+    caçar o bug da agenda), com o placar de estrelas do jogo.
+  - **"O chefão" (Fliperama):** o bug é um chefão. O defeito é o do chamado
+    da agenda do Salão Girassol (Depuração, U6); a barra de vida só cai quando
+    um caso de teste fica verde na gravação (quatro casos, um por vez).
+  - **Onze tomadas novas no celular** (V05 a V09 no Doce, F01 a F06 no
+    Fliperama). O gravador ganhou a "janela": grava só uma área da página,
+    aproximada e nítida, para o que é pequeno demais no celular.
+  - **Música por medida** (`video/scripts/energia.mjs`): `sites` no aprendiz
+    e `paginas-vivas` no chefão, cada uma numa janela de compassos inteiros;
+    o vídeo dura a janela, os cortes caem nas batidas e o som emenda em laço.
+  - **Revisão** (`node scripts/revisar.mjs --curtos`): folhas em
+    `video/revisao/curtos/` (um quadro a cada 0,5 s, o primeiro segundo, o
+    tamanho de celular e os dois lado a lado), OCR atrás de "construção",
+    "Em breve", "chegando", "grátis" e "R$" (nada), o laço da imagem (0,41% e
+    0,73% de diferença entre o último quadro e o primeiro) e do som.
+  - **Para fazer uma v2:** a seção "Curtos" do `video/README.md`; o roteiro
+    com os tempos está em `video/ROTEIRO-CURTOS.md`.
+  - **Build gravado:** as tomadas são do jogo como estava antes das rodadas
+    41 e 42; telas que mudaram depois (por exemplo, a comparação dos casos
+    de teste do contrato) aparecem nos curtos como eram.
+
+- **Vídeo de apresentação v1 ("Fase 0: Conhecer o InterativAI").** O vídeo
+  de introdução, feito com o próprio jogo, num projeto separado (Remotion)
+  na pasta `video/`. Nada em `src/`, `public/`, `testes/` nem no
+  `package.json` da raiz foi alterado; a raiz só ganhou `video` no `exclude`
+  do `tsconfig.json` e `video/**` nos ignorados do ESLint.
+  - **Entregue em `video/saida/`:** `interativai-apresentacao-16x9-v1.mp4`
+    (1920 x 1080, 108,3 s, 31,3 MB, -14,6 LUFS), `interativai-apresentacao-9x16-v1.mp4`
+    (1080 x 1920, 49,4 s, 15,1 MB, -14,2 LUFS, montagem própria),
+    `capa-16x9-v1.png`, `capa-9x16-v1.png` e a legenda
+    `interativai-apresentacao-16x9-v1.srt`.
+  - **Como é:** o vídeo é uma fase do jogo. O computadorzinho narra com o
+    balão e a voz de modem (o gerador do jogo), a lista "Fase 0" marca cinco
+    de seis objetivos e o sexto ("Começar a sua jornada") fica para quem
+    assiste. Toda interface mostrada é gravação real de um build de
+    produção: 22 tomadas (18 de computador, 4 de celular), com o cursor
+    redesenhado pelo vídeo. A trilha são as músicas das ilhas.
+  - **Números do vídeo vêm do código** (`video/scripts/contar.mjs`): 249
+    fases publicadas em 67 unidades de 3 ilhas; o título diz "Mais de 240
+    fases para jogar hoje". As ilhas sem unidade publicada aparecem como
+    "chegando".
+  - **Revisão:** folhas de contato em `video/revisao/` (um quadro a cada
+    2 s de cada vídeo e 12 quadros de cada tomada) e o resumo em
+    `video/revisao/revisao.txt` (sem tela preta nem congelada, voz pelo menos
+    10,5 dB acima da música, sem emoji, sem cor fora dos tokens).
+  - **Para fazer uma v2:** `video/README.md` (regravar uma tomada, mudar uma
+    fala no `video/src/roteiro.ts`, renderizar e entregar com nome novo; a
+    v1 não é sobrescrita). O roteiro com os tempos está em `video/ROTEIRO.md`.
+
 - **Rodada 42: termos em inglês e glossário bilíngue.** 252 conceitos
   receberam `termoIngles`; Salvar como Meu tema tem marca explícita de sem
   equivalente. O glossário exibe e busca nos dois idiomas, com checagem
@@ -781,6 +843,11 @@ núcleo comum.
 
 ### Em andamento
 
+- Vídeo de apresentação v1: aguardando a revisão do pull request (assistir
+  os dois mp4 no celular e conferir as folhas de `video/revisao/`).
+- Vídeos curtos v1: aguardando a revisão do pull request (assistir os dois
+  no celular, com som e no mudo, deixando repetir, e conferir as folhas de
+  `video/revisao/curtos/`).
 - Rodada 42: implementação e validação concluídas, aguardando revisão do
   pull request. Rodada 41 integrada; mundo fluido confirmado pelo Will
   num Android real.
@@ -790,6 +857,55 @@ núcleo comum.
 Revisadas integralmente na rodada 41. As correções e a classificação das
 entradas retiradas estão no `PROGRESSO.md`; abaixo ficam só decisões e
 trabalhos futuros, sem falha conhecida aceita na bateria.
+
+**Achados durante a gravação dos vídeos**
+
+Vistos no build do jogo anterior às rodadas 41 e 42 (as gravações dos
+vídeos são desse build) e não corrigidos pelos vídeos; reconferir antes
+de classificar.
+
+Na gravação dos curtos:
+
+- Chamado da agenda (`logica-depuracao-u6-f2`) no celular em pé: com a
+  cena aberta, o editor do Snippet fica sem altura (sobram as abas e a
+  barra de símbolos); só recolhendo a cena o código aparece.
+- A tela do aplicativo do salão (o aparelho da cena) no celular: a agenda
+  sai com letra de uns 4 px de página; não dá para ler o horário repetido
+  em vermelho, que é a pista do chamado.
+- Ao tocar em Executar com um ponto de parada, a aba Fontes mostra o
+  Console por uns 0,3 s e volta para o Snippet quando o programa pausa.
+- Casos de teste no celular: os campos de cada caso cortam o texto (a
+  entrada vira "[{ horario: 9," e o esperado, "[{ hora") e só cabem dois
+  casos por vez na lista.
+- Painel Estilos no celular (`sites-estilos-u1-f3`): a regra do elemento
+  selecionado aparece no fim do painel, com o quadradinho da cor encostado
+  no computadorzinho.
+- O texto do chamado da Dona Zélia cita o WhatsApp pelo nome (na conversa
+  e no documento): é uma marca real dentro do conteúdo. Vale trocar por
+  "mensagem no celular".
+- Para o vídeo: o pacote de português do tesseract não existe no apt do
+  ambiente de gravação; a revisão dos curtos baixa o `por.traineddata` do
+  repositório do tesseract para `video/.cache/`.
+
+Na gravação da apresentação:
+
+- `npm run build` depende de baixar a Nunito e a JetBrains Mono do Google
+  Fonts: numa máquina sem esse acesso, o build falha. O vídeo contornou
+  com `video/scripts/build-do-jogo.mjs` (fontes dos pacotes locais, sem
+  mexer no jogo). Vale trocar por fontes locais no próprio jogo.
+- Museu, sala 3, comparador de linguagens (`origens-museu-u3-f1`): a
+  1600 x 900 as seis linguagens não cabem na tela, a saída do Python
+  aparece abaixo da dobra e, ao rolar, o fundo da estação termina no meio
+  dos cartões.
+- Contrato da padaria no celular em pé (412 x 732): depois de Executar,
+  com "Linhas do tempo" aberta, o desenho da cena encolhe para uns 80 px
+  de largura (130 antes) e o letreiro fica ilegível.
+- Ilha Sites, L2 fase 2 (Flexbox): a etiqueta da seleção
+  ("div.cards 794 × 184") na prévia cobre o título "Destaques da semana".
+- Tela de dentro da Ilha Sites a 1920 x 1080 num Chromium sem GPU: a
+  rolagem do mapa fica perto de 18 quadros por segundo e o ponteiro sobre
+  o mapa demora (um trajeto de 0,8 s levou uns 3 s). Não medido em
+  aparelho de verdade.
 
 **Checagens automáticas**
 

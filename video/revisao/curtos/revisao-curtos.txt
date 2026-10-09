@@ -1,0 +1,35 @@
+== A lista proibida (OCR) ==
+  o OCR enxerga: achou "construção" nos dois quadros de controle (a tomada V02 da apresentação, com a ilha Páginas vivas "Em construção" na tela)
+
+== O aprendiz: saida/interativai-curto-aprendiz-9x16-v1.mp4 (1080 x 1920, 471 quadros, 15.70 s) ==
+  música: sites, 7 compassos (28 batidas de 0.56073 s) a partir do compasso 30 (65.0442 s), -17.21 dB RMS
+  folhas: revisao/curtos/folha-aprendiz.jpg (32 quadros, um a cada 0,5 s), folha-aprendiz-primeiro-segundo.jpg (7 quadros) e polegar-aprendiz.jpg (360 px por quadro)
+  lista proibida: nada em 63 quadros (um a cada 0,25 s, cada um lido em cinco faixas ampliadas): "construção", "Em breve", "chegando", "grátis", "R$"
+  laço da imagem: o último quadro difere 0.41% do primeiro (diferença média por pixel; o limite é 2%)
+  laço do som: degrau de 0.0720 na emenda (o maior degrau entre amostras vizinhas nos 50 ms de cada lado é 0.1755); volume -20.3 dB antes e -14.5 dB depois; a onda da emenda está em revisao/curtos/emenda-aprendiz.png
+  sem tela preta (o quadro 0 já é imagem e texto: é a capa)
+  nenhum trecho com a imagem parada por mais de 0,9 s
+  volume integrado: -14.1 LUFS; pico real: -2.1 dBTP; tamanho: 8.8 MB
+  fala "Aperta start." em 1.73 s: voz -25.1 dB, música -33.1 dB (antes da fala: -26.1 dB), voz 8.0 dB acima
+
+== O chefão: saida/interativai-curto-chefao-9x16-v1.mp4 (1080 x 1920, 476 quadros, 15.87 s) ==
+  música: paginas-vivas, 9 compassos (36 batidas de 0.44097 s) a partir do compasso 56 (97.0138 s), -16.76 dB RMS
+  folhas: revisao/curtos/folha-chefao.jpg (32 quadros, um a cada 0,5 s), folha-chefao-primeiro-segundo.jpg (7 quadros) e polegar-chefao.jpg (360 px por quadro)
+  a conferir no olho (o OCR leu "R$" sem número de preço junto): "dr & HORÁRIO R$" em 10.77 s
+  lista proibida: nada em 64 quadros (um a cada 0,25 s, cada um lido em cinco faixas ampliadas): "construção", "Em breve", "chegando", "grátis", "R$"
+  laço da imagem: o último quadro difere 0.73% do primeiro (diferença média por pixel; o limite é 2%)
+  laço do som: degrau de 0.0028 na emenda (o maior degrau entre amostras vizinhas nos 50 ms de cada lado é 0.7083); volume -21.0 dB antes e -9.0 dB depois; a onda da emenda está em revisao/curtos/emenda-chefao.png
+  sem tela preta (o quadro 0 já é imagem e texto: é a capa)
+  nenhum trecho com a imagem parada por mais de 0,9 s
+  volume integrado: -14.1 LUFS; pico real: -1.9 dBTP; tamanho: 10.3 MB
+  fala "1 jogador?" em 13.83 s: voz -24.2 dB, música -32.3 dB (antes da fala: -27.8 dB), voz 8.1 dB acima
+
+  as duas folhas lado a lado: revisao/curtos/lado-a-lado.jpg
+
+== Textos, afirmações e ritmo ==
+  nenhum emoji em 39 textos nem em 15 arquivos de src/curtos
+  nenhuma cor em hexadecimal em src/curtos (só tokens de src/tema/tokens.css)
+  nenhum texto com "em construção", "em breve", "chegando", preço, grátis, assinatura, certificado ou emprego
+  número mostrado: "mais de 240 fases" (o código tem 249 fases publicadas: confere)
+  O aprendiz: os 10 cortes caem em batidas (ou meias batidas) da música; a gravação mais longa sem corte dura 2.23 s
+  O chefão: os 12 cortes caem em batidas (ou meias batidas) da música; a gravação mais longa sem corte dura 2.20 s

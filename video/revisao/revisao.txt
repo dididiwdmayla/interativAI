@@ -1,0 +1,49 @@
+
+== 16x9: saida/interativai-apresentacao-16x9-v1.mp4 (108.30 s) ==
+  folhas de contato: 4 em revisao/folha-16x9-*.jpg (um quadro a cada 2 s: 1 s, 3 s, 5 s...)
+  sem quadros pretos no meio (preto só 0.0-1.1 s e 107.5-108.2 s)
+  trechos quase parados (mais de 1,2 s, o limite é 4 s): 71.5 s por 1.2 s
+  volume integrado: -14.6 LUFS; pico real: -1.7 dBTP
+  voz e música em cada fala (RMS, astats):
+      3.35 s  oi           voz -26.6 dB  música (sem música)  voz acima da música: sem música
+      6.50 s  f12          voz -22.0 dB  música (sem música)  voz acima da música: sem música
+     14.40 s  pronto       voz -26.1 dB  música (sem música)  voz acima da música: sem música
+     18.20 s  qualquer     voz -25.5 dB  música (sem música)  voz acima da música: sem música
+     27.37 s  ilhas        voz -25.2 dB  música -35.9 dB (antes da fala: -29.0 dB)  voz acima da música: 10.7 dB
+     33.16 s  madrugada    voz -25.7 dB  música -36.7 dB (antes da fala: -30.2 dB)  voz acima da música: 11.0 dB
+     42.03 s  mexe         voz -25.8 dB  música -40.2 dB (antes da fala: -39.4 dB)  voz acima da música: 14.4 dB
+     55.02 s  vitrine      voz -25.3 dB  música -38.5 dB (antes da fala: -37.6 dB)  voz acima da música: 13.3 dB
+     59.70 s  cliente      voz -25.7 dB  música -38.5 dB (antes da fala: -38.8 dB)  voz acima da música: 12.8 dB
+     62.81 s  errou        voz -25.0 dB  música -38.6 dB (antes da fala: -39.3 dB)  voz acima da música: 13.5 dB
+     67.50 s  familia      voz -25.1 dB  música -39.5 dB (antes da fala: -36.1 dB)  voz acima da música: 14.4 dB
+     73.20 s  python       voz -25.6 dB  música -39.2 dB (antes da fala: -39.3 dB)  voz acima da música: 13.6 dB
+     78.05 s  travou       voz -23.2 dB  música -36.7 dB (antes da fala: -38.6 dB)  voz acima da música: 13.6 dB
+     83.74 s  segredo      voz -25.8 dB  música -36.3 dB (antes da fala: -30.2 dB)  voz acima da música: 10.5 dB
+     87.50 s  construindo  voz -22.3 dB  música -38.1 dB (antes da fala: -28.9 dB)  voz acima da música: 15.8 dB
+     91.10 s  ia           voz -25.3 dB  música -37.0 dB (antes da fala: -30.4 dB)  voz acima da música: 11.6 dB
+    101.21 s  vez          voz -25.4 dB  música -36.5 dB (antes da fala: -29.1 dB)  voz acima da música: 11.1 dB
+  a voz fica pelo menos 10.5 dB acima da música em todas as falas
+
+== 9x16: saida/interativai-apresentacao-9x16-v1.mp4 (49.40 s) ==
+  folhas de contato: 3 em revisao/folha-9x16-*.jpg (um quadro a cada 2 s: 1 s, 3 s, 5 s...)
+  sem quadros pretos no meio (preto só 0.0-0.6 s e 48.8-49.3 s)
+  trechos quase parados (mais de 1,2 s, o limite é 4 s): 9.9 s por 1.3 s
+  volume integrado: -14.2 LUFS; pico real: -1.4 dBTP
+  voz e música em cada fala (RMS, astats):
+      1.30 s  oi           voz -26.6 dB  música (sem música)  voz acima da música: sem música
+      4.25 s  f12          voz -22.0 dB  música (sem música)  voz acima da música: sem música
+     11.30 s  pronto       voz -26.1 dB  música -44.0 dB (antes da fala: silêncio)  voz acima da música: 17.9 dB
+     21.12 s  madrugada    voz -25.7 dB  música -38.2 dB (antes da fala: -28.7 dB)  voz acima da música: 12.5 dB
+     24.30 s  mexe         voz -25.8 dB  música -45.5 dB (antes da fala: -39.1 dB)  voz acima da música: 19.7 dB
+     28.29 s  vitrine      voz -25.3 dB  música -45.0 dB (antes da fala: -45.7 dB)  voz acima da música: 19.7 dB
+     32.17 s  cliente      voz -25.7 dB  música -45.4 dB (antes da fala: -46.8 dB)  voz acima da música: 19.7 dB
+     36.53 s  familia      voz -25.1 dB  música -39.8 dB (antes da fala: -38.1 dB)  voz acima da música: 14.7 dB
+     44.41 s  vez          voz -25.4 dB  música -36.1 dB (antes da fala: -28.0 dB)  voz acima da música: 10.7 dB
+  a voz fica pelo menos 10.7 dB acima da música em todas as falas
+
+== Textos e afirmações ==
+  nenhum emoji em 35 textos nem em 22 arquivos de peças
+  nenhuma cor em hexadecimal nas peças (só tokens de src/tema/tokens.css)
+  nenhuma fala sobre preço, grátis, assinatura, certificado ou emprego
+  número mostrado no título: "Mais de 240 fases" (o código tem 249 fases publicadas em 3 ilhas: confere)
+  as 5 ilhas do bloco "Chegando" estão sem unidade publicada no código (em construção)
