@@ -26,6 +26,8 @@ for (const id of ids) {
       feita = true;
     } catch (erro) {
       console.error(`${id}: tentativa ${tentativa} falhou: ${String(erro).split("\n")[0]}`);
+      // DEPURAR=1: mostra onde a tomada parou.
+      if (process.env.DEPURAR) console.error(erro?.stack ?? erro);
       await fecharNavegadores();
     }
   }

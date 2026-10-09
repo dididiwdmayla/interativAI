@@ -99,6 +99,8 @@ export async function abrirTomada({ id, formato = "computador", progresso, rota,
   const quadros = [];
   const eventos = [];
   let mouse = { x: f.largura / 2, y: f.altura / 2 };
+  /** A janela aproximada da tomada (px da página), quando há uma: ver tomada.janela(). */
+  let janela = null;
   const agora = () => Date.now() / 1000 - t0;
   const registrar = (evento) => {
     if (gravando) eventos.push({ t: Number(agora().toFixed(3)), ...evento });
@@ -139,6 +141,30 @@ export async function abrirTomada({ id, formato = "computador", progresso, rota,
       await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1, maxWidth: f.saida[0], maxHeight: f.saida[1] });
     },
     esperar: espera,
+    /**
+     * Grava só uma janela da página, aproximada e nítida (como quem abre os dedos na tela): o Chrome desenha
+     * a área pedida no tamanho inteiro do quadro, sem a página perceber (o layout não muda). Serve para o
+     * que é pequeno demais no celular, como a tela de um aparelho da cena. Chamar antes de iniciar().
+     * `area` em px da página; a janela tem a largura de `area` mais a folga, a proporção do formato e o
+     * centro de `area` (ou `centroY`). No take.json, as medidas da página e os pontos passam a ser os da janela.
+     * Depois disto, toque só com `tocarPorDentro` (o Chrome não converte os toques para a janela).
+     */
+    async janela(area, { folga = 0.1, centroY } = {}) {
+      const largura = Math.min(f.largura, area.width * (1 + folga * 2));
+      const altura = (largura * f.altura) / f.largura;
+      const x = Math.min(f.largura - largura, Math.max(0, area.x + area.width / 2 - largura / 2));
+      const y = Math.min(f.altura - altura, Math.max(0, (centroY ?? area.y + area.height / 2) - altura / 2));
+      janela = { x, y, largura, altura, fator: f.largura / largura };
+      await cdp.send("Emulation.setDeviceMetricsOverride", { width: f.largura, height: f.altura, deviceScaleFactor: f.escala, mobile: f.toque, viewport: { x, y, width: largura, height: altura, scale: janela.fator } });
+      await espera(300);
+      return janela;
+    },
+    /** Aciona um elemento sem passar pelo ponteiro (para as tomadas com janela): o clique do próprio elemento. */
+    async tocarPorDentro(localizador) {
+      const caixa = await localizador.first().boundingBox().catch(() => null);
+      if (caixa) registrar({ tipo: "toque", x: Math.round(caixa.x + caixa.width / 2), y: Math.round(caixa.y + caixa.height / 2) });
+      await localizador.first().evaluate((el) => el.click());
+    },
     /** Uma marca com nome (o roteiro do vídeo acha o momento por ela). */
     marcar(nome, dados = {}) {
       registrar({ tipo: "marca", nome, ...dados });
@@ -238,17 +264,20 @@ export async function abrirTomada({ id, formato = "computador", progresso, rota,
       const duracao = Number(agora().toFixed(3));
       gravando = false;
       await cdp.send("Page.stopScreencast").catch(() => {});
+      // Com janela, o registro fala a língua da janela: a "página" é a área gravada e os pontos são relativos a ela.
+      const naJanela = (evento) => (janela && typeof evento.x === "number" ? { ...evento, x: Math.round(evento.x - janela.x), y: Math.round(evento.y - janela.y) } : evento);
       const take = {
         id,
         descricao,
         formato,
-        pagina: { largura: f.largura, altura: f.altura, escala: f.escala },
+        pagina: janela ? { largura: Number(janela.largura.toFixed(2)), altura: Number(janela.altura.toFixed(2)), escala: Number((f.escala * janela.fator).toFixed(3)) } : { largura: f.largura, altura: f.altura, escala: f.escala },
+        ...(janela ? { janela: { x: Number(janela.x.toFixed(2)), y: Number(janela.y.toFixed(2)), largura: Number(janela.largura.toFixed(2)), altura: Number(janela.altura.toFixed(2)) } } : {}),
         saida: { largura: f.saida[0], altura: f.saida[1] },
         duracao,
         quadrosGravados: quadros.length,
         rota,
         ...extra,
-        eventos,
+        eventos: eventos.map(naJanela),
         quadros,
       };
       writeFileSync(path.join(pasta, "take.json"), JSON.stringify(take));

@@ -26,6 +26,17 @@ import V01 from "../dados/takes/V01-sites-u1-celular.json";
 import V02 from "../dados/takes/V02-mundo-celular.json";
 import V03 from "../dados/takes/V03-padaria-celular.json";
 import V04 from "../dados/takes/V04-museu-celular.json";
+import V05 from "../dados/takes/V05-estilos-celular.json";
+import V06 from "../dados/takes/V06-chamado-celular.json";
+import V07 from "../dados/takes/V07-mundo-noite-celular.json";
+import V08 from "../dados/takes/V08-insignias-celular.json";
+import V09 from "../dados/takes/V09-vitrine-de-perto.json";
+import F01 from "../dados/takes/F01-missao-fliperama.json";
+import F02 from "../dados/takes/F02-luta-fliperama.json";
+import F03 from "../dados/takes/F03-mundo-fliperama.json";
+import F04 from "../dados/takes/F04-museu-fliperama.json";
+import F05 from "../dados/takes/F05-python-fliperama.json";
+import F06 from "../dados/takes/F06-insignias-fliperama.json";
 
 export type CaixaDeIlha = { ilha: string; nome: string; x: number; y: number; l: number; a: number; arte: Area | null };
 export type Evento = {
@@ -46,6 +57,8 @@ export type Take = {
   id: string;
   formato: "computador" | "perto" | "medio" | "celular";
   pagina: { largura: number; altura: number; escala: number };
+  /** Quando a tomada grava só uma janela aproximada da página (scripts/lib/gravador.mjs): onde ela fica na página inteira. */
+  janela?: { x: number; y: number; largura: number; altura: number };
   saida: { largura: number; altura: number };
   duracao: number;
   eventos: Evento[];
@@ -74,6 +87,17 @@ export const TAKES = {
   "V02-mundo-celular": V02,
   "V03-padaria-celular": V03,
   "V04-museu-celular": V04,
+  "V05-estilos-celular": V05,
+  "V06-chamado-celular": V06,
+  "V07-mundo-noite-celular": V07,
+  "V08-insignias-celular": V08,
+  "V09-vitrine-de-perto": V09,
+  "F01-missao-fliperama": F01,
+  "F02-luta-fliperama": F02,
+  "F03-mundo-fliperama": F03,
+  "F04-museu-fliperama": F04,
+  "F05-python-fliperama": F05,
+  "F06-insignias-fliperama": F06,
 } as unknown as Record<IdTomada, Take>;
 
 export const takeDe = (id: IdTomada): Take => TAKES[id];

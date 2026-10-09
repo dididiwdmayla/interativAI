@@ -18,6 +18,12 @@ const alunoNoMeio = (extra = {}) =>
 /** As soluções do contrato da padaria, as mesmas que a jornada dos testes usa. */
 const CONTRATO = JSON.parse(readFileSync(path.join(RAIZ, "testes", "contrato-jornadas.json"), "utf8")).contrato;
 const CODIGO_DA_VITRINE = CONTRATO.partes.find((parte) => parte.id === "contador").solucaoDeTeste.find((acao) => acao.tipo === "definirSnippet").codigo;
+/**
+ * A mesma solução, com as promoções do letreiro sem o preço ("SONHO" no lugar de "SONHO R$ 4"): os curtos
+ * não podem mostrar "R$" em quadro nenhum. É código que o aluno escreveria igual; só o texto do letreiro muda.
+ */
+const CODIGO_DA_VITRINE_SEM_PRECO = CODIGO_DA_VITRINE.replace(/ R\$ \d+/g, "");
+if (/R\$/.test(CODIGO_DA_VITRINE_SEM_PRECO) || CODIGO_DA_VITRINE_SEM_PRECO === CODIGO_DA_VITRINE) throw new Error("as promoções da vitrine mudaram de formato: confira o CODIGO_DA_VITRINE_SEM_PRECO");
 /** O contrato já na etapa de trabalho, com a lista de requisitos certa (a que a jornada dos testes monta). */
 const CONTRATO_NO_TRABALHO = { contrato: { etapa: "trabalho", escolha: CONTRATO.escolha, tentativas: 0, mudou: false, tempoMs: 0, entregue: false } };
 
@@ -784,4 +790,523 @@ export const TOMADAS = {
     await t.esperar(2500);
     return t.terminar();
   },
+
+  /* ---------------------------------------------------------------- */
+  /* Tomadas dos curtos ("O aprendiz", tema Doce, e "O chefão",       */
+  /* tema Fliperama). Todas no celular em pé.                         */
+  /* ---------------------------------------------------------------- */
+
+  // V05: o painel Estilos no celular, trocando a cor do cabeçalho; a prévia muda.
+  async V05() {
+    const fase = "sites-estilos-u1-f3";
+    // Com o último objetivo ativo, trocar a cor não conclui objetivo nenhum: o balão do computadorzinho do jogo não abre em cima da ação.
+    const t = await abrirTomada({ id: "V05-estilos-celular", formato: "celular", descricao: "No celular em pé: o painel Estilos, a cor de fundo do cabeçalho trocada pelo seletor e a prévia mudando", progresso: progressoNaFase(fase, [], { objetivoAtual: 3 }), rota: `/fase/${fase}`, esperar: "section[data-previa] iframe" });
+    const { pagina } = t;
+    await esperarPronto(pagina);
+    await continuarFalas(pagina);
+    await fecharBalao(pagina);
+    const chave = await chaveDoSeletor(pagina, "header");
+    const linha = pagina.locator(`[role=treeitem][data-chave="${chave}"] > div`).first();
+    await linha.scrollIntoViewIfNeeded();
+    await t.esperar(600);
+    await t.iniciar();
+    await t.caixa("previa", pagina.locator("section[data-previa]").first());
+    await caixaNaPrevia(t, "cabecalho", "header");
+    await t.esperar(700);
+    t.marcar("selecionar");
+    await t.tocar(linha, { pausa: 250 });
+    await esperarPronto(pagina);
+    await t.esperar(500);
+    t.marcar("estilos");
+    await t.tocar(pagina.getByRole("tab", { name: "Estilos", exact: true }).first(), { pausa: 250 });
+    await esperarPronto(pagina);
+    await fecharBalao(pagina);
+    const cor = pagina.locator("[data-seletor-cor]:visible").first();
+    await cor.waitFor();
+    // A regra do cabeçalho sobe para o meio do painel (embaixo, o computadorzinho do jogo cobre o quadradinho da cor).
+    await cor.evaluate((el) => {
+      let no = el.parentElement;
+      while (no && !(no.scrollHeight > no.clientHeight + 10 && /(auto|scroll)/.test(getComputedStyle(no).overflowY))) no = no.parentElement;
+      if (no) no.setAttribute("data-video-rola", "");
+    });
+    const antes = await cor.boundingBox();
+    await t.rolarSuave("[data-video-rola]", { dy: Math.max(0, antes.y - 600), ms: 450, linear: false });
+    await t.esperar(350);
+    await t.caixa("regra", pagina.locator('[data-declaracao="background-color"]:visible').first());
+    await t.caixa("quadradinho", cor);
+    t.marcar("clique-no-quadradinho");
+    await t.tocar(cor, { pausa: 250 });
+    await t.esperar(300);
+    // O seletor de cor do sistema não aparece no navegador sem tela: as cores entram no campo uma a uma, como quem arrasta o seletor.
+    const cores = ["#7a9e9a", "#7a93b0", "#7a82c4", "#8a74d4", "#a866d6", "#c558c8", "#d647a6", "#d6337f"];
+    for (const [indice, valor] of cores.entries()) {
+      await cor.fill(valor);
+      if (indice === 0) {
+        await doisQuadros(pagina);
+        t.marcar("cor-mudou");
+      }
+      await t.esperar(150);
+    }
+    await esperarPronto(pagina);
+    t.marcar("cor-final");
+    await t.esperar(3200);
+    return t.terminar();
+  },
+
+  // V06: o chamado da agenda do salão no celular (Doce): pausa, Observar, conserto e os testes ficando verdes.
+  V06: () => chamadoDaAgenda("V06-chamado-celular", "doce"),
+
+  // V07: o mundo de noite no celular (Doce), só pelas ilhas com conteúdo.
+  V07: () => mundoDeNoiteNoCelular("V07-mundo-noite-celular", "doce"),
+
+  // V08: o painel de insígnias no celular (Doce).
+  V08: () => insigniasNoCelular("V08-insignias-celular", "doce"),
+
+  // V09: a vitrine da padaria de perto (a cena do contrato no celular, gravada numa janela aproximada).
+  async V09() {
+    const fase = "logica-programa-de-verdade-u1-f2";
+    const t = await abrirTomada({ id: "V09-vitrine-de-perto", formato: "celular", descricao: "O contrato da padaria no celular, com a gravação aproximada na cena: o código acende a luz, o letreiro (com as promoções sem o preço) e o forno da vitrine", progresso: progressoNaFase(fase, ["sites", "logica"], { objetivoAtual: 0, contrato: { ...CONTRATO_NO_TRABALHO.contrato, mudou: true } }), rota: `/fase/${fase}`, esperar: "[data-jogo-fase]" });
+    const { pagina } = t;
+    await esperarPronto(pagina);
+    await continuarFalas(pagina);
+    await fecharBalao(pagina);
+    await pagina.locator('[data-abas-composicao] [data-segmento="snippet"]').tap();
+    await esperarPronto(pagina);
+    await pagina.locator("[data-editor-snippet] .cm-content").click();
+    await pagina.keyboard.press("ControlOrMeta+A");
+    await pagina.keyboard.press("Delete");
+    // A solução do contrato com as promoções sem o preço (ver CODIGO_DA_VITRINE_SEM_PRECO).
+    await pagina.keyboard.insertText(CODIGO_DA_VITRINE_SEM_PRECO);
+    await esperarPronto(pagina);
+    await fecharBalao(pagina);
+    if (!(await pagina.locator('[data-area-trabalho="cena"]').isVisible())) {
+      await pagina.locator("[data-alternar-cena]").tap();
+      await esperarPronto(pagina);
+    }
+    await pagina.evaluate(() => document.activeElement?.blur());
+    // Fora da gravação: uma primeira rodada (o computadorzinho comemora os requisitos agora) e a conversa da cliente, se vier.
+    await pagina.locator("[data-executar-snippet]").tap();
+    await esperarPronto(pagina, 30000);
+    await continuarFalas(pagina, 12);
+    for (let i = 0; i < 14 && (await pagina.locator("[data-conversa-cliente]").isVisible().catch(() => false)); i++) {
+      const fim = pagina.locator("[data-conversa-fim]");
+      if (await fim.isVisible().catch(() => false)) await fim.tap();
+      else await pagina.locator("[data-conversa-continuar]").tap().catch(() => {});
+      await t.esperar(300);
+    }
+    await esperarPronto(pagina, 30000);
+    await continuarFalas(pagina, 12);
+    await fecharBalao(pagina);
+    await pagina.locator('[data-velocidade="2"]').first().tap().catch(() => {});
+    await pagina.evaluate(() => document.activeElement?.blur());
+    await t.esperar(600);
+    // A janela: o desenho da cena ocupa a largura do quadro (no celular ele tem uns 100 px de largura).
+    const desenho = await desenhoDaCena(pagina);
+    await t.janela(desenho, { folga: 0.06 });
+    await t.esperar(400);
+    await t.iniciar();
+    t.marcar("caixa:desenho", { x: Math.round(desenho.x), y: Math.round(desenho.y), l: Math.round(desenho.width), a: Math.round(desenho.height) });
+    await t.esperar(900);
+    t.marcar("executar");
+    await t.tocarPorDentro(pagina.locator("[data-executar-snippet]"));
+    await pagina.waitForFunction(() => document.querySelector('[data-dispositivo="luz"]')?.getAttribute("data-ligada") === "true" || document.querySelector('[data-desenho="luz"]')?.getAttribute("data-ligada") === "true", null, { timeout: 15000, polling: 50 }).then(() => t.marcar("luz-acesa")).catch(() => t.marcar("luz-nao-vista"));
+    await t.esperar(8000);
+    return t.terminar();
+  },
+
+  // F01: a missão do chefão: a tela do aplicativo do salão, com o horário repetido em vermelho (janela aproximada).
+  async F01() {
+    const t = await abrirChamadoDaAgenda("F01-missao-fliperama", "fliperama", "O chamado da agenda do Salão Girassol no Fliperama, com a gravação aproximada na tela do aplicativo: a terça aparece com o horário das 10h marcado duas vezes, em vermelho");
+    const { pagina } = t;
+    await pagina.locator('[data-abas-composicao] [data-segmento="snippet"]').tap();
+    await esperarPronto(pagina);
+    await fecharBalao(pagina);
+    await pagina.locator('[data-area-cena][data-tocando="nao"]').waitFor({ timeout: 15000 }).catch(() => {});
+    const aparelho = pagina.locator('[data-cena] [data-dispositivo="tela"]').first();
+    const caixaDoAparelho = await aparelho.boundingBox();
+    // A janela tem 150 px de página, com a tela do aplicativo (uns 68 px) do meio para a direita: o texto da agenda
+    // fica com uns 28 px no quadro, e sobra o lado esquerdo para o cartão da cliente que o vídeo desenha por cima.
+    await t.janela({ x: caixaDoAparelho.x - 70, y: caixaDoAparelho.y, width: 150, height: caixaDoAparelho.height }, { folga: 0, centroY: caixaDoAparelho.y + caixaDoAparelho.height / 2 + 20 });
+    await t.esperar(400);
+    await t.iniciar();
+    await t.caixa("tela", aparelho);
+    await t.esperar(700);
+    t.marcar("executar");
+    await t.tocarPorDentro(pagina.locator("[data-executar-snippet]"));
+    await pagina.waitForFunction(() => document.querySelector('[data-cena] [data-dispositivo="tela"]')?.getAttribute("data-conflitos") === "1" && document.querySelector('[data-cena] [data-linha-agenda="repetido"]'), null, { timeout: 15000, polling: 40 }).then(() => t.marcar("horario-repetido")).catch(() => t.marcar("horario-nao-visto"));
+    await doisQuadros(pagina);
+    await t.caixa("tela-acesa", aparelho);
+    await t.esperar(5000);
+    return t.terminar({ texto: await aparelho.getAttribute("data-texto"), conflitos: await aparelho.getAttribute("data-conflitos") });
+  },
+
+  // F02: a luta: o mesmo chamado no Fliperama, com as mesmas marcas da V06.
+  F02: () => chamadoDaAgenda("F02-luta-fliperama", "fliperama"),
+
+  // F03: o mundo de noite no celular (Fliperama), só pelas ilhas com conteúdo.
+  F03: () => mundoDeNoiteNoCelular("F03-mundo-fliperama", "fliperama"),
+
+  // F04: o corredor do museu no celular (Fliperama), com os primeiros antepassados acordando.
+  async F04() {
+    const t = await abrirTomada({ id: "F04-museu-fliperama", formato: "celular", descricao: "O Museu das Origens no celular, no Fliperama: o corredor descendo e os primeiros antepassados acordando", progresso: progressoDeQuemJogou([], { tema: "fliperama" }), rota: "/ilha/origens", esperar: "[data-trilho-museu]" });
+    const { pagina } = t;
+    const TRILHO = "[data-trilho-museu]";
+    await t.esperar(2500);
+    await t.iniciar();
+    await t.esperar(1200);
+    const medida = await pagina.evaluate((s) => { const el = document.querySelector(s); return el.scrollHeight - el.clientHeight; }, TRILHO);
+    const dy = Math.min(medida, 1500);
+    t.marcar("rolar", { dy, ms: 6500 });
+    await vigiar(t, t.rolarSuave(TRILHO, { dy, ms: 6500, linear: true }), '[data-epoca][data-acordado="sim"]', "data-epoca", "acordou");
+    t.marcar("fim");
+    await t.esperar(2000);
+    return t.terminar();
+  },
+
+  // F05: a sala 3 do museu no celular (Fliperama): o Python rodando de verdade no navegador.
+  async F05() {
+    const fase = "origens-museu-u3-f1";
+    const t = await abrirTomada({ id: "F05-python-fliperama", formato: "celular", descricao: "Museu, sala 3, no celular e no Fliperama: o comparador roda o Python de verdade no navegador",
+      // Com o último objetivo ativo, rodar o Python não conclui objetivo nenhum: o balão do computadorzinho do jogo não abre em cima do cartão.
+      progresso: progressoNaFase(fase, ["origens"], { objetivoAtual: 4 }, { tema: "fliperama" }), rota: `/fase/${fase}`, esperar: "[data-estacao]" });
+    const { pagina } = t;
+    await esperarPronto(pagina, 30000);
+    for (let i = 0; i < 8; i++) {
+      const botao = pagina.getByRole("button", { name: /^(Continuar|Vamos lá!)$/ }).first();
+      if (!(await botao.isVisible().catch(() => false))) break;
+      await botao.tap();
+      await esperarPronto(pagina);
+    }
+    await continuarFalas(pagina);
+    if (await pagina.locator("[data-previsao]").first().isVisible().catch(() => false)) {
+      await (await opcaoDaPrevisao(pagina)).tap();
+      await esperarPronto(pagina);
+    }
+    await continuarFalas(pagina);
+    await fecharBalao(pagina);
+    const rodar = pagina.locator('[data-rodar="python"]').first();
+    const cartao = pagina.locator('[data-programa-linguagem="python"]').first();
+    // O cartão do Python no alto da tela, com espaço embaixo para a saída.
+    await cartao.evaluate((el) => {
+      let no = el.parentElement;
+      while (no && !(no.scrollHeight > no.clientHeight + 20 && /(auto|scroll)/.test(getComputedStyle(no).overflowY))) no = no.parentElement;
+      if (no) {
+        no.setAttribute("data-video-rola", "");
+        no.scrollTop += el.getBoundingClientRect().top - 118;
+      }
+    });
+    await esperarPronto(pagina);
+    await fecharBalao(pagina);
+    await t.esperar(600);
+    await t.iniciar();
+    await t.caixa("python", cartao);
+    await t.esperar(800);
+    t.marcar("rodar-python");
+    await t.tocar(rodar, { pausa: 250 });
+    await pagina.locator('[data-saida-linguagem="python"][data-pronta="sim"]').first().waitFor({ timeout: 120000 });
+    await doisQuadros(pagina);
+    t.marcar("python-rodou");
+    await t.caixa("saida", pagina.locator('[data-saida-linguagem="python"]').first());
+    await t.caixa("python-depois", cartao);
+    await t.esperar(4000);
+    return t.terminar();
+  },
+
+  // F06: o painel de insígnias no celular (Fliperama).
+  F06: () => insigniasNoCelular("F06-insignias-fliperama", "fliperama"),
 };
+
+/** A área do desenho da cena (o SVG tem a proporção do painel; o desenho, 320 x 200, fica centrado nele). */
+async function desenhoDaCena(pagina) {
+  return pagina.locator("[data-cena]").first().evaluate((el) => {
+    const svg = el.tagName.toLowerCase() === "svg" ? el : el.querySelector("svg");
+    const caixa = svg.getBoundingClientRect();
+    const vista = svg.viewBox.baseVal;
+    const proporcao = vista && vista.width ? vista.width / vista.height : 1.6;
+    const largura = Math.min(caixa.width, caixa.height * proporcao);
+    const altura = largura / proporcao;
+    return { x: caixa.x + (caixa.width - largura) / 2, y: caixa.y + (caixa.height - altura) / 2, width: largura, height: altura };
+  });
+}
+
+/** As soluções dos chamados da Depuração, as mesmas que a jornada dos testes usa. */
+const CHAMADO_DA_AGENDA = JSON.parse(readFileSync(path.join(RAIZ, "testes", "chamados-jornadas.json"), "utf8"))["6"].contrato;
+
+/** Abre o chamado da agenda do Salão Girassol (Depuração, U6, fase 2) no celular, já na etapa de trabalho, com as falas de entrada passadas. */
+async function abrirChamadoDaAgenda(id, tema, descricao) {
+  const fase = "logica-depuracao-u6-f2";
+  // `mudou: true`: a mensagem de mudança de pedido da cliente não aparece no meio da tomada (e o conserto simples não fecha requisito nenhum).
+  const t = await abrirTomada({ id, formato: "celular", descricao, progresso: progressoNaFase(fase, ["sites", "logica"], { objetivoAtual: 0, contrato: { etapa: "trabalho", escolha: CHAMADO_DA_AGENDA.escolha, tentativas: 0, mudou: true, tempoMs: 0, entregue: false } }, { tema }), rota: `/fase/${fase}`, esperar: "[data-jogo-fase]" });
+  await esperarPronto(t.pagina);
+  await continuarFalas(t.pagina, 12);
+  await fecharBalao(t.pagina);
+  return t;
+}
+
+/**
+ * A investigação e o conserto do chamado da agenda, no celular (V06 no Doce, F02 no Fliperama).
+ * Marcas: `pausou` (o programa parado na linha 3), `pausou-2` (a segunda pausa, no pedido das 10h),
+ * `observou` (o Observar com os valores da segunda pausa), `selecionou` e `consertou` (o trecho errado
+ * selecionado e apagado) e `teste-verde-1`... (cada caso de teste que fica verde).
+ * Os casos entram um por vez (escrever, adicionar, rodar): assim cada teste fica verde num momento seu.
+ */
+async function chamadoDaAgenda(id, tema) {
+  const t = await abrirChamadoDaAgenda(id, tema, `O chamado da agenda do Salão Girassol no celular (${tema === "doce" ? "Doce" : "Fliperama"}): ponto de parada, o programa pausado, o Observar, o conserto e os casos de teste ficando verdes, um por vez`);
+  const { pagina } = t;
+  const pronto = () => esperarPronto(pagina, 30000);
+  const mudo = async (alvo) => {
+    await alvo.tap({ timeout: 8000 });
+    await pronto();
+  };
+  const linha3 = pagina.locator("[data-editor-snippet] .cm-lineNumbers .cm-gutterElement", { hasText: /^3$/ });
+  const abaDeFontes = (nome) => pagina.getByRole("tablist", { name: "Mostrar na aba Fontes" }).getByRole("tab", { name: nome, exact: true });
+  const retomar = pagina.locator('[data-controle-depurador="retomar"]:visible').first();
+  const pausado = pagina.getByText("Pausado: o código fica só para ler", { exact: false }).first();
+  const executar = pagina.locator("[data-executar-snippet]");
+  const esperarPausa = async () => {
+    await abaDeFontes("Snippet").waitFor();
+    await pagina.waitForFunction(() => { const b = document.querySelector('[data-controle-depurador="retomar"]'); return b && !b.disabled; }, null, { timeout: 15000, polling: 40 });
+    await doisQuadros(pagina);
+  };
+  const estaPausado = () => pagina.evaluate(() => { const b = [...document.querySelectorAll('[data-controle-depurador="retomar"]')].find((el) => el.getBoundingClientRect().width > 0); return Boolean(b && !b.disabled); });
+  const ateOFim = async (toque) => {
+    for (let i = 0; i < 8 && (await estaPausado()); i++) {
+      // O balão do computadorzinho do jogo abre em cima dos controles quando um requisito é cumprido.
+      await continuarFalas(pagina, 12);
+      await fecharBalao(pagina);
+      if (toque) await t.tocar(retomar, { pausa: 150 });
+      else await retomar.tap({ timeout: 8000 });
+      await t.esperar(350);
+    }
+    await pronto();
+  };
+
+  // A cena recolhida deixa espaço para o código (em pé, a cena aberta aperta o editor).
+  if (await pagina.locator('[data-area-trabalho="cena"]').isVisible().catch(() => false)) await mudo(pagina.locator("[data-alternar-cena]"));
+  await mudo(pagina.locator('[data-abas-composicao] [data-segmento="snippet"]'));
+  await fecharBalao(pagina);
+
+  // Fora da gravação: a investigação inteira uma vez. O requisito "reproduzir o defeito" fica cumprido e o
+  // computadorzinho do jogo comemora agora (no celular o balão dele abre sozinho, em cima do código).
+  await mudo(linha3);
+  await mudo(abaDeFontes("Depurador"));
+  const abaObservar = pagina.getByRole("tablist", { name: "Painéis do depurador" }).getByRole("tab", { name: "Observar", exact: true });
+  if (await abaObservar.isVisible().catch(() => false)) await mudo(abaObservar);
+  for (const expressao of ["pedido.horario", "agenda[i].horario === pedido.horario"]) {
+    await pagina.locator("[data-campo-observar]:visible").first().fill(expressao);
+    await mudo(pagina.locator("[data-adicionar-observacao]:visible").first());
+  }
+  await pagina.evaluate(() => document.activeElement?.blur());
+  await mudo(executar);
+  await t.esperar(600);
+  await ateOFim(false);
+  await continuarFalas(pagina, 12);
+  await fecharBalao(pagina);
+  // Tira o ponto de parada e volta ao Snippet: a tomada começa com o código limpo.
+  await mudo(abaDeFontes("Snippet"));
+  await mudo(linha3);
+  await pagina.locator("[data-editor-snippet] .cm-scroller").evaluate((el) => { el.scrollTop = 0; el.setAttribute("data-video-rola", ""); });
+  await pagina.evaluate(() => document.activeElement?.blur());
+  await fecharBalao(pagina);
+  await t.esperar(700);
+
+  await t.iniciar();
+  await t.caixa("codigo", pagina.locator("[data-editor-snippet]").first());
+  await t.esperar(800);
+  // 1) O ponto de parada e a pausa.
+  t.marcar("ponto");
+  await t.tocar(linha3, { pausa: 250 });
+  await pronto();
+  await t.esperar(600);
+  t.marcar("executar");
+  await t.tocar(executar, { pausa: 250 });
+  await esperarPausa();
+  t.marcar("pausou");
+  await t.caixa("linha-pausada", pagina.locator("[data-editor-snippet] .cm-line").nth(2));
+  await t.caixa("aviso", pausado);
+  await t.esperar(1600);
+  // A segunda pausa: o pedido das 10h (a agenda já tem a Bia às 10h, na segunda posição).
+  await t.tocar(retomar, { pausa: 250 });
+  await t.esperar(300);
+  await esperarPausa();
+  t.marcar("pausou-2");
+  await t.esperar(900);
+  // 2) O Observar: o horário pedido é 10 e a comparação deu false (o programa só olhou a primeira marcação).
+  await t.tocar(abaDeFontes("Depurador"), { pausa: 250 });
+  await pronto();
+  if (await abaObservar.isVisible().catch(() => false) && (await abaObservar.getAttribute("aria-selected")) !== "true") await t.tocar(abaObservar, { pausa: 200 });
+  await pagina.waitForFunction(() => [...document.querySelectorAll("[data-observacao]")].filter((el) => el.getBoundingClientRect().width > 0).every((el) => el.querySelector("[data-valor-observado=valor]")), null, { timeout: 10000, polling: 40 });
+  await doisQuadros(pagina);
+  t.marcar("observou");
+  await t.caixa("observado", pagina.locator('[data-observacao="agenda[i].horario === pedido.horario"]:visible').first());
+  await t.caixa("observados", pagina.locator("[data-observacao]:visible").first().locator(".."));
+  const valores = await pagina.locator("[data-observacao]:visible").evaluateAll((els) => els.map((el) => `${el.getAttribute("data-observacao")} = ${el.querySelector("[data-valor-observado=valor]")?.textContent.trim()}`));
+  await t.esperar(1800);
+  await ateOFim(true);
+  await continuarFalas(pagina, 12);
+  await fecharBalao(pagina);
+  // 3) O conserto: o trecho do "else" que marca a cliente já na primeira volta sai do código.
+  await t.tocar(abaDeFontes("Snippet"), { pausa: 250 });
+  await pronto();
+  await t.tocar(linha3, { pausa: 200 });
+  await pronto();
+  await t.esperar(400);
+  const pontos = await pagina.evaluate(() => {
+    const linhas = [...document.querySelectorAll("[data-editor-snippet] .cm-content .cm-line")];
+    const rolo = document.querySelector("[data-video-rola]");
+    const quinta = linhas[4];
+    const oitava = linhas[7];
+    if (rolo && quinta) rolo.scrollTop += quinta.getBoundingClientRect().top - rolo.getBoundingClientRect().top - 70;
+    const ponto = (linha, depoisDe) => {
+      const andador = document.createTreeWalker(linha, NodeFilter.SHOW_TEXT);
+      let resto = depoisDe === null ? linha.textContent.length : linha.textContent.indexOf(depoisDe) + depoisDe.length;
+      let no = andador.nextNode();
+      let ultimo = no;
+      while (no) {
+        if (resto <= no.textContent.length) break;
+        resto -= no.textContent.length;
+        ultimo = no;
+        no = andador.nextNode();
+      }
+      const alvo = no ?? ultimo;
+      const faixa = document.createRange();
+      faixa.setStart(alvo, Math.min(resto, alvo.textContent.length));
+      faixa.collapse(true);
+      const caixa = faixa.getBoundingClientRect();
+      return { x: caixa.x, y: caixa.y + caixa.height / 2 };
+    };
+    return { textos: [quinta.textContent, oitava.textContent], de: ponto(quinta, "}"), ate: ponto(oitava, null) };
+  });
+  if (!/else/.test(pontos.textos[0])) throw new Error(`${id}: a linha 5 não é a do else (${pontos.textos[0]})`);
+  await t.esperar(500);
+  await pagina.mouse.click(pontos.de.x + 1, pontos.de.y);
+  await pagina.keyboard.down("Shift");
+  await pagina.mouse.click(pontos.ate.x + 1, pontos.ate.y);
+  await pagina.keyboard.up("Shift");
+  await doisQuadros(pagina);
+  t.marcar("selecionou");
+  await t.caixa("trecho", pagina.locator("[data-editor-snippet] .cm-line").nth(5));
+  await t.esperar(900);
+  await t.tecla("Backspace");
+  await pronto();
+  await doisQuadros(pagina);
+  t.marcar("consertou");
+  await pagina.evaluate(() => document.activeElement?.blur());
+  const codigo = await pagina.locator("[data-editor-snippet] .cm-content").evaluate((el) => [...el.querySelectorAll(".cm-line")].map((linha) => linha.textContent).join("\n"));
+  await t.esperar(1500);
+  await fecharBalao(pagina);
+  // 4) Os testes: o caso que já vinha na lista e mais três, um por vez; o último é o do horário repetido.
+  await t.tocar(pagina.locator('[data-abas-composicao] [data-segmento="testes"]'), { pausa: 250 });
+  await pronto();
+  await fecharBalao(pagina);
+  await t.caixa("casos", pagina.locator("[data-casos-de-teste]").first());
+  const lista = pagina.locator("[data-lista-casos]").first().locator("..");
+  await lista.evaluate((el) => el.setAttribute("data-video-casos", ""));
+  const rodar = pagina.locator("[data-rodar-casos]");
+  const verde = async (indice) => {
+    await pagina.locator(`[data-caso="${indice}"][data-situacao-caso="passou"]`).waitFor({ timeout: 15000 });
+    await doisQuadros(pagina);
+    t.marcar(`teste-verde-${indice + 1}`);
+    await t.caixa(`caso-${indice + 1}`, pagina.locator(`[data-caso="${indice}"]`).first());
+  };
+  const ana = '{ horario: 9, cliente: "Ana" }';
+  const bia = '{ horario: 10, cliente: "Bia" }';
+  const novos = [
+    { entrada: `[${ana}, ${bia}], { horario: 9, cliente: "Caio" }`, esperado: `[${ana}, ${bia}]` },
+    { entrada: `[${ana}, ${bia}], { horario: 11, cliente: "Cris" }`, esperado: `[${ana}, ${bia}, { horario: 11, cliente: "Cris" }]` },
+    // O defeito do chamado: a terça, com as 10h já ocupadas pela Bia na segunda posição.
+    { entrada: `[${ana}, ${bia}], { horario: 10, cliente: "Dani" }`, esperado: `[${ana}, ${bia}]` },
+  ];
+  await t.esperar(700);
+  t.marcar("rodar-1");
+  await t.tocar(rodar, { pausa: 250 });
+  await verde(0);
+  await t.esperar(1100);
+  for (const [n, caso] of novos.entries()) {
+    await pagina.locator("[data-entrada-nova]").fill(caso.entrada);
+    await pagina.locator("[data-esperado-novo]").fill(caso.esperado);
+    await t.esperar(250);
+    await t.tocar(pagina.locator("[data-adicionar-caso]"), { pausa: 200 });
+    await pronto();
+    await pagina.evaluate(() => document.activeElement?.blur());
+    // O caso novo entra no fim da lista: ela desce para ele aparecer.
+    await t.rolarSuave("[data-video-casos]", { dy: 400, ms: 350, linear: false });
+    await t.esperar(450);
+    t.marcar(`pendente-${n + 2}`);
+    await t.caixa(`caso-pendente-${n + 2}`, pagina.locator(`[data-caso="${n + 1}"]`).first());
+    await t.esperar(500);
+    t.marcar(`rodar-${n + 2}`);
+    await t.tocar(rodar, { pausa: 250 });
+    await verde(n + 1);
+    await t.esperar(1100);
+  }
+  await t.esperar(1500);
+  const situacoes = await pagina.locator("[data-caso]").evaluateAll((els) => els.map((el) => el.getAttribute("data-situacao-caso")));
+  return t.terminar({ tema, valoresObservados: valores, codigoDepoisDoConserto: codigo, situacoesDosCasos: situacoes });
+}
+
+/** O mundo de noite no celular, do começo até a Ilha Lógica, sem chegar nas ilhas em construção. */
+async function mundoDeNoiteNoCelular(id, tema) {
+  const t = await abrirTomada({ id, formato: "celular", descricao: `O mundo de noite no celular em pé (${tema === "doce" ? "Doce" : "Fliperama"}): Porto da revisão, Origens, Sites e Lógica, rolado com o dedo, sem chegar nas ilhas em construção`, progresso: alunoNoMeio({ tema }), rota: "/?hora=22", esperar: "[data-mapa=mundo]", armazenamento: semAceno() });
+  const { pagina } = t;
+  await pagina.locator("[data-mascote-no-mapa]").first().waitFor();
+  await pagina.evaluate((s) => { document.querySelector(s).scrollLeft = 0; }, MUNDO);
+  await t.esperar(2200);
+  // Até onde dá para rolar sem a primeira ilha em construção (Páginas vivas) entrar na tela.
+  const limite = await pagina.evaluate(() => {
+    const arte = document.querySelector('[data-ilha-arte="paginas-vivas"]')?.getBoundingClientRect();
+    return arte ? arte.x - window.innerWidth - 40 : 300;
+  });
+  await t.iniciar();
+  await caixasDasIlhas(t);
+  await t.esperar(1500);
+  for (let arrasto = 1; arrasto <= 5; arrasto++) {
+    const sobra = limite - (await pagina.evaluate((s) => document.querySelector(s).scrollLeft, MUNDO));
+    if (sobra < 50) break;
+    t.marcar(`arrasto:${arrasto}`);
+    const y = 440 + (arrasto % 2) * 40;
+    await t.arrastarDedo({ x: 330, y }, { x: 330 - Math.min(170, sobra * 0.42), y }, 700);
+    await t.esperar(1400);
+  }
+  // Se o embalo passou do limite, a tomada não serve: o gravar.mjs tenta de novo.
+  const rolado = await pagina.evaluate((s) => document.querySelector(s).scrollLeft, MUNDO);
+  if (rolado > limite + 30) throw new Error(`${id}: o mundo rolou até ${Math.round(rolado)} px e uma ilha em construção entrou na tela (limite ${Math.round(limite)})`);
+  await caixasDasIlhas(t);
+  t.marcar("parou");
+  await t.esperar(2500);
+  return t.terminar({ tema, rolado: Math.round(rolado), limite: Math.round(limite), periodo: await pagina.locator("[data-mundo-desenho]").getAttribute("data-periodo") });
+}
+
+/** O painel de insígnias aberto pelo menu do celular, a partir do mundo. */
+async function insigniasNoCelular(id, tema) {
+  const t = await abrirTomada({ id, formato: "celular", descricao: `O painel de insígnias no celular em pé (${tema === "doce" ? "Doce" : "Fliperama"})`, progresso: alunoNoMeio({ tema }), rota: "/?hora=22", esperar: "[data-mapa=mundo]", armazenamento: semAceno() });
+  const { pagina } = t;
+  await pagina.locator("[data-mascote-no-mapa]").first().waitFor();
+  await pagina.evaluate((s) => { document.querySelector(s).scrollLeft = 0; }, MUNDO);
+  await t.esperar(2000);
+  await t.iniciar();
+  await t.esperar(700);
+  t.marcar("menu");
+  await t.tocar(pagina.getByRole("button", { name: "Mais opções" }).first(), { pausa: 250 });
+  const item = pagina.getByRole("button", { name: /Insígnias/ }).or(pagina.getByRole("link", { name: /Insígnias/ })).or(pagina.getByRole("menuitem", { name: /Insígnias/ })).first();
+  await item.waitFor({ timeout: 5000 });
+  await t.esperar(500);
+  t.marcar("insignias");
+  await t.tocar(item, { pausa: 250 });
+  await pagina.locator("[data-painel-insignias]").waitFor();
+  await t.esperar(500);
+  await t.caixa("painel", pagina.locator("[data-painel-insignias]").first());
+  t.marcar("painel-aberto");
+  await t.esperar(1500);
+  // Desce a lista devagar, para mostrar os selos.
+  await pagina.locator("[data-painel-insignias]").first().evaluate((el) => {
+    let no = el;
+    const rola = (candidato) => candidato.scrollHeight > candidato.clientHeight + 20 && /(auto|scroll)/.test(getComputedStyle(candidato).overflowY);
+    const dentro = [el, ...el.querySelectorAll("*")].find(rola);
+    while (!dentro && no && !rola(no)) no = no.parentElement;
+    (dentro ?? no)?.setAttribute("data-video-rola", "");
+  });
+  if (await pagina.locator("[data-video-rola]").count()) await t.rolarSuave("[data-video-rola]", { dy: 260, ms: 2500, linear: false });
+  await t.esperar(2000);
+  return t.terminar({ tema });
+}

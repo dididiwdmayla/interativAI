@@ -121,7 +121,19 @@ export type IdTomada =
   | "V01-sites-u1-celular"
   | "V02-mundo-celular"
   | "V03-padaria-celular"
-  | "V04-museu-celular";
+  | "V04-museu-celular"
+  // Tomadas dos curtos (src/curtos/roteiro.ts):
+  | "V05-estilos-celular"
+  | "V06-chamado-celular"
+  | "V07-mundo-noite-celular"
+  | "V08-insignias-celular"
+  | "V09-vitrine-de-perto"
+  | "F01-missao-fliperama"
+  | "F02-luta-fliperama"
+  | "F03-mundo-fliperama"
+  | "F04-museu-fliperama"
+  | "F05-python-fliperama"
+  | "F06-insignias-fliperama";
 
 /** Um instante da tomada: em segundos, ou relativo a uma marca do take.json. */
 export type Instante = number | { marca: string; mais?: number };
