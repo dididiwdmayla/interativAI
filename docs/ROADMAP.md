@@ -29,6 +29,37 @@ núcleo comum.
 
 ### Feito
 
+- **Vídeos curtos v1 ("O aprendiz" e "O chefão").** Dois verticais de uns
+  15 s (1080 x 1920, em laço) para Reels, TikTok e Shorts, com a mesma ideia
+  ("Programe jogando.") contada de dois jeitos. São composições novas no
+  projeto `video/`; a apresentação v1 não mudou (os mesmos quadros, conferidos
+  antes e depois) e nada em `src/`, `public/`, `testes/` nem no
+  `package.json` da raiz foi alterado.
+  - **Entregue em `video/saida/`:** `interativai-curto-aprendiz-9x16-v1.mp4`
+    (15,70 s, 8,8 MB, -14,1 LUFS), `interativai-curto-chefao-9x16-v1.mp4`
+    (15,87 s, 10,3 MB, -14,1 LUFS) e as capas `capa-curto-aprendiz-v1.png` e
+    `capa-curto-chefao-v1.png` (o quadro 0 de cada um).
+  - **"O aprendiz" (Doce):** um aprendiz montado com o kit de clientes do
+    jogo reage numa câmera de streamer enquanto a partida passa por quatro
+    fases reais (mexer num site, trocar uma cor, acender a vitrine da padaria,
+    caçar o bug da agenda), com o placar de estrelas do jogo.
+  - **"O chefão" (Fliperama):** o bug é um chefão. O defeito é o do chamado
+    da agenda do Salão Girassol (Depuração, U6); a barra de vida só cai quando
+    um caso de teste fica verde na gravação (quatro casos, um por vez).
+  - **Onze tomadas novas no celular** (V05 a V09 no Doce, F01 a F06 no
+    Fliperama). O gravador ganhou a "janela": grava só uma área da página,
+    aproximada e nítida, para o que é pequeno demais no celular.
+  - **Música por medida** (`video/scripts/energia.mjs`): `sites` no aprendiz
+    e `paginas-vivas` no chefão, cada uma numa janela de compassos inteiros;
+    o vídeo dura a janela, os cortes caem nas batidas e o som emenda em laço.
+  - **Revisão** (`node scripts/revisar.mjs --curtos`): folhas em
+    `video/revisao/curtos/` (um quadro a cada 0,5 s, o primeiro segundo, o
+    tamanho de celular e os dois lado a lado), OCR atrás de "construção",
+    "Em breve", "chegando", "grátis" e "R$" (nada), o laço da imagem (0,41% e
+    0,73% de diferença entre o último quadro e o primeiro) e do som.
+  - **Para fazer uma v2:** a seção "Curtos" do `video/README.md`; o roteiro
+    com os tempos está em `video/ROTEIRO-CURTOS.md`.
+
 - **Vídeo de apresentação v1 ("Fase 0: Conhecer o InterativAI").** O vídeo
   de introdução, feito com o próprio jogo, num projeto separado (Remotion)
   na pasta `video/`. Nada em `src/`, `public/`, `testes/` nem no
@@ -792,11 +823,36 @@ núcleo comum.
 
 - Vídeo de apresentação v1: aguardando a revisão do pull request (assistir
   os dois mp4 no celular e conferir as folhas de `video/revisao/`).
+- Vídeos curtos v1: aguardando a revisão do pull request (assistir os dois
+  no celular, com som e no mudo, deixando repetir, e conferir as folhas de
+  `video/revisao/curtos/`).
 - Rodada 40 (mundo fluido): aguardando a revisão do pull request, rolando o
   mundo num Android de verdade, de dia e de noite, rápido, ida e volta (sem
   travar e sem ilha sem nome), e trocando as animações no menu.
 
 ### Pendências
+
+- **Achados no jogo durante a gravação dos curtos (não corrigidos):**
+  - Chamado da agenda (`logica-depuracao-u6-f2`) no celular em pé: com a
+    cena aberta, o editor do Snippet fica sem altura (sobram as abas e a
+    barra de símbolos); só recolhendo a cena o código aparece.
+  - A tela do aplicativo do salão (o aparelho da cena) no celular: a agenda
+    sai com letra de uns 4 px de página; não dá para ler o horário repetido
+    em vermelho, que é a pista do chamado.
+  - Ao tocar em Executar com um ponto de parada, a aba Fontes mostra o
+    Console por uns 0,3 s e volta para o Snippet quando o programa pausa.
+  - Casos de teste no celular: os campos de cada caso cortam o texto (a
+    entrada vira "[{ horario: 9," e o esperado, "[{ hora") e só cabem dois
+    casos por vez na lista.
+  - Painel Estilos no celular (`sites-estilos-u1-f3`): a regra do elemento
+    selecionado aparece no fim do painel, com o quadradinho da cor encostado
+    no computadorzinho.
+  - O texto do chamado da Dona Zélia cita o WhatsApp pelo nome (na conversa
+    e no documento): é uma marca real dentro do conteúdo. Vale trocar por
+    "mensagem no celular".
+  - Para o vídeo: o pacote de português do tesseract não existe no apt do
+    ambiente de gravação; a revisão dos curtos baixa o `por.traineddata` do
+    repositório do tesseract para `video/.cache/`.
 
 - **Achados no jogo durante a gravação do vídeo (não corrigidos):**
   - `npm run build` depende de baixar a Nunito e a JetBrains Mono do Google
