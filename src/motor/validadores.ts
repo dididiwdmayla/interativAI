@@ -348,8 +348,14 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       return { passou: comparar(quantidade, validador.op, validador.valor), descricao, detalhe: `achou ${quantidade}` };
     }
     case "textoContem": {
-      const textos = textosDe(consultar(documento, validador.seletor));
-      const alvo = normalizarTexto(validador.valor);
+      const normalizarTrecho = (texto: string): string => {
+        let trecho = normalizarTexto(texto);
+        if (validador.ignorarAcentos) trecho = trecho.normalize("NFD").replace(/\p{M}/gu, "");
+        if (validador.ignorarCaixa) trecho = trecho.toLocaleLowerCase("pt-BR");
+        return trecho;
+      };
+      const textos = textosDe(consultar(documento, validador.seletor)).map(normalizarTrecho);
+      const alvo = normalizarTrecho(validador.valor);
       return { passou: alvo.length > 0 && textos.some((texto) => texto.includes(alvo)), descricao, detalhe: `textos: ${lista(textos)}` };
     }
     case "textoIgual": {

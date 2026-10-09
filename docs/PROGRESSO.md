@@ -3,6 +3,61 @@
 Rodada anterior: `docs/arquivo/PROGRESSO-rodada-39.md`.
 Status consolidado: `docs/ROADMAP.md`.
 
+## Rodada 42: termos em inglês e glossário bilíngue
+
+Branch `codex/glossario-bilingue`, base `864d1f7`. IDs, resumos e fases
+publicadas preservados.
+
+### Etapa 1 — Catálogo
+
+252 conceitos antigos receberam `termoIngles`, com vocabulário técnico:
+array, breakpoint, scope, accumulator, type selector e call frame.
+Conceitos compostos usam os dois termos quando necessário (step into / step out).
+Único conceito sem equivalente: `salvar-como-meu-tema` (Salvar como Meu tema),
+recurso próprio do jogo, marcado com `semEquivalenteIngles: true`.
+Fontes: [MDN Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array),
+[seletores CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Selectors/Selectors_and_combinators),
+[Chrome DevTools](https://developer.chrome.com/docs/devtools/javascript/reference) e
+[Google Search Central](https://developers.google.com/search/docs/appearance/title-link).
+Validação: 23.230 testes, build e lint verdes. A instalação temporária do
+Playwright interferiu nas dependências locais durante o primeiro build;
+restauradas com `npm ci`, sem mudar manifesto ou lockfile, build repetido verde.
+
+### Etapa 2 — Glossário e checagem
+
+Exibição ao lado do nome e busca bilíngue já existiam e foram preservadas.
+Campo de busca agora explica os dois idiomas. Regra geral exige termo não
+vazio ou `semEquivalenteIngles: true`, rejeitando também os dois juntos.
+Regressões cobrem array → lista, breakpoint, step over, exceção explícita e
+campos faltantes; a jornada confere nome e termo inglês nos três layouts.
+Validação: 23.234 testes, build, lint e `explorar.mjs` nos três layouts verdes.
+
+### Etapa 3 — Comparação de texto e status
+
+`textoContem` aceita `ignorarCaixa` e `ignorarAcentos` separadamente, ambas
+com padrão falso. Normaliza encontrado e esperado; testes cobrem opções
+isoladas, juntas, Unicode decomposto, vazio, seletor ausente e composição.
+Guia explica quando habilitar cada opção e recomenda ambas para respostas
+livres do aluno. Nenhuma fase publicada usa ou recebeu opções novas.
+Android real/compositor movido de Pendências para Feito: Will confirmou o
+mundo fluido em aparelho real. Termos e glossário registrados em Feito;
+Porto de chegada é o próximo passo. Missões de campo adicionais ficam
+registradas para futuras unidades, preservando o conteúdo congelado.
+
+### Verificação final
+
+23.236 testes em 57 arquivos, build e lint verdes. Bateria de conteúdo
+completa verde (mapa, explorar, publicar e revisão). Glossário verificado
+nos três layouts; 26 provas do núcleo passaram, incluindo as opções novas.
+Bateria completa de navegador executada uma vez: 227 entradas, 226 verdes
+na primeira execução. Única falha: a prova do modo automático em 12x veio
+com animações completas, embora o mundo medido entregasse 50,9 quadros/s.
+Repetido somente o cenário afetado (`RITMOS=12 HORAS=12`): verde, modo leve
+ligado e 52,2 quadros/s. Nenhum limite, timeout ou código do mundo foi alterado.
+As paradas com 40 MB de vídeo passaram: 23 ilhas, nenhuma sem arte/nome e
+nenhum buraco no mar. Oscilação da prova 12x registrada nas Pendências;
+Android real/compositor continua resolvido pelo teste do Will.
+
 ## Rodada 41: faxina técnica das pendências
 
 Branch `codex/faxina-tecnica-pendencias`, base `3d3685e`, depois dos merges
