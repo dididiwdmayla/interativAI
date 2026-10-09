@@ -1,3 +1,4 @@
+import { diferencaTexto, textoComDiferenca, type DiferencaTexto } from "../contrato/diferencaTexto";
 import { instantesDeValor, resolverAtores } from "./acontecimentos";
 /*
  * Os validadores das cenas programáveis (área cena), puros: olham o rastro
@@ -45,7 +46,7 @@ export function cenariosDaFase(fase: Fase): AcontecimentoCena[][] {
 /** Os validadores que olham a cena (os de dentro de um variosCenarios só podem ser estes, com todos/algum/nao). */
 export const VALIDADORES_DE_CENA = new Set(["estadoNaCena", "sequenciaNaCena", "reagiu", "variosCenarios"]);
 
-export type Conferencia = { passou: boolean; detalhe: string };
+export type Conferencia = { passou: boolean; detalhe: string; diferencaTexto?: DiferencaTexto };
 
 /** A cena ainda não rodou (só a memória do começo): os validadores não passam. */
 function semExecucao(rastro: RastroCena | null | undefined): Conferencia | null {
@@ -64,9 +65,11 @@ export function conferirEstado(validador: Extract<Validador, { tipo: "estadoNaCe
   if (vazio || !rastro) return vazio ?? { passou: false, detalhe: "" };
   const instante = validador.noTempo ?? rastro.duracaoMs;
   const valor = valorNoTempo(rastro, validador.dispositivo, validador.propriedade, instante);
+  const diferenca = typeof valor === "string" && typeof validador.valor === "string" && valor !== validador.valor ? diferencaTexto(validador.valor, valor) : undefined;
   return {
+    diferencaTexto: diferenca,
     passou: valoresIguais(valor, validador.valor),
-    detalhe: `${validador.dispositivo}.${validador.propriedade} em ${textoDoTempo(instante)}: ${textoDoValorCena(valor)}`,
+    detalhe: `${validador.dispositivo}.${validador.propriedade} em ${textoDoTempo(instante)}: ${diferenca ? textoComDiferenca(diferenca) : textoDoValorCena(valor)}`,
   };
 }
 

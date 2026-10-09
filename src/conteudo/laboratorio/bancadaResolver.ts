@@ -41,12 +41,14 @@ const SOLUCAO_PLANO_MEDIA = ["vazia", "zerar", "somar", "dividir", "devolver"].m
 
 /** O plano depois da troca (a lista vazia depois da soma), como o "Levar o plano pro código" escreve. */
 export const COMENTARIOS_MEDIA = [
+  "// <interativai:plano>",
   "// Plano: Calcular a média das notas",
   "// 1. Começar a soma em zero",
   "// 2. Se não tiver nenhuma nota, devolver 0",
   "// 3. Somar cada nota na soma",
   "// 4. Dividir a soma pela quantidade de notas",
   "// 5. Devolver a média",
+  "// </interativai:plano>",
 ].join("\n");
 
 export const CODIGO_MEDIA = [
@@ -251,11 +253,13 @@ export const PLANO_APROVADOS: DadosOrdenar = {
 };
 
 export const CODIGO_APROVADOS = [
+  "// <interativai:plano>",
   "// Plano: Contar quantos passaram",
   "// 1. Começar a contagem em zero",
   "// 2. Olhar cada nota da lista",
   "// 3. Se a nota for 6 ou mais, contar mais um",
   "// 4. Devolver a contagem",
+  "// </interativai:plano>",
   "",
   "function aprovados(notas) {",
   "  let contagem = 0;",

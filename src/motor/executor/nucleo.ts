@@ -19,6 +19,7 @@ import {
   type ErroExecucao,
   type EscopoMemoria,
   type FotoMemoria,
+  type QuadroMemoria,
   type InstantePausa,
   type MedicaoPassos,
   type NivelSaida,
@@ -614,6 +615,10 @@ export class NucleoExecutor {
     return { t: "ref", id };
   }
 
+  // Fotos imutáveis compartilham quadros que não mudaram. Na recursão isso
+  // evita transportar centenas de milhares de cópias pelo postMessage.
+  private quadrosFotografados = new Map<number, QuadroMemoria>();
+
   private fotografar(): FotoMemoria {
     const monte: Record<string, ObjetoMemoria> = {};
     const conta = { n: 0 };
@@ -639,7 +644,20 @@ export class NucleoExecutor {
         }
         escopos.push({ id: escopo.id, tipo: escopo.tipo, variaveis });
       }
-      return { nome: quadro.nome, chamada: quadro.chamada, escopos, linha: quadro.linha };
+      const novo: QuadroMemoria = { nome: quadro.nome, chamada: quadro.chamada, escopos, linha: quadro.linha };
+      const anterior = this.quadrosFotografados.get(quadro.chamada);
+      const valorIgual = (a: ValorMemoria, b: ValorMemoria) => a.t === b.t &&
+        ("v" in a ? "v" in b && a.v === b.v : "id" in a ? "id" in b && a.id === b.id :
+          a.t === "funcao" ? b.t === "funcao" && a.nome === b.nome && a.seta === b.seta : true);
+      const igual = anterior && anterior.nome === novo.nome && anterior.linha === novo.linha &&
+        anterior.escopos.length === escopos.length && escopos.every((escopo, i) => {
+          const antes = anterior.escopos[i];
+          return antes.id === escopo.id && antes.tipo === escopo.tipo && antes.variaveis.length === escopo.variaveis.length &&
+            escopo.variaveis.every((v, k) => v.nome === antes.variaveis[k].nome && v.declaracao === antes.variaveis[k].declaracao && valorIgual(v.valor, antes.variaveis[k].valor));
+        });
+      if (igual) return anterior;
+      this.quadrosFotografados.set(quadro.chamada, novo);
+      return novo;
     });
     return { quadros, monte };
   }
@@ -649,6 +667,7 @@ export class NucleoExecutor {
   private comecar(gravando: boolean) {
     this.pilha = [{ nome: "Global", chamada: 0, escopos: [], linha: null, coluna: null }];
     this.passos = [];
+    this.quadrosFotografados.clear();
     this.saidas = [];
     this.gravando = gravando;
     this.cortado = false;

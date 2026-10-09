@@ -117,7 +117,7 @@ function ferramentas({ pagina }) {
   await tocar(pagina.locator("[data-levar-plano]"));
   if (MODO === "retrato") conferir((await pagina.locator("[data-composicao]").getAttribute("data-aba-composta")) === "snippet", `${MODO}: levar o plano mostra o código`);
   const comPlano = await snippet();
-  conferir(comPlano.startsWith("// Plano: Calcular a média das notas\n// 1. Se não tiver nenhuma nota, devolver 0\n// 2. Começar a soma em zero"), `${MODO}: o plano entrou no topo do Snippet como comentários`);
+  conferir(comPlano.startsWith("// <interativai:plano>\n// Plano: Calcular a média das notas\n// 1. Se não tiver nenhuma nota, devolver 0\n// 2. Começar a soma em zero"), `${MODO}: o plano entrou no topo do Snippet como comentários`);
   conferir(comPlano.endsWith("let rascunho = 1;"), `${MODO}: o código que já existia ficou`);
   conferir(await concluido(), `${MODO}: planoComentado passa`);
   await naConversa(/Próximo objetivo/);
@@ -127,7 +127,7 @@ function ferramentas({ pagina }) {
   await area("plano");
   conferir((await pagina.locator("[data-lista-ordenar='plano'] [data-no-codigo]").count()) === 5, `${MODO}: os cinco passos ganham o selo de que estão no código`);
   await tocar(pagina.locator('[data-lista-ordenar="plano"] [data-escolher-passo="dividir"]'));
-  conferir((await pagina.locator("[data-passo-no-codigo]").getAttribute("data-passo-no-codigo")) === "5", `${MODO}: o rodapé diz a linha do passo`);
+  conferir((await pagina.locator("[data-passo-no-codigo]").getAttribute("data-passo-no-codigo")) === String(comPlano.split("\n").findIndex((linha) => linha.includes("4. Dividir a soma")) + 1), `${MODO}: o rodapé diz a linha do passo`);
   const acesa = await pagina.locator("[data-editor-snippet] .cm-linha-destacada").evaluateAll((linhas) => linhas.map((l) => l.textContent));
   conferir(acesa.length === 1 && acesa[0].includes("4. Dividir a soma"), `${MODO}: o comentário do passo acende no código (${acesa})`);
   if (MODO === "retrato") {
@@ -332,7 +332,7 @@ function ferramentas({ pagina }) {
   const conferirSalvo = async (quando) => {
     conferir(JSON.stringify(await plano()) === '["zerar","olhar","contar","devolver"]', `${MODO}: ${quando}, o plano continua`);
     const codigo = await snippet();
-    conferir(codigo.startsWith("// Plano: Contar quantos passaram") && codigo.includes("return contagem;"), `${MODO}: ${quando}, o código continua`);
+    conferir(codigo.startsWith("// <interativai:plano>\n// Plano: Contar quantos passaram") && codigo.includes("return contagem;"), `${MODO}: ${quando}, o código continua`);
     conferir((await pagina.locator('[data-entrada-caso="0"]').inputValue()) === "[7, 4, 9]", `${MODO}: ${quando}, o caso continua`);
     conferir((await partesFeitas()) === "plano,plano-no-codigo,codigo", `${MODO}: ${quando}, o checklist continua`);
   };

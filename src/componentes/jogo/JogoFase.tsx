@@ -117,7 +117,7 @@ import type { EventoFase } from "@/motor/eventos";
 import { filaPedeJogador } from "@/motor/filaDeFalas";
 import { enunciadoDe, FALA_CONTRATO, FALA_DESAFIO, FALA_PROJETO, falaFinalDe, type ModoJogo, ofereceContinuar } from "@/motor/estadoMotor";
 import { viaDaOrigem } from "@/motor/nucleoPainel";
-import { avaliarDetalhado } from "@/motor/validadores";
+import { avaliarDetalhado, type ResultadoValidador } from "@/motor/validadores";
 import { analisarCss } from "@/motor/css/analisarCss";
 import { acharDeclaracao, acharRegra } from "@/motor/css/editarCss";
 import { NOME_FOLHA_DO_JOGO, valorEfetivo } from "@/motor/css/cascata";
@@ -1478,6 +1478,13 @@ export function JogoFase({
     return barramento.assinar(() => setVersaoLab((versao) => versao + 1));
   }, [barramento, lab]);
 
+  const contextoDoContrato = contrato ? motor.contextoValidacao() : null;
+  const diferencasDe = (resultado: ResultadoValidador): NonNullable<ResultadoValidador["diferencaTexto"]>[] => [
+    ...(resultado.passou || !resultado.diferencaTexto ? [] : [resultado.diferencaTexto]),
+    ...(resultado.passou ? [] : (resultado.filhos ?? []).flatMap(diferencasDe)),
+  ];
+  const diferencasDoContrato = contextoDoContrato ? Object.fromEntries((itensChecklist ?? []).map((parte) => [parte.id, diferencasDe(avaliarDetalhado(parte.validador, contextoDoContrato))])) : undefined;
+
   const apiLab: ApiLab = {
     versao: versaoLab,
     avaliarItens: (): ItemLab[] => {
@@ -1912,7 +1919,7 @@ export function JogoFase({
 
   const topoContrato = contrato ? <CabecalhoContrato contrato={contrato.contrato} aoAbrirDocumento={abrirDocumento} /> : null;
   const checklist = itensChecklist ? (
-    <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
+    <ChecklistDesafio partes={itensChecklist} diferencas={diferencasDoContrato} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
   ) : null;
   const objetivoDaLinha = objetivoAtivo !== null ? objetivosNaTela[objetivoAtivo] : null;
 
@@ -1932,7 +1939,7 @@ export function JogoFase({
       )}
       {layout === "paisagem" && itensChecklist && estado.etapa === "objetivos" && (
         <div className="max-h-40 shrink-0">
-          <ChecklistDesafio partes={itensChecklist} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
+          <ChecklistDesafio partes={itensChecklist} diferencas={diferencasDoContrato} feitas={estado.partesFeitas} titulo={tituloChecklist} novas={novasDoContrato} topo={topoContrato} vazio={vazioDoChecklist} />
         </div>
       )}
       <BalaoFala fala={falaNaTela} pergunta={perguntaDaFala} rabo={movel ? "baixo-direita" : "esquerda"}>
@@ -2955,6 +2962,7 @@ export function JogoFase({
           fecharDepoisDe={
             layout === "paisagem" &&
             emObjetivo &&
+            !ferramentaEmCena &&
             !filaPedeJogador(estado) &&
             !estado.confirmandoSolucao &&
             !previsaoPendente &&

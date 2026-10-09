@@ -23,16 +23,10 @@ Estrutura (o mapa, rodada 5):
   unidades planejadas aparecem no mapa, "Em breve".
 - Cada unidade tem várias fases, terminando no desafio.
 
-Hoje existem duas unidades prontas, na Ilha Sites › Elementos:
-
-- **Unidade 1, "O site é seu"**: Fase 1 guiada, Fase 2 só de sozinho (a
-  exceção: a Fase 1 já estava publicada) e o desafio na Lanchonete Sabor
-  Rápido.
-- **Unidade 2, "Faxina no site"**: a unidade-modelo, completa (3 fases de
-  micro-passos no Jornal da Vila e o desafio na loja Brinquedos Arco-Íris).
-
-A próxima é a U3, "Títulos e textos" (motor pronto: renomear tag). Zonas
-com `requerMotor` no currículo esperam trabalho de motor.
+O conteúdo publicado e o estágio de cada ilha estão consolidados em
+`docs/ROADMAP.md` e `src/conteudo/publicados.json`. A plataforma já inclui
+Sites, Lógica, o museu completo das Origens, contratos e revisão diária.
+Zonas com `requerMotor` aguardam o motor indicado no currículo.
 
 O conteúdo é produzido em massa a partir do formato declarativo, das
 checagens automáticas e do guia `docs/GUIA-DE-CONTEUDO.md`.

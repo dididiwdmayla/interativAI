@@ -29,6 +29,16 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 41: faxina técnica das dez pendências.** Duplo toque da U4
+  sem mover o alvo, rastro compacto e Home/End da U3 sob carga, portões recortados pela
+  proximidade, exportação de todo o kit com prova no Node, tempo de contrato
+  visível/ativo, comparação exata com diferenças, plano delimitado sem
+  apagar comentários, Aplicar solução conferindo novamente, `textoContem`
+  documentado e meta da padaria de 715,75 para 555,75 px em retrato.
+  Pendências restantes classificadas por decisão do Will ou ilha futura.
+  Detalhe e validação em `docs/PROGRESSO.md`.
+
+
 - **Rodada 40: o mundo fluido no celular e os nomes das ilhas que não somem.**
   Detalhe em `docs/PROGRESSO.md`.
   - **Medida de celular** (`testes/desempenho-mundo.mjs`): processador
@@ -762,307 +772,139 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 40 (mundo fluido): aguardando a revisão do pull request, rolando o
-  mundo num Android de verdade, de dia e de noite, rápido, ida e volta (sem
-  travar e sem ilha sem nome), e trocando as animações no menu.
+- Rodada 41 (faxina técnica): dez correções concluídas e documentadas,
+  em revisão no pull request. Rodadas 39/40 já integradas; a conferência
+  num Android real fica nas decisões do Will abaixo.
 
 ### Pendências
 
-- **Rodada 40, para depois:**
-  - As medidas são de um Chromium sem tela, com o processador e a memória
-    de vídeo limitados por emulação; o compositor e a GPU de um celular de
-    verdade não foram limitados. Falta a confirmação no Android.
-  - As ondinhas do mundo pararam de deslizar (eram duas camadas do tamanho
-    do mundo; a vida do mar ficou com reflexos, espuma, peixes e o
-    barquinho). Na tela da ilha, continuam deslizando.
-  - Enquanto se rola, todo o mundo pausa (e volta 600 ms depois); pausar e
-    voltar custa um recálculo de cada animação na tela (até ~90 ms em 6x,
-    num momento em que nada se mexe).
-  - A área de rolagem do mundo é uns 15 px mais larga que o desenho: no fim
-    do mundo aparece uma faixa do azul de fundo, que de noite destoa.
-  - Com 32 MB de memória de vídeo (celular bem de entrada, tela de 3x), a
-    versão nova ainda perde 3 de 15 nomes (a antiga, 17 de 33); abaixo disso,
-    só o modo leve com menos camadas ajudaria.
-  - Cada classe animada nova do mundo precisa entrar nas duas listas do
-    `globals.css` (o `desempenho-mundo.mjs` acusa uma esquecida).
+Revisadas integralmente na rodada 41. As correções e a classificação das
+entradas retiradas estão no `PROGRESSO.md`; abaixo ficam só decisões e
+trabalhos futuros, sem falha conhecida aceita na bateria.
 
-- **Rodada 39, para depois:**
-  - Deitado, cabem quatro ou cinco ilhas inteiras e todas animam por
-    dentro (a regra é metade da ilha na tela).
-  - O mundo segue o relógio do aparelho: quem joga de noite vê o mundo
-    escuro. Se incomodar, um ajuste de "sempre de dia" nos Ajustes.
-  - "Parte feita" do desafio não espera o Continuar; a fala final do
-    desafio resume e leva a fila. Se o Will quiser a parte esperando, é uma
-    troca de uma linha no motor (`aguarda: true`), mas as jornadas que fazem
-    várias partes seguidas passam a tocar Continuar.
-  - A fala pedida (tutor, link) troca uma importante que estava na tela;
-    a pausa (Próximo objetivo) continua valendo.
-  - O aceno guarda a hora numa chave própria do localStorage
-    (`ilha-sites:mundo:ultima-visita`), fora do progresso e da migração.
-  - A garrafa tem 8 curiosidades (`curiosidades.ts`); o "eu vi!" da baleia
-    não conta em lugar nenhum (uma insígnia escondida seria opção).
-  - `?hora=` e `?baleia` ficam abertos no endereço (para conferir e para os
-    testes).
+**Precisa de decisão do Will**
 
-- **Rodada 38, para depois:**
-  - O Python baixa uns 13 MB na primeira vez (o núcleo do Pyodide). Vale
-    medir num celular de verdade, com 4G, e decidir se a sala avisa antes.
-  - Um programa Python que trava só para no tempo limite (5 s), derrubando
-    o worker: o próximo Rodar acorda outro (do cache). Parar no meio pede
-    isolamento de origem cruzada (SharedArrayBuffer), que o jogo não tem.
-  - A saída de COBOL e BASIC foi conferida pela gramática, não por um
-    compilador (não havia GnuCOBOL nem BASIC no ambiente); C e Java foram
-    compilados e rodados.
-  - O /lab/fases acorda o Python na própria página para as checagens (o
-    Rodar checagens demora uns segundos a mais na primeira vez).
-  - Bancada de portões no celular em pé, a 100%: as áreas de toque (44 px)
-    das portas de portões vizinhos se cobrem, e o aluno precisa ampliar
-    (como na bancada da Lógica). Vale abrir a bancada do museu já
-    ampliada no toque, ou espaçar mais os portões novos.
-  - O cartão compacto da apresentação (o "No F12 de verdade" recolhido)
-    só aparece quando o cartão inteiro não cabe ao lado do alvo; conferir
-    num celular deitado de verdade se a leitura do F12 não se perde.
-  - A Revisão do dia continua sem a área exposicao: os 42 itens novos são
-    previsões sobre vitrines.
-  - O lugar da próxima geração continua abrindo com a sala 2; a insígnia
-    da história vem com as seis.
+- Mundo em Android real (rodadas 37/40): decidir quais aparelhos testar,
+  inclusive o compositor/GPU sem emulação e o limite de 32 MB, em que ainda
+  se perderam 3 de 15 nomes. O modo leve permanece a alternativa atual.
+- Mar do mundo (40): decidir se vale retomar as ondinhas deslizando sem
+  camadas do tamanho do mundo; hoje reflexos, espuma, peixes e barco animam.
+- Pausa durante rolagem (40): decidir se o recálculo de até 90 ms em 6x,
+  ao retomar depois de 600 ms, pede outra otimização em aparelho real.
+- Faixa no fim do mundo (40): decidir o acabamento dos cerca de 15 px de
+  área de rolagem além do desenho, especialmente de noite.
+- Ilhas visíveis deitadas (39) e barra de temas (37): decidir se quatro ou
+  cinco ilhas animando e a altura curta com o menu aberto exigem outro layout.
+- Dia/noite (39): decidir se os Ajustes devem oferecer "sempre de dia".
+- Fila de falas (39): decidir se "Parte feita" também espera Continuar e
+  se uma fala pedida pelo aluno pode substituir a importante atual.
+- Aceno (39): decidir se a hora da última visita fica fora da migração,
+  na chave própria `ilha-sites:mundo:ultima-visita`, como hoje.
+- Baleia/garrafa (39): decidir se ver a baleia dá insígnia e se ampliar as
+  oito curiosidades; decidir também se `?hora=` e `?baleia` ficam públicos.
+- Python inicial (38): medir os cerca de 13 MB em 4G real e decidir se o
+  museu precisa avisar antes. O /lab/fases ainda aquece Python na página;
+  decidir se a demora inicial da conferência precisa de aviso próprio.
+- Cartão compacto de ferramenta (38): conferir em celular deitado real e
+  decidir se o "No F12 de verdade" recolhido continua legível.
+- Antepassados (36): decidir se quem revisita o corredor sempre ouve as
+  assinaturas ou se deve haver um "já se conhecem" no progresso.
+- Próxima geração (36/38): decidir se o lugar continua abrindo na sala 2
+  ou só com as seis. A insígnia da história já exige as seis.
+- Gigante de válvulas (36): decidir se merece sala própria; hoje visita
+  as salas 1/4 e o computador bege é o anfitrião da 4.
+- Sons do museu (36): decidir se a assinatura da próxima geração ganha
+  arquivo gravado, mantendo os sons sintetizados das demais.
+- Estufa repetida (37): decidir qual cena trocar numa rodada de conteúdo
+  de Depuração U4 ou Estruturas U3; estão em `CENAS_REPETIDAS_CONFERIDAS`.
+- Layout do trabalho (26/29): decidir mudanças para palco/casos baixos no
+  computador (incluindo 1024 x 768), plano quebrando linhas, cena apertando
+  código em pé e poucas linhas/teclado deitado; o divisor e o aviso de virar
+  o celular continuam. Decidir também um aviso de memória alterada no palco
+  recolhido em retrato.
+- Contrato (29/35): decidir se a entrega permite voltar e revisar e se o
+  software sem cena (estoque) exporta programa + relatório com uma saída
+  útil; hoje sairia mudo. Decidir cartão próprio de diagnóstico apenas se
+  outros contratos precisarem; o plano agrupado já cumpre esse papel.
+- Falas do cliente (29): decidir se o ritmo letra por letra deve mudar;
+  Continuar já completa a fala, mas as jornadas ficam mais longas.
+- Meta de cena (28): decidir se o conteúdo pode escolher um instante para
+  cenas cujas mudanças ficam espalhadas; hoje usa o meio das mudanças.
+- Circuito com oito linhas (20): decidir ajustes de tabela/bancada em
+  retrato após conferir com jogadores. Os alvos sobrepostos foram corrigidos.
+- Abas de programa (17/22): decidir esconder Elementos trancada e mudar
+  a posição de Desempenho; decidir persistir medições do gráfico.
+- Computadorzinho no celular (17): conferir e decidir o posicionamento
+  quando cobre parte da barra de símbolos do Console.
+- Bancadas (17): decidir se o conceito marcador "elemento" deve ser
+  substituído nos exemplos antigos; conceitos reais já existem no conteúdo.
+- Passos de plataformas (16): decidir uma tela com passos/fatos e data;
+  `plataformas-marketing.ts` continua conferido pelo teste de conteúdo.
+- Simulador S5 (16): decidir se ganha desafio com antes/depois; hoje a
+  validação `simulacao` pertence ao `simulador-campanha`. Não migrar publicada
+  sem uma rodada própria de conteúdo.
+- Gerador de revisão (15/16): decidir se os scripts locais que produziram
+  os 218 itens devem virar ferramenta da fábrica.
+- Cobertura pelo mapa (14): decidir priorizar jornadas de E5, R1, R2 e P1,
+  nos três layouts e desafios. A cobertura de conteúdo e pelo /lab existe;
+  o fluxo publicado dessas unidades ainda não tem jornada própria completa.
+  Usar `PUBLICADAS`/`prontasDaIlha`, sem listas de semeado fixas.
+- Revisão diária (14): decidir posição do Porto nas outras trilhas e
+  música própria; decidir se `Objetivo.conceitos` terá uso além da ajuda
+  atual aproximada pelas estrelas.
 
-- **Rodada 37, para depois:**
-  - O sumiço das ilhas foi reproduzido pela medida de repintura do Chrome
-    (a causa), não no Android em si: o ambiente de teste é um Chromium sem
-    GPU. Vale conferir num celular de verdade, rolando o mundo.
-  - Cada ilha do mundo é uma camada do compositor (`will-change`): umas 10
-    camadas pequenas; num aparelho com pouca memória de vídeo, vale olhar.
-  - A estufa aparece igual na Depuração U4 e em Estruturas U3
-    (`CENAS_REPETIDAS_CONFERIDAS`): trocar uma delas quando uma rodada de
-    conteúdo mexer nessas unidades.
-  - A registradora e a tela de aplicativo não brilham sozinhas à noite
-    (não entram na `Emissao` da cena): nenhuma cena noturna usa elas hoje.
-  - O Levar pro mundo de um contrato sem cena (o estoque) continua
-    pendente: o programa não escreve nada no console, então o .js sairia
-    mudo.
-  - Deitado, a ilha ocupa a altura da tela e o caminho fica quase reto
-    (a placa de cada zona tem a faixa de cima); com a barra de temas aberta,
-    sobra pouca altura.
+**Fica para uma ilha futura**
 
-- **`unidades.mjs retrato` quebrado também na principal (achado na rodada
-  36):** o duplo toque em `#nav-integrantes` (U4F1, objetivo 3) seleciona o
-  elemento mas não abre o campo de edição (`editarValorAtributo`, linha
-  167). Reproduz igual na principal antes da rodada 36; desktop e paisagem
-  passam. Investigar o duplo toque do `TextoEditavel` em retrato.
-- **Museu das Origens (rodada 36), para depois:**
-  - A estação de camadas usa uma máquina de brinquedo (PEGA, SOMA, GUARDA
-    e bits inventados), declarada na placa como simplificada. Se um dia a
-    sala 4 mostrar um processador de verdade, as instruções mudam lá.
-  - A Revisão do dia não aceita a área exposicao: os 24 itens do museu são
-    previsões sobre vitrines (mini-sites). Uma revisão com estação de
-    verdade pede o `ItemRevisao` com áreas.
-  - Os antepassados acordam de novo a cada visita (é a graça do corredor);
-    quem volta muitas vezes ouve as assinaturas de novo. Um "já se
-    conhecem" no progresso é opção, se incomodar.
-  - O lugar da próxima geração abre com a sala 2 (`SALA_DA_PROXIMA_GERACAO`
-    em `src/lib/museu.ts`); as salas da parte 2 não mudam isso.
-  - O gigante de válvulas não tem sala própria (aparece de visita nas salas
-    1 e 4); o computador bege é o anfitrião previsto da sala 4.
-  - Os sons do museu são todos sintetizados; a assinatura da próxima
-    geração é um bom candidato a arquivo gravado (`proxima-geracao`).
-  - A ilha Python entrou no mundo com arte e sem música (toca silêncio,
-    como Frameworks): a faixa entra quando a ilha tiver conteúdo.
-
-- **Depuração, para depois (rodada 35):**
-  - A passagem de uma pausa para a seguinte (Passar por cima, Entrar, Sair)
-    leva a cena por salto, como a linha do tempo faz; só Retomar toca a
-    animação. Animar o trecho entre as duas pausas fica como melhoria.
-  - Os chamados usam `fimDeIlha: false`. Desde a rodada 37, a agenda (com
-    a tela do aplicativo) tem Levar pro mundo; o do software sem cena (o
-    programa e o relatório num .js) continua uma ideia para o contrato das
-    próximas ilhas.
-  - Não há um cartão de diagnóstico dedicado no formato contrato: o quadro de
-    plano agrupado faz o papel (guia, 31.10). Um tipo próprio só vale se mais
-    contratos pedirem diagnóstico.
-  - O catálogo de conceitos ganhou `termoIngles` na rodada 36, mas os
-    conceitos antigos (inclusive os três da Depuração) ainda estão sem o
-    termo (ROADMAP, Próximo).
-
-- **Testes sob carga (Algoritmos, rodada 37):** `algoritmos.mjs retrato 3`
-  esgotou o tempo na navegação da linha do tempo (Home e End até o passo
-  do erro) com a bateria em `PARALELO=4`; sozinho, passa.
-- **Testes sob carga (Depuração):** a checagem conjunta das bancadas
-  tem limite de 5 s, e a prova de recursão infinita espera estourar a
-  pilha antes da proteção de 1,5 s. Com testes e navegadores simultâneos,
-  ambos falharam nesta rodada e passaram isolados. Rodar conteúdo sem
-  jornadas concorrentes, com `--maxWorkers=1`, estabilizou essas provas; revisar a estabilidade dessas provas sem afrouxar o motor.
-
-- **Custo escondido (rodada 32), para depois:**
-  - Fora do modelo (contam 0 escondidos): `flat`, `Object.assign`,
-    `structuredClone`, `JSON.stringify`/`parse`, `slice`/`padStart` de
-    texto, a desestruturação com resto (`[a, ...resto] = lista`) e
-    chamadas indiretas (`Array.prototype.shift.call(l)`, `l["shift"]()`,
-    `l?.shift()`). Nenhum conteúdo depende deles hoje.
-  - O deslize do trem é por transform: numa lista que quebra em duas
-    linhas no palco estreito, o vagão que muda de linha desliza na
-    horizontal (aproximação).
-
-- **Levar pro mundo:** ainda não exporta os dispositivos da seção 30.8
-  (geladeira, semáforo, aspersor...), nem os acontecimentos genéricos e os
-  atores. A registradora e a tela de aplicativo já saem (rodada 37). Um
-  contrato com um aparelho que não sai não oferece o botão (a regra
-  `contrato` cobra).
-
-- **Contratos (rodada 29), para depois:**
-  - Os próximos contratos (Páginas vivas, Rede e Servidor...) pedem o Levar
-    pro mundo de cada ilha (o site com interação, o sistema com dados): o
-    da Lógica é o .js (`src/motor/contrato/levarProMundo.ts`).
-  - O contrato da padaria abre depois de Estruturas de dados; a fase 1 da
-    unidade apresenta os aparelhos específicos da padaria.
-  - No computador, com as cinco áreas, o palco fica baixo entre a cena e os
-    casos de teste (o divisor arrasta). Em pé, a cena aberta aperta o
-    código; ela recolhe sozinha só com o teclado aberto.
-  - O texto do cliente aparece letra por letra (uns 3 s por fala): as
-    jornadas do contrato ficam mais longas; "Continuar" no meio completa a
-    fala.
-  - O tempo de trabalho do relatório conta com a fase aberta na etapa de
-    trabalho (salvo de minuto em minuto); uma aba esquecida aberta conta.
-  - O relatório não tem "voltar e revisar": depois de tudo marcado, é
-    enviar.
-- **Cenas programáveis (rodada 28), para depois:**
-  - Cada linha do tempo do `variosCenarios` roda o código de novo a cada
-    Executar (cada uma com o próprio limite de 1,5 s): use 2 a 4 linhas do
-    tempo, com loops de `esperar(100)` ou mais.
-  - Com loops curtos e cenas longas, a linha do tempo da execução para nas
-    primeiras 1.000 fotos (a cena continua tocando até o fim).
-  - `ItemRevisao` não aceita cena (como não aceita áreas compostas): a
-    revisão de conceitos de cena fica em previsões.
-  - O aviso de cena repetida só aparece na saída do `testar:conteudo`
-    (o `/lab/fases` não mostra avisos).
-  - A foto da cena na meta de um desafio usa o meio das mudanças que o
-    código fez; uma cena com mudanças muito espalhadas pode pedir um
-    instante escolhido pelo conteúdo.
-  - À noite, o escuro cobre também a janela e a rua; uma janela com luz
-    própria (poste, lua mais forte) pede uma peça emissiva nova no kit.
-
-- **Revisão de planejamento (rodada 27):** ItemRevisao não aceita quadro
-  nem áreas compostas. Os sete conceitos novos têm duas previsões cada;
-  revisão com cartões/casos próprios pede essa capacidade no item.
-- **Resumo inicial do PROJETO.md:** ainda descreve duas unidades prontas
-  e U3 de Elementos como próxima; atualizar a síntese sem duplicar o
-  status consolidado deste ROADMAP.
-
-- **Tela composta (rodada 26), para depois:**
-  - Deitado, o código mostra poucas linhas (abas do DevTools, o cabeçalho
-    do Snippet, o seletor Snippet | Console e a barra de símbolos ocupam a
-    altura); com o teclado aberto, quase nada. É o mesmo aperto das fases
-    de programa deitadas; o recado de virar o celular continua valendo.
-  - Em pé, o palco começa recolhido; quem quer ver a memória depois de
-    Executar precisa abri-lo (talvez um aviso de "a memória mudou" no
-    cabeçalho dele).
-  - No computador de 1024 x 768, a lista de casos fica baixa embaixo do
-    palco (o divisor arrasta); a coluna do plano quebra cartões longos em
-    duas linhas.
-  - O bloco do plano no código é o cabeçalho e as linhas numeradas logo
-    abaixo: um comentário numerado do aluno colado ao bloco é lido como
-    parte dele e some quando o plano muda. Só comentários de linha inteira
-    contam para `planoComentado`.
-  - `casosDoAluno.incluir` casa por argumentos e/ou saída exatos: uma borda
-    como "pago igual ao preço" (qualquer valor) precisa ser escrita pela
-    saída esperada (`esperado: 0`) ou por argumentos fixos.
-  - Os tipos publicados (DevTools, programa, circuito, ponte e
-    ordenar-passos) não passaram a usar a composição por baixo: migrá-los
-    pede revisar telas e testes publicados, sem ganho para o aluno agora.
-
-- **Lógica, parte B (rodada 22), para depois:**
-  - O depurador anda pelo rastro, que guarda até 1.000 fotos da memória:
-    num programa mais longo, as pausas depois disso não acontecem. A zona
-    Depuração deve usar programas curtos, dentro dessas primeiras 1.000 fotos.
-  - O palco ainda não mostra as variáveis declaradas dentro de um `case`
-    do `switch` (o escopo de bloco cobre if, for, while e for...of).
-  - A troca com variável auxiliar aparece como duas escritas que piscam;
-    só a troca numa linha (desestruturação) acende "trocou".
-  - No celular, a aba Desempenho fica depois das abas trancadas (Elementos
-    e Rede) e pede rolar a barra de abas; as medições do gráfico não são
-    salvas no progresso (Medir de novo depois de recarregar).
-  - developer.chrome.com está bloqueado pela política de rede do ambiente
-    (os fatos do Chrome foram conferidos pela busca); vale reconferir os
-    textos de atalhos e painéis quando o acesso for liberado.
-
-- **Zona Decisões (rodada 20), para depois:**
-  - Fases de circuito têm 3 chaves e até 3 saídas (8 linhas na tabela): a
-    tabela e a bancada em retrato ficam apertadas; revisar o visual com
-    jogadores.
-  - A jornada de U2 depende do id automático dos portões (`e1`, `ou1`,
-    `nao1`), que o motor atribui; se o esquema mudar, ajustar o JSON.
-
-- **Lógica, parte A (rodada 17), para depois:**
-  - Numa fase de programa a aba Elementos aparece trancada (não há
-    página); talvez escondê-la.
-  - No celular, o computadorzinho às vezes cobre parte da barra de
-    símbolos do Console.
-  - O executor não roda `setTimeout`, `async`/`await` e `fetch` (erro
-    "Ainda não roda aqui"): ficam para a Ilha Rede e Servidor.
-  - As bancadas do `/lab` usam o conceito "elemento" como marcador; os
-    conceitos `snippet-js`, `funcao-js` e `portao-logico` entram com as
-    unidades que os ensinam.
-
-- **Tela dos passos das plataformas (rodada 16):** o
-  `plataformas-marketing.ts` (perfil da empresa, Search Console, Google Ads,
-  schema.org) só é lido pelo `testar:conteudo`; as fases carregam o "conferido
-  em" e o caminho geral em falas. Uma tela que liste os passos e fatos (com a
-  data) é trabalho de motor.
-- **Validador de texto livre (rodada 16):** respostas escritas (h1, texto que
-  responde, resposta a avaliação) só conferem "mudou" (`textoDiferenteDoInicial`)
-  ou igualdade. Um `textoContem` fecharia a porta de "qualquer coisa vale".
-- **Simulador sem antes e depois (rodada 16):** os validadores `simulacao` só
-  existem no tipo `simulador-campanha`, então o desafio da S5 não é do tipo
-  `desafio` e a unidade não tem meta com antes e depois.
-- **Gerador de itens (rodadas 15 e 16):** os 218 itens das duas rodadas
-  saíram de scripts locais, fora do repositório; promover um gerador à fábrica
-  segue em aberto.
-- **Itens de revisão de `salvar-como-meu-tema` e `index-html`:** só
-  previsões (o Meu tema só existe na maquete do jogo; o `index.html` não
-  tem gesto próprio). Se `ItemRevisao` um dia aceitar o site do jogo,
-  ganham uma ação.
-- **Bateria completa (rodada 14):** três testes quebrados desde a rodada
-  13 foram corrigidos: `publicar.mjs` (a P2 não apresenta mais o modo
-  dispositivo e o Lighthouse), `layout.mjs` (o semeado de Elementos e
-  Estilos agora vem do `publicados.json`, com a E5) e `explorar.mjs` (12
-  temas).
-- **Jornadas de navegador pelo mapa das unidades novas.** E5, R1, R2 e
-  P1 foram verificadas por `testar:conteudo` (que reproduz o mesmo motor
-  de validação e ações do jogo real) e por fases de prática jogadas de
-  ponta a ponta em `/lab/fases` no desktop; faltam as jornadas
-  Playwright pelo MAPA (mundo → ilha → fase, como `testes/layout.mjs` e
-  `testes/publicar.mjs` fazem) e a cobertura de retrato/paisagem,
-  inclusive dos desafios. Ao escrever essas jornadas, seguir o padrão
-  dinâmico de `publicar.mjs` (`prontasDaIlha`/`PUBLICADAS` de
-  `testes/curriculo.mjs`) em vez de listas de fases hardcoded — evita o
-  atrito registrado nas rodadas 4 e 5 do `ATRITOS-FABRICA.md` de toda
-  zona nova quebrar o semeado das zonas seguintes.
-- **Revisão do dia, detalhes para depois:** o Porto só aparece na trilha
-  Web na posição fixa (trilhas futuras podem querer outro lugar); a
-  música da revisão é a do mapa; `Objetivo.conceitos` ainda não é usado
-  por nenhuma fase (a ajuda é aproximada pelas estrelas da fase).
-- **`/lab/fases`, "Aplicar solução do objetivo atual" num desafio:** o
-  checklist não recalcula sozinho depois de uma ação sintética sem
-  nenhuma interação real de UI entre uma parte e outra (reproduzido
-  também num desafio antigo e publicado, U6-F3; não afeta
-  `testar:conteudo` nem o jogo real). Detalhe:
-  `docs/ATRITOS-FABRICA.md`, "Rodada 5", item 7.
+- **Ilha Python:** parada imediata de programa travado (SharedArrayBuffer
+  e isolamento de origem); hoje o timeout de 5 s recria o worker pelo cache.
+  Conferir COBOL/BASIC em compiladores reais quando a zona Outras linguagens
+  os usar; hoje a saída simulada foi conferida pela gramática, C/Java rodaram.
+  Música própria da ilha quando ganhar conteúdo; Frameworks também espera
+  sua ilha ter conteúdo para a faixa.
+- **Ilha Origens, futura ampliação:** substituir a máquina de brinquedo
+  (PEGA/SOMA/GUARDA/bits inventados) por processador real só se a sala 4
+  passar a ensinar essa arquitetura; a simplificação atual é declarada.
+- **Ilha Páginas vivas, parte A:** animação entre pausas do depurador
+  (Passar por cima/Entrar/Sair), escopo de `case` no palco, marcação da troca
+  por variável auxiliar e exportação do site com interação. Revisar alocação
+  das áreas no celular quando essas novas ferramentas entrarem.
+- **Ilha Páginas vivas, revisão do motor:** modelo de custo para `flat`,
+  `Object.assign`, `structuredClone`, JSON, `slice`/`padStart` de texto,
+  desestruturação com resto e chamadas indiretas. Nenhuma publicada depende
+  deles hoje. Melhorar o deslize do trem quando o vagão troca de linha.
+- **Ilha Páginas vivas, revisão do depurador:** estender pausas além das
+  primeiras 1.000 fotos. Cenas com loops curtos também atingem esse limite;
+  a cena continua até o fim. Manter conteúdo atual dentro do rastro.
+- **Ilha Páginas vivas, expansão da revisão:** `ItemRevisao` com áreas de
+  exposição, cena, plano e casos; hoje os itens do museu (42), cena e
+  planejamento (sete conceitos) usam previsões. Revisão de Meu tema/index.html
+  com ação depende de aceitar o site do jogo nesse formato.
+- **Ilha Páginas vivas, kit de cenas:** emissões noturnas para registradora,
+  telaApp e janela/rua/poste/lua; nenhuma cena noturna publicada usa os dois
+  primeiros. Melhorar a escolha da foto da meta se houver regra de conteúdo.
+- **Ilha Páginas vivas, fábrica:** mostrar avisos de cena repetida no
+  /lab/fases; hoje só o teste de conteúdo os mostra. IDs automáticos de
+  portões em U2 devem continuar estáveis; se o motor mudar, ajustar sua
+  jornada. Migrar tipos publicados para composição só com ganho concreto
+  e revisão própria das telas/testes.
+- **Ilha Páginas vivas, contratos novos:** casos do aluno que representam
+  relações de borda (por exemplo pago igual ao preço) além de argumentos ou
+  saída exatos. Hoje `esperado: 0`/argumentos fixos são o contrato explícito.
+- **Ilha Rede e Servidor:** `setTimeout`, `async`/`await`, `fetch` e exportação
+  do sistema com dados. Respeitar 2–4 linhas de `variosCenarios` e laços com
+  `esperar(100)` ou mais enquanto cada execução tem limite de 1,5 s.
+- **Ilha Rede e Servidor, documentação:** reconferir atalhos/painéis do
+  Chrome na fonte original quando o acesso permitir; o registro antigo de
+  bloqueio do ambiente não é regra do produto.
 
 ### Próximo (em ordem)
 
-1. Faxina técnica das pendências (as desta seção, das mais antigas às da
-   rodada 40).
-2. Conteúdo: os termos em inglês (`termoIngles`) dos conceitos existentes,
-   e as missões de campo que leem documentação original (guia, seção 1).
-3. Planejar o início do jogo (o porto de chegada) e o login.
-4. Opus: Ilha Páginas vivas, parte A (JavaScript rodando no site-alvo,
-   eventos, o tempo assíncrono no executor, a aba Aplicação e a base de
-   orientação a objetos).
-5. Depois: motores das outras ilhas (Rede e Servidor; Python no navegador,
-   a partir do executor por linguagem da rodada 38; IA ao vivo; Ofício),
-   intercalados com conteúdo, e a trilha Automação industrial a partir do
-   protótipo `InterativAIPLUS` (ver "Como integrar uma trilha nova" no
-   `PROJETO.md`).
+1. Termos em inglês dos conceitos (`termoIngles`) e missões de campo que
+   leem documentação original (guia, seção 1).
+2. Porto de chegada.
+3. Login e versão pública (planejar).
+4. Ilha Páginas vivas, parte A (JavaScript no site-alvo, eventos, tempo
+   assíncrono, aba Aplicação e base de orientação a objetos).
 
 ## Decisões aprovadas
 

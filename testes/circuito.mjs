@@ -26,12 +26,8 @@ async function tocar(localizador, opcoes = {}) {
   if (movel) await fecharBalao(pagina);
   await localizador.scrollIntoViewIfNeeded();
   if (toque && await localizador.evaluate(el => el instanceof SVGElement)) {
-    // Um jogador amplia e navega até a peça antes de tocar. Dois dedos
-    // também arrastam o enquadramento, sem alterar peças sob os dedos.
+    // A jornada liga na escala inicial; a navegação de zoom é testada depois.
     const area = pagina.getByRole("application", { name: "Bancada do circuito" });
-    while (parseInt(await pagina.locator('[data-zoom-circuito]').innerText()) < 150) {
-      await pagina.getByRole("button", { name: "Aumentar zoom do circuito" }).tap();
-    }
     const cdp = cdpToque;
     for (let i = 0; i < 20; i++) {
       const a = await area.boundingBox();

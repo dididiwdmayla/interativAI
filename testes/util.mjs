@@ -74,6 +74,21 @@ export async function abrir({ largura = 1440, altura = 900, toque = false, escal
   return { navegador, contexto, pagina, erros };
 }
 
+/** Dois toques reais no mesmo ponto, com a cadência do dedo preservada sob carga. */
+export async function duploToque(pagina, x, y) {
+  const cdp = await pagina.context().newCDPSession(pagina);
+  const tempo = Date.now() / 1000;
+  try {
+    for (const [tipo, atraso] of [["touchStart", 0], ["touchEnd", 0.04], ["touchStart", 0.14], ["touchEnd", 0.18]]) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: tipo,
+        touchPoints: tipo === "touchStart" ? [{ x, y, id: 1 }] : [],
+        timestamp: tempo + atraso,
+      });
+    }
+  } finally { await cdp.detach(); }
+}
+
 /** Progresso v2 com uma fase em andamento (introdução e meta já vistas). */
 export function progressoComFase(faseId, estadoFase = {}, extra = {}) {
   return {

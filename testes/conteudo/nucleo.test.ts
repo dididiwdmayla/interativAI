@@ -337,3 +337,18 @@ describe("links na prévia", () => {
     expect(link("#ancora").alvo?.id).toBe("rodape");
   });
 });
+
+describe("textoContem", () => {
+  it("exige o trecho, preservando caixa e acento, com espaços normalizados", () => {
+    const sim = nova();
+    const v = { tipo: "textoContem", seletor: "#a1 p", valor: "Texto um" } as const;
+    expect(sim.avaliar(v).passou).toBe(true);
+    expect(sim.avaliar({ ...v, valor: "qualquer coisa" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "texto um" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "Téxto um" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "Texto   um" }).passou).toBe(true);
+    expect(sim.avaliar({ ...v, seletor: ".ausente" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "  " }).passou).toBe(false);
+    expect(sim.avaliar({ tipo: "todos", validadores: [v] }).passou).toBe(true);
+  });
+});

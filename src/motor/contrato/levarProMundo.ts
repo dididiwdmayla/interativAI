@@ -21,7 +21,7 @@ function nomeDe(dispositivo: DispositivoCena): string {
   return dispositivo.nome ?? CATALOGO_DISPOSITIVOS[dispositivo.tipo].nome;
 }
 
-type Acontecimento = { ms: number; texto: string; tipo: "chega" | "sai" | "aperta"; dispositivo?: string };
+type Acontecimento = { ms: number; texto: string; tipo: "chega" | "sai" | "aperta" | "entrada"; dispositivo?: string };
 
 /** Os acontecimentos da linha do tempo, em ordem, com a frase de cada um. */
 function acontecimentos(cena: DadosCena): Acontecimento[] {
@@ -32,7 +32,9 @@ function acontecimentos(cena: DadosCena): Acontecimento[] {
         ...(item.saiMs !== undefined ? [{ ms: item.saiMs, texto: "Alguém foi embora.", tipo: "sai" as const }] : []),
       ];
     }
-    if (item.tipo !== "interruptor") throw new Error("O Levar pro mundo ainda não exporta acontecimentos genéricos de cena.");
+    if (item.tipo === undefined) {
+      return [{ ms: "em" in item ? item.em : item.de, tipo: "entrada", dispositivo: item.dispositivo, texto: `${item.dispositivo}.${item.propriedade}: ${"em" in item ? String(item.valor) : `${item.valorInicial} a ${item.valorFinal}`}` }];
+    }
     const alvo = cena.dispositivos.find((d) => d.id === item.dispositivo);
     return [{ ms: item.noMs, texto: `Alguém apertou ${alvo ? nomeDe(alvo).toLowerCase() : item.dispositivo}.`, tipo: "aperta", dispositivo: item.dispositivo }];
   });
@@ -47,7 +49,8 @@ function criarDispositivo(dispositivo: DispositivoCena): string {
   const inicial = { ...CATALOGO_DISPOSITIVOS[dispositivo.tipo].inicial, ...(dispositivo.inicial ?? {}) };
   const ini = (chave: string) => js(inicial[chave]);
   switch (dispositivo.tipo) {
-    default: throw new Error(`O Levar pro mundo ainda não exporta ${dispositivo.tipo}.`);
+    case "sensorCarro": case "geladeira": case "botao": case "sensorUmidade": case "sensorDia": case "alarme": case "aspersor": case "semaforo":
+      return `aparelhoGenerico(${nome}, ${js(dispositivo.id)}, ${js(inicial)}, ${js(CATALOGO_DISPOSITIVOS[dispositivo.tipo])})`;
     case "lampada":
       return `lampada(${nome}, ${ini("ligada")}, ${ini("brilho")})`;
     case "sensor":
@@ -74,7 +77,31 @@ function criarDispositivo(dispositivo: DispositivoCena): string {
 }
 
 /** As fábricas dos dispositivos (só as dos tipos que a cena usa entram no arquivo). */
-const FABRICAS: Partial<Record<DispositivoCena["tipo"], string>> = {
+const GENERICA = `
+  function aparelhoGenerico(nome, id, inicial, ficha) {
+    var estado = Object.assign({}, inicial), objeto = {};
+    ficha.comandos.forEach(function (comando) {
+      if (!comando.efeito) throw new Error("Comando sem exportação: " + comando.nome);
+      objeto[comando.nome] = function (valor) {
+        aindaRoda(); var efeito = comando.efeito;
+        if (efeito.argumento && efeito.argumento.valores.indexOf(valor) < 0) throw new RangeError(comando.nome + ": valor inválido " + valor);
+        estado[efeito.propriedade] = efeito.argumento ? valor : efeito.valor;
+        avisar(nome + ": " + comando.nome + (efeito.argumento ? " " + valor : ""));
+      };
+    });
+    ficha.propriedades.forEach(function (p) {
+      Object.defineProperty(objeto, p.nome, { enumerable: true,
+        get: function () { aindaRoda(); return p.doMundo ? valorTemporal(id, p.nome, estado[p.nome]) : estado[p.nome]; },
+        set: function (valor) { aindaRoda(); if (!p.escreve) soLeitura(p.nome); if (p.faixa) valor = numeroNaFaixa(valor, p.nome, p.faixa[0], p.faixa[1], false); estado[p.nome] = valor; avisar(nome + ": " + p.nome + " " + valor); }
+      });
+    });
+    return objeto;
+  }`;
+
+const FABRICAS: Record<DispositivoCena["tipo"], string> = {
+  sensorCarro: GENERICA, geladeira: GENERICA, botao: GENERICA,
+  sensorUmidade: GENERICA, sensorDia: GENERICA, alarme: GENERICA,
+  aspersor: GENERICA, semaforo: GENERICA,
   lampada: `
   function lampada(nome, ligada, brilho) {
     var objeto = {
@@ -126,7 +153,7 @@ const FABRICAS: Partial<Record<DispositivoCena["tipo"], string>> = {
   }`,
   forno: `
   function forno(nome, ligadoNoComeco) {
-    var ligado = ligadoNoComeco;
+    var ligado = ligadoNoComeco, desligaEm = 0;
     var trocas = [];
     function temperatura() {
       var graus = ${FORNO.ambiente}, estado = ligadoNoComeco, desde = 0;
@@ -140,10 +167,12 @@ const FABRICAS: Partial<Record<DispositivoCena["tipo"], string>> = {
       return Math.round(graus);
     }
     var objeto = {
-      ligar: function () { aindaRoda(); if (!ligado) { ligado = true; trocas.push({ ms: relogioMs, ligado: true }); avisar(nome + ": ligado (esquentando)"); } },
-      desligar: function () { aindaRoda(); if (ligado) { ligado = false; trocas.push({ ms: relogioMs, ligado: false }); avisar(nome + ": desligado"); } }
+      assar: function (ms) { aindaRoda(); ms = numeroNaFaixa(ms, "assar", 1, 60000, true); objeto.ligar(); desligaEm = relogioMs + ms; var fim = desligaEm; AGENDADOS.push({ ms: fim, fazer: function () { if (desligaEm === fim) objeto.desligar(); } }); avisar(nome + ": assar " + ms + " ms"); },
+      ligar: function () { aindaRoda(); desligaEm = 0; if (!ligado) { ligado = true; trocas.push({ ms: relogioMs, ligado: true }); avisar(nome + ": ligado (esquentando)"); } },
+      desligar: function () { aindaRoda(); desligaEm = 0; if (ligado) { ligado = false; trocas.push({ ms: relogioMs, ligado: false }); avisar(nome + ": desligado"); } }
     };
     Object.defineProperty(objeto, "ligado", { enumerable: true, get: function () { aindaRoda(); return ligado; }, set: function () { soLeitura("ligado", "ligar() ou desligar()"); } });
+    Object.defineProperty(objeto, "restante", { enumerable: true, get: function () { aindaRoda(); return Math.max(0, desligaEm - relogioMs); }, set: function () { soLeitura("restante", "assar(ms)"); } });
     Object.defineProperty(objeto, "temperatura", { enumerable: true, get: function () { aindaRoda(); return temperatura(); }, set: function () { soLeitura("temperatura"); } });
     return objeto;
   }`,
@@ -256,6 +285,40 @@ export function programaParaLevar({ contrato, cena, codigo }: { contrato: DadosC
     `  var HORA_INICIAL = ${horaInicial === null ? "null" : horaInicial};`,
     `  var MS_POR_HORA = ${RELOGIO.msPorHora};`,
     `  var ACONTECIMENTOS = ${js(cena ? acontecimentos(cena) : [])};`,
+    `  var ENTRADAS = ${js((cena?.linhaDoTempo ?? []).filter(e => e.tipo === undefined))};`,
+    `  var REACOES = ${js(cena?.reacoes ?? [])};`,
+    `  var ATORES = ${js(cena?.atores ?? [])};`,
+    "  var DISPOSITIVOS = {}, EFEITOS = [], PENDENTES = [], ANTERIORES = [], OCUPADOS = {}, AGENDADOS = [];",
+    "  var conferindoReacoes = false;",
+    `  function valorTemporal(id, propriedade, inicial) {
+      var valor = inicial;
+      ENTRADAS.concat(EFEITOS).filter(function (e) { return e.dispositivo === id && e.propriedade === propriedade; }).sort(function (a, b) { return (a.em === undefined ? a.de : a.em) - (b.em === undefined ? b.de : b.em); }).forEach(function (e) {
+        var inicio = e.em === undefined ? e.de : e.em;
+        if (inicio <= relogioMs) valor = e.em === undefined ? e.valorInicial + (e.valorFinal - e.valorInicial) * Math.max(0, Math.min(1, (relogioMs - e.de) / (e.ate - e.de))) : e.valor;
+      });
+      return valor;
+    }
+    function conferirReacoes() {
+      if (conferindoReacoes) return;
+      conferindoReacoes = true;
+      try {
+        REACOES.forEach(function (r, i) {
+          var casa = [r.quando].concat(r.se || []).every(function (c) { return DISPOSITIVOS[c.dispositivo] && DISPOSITIVOS[c.dispositivo][c.propriedade] === c.valor; });
+          if (!casa) PENDENTES[i] = undefined;
+          if (casa && !ANTERIORES[i]) PENDENTES[i] = relogioMs + (r.atrasoMs || 0);
+          ANTERIORES[i] = casa;
+          if (!casa || PENDENTES[i] !== relogioMs) return;
+          PENDENTES[i] = undefined;
+          var ator = ATORES.find(function (a) { return a.id === r.entao.ator; });
+          var acao = ator && ator.acoes[r.entao.acao];
+          if (!acao || (OCUPADOS[ator.id] || 0) > relogioMs) return;
+          var fim = relogioMs + acao.duracaoMs;
+          OCUPADOS[ator.id] = fim;
+          console.log("[" + quando(relogioMs) + "] " + ator.id + ": " + r.entao.acao);
+          (acao.aoConcluir || []).forEach(function (e) { EFEITOS.push(Object.assign({ em: fim }, e)); });
+        });
+      } finally { conferindoReacoes = false; }
+    }`,
     "  var relogioMs = 0;",
     "  var proximo = 0;",
     "  var acabou = false;",
@@ -268,9 +331,18 @@ export function programaParaLevar({ contrato, cena, codigo }: { contrato: DadosC
     "    var minutos = Math.floor((ms / MS_POR_HORA) * 60);",
     "    return doisDigitos((HORA_INICIAL + Math.floor(minutos / 60)) % 24) + \":\" + doisDigitos(minutos % 60);",
     "  }",
-    "  function avisar(texto) { console.log(\"[\" + quando(relogioMs) + \"] \" + texto); }",
+    "  function avisar(texto) { console.log(\"[\" + quando(relogioMs) + \"] \" + texto); conferirReacoes(); }",
     "  /** O mundo anda até o instante: quem chega, quem vai embora, quem aperta. */",
     "  function andarAte(ms) {",
+    "    var anterior = relogioMs;",
+    "    while (true) {",
+    "      var instantes = ENTRADAS.map(function(e) { return e.em === undefined ? e.de : e.em; }).concat(ENTRADAS.filter(function(e) { return e.ate !== undefined; }).map(function(e) { return e.ate; }), EFEITOS.map(function(e) { return e.em; }), PENDENTES, Object.values(OCUPADOS), AGENDADOS.map(function(a) { return a.ms; }));",
+    "      REACOES.forEach(function(r) { [r.quando].concat(r.se || []).forEach(function(c) { ENTRADAS.forEach(function(e) { if(e.em === undefined && e.dispositivo === c.dispositivo && e.propriedade === c.propriedade && typeof c.valor === 'number' && e.valorInicial !== e.valorFinal) { var p = (c.valor-e.valorInicial)/(e.valorFinal-e.valorInicial); if(p>=0 && p<=1) instantes.push(e.de+p*(e.ate-e.de)); } }); }); });",
+    "      var proximos = instantes.filter(function(t) { return t > anterior && t <= ms; });",
+    "      if (!proximos.length) break;",
+    "      anterior = Math.min.apply(null, proximos); relogioMs = anterior; AGENDADOS.filter(function(a) { return a.ms === anterior; }).forEach(function(a) { a.fazer(); }); AGENDADOS = AGENDADOS.filter(function(a) { return a.ms > anterior; }); conferirReacoes();",
+    "    }",
+    "    relogioMs = ms; conferirReacoes();",
     "    while (proximo < ACONTECIMENTOS.length && ACONTECIMENTOS[proximo].ms <= ms) {",
     "      var acontecimento = ACONTECIMENTOS[proximo++];",
     "      console.log(\"[\" + quando(acontecimento.ms) + \"] \" + acontecimento.texto);",
@@ -290,7 +362,7 @@ export function programaParaLevar({ contrato, cena, codigo }: { contrato: DadosC
     "    return vezes;",
     "  }",
     "  /** Depois do fim da simulação, nada mais roda (nem um try/catch segura). */",
-    "  function aindaRoda() { if (acabou) throw FIM; }",
+    "  function aindaRoda() { if (acabou && !conferindoReacoes) throw FIM; }",
     "  function soLeitura(nome, comando) { throw new TypeError(nome + \" só dá para ler.\" + (comando ? \" Use \" + comando + \".\" : \" Quem muda é o mundo.\")); }",
     "  function numeroNaFaixa(valor, nome, minimo, maximo, inteiro) {",
     "    if (typeof valor !== \"number\" || valor !== valor) throw new TypeError(nome + \" precisa ser um número, de \" + minimo + \" a \" + maximo + \".\");",
@@ -306,12 +378,13 @@ export function programaParaLevar({ contrato, cena, codigo }: { contrato: DadosC
     "    andarAte(alvo);",
     "    relogioMs = alvo;",
     "  }",
-    ...tipos.map((tipo) => FABRICAS[tipo]),
+    ...new Set(tipos.map((tipo) => FABRICAS[tipo])),
     "",
     "  // Os aparelhos da cena, com os nomes que o seu código usa.",
-    ...(cena?.dispositivos ?? []).map((d) => `  var ${d.id} = ${criarDispositivo(d)};`),
+    ...(cena?.dispositivos ?? []).map((d) => `  var ${d.id} = DISPOSITIVOS[${js(d.id)}] = ${criarDispositivo(d)};`),
     "",
     "  console.log(\"" + contrato.projeto.replace(/"/g, "'") + ": começou a simulação.\");",
+    "  conferirReacoes();",
     "  try {",
     "    // ======================= O SEU PROGRAMA =======================",
     ...codigo.split("\n").map((linha) => (linha ? `    ${linha}` : "")),

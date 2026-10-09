@@ -2742,3 +2742,17 @@ peças vêm fixas e o aluno só pluga (as caixas de válvulas precisam de
 realimentação guarda estado (`anteriores`): é a memória e o selo da
 contatora (a ponte com a trilha Automação). `circuitoLembra` liga e solta
 o `liga` (a saída precisa ficar acesa) e depois o `desliga`.
+
+### Validador de trecho de texto: `textoContem`
+
+`{ tipo: "textoContem", seletor: "h1", valor: "Serviços da vila" }`
+exige que pelo menos um elemento selecionado contenha o trecho. Normaliza
+espaços e quebras como `textoIgual`, mas preserva maiúsculas e acentos.
+Trecho vazio e seletor sem elemento reprovam. Combina com `todos`, `algum`
+e `nao`. Serve para respostas livres com conteúdo obrigatório; não basta
+mudar o texto. Fases publicadas continuam com os validadores originais.
+
+O plano gerado no Snippet agora tem `// <interativai:plano>` e
+`// </interativai:plano>`. Só o texto entre os marcadores é reescrito.
+Blocos antigos sem fim explícito são preservados; levar novamente insere
+um bloco delimitado sem apagar comentários antigos do aluno.

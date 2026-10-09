@@ -29,7 +29,7 @@ async function tocar(el) {
   await pronto();
 }
 /**
- * Uma peça da bancada de portões, no toque: como em circuito.mjs, o jogador amplia (150%) e arrasta o
+ * Uma peça da bancada de portões, no toque: como em circuito.mjs, o jogador usa a escala inicial e arrasta o
  * enquadramento com dois dedos até a peça, e toca nela (na posição dada, ou no meio).
  */
 async function tocarNaBancada(estacao, el, posicao) {
@@ -37,10 +37,6 @@ async function tocarNaBancada(estacao, el, posicao) {
   await fecharBalao(pagina);
   await el.scrollIntoViewIfNeeded();
   const area = estacao.getByRole("application", { name: "Bancada do circuito" });
-  while (parseInt(await estacao.locator("[data-zoom-circuito]").innerText()) < 150) {
-    await estacao.getByRole("button", { name: "Aumentar zoom do circuito" }).tap();
-    await pronto();
-  }
   for (let i = 0; i < 20; i++) {
     const a = await area.boundingBox();
     const caixa = await el.boundingBox();
@@ -121,7 +117,11 @@ async function acao(a) {
   } else if (a.tipo === "rodarLinguagem") {
     // O Python baixa e acorda na primeira vez: a barra de carga aparece, e a saída chega depois.
     await tocar(estacao.locator(`[data-rodar="${a.linguagem}"]`));
-    await estacao.locator(`[data-saida-linguagem="${a.linguagem}"][data-pronta="sim"]`).waitFor({ timeout: 120000 });
+    await estacao.locator(`[data-saida-linguagem="${a.linguagem}"][data-pronta="sim"]`).waitFor({ timeout: 120000 }).catch(async erro => {
+      await pagina.screenshot({path: `testes-falha-museu-${modo}.png`});
+      console.log('diagnóstico da linguagem', await pagina.locator('[data-jogo-fase]').evaluate(el => ({objetivo:el.getAttribute('data-objetivo-atual'), apresentacao:el.getAttribute('data-apresentacao-estado'), saidas:[...el.querySelectorAll('[data-saida-linguagem]')].map(e=>({linguagem:e.getAttribute('data-saida-linguagem'), pronta:e.getAttribute('data-pronta'), texto:e.textContent})), erros:[...el.querySelectorAll('[role=alert]')].map(e=>e.textContent)})));
+      throw erro;
+    });
     await pronto();
   } else if (a.tipo === "cantarCoral") {
     await tocar(estacao.locator("[data-cantar-coral]"));
@@ -178,6 +178,7 @@ async function conversa(nome) {
   const botao = pagina.getByRole("button", { name: nome }).first();
   await botao.waitFor({ timeout: 15000 }).catch(async (erro) => {
     await pagina.screenshot({ path: `testes-falha-museu-${modo}.png` });
+    console.log('diagnóstico conversa', await pagina.evaluate(()=>({objetivo:document.querySelector('[data-jogo-fase]')?.getAttribute('data-objetivo-atual'),fila:document.querySelector('[data-jogo-fase]')?.getAttribute('data-fila-falas'),botoes:[...document.querySelectorAll('[data-balao-mascote] button')].map(e=>e.textContent),fios:[...document.querySelectorAll('[data-fio]')].map(e=>e.getAttribute('data-fio'))})));
     throw erro;
   });
   await tocar(botao);

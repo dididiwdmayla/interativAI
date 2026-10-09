@@ -1,0 +1,20 @@
+import { abrir, esperarPronto, fecharBalao, conferir } from './util.mjs';
+const modo=process.argv[2]??'desktop';
+const [largura,altura]=modo==='retrato'?[390,844]:modo==='paisagem'?[844,390]:[1440,900];
+const {pagina,navegador}=await abrir({largura,altura,toque:modo!=='desktop',rota:'/lab/fases?fase=logica-programa-de-verdade-u1-f2',esperar:'[data-jogo-fase]'});
+await pagina.getByRole('button',{name:'Recolher o lab'}).click();
+await esperarPronto(pagina);
+if(modo!=='desktop')await fecharBalao(pagina);
+const aba=pagina.locator('[data-abas-composicao] [data-segmento="snippet"]');
+if(await aba.count())await aba.click();
+const fontes=pagina.getByRole('tab',{name:'Fontes',exact:true});if(await fontes.isVisible())await fontes.click();
+const editor=pagina.locator('[data-editor-snippet] .cm-content');
+await editor.focus();await pagina.keyboard.press('ControlOrMeta+A');await pagina.keyboard.insertText('letreiro.mostrar("CLIENTES:4");');
+await esperarPronto(pagina);await pagina.locator('[data-executar-snippet]').click();await esperarPronto(pagina);
+if(modo==='retrato') { const botao=pagina.locator('button[aria-expanded]').filter({hasText:/Checklist|Requisitos/}).first();if(await botao.count()&&await botao.getAttribute('aria-expanded')==='false')await botao.click(); }
+if(modo==='paisagem')await pagina.locator('[data-balao]').first().click();
+const diferenca=pagina.locator('[data-diferenca-texto]').filter({hasText:'CLIENTES:␠4'}).first();
+await diferenca.waitFor();
+conferir((await diferenca.innerText()).replace(/\(ausente\)/g, '').includes('Recebido: CLIENTES:4'),'contrato mostra esperado e recebido');
+conferir(await diferenca.locator('mark').first().innerText()==='␠','contrato destaca o espaço ausente');
+await navegador.close();

@@ -10,7 +10,7 @@
  *
  * No agrupar, cada passo grande vira "// 1. Título" e os subpassos,
  * "//   1.1 texto". Mexer no plano depois reescreve SÓ esse bloco (o
- * cabeçalho "// Plano:" e as linhas numeradas logo abaixo dele); o resto do
+ * marcadores de início e fim; blocos antigos sem marcadores ficam intactos); o resto do
  * código fica como está.
  *
  * O caminho de volta (validador planoComentado): os comentários de linha
@@ -29,9 +29,10 @@ export const CABECALHO_DO_PLANO = "// Plano:";
 /** Linha de comentário inteira: o texto depois de "//". */
 const COMENTARIO = /^\s*\/\/(.*)$/;
 /** Cabeçalho do bloco. */
-const CABECALHO = /^\s*\/\/\s*Plano\s*:/i;
+export const INICIO_DO_PLANO = "// <interativai:plano>";
+export const FIM_DO_PLANO = "// </interativai:plano>";
 /** Linha numerada do bloco ("// 2. texto", "//   1.2 texto"). */
-const LINHA_NUMERADA = /^\s*\/\/\s*\d+(?:\.\d+)*[.)]?\s/;
+
 /** A numeração no começo do texto de um comentário. */
 const NUMERACAO = /^\s*\d+(?:\.\d+)*[.)]?\s*/;
 
@@ -39,7 +40,7 @@ const textoDoCartao = (dados: DadosOrdenar, id: string) => dados.cartoes.find((c
 
 /** As linhas do bloco do plano, na ordem do aluno (sem recuo). */
 export function linhasDoPlano(dados: DadosOrdenar, estado: EstadoOrdenar): string[] {
-  const linhas = [`${CABECALHO_DO_PLANO} ${dados.problema}`];
+  const linhas = [INICIO_DO_PLANO, `${CABECALHO_DO_PLANO} ${dados.problema}`];
   if (dados.modo === "agrupar") {
     (dados.grupos ?? []).forEach((grupo, g) => {
       linhas.push(`// ${g + 1}. ${grupo.titulo}`);
@@ -48,16 +49,17 @@ export function linhasDoPlano(dados: DadosOrdenar, estado: EstadoOrdenar): strin
   } else {
     ordemDoPlano(dados, estado).forEach((id, i) => linhas.push(`// ${i + 1}. ${textoDoCartao(dados, id)}`));
   }
+  linhas.push(FIM_DO_PLANO);
   return linhas;
 }
 
 /** Onde o bloco do plano está no código: posições (de, até) do texto e o recuo do cabeçalho. */
 export function acharBlocoDoPlano(codigo: string): { de: number; ate: number; recuo: string } | null {
   const linhas = codigo.split("\n");
-  const inicio = linhas.findIndex((linha) => CABECALHO.test(linha));
+  const inicio = linhas.findIndex((linha) => linha.trim() === INICIO_DO_PLANO);
   if (inicio < 0) return null;
-  let fim = inicio;
-  while (fim + 1 < linhas.length && LINHA_NUMERADA.test(linhas[fim + 1])) fim += 1;
+  const fim = linhas.findIndex((linha, i) => i > inicio && linha.trim() === FIM_DO_PLANO);
+  if (fim < 0) return null;
   const de = linhas.slice(0, inicio).reduce((total, linha) => total + linha.length + 1, 0);
   const ate = de + linhas.slice(inicio, fim + 1).join("\n").length;
   return { de, ate, recuo: /^\s*/.exec(linhas[inicio])?.[0] ?? "" };
@@ -112,7 +114,7 @@ function comentariosDoPlano(dados: DadosOrdenar, codigo: string): ComentarioDoPl
   const achados: ComentarioDoPlano[] = [];
   codigo.split("\n").forEach((linha, indice) => {
     const comentario = COMENTARIO.exec(linha);
-    if (!comentario || CABECALHO.test(linha)) return;
+    if (!comentario || linha.trim() === INICIO_DO_PLANO) return;
     const texto = normalizarPasso(comentario[1].replace(NUMERACAO, ""));
     if (!texto) return;
     const grupo = grupos.get(texto);

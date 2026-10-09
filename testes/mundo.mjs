@@ -56,15 +56,23 @@ const progresso = {
 const { navegador, contexto, pagina, erros } = await abrir({ largura, altura, toque, progresso, rota: "/?hora=12", esperar: "[data-mapa=mundo]" });
 const area = pagina.getByRole("region", { name: /Mapa do mundo/ });
 await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
-await pagina.evaluate(() => document.fonts.ready);
-await doisQuadros(pagina);
 conferir((await pagina.locator("[data-mundo-desenho]").getAttribute("data-periodo")) === "dia", `${MODO}: ?hora=12 deixa o mundo de dia`);
 
 // ------------------------------------------------ o computadorzinho acena para quem chega (e o recado some)
-conferir((await pagina.locator('[data-acenando="sim"]').count()) === 1, `${MODO}: quem chega ao mundo pela primeira vez ganha um aceno`);
-conferir(((await pagina.locator("[data-oi-do-computadorzinho]").textContent()) ?? "").startsWith("Oi!"), `${MODO}: e um oi do computadorzinho`);
+// O aceno dura poucos segundos: conferir antes de esperar o carregamento
+// das fontes, que sob carga pode terminar só depois que o aceno acabou.
+const chegada = await pagina.waitForFunction(() => {
+  const acenos = document.querySelectorAll('[data-acenando="sim"]');
+  if (!acenos.length) return null;
+  return { acenos: acenos.length, oi: document.querySelector("[data-oi-do-computadorzinho]")?.textContent ?? "" };
+}, null, { timeout: 8000 });
+const aceno = await chegada.jsonValue();
+conferir(aceno.acenos === 1, `${MODO}: quem chega ao mundo pela primeira vez ganha um aceno`);
+conferir(aceno.oi.startsWith("Oi!"), `${MODO}: e um oi do computadorzinho`);
 await pagina.locator('[data-acenando="nao"]').waitFor({ timeout: 8000 });
 conferir((await pagina.locator("[data-oi-do-computadorzinho]").count()) === 0, `${MODO}: o aceno dura uns segundos e o oi some`);
+await pagina.evaluate(() => document.fonts.ready);
+await doisQuadros(pagina);
 
 // ------------------------------------------------ cabe na altura, centralizado
 const medidas = await area.evaluate((el) => {
@@ -407,7 +415,8 @@ conferir((await pagina.locator("[data-peixe]").count()) > 0, `${MODO}: de volta 
 await pagina.goto(`${URL_JOGO}/?hora=12`);
 await pagina.locator("[data-mascote-no-mapa=logica]").waitFor();
 await pagina.emulateMedia({ reducedMotion: "reduce" });
-await pagina.waitForTimeout(600);
+// Esperar a mudança de estado do React, não uma pausa fixa de 600 ms.
+await pagina.waitForFunction(() => document.querySelectorAll('[data-peixe],[data-gaivota]').length === 0);
 conferir((await pagina.locator("[data-peixe]").count()) === 0 && (await pagina.locator("[data-gaivota]").count()) === 0, `${MODO}: com menos movimento, sem peixes saltando nem gaivotas`);
 const paradoAntes = await ondeEstaOBarco();
 await pagina.waitForTimeout(700);

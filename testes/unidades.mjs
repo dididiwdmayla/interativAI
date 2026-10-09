@@ -16,6 +16,7 @@ import {
   abrirBalao as abrirBalaoDaPagina,
   chaveDoSeletor,
   conferir,
+  duploToque,
   continuarFalas,
   errosRelevantes,
   esperarPronto,
@@ -64,7 +65,10 @@ async function fecharBalao() {
 
 async function mostrarPainel(segmento) {
   if (!movel) return;
-  await fecharBalao();
+  // O véu do Experimente libera só a ferramenta; se a aba já está aberta,
+  // fechar o balão por fora dela é um gesto bloqueado.
+  const apresentandoAgora = await pagina.locator('[data-jogo-fase][data-apresentacao-estado="ativa"]').count();
+  if (!apresentandoAgora) await fecharBalao();
   const aba = segmento === "Árvore" ? abaDaArvore(pagina) : pagina.getByRole("tab", { name: segmento, exact: true });
   if ((await aba.getAttribute("aria-selected")) !== "true") {
     // O véu de uma apresentação só libera a ferramenta: trocar de segmento
@@ -146,8 +150,8 @@ async function editarTexto(seletor, texto) {
  * duplo toque precisa dos dois toques em menos de 350 ms (TextoEditavel):
  * as checagens de ação do Playwright entre um `tap()` e outro às vezes
  * passavam disso (a causa da instabilidade da U4 em retrato e paisagem).
- * Por isso os dois toques vão direto na tela, um atrás do outro, como um
- * dedo de verdade.
+ * Por isso os dois toques vão direto na tela com seus carimbos de tempo,
+ * como um dedo, sem contar a latência dos comandos na cadência do gesto.
  */
 async function editarValorAtributo(seletor, novoValor) {
   const chave = await chaveDoSeletor(pagina, seletor);
@@ -160,8 +164,7 @@ async function editarValorAtributo(seletor, novoValor) {
     const caixa = await alvo.boundingBox();
     const x = caixa.x + caixa.width / 2;
     const y = caixa.y + caixa.height / 2;
-    await pagina.touchscreen.tap(x, y);
-    await pagina.touchscreen.tap(x, y);
+    await duploToque(pagina, x, y);
   } else {
     await alvo.dblclick();
   }
@@ -449,7 +452,10 @@ await apresentacao("previa", async () => {
 await apresentacao("me-ajuda", () => tocar(pagina.getByRole("button", { name: /^Me ajuda\. Próxima/ }).first()));
 await apresentacao("tutor", async () => {
   const campo = pagina.getByPlaceholder("Pergunte ao computadorzinho...").first();
-  await campo.fill("o que é uma tag?");
+  await campo.fill("o que é uma tag?").catch(async erro => {
+    console.log('diagnóstico tutor', await pagina.evaluate(() => ({ etapa: document.querySelector('[data-jogo-fase]')?.getAttribute('data-etapa'), balao: document.querySelector('[data-balao]')?.getAttribute('data-balao'), apresentacao: document.querySelector('[data-apresentacao]')?.getAttribute('data-apresentacao'), campos:[...document.querySelectorAll('input')].map(e=>({placeholder:e.placeholder,disabled:e.disabled})) })));
+    await falhar('tutor', erro);
+  });
   await campo.press("Enter");
 });
 await assentar();
