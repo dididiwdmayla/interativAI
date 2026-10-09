@@ -153,7 +153,10 @@ isso sem virar aula de inglês:
 
 - **todo conceito novo tem `termoIngles`** (`src/conteudo/conceitos.ts`):
   o nome como aparece na documentação ("bit", "breakpoint", "event
-  loop"). O glossário mostra os dois e a busca acha pelos dois;
+  loop"). Se for um conceito próprio do jogo sem equivalente técnico,
+  marque `semEquivalenteIngles: true` e deixe `termoIngles` ausente; não
+  invente tradução. A checagem exige uma das duas opções em todo o catálogo.
+  O glossário mostra os dois e a busca acha pelos dois;
 - na primeira vez que o termo aparece numa fala, diga os dois: "o ponto de
   parada (em inglês, breakpoint)". Depois, use o nome em português;
 - **de vez em quando, uma missão de campo pede ler um trecho curto da
@@ -161,8 +164,8 @@ isso sem virar aula de inglês:
   ("abra a página do `Array.prototype.push` na MDN em inglês e ache o que
   ele devolve: procure por Return value"). Uma por zona, mais ou menos;
   diga onde procurar, nunca peça para traduzir o texto inteiro;
-- os conceitos antigos ainda não têm o termo: preencher fica para uma
-  tarefa de conteúdo (ROADMAP).
+- conceitos antigos também têm o termo ou a exceção explícita; nomes, ids
+  e textos de fases publicadas permanecem congelados.
 
 **A fila de falas (rodada 39).** Uma fala nunca some antes de dar tempo de
 ler (`src/motor/filaDeFalas.ts`). O motor separa três jeitos de uma fala
@@ -2742,3 +2745,29 @@ peças vêm fixas e o aluno só pluga (as caixas de válvulas precisam de
 realimentação guarda estado (`anteriores`): é a memória e o selo da
 contatora (a ponte com a trilha Automação). `circuitoLembra` liga e solta
 o `liga` (a saída precisa ficar acesa) e depois o `desliga`.
+
+### Validador de trecho de texto: `textoContem`
+
+`{ tipo: "textoContem", seletor: "h1", valor: "Serviços da vila" }`
+exige que pelo menos um elemento selecionado contenha o trecho. Normaliza
+espaços e quebras como `textoIgual`, mas preserva maiúsculas e acentos.
+As opções `ignorarCaixa` e `ignorarAcentos` têm padrão `false`, preservando
+os critérios publicados. Use `ignorarCaixa: true` quando capitalização não
+for parte da habilidade ("Serviços" e "SERVIÇOS"); use `ignorarAcentos: true`
+quando acentuação não for parte da habilidade ("serviços" e "servicos").
+Texto digitado pelo aluno costuma precisar das duas:
+
+```ts
+{ tipo: "textoContem", seletor: "h1", valor: "Serviços da vila", ignorarCaixa: true, ignorarAcentos: true }
+```
+
+A normalização vale para o texto encontrado e para o trecho esperado.
+Trecho vazio, inclusive depois de normalizar, e seletor sem elemento
+reprovam. Combina com `todos`, `algum`
+e `nao`. Serve para respostas livres com conteúdo obrigatório; não basta
+mudar o texto. Fases publicadas continuam com os validadores originais.
+
+O plano gerado no Snippet agora tem `// <interativai:plano>` e
+`// </interativai:plano>`. Só o texto entre os marcadores é reescrito.
+Blocos antigos sem fim explícito são preservados; levar novamente insere
+um bloco delimitado sem apagar comentários antigos do aluno.

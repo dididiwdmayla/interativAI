@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { FASES } from "@/conteudo";
+import { conferirInglesDosConceitos } from "@/conteudo/checagens";
 import { CONCEITOS } from "@/conteudo/conceitos";
 import { buscarNoGlossario, destinoDaFase, montarGlossario, normalizarBusca } from "@/lib/glossario";
 import { PROGRESSO_PADRAO } from "@/lib/progresso";
@@ -17,6 +18,25 @@ const verbete = (id: string) => {
 };
 
 describe("glossário", () => {
+  it("exige inglês ou exceção explícita em todo o catálogo", () => {
+    expect(conferirInglesDosConceitos()).toEqual([]);
+    expect(CONCEITOS.filter((conceito) => conceito.semEquivalenteIngles).map((conceito) => conceito.id))
+      .toEqual(["salvar-como-meu-tema"]);
+  });
+
+  it("rejeita termo ausente, vazio, marca falsa e termo junto da exceção", () => {
+    for (const campos of [{}, { termoIngles: "  " }, { semEquivalenteIngles: false }, { termoIngles: "array", semEquivalenteIngles: true }]) {
+      expect(conferirInglesDosConceitos([{ id: "array-js", ...campos }])).toHaveLength(1);
+    }
+    expect(conferirInglesDosConceitos([{ id: "salvar-como-meu-tema", semEquivalenteIngles: true }])).toEqual([]);
+  });
+
+  it("encontra a lista pelo termo array e os comandos pelos nomes do DevTools", () => {
+    expect(buscarNoGlossario(glossario, "ARRAY").map((entrada) => entrada.conceito.id)).toContain("array-js");
+    expect(buscarNoGlossario(glossario, "breakpoint").map((entrada) => entrada.conceito.id)).toContain("ponto-de-parada");
+    expect(buscarNoGlossario(glossario, "step over").map((entrada) => entrada.conceito.id)).toContain("passar-por-cima");
+  });
+
   it("tem todos os conceitos do catálogo, em ordem alfabética", () => {
     expect(glossario.map((entrada) => entrada.conceito.id).sort()).toEqual(CONCEITOS.map((conceito) => conceito.id).sort());
     const nomes = glossario.map((entrada) => entrada.conceito.nome);

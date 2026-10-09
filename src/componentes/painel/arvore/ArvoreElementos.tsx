@@ -98,13 +98,10 @@ export function ArvoreElementos({
 
   useEffect(() => {
     if (chaveSelecionada === null) return;
-    // Primeiro só a linha do nó; o item inteiro (que no celular inclui a barra
-    // de ações logo embaixo) entra na vista depois da janela do duplo toque.
-    // Rolar tudo na hora movia a linha debaixo do dedo entre os dois toques,
-    // e o segundo caía em outro lugar.
+    // A linha também pode crescer com a seleção e sua barra de ações.
+    // Até rolar só a linha move o atributo sob o dedo (U4F1 em retrato).
+    // Toda rolagem automática espera o fim da janela do duplo toque.
     const item = recipiente.current?.querySelector(`[data-chave="${chaveSelecionada}"]`);
-    const linha = item?.querySelector(":scope > div") ?? item;
-    linha?.scrollIntoView({ block: "nearest" });
     const inteiro = agendarRastreado(() => {
       if (item?.isConnected) item.scrollIntoView({ block: "nearest" });
     }, ESPERA_ROLAR_ITEM_MS);

@@ -63,7 +63,7 @@ async function conferirRastro(habilidade){
  }
  // A cena também move a linha do tempo. Não presumir que estamos no fim
  // quando a execução responde: ir ao início pela UI pausa a animação.
- await barra.focus();await pagina.keyboard.press('Home');await esperarPasso(0);
+ await barra.press('Home');await esperarPasso(0);
  let leu=false,trocou=false,quadros=0;
  for(let i=0;i<total;i++){
   leu ||= await pagina.locator('[data-vagao][data-lido="sim"]').count()>0;
@@ -115,11 +115,16 @@ for(const fase of fases){
     // ter selecionado outro passo enquanto o teste abriu a área.
     const tempo=pagina.locator('[data-linha-do-tempo]');
     const ultimo=Number(await tempo.getAttribute('data-total-passos'))-1;
+    conferir(ultimo >= 1, 'execução da recursão devolve o rastro, sem estourar a reserva do worker');
     const barra=tempo.locator('[data-barra-tempo]');
-    await barra.focus();await pagina.keyboard.press('Home');
+    await barra.press('Home');
     await pagina.waitForFunction(()=>document.querySelector('[data-linha-do-tempo]')?.getAttribute('data-passo-atual')==='0');
     await pagina.locator('[data-area-cena][data-tocando="nao"]').waitFor({state:'attached'});
-    await pagina.keyboard.press('End');
+    // Home repetido no extremo também deve manter a cena pausada.
+    await barra.press('Home');
+    conferir(await tempo.getAttribute('data-passo-atual') === '0', 'Home no extremo mantém o primeiro passo');
+    // Rebobinar muda o palco e pode retirar o foco da barra no layout móvel.
+    await barra.press('End');
     await pagina.waitForFunction(alvo=>Number(document.querySelector('[data-linha-do-tempo]')?.getAttribute('data-passo-atual'))===alvo,ultimo);
     conferir((await pagina.locator('[data-palco-erro]').innerText()).includes('RangeError'),'proteção de recursão aparece no palco');
    }

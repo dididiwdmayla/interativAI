@@ -63,6 +63,8 @@ export type Validador =
   | { tipo: "contagem"; seletor: string; op: OperadorContagem; valor: number; comTexto?: boolean }
   /** Algum elemento do seletor tem exatamente este texto. */
   | { tipo: "textoIgual"; seletor: string; valor: string }
+  /** Contém o trecho; espaços normalizados, caixa/acentos exatos por padrão. */
+  | { tipo: "textoContem"; seletor: string; valor: string; ignorarCaixa?: boolean; ignorarAcentos?: boolean }
   /**
    * Existe texto NOVO: algum elemento do seletor tem um texto (não vazio)
    * que nenhum elemento do mesmo seletor tinha no começo da fase.

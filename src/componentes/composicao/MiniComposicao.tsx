@@ -16,18 +16,19 @@ function codigoResumido(codigo: string): string {
   const bloco = acharBlocoDoPlano(codigo);
   if (!bloco) return codigo;
   const linhas = codigo.slice(bloco.de, bloco.ate).split("\n");
-  return `${codigo.slice(0, bloco.de)}${linhas[0]} (${linhas.length - 1} passos em comentário)${codigo.slice(bloco.ate)}`;
+  return `${codigo.slice(0, bloco.de)}${linhas[1]} (${linhas.length - 3} passos em comentário)${codigo.slice(bloco.ate)}`;
 }
 
 /** Linhas do código mostradas (o resto vira "..."). */
 const LINHAS_DO_CODIGO = 9;
 
 export function MiniComposicao({ retrato, legenda }: { retrato: RetratoComposicao | null; legenda: string }) {
+  const soCena = Boolean(retrato?.cena && !retrato.plano && retrato.codigo == null && !retrato.casos && !retrato.exposicao);
   const linhas = retrato?.codigo ? codigoResumido(retrato.codigo).split("\n") : [];
   return (
     <figure className="flex min-w-0 flex-1 flex-col gap-1" data-mini-composicao={legenda}>
       <figcaption className="text-xs font-black uppercase tracking-wide text-texto-suave">{legenda}</figcaption>
-      <div className="flex h-72 min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]">
+      <div className={`flex ${soCena ? "h-auto" : "h-72"} min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border-2 border-borda bg-painel p-1.5 text-[11px]`}>
         {retrato?.exposicao &&
           retrato.exposicao.dados.estacoes.map((estacao) => {
             const estado = retrato.exposicao?.estado.estacoes[estacao.id];

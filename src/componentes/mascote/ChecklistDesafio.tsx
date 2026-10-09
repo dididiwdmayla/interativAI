@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import type { DiferencaTexto } from "@/motor/contrato/diferencaTexto";
 import type { ReactNode } from "react";
 import { Carinha } from "./Carinha";
 
@@ -15,10 +16,11 @@ type Props = {
   topo?: ReactNode;
   /** No lugar da lista (o contrato antes da etapa de requisitos: a lista é o aluno que monta). */
   vazio?: string;
+  diferencas?: Record<string, DiferencaTexto[]>;
 };
 
 /** Checklist do desafio (ou dos requisitos do projeto): cada item se marca sozinho quando o validador dele passa. */
-export function ChecklistDesafio({ partes, feitas, titulo = "Checklist do desafio", novas, topo, vazio }: Props) {
+export function ChecklistDesafio({ partes, feitas, titulo = "Checklist do desafio", novas, topo, vazio, diferencas }: Props) {
   const total = partes.length;
   const marcadas = partes.filter((parte) => feitas.includes(parte.id)).length;
   return (
@@ -63,6 +65,15 @@ export function ChecklistDesafio({ partes, feitas, titulo = "Checklist do desafi
                 </AnimatePresence>
               </span>
               <span>
+                {!feita && diferencas?.[parte.id]?.map((d, i) => (
+                  <span key={i} className="my-1 block rounded bg-superficie p-1 font-mono text-xs text-texto" data-diferenca-texto>
+                    {(["esperado", "recebido"] as const).map((tipo) => {
+                      const texto = d[tipo], fim = tipo === "esperado" ? d.fimEsperado : d.fimRecebido;
+                      return <span key={tipo} className="block">{tipo === "esperado" ? "Esperado" : "Recebido"}: {texto.slice(0, d.inicio)}<mark className="rounded bg-destaque px-0.5 text-texto">{texto.slice(d.inicio, fim).replace(/ /g, "␠") || "(ausente)"}</mark>{texto.slice(fim)}</span>;
+                    })}
+                    <span className="block font-sans text-texto-suave">␠ indica espaço</span>
+                  </span>
+                ))}
                 {novas?.has(parte.id) && (
                   <span className="mr-1 inline-block rounded-full bg-secundaria px-1.5 align-middle text-[10px] font-black uppercase tracking-wide text-sobre-secundaria" data-parte-nova>
                     Novo

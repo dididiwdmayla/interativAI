@@ -1,3 +1,4 @@
+import type { DiferencaTexto } from "./contrato/diferencaTexto";
 /*
  * Interpretador dos validadores declarativos (src/conteudo/tipos.ts).
  * Funciona com o documento vivo do iframe, com um Document solto
@@ -100,6 +101,7 @@ export type ResultadoValidador = {
   /** O que foi encontrado, quando ajuda a entender uma falha. */
   detalhe?: string;
   filhos?: ResultadoValidador[];
+  diferencaTexto?: DiferencaTexto;
 };
 
 /** Espaços nas pontas fora e espaços repetidos virando um só. */
@@ -160,6 +162,8 @@ export function descreverValidador(validador: Validador): string {
       return `não existe ${validador.seletor}`;
     case "contagem":
       return `quantidade de ${validador.seletor}${validador.comTexto ? " (com texto)" : ""} ${validador.op} ${validador.valor}`;
+    case "textoContem":
+      return `texto de ${validador.seletor} contém "${validador.valor}"`;
     case "textoIgual":
       return `texto de ${validador.seletor} igual a "${validador.valor}"`;
     case "textoDiferenteDoInicial":
@@ -342,6 +346,17 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       if (validador.comTexto) elementos = elementos.filter((elemento) => normalizarTexto(textoVerdadeiro(elemento)).length > 0);
       const quantidade = elementos.length;
       return { passou: comparar(quantidade, validador.op, validador.valor), descricao, detalhe: `achou ${quantidade}` };
+    }
+    case "textoContem": {
+      const normalizarTrecho = (texto: string): string => {
+        let trecho = normalizarTexto(texto);
+        if (validador.ignorarAcentos) trecho = trecho.normalize("NFD").replace(/\p{M}/gu, "");
+        if (validador.ignorarCaixa) trecho = trecho.toLocaleLowerCase("pt-BR");
+        return trecho;
+      };
+      const textos = textosDe(consultar(documento, validador.seletor)).map(normalizarTrecho);
+      const alvo = normalizarTrecho(validador.valor);
+      return { passou: alvo.length > 0 && textos.some((texto) => texto.includes(alvo)), descricao, detalhe: `textos: ${lista(textos)}` };
     }
     case "textoIgual": {
       const textos = textosDe(consultar(documento, validador.seletor));
@@ -785,8 +800,7 @@ export function avaliarDetalhado(validador: Validador, contexto: ContextoValidac
       };
     }
     case "estadoNaCena": {
-      const { passou, detalhe } = conferirEstado(validador, contexto.programa?.cena);
-      return { passou, descricao, detalhe };
+      return { ...conferirEstado(validador, contexto.programa?.cena), descricao };
     }
     case "sequenciaNaCena": {
       const { passou, detalhe } = conferirSequencia(validador, contexto.programa?.cena);

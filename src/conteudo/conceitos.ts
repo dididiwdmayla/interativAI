@@ -14,9 +14,9 @@
  * - temas: pelo menos um (src/curriculo/temas.ts). Eles acendem o conceito
  *   na lente de temas do mapa e no glossário;
  * - termoIngles: o nome como aparece na documentação em inglês ("bit",
- *   "event loop", "breakpoint"). Opcional nos conceitos antigos (preencher é
- *   uma tarefa de conteúdo), obrigatório nos novos a partir da rodada 36
- *   (guia, seção 1). O glossário mostra os dois e a busca acha pelos dois.
+ *   "event loop", "breakpoint"). Todo conceito tem o termo ou a marca
+ *   semEquivalenteIngles: true quando é próprio do jogo (guia, seção 1).
+ *   O glossário mostra os dois e a busca acha pelos dois.
  */
 import type { IdTema } from "@/curriculo/temas";
 
@@ -62,95 +62,102 @@ const CATALOGO = {
   "software-embarcado": {"nome": "Software embarcado", "termoIngles": "embedded software", "resumo": "O programa que mora dentro de um aparelho (semáforo, carro, micro-ondas) e controla o aparelho, sem tela de computador.", "temas": ["fundamentos"]},
   "carreiras-em-programacao": {"nome": "Carreiras em programação", "termoIngles": "software careers", "resumo": "Front-end, back-end, dados, segurança, sistemas embarcados: o mesmo jeito de pensar abre caminhos diferentes.", "temas": ["fundamentos"]},
 
-  "reproduzir-o-defeito": {"nome": "Reproduzir o defeito", "resumo": "Antes de procurar a causa, ache um caso que funciona e um que falha e compare as entradas: o que muda entre eles é a pista.", "temas": ["logica", "ferramentas"]},
-  "causa-raiz": {"nome": "Causa raiz", "resumo": "O sintoma é o que aparece errado; a causa raiz é a decisão no código que o produz. Consertar só o sintoma deixa o defeito vivo.", "temas": ["logica", "ferramentas"]},
-  "teste-de-regressao": {"nome": "Teste de regressão", "resumo": "Depois de consertar, rode de novo os casos antigos junto com o novo: um conserto bom não quebra o que já funcionava.", "temas": ["logica", "ferramentas"]},
-  "observar-expressoes": {"nome": "Observar expressões", "resumo": "Observar acompanha valores e condições no instante de cada pausa sem alterar o código investigado.", "temas": ["logica", "ferramentas"]},
-  "escopo-na-pausa": {"nome": "Escopo na pausa", "resumo": "Escopo separa as variáveis locais, de bloco e de fora para revelar qual caixinha a linha pausada lê.", "temas": ["logica", "ferramentas"]},
-  "retorno-no-depurador": {"nome": "Investigar o retorno", "resumo": "Comparar o valor local com o que chega a quem chamou distingue cálculo, impressão e retorno ausente.", "temas": ["logica", "ferramentas"]},
-  "passar-por-cima": {"nome": "Passar por cima", "resumo": "Passar por cima executa a linha inteira, incluindo uma chamada, e para na próxima linha do mesmo nível.", "temas": ["logica", "ferramentas"]},
-  "entrar-e-sair": {"nome": "Entrar e sair de função", "resumo": "Entrar segue a chamada por dentro; Sair termina essa chamada e volta ao código que pediu sua resposta.", "temas": ["logica", "ferramentas"]},
+  "reproduzir-o-defeito": {"nome": "Reproduzir o defeito", termoIngles: "reproduce a bug", "resumo": "Antes de procurar a causa, ache um caso que funciona e um que falha e compare as entradas: o que muda entre eles é a pista.", "temas": ["logica", "ferramentas"]},
+  "causa-raiz": {"nome": "Causa raiz", termoIngles: "root cause", "resumo": "O sintoma é o que aparece errado; a causa raiz é a decisão no código que o produz. Consertar só o sintoma deixa o defeito vivo.", "temas": ["logica", "ferramentas"]},
+  "teste-de-regressao": {"nome": "Teste de regressão", termoIngles: "regression test", "resumo": "Depois de consertar, rode de novo os casos antigos junto com o novo: um conserto bom não quebra o que já funcionava.", "temas": ["logica", "ferramentas"]},
+  "observar-expressoes": {"nome": "Observar expressões", termoIngles: "Watch expressions", "resumo": "Observar acompanha valores e condições no instante de cada pausa sem alterar o código investigado.", "temas": ["logica", "ferramentas"]},
+  "escopo-na-pausa": {"nome": "Escopo na pausa", termoIngles: "Scope", "resumo": "Escopo separa as variáveis locais, de bloco e de fora para revelar qual caixinha a linha pausada lê.", "temas": ["logica", "ferramentas"]},
+  "retorno-no-depurador": {"nome": "Investigar o retorno", termoIngles: "return value", "resumo": "Comparar o valor local com o que chega a quem chamou distingue cálculo, impressão e retorno ausente.", "temas": ["logica", "ferramentas"]},
+  "passar-por-cima": {"nome": "Passar por cima", termoIngles: "step over", "resumo": "Passar por cima executa a linha inteira, incluindo uma chamada, e para na próxima linha do mesmo nível.", "temas": ["logica", "ferramentas"]},
+  "entrar-e-sair": {"nome": "Entrar e sair de função", termoIngles: "step into / step out", "resumo": "Entrar segue a chamada por dentro; Sair termina essa chamada e volta ao código que pediu sua resposta.", "temas": ["logica", "ferramentas"]},
 
-  "ponto-de-parada": {"nome": "Ponto de parada", "resumo": "Marcar uma linha permite pausar antes dela executar e olhar a memória daquele instante.", "temas": ["logica", "ferramentas"]},
-  "hipotese-de-bug": {"nome": "Hipótese de bug", "resumo": "Uma explicação provisória do defeito precisa ser confirmada ou descartada pelos valores observados.", "temas": ["logica", "ferramentas"]},
-  "bug-silencioso": {"nome": "Bug silencioso", "resumo": "Um programa pode terminar sem erro e ainda devolver o resultado errado; casos de teste revelam a diferença.", "temas": ["logica", "ferramentas"]},
+  "ponto-de-parada": {"nome": "Ponto de parada", termoIngles: "breakpoint", "resumo": "Marcar uma linha permite pausar antes dela executar e olhar a memória daquele instante.", "temas": ["logica", "ferramentas"]},
+  "hipotese-de-bug": {"nome": "Hipótese de bug", termoIngles: "hypothesis", "resumo": "Uma explicação provisória do defeito precisa ser confirmada ou descartada pelos valores observados.", "temas": ["logica", "ferramentas"]},
+  "bug-silencioso": {"nome": "Bug silencioso", termoIngles: "logic error", "resumo": "Um programa pode terminar sem erro e ainda devolver o resultado errado; casos de teste revelam a diferença.", "temas": ["logica", "ferramentas"]},
 
-  "dicionario-de-erros": {"nome": "Dicionário de erros", "resumo": "SyntaxError aponta escrita inválida, ReferenceError um nome indisponível e TypeError uma operação incompatível com o valor.", "temas": ["logica", "ferramentas"]},
-  "causa-do-erro": {"nome": "Pista e causa", "resumo": "A linha apontada mostra onde a falha apareceu; a causa pode estar antes, como no limite de um laço.", "temas": ["logica", "ferramentas"]},
+  "dicionario-de-erros": {"nome": "Dicionário de erros", termoIngles: "JavaScript error reference", "resumo": "SyntaxError aponta escrita inválida, ReferenceError um nome indisponível e TypeError uma operação incompatível com o valor.", "temas": ["logica", "ferramentas"]},
+  "causa-do-erro": {"nome": "Pista e causa", termoIngles: "error location", "resumo": "A linha apontada mostra onde a falha apareceu; a causa pode estar antes, como no limite de um laço.", "temas": ["logica", "ferramentas"]},
 
-"arvore-de-dados": {"nome": "Árvore de dados", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
-"percorrer-arvore": {"nome": "Percorrer a árvore", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
+"arvore-de-dados": {"nome": "Árvore de dados", termoIngles: "tree", "resumo": "Uma árvore tem uma raiz e nós com filhos; folhas não têm filhos, como os elementos aninhados do DOM.", "temas": ["dados", "logica"]},
+"percorrer-arvore": {"nome": "Percorrer a árvore", termoIngles: "tree traversal", "resumo": "Visitar um nó e chamar a mesma função para cada filho permite percorrer ramos de profundidades diferentes.", "temas": ["dados", "logica"]},
 
-"dicionario-map": {"nome": "Dicionário com Map", "resumo": "Map guarda pares: set escreve ou atualiza, get lê, has confere se a chave existe.", "temas": ["dados", "logica"]},
-"objeto-ou-map": {"nome": "Objeto ou Map", "resumo": "Objeto descreve campos de uma coisa; Map serve para pares dinâmicos com chaves que também podem ser números ou objetos.", "temas": ["dados", "logica"]},
-"busca-com-map": {"nome": "Buscar com Map", "resumo": "Montar um Map custa percorrer os dados uma vez; muitas consultas has evitam repetir includes numa lista grande.", "temas": ["dados", "logica", "desempenho"]},
+"dicionario-map": {"nome": "Dicionário com Map", termoIngles: "Map", "resumo": "Map guarda pares: set escreve ou atualiza, get lê, has confere se a chave existe.", "temas": ["dados", "logica"]},
+"objeto-ou-map": {"nome": "Objeto ou Map", termoIngles: "Object / Map", "resumo": "Objeto descreve campos de uma coisa; Map serve para pares dinâmicos com chaves que também podem ser números ou objetos.", "temas": ["dados", "logica"]},
+"busca-com-map": {"nome": "Buscar com Map", termoIngles: "Map lookup", "resumo": "Montar um Map custa percorrer os dados uma vez; muitas consultas has evitam repetir includes numa lista grande.", "temas": ["dados", "logica", "desempenho"]},
 
-"fila-js": {"nome": "Fila", "resumo": "Numa fila, o primeiro item que entrou sai primeiro; push entra pelo fim e shift sai pelo começo.", "temas": ["dados", "logica"]},
-"fila-por-indice": {"nome": "Fila sem deslizar", "resumo": "Para atender uma lista grande, avançar um índice preserva a ordem sem deslocar todos os vagões a cada shift.", "temas": ["dados", "logica", "desempenho"]},
+"fila-js": {"nome": "Fila", termoIngles: "queue", "resumo": "Numa fila, o primeiro item que entrou sai primeiro; push entra pelo fim e shift sai pelo começo.", "temas": ["dados", "logica"]},
+"fila-por-indice": {"nome": "Fila sem deslizar", termoIngles: "queue with a head index", "resumo": "Para atender uma lista grande, avançar um índice preserva a ordem sem deslocar todos os vagões a cada shift.", "temas": ["dados", "logica", "desempenho"]},
 
-"pilha-js": {"nome": "Pilha", "resumo": "Numa pilha, o último item que entrou é o primeiro a sair; push e pop usam o mesmo lado.", "temas": ["dados", "logica"]},
-"pilha-vazia": {"nome": "Pilha vazia", "resumo": "Antes de retirar de uma pilha, confira length; pop no vazio devolve undefined.", "temas": ["dados", "logica"]},
+"pilha-js": {"nome": "Pilha", termoIngles: "stack", "resumo": "Numa pilha, o último item que entrou é o primeiro a sair; push e pop usam o mesmo lado.", "temas": ["dados", "logica"]},
+"pilha-vazia": {"nome": "Pilha vazia", termoIngles: "empty stack", "resumo": "Antes de retirar de uma pilha, confira length; pop no vazio devolve undefined.", "temas": ["dados", "logica"]},
 
-"custo-em-passos": {"nome": "Custo em passos", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
-"crescimento-dos-passos": {"nome": "Crescimento dos passos", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
-"evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},
+"custo-em-passos": {"nome": "Custo em passos", termoIngles: "step count", "resumo": "Contar as linhas executadas ajuda a comparar o trabalho dos algoritmos sem depender da velocidade da máquina.", "temas": ["desempenho", "logica"]},
+"crescimento-dos-passos": {"nome": "Crescimento dos passos", termoIngles: "time complexity", "resumo": "Medir a mesma tarefa com listas maiores mostra se o trabalho cresce junto com a entrada ou dispara.", "temas": ["desempenho", "logica"]},
+"evitar-trabalho-repetido": {"nome": "Evitar trabalho repetido", termoIngles: "algorithm optimization", "resumo": "Usar a ordem da lista pode evitar comparar cada par; o resultado precisa continuar correto nas bordas.", "temas": ["desempenho", "logica"]},
 
-"recursao-js": {"nome": "Recursão", "resumo": "Uma função chama ela mesma para resolver uma versão menor do problema; cada chamada ganha uma moldura.", "temas": ["logica"]},
-"caso-base-recursao": {"nome": "Caso de parada da recursão", "resumo": "O caso base devolve uma resposta sem nova chamada; sem alcançá-lo, a recursão continua até a proteção cortar.", "temas": ["logica"]},
-"problema-menor-recursao": {"nome": "Um problema menor a cada chamada", "resumo": "A cada chamada, diminuir o número ou avançar na lista aproxima a função do caso de parada.", "temas": ["logica", "desempenho"]},
+"recursao-js": {"nome": "Recursão", termoIngles: "recursion", "resumo": "Uma função chama ela mesma para resolver uma versão menor do problema; cada chamada ganha uma moldura.", "temas": ["logica"]},
+"caso-base-recursao": {"nome": "Caso de parada da recursão", termoIngles: "base case", "resumo": "O caso base devolve uma resposta sem nova chamada; sem alcançá-lo, a recursão continua até a proteção cortar.", "temas": ["logica"]},
+"problema-menor-recursao": {"nome": "Um problema menor a cada chamada", termoIngles: "recursive case", "resumo": "A cada chamada, diminuir o número ou avançar na lista aproxima a função do caso de parada.", "temas": ["logica", "desempenho"]},
 
-"ordenacao-selecao": {"nome": "Ordenação por seleção", "resumo": "Procurar o menor do trecho restante e colocá-lo na próxima posição da lista.", "temas": ["logica", "desempenho"]},
-"ordenacao-bolha": {"nome": "Ordenação por bolha", "resumo": "Comparar vizinhos e trocar os fora de ordem, levando o maior ao fim em cada passada.", "temas": ["logica", "desempenho"]},
-"sort-numerico": {"nome": "sort com números", "resumo": "O sort padrão compara como texto; o comparador (a, b) => a - b coloca números em ordem crescente.", "temas": ["logica", "desempenho"]},
+"ordenacao-selecao": {"nome": "Ordenação por seleção", termoIngles: "selection sort", "resumo": "Procurar o menor do trecho restante e colocá-lo na próxima posição da lista.", "temas": ["logica", "desempenho"]},
+"ordenacao-bolha": {"nome": "Ordenação por bolha", termoIngles: "bubble sort", "resumo": "Comparar vizinhos e trocar os fora de ordem, levando o maior ao fim em cada passada.", "temas": ["logica", "desempenho"]},
+"sort-numerico": {"nome": "sort com números", termoIngles: "numeric sort", "resumo": "O sort padrão compara como texto; o comparador (a, b) => a - b coloca números em ordem crescente.", "temas": ["logica", "desempenho"]},
 
-"busca-linear": {"nome": "Busca linear", "resumo": "Olhar um item por vez até achar o alvo ou chegar ao fim da lista.", "temas": ["logica", "desempenho"]},
-"busca-binaria": {"nome": "Busca binária", "resumo": "Numa lista ordenada, comparar o meio e descartar a metade que não pode conter o alvo.", "temas": ["logica", "desempenho"]},
-"lista-ordenada": {"nome": "Lista ordenada", "resumo": "Manter os valores em ordem para que a busca binária possa descartar uma metade com segurança.", "temas": ["logica", "desempenho"]},
+"busca-linear": {"nome": "Busca linear", termoIngles: "linear search", "resumo": "Olhar um item por vez até achar o alvo ou chegar ao fim da lista.", "temas": ["logica", "desempenho"]},
+"busca-binaria": {"nome": "Busca binária", termoIngles: "binary search", "resumo": "Numa lista ordenada, comparar o meio e descartar a metade que não pode conter o alvo.", "temas": ["logica", "desempenho"]},
+"lista-ordenada": {"nome": "Lista ordenada", termoIngles: "sorted array", "resumo": "Manter os valores em ordem para que a busca binária possa descartar uma metade com segurança.", "temas": ["logica", "desempenho"]},
 
-"casos-de-borda": {"nome": "Casos de borda", "resumo": "Testar vazio, zero, repetido e negativo para expor regras que um caso comum não verifica.", "temas": ["logica", "ferramentas"]},
+"casos-de-borda": {"nome": "Casos de borda", termoIngles: "edge cases", "resumo": "Testar vazio, zero, repetido e negativo para expor regras que um caso comum não verifica.", "temas": ["logica", "ferramentas"]},
 
-"dependencias-passos": {"nome": "Dependências dos passos", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},
+"dependencias-passos": {"nome": "Dependências dos passos", termoIngles: "data dependencies", "resumo": "Executar cada passo depois dos dados de que ele precisa, aceitando ordens independentes.", "temas": ["logica"]},
 
-"pseudocodigo": {"nome": "Pseudocódigo", "resumo": "Planejar em palavras claras, sem precisar da sintaxe de uma linguagem.", "temas": ["logica"]},
+"pseudocodigo": {"nome": "Pseudocódigo", termoIngles: "pseudocode", "resumo": "Planejar em palavras claras, sem precisar da sintaxe de uma linguagem.", "temas": ["logica"]},
 
-"entender-problema": {"nome": "Entender o problema", "resumo": "Separar os dados de entrada, a resposta pedida e exemplos antes de programar.", "temas": ["logica"]},
-"decompor-problema": {"nome": "Decompor um problema", "resumo": "Dividir um pedido grande em partes pequenas que dá para resolver separadamente.", "temas": ["logica"]},
-"plano-comentado": {"nome": "Plano no código", "resumo": "Guardar o plano em comentários para conferir qual ideia cada linha realiza.", "temas": ["logica", "ferramentas"]},
-"exemplos-de-teste": {"nome": "Exemplos de teste", "resumo": "Escrever entradas e saídas esperadas antes de conferir a função.", "temas": ["logica", "ferramentas"]},
+"entender-problema": {"nome": "Entender o problema", termoIngles: "problem analysis", "resumo": "Separar os dados de entrada, a resposta pedida e exemplos antes de programar.", "temas": ["logica"]},
+"decompor-problema": {"nome": "Decompor um problema", termoIngles: "decomposition", "resumo": "Dividir um pedido grande em partes pequenas que dá para resolver separadamente.", "temas": ["logica"]},
+"plano-comentado": {"nome": "Plano no código", termoIngles: "code comments", "resumo": "Guardar o plano em comentários para conferir qual ideia cada linha realiza.", "temas": ["logica", "ferramentas"]},
+"exemplos-de-teste": {"nome": "Exemplos de teste", termoIngles: "test cases", "resumo": "Escrever entradas e saídas esperadas antes de conferir a função.", "temas": ["logica", "ferramentas"]},
 
   // Unidade 1: o site é seu
   elemento: {
     nome: "Elemento",
+    termoIngles: "element",
     resumo: "Cada pecinha que monta uma página, como um título, um parágrafo ou um botão.",
     temas: ["interfaces"],
   },
   tag: {
     nome: "Tag",
+    termoIngles: "tag",
     resumo: "A etiqueta entre os sinais de menor e maior que diz que tipo de peça é aquela, como h1 ou button.",
     temas: ["interfaces"],
   },
   "selecionar-pela-arvore": {
     nome: "Selecionar pela árvore",
+    termoIngles: "DOM tree",
     resumo: "Clicar num item da árvore do F12 para escolher uma peça e ver ela acender na tela.",
     temas: ["ferramentas"],
   },
   "modo-inspecionar": {
     nome: "Modo inspecionar",
+    termoIngles: "Inspect mode",
     resumo: "A setinha do F12: você aponta algo na tela e o painel mostra qual peça é.",
     temas: ["ferramentas"],
   },
   "editar-texto": {
     nome: "Editar texto",
+    termoIngles: "Edit text",
     resumo: "Trocar o texto de uma peça com dois cliques na árvore, só para você ver.",
     temas: ["ferramentas"],
   },
   "codigo-html": {
     nome: "Código HTML",
+    termoIngles: "HTML",
     resumo: "A página escrita na língua que o navegador entende, cheia de tags.",
     temas: ["interfaces"],
   },
   "lista-e-itens": {
     nome: "Lista e itens",
+    termoIngles: "unordered list / list item",
     resumo: "Uma lista (ul) guarda itens (li), um para cada coisa da lista.",
     temas: ["interfaces"],
   },
@@ -158,41 +165,49 @@ const CATALOGO = {
   // Unidade 2: faxina no site
   "elemento-pai": {
     nome: "Elemento pai",
+    termoIngles: "parent element",
     resumo: "A peça que guarda outra dentro dela, como uma caixa guarda um brinquedo.",
     temas: ["interfaces"],
   },
   "elemento-filho": {
     nome: "Elemento filho",
+    termoIngles: "child element",
     resumo: "A peça que mora dentro de outra; ela vai junto para onde o pai for.",
     temas: ["interfaces"],
   },
   aninhamento: {
     nome: "Aninhamento",
+    termoIngles: "nesting",
     resumo: "Peças dentro de peças, em andares, como bonecas russas uma dentro da outra.",
     temas: ["interfaces"],
   },
   "esconder-elemento": {
     nome: "Esconder elemento",
+    termoIngles: "Hide element",
     resumo: "Deixar uma peça invisível sem tirar ela da página: o lugar dela continua reservado.",
     temas: ["interfaces", "ferramentas"],
   },
   "remover-do-documento": {
     nome: "Remover do documento",
+    termoIngles: "Delete element",
     resumo: "Apagar a peça de vez: ela sai da página e o que vem depois sobe para ocupar o lugar.",
     temas: ["interfaces", "ferramentas"],
   },
   desfazer: {
     nome: "Desfazer e refazer",
+    termoIngles: "undo / redo",
     resumo: "Voltar um passo atrás quando algo deu errado, e ir para a frente de novo se mudar de ideia.",
     temas: ["ferramentas"],
   },
   "duplicar-elemento": {
     nome: "Duplicar elemento",
+    termoIngles: "Duplicate element",
     resumo: "Fazer uma cópia exata de uma peça, com tudo o que tem dentro, logo depois dela.",
     temas: ["ferramentas"],
   },
   "elementos-irmaos": {
     nome: "Elementos irmãos",
+    termoIngles: "sibling elements",
     resumo: "Peças que moram dentro do mesmo pai, uma do lado da outra.",
     temas: ["interfaces"],
   },
@@ -200,26 +215,31 @@ const CATALOGO = {
   // Unidade 3: títulos e textos
   "titulos-hierarquia": {
     nome: "Hierarquia de títulos",
+    termoIngles: "heading hierarchy",
     resumo: "Os títulos vão de h1 (o mais importante) a h6: o número mostra o nível, não o tamanho da letra.",
     temas: ["interfaces", "acessibilidade"],
   },
   paragrafo: {
     nome: "Parágrafo",
+    termoIngles: "paragraph",
     resumo: "A tag p marca um bloco de texto corrido, a peça mais comum de uma página.",
     temas: ["interfaces"],
   },
   "enfase-forte": {
     nome: "Ênfase forte",
+    termoIngles: "strong importance",
     resumo: "O strong diz que aquele trecho é importante de verdade; o b só deixa em negrito, sem avisar ninguém.",
     temas: ["interfaces", "acessibilidade"],
   },
   "enfase-leve": {
     nome: "Ênfase leve",
+    termoIngles: "emphasis",
     resumo: "O em marca um tom diferente na frase; o i só deixa em itálico, sem dizer que é especial.",
     temas: ["interfaces", "acessibilidade"],
   },
   "lista-numerada": {
     nome: "Lista numerada",
+    termoIngles: "ordered list",
     resumo: "A tag ol numera os itens porque a ordem deles importa; a ul não numera porque a ordem não importa.",
     temas: ["interfaces"],
   },
@@ -227,36 +247,43 @@ const CATALOGO = {
   // Unidade 4: links, imagens, id e class
   "editar-atributo": {
     nome: "Editar atributo",
+    termoIngles: "Edit attribute",
     resumo: "Trocar o valor de um atributo (como href, alt ou class) com dois cliques na árvore, só para você ver.",
     temas: ["ferramentas"],
   },
   "link-href": {
     nome: "Link e href",
+    termoIngles: "hyperlink / href",
     resumo: "A tag a cria um link; o href diz para onde ele leva, um endereço ou um lugar da própria página.",
     temas: ["interfaces"],
   },
   "link-ancora": {
     nome: "Link âncora",
+    termoIngles: "fragment link",
     resumo: "Um href que começa com # não sai da página: ele rola até o elemento com aquele id.",
     temas: ["interfaces"],
   },
   "link-aba-nova": {
     nome: "Abrir em aba nova",
+    termoIngles: "new tab",
     resumo: "O atributo target=\"_blank\" faz o link abrir numa aba nova, sem fechar a página atual.",
     temas: ["interfaces"],
   },
   "imagem-alt": {
     nome: "Imagem e alt",
+    termoIngles: "image / alternative text",
     resumo: "O alt descreve a imagem em palavras: quem não consegue ver a imagem ouve ou lê essa descrição.",
     temas: ["interfaces", "acessibilidade"],
   },
   "id-unico": {
     nome: "Id é único",
+    termoIngles: "id",
     resumo: "Um id identifica UMA peça só na página inteira; duas peças com o mesmo id confundem o navegador.",
     temas: ["interfaces"],
   },
   "class-repetivel": {
     nome: "Class é repetível",
+    termoIngles: "class",
     resumo: "Uma class pode se repetir em várias peças parecidas, para tratar todas elas juntas.",
     temas: ["interfaces"],
   },
@@ -264,21 +291,25 @@ const CATALOGO = {
   // Unidade 5: caixas e seções
   "div-generica": {
     nome: "Div genérica",
+    termoIngles: "div",
     resumo: "A div é uma caixa sem significado nem estilo próprio: ela só agrupa, e o visual depende do CSS.",
     temas: ["interfaces"],
   },
   "semantica-html": {
     nome: "Semântica do HTML",
+    termoIngles: "HTML semantics",
     resumo: "Usar a tag certa (como header ou footer) ajuda leitor de tela, busca e quem lê o código depois, mesmo sem mudar o visual.",
     temas: ["interfaces", "acessibilidade"],
   },
   "section-vs-article": {
     nome: "Section ou article",
+    termoIngles: "section / article",
     resumo: "section agrupa conteúdo por tema; article é um conteúdo que se basta sozinho e poderia ser reaproveitado em outro lugar.",
     temas: ["interfaces", "acessibilidade"],
   },
   "span-generico": {
     nome: "Span genérico",
+    termoIngles: "span",
     resumo: "O span é a versão em linha da div: uma marcação sem significado, só um gancho de estilo dentro do texto.",
     temas: ["interfaces"],
   },
@@ -286,21 +317,25 @@ const CATALOGO = {
   // Unidade 6: página do zero
   "estrutura-do-documento": {
     nome: "Estrutura do documento",
+    termoIngles: "document structure",
     resumo: "Toda página começa com doctype, html, head e body: o esqueleto onde tudo o mais mora.",
     temas: ["interfaces"],
   },
   "head-vs-body": {
     nome: "Head e body",
+    termoIngles: "head / body",
     resumo: "O head guarda informação sobre a página (título, codificação); o body guarda o que aparece na tela.",
     temas: ["interfaces"],
   },
   title: {
     nome: "Title",
+    termoIngles: "title",
     resumo: "A tag title, dentro do head, dá o nome que aparece na aba do navegador, não na página.",
     temas: ["interfaces"],
   },
   "meta-charset": {
     nome: "Meta charset",
+    termoIngles: "character encoding",
     resumo: "A tag meta charset diz ao navegador como ler as letras da página; sem ela, acentos podem sair errados.",
     temas: ["interfaces"],
   },
@@ -308,66 +343,79 @@ const CATALOGO = {
   // Zona Estilos, E1: a aba Estilos
   "o-que-e-css": {
     nome: "O que é CSS",
+    termoIngles: "CSS",
     resumo: "A folha de estilo diz como as peças aparecem (cor, tamanho, fonte); o HTML diz o que elas são.",
     temas: ["interfaces"],
   },
   "regra-e-declaracao": {
     nome: "Regra e declaração",
+    termoIngles: "CSS rule / declaration",
     resumo: "Uma regra junta um seletor e declarações; cada declaração é uma propriedade e um valor, como color: white.",
     temas: ["interfaces"],
   },
   "cor-do-texto": {
     nome: "Cor do texto",
+    termoIngles: "color",
     resumo: "A propriedade color pinta as letras de uma peça.",
     temas: ["interfaces"],
   },
   "cor-de-fundo": {
     nome: "Cor de fundo",
+    termoIngles: "background-color",
     resumo: "A propriedade background-color pinta o fundo da caixa de uma peça.",
     temas: ["interfaces"],
   },
   "cor-por-nome": {
     nome: "Cor por nome",
+    termoIngles: "named color",
     resumo: "O CSS conhece cores pelo nome em inglês, como white, crimson ou gold.",
     temas: ["interfaces"],
   },
   "ligar-desligar-declaracao": {
     nome: "Ligar e desligar declaração",
+    termoIngles: "disable / enable declaration",
     resumo: "A caixinha do painel Estilos desliga uma declaração sem apagar, para testar o que ela faz.",
     temas: ["interfaces", "ferramentas"],
   },
   "tamanho-da-letra": {
     nome: "Tamanho da letra",
+    termoIngles: "font-size",
     resumo: "A propriedade font-size muda o tamanho do texto, por exemplo em px, os pontinhos da tela.",
     temas: ["interfaces"],
   },
   "unidade-rem": {
     nome: "Unidade rem",
+    termoIngles: "rem",
     resumo: "1rem é o tamanho da letra da página inteira (16px, se ninguém mudou), então 2rem é o dobro disso.",
     temas: ["interfaces", "acessibilidade"],
   },
   "familia-da-fonte": {
     nome: "Família da fonte",
+    termoIngles: "font-family",
     resumo: "A propriedade font-family escolhe o desenho das letras, com uma reserva no fim, como Georgia, serif.",
     temas: ["interfaces"],
   },
   "alinhamento-do-texto": {
     nome: "Alinhamento do texto",
+    termoIngles: "text-align",
     resumo: "A propriedade text-align põe o texto à esquerda, no centro ou à direita da caixa dele.",
     temas: ["interfaces"],
   },
   "peso-da-fonte": {
     nome: "Peso da fonte",
+    termoIngles: "font-weight",
     resumo: "A propriedade font-weight deixa a letra mais grossa (bold) ou normal.",
     temas: ["interfaces"],
   },
   "cor-hexadecimal": {
     nome: "Cor em hexadecimal",
+    termoIngles: "hex color",
     resumo: "Uma cor escrita como #RRGGBB: quanto de vermelho, verde e azul, de 00 (nada) a FF (tudo).",
     temas: ["interfaces"],
   },
   "regra-nova": {
     nome: "Regra nova",
+    termoIngles: "New style rule",
     resumo: "Quando nenhuma regra pega a peça, você cria uma com o seletor dela e escreve as declarações.",
     temas: ["interfaces", "ferramentas"],
   },
@@ -375,21 +423,25 @@ const CATALOGO = {
   // Zona Estilos, E2: Seletores
   "seletor-de-tag": {
     nome: "Seletor de tag",
+    termoIngles: "type selector",
     resumo: "Um seletor com o nome de uma tag (como h3) pega TODAS as peças daquele tipo na página.",
     temas: ["interfaces"],
   },
   "seletor-de-classe": {
     nome: "Seletor de classe",
+    termoIngles: "class selector",
     resumo: "Um seletor que começa com ponto (.autor) pega toda peça com aquela class, não importa onde ela more.",
     temas: ["interfaces"],
   },
   "seletor-de-id": {
     nome: "Seletor de id",
+    termoIngles: "ID selector",
     resumo: "Um seletor que começa com sustenido (#id) pega só UMA peça, porque um id não se repete na página.",
     temas: ["interfaces"],
   },
   "seletor-descendente": {
     nome: "Seletor descendente",
+    termoIngles: "descendant combinator",
     resumo: "Dois seletores com um espaço entre eles (main .preco) pegam só o segundo quando ele está dentro do primeiro.",
     temas: ["interfaces"],
   },
@@ -397,26 +449,31 @@ const CATALOGO = {
   // Zona Estilos, E3: Modelo de caixa
   "modelo-de-caixa": {
     nome: "Modelo de caixa",
+    termoIngles: "box model",
     resumo: "Toda peça é uma caixa com quatro camadas: conteúdo, padding, border e margin, de dentro pra fora.",
     temas: ["interfaces"],
   },
   "padding-css": {
     nome: "Padding",
+    termoIngles: "padding",
     resumo: "O padding é o espaço DENTRO da caixa, entre o conteúdo e a borda: empurra o conteúdo pra dentro.",
     temas: ["interfaces"],
   },
   "border-css": {
     nome: "Border",
+    termoIngles: "border",
     resumo: "A border é a linha ao redor do padding: tem espessura, estilo (como solid) e cor.",
     temas: ["interfaces"],
   },
   "margin-css": {
     nome: "Margin",
+    termoIngles: "margin",
     resumo: "O margin é o espaço FORA da caixa: empurra as peças vizinhas pra longe, sem mudar o tamanho dela.",
     temas: ["interfaces"],
   },
   "box-sizing": {
     nome: "Box-sizing",
+    termoIngles: "box-sizing",
     resumo: "Com border-box, o padding e a border entram DENTRO da largura definida, em vez de somar a ela.",
     temas: ["interfaces"],
   },
@@ -424,26 +481,31 @@ const CATALOGO = {
   // Zona Estilos, E4: Por que minha regra não pega?
   "cascata-css": {
     nome: "Cascata",
+    termoIngles: "cascade",
     resumo: "Várias regras podem mirar a mesma peça ao mesmo tempo; a cascata decide qual declaração vence.",
     temas: ["interfaces"],
   },
   "ordem-das-regras": {
     nome: "Ordem das regras",
+    termoIngles: "source order",
     resumo: "Quando duas regras têm a MESMA especificidade, a que vem depois no arquivo vence.",
     temas: ["interfaces"],
   },
   "especificidade-css": {
     nome: "Especificidade",
+    termoIngles: "specificity",
     resumo: "Um seletor com id vence um com classe, que vence um só de tag — não importa a ordem no arquivo.",
     temas: ["interfaces"],
   },
   "heranca-css": {
     nome: "Herança",
+    termoIngles: "inheritance",
     resumo: "Sem regra própria, uma peça herda as propriedades herdáveis (como color) do ancestral mais perto.",
     temas: ["interfaces"],
   },
   "importante-css": {
     nome: "!important",
+    termoIngles: "!important",
     resumo: "!important faz uma declaração vencer quase tudo; editar a própria declaração é o jeito de mudar seu valor, mas é melhor evitar usá-lo.",
     temas: ["interfaces"],
   },
@@ -451,26 +513,31 @@ const CATALOGO = {
   // Zona Layout, L1: Display
   "display-css": {
     nome: "Display",
+    termoIngles: "display",
     resumo: "O display de uma peça decide o formato da caixa dela: block, inline, inline-block ou none.",
     temas: ["interfaces"],
   },
   "display-block": {
     nome: "Display block",
+    termoIngles: "block",
     resumo: "block faz a caixa ocupar a linha toda (a largura do pai) e empurra o que vem depois para baixo.",
     temas: ["interfaces"],
   },
   "display-inline": {
     nome: "Display inline",
+    termoIngles: "inline",
     resumo: "inline é o padrão de peças como span e a: fica ao lado do texto e ignora width e height.",
     temas: ["interfaces"],
   },
   "display-inline-block": {
     nome: "Display inline-block",
+    termoIngles: "inline-block",
     resumo: "inline-block fica lado a lado como inline, mas respeita width, height e padding como block.",
     temas: ["interfaces"],
   },
   "display-none": {
     nome: "Display none",
+    termoIngles: "none",
     resumo: "display: none tira a peça do fluxo da página: ela some e o espaço dela fecha, como se nunca tivesse existido.",
     temas: ["interfaces"],
   },
@@ -478,31 +545,37 @@ const CATALOGO = {
   // Zona Layout, L2: Flexbox
   flexbox: {
     nome: "Flexbox",
+    termoIngles: "flexbox",
     resumo: "Com display: flex, os filhos de uma caixa entram numa fila e ganham comandos de alinhamento.",
     temas: ["interfaces"],
   },
   "flex-direction": {
     nome: "Flex-direction",
+    termoIngles: "flex-direction",
     resumo: "flex-direction escolhe o sentido da fila: row (em linha) ou column (em coluna).",
     temas: ["interfaces"],
   },
   "justify-content": {
     nome: "Justify-content",
+    termoIngles: "justify-content",
     resumo: "justify-content espalha os filhos ao longo da fila: no começo, no fim, no centro ou com espaço entre eles.",
     temas: ["interfaces"],
   },
   "align-items": {
     nome: "Align-items",
+    termoIngles: "align-items",
     resumo: "align-items alinha os filhos no sentido cruzado da fila: topo, base, centro ou esticado.",
     temas: ["interfaces"],
   },
   "gap-css": {
     nome: "Gap",
+    termoIngles: "gap",
     resumo: "gap cria um espaço fixo entre os filhos de um flex ou de um grid, sem precisar de margin em cada um.",
     temas: ["interfaces"],
   },
   "flex-wrap": {
     nome: "Flex-wrap",
+    termoIngles: "flex-wrap",
     resumo: "flex-wrap deixa os filhos quebrarem para a linha de baixo quando não cabem todos na fila.",
     temas: ["interfaces"],
   },
@@ -510,26 +583,31 @@ const CATALOGO = {
   // Zona Layout, L3: Grid
   "css-grid": {
     nome: "CSS Grid",
+    termoIngles: "CSS Grid",
     resumo: "Com display: grid, uma caixa vira uma grade de linhas e colunas, e os filhos se encaixam nela.",
     temas: ["interfaces"],
   },
   "grid-template-columns": {
     nome: "Grid-template-columns",
+    termoIngles: "grid-template-columns",
     resumo: "grid-template-columns diz quantas colunas o grid tem e a largura de cada uma.",
     temas: ["interfaces"],
   },
   "fr-do-grid": {
     nome: "Unidade fr",
+    termoIngles: "fr",
     resumo: "fr divide o espaço que sobra em frações; 1fr 2fr dá o dobro do espaço para a segunda coluna.",
     temas: ["interfaces"],
   },
   "grid-template-rows": {
     nome: "Grid-template-rows",
+    termoIngles: "grid-template-rows",
     resumo: "grid-template-rows diz quantas linhas o grid tem e a altura de cada uma, como as colunas mas na vertical.",
     temas: ["interfaces"],
   },
   "grid-template-areas": {
     nome: "Grid-template-areas",
+    termoIngles: "grid-template-areas",
     resumo: "grid-template-areas desenha o layout com nomes, como um mapa de caixas, e cada filho ocupa uma área.",
     temas: ["interfaces"],
   },
@@ -537,31 +615,37 @@ const CATALOGO = {
   // Zona Layout, L4: Posição e camadas
   "position-css": {
     nome: "Position",
+    termoIngles: "position",
     resumo: "position muda como uma peça se posiciona na página: static (o padrão), relative, absolute, fixed ou sticky.",
     temas: ["interfaces"],
   },
   "position-relative": {
     nome: "Position relative",
+    termoIngles: "relative positioning",
     resumo: "relative desliza a peça a partir do lugar onde ela estaria, sem tirar o espaço dela do fluxo.",
     temas: ["interfaces"],
   },
   "position-absolute": {
     nome: "Position absolute",
+    termoIngles: "absolute positioning",
     resumo: "absolute tira a peça do fluxo e a posiciona a partir do ancestral mais próximo com position diferente de static.",
     temas: ["interfaces"],
   },
   "position-fixed": {
     nome: "Position fixed",
+    termoIngles: "fixed positioning",
     resumo: "fixed gruda a peça na janela: ela fica no lugar mesmo quando a página rola.",
     temas: ["interfaces"],
   },
   "position-sticky": {
     nome: "Position sticky",
+    termoIngles: "sticky positioning",
     resumo: "sticky se comporta como normal até a rolagem chegar num limite, e então gruda como fixed.",
     temas: ["interfaces"],
   },
   "z-index-css": {
     nome: "Z-index",
+    termoIngles: "z-index",
     resumo: "z-index decide qual peça fica por cima quando duas se sobrepõem: o número maior vence.",
     temas: ["interfaces"],
   },
@@ -569,91 +653,109 @@ const CATALOGO = {
   // Zona Publicar, P2: Do jogo pro mundo
   "modo-dispositivo": {
     nome: "Modo dispositivo",
+    termoIngles: "Device Mode",
     resumo: "O botão do F12 que mostra a página do tamanho de um celular ou tablet, sem sair do computador.",
     temas: ["ferramentas", "interfaces"],
   },
   "auditoria-lighthouse": {
     nome: "Lighthouse",
+    termoIngles: "Lighthouse",
     resumo: "A aba do F12 que confere a página e dá notas de acessibilidade, boas práticas e SEO, apontando o que consertar.",
     temas: ["ferramentas", "acessibilidade"],
   },
   "css-externo": {
     nome: "CSS em arquivo separado",
+    termoIngles: "external stylesheet",
     resumo: "O visual mora num arquivo .css à parte, ligado à página por uma linha link no head.",
     temas: ["interfaces", "ferramentas"],
   },
   "index-html": {
     nome: "index.html",
+    termoIngles: "index.html",
     resumo: "O nome da página de entrada de um site: é o arquivo que o servidor mostra quando alguém abre o endereço.",
     temas: ["servidores"],
   },
   "publicar-site": {
     nome: "Publicar um site",
+    termoIngles: "website deployment",
     resumo: "Pôr os arquivos do site num servidor da internet, para qualquer pessoa abrir pelo endereço.",
     temas: ["servidores", "ferramentas"],
   },
   "variavel-css": {
     nome: "Variável CSS",
+    termoIngles: "custom property",
     resumo: "Um nome que guarda um valor (--nome: valor), usado em qualquer lugar com var(--nome). Mude num lugar só, e tudo que usa ela muda junto.",
     temas: ["interfaces"],
   },
   "escopo-de-variavel": {
     nome: "Alcance de uma variável",
+    termoIngles: "scope",
     resumo: "Uma variável declarada numa peça só vale nela e em quem está dentro dela; declarada no :root, vale na página inteira.",
     temas: ["interfaces"],
   },
   "contraste-de-cor": {
     nome: "Contraste de cor",
+    termoIngles: "color contrast",
     resumo: "A diferença entre a cor do texto e a do fundo. Pouco contraste deixa o texto difícil de ler, principalmente para quem enxerga menos.",
     temas: ["acessibilidade", "interfaces"],
   },
   "salvar-como-meu-tema": {
     nome: "Salvar como Meu tema",
+    semEquivalenteIngles: true,
     resumo: "Guardar o conjunto de cores que você criou como um tema novo, para usar no jogo inteiro a partir de agora.",
     temas: ["interfaces"],
   },
   "meta-viewport": {
     nome: "Meta viewport",
+    termoIngles: "viewport meta tag",
     resumo: "A linha no head que avisa o navegador do celular para desenhar a página do tamanho da tela dele, em vez de uma versão gigante encolhida.",
     temas: ["interfaces", "acessibilidade"],
   },
   "simulacao-sem-viewport": {
     nome: "Sem viewport, a página desenha gigante",
+    termoIngles: "layout viewport",
     resumo: "Sem o meta viewport, o navegador do celular desenha a página como se a tela tivesse 980px de largura e encolhe tudo para caber: fica pequeno e difícil de tocar.",
     temas: ["interfaces", "acessibilidade"],
   },
   "orientacao-da-tela": {
     nome: "Retrato e paisagem",
+    termoIngles: "screen orientation",
     resumo: "A tela pode estar em pé (retrato, mais alta que larga) ou deitada (paisagem, mais larga que alta); o layout pode reagir a cada uma.",
     temas: ["interfaces"],
   },
   "media-query": {
     nome: "Media query (@media)",
+    termoIngles: "media query",
     resumo: "Uma regra de CSS que só vale quando a tela cumpre uma condição, como a largura mínima ou máxima: @media (max-width: 600px) { ... }.",
     temas: ["interfaces"],
   },
   "breakpoint": {
     nome: "Breakpoint",
+    termoIngles: "breakpoint",
     resumo: "A largura de tela onde o layout muda de jeito, porque uma @media liga ou desliga ali.",
     temas: ["interfaces"],
   },
   "mobile-first": {
     nome: "Mobile first",
+    termoIngles: "mobile first",
     resumo: "Escrever primeiro o CSS para a tela pequena (sem @media nenhuma) e usar min-width para ir ACRESCENTANDO layout conforme a tela cresce.",
     temas: ["interfaces"],
   },
   "unidade-responsiva": {
     nome: "Unidade responsiva (%, max-width)",
+    termoIngles: "relative length / max-width",
     resumo: "Uma medida que se adapta ao espaço disponível, em vez de um tamanho fixo: max-width: 100% nunca passa da largura do pai.",
     temas: ["interfaces"],
   },
   "imagem-responsiva": {
     nome: "Imagem responsiva",
+    termoIngles: "responsive image",
     resumo: "Uma imagem com max-width: 100% (e height: auto): nunca estoura a largura do espaço dela, em nenhuma tela.",
     temas: ["interfaces", "acessibilidade"],
   },
   "rotulo-acessivel": {
     nome: "Rótulo acessível",
+    termoIngles: "accessible name",
     resumo: "O texto que diz o que um link ou botão faz para quem usa leitor de tela: o texto visível ou, se for só um ícone, um aria-label.",
     temas: ["acessibilidade", "interfaces"],
   },
@@ -661,186 +763,222 @@ const CATALOGO = {
   // Zona Ser encontrado (opcional), S1: como o Google acha seu site
   rastreamento: {
     nome: "Rastreamento",
+    termoIngles: "crawling",
     resumo: "O robô do buscador visita as páginas e segue os links de uma para outra, bem antes de alguém buscar.",
     temas: ["presenca-digital"],
   },
   indexacao: {
     nome: "Indexação",
+    termoIngles: "indexing",
     resumo: "Guardar a página visitada no catálogo do buscador: na hora da busca, ele procura no catálogo, não no site.",
     temas: ["presenca-digital"],
   },
   "titulo-na-busca": {
     nome: "Título na busca",
+    termoIngles: "title link",
     resumo: "O texto do <title> vira o título azul do resultado; se for longo demais, a busca corta com reticências.",
     temas: ["presenca-digital", "interfaces"],
   },
   "descricao-na-busca": {
     nome: "Descrição na busca",
+    termoIngles: "snippet",
     resumo: "A meta description é o convite embaixo do título no resultado; sem ela, a busca mostra um trecho qualquer da página.",
     temas: ["presenca-digital"],
   },
   noindex: {
     nome: "noindex",
+    termoIngles: "noindex",
     resumo: "Uma meta no head que pede para a página ficar fora da busca: ela continua no ar para quem tem o link.",
     temas: ["presenca-digital"],
   },
   // Zona Ser encontrado (opcional), S2: SEO na página
   "h1-da-pagina": {
     nome: "h1 da página",
+    termoIngles: "h1",
     resumo: "O título principal da página, um só, que diz do que ela trata: a busca e o leitor de tela se orientam por ele.",
     temas: ["presenca-digital", "acessibilidade"],
   },
   "enchimento-de-palavra-chave": {
     nome: "Enchimento de palavra-chave",
+    termoIngles: "keyword stuffing",
     resumo: "Repetir a mesma palavra sem sentido para tentar subir na busca: só deixa o texto ruim de ler.",
     temas: ["presenca-digital"],
   },
   "texto-que-responde": {
     nome: "Texto que responde",
+    termoIngles: "helpful content",
     resumo: "Um texto que diz o que a pessoa foi buscar (preço, horário, como funciona), com as palavras que ela usaria.",
     temas: ["presenca-digital"],
   },
   "texto-de-link": {
     nome: "Texto de link",
+    termoIngles: "link text",
     resumo: "O texto do link diz para onde ele leva (\"Veja o cardápio\"), em vez de \"clique aqui\", que fora da frase não diz nada.",
     temas: ["presenca-digital", "acessibilidade"],
   },
   "velocidade-da-pagina": {
     nome: "Velocidade da página",
+    termoIngles: "page speed",
     resumo: "Quanto a página demora para aparecer: foto pesada e muita coisa para baixar fazem a pessoa desistir antes de ver.",
     temas: ["desempenho", "presenca-digital"],
   },
   "imagem-preguicosa": {
     nome: "Imagem preguiçosa (lazy)",
+    termoIngles: "lazy loading",
     resumo: "Com loading=\"lazy\" na img, a foto só baixa quando a pessoa rola até perto dela, e a página abre mais rápido.",
     temas: ["desempenho"],
   },
   // Zona Ser encontrado (opcional), S3: seu negócio no mapa
   "perfil-da-empresa": {
     nome: "Perfil da Empresa no Google",
+    termoIngles: "Google Business Profile",
     resumo: "A ficha do negócio no Google, com endereço, telefone, horário, fotos e avaliações: é o que faz ele aparecer na busca local e no mapa.",
     temas: ["presenca-digital"],
   },
   "nome-endereco-telefone": {
     nome: "Nome, endereço e telefone iguais",
+    termoIngles: "NAP consistency",
     resumo: "Os mesmos dados do negócio no site, no perfil e nas redes: dado diferente confunde o cliente e a busca.",
     temas: ["presenca-digital", "dados"],
   },
   "avaliacoes-do-cliente": {
     nome: "Avaliações dos clientes",
+    termoIngles: "customer reviews",
     resumo: "O que os clientes dizem do negócio: peça e responda com educação, nunca compre, porque avaliação comprada é falsa.",
     temas: ["presenca-digital"],
   },
   "dados-estruturados": {
     nome: "Dados estruturados (JSON-LD)",
+    termoIngles: "structured data / JSON-LD",
     resumo: "Um bloco de dados no head que descreve o negócio para a busca num formato que ela lê fácil; ajuda, mas não garante o cartão no mapa.",
     temas: ["presenca-digital", "dados"],
   },
   "local-business": {
     nome: "LocalBusiness e subtipos",
+    termoIngles: "LocalBusiness",
     resumo: "O tipo de dado que descreve um negócio local; use o subtipo mais específico que existir, como Bakery, Plumber ou Dentist.",
     temas: ["presenca-digital", "dados"],
   },
   // Zona Ser encontrado (opcional), S4: medir quem chega
   analytics: {
     nome: "Analytics",
+    termoIngles: "Google Analytics",
     resumo: "Um programa de análise que o site carrega para contar visitas e eventos: mostra o que as pessoas fazem no site.",
     temas: ["presenca-digital", "dados"],
   },
   "search-console": {
     nome: "Search Console",
+    termoIngles: "Google Search Console",
     resumo: "Ferramenta gratuita do Google que mostra como o site aparece na busca: pesquisas, cliques e problemas de indexação.",
     temas: ["presenca-digital", "ferramentas"],
   },
   "evento-de-medicao": {
     nome: "Evento de medição",
+    termoIngles: "event",
     resumo: "O registro de que algo aconteceu no site, com um nome, como clique_whatsapp; no jogo, o data-evento da peça gera ele.",
     temas: ["presenca-digital", "dados"],
   },
   conversao: {
     nome: "Conversão",
+    termoIngles: "conversion",
     resumo: "Uma ação importante depois do clique, como compra, ligação ou cadastro: é o que conta, mais do que a visita.",
     temas: ["presenca-digital", "dados"],
   },
   "link-rastreavel-utm": {
     nome: "Link rastreável (utm)",
+    termoIngles: "UTM parameters",
     resumo: "Um link com utm_source, utm_medium e utm_campaign no fim, que diz à medição de onde a visita veio; a página não muda.",
     temas: ["presenca-digital", "dados"],
   },
   // Zona Ser encontrado (opcional), S5: anúncio pago por dentro
   "leilao-de-anuncio": {
     nome: "Leilão do anúncio",
+    termoIngles: "ad auction",
     resumo: "A disputa que decide quem aparece quando alguém busca: o lance conta, mas não sozinho (qualidade, concorrência e contexto também).",
     temas: ["presenca-digital", "desempenho"],
   },
   "custo-por-clique": {
     nome: "Custo por clique",
+    termoIngles: "cost per click (CPC)",
     resumo: "O que o anunciante paga por cada clique no anúncio: o lance é o máximo, e o custo real costuma ficar abaixo dele.",
     temas: ["presenca-digital", "dados"],
   },
   "palavra-chave-de-anuncio": {
     nome: "Palavra-chave do anúncio",
+    termoIngles: "keyword",
     resumo: "O termo que a pessoa digita na busca e que o anunciante escolhe para o anúncio poder aparecer; há correspondência ampla, de frase e exata.",
     temas: ["presenca-digital"],
   },
   "orcamento-diario": {
     nome: "Orçamento diário",
+    termoIngles: "average daily budget",
     resumo: "O teto do que o anúncio gasta por dia: quando a verba do dia acaba, o anúncio deixa de aparecer.",
     temas: ["presenca-digital", "dados"],
   },
   "pagina-de-destino": {
     nome: "Página de destino",
+    termoIngles: "landing page",
     resumo: "A página onde a pessoa cai depois de clicar no anúncio: decide quantos cliques viram clientes, e uma página melhor barateia o cliente.",
     temas: ["presenca-digital", "desempenho"],
   },
   "indice-de-qualidade": {
     nome: "Índice de qualidade",
+    termoIngles: "Quality Score",
     resumo: "Uma nota de 1 a 10, por palavra-chave, que só serve de diagnóstico do anúncio e da página: não entra no leilão.",
     temas: ["presenca-digital", "dados"],
   },
   // Ilha Lógica, Primeiros comandos: U1 (rodada 17)
   "console-js": {
     nome: "Console",
+    termoIngles: "Console",
     resumo: "A aba do F12 onde você escreve um comando de JavaScript, aperta Enter e vê a resposta na hora, em qualquer site.",
     temas: ["logica", "ferramentas"],
   },
   "operacoes-aritmeticas": {
     nome: "Operações de conta",
+    termoIngles: "arithmetic operators",
     resumo: "Os sinais que fazem conta no código: + soma, - subtrai, * multiplica, / divide e % dá o resto da divisão.",
     temas: ["logica"],
   },
   "ordem-das-operacoes": {
     nome: "Ordem das operações",
+    termoIngles: "operator precedence",
     resumo: "Como na escola: vezes e dividir vêm antes de mais e menos, e o que está entre parênteses vem primeiro.",
     temas: ["logica"],
   },
   "variavel-let": {
     nome: "Variável com let",
+    termoIngles: "let",
     resumo: "Uma caixinha com nome que guarda um valor e pode trocar de valor depois: let total = 10.",
     temas: ["logica", "dados"],
   },
   "variavel-const": {
     nome: "Constante com const",
+    termoIngles: "const",
     resumo: "Uma caixinha com nome que guarda o mesmo valor para sempre: tentar trocar dá erro.",
     temas: ["logica", "dados"],
   },
   "nome-de-variavel": {
     nome: "Nome de variável",
+    termoIngles: "identifier",
     resumo: "Um bom nome diz o que a caixinha guarda (precoDoPao, e não x), sem espaço nem acento, com as palavras coladas e a segunda em maiúscula.",
     temas: ["logica"],
   },
   "undefined-js": {
     nome: "undefined",
+    termoIngles: "undefined",
     resumo: "O jeito do JavaScript dizer que não tem valor ali: é o que o Console responde depois de uma linha que só guarda algo, como let preco = 5.",
     temas: ["logica", "dados"],
   },
   "ler-mensagem-de-erro": {
     nome: "Ler a mensagem de erro",
+    termoIngles: "error message",
     resumo: "O erro vermelho diz o tipo do problema, o que aconteceu e a linha: ler com calma mostra por onde começar a consertar.",
     temas: ["logica", "ferramentas"],
   },
   "string-js": {
   "nome": "Texto (string)",
+    termoIngles: "string",
   "resumo": "Um valor que guarda caracteres, como um nome ou uma mensagem, escrito entre aspas.",
   "temas": [
     "logica",
@@ -849,6 +987,7 @@ const CATALOGO = {
 },
   "aspas-js": {
   "nome": "Aspas do texto",
+    termoIngles: "quotes",
   "resumo": "Aspas simples, duplas ou crases delimitam o texto; sem elas, uma palavra é lida como nome de variável.",
   "temas": [
     "logica"
@@ -856,6 +995,7 @@ const CATALOGO = {
 },
   "concatenacao-js": {
   "nome": "Juntar textos",
+    termoIngles: "string concatenation",
   "resumo": "O + junta textos na ordem escrita, sem inventar espaços entre eles.",
   "temas": [
     "logica"
@@ -863,6 +1003,7 @@ const CATALOGO = {
 },
   "template-literal": {
   "nome": "Frase com valores",
+    termoIngles: "template literal",
   "resumo": "Entre crases, ${nome} coloca o valor da variável dentro do texto.",
   "temas": [
     "logica",
@@ -871,6 +1012,7 @@ const CATALOGO = {
 },
   "length-texto": {
   "nome": "Tamanho do texto",
+    termoIngles: "String.length",
   "resumo": "A propriedade .length informa o tamanho do texto, incluindo espaços.",
   "temas": [
     "logica",
@@ -879,6 +1021,7 @@ const CATALOGO = {
 },
   "console-log": {
   "nome": "Mostrar com console.log",
+    termoIngles: "console.log",
   "resumo": "console.log mostra uma mensagem; a resposta da chamada no Console continua sendo undefined.",
   "temas": [
     "logica",
@@ -887,6 +1030,7 @@ const CATALOGO = {
 },
   "tipo-js": {
   "nome": "Tipo do valor",
+    termoIngles: "data type",
   "resumo": "Número, texto, booleano, undefined e null representam coisas diferentes, mesmo quando parecem iguais.",
   "temas": [
     "logica",
@@ -895,6 +1039,7 @@ const CATALOGO = {
 },
   "typeof-js": {
   "nome": "Perguntar o tipo",
+    termoIngles: "typeof",
   "resumo": "typeof devolve um texto com o nome do tipo do valor, como number ou string.",
   "temas": [
     "logica",
@@ -903,6 +1048,7 @@ const CATALOGO = {
 },
   "igualdade-estrita": {
   "nome": "Comparar com ===",
+    termoIngles: "strict equality",
   "resumo": "O === compara valor e tipo e responde true ou false, sem guardar nada nas variáveis.",
   "temas": [
     "logica",
@@ -911,6 +1057,7 @@ const CATALOGO = {
 },
   "coercao-js": {
   "nome": "Conversão automática",
+    termoIngles: "type coercion",
   "resumo": "Algumas operações convertem tipos sozinhas: + com texto junta, enquanto * e - tentam usar números.",
   "temas": [
     "logica",
@@ -919,6 +1066,7 @@ const CATALOGO = {
 },
   "conversao-number": {
   "nome": "Converter com Number",
+    termoIngles: "Number",
   "resumo": "Number(texto) tenta transformar texto numérico em número antes de fazer a conta.",
   "temas": [
     "logica",
@@ -927,6 +1075,7 @@ const CATALOGO = {
 },
   "conversao-string": {
   "nome": "Converter com String",
+    termoIngles: "String",
   "resumo": "String(valor) transforma um valor em texto, útil para montar uma mensagem.",
   "temas": [
     "logica",
@@ -935,6 +1084,7 @@ const CATALOGO = {
 },
   "comentario-js": {
   "nome": "Comentário no código",
+    termoIngles: "comment",
   "resumo": "O computador ignora o trecho entre // e o fim da linha, ou entre /* e */; o resto continua executando.",
   "temas": [
     "logica",
@@ -943,107 +1093,128 @@ const CATALOGO = {
 },
   "booleano-js": {
   "nome": "Verdadeiro ou falso",
+    termoIngles: "boolean",
   "resumo": "Um valor com só duas opções, true (verdadeiro) ou false (falso): é o que uma pergunta do código devolve.",
   "temas": ["logica","dados"]
 },
   "comparacao-js": {
   "nome": "Comparar com > e <",
+    termoIngles: "comparison operators",
   "resumo": "Os sinais > e < perguntam se um valor é maior ou menor que outro, e o Console responde true ou false.",
   "temas": ["logica"]
 },
   "limite-da-comparacao": {
   "nome": "Maior ou igual (>= e <=)",
+    termoIngles: "greater than or equal / less than or equal",
   "resumo": "Com >= e <=, o valor que está exatamente no limite também conta; com > e <, ele fica de fora.",
   "temas": ["logica"]
 },
   "diferente-estrito": {
   "nome": "Diferente com !==",
+    termoIngles: "strict inequality",
   "resumo": "O !== pergunta se dois valores são diferentes em valor ou em tipo: é o contrário do ===.",
   "temas": ["logica"]
 },
   "atribuir-ou-comparar": {
   "nome": "Guardar não é comparar",
+    termoIngles: "assignment / equality",
   "resumo": "Um = guarda um valor numa caixinha e a muda; três === perguntam se dois valores são iguais, sem mudar nada.",
   "temas": ["logica"]
 },
   "igualdade-solta": {
   "nome": "Igualdade solta ==",
+    termoIngles: "loose equality",
   "resumo": "O == compara convertendo os tipos antes ('10' == 10 dá true): por isso quase sempre se usa o ===.",
   "temas": ["logica"]
 },
   "portao-e": {
   "nome": "Portão E",
+    termoIngles: "AND gate",
   "resumo": "Só acende quando as duas entradas estão ligadas; no código se escreve && (true && true é true).",
   "temas": ["logica","fundamentos"]
 },
   "tabela-verdade": {
   "nome": "Tabela verdade",
+    termoIngles: "truth table",
   "resumo": "Uma tabela que lista todos os jeitos de ligar as chaves e mostra, em cada um, se a saída acende.",
   "temas": ["logica","fundamentos"]
 },
   "portao-ou": {
   "nome": "Portão OU",
+    termoIngles: "OR gate",
   "resumo": "Acende quando pelo menos uma entrada está ligada (as duas também valem); no código se escreve ||.",
   "temas": ["logica","fundamentos"]
 },
   "portao-nao": {
   "nome": "Portão NÃO",
+    termoIngles: "NOT gate",
   "resumo": "Inverte o valor: o que era ligado vira desligado e o contrário; no código é o ponto de exclamação (!).",
   "temas": ["logica","fundamentos"]
 },
   "operadores-logicos": {
   "nome": "&&, || e !",
+    termoIngles: "logical operators",
   "resumo": "Os operadores do código que fazem o papel dos portões: && é o E, || é o OU e ! é o NÃO.",
   "temas": ["logica"]
 },
   "ordem-e-ou": {
   "nome": "Ordem do E e do OU",
+    termoIngles: "operator precedence",
   "resumo": "O E é calculado antes do OU, e os parênteses mudam quem vai primeiro: a mesma conta pode dar resultados diferentes.",
   "temas": ["logica"]
 },
   "if-js": {
   "nome": "Se (if)",
+    termoIngles: "if",
   "resumo": "O if roda um trecho de código só quando a condição entre parênteses é true; se for false, o trecho é pulado.",
   "temas": ["logica"]
 },
   "bloco-js": {
   "nome": "Bloco entre chaves",
+    termoIngles: "block",
   "resumo": "As chaves { } agrupam várias linhas num único bloco, que roda inteiro ou não roda.",
   "temas": ["logica"]
 },
   "else-js": {
   "nome": "Senão (else)",
+    termoIngles: "else",
   "resumo": "O else é o plano B do if: roda quando a condição é false, e nunca junto com o bloco do if.",
   "temas": ["logica"]
 },
   "else-if-js": {
   "nome": "Else if e a ordem",
+    termoIngles: "else if",
   "resumo": "O else if encadeia mais uma pergunta; o programa para na primeira true, então a ordem das perguntas muda o resultado.",
   "temas": ["logica"]
 },
   "condicao-composta": {
   "nome": "Condição com && e ||",
+    termoIngles: "logical AND / logical OR",
   "resumo": "Dentro do if dá para juntar condições: && exige todas, || aceita qualquer uma, e parênteses decidem quem vai primeiro.",
   "temas": ["logica"]
 },
   "falsy-js": {
   "nome": "Valores falsos",
+    termoIngles: "falsy",
   "resumo": "No if, estes valores contam como falsos: false, 0, texto vazio, null, undefined e NaN.",
   "temas": ["logica","dados"]
 },
   "truthy-js": {
   "nome": "Valores verdadeiros",
+    termoIngles: "truthy",
   "resumo": "Todo valor que não é falso conta como verdadeiro no if, até o texto '0', o texto 'false' e a lista vazia.",
   "temas": ["logica","dados"]
 },
   "dupla-negacao": {
   "nome": "!!valor",
+    termoIngles: "double NOT",
   "resumo": "Dois ! seguidos transformam qualquer valor em true ou false, do jeito que o if o enxerga.",
   "temas": ["logica","dados"]
 },
 
   "while-js": {
   "nome": "Enquanto (while)",
+    termoIngles: "while loop",
   "resumo": "Testa a condição antes de cada volta e repete só o bloco enquanto ela for true.",
   "temas": [
     "logica"
@@ -1051,6 +1222,7 @@ const CATALOGO = {
 },
   "condicao-de-parada": {
   "nome": "Condição de parada",
+    termoIngles: "termination condition",
   "resumo": "O laço termina quando a condição fica false; se já começa false, não há voltas.",
   "temas": [
     "logica"
@@ -1058,6 +1230,7 @@ const CATALOGO = {
 },
   "contador-js": {
   "nome": "Contador",
+    termoIngles: "counter",
   "resumo": "Guarda o número da volta: i = i + 1 ou i++ aumenta um; i-- diminui um.",
   "temas": [
     "logica"
@@ -1065,6 +1238,7 @@ const CATALOGO = {
 },
   "loop-infinito": {
   "nome": "Loop infinito e proteção",
+    termoIngles: "infinite loop",
   "resumo": "Se a condição nunca fica falsa, o laço não termina. O jogo limita passos e tempo para proteger a aba.",
   "temas": [
     "logica"
@@ -1073,6 +1247,7 @@ const CATALOGO = {
 
   "for-js": {
   "nome": "Laço for",
+    termoIngles: "for loop",
   "resumo": "Junta início, condição e atualização, separados por ponto e vírgula, para repetir um bloco.",
   "temas": [
     "logica"
@@ -1080,6 +1255,7 @@ const CATALOGO = {
 },
   "for-of-js": {
   "nome": "for...of em textos",
+    termoIngles: "for...of",
   "resumo": "Entrega uma letra por volta, na ordem do texto, até ele acabar.",
   "temas": [
     "logica"
@@ -1087,6 +1263,7 @@ const CATALOGO = {
 },
   "break-js": {
   "nome": "Saída com break",
+    termoIngles: "break",
   "resumo": "Sai do laço atual imediatamente; o programa continua depois do bloco.",
   "temas": [
     "logica"
@@ -1095,6 +1272,7 @@ const CATALOGO = {
 
   "acumulador-js": {
   "nome": "Acumulador",
+    termoIngles: "accumulator",
   "resumo": "Guarda a soma dos valores, começando fora do laço; total += preco acrescenta o preço ao total.",
   "temas": [
     "logica",
@@ -1103,6 +1281,7 @@ const CATALOGO = {
 },
   "contador-condicional": {
   "nome": "Contador condicional",
+    termoIngles: "conditional counting",
   "resumo": "Aumenta só quando um if passa: conta os casos que atendem à condição, não todos os casos.",
   "temas": [
     "logica",
@@ -1111,6 +1290,7 @@ const CATALOGO = {
 },
   "maior-menor-js": {
   "nome": "Maior e menor",
+    termoIngles: "maximum / minimum",
   "resumo": "Compara cada valor com os extremos guardados e só troca ao achar um maior ou menor; o início deve ser um valor real.",
   "temas": [
     "logica",
@@ -1119,6 +1299,7 @@ const CATALOGO = {
 },
   "media-js": {
   "nome": "Média",
+    termoIngles: "mean",
   "resumo": "Divide a soma pela quantidade de valores, sem confundir a quantidade com o contador final da volta.",
   "temas": [
     "logica",
@@ -1127,6 +1308,7 @@ const CATALOGO = {
 },
 "funcao-js": {
   "nome": "Função",
+    termoIngles: "function",
   "resumo": "Guarda instruções sob um nome; criar uma função não executa seu corpo.",
   "temas": [
     "logica"
@@ -1134,6 +1316,7 @@ const CATALOGO = {
 },
 "chamada-funcao": {
   "nome": "Chamada de função",
+    termoIngles: "function call",
   "resumo": "Os parênteses executam a função; ler apenas o nome obtém a própria função.",
   "temas": [
     "logica"
@@ -1141,6 +1324,7 @@ const CATALOGO = {
 },
 "moldura-funcao": {
   "nome": "Moldura de chamada",
+    termoIngles: "call frame",
   "resumo": "Cada chamada tem seu próprio quadro no palco e volta para quem chamou ao terminar.",
   "temas": [
     "logica"
@@ -1148,6 +1332,7 @@ const CATALOGO = {
 },
 "parametro-argumento": {
   "nome": "Parâmetro e argumento",
+    termoIngles: "parameter / argument",
   "resumo": "Parâmetro é o nome de dentro; argumento é o valor entregue na posição da chamada.",
   "temas": [
     "logica"
@@ -1155,6 +1340,7 @@ const CATALOGO = {
 },
 "return-js": {
   "nome": "Retorno",
+    termoIngles: "return",
   "resumo": "return entrega um valor para quem chamou e encerra a chamada.",
   "temas": [
     "logica"
@@ -1162,6 +1348,7 @@ const CATALOGO = {
 },
 "mostrar-ou-devolver": {
   "nome": "Mostrar ou devolver",
+    termoIngles: "logging / returning",
   "resumo": "console.log mostra uma mensagem; return entrega um resultado. Sem return a função devolve undefined.",
   "temas": [
     "logica"
@@ -1169,6 +1356,7 @@ const CATALOGO = {
 },
 "return-encerra": {
   "nome": "Return encerra a chamada",
+    termoIngles: "early return",
   "resumo": "Um return termina imediatamente a chamada; as instruções seguintes daquela função não executam.",
   "temas": [
     "logica"
@@ -1176,6 +1364,7 @@ const CATALOGO = {
 },
 "escopo-global-js": {
   "nome": "Escopo global",
+    termoIngles: "global scope",
   "resumo": "Uma variável do topo continua disponível entre chamadas.",
   "temas": [
     "logica"
@@ -1183,6 +1372,7 @@ const CATALOGO = {
 },
 "escopo-funcao-js": {
   "nome": "Escopo de função",
+    termoIngles: "function scope",
   "resumo": "Uma variável local pertence à chamada; um nome igual fora representa outra caixinha.",
   "temas": [
     "logica"
@@ -1190,6 +1380,7 @@ const CATALOGO = {
 },
 "escopo-bloco-js": {
   "nome": "Escopo de bloco",
+    termoIngles: "block scope",
   "resumo": "let e const dentro de chaves só existem naquele bloco, inclusive dentro de uma função.",
   "temas": [
     "logica"
@@ -1197,6 +1388,7 @@ const CATALOGO = {
 },
 "estado-entre-chamadas": {
   "nome": "Estado entre chamadas",
+    termoIngles: "persistent state",
   "resumo": "Uma local nasce de novo a cada chamada; para guardar uma contagem entre chamadas a caixinha deve sobreviver fora.",
   "temas": [
     "logica"
@@ -1204,6 +1396,7 @@ const CATALOGO = {
 },
 "arrow-js": {
   "nome": "Função com seta",
+    termoIngles: "arrow function",
   "resumo": "A seta => cria uma função; parâmetros e chamadas continuam funcionando do mesmo jeito.",
   "temas": [
     "logica"
@@ -1211,6 +1404,7 @@ const CATALOGO = {
 },
 "retorno-implicito": {
   "nome": "Retorno implícito",
+    termoIngles: "implicit return",
   "resumo": "Uma arrow sem chaves devolve automaticamente o valor da expressão depois da seta.",
   "temas": [
     "logica"
@@ -1218,6 +1412,7 @@ const CATALOGO = {
 },
 "arrow-com-bloco": {
   "nome": "Arrow com bloco",
+    termoIngles: "block body",
   "resumo": "Com chaves, a arrow executa instruções e precisa de return para devolver um resultado.",
   "temas": [
     "logica"
@@ -1226,6 +1421,7 @@ const CATALOGO = {
 
   "array-js": {
     "nome": "Lista de valores",
+    termoIngles: "array",
     "resumo": "Uma lista guarda vários valores em vagões numerados, na ordem escrita.",
     "temas": [
       "logica",
@@ -1234,6 +1430,7 @@ const CATALOGO = {
   },
   "indice-lista-js": {
     "nome": "Índice começa em zero",
+    termoIngles: "zero-based index",
     "resumo": "O primeiro índice é 0. Ler uma posição ausente devolve undefined, sem erro.",
     "temas": [
       "logica",
@@ -1242,6 +1439,7 @@ const CATALOGO = {
   },
   "length-lista-js": {
     "nome": "Tamanho da lista",
+    termoIngles: "Array.length",
     "resumo": "length conta os itens; o último índice de uma lista não vazia é length - 1.",
     "temas": [
       "logica",
@@ -1250,6 +1448,7 @@ const CATALOGO = {
   },
   "push-pop-js": {
     "nome": "Pôr e tirar pelo fim",
+    termoIngles: "push / pop",
     "resumo": "push acrescenta ao fim; pop tira e devolve o último item da lista.",
     "temas": [
       "logica",
@@ -1258,6 +1457,7 @@ const CATALOGO = {
   },
   "const-lista-js": {
     "nome": "Const e conteúdo",
+    termoIngles: "const array",
     "resumo": "const impede trocar a lista inteira, mas permite alterar seus itens.",
     "temas": [
       "logica",
@@ -1266,6 +1466,7 @@ const CATALOGO = {
   },
   "referencia-lista-js": {
     "nome": "Duas setas, uma lista",
+    termoIngles: "reference",
     "resumo": "Atribuir uma lista a outra variável compartilha a lista; não copia os vagões.",
     "temas": [
       "logica",
@@ -1275,6 +1476,7 @@ const CATALOGO = {
 
   "map-lista-js": {
     "nome": "Transformar com map",
+    termoIngles: "Array.prototype.map",
     "resumo": "map chama a função para cada item e devolve uma lista nova; a original permanece.",
     "temas": [
       "logica",
@@ -1283,6 +1485,7 @@ const CATALOGO = {
   },
   "filter-lista-js": {
     "nome": "Selecionar com filter",
+    termoIngles: "Array.prototype.filter",
     "resumo": "filter devolve uma lista com todos os itens cuja condição deu true, ou [] quando nenhum serve.",
     "temas": [
       "logica",
@@ -1291,6 +1494,7 @@ const CATALOGO = {
   },
   "find-lista-js": {
     "nome": "Achar com find",
+    termoIngles: "Array.prototype.find",
     "resumo": "find devolve só o primeiro item que serve, ou undefined quando não encontra.",
     "temas": [
       "logica",
@@ -1299,6 +1503,7 @@ const CATALOGO = {
   },
 "percorrer-lista-js": {
   "nome": "Percorrer os vagões",
+    termoIngles: "array iteration",
   "resumo": "for...of entrega os valores da lista; for com índice lê lista[i] até antes de length.",
   "temas": [
     "logica",
@@ -1308,6 +1513,7 @@ const CATALOGO = {
 
   "objeto-js": {
     "nome": "Ficha de dados",
+    termoIngles: "object",
     "resumo": "Um objeto reúne campos nomeados: cada chave guarda um valor, não uma posição numerada.",
     "temas": [
       "logica",
@@ -1316,6 +1522,7 @@ const CATALOGO = {
   },
   "acesso-objeto-js": {
     "nome": "Ponto e colchetes",
+    termoIngles: "property accessors",
     "resumo": "obj.total e obj[\"total\"] leem a mesma chave; chave ausente dá undefined.",
     "temas": [
       "logica",
@@ -1324,6 +1531,7 @@ const CATALOGO = {
   },
   "mudar-campo-js": {
     "nome": "Alterar e acrescentar campos",
+    termoIngles: "property assignment",
     "resumo": "Atribuir obj.chave muda só esse campo; uma chave nova acrescenta um campo à ficha.",
     "temas": [
       "logica",
@@ -1333,6 +1541,7 @@ const CATALOGO = {
 
   "lista-objetos-js": {
     "nome": "Lista de fichas",
+    termoIngles: "array of objects",
     "resumo": "Uma lista pode guardar objetos: lista[0] escolhe uma ficha e lista[0].nome lê um campo dela.",
     "temas": [
       "logica",
@@ -1341,6 +1550,7 @@ const CATALOGO = {
   },
   "somar-campo-js": {
     "nome": "Somar um campo",
+    termoIngles: "sum",
     "resumo": "Percorra as fichas e acrescente o campo numérico de cada item ao acumulador.",
     "temas": [
       "logica",
@@ -1349,6 +1559,7 @@ const CATALOGO = {
   },
   "filtrar-campo-js": {
     "nome": "Filtrar por campo",
+    termoIngles: "filter by property",
     "resumo": "A condição do filter pode ler um campo da ficha; o resultado guarda as fichas aprovadas.",
     "temas": [
       "logica",
@@ -1357,13 +1568,14 @@ const CATALOGO = {
   },
   "desestruturacao-objeto-js": {
     "nome": "Separar campos em variáveis",
+    termoIngles: "object destructuring",
     "resumo": "const { nome, preco } = item lê esses campos e cria variáveis locais com seus valores.",
     "temas": [
       "logica",
       "dados"
     ]
   },
-} as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[]; termoIngles?: string }>;
+} as const satisfies Record<string, { nome: string; resumo: string; temas: readonly IdTema[]; termoIngles?: string; semEquivalenteIngles?: boolean }>;
 
 export type IdConceito = keyof typeof CATALOGO;
 
@@ -1372,8 +1584,10 @@ export type Conceito = {
   nome: string;
   resumo: string;
   temas: readonly IdTema[];
-  /** O termo da documentação em inglês (ausente nos conceitos antigos que ainda não foram preenchidos). */
+  /** O termo usado na documentação em inglês. */
   termoIngles?: string;
+  /** Conceito próprio do jogo, sem equivalente técnico em inglês. */
+  semEquivalenteIngles?: boolean;
 };
 
 export const IDS_CONCEITOS = Object.keys(CATALOGO) as IdConceito[];

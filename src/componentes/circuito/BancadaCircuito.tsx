@@ -7,9 +7,9 @@
  * bolinha da direita de uma peça e depois numa bolinha da esquerda de
  * outra liga o fio. Os fios acesos mostram a corrente andando.
  */
-import { type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type PointerEvent, useEffect, useMemo, useId, useRef, useState } from "react";
 import { ALTURA_BANCADA, type Circuito, fioChave, LARGURA_BANCADA, NOME_DO_PORTAO, type TipoPortao } from "@/motor/circuito/modelo";
-import { caminhoDoFio, geometriaDa } from "./geometria";
+import { alvosDoCircuito, celulaDoAlvo, caminhoDoFio, geometriaDa } from "./geometria";
 import { BotaoNavegacaoCircuito } from "./BotaoNavegacaoCircuito";
 import { PecaCircuito } from "./PecaCircuito";
 
@@ -44,6 +44,8 @@ const meio = (a: PontoTela, b: PontoTela): PontoTela => ({ clientX: (a.clientX +
 type Escolha = { tipo: "peca"; id: string } | { tipo: "fio"; para: string; porta: number } | null;
 
 export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaque, aoAdicionar, aoLigar, aoAlternar, aoMover, aoApagarPeca, aoApagarFio }: Props) {
+  const prefixoAlvos = useId().replace(/:/g, "");
+  const alvos = useMemo(() => alvosDoCircuito(circuito.pecas), [circuito.pecas]);
   const svg = useRef<SVGSVGElement>(null);
   const arrasto = useRef<Arrasto | null>(null);
   const [puxando, setPuxando] = useState<string | null>(null);
@@ -64,6 +66,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
   const pontos = useRef(new Map<number, PontoTela>());
   const navegacao = useRef<Navegacao | null>(null);
   const ignorarClick = useRef(false);
+  const toqueNoCorpo = useRef<string | null>(null);
   const quadro = camera ?? lerQuadro(enquadramento);
   const escala = Math.min(tamanho.largura / quadro.largura, tamanho.altura / quadro.altura);
   useEffect(() => {
@@ -102,7 +105,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
 
   const apertarArea = (evento: PointerEvent<SVGSVGElement>) => {
     if (evento.button !== 0) return;
-    if (pontos.current.size === 0) ignorarClick.current = false;
+    if (pontos.current.size === 0) { ignorarClick.current = false; toqueNoCorpo.current = null; }
     pontos.current.set(evento.pointerId, evento);
     if (pontos.current.size >= 2) {
       const [a, b] = [...pontos.current.values()];
@@ -160,19 +163,24 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
       return;
     }
     if (!atual || atual.andou) return;
-    const peca = porId.get(atual.id);
+    // O click ainda pertence à bancada antiga. Mudar a fase no pointerup
+    // permitia que o click seguinte acertasse um botão recém-aberto sob o dedo.
+    toqueNoCorpo.current = atual.id;
+  };
+
+  const tocarCorpo = (id: string, evento: { clientX: number; clientY: number }) => {
+    const peca = porId.get(id);
     if (!peca) return;
-    // Com um fio puxado, tocar no corpo de outra peça liga na bolinha de entrada mais perto do dedo.
     const entradas = geometriaDa(peca).entradas;
-    if (puxando && puxando !== peca.id && entradas.length > 0) {
+    if (puxando && puxando !== id && entradas.length > 0) {
       const ponto = pontoNaBancada(evento);
       const porta = entradas.reduce((melhor, p, i) => (Math.abs(p.y - ponto.y) < Math.abs(entradas[melhor].y - ponto.y) ? i : melhor), 0);
-      aoLigar(puxando, peca.id, porta);
+      aoLigar(puxando, id, porta);
       setPuxando(null);
       return;
     }
     if (peca.tipo === "entrada") aoAlternar(peca.id);
-    else setEscolha({ tipo: "peca", id: atual.id });
+    else setEscolha({ tipo: "peca", id });
   };
 
   const tocarEntradaDe = (id: string, porta: number) => {
@@ -253,7 +261,14 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
         onPointerDown={comecarArrastoArea}
         onPointerMove={mover}
         onClickCapture={(evento) => {
-          if (ignorarClick.current) { evento.preventDefault(); evento.stopPropagation(); }
+          if (ignorarClick.current) { evento.preventDefault(); evento.stopPropagation(); return; }
+          const corpo = toqueNoCorpo.current;
+          toqueNoCorpo.current = null;
+          if (corpo) {
+            evento.preventDefault();
+            evento.stopPropagation();
+            tocarCorpo(corpo, evento);
+          }
         }}
         onPointerUp={soltar}
         onPointerCancel={(evento) => {
@@ -272,6 +287,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
         data-puxando={puxando ?? ""}
       >
         <defs>
+          {alvos.map((alvo) => <clipPath key={alvo.id} id={`${prefixoAlvos}-${alvo.id}`} clipPathUnits="userSpaceOnUse"><polygon points={celulaDoAlvo(alvo, alvos).map((p) => `${p.x},${p.y}`).join(" ")} /></clipPath>)}
           <pattern id="grade-bancada" width="20" height="20" patternUnits="userSpaceOnUse">
             <circle cx="1" cy="1" r="1" fill="var(--cor-circuito-grade)" />
           </pattern>
@@ -303,6 +319,7 @@ export function BancadaCircuito({ circuito, valores, fios, paleta, toque, destaq
             destacada={destaque === peca.id}
             puxando={puxando === peca.id}
             escala={escala}
+            prefixoAlvos={prefixoAlvos}
             aoApertarCorpo={apertarCorpo(peca.id)}
             aoTocarSaida={() => {
               setEscolha(null);

@@ -337,3 +337,44 @@ describe("links na prévia", () => {
     expect(link("#ancora").alvo?.id).toBe("rodape");
   });
 });
+
+describe("textoContem", () => {
+  it("ignora caixa e acentos de forma independente e nas duas pontas", () => {
+    const sim = nova();
+    sim.executar([{ tipo: "definirTexto", seletor: "#a1 p", valor: "SERVIÇOS da vila" }]);
+    const v = { tipo: "textoContem", seletor: "#a1 p", valor: "servicos" } as const;
+    expect(sim.avaliar({ ...v, ignorarCaixa: true, ignorarAcentos: true }).passou).toBe(true);
+    expect(sim.avaliar({ ...v, ignorarCaixa: true }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, ignorarAcentos: true }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "serviços", ignorarCaixa: true }).passou).toBe(true);
+    expect(sim.avaliar({ ...v, valor: "SERVICOS", ignorarAcentos: true }).passou).toBe(true);
+    expect(sim.avaliar({ ...v, valor: "serviços", ignorarCaixa: false, ignorarAcentos: false }).passou).toBe(false);
+    sim.executar([{ tipo: "definirTexto", seletor: "#a1 p", valor: "servicos" }]);
+    expect(sim.avaliar({ ...v, valor: "SERVIÇOS", ignorarCaixa: true, ignorarAcentos: true }).passou).toBe(true);
+  });
+
+  it("normaliza acento decomposto e mantém vazio, ausente e composição seguros", () => {
+    const sim = nova();
+    sim.executar([{ tipo: "definirTexto", seletor: "#a1 p", valor: "  SERVIC\u0327OS   da\nvila " }]);
+    const v = { tipo: "textoContem", seletor: "#a1 p", valor: "serviços da vila", ignorarCaixa: true, ignorarAcentos: true } as const;
+    expect(sim.avaliar(v).passou).toBe(true);
+    expect(sim.avaliar({ ...v, valor: " \u0301 " }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, seletor: ".ausente" }).passou).toBe(false);
+    expect(sim.avaliar({ tipo: "todos", validadores: [v] }).passou).toBe(true);
+    expect(sim.avaliar({ tipo: "algum", validadores: [{ ...v, valor: "inexistente" }, v] }).passou).toBe(true);
+    expect(sim.avaliar({ tipo: "nao", validador: v }).passou).toBe(false);
+  });
+
+  it("exige o trecho, preservando caixa e acento, com espaços normalizados", () => {
+    const sim = nova();
+    const v = { tipo: "textoContem", seletor: "#a1 p", valor: "Texto um" } as const;
+    expect(sim.avaliar(v).passou).toBe(true);
+    expect(sim.avaliar({ ...v, valor: "qualquer coisa" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "texto um" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "Téxto um" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "Texto   um" }).passou).toBe(true);
+    expect(sim.avaliar({ ...v, seletor: ".ausente" }).passou).toBe(false);
+    expect(sim.avaliar({ ...v, valor: "  " }).passou).toBe(false);
+    expect(sim.avaliar({ tipo: "todos", validadores: [v] }).passou).toBe(true);
+  });
+});
