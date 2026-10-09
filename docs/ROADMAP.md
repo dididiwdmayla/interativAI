@@ -29,6 +29,15 @@ núcleo comum.
 
 ### Feito
 
+- **Rodada 42: termos em inglês e glossário bilíngue.** 252 conceitos
+  receberam `termoIngles`; Salvar como Meu tema tem marca explícita de sem
+  equivalente. O glossário exibe e busca nos dois idiomas, com checagem
+  obrigatória do catálogo. `textoContem` ganhou `ignorarCaixa` e
+  `ignorarAcentos`, ambas desligadas por padrão e documentadas no guia.
+  IDs e textos publicados preservados; detalhe em `docs/PROGRESSO.md`.
+- **Android real/compositor (rodadas 37/40): resolvido.** Will testou
+  num Android de verdade e confirmou que o mundo ficou fluido.
+
 - **Rodada 41: faxina técnica das dez pendências.** Duplo toque da U4
   sem mover o alvo, rastro compacto e Home/End da U3 sob carga, portões recortados pela
   proximidade, exportação de todo o kit com prova no Node, tempo de contrato
@@ -772,9 +781,9 @@ núcleo comum.
 
 ### Em andamento
 
-- Rodada 41 (faxina técnica): dez correções concluídas e documentadas,
-  em revisão no pull request. Rodadas 39/40 já integradas; a conferência
-  num Android real fica nas decisões do Will abaixo.
+- Rodada 42: implementação e validação concluídas, aguardando revisão do
+  pull request. Rodada 41 integrada; mundo fluido confirmado pelo Will
+  num Android real.
 
 ### Pendências
 
@@ -782,11 +791,16 @@ Revisadas integralmente na rodada 41. As correções e a classificação das
 entradas retiradas estão no `PROGRESSO.md`; abaixo ficam só decisões e
 trabalhos futuros, sem falha conhecida aceita na bateria.
 
+**Checagens automáticas**
+
+- Desempenho do mundo, cenário 12x (42): investigar a oscilação da prova
+  do disparo automático do modo leve no executor. Na bateria ficou em
+  completas (50,9 quadros/s); repetindo só o cenário, passou em leves
+  (52,2 quadros/s). Limites e código do mundo preservados; não é a
+  pendência de Android real/compositor, já resolvida pelo Will.
+
 **Precisa de decisão do Will**
 
-- Mundo em Android real (rodadas 37/40): decidir quais aparelhos testar,
-  inclusive o compositor/GPU sem emulação e o limite de 32 MB, em que ainda
-  se perderam 3 de 15 nomes. O modo leve permanece a alternativa atual.
 - Mar do mundo (40): decidir se vale retomar as ondinhas deslizando sem
   camadas do tamanho do mundo; hoje reflexos, espuma, peixes e barco animam.
 - Pausa durante rolagem (40): decidir se o recálculo de até 90 ms em 6x,
@@ -855,6 +869,9 @@ trabalhos futuros, sem falha conhecida aceita na bateria.
 
 **Fica para uma ilha futura**
 
+- Inglês técnico: ampliar missões de campo que leem documentação original
+  nas próximas unidades (guia, seção 1), sem mudar textos publicados.
+
 - **Ilha Python:** parada imediata de programa travado (SharedArrayBuffer
   e isolamento de origem); hoje o timeout de 5 s recria o worker pelo cache.
   Conferir COBOL/BASIC em compiladores reais quando a zona Outras linguagens
@@ -899,11 +916,9 @@ trabalhos futuros, sem falha conhecida aceita na bateria.
 
 ### Próximo (em ordem)
 
-1. Termos em inglês dos conceitos (`termoIngles`) e missões de campo que
-   leem documentação original (guia, seção 1).
-2. Porto de chegada.
-3. Login e versão pública (planejar).
-4. Ilha Páginas vivas, parte A (JavaScript no site-alvo, eventos, tempo
+1. Porto de chegada.
+2. Login e versão pública (planejar).
+3. Ilha Páginas vivas, parte A (JavaScript no site-alvo, eventos, tempo
    assíncrono, aba Aplicação e base de orientação a objetos).
 
 ## Decisões aprovadas

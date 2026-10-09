@@ -2751,7 +2751,19 @@ o `liga` (a saída precisa ficar acesa) e depois o `desliga`.
 `{ tipo: "textoContem", seletor: "h1", valor: "Serviços da vila" }`
 exige que pelo menos um elemento selecionado contenha o trecho. Normaliza
 espaços e quebras como `textoIgual`, mas preserva maiúsculas e acentos.
-Trecho vazio e seletor sem elemento reprovam. Combina com `todos`, `algum`
+As opções `ignorarCaixa` e `ignorarAcentos` têm padrão `false`, preservando
+os critérios publicados. Use `ignorarCaixa: true` quando capitalização não
+for parte da habilidade ("Serviços" e "SERVIÇOS"); use `ignorarAcentos: true`
+quando acentuação não for parte da habilidade ("serviços" e "servicos").
+Texto digitado pelo aluno costuma precisar das duas:
+
+```ts
+{ tipo: "textoContem", seletor: "h1", valor: "Serviços da vila", ignorarCaixa: true, ignorarAcentos: true }
+```
+
+A normalização vale para o texto encontrado e para o trecho esperado.
+Trecho vazio, inclusive depois de normalizar, e seletor sem elemento
+reprovam. Combina com `todos`, `algum`
 e `nao`. Serve para respostas livres com conteúdo obrigatório; não basta
 mudar o texto. Fases publicadas continuam com os validadores originais.
 
